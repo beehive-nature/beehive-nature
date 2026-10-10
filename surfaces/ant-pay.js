@@ -233,7 +233,186 @@
     return { pay: pay, resume: resume, verify: verify, contracts: contracts };
   }
 
-  var api = { create: create, injectedSigner: injectedSigner, trezorSigner: trezorSigner, loadTrezorConnect: loadTrezorConnect, CHAIN_ID: CHAIN_ID,
+  /* Hosted SDK payer. Reuses the estate wire encoders above and the reservation
+     rule in ops/ant-extsig/src/budget.rs: unknown sends retain their full gas
+     exposure; only a verified mined receipt can lower it. One journal belongs
+     to one file hash. Web Locks serializes all purchase flows in this origin.
+     Clearing site data or using another device removes this local protection. */
+  function createHosted(cfg) {
+    var storage = cfg.storage, rpc = cfg.rpc, eth = cfg.ethereum;
+    var clock = cfg.now || Date.now, pause = cfg.sleep || (ms => new Promise(r => setTimeout(r, ms)));
+    var key = 'bnr.ant.purchase.v1:' + cfg.artifact.sha256;
+    var fail = (code, message) => { throw refusal(code, message); };
+    var dec = v => { if (typeof v !== 'string' || !/^(0|[1-9]\d*)$/.test(v)) fail('binding', 'Invalid decimal amount'); return BigInt(v); };
+    var hx = v => '0x' + BigInt(v).toString(16);
+    var same = (a,b) => String(a).toLowerCase() === String(b).toLowerCase();
+    var copy = v => JSON.parse(JSON.stringify(v));
+    var digest = async v => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(v)))), b => b.toString(16).padStart(2,'0')).join('');
+    var artifact = copy(cfg.artifact), network = copy(cfg.network);
+    if (!/^[a-f0-9]{64}$/.test(artifact.sha256) || !Number.isSafeInteger(artifact.bytes) || artifact.bytes < 3) fail('binding','Invalid file identity');
+    if (network.chainId !== CHAIN_ID || !isAddr(network.paymentTokenAddress) || !isAddr(network.paymentVaultAddress)) fail('binding','Expected the bundled Arbitrum One payment network');
+    var raw = storage.getItem(key);
+    var ledger = raw ? JSON.parse(raw) : {v:1, artifact, network, plans:[], checkpoint:null, result:null, receipt:null};
+    if (JSON.stringify(ledger.artifact) !== JSON.stringify(artifact) || JSON.stringify(ledger.network) !== JSON.stringify(network)) fail('binding','Saved purchase belongs to a different file or payment network');
+    function save(){ storage.setItem(key, JSON.stringify(ledger)); }
+    save(); // Storage failure must precede even a wallet request.
+    function stopped(signal){ if (signal && signal.aborted) fail('cancelled','Request stopped. Submitted transactions may still settle; resume this file to reconcile.'); }
+    async function chain(){ if (BigInt(await rpc('eth_chainId',[])) !== BigInt(CHAIN_ID)) fail('wrong-chain','The payment RPC is not Arbitrum One'); }
+    async function account(prompt){
+      if (!eth || typeof eth.request !== 'function') fail('no-wallet','Connect an Arbitrum One browser wallet to pay for storage');
+      if (BigInt(await eth.request({method:'eth_chainId'})) !== BigInt(CHAIN_ID)) fail('wrong-chain','Select Arbitrum One in your browser wallet');
+      var accounts = await eth.request({method:prompt?'eth_requestAccounts':'eth_accounts'});
+      if (!accounts || !isAddr(accounts[0])) fail('no-wallet','The browser wallet shared no account');
+      return accounts[0].toLowerCase();
+    }
+    function quotesOf(quotes){
+      if (!Array.isArray(quotes) || !quotes.length || quotes.length > MAX_PER_TX) fail('binding','Expected one supported wave of quotes');
+      var seen = new Set();
+      return quotes.map(q => {
+        var h = '0x'+strip(q.quoteHash);
+        if (!isH32(h) || !isAddr(q.rewardsAddress) || seen.has(h)) fail('binding','Malformed or repeated storage quote');
+        seen.add(h); dec(q.amount);
+        return {quote_hash:h,rewards_address:q.rewardsAddress.toLowerCase(),amount_atto:q.amount};
+      });
+    }
+    function checkedNetwork(n){ if(n.chainId!==network.chainId || !same(n.paymentTokenAddress,network.paymentTokenAddress) || !same(n.paymentVaultAddress,network.paymentVaultAddress)) fail('binding','Payment network or contracts changed'); }
+    function gasExposure(){ return ledger.plans.reduce((sum,p)=>sum+p.txs.reduce((s,t)=>s+BigInt(t.actualWei ?? t.reservedWei),0n),0n); }
+    function storageExposure(){ return ledger.plans.reduce((sum,p)=>sum+(p.txs.some(t=>t.kind==='payment'&&t.state!=='planned')?BigInt(p.total):0n),0n); }
+    function authorized(p, signal){
+      stopped(signal);
+      if (!p.authorization || p.authorization.invoice !== p.id || p.authorization.payer !== p.payer || p.authorization.expiresAt !== p.expiresAt || clock() >= p.expiresAt) fail('expired','The invoice is not authorized or has expired. No new transaction was requested.');
+      if (BigInt(p.total)+storageExposure()-(p.txs.some(t=>t.kind==='payment'&&t.state!=='planned')?BigInt(p.total):0n)>100n*10n**18n) fail('over-ceiling','The file would exceed the 100 ANT storage ceiling');
+      if (gasExposure()>BigInt(p.authorization.gasCeilingWei)) fail('gas-ceiling','Aggregate gas exposure exceeds the authorized ETH limit');
+    }
+    async function invoice(n, quotes, gasCeilingWei, signal){
+      var quoteExpiresAt=clock()+120000;
+      stopped(signal); checkedNetwork(n); await chain();
+      var payments=quotesOf(quotes), total=payments.reduce((s,q)=>s+BigInt(q.amount_atto),0n).toString();
+      var binding=await digest({artifact,network,payments});
+      var claims=JSON.parse(storage.getItem('bnr.ant.quote-claims.v1')||'{}');
+      if(payments.some(q=>claims[q.quote_hash]&&claims[q.quote_hash]!==artifact.sha256))fail('replay','A quote belongs to another saved file purchase. Reconcile that purchase first.');
+      var prior=ledger.plans.find(p=>p.binding===binding&&!p.superseded);
+      if(prior && prior.txs.some(t=>t.state!=='planned')) return copy(prior);
+      if(ledger.plans.some(p=>p.binding!==binding&&p.txs.some(t=>t.state==='sending'||t.state==='submitted'||t.state==='failed'))) fail('uncertain','An earlier payment must be reconciled before requesting another price');
+      if(ledger.plans.some(p=>!p.superseded&&p.binding!==binding&&p.payments.some(q=>payments.some(v=>v.quote_hash===q.quote_hash)))) fail('replay','This price overlaps a kept payment. Resume its checkpoint.');
+      var ceiling=dec(gasCeilingWei);
+      if(ceiling===0n) fail('gas-ceiling','Set a separate maximum ETH network fee');
+      if(ledger.gasCeilingWei && ledger.gasCeilingWei!==gasCeilingWei) fail('gas-ceiling','Resume with the original aggregate ETH limit');
+      if(BigInt(total)+storageExposure()>100n*10n**18n) fail('over-ceiling','The file would exceed 100 ANT');
+      var payer=await account(true);
+      var allowance=BigInt(await rpc('eth_call',[{to:network.paymentTokenAddress,data:SEL.allowance+pad32(payer)+pad32(network.paymentVaultAddress)},'latest']));
+      var balance=BigInt(await rpc('eth_call',[{to:network.paymentTokenAddress,data:SEL.balanceOf+pad32(payer)},'latest']));
+      if(balance<BigInt(total)) fail('short-ant','This account has less ANT than the quoted price');
+      var fee=BigInt(await rpc('eth_gasPrice',[]))*2n;
+      if(fee===0n) fail('gas-ceiling','The network returned no usable fee');
+      var txs=[];
+      if(allowance<BigInt(total)){
+        var approval={kind:'approval',to:network.paymentTokenAddress,data:encodeApprove(network.paymentVaultAddress,total)};
+        approval.gas=hx((BigInt(await rpc('eth_estimateGas',[{from:payer,to:approval.to,data:approval.data,value:'0x0'}]))*120n+99n)/100n);
+        txs.push(approval);
+      }
+      // Approval may be required before payment simulation succeeds. Reserve a
+      // declared upper bound now, then simulate under that bound before sending.
+      txs.push({kind:'payment',to:network.paymentVaultAddress,data:encodePayForQuotes(payments),gas:hx(3000000)});
+      txs.forEach(t=>{t.maxFeePerGas=hx(fee);t.maxPriorityFeePerGas='0x0';t.reservedWei=(BigInt(t.gas)*fee).toString();t.state='planned';});
+      var exposure=gasExposure()+(prior?-prior.txs.reduce((s,t)=>s+BigInt(t.reservedWei),0n):0n)+txs.reduce((s,t)=>s+BigInt(t.reservedWei),0n);
+      if(exposure>ceiling) fail('gas-ceiling','This plan needs up to '+exposure+' wei in aggregate network fees, above your limit');
+      if(BigInt(await rpc('eth_getBalance',[payer,'latest']))<exposure) fail('no-gas','The account cannot cover this plan’s bounded network fee');
+      var p={binding,id:await digest({binding,payer,txs,gasCeilingWei,created:clock()}),payer,payments,total,expiresAt:quoteExpiresAt,gasCeilingWei,txs,authorization:null};
+      if(clock()>=quoteExpiresAt)fail('expired','The quote expired while preparing the invoice');
+      if(prior)ledger.plans.splice(ledger.plans.indexOf(prior),1);
+      ledger.plans.push(p);ledger.gasCeilingWei=gasCeilingWei;save();return copy(p);
+    }
+    function authorize(shown){
+      var p=ledger.plans.find(x=>x.id===shown.id);
+      if(!p || JSON.stringify(copy(p))!==JSON.stringify(shown) || clock()>=p.expiresAt) fail('binding','The displayed invoice changed or expired');
+      p.authorization={invoice:p.id,payer:p.payer,expiresAt:p.expiresAt,gasCeilingWei:p.gasCeilingWei,artifactSha256:artifact.sha256,at:clock()};save();
+      return p.id;
+    }
+    async function observe(p,t,signal){
+      await chain();
+      // A provider can throw after broadcast. Discover the exact nonce on chain;
+      // absence is never permission to broadcast again.
+      if(!t.hash){
+        var end=BigInt(await rpc('eth_blockNumber',[])),start=BigInt(t.block);
+        if(end-start>1000n) fail('uncertain','Payment history exceeds this recovery window. No replacement payment was sent.');
+        for(var b=start;b<=end;b++){
+          var block=await rpc('eth_getBlockByNumber',[hx(b),true]);
+          var found=(block?.transactions||[]).find(x=>same(x.from,p.payer)&&BigInt(x.nonce)===BigInt(t.nonce));
+          if(found){t.hash=found.hash;save();break;}
+        }
+        if(!t.hash) fail('uncertain','The wallet outcome is still unknown. Resume later; no duplicate transaction was sent.');
+      }
+      for(var i=0;i<40;i++){
+        stopped(signal);
+        var receipt=await rpc('eth_getTransactionReceipt',[t.hash]);
+        if(receipt){
+          var tx=await rpc('eth_getTransactionByHash',[t.hash]);
+          if(!isH32(receipt.blockHash)||!same(receipt.transactionHash,t.hash)||!tx||!same(tx.hash,t.hash)||!same(tx.from,p.payer)||!same(tx.to,t.to)||!same(tx.input,t.data)||BigInt(tx.value)!==0n||BigInt(tx.nonce)!==BigInt(t.nonce)||BigInt(tx.chainId)!==BigInt(CHAIN_ID)||BigInt(tx.gas)>BigInt(t.gas)||BigInt(tx.maxFeePerGas)>BigInt(t.maxFeePerGas)) fail('binding','Mined transaction differs from the authorized invoice');
+          var canonical=await rpc('eth_getBlockByNumber',[receipt.blockNumber,false]);
+          if(!isH32(canonical?.hash)||!same(canonical.hash,receipt.blockHash)||BigInt(await rpc('eth_blockNumber',[]))<BigInt(receipt.blockNumber)+1n){await pause(1500);continue;}
+          var actual=BigInt(receipt.gasUsed)*BigInt(receipt.effectiveGasPrice);
+          if(actual>BigInt(t.reservedWei)) fail('gas-ceiling','Mined gas exceeds its reservation');
+          t.actualWei=actual.toString();t.state=receipt.status==='0x1'?'confirmed':'failed';t.receipt=receipt;save();
+          if(t.state==='failed')fail('tx-reverted','The transaction reverted. Its gas remains in the ledger; no automatic replacement is sent.');
+          return;
+        }
+        await pause(1500);
+      }
+      fail('uncertain','Confirmation is pending. Resume this file to check again without paying twice.');
+    }
+    async function settle(id,signal,recoverOnly){
+      var p=ledger.plans.find(p=>p.id===id); if(!p)fail('binding','No such invoice');
+      await chain();
+      for(var t of p.txs){
+        if(t.state!=='planned'){await observe(p,t,signal);continue;}
+        if(recoverOnly)fail('uncertain','This invoice still needs an explicitly authorized transaction; recovery sends nothing');
+        authorized(p,signal);
+        if(await account(false)!==p.payer)fail('binding','The wallet account changed');
+        var estimated=BigInt(await rpc('eth_estimateGas',[{from:p.payer,to:t.to,data:t.data,value:'0x0'}]));
+        if(estimated>BigInt(t.gas))fail('gas-ceiling','Gas estimate exceeds the authorized transaction limit');
+        t.nonce=await rpc('eth_getTransactionCount',[p.payer,'pending']);t.block=await rpc('eth_blockNumber',[]);
+        // Repeat expiry/cancellation after asynchronous checks, immediately before
+        // the durable send marker. This marker is never removed on a send error.
+        authorized(p,signal);
+        if(await account(false)!==p.payer)fail('binding','The wallet account changed before signing');
+        authorized(p,signal);
+        var claims=JSON.parse(storage.getItem('bnr.ant.quote-claims.v1')||'{}');
+        if(p.payments.some(q=>claims[q.quote_hash]&&claims[q.quote_hash]!==artifact.sha256))fail('replay','Another file already reserved this quote');
+        p.payments.forEach(q=>{claims[q.quote_hash]=artifact.sha256;});
+        storage.setItem('bnr.ant.quote-claims.v1',JSON.stringify(claims));
+        t.state='sending';save();
+        var h=await eth.request({method:'eth_sendTransaction',params:[{from:p.payer,to:t.to,data:t.data,value:'0x0',chainId:CHAIN_HEX,nonce:t.nonce,gas:t.gas,maxFeePerGas:t.maxFeePerGas,maxPriorityFeePerGas:t.maxPriorityFeePerGas}]});
+        if(!isH32(h))fail('uncertain','The wallet returned no transaction hash. Resume to reconcile; do not start another payment.');
+        t.hash=h;t.state='submitted';save();await observe(p,t,signal);
+      }
+      var paid=p.txs.find(t=>t.kind==='payment');
+      return {transactionHash:paid.hash,walletAddress:p.payer,totalAmount:p.total};
+    }
+    function provider(id){return {
+      pay:async(n,quotes,context)=>{checkedNetwork(n);var p=ledger.plans.find(p=>p.id===id);if(!p||await digest({artifact,network,payments:quotesOf(quotes)})!==p.binding)fail('binding','Quotes differ from the authorized invoice');return settle(id,context.signal,false);},
+      recover:async(n,quotes,attempt,context)=>{checkedNetwork(n);var binding=await digest({artifact,network,payments:quotesOf(quotes)});var p=ledger.plans.find(p=>p.binding===binding&&!p.superseded);if(!p)fail('uncertain','No matching durable payment record');return settle(p.id,context.signal,true);}
+    };}
+    return {invoice,authorize,provider,snapshot:()=>copy(ledger),
+      retryUnpaid:async signal=>{
+        if(!ledger.checkpoint || ledger.result || ledger.plans.some(p=>p.txs.some(t=>t.kind==='payment'&&t.state!=='planned')))return false;
+        // If only approvals were attempted, reconcile them before discarding the
+        // unpaid SDK checkpoint. Preserve their gas and obtain fresh quotes.
+        for(var p of ledger.plans)for(var t of p.txs)if(t.state!=='planned')await observe(p,t,signal);
+        for(var p of ledger.plans){p.txs=p.txs.filter(t=>t.state!=='planned');p.superseded=true;}
+        ledger.checkpoint=null;save();return true;
+      },
+      checkpoint:value=>{ledger.checkpoint=copy(value);save();},
+      uploaded:result=>{ledger.result=copy(result);save();},
+      reconcile:async bytes=>{
+        var hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
+        if(!ledger.result||hash!==artifact.sha256||bytes.byteLength!==artifact.bytes)fail('hash-mismatch','Retrieved bytes do not match the original file');
+        for(var p of ledger.plans)for(var t of p.txs)if(t.state!=='planned')await observe(p,t,null);
+        ledger.receipt={schema:'bpay.ant.reconciled/1',artifact,network,file:ledger.result.file,storageAtto:storageExposure().toString(),gasWei:ledger.plans.reduce((sum,p)=>sum+p.txs.reduce((s,t)=>s+BigInt(t.actualWei||'0'),0n),0n).toString(),gasExposureWei:gasExposure().toString(),gasCeilingWei:ledger.gasCeilingWei||'0',invoices:ledger.plans.filter(p=>p.authorization).map(p=>p.id),transactions:ledger.plans.flatMap(p=>p.txs.filter(t=>t.hash).map(t=>({kind:t.kind,hash:t.hash,gasWei:t.actualWei}))),retrievedSha256:hash,retrievedBytes:bytes.byteLength,reconciledAt:new Date(clock()).toISOString()};save();return copy(ledger.receipt);
+      }};
+  }
+
+  var api = { createHosted: createHosted, create: create, injectedSigner: injectedSigner, trezorSigner: trezorSigner, loadTrezorConnect: loadTrezorConnect, CHAIN_ID: CHAIN_ID,
     _wire: { encodeApprove: encodeApprove, encodePayForQuotes: encodePayForQuotes, rlp: rlp, serialize1559: serialize1559, SEL: SEL } };
   if (typeof module === 'object' && module.exports) module.exports = api;
   if (typeof window === 'object') root.AntPay = api;
