@@ -9,12 +9,17 @@
 #                  byte_at and encode, each proven equal to its Cryptol
 #                  definition for every input in its domain. Every obligation
 #                  must print its PROVEN line.
+#   DECODE-EQUIVALENCE wb001-saw/decode.saw (RB05): the decoder core
+#                  (byte_from, bytes_from_N, be32_from, be64_from, block_code,
+#                  decode_core) proven equal to WB001Decode.cry for every buffer
+#                  and every input length; decode is the wrapper that hands
+#                  decode_core its input. Every obligation must print its PROVEN line.
 #   PROVE-UNIVERSAL wb001-saw/injective.saw: wireInjective for ALL valid
 #                  intent pairs, through the first-difference ladder. Every
 #                  rung must print its PROVEN line.
-#   TEETH          rust-teeth.saw and injective-teeth.saw ask a deliberately
-#                  wrong obligation each; both MUST fail with a solver
-#                  counterexample. Passing, or failing any other way, is red.
+#   TEETH          rust-teeth.saw, decode-teeth.saw and injective-teeth.saw ask
+#                  a deliberately wrong obligation each; each MUST fail with a
+#                  solver counterexample. Passing, or failing any other way, is red.
 #   SPEC-CHECK     wb001-cryptol/Ed25519.cry: the RFC 8032 Ed25519 spec on its
 #                  closed terms (RFC §7.1 vectors, SHA-512("abc"), the
 #                  OpenSSL-oracle envelope rows, the verifier's refusals).
@@ -96,6 +101,11 @@ run_required rust.saw utf8_step well_formed_utf8_64 well_formed_utf8_128 \
   pad_ok_32 pad_ok_64 pad_ok_128 pad_ok_4096 valid_intent offsets byte_at encode
 run_teeth rust-teeth.saw
 
+# ---- DECODE-EQUIVALENCE (RB05) -----------------------------------------------------
+run_required decode.saw utf8_step well_formed_utf8_64 well_formed_utf8_128 byte_at_pos byte_from \
+  bytes_from_32 bytes_from_64 bytes_from_128 chunk_64 bytes_from_4096 be32_from be64_from block_code decode_core
+run_teeth decode-teeth.saw
+
 # ---- PROVE-UNIVERSAL -------------------------------------------------------------
 run_required injective.saw validImpliesBounded validImpliesPadded \
   "fd01 (domain)" "fd02 (nonce)" "fd03 (epoch)" "fd04 (action)" "fd05 (destination)" \
@@ -117,4 +127,4 @@ for prop in sha512Abc rfcTest1 rfcTest2 rfcTest3 rfcTestAbc oracleEnvBase oracle
 done
 
 say "== SAW WB001: ladder state =="
-say "BUILD: PASS | EQUIVALENCE: PROVEN (11 obligations, Rust model == Cryptol spec) | PROVE-UNIVERSAL: wireInjective PROVEN (21 rungs) | TEETH: PASS (2) | SPEC-CHECK: Ed25519 RFC 8032 PASS (8)"
+say "BUILD: PASS | EQUIVALENCE: PROVEN (11 obligations, Rust model == Cryptol spec) | DECODE-EQUIVALENCE: PROVEN (14 obligations, decode_core == decodeSpec) | PROVE-UNIVERSAL: wireInjective PROVEN (21 rungs) | TEETH: PASS (3) | SPEC-CHECK: Ed25519 RFC 8032 PASS (8)"

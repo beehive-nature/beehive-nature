@@ -1,0 +1,163 @@
+// bTunGsTeN WB001 — the Cryptol spec of the strict DECODER (RB05). The
+// implementation is the decoder core in the Rust model
+// (crates/btungsten-wb001-core: byte_from, bytes_from_N, be32_from,
+// be64_from, block_code, decode_core), proven equal to this file by SAW in
+// wb001-saw/decode.saw for every buffer and every input length.
+// btungsten_wb001::decode is the wrapper that hands decode_core the first
+// MaxEnv bytes of its input, zero filled, and the input's true length.
+//
+// The input is (s, n): s holds the first MaxEnv bytes, n counts them all.
+// No accepted block reaches position MaxEnv (the ten blocks at their
+// maximum lengths end exactly there), so the bytes past it can only be
+// counted, never read.
+//
+// The stream primitives (byteAtPos, byteFrom, bytesFrom, be32From, be64From:
+// read at an explicit position) are shared with the reading of the RB04 grammar
+// (rb05-grammar/WB001Grammar.cry), which imports byteAtPos, bytesFrom,
+// be32From and be64From.
+
+module WB001Decode where
+
+import BTungstenWB001
+
+type Buf = [MaxEnv][8]
+
+//////////////////////////////////////////////////////////////////////////////
+// Stream primitives
+//////////////////////////////////////////////////////////////////////////////
+
+// The byte at stream position p; zero outside the buffer (no byte of an
+// accepted block lies there). Every read at a computed position is this one.
+byteAtPos : Buf -> [32] -> [8]
+byteAtPos s p = if p < 4626 then s @ p else 0
+
+// Byte j of the len value bytes starting at q; zero past len (the formal
+// shape's canonical padding).
+byteFrom : Buf -> [32] -> [32] -> [32] -> [8]
+byteFrom s q len j = if j < len then byteAtPos s (q + j) else 0
+
+bytesFrom : {cap} (fin cap) => Buf -> [32] -> [32] -> [cap][8]
+bytesFrom s q len = [ byteFrom s q len j | j <- take`{cap} [0 ...] ]
+
+// Value bytes base .. base + 63: the payload is read in 64 of these.
+chunk64 : Buf -> [32] -> [32] -> [32] -> [64][8]
+chunk64 s q len base = [ byteFrom s q len (base + i) | i <- take`{64} [0 ...] ]
+
+be32From : Buf -> [32] -> [32]
+be32From s q = byteAtPos s q # byteAtPos s (q + 1) # byteAtPos s (q + 2) # byteAtPos s (q + 3)
+
+be64From : Buf -> [32] -> [64]
+be64From s q = byteAtPos s q # byteAtPos s (q + 1) # byteAtPos s (q + 2) # byteAtPos s (q + 3)
+             # byteAtPos s (q + 4) # byteAtPos s (q + 5) # byteAtPos s (q + 6) # byteAtPos s (q + 7)
+
+//////////////////////////////////////////////////////////////////////////////
+// Verdicts: accepted, or the first refusal in the decoder's check order
+// (btungsten_wb001::Refusal maps them to the pinned vectors' codes).
+//////////////////////////////////////////////////////////////////////////////
+
+dOk, dShort, dMagic, dVersion, dTagOrder, dLength, dUtf8, dTrailing : [8]
+dOk = 0
+dShort = 1
+dMagic = 2
+dVersion = 3
+dTagOrder = 4
+dLength = 5
+dUtf8 = 6
+dTrailing = 7
+
+// The block header at `at`: short header, wrong tag, length outside
+// [lo, hi], short value, in that order; dOk when the value fits in n.
+blockCode : Buf -> [64] -> [32] -> [8] -> [32] -> [32] -> [8]
+blockCode s n at tag lo hi =
+  if (zext at : [64]) + 5 > n then dShort
+  else if byteAtPos s at != tag then dTagOrder
+  else if (len < lo) || (len > hi) then dLength
+  else if (zext at : [64]) + 5 + zext len > n then dShort
+  else dOk
+  where len = be32From s (at + 1)
+
+//////////////////////////////////////////////////////////////////////////////
+// The decoder: magic, version, the ten blocks in ascending tag order (the
+// UTF-8 law on the four text fields, through the spec's own DFA), and exact
+// consumption. The decoded intent is meaningful when the verdict is dOk.
+//////////////////////////////////////////////////////////////////////////////
+
+decodeSpec : Buf -> [64] -> ([8], Intent)
+decodeSpec s n = (code, val)
+  where
+    aDom = 8 : [32]
+    cDom = blockCode s n aDom 0x01 1 64
+    lDom = be32From s (aDom + 1)
+    fDom = bytesFrom`{64} s (aDom + 5) lDom
+    aNon = aDom + 5 + lDom
+    cNon = blockCode s n aNon 0x02 32 32
+    lNon = be32From s (aNon + 1)
+    fNon = bytesFrom`{32} s (aNon + 5) lNon
+    aEpo = aNon + 5 + lNon
+    cEpo = blockCode s n aEpo 0x03 8 8
+    wEpo = be64From s (aEpo + 5)
+    aAct = aEpo + 5 + 8
+    cAct = blockCode s n aAct 0x04 32 32
+    lAct = be32From s (aAct + 1)
+    fAct = bytesFrom`{32} s (aAct + 5) lAct
+    aDst = aAct + 5 + lAct
+    cDst = blockCode s n aDst 0x05 1 128
+    lDst = be32From s (aDst + 1)
+    fDst = bytesFrom`{128} s (aDst + 5) lDst
+    aCap = aDst + 5 + lDst
+    cCap = blockCode s n aCap 0x06 1 64
+    lCap = be32From s (aCap + 1)
+    fCap = bytesFrom`{64} s (aCap + 5) lCap
+    aAmt = aCap + 5 + lCap
+    cAmt = blockCode s n aAmt 0x07 8 8
+    wAmt = be64From s (aAmt + 5)
+    aExp = aAmt + 5 + 8
+    cExp = blockCode s n aExp 0x08 8 8
+    wExp = be64From s (aExp + 5)
+    aPay = aExp + 5 + 8
+    cPay = blockCode s n aPay 0x09 1 128
+    lPay = be32From s (aPay + 1)
+    fPay = bytesFrom`{128} s (aPay + 5) lPay
+    aPld = aPay + 5 + lPay
+    cPld = blockCode s n aPld 0x0a 0 4096
+    lPld = be32From s (aPld + 1)
+    fPld = bytesFrom`{4096} s (aPld + 5) lPld
+    aEnd = aPld + 5 + lPld
+    code =
+      if n < 8 then dShort
+      else if take`{7} s != take`{7} head8 then dMagic
+      else if s @ 7 != head8 @ 7 then dVersion
+      else if cDom != dOk then cDom
+      else if ~ (wellFormedUtf8 { len = 0 : [32], bytes = fDom }) then dUtf8
+      else if cNon != dOk then cNon
+      else if cEpo != dOk then cEpo
+      else if cAct != dOk then cAct
+      else if cDst != dOk then cDst
+      else if ~ (wellFormedUtf8 { len = 0 : [32], bytes = fDst }) then dUtf8
+      else if cCap != dOk then cCap
+      else if ~ (wellFormedUtf8 { len = 0 : [32], bytes = fCap }) then dUtf8
+      else if cAmt != dOk then cAmt
+      else if cExp != dOk then cExp
+      else if cPay != dOk then cPay
+      else if ~ (wellFormedUtf8 { len = 0 : [32], bytes = fPay }) then dUtf8
+      else if cPld != dOk then cPld
+      else if (zext aEnd : [64]) != n then dTrailing
+      else dOk
+    val =
+      { domain      = { len = lDom, bytes = fDom }
+      , nonce       = { len = lNon, bytes = fNon }
+      , epoch       = wEpo
+      , action      = { len = lAct, bytes = fAct }
+      , destination = { len = lDst, bytes = fDst }
+      , capability  = { len = lCap, bytes = fCap }
+      , amount      = wAmt
+      , expiry      = wExp
+      , payer       = { len = lPay, bytes = fPay }
+      , payload     = { len = lPld, bytes = fPld }
+      }
+
+decodeCode : Buf -> [64] -> [8]
+decodeCode s n = (decodeSpec s n).0
+
+decodeVal : Buf -> [64] -> Intent
+decodeVal s n = (decodeSpec s n).1

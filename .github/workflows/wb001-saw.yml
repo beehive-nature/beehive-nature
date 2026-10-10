@@ -1,10 +1,12 @@
 name: WB001 SAW proofs
 
 # bTunGsTeN WB001 on the Rust model itself (crates/btungsten-wb001-core): SAW
-# over MIR proves the model equal to the Cryptol spec (EQUIVALENCE), proves
-# wireInjective for all valid intents (PROVE-UNIVERSAL), runs two TEETH
+# over MIR proves the model equal to the Cryptol spec (EQUIVALENCE), the
+# decoder core equal to the decoder spec (DECODE-EQUIVALENCE), proves
+# wireInjective for all valid intents (PROVE-UNIVERSAL), runs three TEETH
 # obligations that must fail, and checks the RFC 8032 Ed25519 Cryptol spec on
-# its closed terms. Toolchain pins and the mir-json cache are shared with the
+# its closed terms. RB05 then proves the RB04 grammar equal to the decoder
+# spec on every input, with RB04's four TEETH substitutions as its controls. Toolchain pins and the mir-json cache are shared with the
 # WB002 SAW workflow (same key, same commit, same nightly).
 
 on:
@@ -72,6 +74,9 @@ jobs:
           echo "$HOME/mir-json-inst/bin" >> "$GITHUB_PATH"
           echo "SAW_RUST_LIBRARY_PATH=$HOME/mir-json/rlibs" >> "$GITHUB_ENV"
           "$HOME/mir-json-inst/bin/mir-json" --version
-      - name: WB001 SAW — BUILD + EQUIVALENCE + PROVE-UNIVERSAL + TEETH + Ed25519 SPEC-CHECK
+      - name: WB001 SAW — BUILD + EQUIVALENCE + DECODE-EQUIVALENCE + PROVE-UNIVERSAL + TEETH + Ed25519 SPEC-CHECK
         shell: bash
         run: sh scripts/btungsten/wb001-saw-check.sh saw saw-rustc "$HOME/saw/bin/cryptol"
+      - name: RB05 SAW — the RB04 grammar is the WB001 decoder on every input (PROVE-UNIVERSAL + TEETH)
+        shell: bash
+        run: sh scripts/btungsten/rb05-saw-check.sh saw
