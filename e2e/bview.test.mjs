@@ -520,7 +520,7 @@ assert.ok(PLAN.dur > 9 && PLAN.m1 > PLAN.m0 && PLAN.m0 < 16 << 10, 'fixture is m
 // A door delivering the fixture at `share` x its bitrate (dropping to `drop.share` once `drop.at`
 // bytes are out); the page's play() calls, the bytes the door had sent by then, and every
 // decodingInfo() question are recorded (the answer can be forced).
-async function paced(share, { smooth, drop, reg } = {}) {
+async function paced(share, { smooth, drop, reg, previewBlockMs = 0 } = {}) {
   const bps = (PLAN.m1 - PLAN.m0) / PLAN.dur, rate = share * bps;
   // (init-script args travel as JSON: no Infinity — "never drops" is a byte count past the file)
   const gaps = [Math.round(PIECE / rate * 1000), drop ? drop.at : FIX.length + 1, drop ? Math.round(PIECE / (drop.share * bps) * 1000) : 0];
@@ -529,8 +529,19 @@ async function paced(share, { smooth, drop, reg } = {}) {
     json: () => 'abort',
   });
   if (reg) await o.ctx.addInitScript(r => { try { localStorage.setItem('bregister', r); } catch {} }, reg);
-  await o.ctx.addInitScript(([door, piece, [gap, dropAt, slowGap], smooth, size]) => {
+  await o.ctx.addInitScript(([door, piece, [gap, dropAt, slowGap], smooth, size, previewBlockMs]) => {
     window.__fed = 0; window.__size = size; window.__plays = []; window.__dec = []; window.__decOut = [];
+    if (previewBlockMs) {
+      const src = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'src');
+      let first = true;
+      Object.defineProperty(HTMLMediaElement.prototype,'src',{
+        get(){return src.get.call(this);},
+        set(value){
+          if(first){first=false;const until=performance.now()+previewBlockMs;while(performance.now()<until){}}
+          src.set.call(this,value);
+        }
+      });
+    }
     const play = HTMLMediaElement.prototype.play;
     HTMLMediaElement.prototype.play = function () {
       window.__plays.push({ fed: window.__fed, bar: !document.getElementById('pg').hidden });
@@ -554,7 +565,7 @@ async function paced(share, { smooth, drop, reg } = {}) {
       } }));
       return new Response(slow, { status: r.status, headers: new Headers(r.headers) });
     };
-  }, [DOOR, PIECE, gaps, smooth, FIX.length]);
+  }, [DOOR, PIECE, gaps, smooth, FIX.length, previewBlockMs]);
   await o.p.goto(`${ORIGIN}/surfaces/bview.html`, { waitUntil: 'domcontentloaded' });
   const vp9 = await o.p.evaluate(() => document.createElement('video').canPlayType('video/mp4; codecs="vp09.00.10.08"') !== '');
   if (!vp9) console.log('# note: VP9-in-MP4 unavailable in this Chromium — skipping the time-based playback asserts');
@@ -566,8 +577,8 @@ const probe = p => p.evaluate(() => {
     bar: !document.getElementById('pg').hidden, wait: w && !w.hidden ? w.textContent : '', waitS: w && !w.hidden ? +(w.dataset.s || 0) : 0, rough: !!r && !r.hidden };
 });
 
-test('slow door (0.5x bitrate): an honest countdown, no play before the computed threshold, then no freeze', async () => {
-  const { ctx, p, errs, hits, rate, vp9 } = await paced(0.5);
+for (const previewBlockMs of [0,1000]) test('slow door (0.5x bitrate): an honest countdown, no play before the computed threshold, then no freeze' + (previewBlockMs ? ' with one-second preview work' : ''), async () => {
+  const { ctx, p, errs, hits, rate, vp9 } = await paced(0.5,{previewBlockMs});
   if (!vp9) { await ctx.close(); return; }
   const need = PLAN.m1 - rate * (PLAN.dur - MARGIN) / SAFETY;   // bytes local when the rule allows play
   await watch(p, A1);

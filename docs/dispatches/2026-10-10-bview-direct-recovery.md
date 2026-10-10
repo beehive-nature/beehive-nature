@@ -55,3 +55,47 @@ through the Actions cancellation API. No other lane's run was cancelled.
 Network-level repair, physical mobile validation, a reproduced Benchmark 003
 result and a stable performance distribution remain unestablished. The delivered
 repair is bounded client recovery with inspectable measurements.
+
+## Final acceptance follow-up
+
+PR #382 merged as `cffb14831`. Inspection of the raw timeline separates the
+39.655-second decoded preview from the first moving, unpaused playhead around
+74 seconds. The live runner now reports that latter observation separately,
+relative to its play mark. Capture also retains video dimensions, duration,
+source changes, and current-source total/dropped frame counters; frame counters
+are not cumulative across source replacements. A sentinel probe confirmed these
+numeric fields survive and private identifiers remain excluded.
+
+The combined parallel browser run passed 39/40 in 122194.6851 ms. Its slow-relay
+countdown predicted 14 seconds and started after 8.8 seconds, outside its
+tolerance. Isolated baseline and release probes both passed 4/4: predicted
+9 seconds, observed 8.5 seconds, complete playback and longest pause below
+165 ms. The relay estimator was unchanged by this repair. CI now runs these
+browser suites sequentially so the 214 MB fault fixture does not compete with
+the paced relay's wall-clock assertions. Sequential execution alone also failed
+(15 seconds predicted, 8.7 observed), so it is not claimed as the repair. Both
+failed results are retained.
+
+A deterministic one-second pause during the first preview reproduced the actual
+defect: the estimate said 53 seconds, while playback started after 9.1 seconds.
+The serial stream consumer includes that local preview pause in its short
+delivery windows. Resetting only the last-chunk interval still failed (53 versus
+9.2 seconds). Restarting both short windows fixed that case but delayed fast
+startup (868352 of 1187514 bytes, beyond the existing 40% threshold). The final
+correction subtracts the measured local preview duration from the short-window
+clocks instead of discarding the established rate. The conservative first-byte
+average is preserved. A stale preview cannot
+change the next video's rate clock. The paced playback regression now exercises
+both normal preview processing and the injected one-second pause, retaining all
+buffer-threshold, countdown, complete-playback and no-freeze assertions.
+
+Final focused compensation run: 7/7 passed in 93250.893 ms. Normal slow playback
+predicted 9 seconds and took 8.9 seconds. Fast playback started at 288 KiB of
+1160 KiB. The mid-play slowdown showed its wait immediately, predicted 12 seconds,
+and resumed after 12.0 seconds. `preview-window-compensation.log` retains the
+complete focused result. The final full suite and deployed measurements follow.
+
+Initial narrow filtered probes were cancelled by Node with "Promise resolution
+is still pending but the event loop has already resolved" before exercising
+the player. Including the suite's initial personal-video cases kept its setup
+alive for both valid baseline/release probes above.

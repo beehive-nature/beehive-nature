@@ -1,0 +1,77 @@
+# direct chunk lanes: three boundary reads per file, Blob playback, no service worker, one connection across two addresses, readers closed, no relay
+✔ direct: chunks read on their boundaries, real frames from a Blob, one connection, no relay (2170.6409ms)
+✔ direct setup rejection automatically uses the existing relay (646.1186ms)
+✔ a direct connection that never opens reaches the relay after the quiet limit (12719.3759ms)
+✔ an open file whose chunks never arrive reaches the relay and cancels the stuck reads (45844.3978ms)
+✔ large-file relay startup records a first-frame receipt when early preview is skipped (2950.9597ms)
+✔ direct only: a failed direct start stops, records why, and never asks the relay (2158.2552ms)
+✔ direct only: a clean run is labelled direct with no relay bytes (610.2354ms)
+✔ relay only: every byte is labelled relay and no direct connection opens (588.6499ms)
+✔ later chunks cannot postpone recovery from a missing playable head (2166.06ms)
+✔ head progress renews the next demand deadline and completes ordered delivery (1999.1745ms)
+✔ ordered starvation on the fallback route asks the relay exactly once (1411.7079ms)
+✔ retry-once: a settled failed head recovers without relay or duplicate bytes (939.7922ms)
+✔ retry-short: a settled failed head recovers without relay or duplicate bytes (890.5067ms)
+✔ retry exhaustion is bounded on direct-only (1835.276ms)
+✔ retry exhaustion is bounded on direct (1796.1646ms)
+✔ cancelling during backoff launches no retry and late reads cannot change its receipt (2788.4107ms)
+# 52 chunks: 54 attempts, two settled failures, same-byte SHA-256, <=3 reads, no duplicate in-flight range
+✔ 52-chunk transfer recovers chunk 16 twice, preserves order and verifies every byte (3137.0334ms)
+✔ a widespread failure cannot exceed the twelve-retry transfer budget (1666.486ms)
+✔ personal videos: save, name, deduplicate across reloads and tabs, then remove (1991.3761ms)
+✔ personal videos: actual playback is recorded; replay works; removal survives resume (1417.6236ms)
+✔ personal videos: blocked and unreadable storage never claim a successful save (1160.76ms)
+✔ antd 0.12.0 door: stub /stream aborts fast, envelope plays, full decode still finishes (2581.8711ms)
+✔ upgraded door (antd >= 0.12.1): honest /stream plays as progressive Blob; envelope never fetched (1942.2508ms)
+✔ progressive envelope: first frame before the JSON body finishes (12031.3708ms)
+✔ honest /stream binary progressive: first frame before the body finishes (9342.6799ms)
+✔ door down, not a video, error envelope: the honest failure row and no page errors (2311.13ms)
+✔ a bad address requests nothing (449.4197ms)
+✔ a new address cancels the old download; only the new one plays (6487.8597ms)
+✔ the real door reply shape: no Content-Length, the bar says busy (never a frozen 0) and the Blob still plays (2873.7358ms)
+✔ cypherpunk sheet: honest path/size fields only — no invented Autonomi network stats (904.4171ms)
+# slow: rule plays at >= 759 KiB of 1160; page played at 784 KiB; countdown 9 8 7 6 5 4 3 2 1 (said ~9 s, took 8.3 s)
+# slow: longest stop after start 156 ms; reached 9.78 s of 10.00 s
+✔ slow door (0.5x bitrate): an honest countdown, no play before the computed threshold, then no freeze (25192.063ms)
+# slow: rule plays at >= 759 KiB of 1160; page played at 800 KiB; countdown 11 10 9 8 7 6 5 4 3 2 1 (said ~11 s, took 8.6 s)
+# slow: longest stop after start 190 ms; reached 9.71 s of 10.00 s
+✔ slow door (0.5x bitrate): an honest countdown, no play before the computed threshold, then no freeze with one-second preview work (25702.2257ms)
+# fast: page played at 368 KiB of 1160
+# progressive handoffs: [{"covered":true,"pixel":true,"previousHeight":199.125,"height":199.125},{"covered":true,"pixel":true,"previousHeight":199.125,"height":199.125},{"covered":true,"pixel":true,"previousHeight":199.125,"height":199.125},{"covered":true,"pixel":true,"previousHeight":199.125,"height":199.125}]
+✔ fast door (2x bitrate): plays early, long before the file is in; decodingInfo asked with the moov facts (12725.0265ms)
+✔ decodingInfo says smooth=false: the plain warning row shows while the file is still arriving; playback is not blocked (4572.241ms)
+✖ door slows mid-play (2x then 0.4x): the Blob runs dry, the countdown returns at once, playback resumes by itself (13913.8482ms)
+# bee: bg rgb(251, 247, 240) · button "watch" r=999px · stage 354px · art false · instrument panes 0
+# raver: bg rgb(18, 14, 30) · button "▶
+play" r=999px · stage 390px · art true · instrument panes 0
+# cypherpunk: bg rgb(6, 17, 12) · button "fetch" r=6px · stage 354px · art false · instrument panes 4
+✔ three registers are three authored experiences at 390 px, and none repeats the address (19854.7002ms)
+✔ raver motion is optional: one tap pauses it, the choice is remembered estate-wide (800.0903ms)
+✔ poster gain does not erase long-clip stall regression or invent warm results (1.9633ms)
+✔ zero baseline is not an infinite percentage or a missing value (2.1399ms)
+✔ bad inputs and misleading provenance fail closed (1.1617ms)
+✔ capture preserves unknowns, distinguishes cache, bounds samples and excludes sensitive fields (83.2392ms)
+ℹ tests 41
+ℹ suites 0
+ℹ pass 40
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 234491.7386
+
+✖ failing tests:
+
+test at e2e\bview.test.mjs:693:1
+✖ door slows mid-play (2x then 0.4x): the Blob runs dry, the countdown returns at once, playback resumes by itself (13913.8482ms)
+  AssertionError [ERR_ASSERTION]: started early on the fast door (868352 of 1187514 B)
+      at TestContext.<anonymous> (file:///C:/Users/travi/.codex/worktrees/0d0c/wt-codex-shu003/e2e/bview.test.mjs:699:10)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

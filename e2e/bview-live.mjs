@@ -40,16 +40,28 @@ try {
     if(e.direct?.stopped || (e.fail&&!e.video?.width))break;
   }
   const capture=await page.evaluate(()=>{bviewTrial.stop();return JSON.parse(bviewTrial.export());});
+  const playMark=capture.marks.find(m=>m.label==='play');
+  const firstPlaying=capture.rows.find(r=>!r.paused&&r.playhead>0);
+  const playbackStartObservedMs=firstPlaying ? firstPlaying.atMs-(playMark?.atMs||0) : null;
   const integrityMatches=e.sha?e.sha===fixture.sha256:null;
+  const transports=capture.rows.filter(r=>r.transport);
+  const firstOpen=transports.find(r=>r.transport.opened>0);
+  const lastTransport=transports.at(-1)?.transport;
+  const transportSummary=lastTransport ? {...lastTransport,
+    firstOpenObservedMs:firstOpen ? firstOpen.atMs-(playMark?.atMs||0) : null,
+    peakSampledOpenChannels:Math.max(...transports.map(r=>r.transport.opened-r.transport.closed)),
+    payloadToFileRatio:integrityMatches ? lastTransport.bytes/fixture.size : null} : null;
+  const routeMatches=values.route==='direct-only' ? e.source?.kind==='direct'&&relayRequests===0
+    : values.route==='relay' ? e.source?.kind==='relay' : ['direct','mixed','relay'].includes(e.source?.kind);
   const result={observedAt:new Date().toISOString(),origin,htmlSha256,browser:browser.version(),
     mode:values.candidate?'candidate HTML on public origin':'deployed public HTML',route:values.route,
     fixture:{source:corpus.source,name:fixture.name,size:fixture.size},
     boundary:'fresh Chrome context; address entry preopens the reader; engine timing and sampled transfer/playback endpoints are distinct; no physical-mobile claim',
-    elapsedMs:Date.now()-started,receivedAtMs,endedAtMs,integrityMatches,
+    elapsedMs:Date.now()-started,receivedAtMs,endedAtMs,playbackStartObservedMs,integrityMatches,
     ttffMs:e.ttffMs,ttfbMs:e.ttfbMs,source:e.source?.kind,actualSize:e.size,
     duration:e.video?.duration,playhead:e.playhead,ended:e.video?.ended,
-    stalls:e.stalls,stallMs:e.stallMs,relayRequests,pageErrors,
-    accepted:integrityMatches===true&&e.video?.ended===true&&e.video?.duration>0&&e.playhead>=e.video.duration-0.5&&pageErrors===0,
+    stalls:e.stalls,stallMs:e.stallMs,relayRequests,pageErrors,transportSummary,routeMatches,
+    accepted:integrityMatches===true&&routeMatches&&e.video?.ended===true&&e.video?.duration>0&&e.playhead>=e.video.duration-0.5&&pageErrors===0,
     capture,'PUBLIC-CONSTANT':'htmlSha256 is a public source digest; no addresses or private peer IDs in capture'};
   await writeFile(output,JSON.stringify(result)+'\n',{flag:'wx'});
   console.log(JSON.stringify({output,accepted:result.accepted,receivedAtMs,endedAtMs,integrityMatches,ttffMs:e.ttffMs,stalls:e.stalls,stallMs:e.stallMs,relayRequests,pageErrors}));
