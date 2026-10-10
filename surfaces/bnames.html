@@ -725,6 +725,16 @@ body[data-reg="bee"] #sky{display:none}
   deriveHardened().then(function(v){ HARDENED=v; refreshGate(); });
   function flash(id,txt){ var el=$(id); el.textContent=txt; el.classList.remove('flash');
     void el.offsetWidth; el.classList.add('flash'); }
+  /* The config row still carries the historical EOS symbol on Vaulta. Keep the
+     numeric text exactly as returned; only the display unit belongs to this UI.
+     Anything that is not a chain asset string ("<amount> <SYMBOL>") is UNREAD:
+     null, so every consumer keeps saying "not read yet" and never a made-up zero. */
+  function displayA(raw){
+    if(typeof raw!=='string')return null;
+    var m=/^(\d+(?:\.\d+)?)\s+([A-Z]{1,7})$/.exec(raw.trim());
+    if(!m)return null;
+    return m[1]+' '+(m[2]==='EOS'?'A':m[2]);
+  }
 
   /* ── the drifting comb sky ── */
   (function(){
@@ -826,8 +836,8 @@ body[data-reg="bee"] #sky{display:none}
   }
   async function loadConfig(){
     var d=await post('/v1/chain/get_table_rows',{json:true,code:'kingbeelovis',scope:'kingbeelovis',table:'config',limit:1});
-    if(d&&d.rows&&d.rows[0]){ live.fee=d.rows[0].registration_fee; live.days=d.rows[0].registration_days;
-      flash('fee',live.fee); flash('days',live.days+' days'); }
+    if(d&&d.rows&&d.rows[0]){ live.fee=displayA(d.rows[0].registration_fee); live.days=d.rows[0].registration_days;
+      if(live.fee!=null) flash('fee',live.fee); flash('days',live.days+' days'); }
   }
   async function loadRamCost(){
     var d=await post('/v1/chain/get_table_rows',{json:true,code:'eosio',scope:'eosio',table:'rammarket',limit:1});
