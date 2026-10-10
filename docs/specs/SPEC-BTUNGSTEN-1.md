@@ -193,6 +193,10 @@ Detection is the only claim the estate's Git layer can make today.
 
 ## §watch — government-procurement relevance
 
+The dated signal ledger lives at `docs/watch/btungsten-procurement-watch.md`
+(newest entries first; every entry names its axes AND the axes it does
+not carry — subset alignment is the honest default).
+
 The procurement watch treats as bTunGsTeN-relevant requirements:
 decentralization, autonomous healing/learning, >10B-user scale, and
 millennium-class infrastructure continuity. A tender carrying any of
