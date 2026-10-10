@@ -2,12 +2,11 @@
 // 202, one round at a time. pq02_harness::shipped_round_<k> runs the crate's
 // generic keccak::keccak_p once with constant RC[k] (through the harness
 // lane type whose operations are u64's own; see harness.rs `Lane`), and is
-// proven equal to keccakRound k for every state, for k = 0..23.
-//
-// What this does not check by machine: that keccak::p1600(s, 24), the u64
-// instantiation, is those 24 bodies in order. That is the crate's loop
-// (`for &rc in round_consts`, src/lib.rs:248), read, not proven: a direct
-// 24-round comparison does not close with any solver here.
+// proven equal to keccakRound k for every state, for k = 0..23. Then
+// pq02_harness::composed (those 24 in order) equal to keccakF, and
+// pq02_harness::agree: keccak::p1600(s, 24), the call sha3 0.10 makes, equal
+// to composed for every state s. Together: the shipped permutation is
+// Keccak-f[1600] for every state (two proofs joined by equality).
 //
 // usage (from this directory): saw shipped.saw   with MIR at ../../../target/saw-pq02/
 
@@ -24,9 +23,24 @@ let shipped_spec ir = do {
   mir_points_to r (mir_term {{ keccakRound (`ir : Integer) st }});
 };
 
-for (eval_list {{ [0 .. 23] : [24][8] }}) (\t -> do {
+ovs <- for (eval_list {{ [0 .. 23] : [24][8] }}) (\t -> do {
   let ir = eval_int t;
   let name = str_concat "shipped_round_" (show ir);
-  mir_verify m (str_concat "pq02_harness::" name) [] false (shipped_spec ir) (w4_unint_bitwuzla []);
+  ov <- mir_verify m (str_concat "pq02_harness::" name) [] false (shipped_spec ir) (w4_unint_bitwuzla []);
   print (str_concat "PQ02-SAW PROVEN " name);
+  return ov;
 });
+
+// The loop: the 24 proofs above stand in for the round calls, and with
+// keccakRound held opaque (z3: its index is an Integer) composed is the
+// spec's fold. agree (the shipped permutation against composed) is its own
+// file, agree*.saw, so its peak memory is not added to these.
+let perm_spec post = do {
+  st <- mir_fresh_var "st" (mir_array 25 mir_u64);
+  r <- mir_alloc_mut (mir_array 25 mir_u64);
+  mir_points_to r (mir_term st);
+  mir_execute_func [r];
+  mir_points_to r (mir_term (post st));
+};
+mir_verify m "pq02_harness::composed" ovs false (perm_spec (\st -> {{ keccakF st }})) (w4_unint_z3 ["keccakRound"]);
+print "PQ02-SAW PROVEN composed";

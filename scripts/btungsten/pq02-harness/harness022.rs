@@ -15,7 +15,11 @@
 //! `keccak_p::<Lane<K>, 1>` (the const assert needs ROUNDS <= RC.len())
 //! run the body once with RC[K]; its operations are u64's own, as the
 //! crate's `impl LaneSize for u64` is. `../pq02-saw/shipped022.saw` proves
-//! each of the 24 equal to FIPS 202 `keccakRound k` for every state.
+//! each of the 24 equal to FIPS 202 `keccakRound k` for every state, then
+//! `composed` (the 24 in order) equal to `keccakF`, then `agree`: the
+//! shipped `keccak_p::<u64, 24>` equal to `composed` for every state. The
+//! two runs execute the same MIR body, so the solver sees the same terms
+//! (a direct 24-round comparison against the spec never closed).
 
 #![no_std]
 #![forbid(unsafe_code)]
@@ -113,3 +117,58 @@ shipped_rounds!(
     shipped_round_16 = 16, shipped_round_17 = 17, shipped_round_18 = 18, shipped_round_19 = 19,
     shipped_round_20 = 20, shipped_round_21 = 21, shipped_round_22 = 22, shipped_round_23 = 23,
 );
+
+/// The 24 proven round bodies, in FIPS 202 order.
+pub fn composed(state: &mut [u64; 25]) {
+    shipped_round_0(state); shipped_round_1(state); shipped_round_2(state); shipped_round_3(state);
+    shipped_round_4(state); shipped_round_5(state); shipped_round_6(state); shipped_round_7(state);
+    shipped_round_8(state); shipped_round_9(state); shipped_round_10(state); shipped_round_11(state);
+    shipped_round_12(state); shipped_round_13(state); shipped_round_14(state); shipped_round_15(state);
+    shipped_round_16(state); shipped_round_17(state); shipped_round_18(state); shipped_round_19(state);
+    shipped_round_20(state); shipped_round_21(state); shipped_round_22(state); shipped_round_23(state);
+}
+
+/// The shipped permutation, as sha3 0.11's soft backend runs it (`get_p1600::<24>`, soft.rs:120).
+pub fn shipped_f(state: &mut [u64; 25]) {
+    soft::keccak_p::<u64, 24>(state);
+}
+
+/// Every lane equal, without a branch.
+fn same(a: &[u64; 25], b: &[u64; 25]) -> bool {
+    let mut d = 0u64;
+    let mut i = 0;
+    while i < 25 {
+        d |= a[i] ^ b[i];
+        i += 1;
+    }
+    d == 0
+}
+
+/// True when the shipped permutation and the composed round bodies agree
+/// on `state`; proven true for every state.
+pub fn agree(state: &[u64; 25]) -> bool {
+    let mut a = *state;
+    let mut b = *state;
+    composed(&mut a);
+    shipped_f(&mut b);
+    same(&a, &b)
+}
+
+/// TOOTH: the round bodies with rounds 5 and 6 swapped (RC[5] != RC[6]).
+pub fn composed_swapped(state: &mut [u64; 25]) {
+    shipped_round_0(state); shipped_round_1(state); shipped_round_2(state); shipped_round_3(state);
+    shipped_round_4(state); shipped_round_6(state); shipped_round_5(state); shipped_round_7(state);
+    shipped_round_8(state); shipped_round_9(state); shipped_round_10(state); shipped_round_11(state);
+    shipped_round_12(state); shipped_round_13(state); shipped_round_14(state); shipped_round_15(state);
+    shipped_round_16(state); shipped_round_17(state); shipped_round_18(state); shipped_round_19(state);
+    shipped_round_20(state); shipped_round_21(state); shipped_round_22(state); shipped_round_23(state);
+}
+
+/// TOOTH: `agree` against `composed_swapped`; must be refuted.
+pub fn agree_swapped(state: &[u64; 25]) -> bool {
+    let mut a = *state;
+    let mut b = *state;
+    composed_swapped(&mut a);
+    shipped_f(&mut b);
+    same(&a, &b)
+}

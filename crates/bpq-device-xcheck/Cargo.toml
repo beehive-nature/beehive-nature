@@ -1,0 +1,34 @@
+[package]
+name = "bpq-device-xcheck"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish = false
+description = "The Rust oracle of the Safe 7 bpq emulator cross-check (the private fork's crypto/bpq/emu_xcheck.py): crates/bsigner/src/bpq.rs compiled from its own file by #[path], and a binary that checks a device card, binding and detached signature against it, reporting key equality, signature verification and the controls as separate results. An oracle, not a signer: no command of bsigner is added or changed (crates/bsigner/CONTRACT.md), and no product crate may depend on this."
+
+[lib]
+name = "bpq_device_xcheck"
+path = "src/lib.rs"
+
+[[bin]]
+name = "bpq-device-xcheck"
+path = "src/main.rs"
+
+# Spelled exactly as crates/bsigner/Cargo.toml so the workspace lockfile resolves
+# every one of them to the version bsigner links; bpq.rs is compiled unmodified.
+[dependencies]
+aes-gcm = "0.10"
+bech32 = "0.9"
+bpq-core = { path = "../bpq-core" }
+btungsten-wb001 = { path = "../btungsten-wb001" }
+fips205 = { version = "=0.4.1", default-features = false, features = ["default-rng", "slh_dsa_shake_256f"] }
+getrandom = "0.2"
+hkdf = "0.12"
+ml-dsa = { version = "0.1", features = ["getrandom", "zeroize"] }
+ml-kem = { version = "0.3", features = ["getrandom"] }
+serde_json = "1"
+sha2 = { workspace = true }
+sha3 = { workspace = true }
+thiserror = "2"
+x25519-dalek = { version = "2", features = ["static_secrets"] }
+zeroize = { workspace = true }

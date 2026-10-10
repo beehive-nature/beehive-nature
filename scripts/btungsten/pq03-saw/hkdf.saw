@@ -1,0 +1,76 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ03 — HKDF-Expand(SHA-256) as hkdf 0.12.4, hmac
+// 0.12.1 and sha2 0.10.9 run it in bsigner's expand_label (32-byte PRK, 32
+// bytes out), against RFC 5869 over RFC 2104 and FIPS 180-4
+// (pq03-cryptol/Hkdf.cry), for every PRK and every info of each length:
+// 21 bytes (BDID-v1/vault-key under root), 55 (the inner padding spills
+// into a block of its own) and 101 (the longest label, a 64-byte context).
+//
+// Two steps per length, because the shipped path hands sha2 its state and
+// its block buffer as two fields of one struct, which a specification
+// standing in for the compression cannot take (its allocations must be
+// disjoint):
+//   reference_N  RFC 5869 written out in the harness over sha2's own
+//                compress256, every block a local of its own, EQUAL to
+//                hkdfExpand32 with the compression standing in, held opaque.
+//   agree_N      the shipped expand EQUAL to reference_N, nothing standing
+//                in but the SHA-NI probe: both run the same compression MIR
+//                on the same blocks, so the solver meets equal terms.
+//
+// ASSUMED, and printed as such: sha2's x86 compress on one block equals
+// FIPS 180-4's compress (pq03-sha256-check.sh proves the soft path's block
+// function; the SHA-NI path is not covered), and the SHA-NI probe answers
+// "absent", which selects that soft path.
+//
+// usage (from this directory): saw hkdf.saw   with MIR at ../../../target/saw-pq03-hkdf/
+
+enable_experimental;
+import "../pq03-cryptol/Sha256.cry";
+import "../pq03-cryptol/Hkdf.cry";
+
+m <- mir_load_module "../../../target/saw-pq03-hkdf/pq03_hkdf.linked-mir.json";
+let proven name = print (str_concat "PQ03-SAW PROVEN " name);
+
+ov_compress <- mir_unsafe_assume_spec m "sha2::sha256::x86::compress" (do {
+  st <- mir_fresh_var "st" (mir_array 8 mir_u32);
+  sp <- mir_alloc_mut (mir_array 8 mir_u32);
+  mir_points_to sp (mir_term st);
+  bs <- mir_fresh_var "bs" (mir_array 1 (mir_array 64 mir_u8));
+  bp <- mir_alloc (mir_array 1 (mir_array 64 mir_u8));
+  mir_points_to bp (mir_term bs);
+  mir_execute_func [sp, mir_slice_value bp];
+  mir_points_to sp (mir_term {{ compress st (split (join (bs @ 0))) }});
+});
+print "PQ03-SAW ASSUMED sha2 x86 compress, one block = FIPS 180-4 compress (the soft path is proven by pq03-sha256-check.sh)";
+ov_soft <- mir_unsafe_assume_spec m "sha2::sha256::x86::shani_cpuid::get" (do {
+  mir_execute_func [];
+  mir_return (mir_term {{ False }});
+});
+print "PQ03-SAW ASSUMED the SHA-NI probe answers absent (the soft path)";
+
+let args n = do {
+  prk <- mir_fresh_var "prk" (mir_array 32 mir_u8);
+  pp <- mir_alloc (mir_array 32 mir_u8);
+  mir_points_to pp (mir_term prk);
+  info <- mir_fresh_var "info" (mir_array n mir_u8);
+  ip <- mir_alloc (mir_array n mir_u8);
+  mir_points_to ip (mir_term info);
+  mir_execute_func [pp, ip];
+  return (prk, info);
+};
+
+let shape n = do {
+  let sn = show n;
+  mir_verify m (str_concat "pq03_hkdf::reference_" sn) [ov_compress] false (do {
+    (prk, info) <- args n;
+    mir_return (mir_term {{ hkdfExpand32 prk info }});
+  }) (w4_unint_bitwuzla ["compress"]);
+  proven (str_concat "reference_" sn);
+  mir_verify m (str_concat "pq03_hkdf::agree_" sn) [ov_soft] false (do {
+    (prk, info) <- args n;
+    mir_return (mir_term {{ True }});
+  }) (w4_unint_bitwuzla []);
+  proven (str_concat "agree_" sn);
+};
+shape 21;
+shape 55;
+shape 101;

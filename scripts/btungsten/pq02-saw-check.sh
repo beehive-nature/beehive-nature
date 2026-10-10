@@ -19,11 +19,16 @@
 #                keccak::keccak_p, run once per constant through the harness
 #                lane type) equals FIPS 202 keccakRound k for every state, for
 #                each k = 0..23; pq02-saw/shipped022.saw the same for 0.2.2's
-#                soft::keccak_p. Not machine-checked: that the 24-round
-#                permutation runs those bodies in order (each crate's loop,
-#                read).
-#   TEETH        shipped-teeth.saw (one ρ offset off by one) MUST fail with a
-#                counterexample.
+#                soft::keccak_p; then, in each, composed (those 24 bodies in
+#                FIPS 202 order, each round proof standing in) equals keccakF.
+#                agree.saw / agree022.saw: the shipped 24-round permutation
+#                (p1600(s, 24); keccak_p::<u64, 24>) equals composed for every
+#                state, nothing standing in. Joined by equality: the shipped
+#                permutation is Keccak-f[1600] for every state.
+#   TEETH        shipped-teeth.saw (one ρ offset off by one), loop-teeth.saw and
+#                loop-teeth022.saw (agree against rounds 5 and 6 swapped) and
+#                order-teeth.saw (composed against FIPS 202 with rounds 5 and 6
+#                swapped) MUST fail with a counterexample.
 #
 # usage: pq02-saw-check.sh <saw> <saw-rustc> <cryptol>
 set -eu
@@ -117,7 +122,9 @@ run_required() {
 run_teeth_verify() {
   _script=$1
   say "== SAW PQ02: TEETH $_script — must FAIL with a counterexample =="
-  _log=$(cd "$SAWDIR" && "$SAW" "$_script" 2>&1) && _rc=0 || _rc=$?
+  # capped like the proofs: a tooth that outgrows the runner fails here, loudly,
+  # instead of taking the runner down (run 37976780346)
+  _log=$(cd "$SAWDIR" && "$SAW" +RTS -M13g -RTS "$_script" 2>&1) && _rc=0 || _rc=$?
   say "$_log" | grep -a -E 'PQ02-SAW-TEETH|Subgoal failed|ounterexample' | head -12 || true
   if say "$_log" | grep -aq 'UNEXPECTED-PROVEN' || [ "$_rc" -eq 0 ]; then
     say "SAW-TEETH $_script: FAIL — the wrong obligation was accepted"
@@ -136,13 +143,18 @@ rounds=""
 i=0
 while [ $i -lt 24 ]; do rounds="$rounds shipped_round_$i"; i=$((i + 1)); done
 # shellcheck disable=SC2086
-run_required shipped.saw $rounds
+run_required shipped.saw $rounds composed
+run_required agree.saw agree
 run_teeth_verify shipped-teeth.saw
+run_teeth_verify loop-teeth.saw
 rounds022=""
 i=0
 while [ $i -lt 24 ]; do rounds022="$rounds022 keccak022.shipped_round_$i"; i=$((i + 1)); done
 # shellcheck disable=SC2086
-run_required shipped022.saw $rounds022
+run_required shipped022.saw $rounds022 keccak022.composed
+run_required agree022.saw keccak022.agree
+run_teeth_verify loop-teeth022.saw
+run_teeth_verify order-teeth.saw
 
 say "== SAW PQ02: ladder state =="
-say "PIN: PASS (2 crates) | BUILD: PASS | SPEC-CHECK: PASS (5) | EQUIVALENCE: PROVEN (keccak 0.1.6 and 0.2.2 round bodies == FIPS 202 keccakRound, all 24 constants each; the 24-round loops read, not proven) | TEETH: PASS (1)"
+say "PIN: PASS (2 crates) | BUILD: PASS | SPEC-CHECK: PASS (5) | EQUIVALENCE: PROVEN (keccak 0.1.6 and 0.2.2: round bodies == FIPS 202 keccakRound, all 24 constants each; the 24 in order == keccakF; the shipped 24-round permutation == those 24, every state) | TEETH: PASS (4)"

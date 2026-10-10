@@ -1,0 +1,48 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ06 — TOOTH bentTwiddle: ml-dsa's NTT against
+// FIPS 204 Algorithm 41 with ONE twiddle factor changed (table entry 5 plus
+// one) MUST fail with a counterexample: the proof reads every constant.
+
+enable_experimental;
+import "../pq05-cryptol/Field.cry";
+import "../pq06-cryptol/DsaNtt.cry";
+include "../../../target/saw-pq06-ntt/names.saw";
+
+m <- mir_load_module "../../../target/saw-pq06-ntt/pq06_ntt.linked-mir.json";
+let elem_adt = mir_find_mangled_adt m elem_adt_name;
+let poly_adt = mir_find_mangled_adt m poly_adt_name;
+let npoly_adt = mir_find_mangled_adt m npoly_adt_name;
+let arr_adt = mir_find_mangled_adt m arr_adt_name;
+let elem_ty = mir_adt elem_adt;
+let elem v = mir_struct_value elem_adt [mir_term v];
+
+// the operators as assumed specs: the tooth is about the twiddles
+let op name post = mir_unsafe_assume_spec m name (do {
+  a <- mir_fresh_var "a" mir_u32;
+  b <- mir_fresh_var "b" mir_u32;
+  mir_precond {{ a < 8380417 /\ b < 8380417 }};
+  mir_execute_func [elem a, elem b];
+  let r = post a b;
+  mir_return (elem r);
+  mir_postcond {{ r < 8380417 }};
+});
+ov_add <- op add_name (\a b -> {{ dsaAdd a b }});
+ov_sub <- op sub_name (\a b -> {{ dsaSub a b }});
+ov_mul <- op mul_name (\a b -> {{ dsaMul a b }});
+
+let poly_of adt f = do {
+  xs <- for (eval_list {{ [0 .. 255] : [256][8] }}) (\i -> return (elem {{ f @ i }}));
+  return (mir_struct_value adt [mir_struct_value arr_adt [mir_array_value elem_ty xs]]);
+};
+
+print "PQ06-SAW-TEETH obligation bentTwiddle";
+mir_verify m ntt_name [ov_add, ov_sub, ov_mul] false (do {
+  f <- mir_fresh_var "f" (mir_array 256 mir_u32);
+  mir_precond {{ all (\x -> x < 8380417) f }};
+  pv <- poly_of poly_adt f;
+  p <- mir_alloc (mir_adt poly_adt);
+  mir_points_to p pv;
+  mir_execute_func [p];
+  rv <- poly_of npoly_adt {{ nttWith (update zetas (5 : [8]) ((zetas @ (5 : [8])) + 1)) f }};
+  mir_return rv;
+}) (w4_unint_bitwuzla ["dsaAdd", "dsaSub", "dsaMul"]);
+print "PQ06-SAW-TEETH UNEXPECTED-PROVEN bentTwiddle";

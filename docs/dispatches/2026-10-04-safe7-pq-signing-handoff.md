@@ -206,8 +206,29 @@ device's signature made on the device. (B) is closed: no phrase goes onto the de
   lifting it is step 2, the founder's reviewed change. Not re-run: `emu_xcheck` (no generated
   code changed; the beehive-nature oracles have moved since `42aac5cfa`, so the re-run belongs
   with step 2 at a pinned oracle revision).
-- **Next, 2026-10-09:** step 2, the clean T3W1 hardware build with bpq lifted out of the
-  emulator-only gate as a reviewed change (founder, with his agent): the three gate sites, the
-  doc sentences, two fresh pinned builds byte-equal (`tools/firmware/build-pinned.sh`,
-  `compare-builds.py`), the image digest recorded. Then gate 6 per
-  `docs/dispatches/2026-10-09-safe7-gate6-ceremony-plan.md` (step 5, this session).
+- **Step 2 candidate landed, 2026-10-09 (Seat 3 by the founder's relayed order, no device).**
+  The founder reassigned step 2 to this seat the same day, with zCode as the independent
+  reviewer. Fork branch `bpq-safe7-7a8709b` fast-forwarded `5e12b132f` → `7dab5f939` (bpq
+  becomes a model-scoped cargo feature of universal T3W1 firmware, hardware and emulator alike,
+  on the tree's `eos` precedent, with a build-time refusal of any other model by name and an
+  xtask test over every model's resolved features; the other models' universal emulators lose
+  bpq and their unit test is guarded) → `967fddb3d` (the emulator cross-check takes its Rust
+  oracle from beehive-nature `crates/bpq-device-xcheck`, bsigner's own `bpq.rs` by `#[path]`,
+  landed on public main at `d46a26c21`; the stale fork copy is deleted) → `bc8bb2e75` (receipts).
+  Evidence: two fresh pinned T3W1 builds of `967fddb3d` at the fixed path, `firmware.bin`,
+  `kernel.bin` and `secmon.bin` byte-identical; the image is 2,396,672 B, 36,352 B over the
+  parent's, the fit re-run reproduces the 10-05 numbers from a committed tree, no debuglink,
+  vendor header `unsafe_signed_prod`, the prebuilt secmon embedded; the emulator cross-check at
+  `967fddb3d` passes in both oracles with key equality and signature verification reported
+  apart. Receipts: fork `crypto/bpq/HARDWARE_CANDIDATE_RECEIPT.md` and
+  `crypto/bpq/emu_xcheck_receipt_967fddb3d.json`; here
+  `docs/receipts/bpq-safe7-hardware-candidate-2026-10-09.json`. The gate-6 plan was corrected
+  to the order (no working wallet, no real seed, non-debug as a requirement, attestation
+  evidence local, divergence at exact revisions, obligations with owners). No image was
+  installed anywhere; nothing here authorizes installing one.
+- **Next, 2026-10-09 (evening):** zCode's independent review
+  (`docs/dispatches/2026-10-09-zcode-review-request-safe7-step2.md`); then the firmware seat's
+  gates 1 (upstream security reconciliation), 2 (native transport on a development unit) and 4
+  (recovery tests on the emulator); gate 5 (the PQ lane); the 13 `dev@beehive-nature` commits
+  (founder acknowledgment). Gate 6 only on the founder's specific informed consent, asked
+  after those receipts exist, per the corrected plan.
