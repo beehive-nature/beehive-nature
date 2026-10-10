@@ -1390,7 +1390,8 @@ document.addEventListener('DOMContentLoaded',function(){
   const SDK_ROOT = '/vendor/ant-browser-sdk/0.1.2/';
   // Autonomi self-encryption cuts a file into CHUNK-sized pieces (three equal pieces under 3 × CHUNK).
   // Reading on those boundaries means no chunk is fetched twice; DIRECT_LANES of them travel at once.
-  const CHUNK = 4190208, DIRECT_LANES = 6;
+  // Three application reads cap the ordered look-ahead at six chunks; the SDK owns peer scheduling.
+  const CHUNK = 4190208, DIRECT_LANES = 3;
   const DIRECT_ATTEMPTS = 3, DIRECT_RETRIES = 12, DIRECT_BACKOFF_MS = [250, 1000];
   // The relay takes over after DIRECT_QUIET_MS without progress or DIRECT_CAP_MS before the file opens,
   // or after DIRECT_STARVE_MS waiting for the next chunk the player needs.

@@ -159,12 +159,14 @@ Late reads cannot change a terminated run's counters. Direct-only still stops;
 the fallback route still uses the relay. No retry fanout or concurrency increase.
 
 October 9 recovery adds up to three attempts per chunk and twelve retries per
-transfer, with 250/1000 ms backoff after settled read failures. Six lanes and the
-relay route's 45-second ordered-wait deadline are unchanged. Direct-only allows
+transfer, with 250/1000 ms backoff after settled read failures. October 10 lowers
+the application read lanes from six to three, capping its look-ahead at six chunks.
+The relay route's 45-second ordered-wait deadline is unchanged. Direct-only allows
 120 seconds for the needed chunk; later chunks never reset it. Unsettled reads are never retried:
 the SDK's JavaScript abort is not proof that its underlying WASM call stopped.
 The capture retains attempt/arrival/emission timestamps and terminal states in
-one bounded `chunkReceipts` array for the latest direct attempt. Peer attribution
+one bounded `chunkReceipts` array for the latest direct attempt (with an explicit
+truncation flag if its 256-chunk capture bound is exceeded). Peer attribution
 stays null. Aggregate data-channel receive counters are distinct from plaintext
 bytes and full wire traffic. Explicit direct-only startup now allows 30 seconds
 of quiet and 90 seconds total; relay-fallback keeps 12 seconds/30 seconds.

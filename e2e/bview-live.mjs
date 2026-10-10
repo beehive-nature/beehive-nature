@@ -26,10 +26,15 @@ try {
   await page.fill('#addr',fixture.address);
   await page.evaluate(()=>bviewTrial.mark('play'));
   const started=Date.now();await page.click('button[type=submit]');
-  let e,receivedAtMs=null,endedAtMs=null;
+  let e,receivedAtMs=null,endedAtMs=null,lastProgress=0;
   while(Date.now()-started<600000) {
     await page.waitForTimeout(1000);
     e=await page.evaluate(()=>window.__bviewEngine());
+    if(Date.now()-started-lastProgress>=15000){
+      lastProgress=Date.now()-started;
+      console.log(JSON.stringify({elapsedMs:lastProgress,source:e.source?.kind,received:!!e.sha,
+        playhead:e.playhead,duration:e.video?.duration,paused:e.video?.paused,directStatus:e.direct?.status}));
+    }
     if(e.sha && receivedAtMs===null)receivedAtMs=Date.now()-started;
     if(e.video?.ended){endedAtMs=Date.now()-started;break;}
     if(e.direct?.stopped || (e.fail&&!e.video?.width))break;
@@ -44,7 +49,7 @@ try {
     ttffMs:e.ttffMs,ttfbMs:e.ttfbMs,source:e.source?.kind,actualSize:e.size,
     duration:e.video?.duration,playhead:e.playhead,ended:e.video?.ended,
     stalls:e.stalls,stallMs:e.stallMs,relayRequests,pageErrors,
-    accepted:integrityMatches===true&&e.video?.ended===true&&pageErrors===0,
+    accepted:integrityMatches===true&&e.video?.ended===true&&e.video?.duration>0&&e.playhead>=e.video.duration-0.5&&pageErrors===0,
     capture,'PUBLIC-CONSTANT':'htmlSha256 is a public source digest; no addresses or private peer IDs in capture'};
   await writeFile(output,JSON.stringify(result)+'\n',{flag:'wx'});
   console.log(JSON.stringify({output,accepted:result.accepted,receivedAtMs,endedAtMs,integrityMatches,ttffMs:e.ttffMs,stalls:e.stalls,stallMs:e.stallMs,relayRequests,pageErrors}));
