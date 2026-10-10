@@ -1,0 +1,9 @@
+$ cargo audit --version
+cargo-audit-audit 0.22.2
+$ ls ~/.cargo/audit.toml /mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/.cargo/audit.toml   # audit configuration files
+ls: cannot access '/home/travi/.cargo/audit.toml': No such file or directory
+ls: cannot access '/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/.cargo/audit.toml': No such file or directory
+$ git -C ~/.cargo/advisory-db log -1 --format='%H %cI %s'   # after the fetching run
+7eebec69c352c7191b1f13eb95dd510eeca5d1de 2026-10-09T10:12:02+02:00 Assigned RUSTSEC-2026-0334 to bip322
+$ git -C ~/.cargo/advisory-db log -1 --format='%H'   # after both audits
+7eebec69c352c7191b1f13eb95dd510eeca5d1de

@@ -1,0 +1,6 @@
+$ date -u
+Fri Oct  9 16:41:12 UTC 2026
+$ git -C ~/.cargo/advisory-db reflog --date=iso
+7eebec69 HEAD@{2026-10-09 07:08:10 -0600}: clone: from https://github.com/RustSec/advisory-db.git
+$ git -C ~/.cargo/advisory-db log -1 --format='%H %cI %s'
+7eebec69c352c7191b1f13eb95dd510eeca5d1de 2026-10-09T10:12:02+02:00 Assigned RUSTSEC-2026-0334 to bip322

@@ -1,0 +1,46 @@
+$ cargo audit --file main.lock   # origin/main's Cargo.lock; this run fetches the database
+    Fetching advisory database from `https://github.com/RustSec/advisory-db.git`
+      Loaded 1296 security advisories (from /home/travi/.cargo/advisory-db)
+    Updating crates.io index
+    Scanning /mnt/c/Users/travi/AppData/Local/Temp/claude/C--Users-travi-beehive-nature--claude-worktrees-goofy-pike-4d5a22/5bc13e26-e310-4488-ae0b-7a4e431b091a/scratchpad/main.lock for vulnerabilities (530 crate dependencies)
+Crate:     rsa
+Version:   0.9.10
+Title:     Marvin Attack: potential key recovery through timing sidechannels
+Date:      2023-11-22
+ID:        RUSTSEC-2023-0071
+URL:       https://rustsec.org/advisories/RUSTSEC-2023-0071
+Severity:  5.9 (medium)
+Solution:  No fixed upgrade is available!
+
+Crate:     rustls
+Version:   0.23.42
+Title:     TLS 1.3 handshake messages incorrectly accepted across encryption level boundaries
+Date:      2026-09-14
+ID:        RUSTSEC-2026-0285
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0285
+Severity:  5.3 (medium)
+Solution:  Upgrade to >=0.23.45
+
+Crate:     bincode
+Version:   1.3.3
+Warning:   unmaintained
+Title:     Bincode is unmaintained
+Date:      2025-12-16
+ID:        RUSTSEC-2025-0141
+URL:       https://rustsec.org/advisories/RUSTSEC-2025-0141
+
+Crate:     proc-macro-error2
+Version:   2.0.1
+Warning:   unmaintained
+Title:     proc-macro-error2 is unmaintained
+Date:      2026-06-07
+ID:        RUSTSEC-2026-0173
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0173
+
+Crate:     chacha20
+Version:   0.10.1
+Warning:   yanked
+
+error: 2 vulnerabilities found!
+warning: 3 allowed warnings found
+exit 1
