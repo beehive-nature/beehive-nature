@@ -29,6 +29,8 @@ test('capture preserves unknowns, distinguishes cache, bounds samples and exclud
   let tick, cleared = false;
   const context = { window: { __bviewEngine: () => ({ path: 'cache', source: {kind:'cache'},
     bytes: 12, ttffMs: null, door: 'SECRET', sha: 'SECRET', direct: null,
+    playStartMs: 100, holds: 2, holdMs: 2300,
+    adaptive: { mode: 'mse', segments: 3, mediaBytes: 12000, url: 'SECRET', token: 'SECRET' },
     video: { paused: false, ended: true } }) },
     document: { hidden: false }, performance: { now: () => 10 },
     setInterval: f => { tick = f; return 1; }, clearInterval: () => { cleared = true; } };
@@ -42,5 +44,8 @@ test('capture preserves unknowns, distinguishes cache, bounds samples and exclud
   assert.equal(cleared, true);
   assert.equal(result.rows[0].source, 'cache');
   assert.equal(result.rows[0].ttffMs, null);
+  assert.equal(result.rows[0].playStartMs, 100);
+  assert.equal(result.rows[0].holdMs, 2300);
+  assert.equal(result.rows[0].adaptive.mediaBytes, 12000);
   assert.equal(text.includes('SECRET'), false);
 });
