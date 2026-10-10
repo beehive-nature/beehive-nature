@@ -1171,7 +1171,15 @@ document.addEventListener('DOMContentLoaded',function(){
       state.previewTried = true;
       state.busy = true;
       let ok = false;
+      const previewAt = performance.now();
       try { ok = await paintBlob(snap(state), BLOB_WAIT, state); } finally { state.busy = false; }
+      // Preview work pauses this consumer. Exclude its known local duration
+      // from short delivery windows, retaining the conservative first-byte average.
+      if (my === job) {
+        const previewMs = performance.now() - previewAt;
+        rateClock.t0 += previewMs;
+        if (rateClock.lastAt) rateClock.lastAt += previewMs;
+      }
       if (my === job && ok && v.videoWidth > 0) {
         state.preview = true;
         state.early = true;
@@ -1390,10 +1398,15 @@ document.addEventListener('DOMContentLoaded',function(){
   const SDK_ROOT = '/vendor/ant-browser-sdk/0.1.2/';
   // Autonomi self-encryption cuts a file into CHUNK-sized pieces (three equal pieces under 3 × CHUNK).
   // Reading on those boundaries means no chunk is fetched twice; DIRECT_LANES of them travel at once.
-  const CHUNK = 4190208, DIRECT_LANES = 6;
+  // Three application reads cap the ordered look-ahead at six chunks; the SDK owns peer scheduling.
+  const CHUNK = 4190208, DIRECT_LANES = 3;
+  const DIRECT_ATTEMPTS = 3, DIRECT_RETRIES = 12, DIRECT_BACKOFF_MS = [250, 1000];
   // The relay takes over after DIRECT_QUIET_MS without progress or DIRECT_CAP_MS before the file opens,
   // or after DIRECT_STARVE_MS waiting for the next chunk the player needs.
   const DIRECT_QUIET_MS = 12000, DIRECT_CAP_MS = 30000, DIRECT_STARVE_MS = 45000, ROUTE_KEY = 'bnr.bview.route';
+  // A viewer choosing direct-only accepts a longer cold discovery window.
+  // The automatic relay route keeps its existing responsiveness budget.
+  const DIRECT_ONLY_QUIET_MS = 30000, DIRECT_ONLY_CAP_MS = 90000, DIRECT_ONLY_STARVE_MS = 120000;
   let directPool = null, directOpen = null, directRun = null, restorePause = false;
   const routeStatus = text => { $('playback-status').textContent = text; };
   const stopDirect = () => { const run = directRun; directRun = null; if (run) run.stop(); };
@@ -1476,20 +1489,36 @@ document.addEventListener('DOMContentLoaded',function(){
     const startedAt = performance.now();
     let stage = 'Connecting to Autonomi nodes', movedAt = startedAt;
     const only = routeOf() === 'direct-only';
-    const capLeft = () => Math.max(1, DIRECT_CAP_MS - (performance.now() - startedAt));
+    const quietMs = only ? DIRECT_ONLY_QUIET_MS : DIRECT_QUIET_MS, capMs = only ? DIRECT_ONLY_CAP_MS : DIRECT_CAP_MS;
+    const starveMs = only ? DIRECT_ONLY_STARVE_MS : DIRECT_STARVE_MS;
+    const capLeft = () => Math.max(1, capMs - (performance.now() - startedAt));
     // The dials themselves are the receipt: how many storage nodes answered so far, shown as it happens.
     const answered = () => { const t = window.__antTransport && window.__antTransport.snapshot(); return t && t.dials ? ' · ' + t.opened + ' of ' + t.dials + ' nodes answered' : ''; };
-    const startupStatus = () => routeStatus(stage + answered() + ' · ' + ((performance.now()-startedAt)/1000).toFixed(0) + ' s · quiet ' + ((performance.now()-movedAt)/1000).toFixed(0) + ' s / ' + DIRECT_QUIET_MS/1000 + ' s. Then ' + (only ? 'stop, no relay.' : 'relay.'));
+    const startupStatus = () => routeStatus(stage + answered() + ' · ' + ((performance.now()-startedAt)/1000).toFixed(0) + ' s · quiet ' + ((performance.now()-movedAt)/1000).toFixed(0) + ' s / ' + quietMs/1000 + ' s. Then ' + (only ? 'stop, no relay.' : 'relay.'));
     const failed = new AbortController();
     const cancelled = () => failed.abort();
     signal.addEventListener('abort', cancelled, { once: true });
     // Every sign of direct progress restarts the quiet clock; the cap bounds the wait for the file to open.
-    const moved = () => { if (settled) return; movedAt = performance.now(); clearTimeout(quiet); quiet = setTimeout(() => failed.abort(), DIRECT_QUIET_MS); };
+    const moved = () => { if (settled) return; movedAt = performance.now(); clearTimeout(quiet); quiet = setTimeout(() => { receipt.status = 'timeout'; failed.abort(); }, quietMs); };
     // The SDK names each step of opening a file; show the viewer which one is running.
     const heard = event => { if (String(event && event.message || '').startsWith('Verified public DataMap')) stage = 'Reading the video map'; moved(); };
-    cap = setTimeout(() => failed.abort(), DIRECT_CAP_MS); moved();
-    const receipt = metrics.direct = {sdk:'0.1.2',lanes:DIRECT_LANES,reused:!!(directPool&&directPool.ready),startupBudgetMs:DIRECT_QUIET_MS,startupCapMs:DIRECT_CAP_MS,starveMs:DIRECT_STARVE_MS,startupElapsedMs:null,connectMs:null,openMs:null,chunks:null,requests:0,completed:0,failed:0,readBytes:0,uniqueBytes:0,readMs:0,firstReadMs:null,firstFrameMs:null,size:null,fallback:null,only,stopped:null};
-    Object.assign(receipt, { emittedBytes:0, bufferedBytes:0, peakBufferedBytes:0, emittedChunks:0, waitingForChunk:null, headWaitMs:0 });
+    cap = setTimeout(() => { receipt.status = 'timeout'; failed.abort(); }, capMs); moved();
+    const receipt = metrics.direct = {sdk:'0.1.2',lanes:DIRECT_LANES,reused:!!(directPool&&directPool.ready),startupBudgetMs:quietMs,startupCapMs:capMs,starveMs,startupElapsedMs:null,connectMs:null,openMs:null,chunks:null,requests:0,completed:0,failed:0,readBytes:0,uniqueBytes:0,readMs:0,firstReadMs:null,firstFrameMs:null,size:null,fallback:null,only,stopped:null};
+    Object.assign(receipt, { emittedBytes:0, bufferedBytes:0, peakBufferedBytes:0, emittedChunks:0, waitingForChunk:null, headWaitMs:0,
+      status:'opening', retries:0, retryLimit:DIRECT_RETRIES, maxAttempts:DIRECT_ATTEMPTS, recoveredChunks:0, chunkReceipts:[] });
+    const receiptAt = metrics.t0;
+    const elapsed = () => performance.now() - receiptAt;
+    // Aborting the SDK's JS wait does not cancel its WASM read. Never retry an
+    // unsettled read. Freeze its receipt on stop, even if it completes later.
+    failed.signal.addEventListener('abort', () => {
+      if (receipt.status === 'reading' || receipt.status === 'opening') receipt.status = 'cancelled';
+      for (const chunk of receipt.chunkReceipts) {
+        if (chunk.state === 'reading' || chunk.state === 'backoff') chunk.state = 'cancelled';
+        for (const attempt of chunk.attempts) if (attempt.outcome === 'pending') {
+          attempt.outcome = chunk.state === 'timeout' ? 'timeout' : 'cancelled'; attempt.endMs = elapsed();
+        }
+      }
+    }, { once:true });
     try {
       if (!directCapable()) throw new Error('Direct playback is unavailable in this browser');
       startupStatus(); ticker = setInterval(startupStatus, 500);
@@ -1509,6 +1538,8 @@ document.addEventListener('DOMContentLoaded',function(){
       settled = true; clearTimeout(quiet); clearTimeout(cap); clearInterval(ticker);
       const plan = directPieces(reader.size);
       receipt.openMs = performance.now() - openAt; receipt.size = reader.size; receipt.chunks = plan.length;
+      receipt.status = 'reading';
+      receipt.chunkReceipts = plan.map(([start,length], index) => ({ index,start,length,state:'queued',attempts:[],arrivedMs:null,emittedMs:null,peer:null }));
       receipt.startupElapsedMs = performance.now() - startedAt;
       metrics.path = 'webrtc'; metrics.cl = reader.size; metrics.acceptRanges = 'chunk lanes';
       const lanes = Math.min(DIRECT_LANES, plan.length);
@@ -1532,29 +1563,60 @@ document.addEventListener('DOMContentLoaded',function(){
         starve = setTimeout(() => {
           const missing = emit; endHeadWait();
           if (!readError) readError = new Error('Direct chunks stopped arriving in order: waiting for chunk ' + missing);
+          receipt.status = 'timeout'; receipt.chunkReceipts[missing].state = 'timeout';
           failed.abort(); wake();
-        }, DIRECT_STARVE_MS);
+        }, starveMs);
       };
       const lane = async () => {
         while (!failed.signal.aborted && next < plan.length) {
           // Never hold more than two rounds of finished chunks ahead of the player.
           if (next - emit >= DIRECT_LANES * 2) { await wait(); continue; }
-          const index = next++, start = plan[index][0], length = plan[index][1], readAt = performance.now();
-          receipt.requests++;
-          try {
-            const bytes = await reader.read(start, length, { signal: failed.signal });
-            if (failed.signal.aborted || my !== job) return;
-            if (bytes.length !== length) throw new Error('Direct chunk came back short');
-            receipt.completed++; receipt.readBytes += bytes.length; receipt.uniqueBytes += bytes.length; receipt.readMs += performance.now() - readAt;
-            if (receipt.firstReadMs == null) receipt.firstReadMs = performance.now() - metrics.t0;
-            arrived.set(index, bytes);
-            receipt.bufferedBytes += bytes.length;
-            receipt.peakBufferedBytes = Math.max(receipt.peakBufferedBytes, receipt.bufferedBytes);
-            wake();
-            if (my === job) paintNerd();
-          } catch (error) {
-            if (!failed.signal.aborted) { receipt.failed++; if (!readError) readError = error; failed.abort(); }
-            wake(); return;
+          const index = next++, start = plan[index][0], length = plan[index][1];
+          const chunk = receipt.chunkReceipts[index];
+          for (let count = 1; count <= DIRECT_ATTEMPTS; count++) {
+            const attempt = { number:count,startMs:elapsed(),endMs:null,outcome:'pending',bytes:0 };
+            chunk.state = 'reading'; chunk.attempts.push(attempt); receipt.requests++;
+            try {
+              const bytes = await reader.read(start, length, { signal: failed.signal });
+              if (failed.signal.aborted || my !== job) return;
+              attempt.bytes = bytes.length; receipt.readBytes += bytes.length;
+              if (bytes.length !== length) { attempt.outcome = 'short'; throw new Error('Direct chunk came back short'); }
+              attempt.endMs = elapsed(); attempt.outcome = 'complete';
+              chunk.state = 'arrived'; chunk.arrivedMs = attempt.endMs;
+              receipt.completed++; receipt.uniqueBytes += bytes.length; receipt.readMs += attempt.endMs - attempt.startMs;
+              if (count > 1) receipt.recoveredChunks++;
+              if (receipt.firstReadMs == null) receipt.firstReadMs = elapsed();
+              arrived.set(index, bytes);
+              receipt.bufferedBytes += bytes.length;
+              receipt.peakBufferedBytes = Math.max(receipt.peakBufferedBytes, receipt.bufferedBytes);
+              wake(); paintNerd(); break;
+            } catch (error) {
+              if (failed.signal.aborted || my !== job) return;
+              attempt.endMs = elapsed(); if (attempt.outcome !== 'short') attempt.outcome = 'failed'; receipt.failed++;
+              // Only settled read failures are retried, in the same lane, under
+              // both per-chunk and per-transfer caps. Keep the head deadline.
+              const retryable = error.name !== 'AbortError' && (!error.code || error.code === 'OPEN_FILE_FAILED');
+              if (!retryable || count === DIRECT_ATTEMPTS || receipt.retries >= DIRECT_RETRIES) {
+                chunk.state = 'failed'; receipt.status = 'failed';
+                if (!readError) readError = new Error('Direct chunk ' + index + ' failed after ' + count + ' attempt(s)');
+                failed.abort(); wake(); return;
+              }
+              chunk.state = 'backoff';
+              await new Promise(resolve => {
+                let timer;
+                const done = () => { clearTimeout(timer); failed.signal.removeEventListener('abort',done); resolve(); };
+                failed.signal.addEventListener('abort',done,{once:true});
+                timer = setTimeout(done,DIRECT_BACKOFF_MS[count - 1]);
+              });
+              if (failed.signal.aborted || my !== job) return;
+              // Other lanes may consume the transfer budget during backoff.
+              if (receipt.retries >= DIRECT_RETRIES) {
+                chunk.state = 'failed'; receipt.status = 'failed';
+                if (!readError) readError = new Error('Direct retry budget exhausted at chunk ' + index);
+                failed.abort(); wake(); return;
+              }
+              receipt.retries++;
+            }
           }
         }
       };
@@ -1566,7 +1628,9 @@ document.addEventListener('DOMContentLoaded',function(){
             const bytes = arrived.get(emit);
             if (bytes) {
               endHeadWait();
-              arrived.delete(emit); emit++; wake();
+              arrived.delete(emit);
+              receipt.chunkReceipts[emit].state = 'emitted'; receipt.chunkReceipts[emit].emittedMs = elapsed();
+              emit++; wake();
               receipt.bufferedBytes -= bytes.length; receipt.emittedBytes += bytes.length; receipt.emittedChunks = emit;
               if (metrics.ttfbMs == null) metrics.ttfbMs = performance.now() - metrics.t0;
               return { done: false, value: bytes };
@@ -1585,7 +1649,9 @@ document.addEventListener('DOMContentLoaded',function(){
       pg.hidden = $('got').hidden = false; pg.value = 0;
       try { await readBinaryStream(rd, new Uint8Array(0), reader.size, signal, my, address); }
       catch (error) { if (!readError) readError = error; }
-      const whole = emit >= plan.length && !readError;
+      const whole = emit >= plan.length && !readError && !signal.aborted && my === job;
+      if (whole) receipt.status = 'complete';
+      else if (receipt.status !== 'timeout' && receipt.status !== 'cancelled') receipt.status = readError ? 'failed' : 'cancelled';
       endHeadWait(); failed.abort(); wake();
       if (directRun && directRun.my === my) directRun = null;
       try { reader.close(); } catch {}
@@ -1599,6 +1665,7 @@ document.addEventListener('DOMContentLoaded',function(){
       paintNerd();
       return true;
     } catch (error) {
+      if (receipt.status === 'opening' || receipt.status === 'reading') receipt.status = signal.aborted || my !== job ? 'cancelled' : 'failed';
       failed.abort(); clearTimeout(starve);
       if (directRun && directRun.my === my) directRun = null;
       if (reader) { try { reader.close(); } catch {} }
@@ -1705,7 +1772,7 @@ document.addEventListener('DOMContentLoaded',function(){
       plan: pl ? { dur: pl.dur, bps: 8 * (pl.m1 - pl.m0) / pl.dur, codec: pl.codec, w: pl.w, h: pl.h, fps: pl.fps, m0: pl.m0, m1: pl.m1 } : null,
       planless: !!(st && st.planless), preview: !!(st && st.preview), sounded: !!(st && st.sounded), stalled: !!(st && st.stalled), done: !!(st && st.done),
       paintedAt: st ? st.paintedAt : 0, waitS, playhead: v.currentTime || 0,
-      direct:metrics.direct?{...metrics.direct}:null,video:videoFacts(),
+      direct:metrics.direct?{...metrics.direct,chunkReceipts:metrics.direct.chunkReceipts.map(c=>({...c,attempts:c.attempts.map(a=>({...a}))}))}:null,video:videoFacts(),
       stalls: metrics.stalls || 0, stallMs: (metrics.stallMs || 0) + (metrics.stallAt ? performance.now() - metrics.stallAt : 0),
       route: metrics.route || null, source: sourceOf(),
     };
@@ -1872,6 +1939,7 @@ document.addEventListener('DOMContentLoaded',function(){
       ['connect wait',esc(ms(dr.connectMs))],['file open',esc(ms(dr.openMs))],
       ['direct size',esc(dr.size==null?'not yet':dr.size+' B')],
       ['chunk reads',esc(dr.requests+' requested · '+dr.completed+' completed · '+dr.failed+' failed')],
+      ['chunk recovery',esc(dr.retries+' retries / '+dr.retryLimit+' limit · '+dr.recoveredChunks+' chunks recovered · '+dr.status)],
       ['unique plaintext',esc(dr.uniqueBytes+' B'+(dr.size?' / '+dr.size+' B · '+(100*dr.uniqueBytes/dr.size).toFixed(1)+'%':''))],
       ['ordered delivery',esc(dr.emittedBytes+' B handed to the player · '+dr.bufferedBytes+' B queued · '+dr.peakBufferedBytes+' B peak queued')],
       ['ordered wait',esc(ms(dr.headWaitMs)+' completed waits'+(dr.waitingForChunk!=null?' · waiting for chunk '+dr.waitingForChunk:''))],

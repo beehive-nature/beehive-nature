@@ -232,17 +232,26 @@ same cases (DIFFERENTIAL rides on KAT).
     whose `KECCAK_F_ROUND_COUNT` is k+1 and whose operations are u64's own)
     equals FIPS 202 `keccakRound k` for every state, for all 24 constants
     (`pq02-saw/shipped.saw`); tooth: one ρ offset off by one, refuted.
-  - Not machine-checked: that `p1600(s, 24)` (the u64 instantiation) runs
-    those 24 bodies in order. That is the crate's loop
-    (`for &rc in round_consts`, src/lib.rs:248), read. Every attempt to
-    check it whole failed to close: the 24-round comparison against the
-    spec (bitwuzla and z3 90 minutes; two rounds already past 24 minutes,
-    because What4 reorders the Rust term's AND/XOR operands so no structure
-    is shared across rounds), ABC's sweeping checker (memory), and a
-    shipped-against-reference agreement run (bitwuzla in CI, ABC 50
-    minutes). A harness copy of the round, composed by 24 overrides, did
-    prove equal to `keccakF` (574 s locally), which shows the composition
-    is sound for a separate function; it is not the shipped loop.
+  - **The loop, 2026-10-09** (both crates, CI run 37985787272). Every direct
+    check of the 24-round permutation against the spec ran out (bitwuzla
+    and z3 90 minutes, ABC's sweeping checker, and an agreement run against
+    a separately written reference), because the solver meets two
+    differently built terms. What closes: in each harness, `composed` runs
+    the crate's own round body once per constant in FIPS 202 order, and is
+    PROVEN equal to `keccakF` with the 24 round proofs standing in and
+    `keccakRound` held opaque; then `agree(s)`, which compares the shipped
+    permutation (keccak 0.1.6 `p1600(s, 24)`, the call sha3 0.10 makes;
+    keccak 0.2.2 `keccak_p::<u64, 24>`, what sha3 0.11's soft backend runs)
+    with `composed(s)` without a branch, is PROVEN true for every state with
+    nothing standing in: both execute the same MIR body, so the solver meets
+    equal terms (keccak 0.1.6: the 24 round proofs with composed 108 s,
+    the agreement 90 s; keccak 0.2.2's agreement 10 s). Joined by equality
+    (one argued step: transitivity), the shipped permutation is
+    Keccak-f[1600] for every state. TEETH: `agree` against the round bodies
+    with rounds 5 and 6 swapped, in each crate, on the all-zero state (a
+    symbolic state made the solver search a whole 24-round miter and took a
+    CI runner down, run 37976780346); and `composed` against FIPS 202 with
+    rounds 5 and 6 swapped, symbolic. Each refuted.
   - **keccak 0.2.2, 2026-10-09** (the Keccak under shake 0.1 for ml-dsa
     0.1.1 and under sha3 0.11 for ml-kem 0.3.2 and slh-dsa, per Cargo.lock):
     its round body (`backends::soft::keccak_p`, the backend
@@ -252,11 +261,34 @@ same cases (DIFFERENTIAL rides on KAT).
     only the `Backend` trait with the one method soft.rs implements, and
     runs the body once per constant through a lane type whose `RC` is
     `[RC[k]]`. `pq02-saw/shipped022.saw`: equal to `keccakRound k` for every
-    state, all 24 constants (CI run 37925287105, 17 s). Read, not proven:
-    `keccak_p::<u64, 24>` runs those bodies in order (`for rc in
-    round_consts`, src/backends/soft.rs:68). The aarch64 SHA-3 backend is
-    not covered; it is compiled only on aarch64.
-  - Not yet: the sponge absorb and squeeze for the stack's lengths.
+    state, all 24 constants (CI run 37925287105, 17 s); the loop above ties
+    `keccak_p::<u64, 24>`. The aarch64 SHA-3 backend is not covered; it is
+    compiled only on aarch64.
+  - **The sponge, 2026-10-09** (CI run 37985787272). `KeccakF1600.cry` gains
+    FIPS 202's sponge at any rate with multi-block squeeze (`spongeR`;
+    SHA3-256 and SHAKE256 at 136, SHA3-512 at 72, SHAKE128 at 168), held to
+    FIPS 202's SHA3-256 of 200 bytes of 0xA3 and, by Python's hashlib (an
+    independent Keccak), both padding edges (135 bytes, where the domain
+    byte and the final bit share a byte; 136) and seven more shapes.
+    sha3 0.10.9 (`pq02-sponge/`, `pq02-saw/sponge.saw`, 7 s): bsigner's
+    SHA3-256 of one block, of two blocks and of two parts in two updates
+    (`bpq::sha3`), and SHAKE256 of a 32-byte seed to 96 bytes
+    (`xwing_expand`), each PROVEN equal to FIPS 202 for every input.
+    sha3 0.11.0 (`pq02-sponge022/`, `sponge022.saw`, 7 s): ML-KEM-768's
+    H (SHA3-256 of 1184), G (SHA3-512 of 33), J (SHAKE256 of 1120 to 32),
+    PRF (SHAKE256 of 33 to 128) and the SampleNTT XOF (SHAKE128 of 34, read
+    in three 168-byte blocks), each PROVEN. In both, the permutation is
+    ASSUMED equal to `keccakF` and held opaque. The loop above ties it by
+    two proofs and two argued steps: transitivity, and that the loop proof
+    and the sponge compile the same checksum-pinned source separately
+    (`docs/dispatches/2026-10-09-pq-proof-batch-closeout.md` §2, A2 and A3).
+    TEETH: Keccak's domain byte 0x01 for SHA-3's 0x06, the two updates'
+    parts swapped, SHA3-512 and SHAKE128 at rate 136; each refuted.
+  - Not covered: shake 0.1.0, ml-dsa's SHAKE. Its sponge-cursor absorbs by
+    reading the `[u64; 25]` state as bytes through a pointer cast
+    (u64_le_utils.rs:40), which SAW's MIR memory model cannot read
+    ("attempted to read empty mux tree"); ML-DSA's SHAKE stays covered by
+    PQ01's ACVP vectors. Not yet: other lengths (each a fixed shape here).
 
 ### PQ03 · SHA-2 / HMAC / HKDF + the bzDiD derivation
 
@@ -339,9 +371,33 @@ same cases (DIFFERENTIAL rides on KAT).
     which this does not cover; the spec groups each FIPS sum the way the
     soft code does (addition mod 2^32 makes every grouping the standard's
     sum, and the closed checks hold the spec to the published digests).
-  - Not yet: the HMAC/HKDF composition at L4 (KAT + DIFFERENTIAL today),
-    the multi-block `compress` loop (one block is proven), and the digest
-    core's padding and length encoding. `deriveRecordKey` and
+  - **HKDF-Expand, 2026-10-09** (hkdf 0.12.4, hmac 0.12.1, sha2 0.10.9;
+    `scripts/btungsten/pq03-hkdf-check.sh`, CI run 37985787272, 52 s).
+    `pq03-cryptol/Hkdf.cry`: SHA-256 of any length (padding and every block),
+    HMAC with a 32-byte key, and HKDF-Expand's first block, held to FIPS
+    180-4's two-block example, RFC 5869 test case 1 and, by Python's hmac,
+    bsigner's three info shapes. The shipped path hands sha2 its state and
+    its block buffer as two fields of one struct, which SAW cannot pass to a
+    specification standing in for the compression (its allocations must be
+    disjoint), so per info length (21 bytes, `BDID-v1/vault-key` under
+    `root`; 55, where the inner padding spills into a block of its own;
+    101, the longest label with a 64-byte context; 32 bytes out): a
+    reference in the harness, RFC 5869 over sha2's own `compress256` with
+    every block a local, is PROVEN equal to `hkdfExpand32` with the
+    one-block compression standing in, opaque; and the shipped `expand`, as
+    `expand_label` calls it, is PROVEN equal to the reference with nothing
+    standing in but the SHA-NI probe. The reference forms its pads the way
+    hmac does (a GenericArray XORed in place): a plain-array reference held
+    the same values in terms SAW does not identify. ASSUMED and printed:
+    the one-block compression equals FIPS compress (proven above for the
+    soft path, on a verbatim copy of the pinned soft.rs: the same-bytes
+    link is argued) and the SHA-NI probe answers absent (a scope: the soft
+    path). TEETH:
+    counter byte 0x02, ipad and opad swapped, and the shipped expand
+    against a bent info on zero inputs; each refuted. This covers, at these
+    shapes, the multi-block compress loop and the digest core's padding and
+    length encoding.
+  - Not yet: `hkdf32` (extract then expand), other info lengths, SHA-NI. `deriveRecordKey` and
     `personaNullifier` keep accepting any string: their labels take no
     counter, so label prefix-freeness alone keeps them apart, but JavaScript's
     UTF-8 encoder maps a lone surrogate to U+FFFD, so two different JS
@@ -467,9 +523,11 @@ The estate's own PQ glue, where its review findings lived.
   TEETH: the conditional subtraction claimed for every word, and Barrett
   claimed for every 32-bit word, each refuted with a counterexample.
   ML-DSA's Barrett reduction (128-bit words) and multiply, in three
-  links: (1) SAW: the shipped code, built as release builds run it (no
-  overflow checks; the workspace sets no release override, so this is how
-  bsigner ships), IS the Barrett algorithm with multiplier 8396807 and
+  links: (1) SAW: the shipped code, built with overflow checks off (Cargo's
+  release default; no profile override, cargo config or RUSTFLAGS was found
+  in the repository, its CI or the build user's home, read 2026-10-09; the
+  bsigner CI exercises in tests.yml:51 is a debug build, and the profile of
+  any other bsigner binary is not recorded), IS the Barrett algorithm with multiplier 8396807 and
   shift 46, and multiply is that algorithm applied to the product
   (`pq05-saw/field-release.saw`, about a second each); (2) z3, over the
   integers: those constants are the macro's own expressions, and for every
@@ -502,8 +560,7 @@ The estate's own PQ glue, where its review findings lived.
   negacyclic product on a fixed pair. CI run 37955111771 (job `saw-ntt`):
   eight obligations in 2,095 s. TEETH: one twiddle factor bent, and one γ
   bent, each refuted with a counterexample. All of ML-KEM's NTT-domain
-  arithmetic is now tied to FIPS 203. Not yet: ML-DSA's NTT (the same
-  method).
+  arithmetic is now tied to FIPS 203. ML-DSA's NTT: see PQ06.
 
 ### PQ06 · ML-DSA (44/65/87)
 
@@ -526,6 +583,35 @@ The estate's own PQ glue, where its review findings lived.
   fields): ML-DSA's conditional subtraction, add, sub and neg PROVEN;
   its Barrett reduction and multiply in three links (release-semantics
   SAW, z3 over the integers, one read no-wrap step), as stated there.
+- **ML-DSA NTT, 2026-10-09** (`scripts/btungsten/pq06-ntt-check.sh`, its
+  own CI job `saw-ntt-dsa`). `pq06-cryptol/DsaNtt.cry` is FIPS 204
+  Algorithms 41, 42 and 45 with the twiddle table COMPUTED (ζ = 1753,
+  ζ^BitRev8(m) mod q with entry 0 left at 0, held to Appendix B's entries)
+  and 256^-1 = 8347681 checked; NTT^-1 undoes NTT on a fixed polynomial,
+  and NTT^-1(NTT f ∘ NTT g) is the schoolbook negacyclic product on a
+  fixed pair. `pq06-ntt/` builds ml-dsa 0.1.1 itself under a lockfile
+  whose every package is the workspace's version and checksum. PROVEN:
+  ml-dsa's `Elem` add, sub and neg equal Field.cry with results below q;
+  then, with `Elem` mul ASSUMED equal to `dsaMul` (this is a debug build,
+  whose Barrett overflow check keeps that proof open; the three links
+  above tie mul for builds with overflow checks off, and a debug build
+  computes the same values whenever that check does not fire) and add, sub and mul
+  uninterpreted, the NTT equals Algorithm 41 for every polynomial with
+  coefficients in the field, all 1,024 butterflies matched against the
+  crate's twiddle table (a const). The inverse in parts, each proof
+  standing in for the next: each of the eight inverse layers equals
+  Algorithm 42's loop at its length (the running index m going in and
+  coming out, the twiddle -zetas[m], results below q), the product by
+  256^-1 equals the spec's, and `ntt_inverse` equals Algorithm 42 with the
+  eight layers held opaque. Then multiply_ntt equals Algorithm 45. CI run
+  37969815052 (job `saw-ntt-dsa`, 34 min): fifteen obligations in
+  1,472 s. TEETH: one twiddle factor bent, and the inverse twiddle's
+  sign dropped, each refuted with a counterexample. Two traps, noted in
+  the SAW file: SAW folds an override's result on constant inputs, so the
+  negation (which only ever meets table constants) stays interpreted
+  (kept uninterpreted, it refutes the true spec); and a spec that stands
+  in for a call must take each coefficient as its own variable. Not yet:
+  the debug build's mul (the open Barrett link above).
 
 ### PQ07 · SLH-DSA-SHAKE-256f + the succession handover
 

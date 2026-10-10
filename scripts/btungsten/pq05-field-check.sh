@@ -76,8 +76,8 @@ say "== SAW PQ05 field: BUILD the harness to MIR JSON (cargo-saw-build) =="
 _found=$(find "$OUT/cargo" -name 'pq05_field-*.linked-mir.json' | head -1)
 [ -n "$_found" ] && [ -s "$_found" ] || { say "SAW-BUILD PQ05: FAIL — no linked MIR"; exit 1; }
 cp "$_found" "$MIR"
-# the same harness as release builds run it: no overflow checks (the
-# workspace sets no release override), for field-release.saw
+# the same harness with overflow checks off (Cargo's release default; the
+# workspace sets no profile override), for field-release.saw
 ( cd "$HARNESS" && RUSTUP_TOOLCHAIN="${MIR_JSON_TOOLCHAIN:-nightly-2026-03-21}" CARGO_TARGET_DIR="$OUT/cargo-release" \
     CARGO_PROFILE_TEST_OVERFLOW_CHECKS=false CARGO_PROFILE_DEV_OVERFLOW_CHECKS=false \
     cargo saw-build ) || { say "SAW-BUILD PQ05: FAIL — harness (release semantics)"; exit 1; }

@@ -143,7 +143,59 @@ continuity intact and fail-closed before it (no silent wraparound of
 far-future intents into past dates) is a mandatory test family. WB004's
 specimen is exactly this boundary.
 
+**L5 — Configuration intent is never runtime evidence (founder ruling
+2026-10-07, vaulta/zk lane; canonized into the standard 2026-10-09).**
+Nine configured peers are not nine connected peers; loopback
+configuration is not a closed socket until the sockets prove it; a
+configured chain ID is not independent chain agreement; and a
+successful RPC response is not proof of execution provenance. Runtime
+admission of any node — and of anything cryptographically downstream of
+it — is earned ONLY by the four-receipt boot gate, in order:
+
+    EXPOSURE → IDENTITY → PEER → AGREEMENT
+
+- **EXPOSURE** — actual listening sockets prove the runtime boundary
+  (observed listeners must match the intended posture; loopback-BOUND
+  is not loopback-CLOSED).
+- **IDENTITY** — the node's OWN `get_info` proves which chain the
+  runtime claims to be on. Nothing downstream inherits the network
+  identity from a configured endpoint.
+- **PEER** — `/v1/net/connections` proves which configured peers
+  actually completed connectivity.
+- **AGREEMENT** — the local LIB `(block_num, block_id)` must match an
+  INDEPENDENT source of the same chain.
+
+Every artifact admitted downstream of a gated node carries the
+trust-domain triplet — `submission_source` → `execution block N + ID` →
+`verification_source` — a provenance statement strictly stronger than
+"transaction succeeded". The gate is one-shot PER RUNTIME INSTANCE:
+receipts name the run/binary/config/data-dir identity and times; a
+restart or config change inherits nothing. A zero-handshake first boot
+is itself evidence: peer compatibility, endpoint reachability,
+protocol/version mismatch, firewall/NAT behavior, and the exact
+semantics of the current build are diagnosed and receipted BEFORE any
+security posture is loosened — never silently (`allowed-connection`
+was not quietly relaxed when Spring's semantics differed from the
+config's reading). First receipted instance: the Jungle4 follower
+(`contracts/zkreceipts/follower-boot.sh` +
+`follower-receipts.sh`; four GREEN receipts
+`docs/receipts/zkr-jungle4-follower-boot-2026-10-08.txt`), whose
+admission gated the zkreceipts live v4 verification run
+(`docs/dispatches/2026-10-08-zkr-live-v4-confirmation.md`).
+
+**Class extension — BT-WORKTREE-ISOLATION (SPECIFIED / NOT BUILT /
+NOT RUN):** autonomous-seat contamination resistance, its own class
+record opened in-tree 2026-10-09 as SPEC-BT-WORKTREE-ISOLATION-1 —
+the three-claim taxonomy (detection / prevention / publication
+integrity), the paired-observation acceptance receipt, the
+canonical-admission boundary hierarchy, and the epoch/TOCTOU rule.
+Detection is the only claim the estate's Git layer can make today.
+
 ## §watch — government-procurement relevance
+
+The dated signal ledger lives at `docs/watch/btungsten-procurement-watch.md`
+(newest entries first; every entry names its axes AND the axes it does
+not carry — subset alignment is the honest default).
 
 The procurement watch treats as bTunGsTeN-relevant requirements:
 decentralization, autonomous healing/learning, >10B-user scale, and

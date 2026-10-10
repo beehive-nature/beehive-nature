@@ -1,0 +1,17 @@
+   Compiling proc-macro2 v1.0.106
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.46
+   Compiling serde_core v1.0.228
+   Compiling autocfg v1.5.1
+   Compiling zmij v1.0.21
+   Compiling serde v1.0.228
+   Compiling num-traits v0.2.19
+   Compiling serde_json v1.0.150
+   Compiling memchr v2.8.2
+   Compiling syn v2.0.118
+   Compiling num-integer v0.1.46
+   Compiling itoa v1.0.18
+   Compiling serde_derive v1.0.228
+   Compiling num-bigint v0.4.8
+   Compiling daedalus-rts-rust v0.1.0 (https://github.com/GaloisInc/daedalus?rev=a4ad7592ef2449fa1da07d2827fc6684293d21ca#a4ad7592)
+    Finished `release` profile [optimized] target(s) in 7.65s

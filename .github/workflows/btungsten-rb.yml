@@ -20,6 +20,11 @@ on:
         default: quick
         type: choice
         options: [quick, full]
+      lanes:
+        description: "the lanes to run, space-separated"
+        required: false
+        default: "rb01 rb02 rb03 rb04"
+        type: string
 
 permissions:
   contents: read
@@ -44,6 +49,8 @@ jobs:
         run: cargo test --locked -p btungsten-bench
       - name: RB03 harness, native — budget.rs (compiled by path) with its own unit tests and the boundary vectors
         run: cargo test --locked --manifest-path scripts/btungsten/rb03-budget/Cargo.toml
+      - name: RB04 harness — the committed Daedalus-generated parsers against BNR's decode (vectors, a fixed-seed sample, TEETH)
+        run: cargo test --locked --manifest-path scripts/btungsten/rb04-daedalus/Cargo.toml
 
   changes:
     runs-on: ubuntu-24.04
@@ -51,6 +58,7 @@ jobs:
       rb01: ${{ steps.f.outputs.rb01 }}
       rb02: ${{ steps.f.outputs.rb02 }}
       rb03: ${{ steps.f.outputs.rb03 }}
+      rb04: ${{ steps.f.outputs.rb04 }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -58,16 +66,29 @@ jobs:
       - id: f
         name: Which lanes did this push touch
         shell: bash
+        env:
+          LANES: ${{ inputs.lanes }}
         run: |
           set -euo pipefail
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            for l in rb01 rb02 rb03; do echo "$l=true" >> "$GITHUB_OUTPUT"; done; exit 0
+            # a mistyped selection fails here rather than running nothing green
+            set -f; n=0
+            for t in $LANES; do
+              case "$t" in rb01|rb02|rb03|rb04) n=$((n + 1)) ;; *) echo "unknown lane '$t' (lanes is space-separated rb01..rb04)" >&2; exit 1 ;; esac
+            done
+            [ "$n" -gt 0 ] || { echo "the lanes input selects no lane" >&2; exit 1; }
+            for l in rb01 rb02 rb03 rb04; do
+              case " $LANES " in *" $l "*) echo "$l=true" ;; *) echo "$l=false" ;; esac >> "$GITHUB_OUTPUT"
+            done; exit 0
           fi
           files=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo ALL)
-          hit() { echo "$files" | grep -qE "$1|^ALL$|crates/btungsten-bench/|\.github/workflows/btungsten-rb\.yml" && echo true || echo false; }
+          # RB04's own lane file does not re-run the other lanes
+          others=$(echo "$files" | grep -vE '^crates/btungsten-bench/src/lanes/rb04\.rs$' || true)
+          hit() { echo "$others" | grep -qE "$1|^ALL$|crates/btungsten-bench/|\.github/workflows/btungsten-rb\.yml" && echo true || echo false; }
           echo "rb01=$(hit 'scripts/btungsten/rb01-psi/')" >> "$GITHUB_OUTPUT"
           echo "rb02=$(hit 'scripts/btungsten/rb02-aes/')" >> "$GITHUB_OUTPUT"
           echo "rb03=$(hit 'scripts/btungsten/rb03-budget/|ops/ant-extsig/src/budget\.rs|ops/ant-extsig/Cargo\.lock')" >> "$GITHUB_OUTPUT"
+          echo "rb04=$(echo "$files" | grep -qE '^crates/btungsten-bench/|^scripts/btungsten/rb04-daedalus/|^crates/btungsten-wb001(-core)?/|^scripts/btungsten/wb001-(vectors|bridge)\.json$|^Cargo\.lock$|^rust-toolchain|\.github/workflows/btungsten-rb\.yml|^ALL$' && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
   rb01-psi:
     needs: changes
@@ -188,3 +209,51 @@ jobs:
           name: rb03-receipt
           path: ${{ runner.temp }}/rb-out/rb03
           retention-days: 14
+
+  rb04-daedalus:
+    needs: changes
+    if: needs.changes.outputs.rb04 == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - name: GHC 9.8.4 and cabal 3.14.2.0, the versions daedalus's own CI builds with at the pin
+        uses: haskell-actions/setup@cd0d9bdd65b20557f41bea4dbe43d0b5fbbfe553 # v2.11.0
+        with:
+          ghc-version: "9.8.4"
+          cabal-version: "3.14.2.0"
+      # The quick plan restores the cabal home (package index and the store of
+      # the generator's dependencies); the full plan builds them cold, so its
+      # receipt measures the whole generator build.
+      - name: Restore the cabal home (keyed on the daedalus pin, GHC and the index state)
+        id: cabal
+        if: env.RB_PLAN_FLAG == '--quick'
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/rbtools/cabal
+          key: rb04-cabal-v1-a4ad7592-ghc-9.8.4-index-2026-10-01T22-42-03Z-ubuntu-24.04
+      - name: RB04 — Daedalus-generated Rust against BNR's WB001 decoder, TEETH, measurements
+        run: |
+          cargo build --locked --release -p btungsten-bench --bins
+          target/release/rbench rb04 $RB_PLAN_FLAG --tools "$HOME/rbtools" --work "$RUNNER_TEMP/rb-work" --out "$RUNNER_TEMP/rb-out/rb04"
+      - name: Save the cabal home
+        if: always() && env.RB_PLAN_FLAG == '--quick' && steps.cabal.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/rbtools/cabal
+          key: rb04-cabal-v1-a4ad7592-ghc-9.8.4-index-2026-10-01T22-42-03Z-ubuntu-24.04
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: rb04-receipt
+          path: ${{ runner.temp }}/rb-out/rb04
+          retention-days: 14
+      - name: Upload the built generator (the daedalus executable at the pin)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: rb04-daedalus-bin
+          path: ${{ runner.temp }}/rb-work/rb04-bin
+          retention-days: 14
+          if-no-files-found: ignore

@@ -1,0 +1,19 @@
+# SPEC-BTUNGSTEN-PQ-1 PQ03 — the proof harness for HKDF-Expand(SHA-256) as
+# bsigner's expand_label runs it. It links hkdf 0.12.4, hmac 0.12.1 and sha2
+# 0.10.9 from crates.io under the committed Cargo.lock, whose checksums
+# ../pq03-hkdf-check.sh holds equal to the workspace Cargo.lock's. Built by
+# cargo-saw-build (mir-json), never by the workspace.
+[package]
+name = "pq03_hkdf"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+hkdf = { version = "=0.12.4", default-features = false }
+sha2 = { version = "=0.10.9", default-features = false, features = ["compress"] }
+
+[workspace]

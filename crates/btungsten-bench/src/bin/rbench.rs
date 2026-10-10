@@ -1,13 +1,15 @@
 //! rbench: run one bTunGsTeN RB lane and write its receipt.
 //!
-//! usage: rbench <rb01|rb02|rb03> [--quick] [--work DIR] [--out DIR] [--tools DIR]
+//! usage: rbench <rb01|rb02|rb03|rb04> [--quick] [--work DIR] [--out DIR] [--tools DIR]
 //!
 //!   --work   build copies, fetched dependencies, build output
 //!            (default target/rbench/work)
 //!   --out    the receipt and its evidence files (default
 //!            target/rbench/out/<lane>)
 //!   --tools  RB02/RB03: the directory holding the pinned verifier bundles
-//!            (see scripts/btungsten/README.md §RB for the layout)
+//!            (see scripts/btungsten/README.md §RB for the layout); RB04:
+//!            the directory whose `cabal` subdirectory is the cabal home
+//!            (config, package index, store)
 //!   --quick  the CI plan: the same rows with fewer samples
 //!
 //! Exit status: 0 only when the receipt's verdict is PASS; 1 FAIL;
@@ -17,14 +19,14 @@
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use btungsten_bench::lanes::{rb01, rb02, rb03};
+use btungsten_bench::lanes::{rb01, rb02, rb03, rb04};
 use btungsten_bench::upstream::repo_root;
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let Some(lane) = args.first().cloned() else {
         eprintln!(
-            "usage: rbench <rb01|rb02|rb03> [--quick] [--work DIR] [--out DIR] [--tools DIR]"
+            "usage: rbench <rb01|rb02|rb03|rb04> [--quick] [--work DIR] [--out DIR] [--tools DIR]"
         );
         return ExitCode::from(3);
     };
@@ -56,6 +58,10 @@ fn main() -> ExitCode {
         "rb03" => match tools {
             Some(t) => rb03::run(&work, &out, &t, quick),
             None => Err("rb03 needs --tools DIR (the Crux-MIR bundle)".into()),
+        },
+        "rb04" => match tools {
+            Some(t) => rb04::run(&work, &out, &t, quick),
+            None => Err("rb04 needs --tools DIR (its cabal subdirectory is the cabal home)".into()),
         },
         other => Err(format!("unknown lane {other}")),
     };

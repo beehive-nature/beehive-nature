@@ -1,0 +1,45 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ02 — the SHA-3 sponge as sha3 0.11.0 runs it on keccak
+// 0.2.2 (ml-kem 0.3.2's and slh-dsa's), against FIPS 202 at any rate
+// (pq02-cryptol/KeccakF1600.cry spongeR: SHA3-256 r = 136, SHA3-512 r = 72,
+// SHAKE128 r = 168, SHAKE256 r = 136, multi-block squeeze), for every input
+// of each shape ML-KEM-768 hashes at: H(ek) SHA3-256 of 1184 bytes, G
+// SHA3-512 of 33, J SHAKE256 of 1120 to 32, the PRF SHAKE256 of 33 to 128,
+// and SampleNTT's SHAKE128 of 34 read as three 168-byte blocks.
+//
+// keccak 0.2.2's soft keccak_p::<u64, 24> (what sha3 0.11 calls through
+// Keccak::with_f1600 on x86_64) is ASSUMED equal to keccakF here and held
+// opaque; agree022.saw and shipped022.saw tie it.
+//
+// usage (from this directory): saw sponge022.saw   with MIR and names.saw at ../../../target/saw-pq02-sponge022/
+
+enable_experimental;
+import "../pq02-cryptol/KeccakF1600.cry";
+include "../../../target/saw-pq02-sponge022/names.saw";
+
+m <- mir_load_module "../../../target/saw-pq02-sponge022/pq02_sponge022.linked-mir.json";
+let proven name = print (str_concat "PQ02-SAW PROVEN " name);
+
+ov_p <- mir_unsafe_assume_spec m keccak_p_name (do {
+  st <- mir_fresh_var "st" (mir_array 25 mir_u64);
+  r <- mir_alloc_mut (mir_array 25 mir_u64);
+  mir_points_to r (mir_term st);
+  mir_execute_func [r];
+  mir_points_to r (mir_term {{ keccakF st }});
+});
+print "PQ02-SAW ASSUMED keccak 0.2.2 keccak_p::<u64, 24> = keccakF (tied by shipped022.saw and agree022.saw)";
+
+let one name n post = do {
+  mir_verify m (str_concat "pq02_sponge022::" name) [ov_p] false (do {
+    x <- mir_fresh_var "m" (mir_array n mir_u8);
+    p <- mir_alloc (mir_array n mir_u8);
+    mir_points_to p (mir_term x);
+    mir_execute_func [p];
+    mir_return (mir_term (post x));
+  }) (w4_unint_bitwuzla ["keccakF"]);
+  proven (str_concat "sha3 0.11.0 " name);
+};
+one "sha3_256_1184" 1184 (\x -> {{ sha3_256 x }});
+one "sha3_512_33" 33 (\x -> {{ sha3_512 x }});
+one "shake256_1120_32" 1120 (\x -> {{ shake256Long`{d = 32} x }});
+one "shake256_33_128" 33 (\x -> {{ shake256Long`{d = 128} x }});
+one "shake128_34_504" 34 (\x -> {{ shake128`{d = 504} x }});

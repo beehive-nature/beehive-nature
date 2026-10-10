@@ -1,6 +1,7 @@
 // SPEC-BTUNGSTEN-PQ-1 PQ05/PQ06 — ML-DSA's Barrett reduction and multiply,
-// with the harness built as release builds run (overflow checks off: the
-// workspace sets no release override, so that is how bsigner ships). The
+// with the harness built with overflow checks off (Cargo's release default;
+// no profile override, cargo config or RUSTFLAGS was found, read 2026-10-09;
+// which profile a given bsigner binary was built with is not recorded). The
 // shipped code IS Field.cry's dsaBarrettAlgo, and multiply is it applied to
 // the product; Field.cry's dsaBarrettRange (z3) carries the algorithm to
 // "the remainder mod q" over the integers.
