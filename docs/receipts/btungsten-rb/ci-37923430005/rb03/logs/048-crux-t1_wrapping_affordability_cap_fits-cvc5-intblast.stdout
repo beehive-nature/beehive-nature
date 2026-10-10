@@ -1,0 +1,20 @@
+test rb03_budget/b5c6597c::faulty[0]::crux_teeth[0]::t1_wrapping_affordability_cap_fits[0]: [Crux] Attempting to prove verification conditions.
+[0KFAILED
+
+failures:
+
+---- rb03_budget/b5c6597c::faulty[0]::crux_teeth[0]::t1_wrapping_affordability_cap_fits[0] counterexamples ----
+Model:
+remaining_wei = 0x4 (signed), 0x4 (unsigned), 4 (decimal)
+gas_limit = 0x2 (signed), 0x2 (unsigned), 2 (decimal)
+network_fee_per_gas = -0x80000000000000000000000000000000 (signed), 0x80000000000000000000000000000000 (unsigned), -170141183460469231731687303715884105728 (decimal)
+headroom_num = 0x0 (signed), 0x0 (unsigned), 0 (decimal)
+headroom_den = 0x2 (signed), 0x2 (unsigned), 2 (decimal)
+
+[Crux-MIR] ---- FINAL RESULTS ----
+[Crux] Goal status:
+[Crux]   Total: 11
+[Crux]   Proved: 10
+[Crux]   Disproved: 1
+[Crux]   Incomplete: 0
+[Crux]   Unknown: 0

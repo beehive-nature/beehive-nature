@@ -1,0 +1,32 @@
+✔ personal videos: save, name, deduplicate across reloads and tabs, then remove (1838.9361ms)
+✔ personal videos: actual playback is recorded; replay works; removal survives resume (1612.6018ms)
+✔ personal videos: blocked and unreadable storage never claim a successful save (1056.6161ms)
+# slow: rule plays at >= 759 KiB of 1160; page played at 784 KiB; countdown 9 8 7 6 5 4 3 2 1 (said ~9 s, took 9.0 s)
+# slow: longest stop after start 163 ms; reached 9.74 s of 10.00 s
+✔ slow door (0.5x bitrate): an honest countdown, no play before the computed threshold, then no freeze (24830.9666ms)
+# slow: rule plays at >= 759 KiB of 1160; page played at 800 KiB; countdown 53 28 21 10 9 8 7 6 5 4 3 2 1 (said ~53 s, took 9.2 s)
+✖ slow door (0.5x bitrate): an honest countdown, no play before the computed threshold, then no freeze with one-second preview work (15808.2316ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 4
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 45928.2754
+
+✖ failing tests:
+
+test at e2e\bview.test.mjs:580:40
+✖ slow door (0.5x bitrate): an honest countdown, no play before the computed threshold, then no freeze with one-second preview work (15808.2316ms)
+  AssertionError [ERR_ASSERTION]: the first number was honest: said ~53 s, it took 9.2 s
+      at TestContext.<anonymous> (file:///C:/Users/travi/.codex/worktrees/0d0c/wt-codex-shu003/e2e/bview.test.mjs:601:10)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

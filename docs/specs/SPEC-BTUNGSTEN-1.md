@@ -82,7 +82,120 @@ implementation forever — it certifies that the architecture CONTAINS THE
 MECHANISMS needed to survive replacing essentially everything underneath
 it.
 
+## §laws — the named laws below the axes (founder rulings)
+
+**L1 — Millennium Authority Continuity (founder ruling 2026-10-09).**
+Axes 5 and 6 are ONE requirement, not two:
+
+> bTunGsTeN must sustain at least 10 billion unique, ACTIVE sovereign
+> users continuously across a 1,000-year operational horizon.
+
+Not 10B registrations accumulated over time. Not 10B database rows. The
+active population must remain uniquely distinguishable, able to
+authenticate, exercise/revoke authority, recover, participate in
+governance, and migrate across infrastructure generations — for the
+whole horizon. Formally, for every epoch e in the horizon:
+
+- every active sovereign is uniquely attributable (no epoch contains two
+  distinguishable sovereign claims to one human, and no active human is
+  unrepresentable);
+- authority of the constitutional object changes only through the
+  currently authorized sovereign action (the WB002 killer invariant,
+  generalized off assets);
+- no dependence remains on ANY original key, signer set, cryptographic
+  algorithm, clock representation, contract implementation, blockchain,
+  organization, or user interface (each extinction is a test row, not a
+  hope).
+
+**L2 — Epochal governance; no millennium proposals (founder ruling
+2026-10-09).** What lasts 1,000 years is the AUTHORITY CONTINUITY, never
+a particular serialized transaction. It is a violation of this standard
+to create a 1,000-year multisig proposal or any long-lived serialized
+execution intent: individual transactions and proposals remain
+short-lived. Governance is epochal:
+
+    10B unique active humans → COMMIT + PROVE (uniqueness / liveness /
+    intent) → decentralized shards → proof aggregation → quorum /
+    capability receipt → bounded, short-lived msig execution (eosio.msig
+    or successor) → SETTLE → immutable bTunGsTeN receipt → next epoch.
+
+**L3 — The execution layer is bounded (founder ruling 2026-10-09).** No
+population-scale approval storage at the execution primitive: the
+reference `eosio.msig` stores requested/provided approvals as
+per-proposal `std::vector<permission_level>` (specimen
+`eosio.msig.hpp:124-146`) — a multisig execution primitive, not
+planetary direct-democracy storage. 10B sovereign humans contribute
+authorization through uniqueness/liveness proofs and aggregation, and
+the root execution layer receives a compact, verifiable aggregate. No
+single shard, aggregator, UI, blockchain, signing algorithm, or
+organization may become indispensable — each is a removable component
+(axis 1 applied to the governance stack itself).
+
+**L4 — Time-representation extinction is a boundary, not an assumption
+(founder finding 2026-10-09).** Antelope transactions encode
+`expiration` as `time_point_sec`, whose sole storage is `uint32_t`
+seconds since 1970 (Spring v1.2.2 `libfc/include/fc/time.hpp:87-99`):
+the maximum representable expiration is 2106-02-07 06:28:15 UTC. The
+standard therefore asks: can governance survive the extinction of its
+own time representation? Crossing a representable-clock boundary (the
+2106 horizon today; whatever replaces it later) with authority
+continuity intact and fail-closed before it (no silent wraparound of
+far-future intents into past dates) is a mandatory test family. WB004's
+specimen is exactly this boundary.
+
+**L5 — Configuration intent is never runtime evidence (founder ruling
+2026-10-07, vaulta/zk lane; canonized into the standard 2026-10-09).**
+Nine configured peers are not nine connected peers; loopback
+configuration is not a closed socket until the sockets prove it; a
+configured chain ID is not independent chain agreement; and a
+successful RPC response is not proof of execution provenance. Runtime
+admission of any node — and of anything cryptographically downstream of
+it — is earned ONLY by the four-receipt boot gate, in order:
+
+    EXPOSURE → IDENTITY → PEER → AGREEMENT
+
+- **EXPOSURE** — actual listening sockets prove the runtime boundary
+  (observed listeners must match the intended posture; loopback-BOUND
+  is not loopback-CLOSED).
+- **IDENTITY** — the node's OWN `get_info` proves which chain the
+  runtime claims to be on. Nothing downstream inherits the network
+  identity from a configured endpoint.
+- **PEER** — `/v1/net/connections` proves which configured peers
+  actually completed connectivity.
+- **AGREEMENT** — the local LIB `(block_num, block_id)` must match an
+  INDEPENDENT source of the same chain.
+
+Every artifact admitted downstream of a gated node carries the
+trust-domain triplet — `submission_source` → `execution block N + ID` →
+`verification_source` — a provenance statement strictly stronger than
+"transaction succeeded". The gate is one-shot PER RUNTIME INSTANCE:
+receipts name the run/binary/config/data-dir identity and times; a
+restart or config change inherits nothing. A zero-handshake first boot
+is itself evidence: peer compatibility, endpoint reachability,
+protocol/version mismatch, firewall/NAT behavior, and the exact
+semantics of the current build are diagnosed and receipted BEFORE any
+security posture is loosened — never silently (`allowed-connection`
+was not quietly relaxed when Spring's semantics differed from the
+config's reading). First receipted instance: the Jungle4 follower
+(`contracts/zkreceipts/follower-boot.sh` +
+`follower-receipts.sh`; four GREEN receipts
+`docs/receipts/zkr-jungle4-follower-boot-2026-10-08.txt`), whose
+admission gated the zkreceipts live v4 verification run
+(`docs/dispatches/2026-10-08-zkr-live-v4-confirmation.md`).
+
+**Class extension — BT-WORKTREE-ISOLATION (SPECIFIED / NOT BUILT /
+NOT RUN):** autonomous-seat contamination resistance, its own class
+record opened in-tree 2026-10-09 as SPEC-BT-WORKTREE-ISOLATION-1 —
+the three-claim taxonomy (detection / prevention / publication
+integrity), the paired-observation acceptance receipt, the
+canonical-admission boundary hierarchy, and the epoch/TOCTOU rule.
+Detection is the only claim the estate's Git layer can make today.
+
 ## §watch — government-procurement relevance
+
+The dated signal ledger lives at `docs/watch/btungsten-procurement-watch.md`
+(newest entries first; every entry names its axes AND the axes it does
+not carry — subset alignment is the honest default).
 
 The procurement watch treats as bTunGsTeN-relevant requirements:
 decentralization, autonomous healing/learning, >10B-user scale, and
@@ -225,7 +338,13 @@ battery LIVE in CI; the wasm-vs-model beat EXECUTED 2026-10-07 (the
 vendored 2021 wasm, verbatim, on Antelope Spring 1.2.2: a 46-step
 corpus at 46/46 verdicts, 0 class/state mismatches, 14 refused steps
 atomic on chain — corpus-sampled, local dev chain, NOT a proof);
-Cryptol/SAW twins staged NOT-RUN/UNVERIFIED under the result-class law.
+Cryptol twin RUN in the CI formal job: TYPECHECK + CHECK-SAMPLED pass,
+`sovereignContinuity` PROVEN for the abstraction with a TEETH control;
+SAW EQUIVALENCE RUN in its own workflow (wb002-saw.yml, SAW 1.6 over
+mir-json schema 13): a Rust twin of `step`/`sovereign` proven equal to the
+Cryptol spec for all inputs, with a TEETH run that must fail — so
+continuity holds of the Rust function. Neither proof reaches the JS port
+or the 2021 wasm; those links stay sampled (result-class law).
 Model-hardening beat (founder review 2026-10-07, same day):
 transactional rollback fidelity (refused actions preserve the whole
 pre-state and log) and authenticated display truth (checkpoint
@@ -233,11 +352,39 @@ contents verified, suffixes bounded to an authenticated tip) — the
 landing closed, the model-correctness claim kept open. See
 scripts/btungsten/README.md.
 
+**WB003 — the century ladder (2026-10-09, MERGED):** axis 6's honesty
+clause made executable on the WB002 model — a fixed ten-century
+schedule carrying a 2019 spine through the extraction, four anchored
+migrations, author extinctions, algorithm eras, partition/reorgs and
+fragment poverty, killer invariant every action, world rebuilt from
+fragments every boundary. Its first boundary went RED and convicted
+four migration seams in the model (repaired red-first; see
+scripts/btungsten/README.md §WB003).
+
+**WB004 — the time-extinction specimen (founder order 2026-10-09,
+CURRENT):** the specimen pair msig.app/jungle + eosio.msig frozen at
+`c526479a` (2025, MIT; preserved verbatim under
+scripts/btungsten/wb004-specimen/). The attacked boundary: governance
+surviving the extinction of its own time representation — Antelope's
+`time_point_sec` expiration is `uint32_t` seconds, maximum
+2106-02-07 06:28:15 UTC, seventy years short of the horizon (§laws L4).
+The workbench instantiates §laws L1-L4: epochal governance (never a
+millennium proposal), bounded execution-layer approvals under
+population-scale unique-human authorization, authority continuity
+across signer/key/algorithm/BP/contract/UI extinction AND the 2106
+representation migration, no indispensable shard/aggregator/UI/chain.
+The test does not ask whether MSIG.app survives until 3026; it asks
+whether authority created through today's stack can outlive MSIG.app,
+today's Antelope encoding, keys, timestamps, producers and eventually
+cryptography itself while retaining an independently verifiable chain
+of legitimacy.
+
 Sequence: WB001 formal core (done: input boundary repaired in beat 2;
 the formal ladder climbed in beat 3 — TYPECHECK, CHECK-SAMPLED and
 PROVE-UNIVERSAL all receipted in the CI formal job) → WB002
-SimpleAssets specimen (CURRENT) → WB003+ scale and century-transition
-legs.
+SimpleAssets specimen (done) → WB003 century ladder (done, 2026-10-09)
+→ WB004 msig/time-extinction specimen (CURRENT) → scale legs (axis 5,
+box-gated).
 
 
 ## §toolchain — Foundation, Emissary, and replaceability

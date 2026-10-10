@@ -94,4 +94,13 @@ group. Raw addresses are not published.
   not for the dead group.
 - Receipt: [cohort, 24 h](https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/ant-reach-cohort-2026-10-07.json).
 
-Scheduled runner windows continue until 2026-10-09.
+## Update 2026-10-08: cohort closed
+
+- Across 17 runs over about 34 hours (SDK 0.1.1, then 0.1.2), the 20 dead
+  endpoints stayed dead in **159/159** settled observations and the 20 live
+  ones stayed open in **203/205**; both misses are the same single endpoint.
+- Final window (2026-10-08 06:24Z), laptop vs GitHub Linux runner: 285
+  endpoints settled on both; 148 dead from both (147 never ICE-connected on
+  any attempt), 137 open from both, 0 opposite.
+- Receipt: [final cohort](https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/ant-reach-cohort-2026-10-08-final.json).
+  The scheduled probe is stopped; the workflow and probe stay available on demand.

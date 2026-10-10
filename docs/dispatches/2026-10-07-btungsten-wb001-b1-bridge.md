@@ -1,5 +1,52 @@
 # 2026-10-07 — WB001 B1: the formal-wire bridge made executable
 
+## CLOSEOUT VERIFICATION (founder order 2026-10-10 — verify, preserve, route, record, close)
+
+**Verified at main `c44672b76`** (PR #387 tip; the B1 merge chain
+`294d38fbf` → … → `c44672b76`):
+
+- **The repaired wire model is retained.**
+  `scripts/btungsten/wb001-cryptol/BTungstenWB001.cry` (renamed from
+  `Intent.cry` in the successor lane's round 4 — Cryptol resolves
+  module names to same-named files) still carries the true-stream
+  rewrite: `byteAt` dispatch over the length-derived block offsets,
+  `wire i = [ byteAt i k | k <- take`{MaxEnv} [0 ...] ]`,
+  `envLenMatchesOffsets`, and the bridge counterexample story in the
+  header (`bridgeIBase = False`, run 37692766559).
+- **The bridge receipts are live on main's own runs.** Run
+  `38079290787` (head `10c9f7872`, conclusion **success**), formal
+  job, verbatim: `FORMAL-CHECK-SAMPLED bridgeIBase…bridgeNearB: PASS`
+  (8/8) + `envLenMatchesOffsets: PASS` +
+  `FORMAL-WIRE-ALIGNMENT: PASS — 8 pinned terms, exact prefix + zero
+  tail + envLen, both legs re-derive every run`. The pin source is now
+  `crates/btungsten-wb001/tests/wb001/pin.rs` (the Rust model became
+  the model — successor lane, 2026-10-08).
+- **wireInjective stays honestly NOT-PROVEN on the Cryptol leg** —
+  same run, verbatim: `FORMAL-PROVE-UNIVERSAL wireInjective: NOT-PROVEN
+  (memory — RTS exhausted the 6291456 KiB cap, rc=251; recorded,
+  never success)`, with `wireIndexDef` and `wireZeroTail` in the same
+  state and the decomposed lemmas PROVEN (`validImpliesBounded`,
+  `offsetsOrdered`, `zeroTailAtPosition`, all Q.E.D.). **The beat-3
+  Q.E.D. remains explicitly invalidated for the deployed encoding** —
+  it was a proof about the pre-B1 padded lookalike and is never cited
+  as the deployed-wire proof (canon: README artifact row + §result-
+  classes corrected-theorem history; the 10-08 founder review's
+  zero-tail refutation, `8b2ac34ae`, extended the same discipline).
+  The SAW-side `wireInjective` proof (`wb001-saw/injective.saw`,
+  PROVEN 2026-10-08) is a SEPARATE result class, recorded separately,
+  never as the Cryptol leg's.
+- **Routing (founder order 2026-10-10):** universal injectivity on
+  the Cryptol leg is OWNED by the active RB05 grammar-equivalence lane
+  (`claude-LoVis/rb05-grammar-equivalence` — decode_core ==
+  decodeSpec for every buffer and input length, PROVEN on its branch).
+  No other seat proofings toward that obligation; recorded in the
+  WB001 §next list to prevent duplicate work.
+
+Session state: the zCode seat's SK001 lane (PR #353 + ratification
+rider #355), the B1 repair (PR #358), and this closeout are all
+merged; no locks, no open worktrees beyond the archived lane trees.
+CLOSED and ARCHIVED 2026-10-10.
+
 zCode seat, branch `zcode/btungsten-wb001-b1-2026-10-07`, worktree
 `wt-zcode-seatlaw`, base `8046a4a86` (origin/main at lane open). The
 finding is the founder's (review B1, relayed with the SK001 closeout

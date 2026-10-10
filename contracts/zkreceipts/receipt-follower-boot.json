@@ -1,0 +1,44 @@
+{
+  "schema": "bnr.zkr-follower-boot/1",
+  "tested_runtime_instance": {
+    "run_pid": 1057656,
+    "boot_utc": "2026-10-08T01:23:06Z",
+    "binary": "/usr/bin/nodeos (Spring v1.2.2, sha256 080932810667b798…)",
+    "config_identity": "instance config sha256 1c9f09b7425d2c58… = in-tree jungle4-node.config.ini with TWO recorded deltas: http 127.0.0.1:8889 and p2p-listen 127.0.0.1:9877 (canonical 8888/9876 held by a sibling seat's rehearsal chain; posture unchanged: loopback bind + allowed-connection=none)",
+    "config_defects_found_and_repaired_for_this_instance": [
+      "the pinned config carries NO operative chain selection: chain-id exists only as a comment and no genesis-json is configured — as written, the file boots a WRONG-CHAIN node (observed: peers go_away 'wrong chain' against a self-generated chain 8a34ec7d…)",
+      "instance repair: --genesis-json from the official EOS-Jungle-Testnet repo genesis (843 bytes, initial_timestamp 2022-02-22T22:22:22); local chain_id then = 73e4385a… as required"
+    ],
+    "data_dir": "/tmp/zkr-follower/data (wiped before this instance; first block under this config)"
+  },
+  "receipts": {
+    "1_EXPOSURE": {
+      "status": "GREEN",
+      "observed_utc": "2026-10-08T01:29Z",
+      "evidence": "ss -ltnp: listeners exactly 127.0.0.1:8889 (http) and 127.0.0.1:9877 (p2p), pid 1057656 — observed listeners MATCH the intended posture (loopback-bound; NOT an absence of sockets)"
+    },
+    "2_IDENTITY": {
+      "status": "LOCAL-VIEW-ONLY",
+      "observed_utc": "2026-10-08T01:30:25Z",
+      "evidence": "local /v1/chain/get_info: chain_id 73e4385a2708e6d7… (matches the pinned Jungle4 id), head 1, LIB 1, server 04bdb089",
+      "limit": "with sync never advancing (see PEER), the local head corroborates nothing about the network's current state — identity of the SPOKEN chain only"
+    },
+    "3_PEER": {
+      "status": "RED — zero completed handshakes",
+      "observed_utc": "2026-10-08T01:30–01:37Z",
+      "evidence": [
+        "/v1/net/connections: 1 connection slot (jungle4.cryptolions.io:9870), last_handshake.block_num = 0 — ZERO completed Jungle4 handshakes",
+        "peer mix over the window: 8 of 9 configured peers dropped (read errors on cryptolions looping; one explicit go_away 'wrong chain' from jungle4.eosphere.io:9876 — UNEXPLAINED: our chain_id is 73e4385a…; consistent with a peer-side mismatch on that port, cause not established)",
+        "net clock offsets ≈ −5.5 s vs peers (WSL clock; hwclock fix requires interactive sudo — environment constraint, recorded)",
+        "operator API /v1/net/connect rejected both documented body shapes (invalid_http_request) — manual reconnect path unavailable in this build",
+        "posture UNCHANGED throughout: allowed-connection=none, loopback binds — no weakening attempted"
+      ],
+      "cause": "NOT DECLARED. Candidates recorded for investigation: peer admission policies for unknown non-producing followers; protocol/version mismatch (zkbench Spring 1.2.2 era vs peers' current); the −5.5 s clock offset; the single eosphere wrong-chain anomaly"
+    },
+    "4_AGREEMENT": {
+      "status": "NOT RUN — blocked",
+      "blocker": "requires an advancing local LIB; PEER red (zero handshakes) means sync never starts. Even with sync, catching up ~290.9M blocks from genesis is the only authorized path available here (no snapshot source authorized); the hosted box (oracle), which could host a snapshot-class sync, currently REFUSES ssh (kex_exchange_identification: Connection reset by peer, 129.153.202.144:22 — the standing bnr-SSH blocker). No height/block-ID comparison was attempted — a reachable public API does not establish agreement."
+    }
+  },
+  "rule_check": "no follower-derived trust was granted (this follower is not used as a verification source by anything); no public-API receipt borrowed follower status; no configuration value promoted into evidence"
+}

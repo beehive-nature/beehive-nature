@@ -1,8 +1,14 @@
-# Tungsten integration — October 7, 2026
+# Tungsten integration — October 10, 2026
 
-PR #338 now integrates main at `7a23164b5`, retaining its 335 intervening
-commits without rewriting branch history. The original experiment and related
+PR #338 now integrates main at `7f339bb0b`, retaining another 215 intervening
+commits after the October 7 integration at `7a23164b5`. The original experiment and related
 work on main are complementary components, with different acceptance scopes.
+
+All 20 checks on the previous head `c9fcf898a` passed. No submitted review
+findings or unresolved review threads were present at the October 10 refresh.
+The [integration closeout dispatch](../../docs/dispatches/2026-10-10-tungsten-integration.md)
+records the fresh integration and merge evidence. The private-chain receipts
+below remain dated October 7; they have not been relabeled as a new chain run.
 
 | Component | Responsibility | Evidence boundary |
 | --- | --- | --- |

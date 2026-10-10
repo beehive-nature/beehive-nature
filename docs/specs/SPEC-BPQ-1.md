@@ -1,7 +1,9 @@
 # SPEC-BPQ-1 — post-quantum keys and sealed objects
 
 Status: IMPLEMENTED. JS: `surfaces/bpq.js` over `surfaces/onboarding/vendor/bpq-lib.js`.
-Rust: `crates/bsigner/src/bpq.rs` (opens and verifies; CLI `bsigner bpq-open`, `bsigner bpq-verify`).
+Rust: `crates/bsigner/src/bpq.rs` (opens and verifies; CLI `bsigner bpq-open`, `bsigner bpq-verify`;
+seals only "only me", one `self` slot, which is how bsigner keeps its own keys at rest — the pinned
+`surfaces/bpq-rust-sealed.json` must open in both implementations).
 Vectors both must pass: `surfaces/bpq-vectors.json` (`node scripts/build-bpq-vectors.mjs --check`,
 `cargo test -p bsigner bpq`).
 
@@ -42,6 +44,22 @@ via `onboarding/bzdid-key.js`) and a context string. In the wallet a persona con
 
 No label is a byte-prefix of another bzDiD label, so label ‖ context never collides.
 
+Context rule (2026-10-08, SPEC-BTUNGSTEN-PQ-1 PQ03). A context is 1 to 64 printable ASCII
+characters (0x20 to 0x7e); `keys`, `successionKeys` (JS) and `bpq::keys`, `bpq::succession_keys`
+(Rust) refuse any other with code `context_rule`. The rule exists for the classical secp256k1
+record key (`BDID-v1/secp256k1-record-key`, `onboarding/bzdid-key.js` `deriveK1Key`), the one
+derivation that appends a retry counter byte when a derived scalar is out of range: without it,
+context `"a"` at counter 1 and context `"a\x01"` at counter 0 have the same HKDF info, so two
+derivations would share a key. `deriveK1Key` holds the same rule and caps the counter at 31, so
+a counter byte is never a printable byte. Every context the wallet builds (`pq:<name>` with a
+printable name of at most 48, `<rail>:<soul>`, `nostr:bnr-devices`, `root`) is inside the rule,
+so no existing key changes; `a1:<agent>` (contracts/vending/tool/a1.mjs) is inside it for any
+printable agent name of at most 61 characters. `crates/bpq-core` builds every info string bsigner derives from;
+SAW proves it equal to `scripts/btungsten/pq03-cryptol/BpqDerive.cry` and proves there that two
+different admitted (label, context, counter) triples never share an info string, over all seven
+labels HKDF-Expand takes from the masterPrk: the four above plus `BDID-v1/ed25519-record-key`,
+`BDID-v1/secp256k1-record-key` and `BDID-v1/persona-nullifier`.
+
 Phrase-only vault (founder ruling 2026-10-04). The reserved context string `root` (no `pq:`
 prefix, so it never equals a wallet persona context, which always starts `pq:`) gives the
 **root vault key** = `expand("BDID-v1/vault-key", 32)` with context `root`: the same HKDF, the
@@ -63,6 +81,8 @@ that context's vault and X-Wing key.
 X-Wing: `SHAKE-256(seed, 96)`; bytes 0–63 are the ML-KEM-768 seed d‖z, bytes 64–95 the X25519
 secret. Public key = ML-KEM-768 encapsulation key (1184 B) ‖ X25519 public key (32 B). Shared
 secret = `SHA3-256(ss_M ‖ ss_X ‖ ct_X ‖ pk_X ‖ "\.//^\")`; ciphertext = ct_M (1088 B) ‖ ct_X (32 B).
+This is draft-connolly-cfrg-xwing-kem-11 (2026-09-23): CI job `pq05-xwing` runs both
+implementations on its Appendix C vectors (SPEC-BTUNGSTEN-PQ-1 PQ05).
 
 - `successionCommit = SHA3-256("bpq1/succession" ‖ slhPublicKey)` (SLH-DSA-SHAKE-256f pk, 64 B)
 - `id = bech32m("bzpq", SHA3-256("bpq1/id" ‖ mlDsaPublicKey ‖ successionCommit))`
@@ -112,10 +132,14 @@ is not signed: files get renamed, their bytes do not. In a repository the signat
 file as `<file>.bpqsig.json`; `node scripts/verify-bpq-signatures.mjs` checks every one in CI and
 `bsigner bpq-verify --file <sig> --target <file>` checks one natively. This is the mechanism by
 which rulings, releases and archive manifests can carry an authorship proof that outlives Ed25519
-and the hosting account. It is not in force yet: no tracked file carries a `.bpqsig.json` (the
-script reports 0 of 0), and while `docs/PQ-SIGNERS.json` does not exist a signature that verifies
-proves only that some `bzpq1` key signed, not whose. Enforcement begins once
-`docs/PQ-SIGNERS.json` lists a signer.
+and the hosting account. In force for the law files (signed since 2026-10-05; enforced as below
+since 2026-10-08): `docs/PQ-LAW.json` names
+them, `docs/PQ-SIGNERS.json` pins the signer, and CI fails any law file whose signature is missing,
+from an unpinned key, or over an earlier version of the file (STALE), and any law-shaped file
+(`docs/CONSTITUTION.md`, `ORDERS-1.md`, `docs/RULINGS-*.md`) left out of the list. Both
+implementations run it: the script above (noble) and `scripts/verify-law-signatures-rust.sh`
+(bsigner). A changed law file turns green again only through the one-press "sign the law"
+(`surfaces/wallet.html#pq-law`).
 
 ## 4 · Sealed object (`bpq1`)
 
@@ -171,6 +195,71 @@ statement naming the new key set and its own next commitment. The forger of the 
 cannot do this: the succession public key was never published. SLH-DSA rests on hash security
 only. Signatures are 49,856 B, which is acceptable once per algorithm era.
 
+Handover v1 (2026-10-08): `{bpq:1, kind:"handover", from, to, at, dsa, slh, card, sig}`.
+`from` is the retired id and `dsa` its ML-DSA-65 public key; `slh` is the revealed
+SLH-DSA-SHAKE-256f public key (64 B, the succession key derived under `from`'s context); `card`
+is the new key set's §3 card, which carries its own next succession commitment, and `to` is
+its id. `sig` = SLH-DSA-SHAKE-256f (pure, empty context, hedged) over
+`"bpq1/handover" ‖ SHA3-256(UTF-8(from ‖ "\n" ‖ to ‖ "\n" ‖ at))`. A verifier refuses unless
+`from` recomputes from `dsa` and `SHA3-256("bpq1/succession" ‖ slh)`, the card verifies and its
+id is `to`, `to` is not `from`, `at` has the §3 shape, and the signature verifies under `slh`.
+Rust only so far: `bpq::handover`, `bpq::verify_handover`, `bsigner bpq-handover`, and
+`bsigner bpq-verify` for a file of kind `handover`; the browser neither makes nor checks one
+yet. A handover is a statement, not a state: refusing a second handover from the same `from`
+(its succession key is spent once revealed) is the job of whoever keeps the log.
+
+## 5b · Nostr event attestation (2026-10-09)
+
+Buzz and every Nostr relay check an event by its secp256k1 Schnorr signature (NIP-01), which a
+quantum adversary forges; that stays upstream's protocol. This statement lets the author's
+bzpq1 key vouch for one event beside it:
+`{bpq:1, kind:"nostr-event", id, event, dsa, succ, sig}`, `event` = the Nostr event id as 64
+lowercase hex characters, `sig` = ML-DSA-65 (pure, empty context) over
+`"bpq1/nostr-event" ‖ the 32 event-id bytes`. The event id is SHA-256 of the event's author key,
+time, kind, tags and content (NIP-01), so the statement names all of them. A verifier refuses
+unless `id` recomputes from `dsa` and `succ`, `event` has that shape, and the signature
+verifies. JS `BPQ.attestNostr` / `BPQ.verifyNostr`, Rust `bpq::attest_nostr` /
+`bpq::verify_nostr`, `bsigner bpq-attest-nostr`, `bsigner bpq-verify`; each verifies the
+other's (`surfaces/bpq-nostr-vector.json` made by bpq.js, `surfaces/bpq-nostr-rust.json` made by
+bsigner, which signs deterministically and reproduces it byte for byte). How a relay carries the statement
+(an event kind and tags beside the attested event, so it is never inside the id it signs) is
+the upstream ask to block/buzz; the label joins the disjoint `bpq1/` set (SPEC-BTUNGSTEN-PQ-1
+PQ04, PQ13).
+
+## 5c · Intent authorization (2026-10-09)
+
+A rail signer (FROST for Bitcoin first; SPEC-BTUNGSTEN-PQ-1 PQ12) acts only on an intent the
+owner's bzpq1 key authorized: `{bpq:1, kind:"intent", id, envelope, dsa, succ, sig}`,
+`envelope` = a WB001 intent envelope (the SAW-proven canonical encoding, SPEC-BTUNGSTEN-1
+WB001) in base64url, `sig` = ML-DSA-65 (pure, empty context) over
+`"bpq1/intent" ‖ SHA3-256(envelope)`. A verifier refuses unless `id` recomputes from `dsa` and
+`succ`, the envelope decodes under WB001's strict decoder, and the signature verifies. The
+signer then refuses unless `id` is the authority it pins. JS `BPQ.attestIntent` /
+`BPQ.verifyIntent` with a WB001 codec (`BPQ.encodeIntent` / `BPQ.decodeIntent`, held to the
+Rust encoder by WB001's 10 pinned envelopes and 9 refusal codes), Rust `bpq::attest_intent` /
+`bpq::verify_intent`, `bsigner bpq-attest-intent`, `bsigner bpq-verify`; each verifies the other's
+(`surfaces/bpq-intent-vector.json` made by bpq.js, `surfaces/bpq-intent-rust.json` made by
+bsigner, reproduced byte for byte). The label joins the disjoint `bpq1/` set (PQ04 proves it with
+fourteen).
+
+**Bitcoin, Taproot key-path spend v1** (`crates/bsigner/src/intent.rs`). The envelope's fields:
+domain `bitcoin:mainnet` or `bitcoin:testnet`; nonce, 32 bytes the wallet chose; epoch, the time
+of authorization; action, SHA-256 of `bpq1/intent/bitcoin/taproot-key-spend/1`; destination, the
+address paid; capability `bsigner/taproot-key-path`, the backend allowed to act; amount, the
+satoshis paid to the destination in total; expiry, after which it authorizes nothing; payer, the
+address every input spends, the only place change may return; payload, the 109-byte descriptor
+`"bTc1" ‖ hash type (1) ‖ fee (8, little-endian) ‖ txid (32) ‖ sha_amounts (32) ‖
+sha_scriptpubkeys (32)`, the last two exactly BIP-341's. The txid commits to every outpoint,
+sequence and output, the version and the lock time; the two hashes to every spent amount and
+scriptPubKey. `bsigner btc-intent` builds the envelope from a PSBT. The gate
+(`intent::verify_spend`, `bsigner btc-verify-intent`) is the only way to a `VerifiedIntent`: the
+authorization verifies under the pinned authority, the expiry has not passed, the PSBT is read
+by bsigner (`psbt.rs`), every input spends the payer's Taproot output with the authorized hash
+type, the descriptor rebuilt from the PSBT equals the authorized one, and every output pays the
+destination or the payer with the destination's total equal to `amount`. Its sighashes are
+BIP-341's, computed by bsigner. Nonce and epoch bind the authorization, not the PSBT: two
+authorizations of one transaction differ only there, and either releases that one transaction.
+
 ## 6 · Agility rules
 
 - Unknown `bpq` version, `aead`, slot `to` or seal `alg`: refuse, never default. An unknown slot
@@ -181,10 +270,10 @@ only. Signatures are 49,856 B, which is acceptable once per algorithm era.
 - Assurance, stated plainly: @noble/post-quantum 0.7.1 (self-audited) and RustCrypto ml-dsa 0.1.1 /
   ml-kem 0.3.2 (unaudited) agree byte for byte on the vectors; that is a cross-check between two
   implementations, not an audit. JS signing is not claimed to be constant-time.
-- Not cross-checked: the SLH-DSA-SHAKE-256f succession key (§2, §5). Only the JS side derives
-  it; the Rust twin takes the succession commitment as an input and never derives the key, so
-  the vectors' `slhPublicKey` has one implementation behind it, and `surfaces/pq-kat.json`
-  carries no SLH-DSA known-answer vectors.
+- Cross-checked since 2026-10-08: the SLH-DSA-SHAKE-256f succession key (§2, §5). The Rust twin
+  derives it (`bpq::succession_keys`, fips205 0.4.1, SK.seed ‖ SK.prf ‖ PK.seed in that order)
+  and reproduces the browser's commitment and id on every `surfaces/bpq-vectors.json` row; every
+  ACVP SLH-DSA-SHAKE-256f case runs in `crates/btungsten-pq` on two Rust implementations.
 
 ## 7 · Hardware signer (Safe 7, T3W1)
 
@@ -202,7 +291,7 @@ recovery phrase goes onto the device and no wallet key is imported into it.
 - **Signing.** The device builds the bytes it signs from the request (§3 binding or §3b detached
   signature), shows them, and signs only after a hold to confirm. Wire messages `BpqGetCard`,
   `BpqCard`, `BpqSign`, `BpqSignature` (ids 1300 to 1303, `messages-bpq.proto` in the fork).
-- **Proved, emulator only** (`docs/receipts/bpq-safe7-emulator-2026-10-04.json`): the device card
+- **Exercised, emulator only** (`docs/receipts/bpq-safe7-emulator-2026-10-04.json`): the device card
   equals what `bpq.js` and `bsigner` derive for the same PRK and context; its bindings and detached
   signatures verify in both. **Not proved:** fit on hardware (ML-DSA-65 working memory on the
   MicroPython heap, 32 KiB app stack), channel confidentiality (the host link is classical Noise),

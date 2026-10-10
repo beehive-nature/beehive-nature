@@ -1,0 +1,28 @@
+# direct chunk lanes: three boundary reads per file, Blob playback, no service worker, one connection across two addresses, readers closed, no relay
+✔ direct: chunks read on their boundaries, real frames from a Blob, one connection, no relay (1554.3061ms)
+✔ direct setup rejection automatically uses the existing relay (879.2117ms)
+✔ a direct connection that never opens reaches the relay after the quiet limit (12698.4332ms)
+✔ an open file whose chunks never arrive reaches the relay and cancels the stuck reads (45618.6828ms)
+✔ large-file relay startup records a first-frame receipt when early preview is skipped (2844.5224ms)
+✔ direct only: a failed direct start stops, records why, and never asks the relay (2113.9845ms)
+✔ direct only: a clean run is labelled direct with no relay bytes (710.3233ms)
+✔ relay only: every byte is labelled relay and no direct connection opens (589.3597ms)
+✔ later chunks cannot postpone recovery from a missing playable head (2194.5421ms)
+✔ head progress renews the next demand deadline and completes ordered delivery (2096.8809ms)
+✔ ordered starvation on the fallback route asks the relay exactly once (1403.0785ms)
+✔ retry-once: a settled failed head recovers without relay or duplicate bytes (875.2589ms)
+✔ retry-short: a settled failed head recovers without relay or duplicate bytes (895.0155ms)
+✔ retry exhaustion is bounded on direct-only (1805.2938ms)
+✔ retry exhaustion is bounded on direct (1838.5094ms)
+✔ cancelling during backoff launches no retry and late reads cannot change its receipt (2723.7971ms)
+# 52 chunks: 54 attempts, two settled failures, same-byte SHA-256, <=3 reads, no duplicate in-flight range
+✔ 52-chunk transfer recovers chunk 16 twice, preserves order and verifies every byte (2994.7495ms)
+✔ a widespread failure cannot exceed the twelve-retry transfer budget (1564.7448ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 86173.2263

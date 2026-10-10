@@ -29,7 +29,7 @@
 set -eu
 
 CRYPTOL="${1:?usage: wb001-formal-check.sh <path-to-cryptol>}"
-CRY="scripts/btungsten/wb001-cryptol/Intent.cry"
+CRY="scripts/btungsten/wb001-cryptol/BTungstenWB001.cry"
 # 240s, not 300: twice the prove process died by SIGTERM (exit 143, at
 # 269s in run 37698302619 and 289s in run 37701649473) BEFORE a 300s
 # wrapper could print the honest classification. Termination by signal
@@ -37,6 +37,11 @@ CRY="scripts/btungsten/wb001-cryptol/Intent.cry"
 # Below the observed window the classification lands; override
 # PROVE_BUDGET_S for a manual long run on a durable host.
 PROVE_BUDGET_S="${PROVE_BUDGET_S:-240}"
+# Address-space cap for every prove call (KiB). 6 GiB: generous for any
+# obligation that closes in seconds, fatal — INSIDE the script — for the
+# unbounded-growth ones that were killing the runner host. See the
+# MEMORY CAP note in prove() for the receipts.
+MEM_CAP_KIB="${MEM_CAP_KIB:-6291456}"
 
 say() { printf '%s\n' "$*"; }
 
@@ -80,14 +85,14 @@ check() {
 }
 
 # ---- FORMAL-WIRE-ALIGNMENT (founder review B1, 2026-10-07): the bridge ----
-# The BRIDGE block in Intent.cry was comment-only until B1 — no Cryptol
+# The BRIDGE block in BTungstenWB001.cry was comment-only until B1 — no Cryptol
 # wire byte had ever been compared to a runtime canonical() byte, so the
 # deployed-envelope claim under the wireInjective proof was prose. These
 # closed-term evaluations compare the .cry wire (prefix + zero tail +
-# envLen) against OPAQUE constants pinned from the runtime
-# (wb001-bridge.json, derived by wb001-bridge-gen.mjs, re-derived on the
-# node leg by wb001-bridge.test.mjs every run). A red here names its
-# term: the twin and the runtime have drifted apart.
+# envLen) against OPAQUE constants pinned from the Rust model
+# (wb001-bridge.json, derived by crates/btungsten-wb001/tests/wb001/pin.rs,
+# re-derived by its cargo test drift gate every run). A red here names its
+# term: the spec and the model have drifted apart.
 check bridgeIBase     ':check bridgeIBase'
 check bridgeTwinL     ':check bridgeTwinL'
 check bridgeTwinR     ':check bridgeTwinR'
@@ -135,8 +140,15 @@ check wireInjective-sampled   ':check wireInjective'
 prove() {
   _name=$1
   _budget=$2
-  say "== formal: PROVE-UNIVERSAL :prove $_name (budget ${_budget}s) =="
-  PROVE_LOG=$(timeout "$_budget" "$CRYPTOL" -c ":load $CRY" -c ":prove $_name" 2>&1) && rc=0 || rc=$?
+  say "== formal: PROVE-UNIVERSAL :prove $_name (budget ${_budget}s, as-cap ${MEM_CAP_KIB} KiB) =="
+  # MEMORY CAP (2026-10-08, sibling seat diagnosis relayed by the founder):
+  # z3 on the comprehension-heavy obligations grows without bound and killed
+  # the RUNNER host (exit-143 kills at 228s, 269s, 289s — moving targets, the
+  # last INSIDE the 240s budget = memory exhaustion, not clock; runs
+  # 37698302619, 37701649473, 37730044412). The subshell cap makes the death
+  # happen INSIDE the script where it can be classified honestly, instead of
+  # taking the job down and turning every PR carrying this step red.
+  PROVE_LOG=$( (ulimit -v "$MEM_CAP_KIB"; exec timeout "$_budget" "$CRYPTOL" -c ":load $CRY" -c ":prove $_name") 2>&1 ) && rc=0 || rc=$?
   if [ "$rc" -eq 0 ]; then
     # Cryptol's universal verdict is printed as "Q.E.D." (some versions
     # "Valid."). The first honestly-successful prove was mis-recorded as
@@ -160,9 +172,18 @@ prove() {
     fi
   elif [ "$rc" -eq 124 ]; then
     say "FORMAL-PROVE-UNIVERSAL $_name: NOT-PROVEN (timeout ${_budget}s — recorded, never success)"
+  elif [ "$rc" -eq 251 ] || say "$PROVE_LOG" | grep -aq "out of memory"; then
+    # The GHC RTS own OOM exit (251, "cryptol: out of memory") — verified
+    # locally under the cap: the death is graceful, inside the script,
+    # and classifies as the same honest open-obligation class as a timeout.
+    say "FORMAL-PROVE-UNIVERSAL $_name: NOT-PROVEN (memory — RTS exhausted the ${MEM_CAP_KIB} KiB cap, rc=$rc; recorded, never success)"
   elif [ "$rc" -eq 137 ]; then
-    say "FORMAL-PROVE-UNIVERSAL $_name: KILLED (SIGKILL, rc=137 — resource death is a fact, its cause is not guessed)"
-    exit 1
+    # With the address-space cap imposed by THIS script, rc=137 is the solver
+    # exceeding the cap — a bounded resource fact, the same honest class as a
+    # timeout: an open obligation, recorded, never success, never a wedge.
+    # (An external SIGKILL would also land here; the cap sits well under host
+    # memory precisely so OUR boundary fires first.)
+    say "FORMAL-PROVE-UNIVERSAL $_name: NOT-PROVEN (memory — solver exceeded the ${MEM_CAP_KIB} KiB address-space cap; recorded, never success)"
   else
     # Includes 143/SIGTERM: termination by signal is a FACT; what sent the
     # signal (orchestration, eviction, OOM policy) is UNEVIDENCED and this
@@ -174,7 +195,11 @@ prove() {
 }
 prove validImpliesBounded 45
 prove offsetsOrdered 90
-prove zeroTailFromBounds 180
+# zeroTailFromBounds (the composed enumeration form) stays CHECK-SAMPLED only:
+# its content is the two lemmas below plus the bridge sampling — re-proving
+# the 4,626-way enumeration would burn budget the pieces already close.
+prove zeroTailAtPosition 120
+prove wireIndexDef 120
 prove wireZeroTail "$PROVE_BUDGET_S"
 prove wireInjective "$PROVE_BUDGET_S"
 

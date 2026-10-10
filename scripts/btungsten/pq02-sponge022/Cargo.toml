@@ -1,0 +1,17 @@
+# SPEC-BTUNGSTEN-PQ-1 PQ02 — the proof harness for the SHA-3 sponge on keccak
+# 0.2.2: sha3 0.11.0 (ml-kem 0.3.2's and slh-dsa's), from crates.io under the committed Cargo.lock, whose
+# checksums ../pq02-sponge022-check.sh holds equal to the workspace
+# Cargo.lock's. Built by cargo-saw-build (mir-json), never by the workspace.
+[package]
+name = "pq02_sponge022"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+sha3 = { version = "=0.11.0", default-features = false }
+
+[workspace]

@@ -297,6 +297,7 @@ body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-
 #eternal #etDkDial .et-tick.et-lit{fill:var(--sk-biomass)}
 #eternal #etDkDial .et-run{fill:var(--sk-ink-soft)}
 #eternal #etDkDial .et-held{fill:var(--sk-guard-wash);stroke:var(--sk-guard);stroke-width:1.5;stroke-dasharray:5 4}
+#eternal #etDkDial .et-hit{fill:transparent;stroke:none!important}
 #eternal #etDkDial .et-lane{fill:none;stroke:var(--sk-cat-gap);stroke-width:2}
 #eternal #etDkDial .et-ring{transition:opacity var(--dur,.26s)}
 #eternal #etDkDial.et-picked .et-ring{opacity:.35}
@@ -447,7 +448,7 @@ body[data-reg="cypherpunk"] :is(.receipt,.gap:not(.tag)){border-radius:0 var(--s
 
 <div class="hero">
   <div class="pstat hero"><div class="n proven">35</div><div class="l">seconds from nothing to a proof on your machine</div></div>
-  <div class="pstat hero"><div class="n gate">4</div><div class="l">held tests, each naming its own blocker</div></div>
+  <div class="pstat hero"><div class="n gate">7</div><div class="l">held tests, each naming its own blocker</div></div>
   <div class="pstat hero"><div class="n unbuilt">2</div><div class="l">lanes unstarted before any user's money</div></div>
 </div>
 
@@ -469,8 +470,8 @@ cargo test -p chain-zano</code></pre>
 
 <section id="held">
   <h2 class="gate">not proven — and the code says so out loud</h2>
-  <p class="dim"><b>Four tests are held shut across the workspace, and every one states why in its own <code>#[ignore]</code> reason</b> — none is skipped quietly:</p>
-  <p class="dim"><code>chain-zano/slip0010.rs</code> waits on a verified end-to-end <code>(seed&nbsp;→&nbsp;view_public)</code> vector, and no tool currently produces one because that derivation is Trezor/Beehive-specific. <code>adapter-lti</code> waits on a real LTI 1.3 AGS capture. <code>mastery-ledger</code> waits on the L2 commons ledger. <code>watchpay/tests/ledger_contention.rs</code> is the child arm of the cross-process lock proof — it exists to be spawned by its own parent test, never to run alone. A green test on a fabricated vector would be worse than a held one, so they stay held.</p>
+  <p class="dim"><b>Seven tests are held shut across the workspace, and every one states why in its own <code>#[ignore]</code> reason</b> — none is skipped quietly:</p>
+  <p class="dim"><code>chain-zano/slip0010.rs</code> waits on a verified end-to-end <code>(seed&nbsp;→&nbsp;view_public)</code> vector, and no tool currently produces one because that derivation is Trezor/Beehive-specific. <code>adapter-lti</code> waits on a real LTI 1.3 AGS capture. <code>mastery-ledger</code> waits on the L2 commons ledger. <code>watchpay/tests/ledger_contention.rs</code> is the child arm of the cross-process lock proof — it exists to be spawned by its own parent test, never to run alone. <code>bsigner/bpq.rs</code> checks X-Wing against the draft standard's own test vectors, which CI fetches and pins rather than the repository keeping them, so it runs there, in the pq05-xwing job, and is held everywhere else. <code>bsigner/taproot.rs</code> checks the Taproot signature hash bsigner computes against BIP-341's own wallet vectors, which CI fetches and pins the same way, so it runs in the pq12-taproot job and is held everywhere else. <code>bsigner/psbt.rs</code> reads every test PSBT in the BIP-174 and BIP-371 texts, which that job fetches and pins too, and is held everywhere else for the same reason. A green test on a fabricated vector would be worse than a held one, so they stay held.</p>
   <p class="dim">The wire contract sits at proto v0.3 — and the file itself reads <b>AUTHORITATIVE DRAFT</b>, not "frozen". This page quotes the artifact rather than the README, because the artifact is the receipt.</p>
 </section>
 
@@ -615,8 +616,8 @@ cargo test -p chain-zano</code></pre>
       h+='</g>';}
     if(hg){var n=Math.max(1,hg.n);
       h+='<g class="et-ring'+sel('gate')+'" data-kind="gate">';
-      for(var j=0;j<n;j++){var b0=TOP+j*2*Math.PI/n+0.05,b1=TOP+(j+1)*2*Math.PI/n-0.05,it=D.held[j];
-        h+='<path class="et-cell et-held'+(R.kind==='gate'&&R.i===j?' et-sel':'')+'" data-kind="gate" data-i="'+j+'" role="button" tabindex="0" aria-pressed="'+(R.kind==='gate'&&R.i===j)+'" aria-label="'+esc(it?it.name+' '+it.why:K('heldOne','a held test'))+'" d="'+arc(102,136,b0,b1)+'"/>';}
+      for(var j=0;j<n;j++){var b0=TOP+j*2*Math.PI/n+0.05,b1=TOP+(j+1)*2*Math.PI/n-0.05,it=D.held[j],bm=(b0+b1)/2;
+        h+='<g data-kind="gate" data-i="'+j+'" role="button" tabindex="0" aria-pressed="'+(R.kind==='gate'&&R.i===j)+'" aria-label="'+esc(it?it.name+' '+it.why:K('heldOne','a held test'))+'"><circle class="et-hit" r="28" cx="'+(119*Math.cos(bm)).toFixed(2)+'" cy="'+(119*Math.sin(bm)).toFixed(2)+'"/><path class="et-cell et-held'+(R.kind==='gate'&&R.i===j?' et-sel':'')+'" d="'+arc(102,136,b0,b1)+'"/></g>';}
       h+='</g>';}
     if(hu){var u=Math.max(1,hu.n);
       h+='<g class="et-ring'+sel('unbuilt')+'" data-kind="unbuilt">';

@@ -236,3 +236,23 @@ and 0.1.2; two scheduled windows fired, two were dropped by GitHub's scheduler):
   live cohort, recorded as such.
 
 Receipt: `docs/receipts/ant-reach-cohort-2026-10-07.json`.
+
+## Cohort closed (2026-10-08)
+
+Founder order 2026-10-08: "complete". The cohort closed at 06:27Z, about a day
+before the planned 2026-10-09 end; windows that never ran are not claimed. The
+last window ran laptop, Linux runner and macOS runner together (Actions run
+37737383030, SDK 0.1.2).
+
+- Over all 17 runs after the baseline (about 34 hours, SDK 0.1.1 then 0.1.2):
+  dead cohort **159 of 159** settled observations dead; live cohort **203 of
+  205** open. Both misses are still the one endpoint `09d7e457307accd9`.
+- Final window, laptop vs Linux runner: 285 endpoints settled on both; 148
+  dead from both (147 of them never ICE-connected on any attempt), 137 open
+  from both, **0 opposite**. The macOS runner dialled only 57 endpoints, so the
+  three-way overlap is small (40 settled: 17 dead, 23 open, 0 differ).
+- `.github/workflows/ant-reach.yml`: the schedule and its date guard are
+  removed; the workflow runs on demand only.
+- WithAutonomi/ant-node#247 gets one closing update with these numbers.
+
+Receipt: `docs/receipts/ant-reach-cohort-2026-10-08-final.json`.

@@ -97,6 +97,7 @@ function mockChain(ctx, opts = {}) {
     }
     if (u.pathname.endsWith('/get_abi')) {
       const want = JSON.parse(route.request().postData()).account_name;
+      if (state.abiHold && state.abiHold.account === want) { await state.abiHold.until; state.abiHold.answered = (state.abiHold.answered || 0) + 1; }   // one account's parts answer only when the test lets them
       return json(want === 'banchor22222' ? COMMIT_ABI : BNAME_ABI);
     }
     if (u.pathname.endsWith('/get_info')) return json({ chain_id: chain, head_block_num: state.head, ...(state.libTime ? { last_irreversible_block_num: state.head - 2, last_irreversible_block_time: state.libTime } : {}) });
@@ -534,6 +535,35 @@ try {
       words.test(said.words) && said.btn === act && !/ram_usage|tx_net|assertion|CPU|NET|<img|banchor22222 has/.test(said.words) && said.cy.includes(refuse.slice(0, 30)) && said.xss === undefined, JSON.stringify(said));
     if (/ram_usage/.test(refuse)) ok('a Jungle4 RAM refusal offers no mainnet RAM buy: its one link opens the composer', await p12.evaluate(() => !!document.querySelector('#tx-out a[href="#composer-sec"]') && !/buy RAM/.test(document.getElementById('tx-out').innerText)), await p12.locator('#tx-out').innerText());
     await c12.close();
+  }
+
+  /* 12c · the parts of the action the composer boots with (cypherpunk: the estate's own) are read the moment the
+     test network is chosen. That answer landing after another action and its args were typed rewrote the args to
+     {} and the press died at build (tests run 38032431715, raver, "missing commit.committer"): a late answer for an
+     action the composer no longer shows is dropped — the typed args stay and the press reaches the chain */
+  {
+    const c12c = await cyContext(); const r12c = mockChain(c12c); let letGo;
+    r12c.abiHold = { account: 'kingbeelovis', until: new Promise(r => { letGo = r; }) };
+    r12c.refuse = 'assertion failure with message: late is not yours [eosio_assert_message_exception]';
+    const pc = await c12c.newPage();
+    await pc.goto(WALLET, { waitUntil: 'load' });
+    await pc.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
+    await pc.selectOption('#tx-net', 'j4');   // reads the booted kingbeelovis:registeracc parts; that answer is held
+    await pc.fill('#tx-contract', 'banchor22222'); await pc.fill('#tx-action', 'commit');
+    await pc.locator('#tx-j4-scaffold').evaluate(el => { el.open = true; });
+    await pc.fill('#tx-j4actor', 'banchor22222'); await pc.fill('#tx-j4key', J4_WIF);
+    await pc.fill('#tx-data', JSON.stringify(COMMIT_ARGS));
+    letGo();   // the held answer lands now, between the typing and the press
+    for (let i = 0; i < 200 && !r12c.abiHold.answered; i++) await pc.waitForTimeout(50);
+    await pc.waitForFunction(() => document.getElementById('tx-out').style.display === 'none' || document.getElementById('tx-data').value === '{}', null, { timeout: 5000 }).catch(() => {});
+    const kept = await pc.evaluate(() => ({ d: document.getElementById('tx-data').value, f: document.querySelectorAll('.tx-f').length, vis: document.getElementById('tx-out').style.display, answered: true }));
+    kept.answered = r12c.abiHold.answered === 1;
+    await pc.click('#tx-go');
+    await pc.waitForFunction(() => ((JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]')[0]) || {}).phase === 'failed', null, { timeout: 30000 }).catch(() => {});
+    const out12c = await pc.locator('#tx-out').textContent();
+    ok('a show-its-parts answer that lands after another action was typed is dropped: the typed args stay, no parts of the old action are drawn, its reading line is gone, and the press reaches the chain',
+      kept.answered && kept.d === JSON.stringify(COMMIT_ARGS) && kept.f === 0 && kept.vis === 'none' && /^the contract refused it\. nothing changed\./.test(out12c) && !/build failed/.test(out12c), JSON.stringify({ kept, out: out12c.slice(0, 120) }));
+    await c12c.close();
   }
 
   /* 12b · a refusal kept in the outbox: a mainnet RAM refusal opens the wallet's own RAM buy, a Jungle4 one never does */

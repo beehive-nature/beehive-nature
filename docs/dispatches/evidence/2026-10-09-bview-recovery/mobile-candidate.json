@@ -1,0 +1,15 @@
+{
+  "mode": "candidate HTML on public origin, mocked network",
+  "device": "Chromium Pixel 7 emulation; not physical Android",
+  "completed": 52,
+  "retries": 2,
+  "recovered": 1,
+  "integrityMatches": true,
+  "firstFrameMs": 1189.5,
+  "relayRequests": 0,
+  "dimensions": {
+    "width": 412,
+    "scroll": 412
+  },
+  "pageErrors": []
+}

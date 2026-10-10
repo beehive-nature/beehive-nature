@@ -1,0 +1,44 @@
+# NOTE: trailing "# PUBLIC-CONSTANT" markers added post-capture for the estate hex scanner (tx/block ids are public chain data); content otherwise verbatim.
+run-local state: /tmp/zkr-final.tjKVP0JC
+== [0] build identity (EXACT equality — pinned release wasm; THE GATE) ==
+PASS: on-chain code hash == pinned wasm sha256 (7a86ac34ddf15489…, this exact build)
+== [1] negative legs against standing anchors (discovered, parent-owned) ==
+  [forged] prerequisite: seq 3
+PASS: forged proof (eval_zw+1) @seq 3 — refused (rc=19): count proof REJECTED — plonk pairing false
+  [count21] prerequisite: seq 4
+PASS: real dead proof vs count=21 @seq 4 — refused (rc=19): count proof REJECTED — plonk pairing false
+  [rootflip] prerequisite: seq 5
+PASS: real dead proof vs mutated root @seq 5 — refused (rc=19): count proof REJECTED — plonk pairing false
+  [kind1] prerequisite: seq 6
+PASS: real DEAD proof vs kind=1 @seq 6 — refused (rc=19): count proof REJECTED — plonk pairing false
+  [reverify] prerequisite: seq 1
+PASS: re-verify @seq 1 (already verified) — refused (rc=19): anchor already verified (one proof per anchor)
+== [2] asym REVERSED claims (the selector law, on-chain) ==
+  [asym019] prerequisite: seq 203
+PASS: valid asym-dead proof vs REVERSED (0,19) @seq 203 — refused (rc=19): count proof REJECTED — plonk pairing false
+  [asym120] prerequisite: seq 204
+PASS: valid asym-live proof vs REVERSED (1,20) @seq 204 — refused (rc=19): count proof REJECTED — plonk pairing false
+== [3] exhaustion — the bounded budget refuses in the open ==
+PASS: anchor beyond cap (table full) — refused (rc=19): anchor table FULL (bounded resource budget)
+== [4] final state (ASSERTED — mandatory coverage, run-local spec) ==
+  coverage: 7 claims — exactly what discovery recorded this run
+  seq 3 (0,20) verified_at 0 (unverified at this observation)
+  seq 4 (0,21) verified_at 0 (unverified at this observation)
+  seq 5 (0,20) verified_at 0 (unverified at this observation)
+  seq 6 (1,20) verified_at 0 (unverified at this observation)
+  seq 1 (0,20) verified_at 1791347511
+  seq 203 (0,19) verified_at 0 (unverified at this observation)
+  seq 204 (1,20) verified_at 0 (unverified at this observation)
+  total rows: 27 == cap 27
+== LEDGER ==
+  identity: PASS
+  forged: PASS
+  count21: PASS
+  rootflip: PASS
+  kind1: PASS
+  reverify: PASS
+  asym019: PASS
+  asym120: PASS
+  exhaust: PASS
+  final: PASS
+== RESULT: 9 passed, 0 failed (incl. 0 never-ran) ==

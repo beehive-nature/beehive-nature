@@ -43,6 +43,12 @@ jobs:
         run: |
           test -x "$SETTLE_BSIGNER_BIN" || { echo "bsigner binary missing: a skipped suite is not a pass"; exit 1; }
           node --test bsigner-nerve.test.mjs
+      # SPEC-BTUNGSTEN-PQ-1 §PQ08: the law gate's second implementation. bsigner
+      # (RustCrypto ML-DSA-65) checks every docs/PQ-LAW.json file against its
+      # current bytes and a pinned signer; the noble half runs in the static job.
+      - name: Law signatures — the built bsigner verifies every law file, current and pinned
+        if: always()
+        run: sh scripts/verify-law-signatures-rust.sh target/debug/bsigner
       - name: Check formatting
         if: always()
         run: cargo fmt --all --check
@@ -114,6 +120,9 @@ jobs:
         if: always()
         run: |
           node scripts/build-bpq-vectors.mjs --check
+          node scripts/build-derive-vectors.mjs --check
+          node scripts/build-nostr-vector.mjs --check
+          node scripts/build-intent-vector.mjs --check
           node --test e2e/bpq.test.mjs
           node scripts/verify-bpq-signatures.mjs
           node --test e2e/law-signatures.test.mjs
@@ -842,10 +851,17 @@ jobs:
       # the bitrate plays early; a mid-play slowdown brings the countdown back and resumes by
       # itself; mediaCapabilities smooth=false shows the plain warning row.
       - name: Watch from Autonomi — plays through today's door and an upgraded one (mocked door)
-        timeout-minutes: 3 # measured: max 105s in run 36750205672 (+71% headroom)
+        timeout-minutes: 6 # 41 sequential checks measured 243.2s on 2026-10-10; retain headroom
         if: always()
         working-directory: e2e
-        run: node --test bview.test.mjs bview-direct.test.mjs ../tools/video-trial/scorecard.test.mjs
+        # The 214 MB recovery fixture must not contend with the paced relay's wall-clock assertions.
+        run: node --test --test-concurrency=1 bview.test.mjs bview-direct.test.mjs ../tools/video-trial/scorecard.test.mjs
+      - name: bView adaptive video — decode, buffer eviction, seek, cancellation and outage budgets
+        timeout-minutes: 3
+        if: always()
+        working-directory: e2e
+        # GitHub's Ubuntu image includes codec-capable Chrome; bundled Chromium lacks H264.
+        run: node --test bview-adaptive.test.mjs ../tools/video-trial/capacity.test.mjs ../tools/video-trial/package-hls.test.mjs
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest
@@ -1102,7 +1118,7 @@ jobs:
     # attempted here and can never be claimed from this job (the shared
     # vectors are sampled agreement). Cryptol is pinned: the version and
     # asset below are part of every receipt this job produces.
-    timeout-minutes: 15
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -1129,10 +1145,17 @@ jobs:
           fi
           z3 --version | head -1
           ./cryptol/bin/cryptol --version
+      # WB002 runs FIRST: its whole ladder takes seconds, and WB001's prove
+      # budgets can consume the job's remaining minutes — order keeps the
+      # cheap receipt from being starved by the expensive one.
+      - name: WB002 formal — TYPECHECK + CHECK-SAMPLED + PROVE sovereignContinuity + TEETH
+        if: always()
+        timeout-minutes: 5
+        run: sh scripts/btungsten/wb002-formal-check.sh "$HOME/cryptol/bin/cryptol"
       - name: WB001 formal — TYPECHECK + CHECK-SAMPLED gate; PROVE attempt recorded
         if: always()
         # 14m, not 10: setup+checks ~75s + TWO 300s prove budgets (wireZeroTail,
         # wireInjective) — the step cap killed the second prove mid-run before
         # the honest timeout classification could print (learned run 37698302619).
-        timeout-minutes: 14
+        timeout-minutes: 19
         run: sh scripts/btungsten/wb001-formal-check.sh "$HOME/cryptol/bin/cryptol"
