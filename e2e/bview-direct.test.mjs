@@ -290,10 +290,10 @@ test('52-chunk transfer recovers chunk 16 twice, preserves order and verifies ev
       assert.equal(d.chunkReceipts[i].state,'emitted');
       if(i)assert.ok(d.chunkReceipts[i].emittedMs>=d.chunkReceipts[i-1].emittedMs);
     }
-    assert.ok(d.peakBufferedBytes<=12*4190208);assert.ok(e.ttffMs>0);
-    assert.ok(await page.evaluate(()=>window.peakReads<=6));assert.equal(await page.evaluate(()=>window.peakSameRange),1);
+    assert.ok(d.peakBufferedBytes<=6*4190208);assert.ok(e.ttffMs>0);
+    assert.ok(await page.evaluate(()=>window.peakReads<=3));assert.equal(await page.evaluate(()=>window.peakSameRange),1);
     assert.equal(relay.length,0);assert.deepEqual(errors,[]);
-    console.log('# 52 chunks: 54 attempts, two settled failures, same-byte SHA-256, <=6 reads, no duplicate in-flight range');
+    console.log('# 52 chunks: 54 attempts, two settled failures, same-byte SHA-256, <=3 reads, no duplicate in-flight range');
   } finally {await ctx.close();}
 });
 

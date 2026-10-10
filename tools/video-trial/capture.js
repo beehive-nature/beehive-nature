@@ -4,7 +4,7 @@
   if (typeof window.__bviewEngine !== 'function') throw new Error('bViEw engine unavailable');
   if (window.bviewTrial) throw new Error('Export and reload before starting another capture');
   const start = performance.now(), rows = [], marks = [];
-  let stopped = false, timer, chunkReceipts = [];
+  let stopped = false, timer, chunkReceipts = [], chunkReceiptsTruncated = false;
   const number = value => Number.isFinite(value) ? value : null;
   const state = value => ['queued','reading','backoff','arrived','emitted','timeout','cancelled','failed','complete','opening','pending','short'].includes(value) ? value : null;
   const sample = () => {
@@ -13,6 +13,7 @@
     const t = window.__antTransport?.snapshot();
     // Keep one bounded chunk timeline, not a full copy in every 250 ms row.
     // Peer attribution is unavailable at this layer; never invent it or copy IDs.
+    chunkReceiptsTruncated = (d?.chunkReceipts?.length || 0) > 256;
     chunkReceipts = (d?.chunkReceipts || []).slice(0,256).map(c => ({
       index:number(c.index),start:number(c.start),length:number(c.length),state:state(c.state),
       arrivedMs:number(c.arrivedMs),emittedMs:number(c.emittedMs),peer:null,
@@ -55,7 +56,7 @@
     export() {
       return JSON.stringify({ schema: 'bview-trial/1', intervalMs: 250,
         boundary: 'one document; sampled engine counters and data-channel payload, not full wire bytes; action marks are manual; chunkReceipts describe the latest direct attempt',
-        stopped, marks, rows, chunkReceipts }, null, 2);
+        stopped, marks, rows, chunkReceipts, chunkReceiptsTruncated }, null, 2);
     }
   };
   timer = setInterval(sample, 250); sample();
