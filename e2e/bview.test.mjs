@@ -42,7 +42,7 @@ const srv = createServer(async (q, s) => {
   try {
     const rel = decodeURIComponent(q.url.split('?')[0]).replace(/^\/surfaces(?=\/|$)/, '').replace(/^\//, '');
     const ct = rel.endsWith('.html') ? 'text/html' : rel.endsWith('.js') ? 'text/javascript' : rel.endsWith('.json') ? 'application/json' : rel.endsWith('.css') ? 'text/css' : rel.endsWith('.woff2') ? 'font/woff2' : 'application/octet-stream';
-    const body = await readFile(join(SURF, rel));
+    const body = await readFile(rel === 'bview.html' && process.env.BVIEW_HTML ? process.env.BVIEW_HTML : join(SURF, rel));
     s.writeHead(200, { 'content-type': ct }); s.end(body);
   } catch { s.writeHead(404); s.end(); }
 });
@@ -612,8 +612,13 @@ test('fast door (2x bitrate): plays early, long before the file is in; decodingI
   await p.evaluate(() => {
     window.__handoffs = [];
     const v = document.getElementById('v'); let previousHeight = 0;
-    const sample = () => { if (v.readyState >= 2) previousHeight = v.getBoundingClientRect().height; requestAnimationFrame(sample); };
-    requestAnimationFrame(sample);
+    // Capture geometry synchronously before a source reset. A RAF can miss the
+    // first decoded preview entirely and leave a false zero-height baseline.
+    const src = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'src');
+    Object.defineProperty(v,'src',{
+      get(){return src.get.call(this);},
+      set(value){previousHeight=this.getBoundingClientRect().height;src.set.call(this,value);}
+    });
     new MutationObserver(() => {
       if ((window.__bviewSrcAssigns || 0) < 2) return;
       const held = document.getElementById('frame-hold');

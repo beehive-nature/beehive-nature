@@ -1,5 +1,28 @@
 # Video trial: browse, playback, and return visits
 
+For the separately supplied bView v0.1.2 comparison, see
+[Benchmark 003](benchmark-003.md) and its
+[reported observations](shu-benchmark-003.json). It is a different corpus/report
+from the October 7 two-arm scorecard below; do not combine their results.
+
+## Owned public acceptance
+
+`corpus-2026-10-09.json` pins the public featured video, its size and published
+digest. This is an independent acceptance sample; its relationship to Shu's
+original corpus is unknown. With `npm ci --prefix e2e` and installed Chrome:
+
+```sh
+node e2e/bview-live.mjs --route direct --out /absolute/new-receipt.json
+```
+
+The explicit live command uses the public site and real network. It creates a
+fresh browser context, requires both matching bytes and playback ending, stops
+after ten minutes at most, and writes an exclusive-create receipt including the
+served HTML digest, browser version, timings, stalls, source path, chunk timeline
+and data-channel counters. A failure is preserved and exits nonzero. Optional
+`--candidate /absolute/bview.html` substitutes only candidate HTML on the public
+origin. No user browser profile, wallet, service, or local server is needed.
+
 This is a measurement kit, not a bTunGsTeN conformance result. Its companion
 bView repair bounds recovery when a needed chunk is missing; it does not claim
 higher network throughput. It follows SPEC-BTUNGSTEN-1's observation/evidence boundary.
@@ -134,6 +157,17 @@ the distinction. These are application counters, not decoded frames or wire byte
 On stop, queued bytes describe the queue at termination, not retained memory.
 Late reads cannot change a terminated run's counters. Direct-only still stops;
 the fallback route still uses the relay. No retry fanout or concurrency increase.
+
+October 9 recovery adds up to three attempts per chunk and twelve retries per
+transfer, with 250/1000 ms backoff after settled read failures. Six lanes and the
+relay route's 45-second ordered-wait deadline are unchanged. Direct-only allows
+120 seconds for the needed chunk; later chunks never reset it. Unsettled reads are never retried:
+the SDK's JavaScript abort is not proof that its underlying WASM call stopped.
+The capture retains attempt/arrival/emission timestamps and terminal states in
+one bounded `chunkReceipts` array for the latest direct attempt. Peer attribution
+stays null. Aggregate data-channel receive counters are distinct from plaintext
+bytes and full wire traffic. Explicit direct-only startup now allows 30 seconds
+of quiet and 90 seconds total; relay-fallback keeps 12 seconds/30 seconds.
 
 Recommended provisional acceptance, agreed before runs: retain the browse gain
 on equal workloads; no additional failures; paired median first-frame regression
