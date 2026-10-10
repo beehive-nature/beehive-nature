@@ -7,5 +7,6 @@ mod boundary;
 mod bridge;
 mod common;
 mod ed25519;
+mod legacy;
 mod pin;
 mod randomized;

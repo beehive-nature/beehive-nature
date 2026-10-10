@@ -7,7 +7,8 @@
 
 pub use btungsten_wb001_core as core;
 use btungsten_wb001_core::{
-    encode, valid_intent, well_formed_utf8_128, well_formed_utf8_64, Intent, HEAD8, MAX_ENV,
+    decode_core, encode, valid_intent, well_formed_utf8_128, well_formed_utf8_64, Intent, D_LENGTH,
+    D_MAGIC, D_OK, D_SHORT, D_TAG_ORDER, D_TRAILING, D_UTF8, D_VERSION, MAX_ENV,
 };
 
 /// A typed refusal. `code()` is the exact string the pinned vectors carry.
@@ -153,101 +154,30 @@ pub fn canonical(i: &Intent) -> Result<Vec<u8>, Refusal> {
     Ok(out[..n].to_vec())
 }
 
-#[derive(Clone, Copy)]
-enum Kind {
-    Utf8,
-    Bytes32,
-    U64,
-    Raw,
-}
-
-const FIELDS: [(u8, Kind, u32, u32); 10] = [
-    (0x01, Kind::Utf8, 1, 64),
-    (0x02, Kind::Bytes32, 32, 32),
-    (0x03, Kind::U64, 8, 8),
-    (0x04, Kind::Bytes32, 32, 32),
-    (0x05, Kind::Utf8, 1, 128),
-    (0x06, Kind::Utf8, 1, 64),
-    (0x07, Kind::U64, 8, 8),
-    (0x08, Kind::U64, 8, 8),
-    (0x09, Kind::Utf8, 1, 128),
-    (0x0a, Kind::Raw, 0, 4096),
-];
-
-fn padded<const CAP: usize>(v: &[u8]) -> [u8; CAP] {
-    let mut a = [0u8; CAP];
-    a[..v.len()].copy_from_slice(v);
-    a
-}
-
 /// Strict decode: magic, version, ascending tags, exact bounds, exact
 /// consumption, well-formed UTF-8 (through the SAW-proven DFA). The same
 /// checks in the order the pinned vectors record, so the same refusal code.
+///
+/// The decision is [`decode_core`], proven equal to the Cryptol `decodeSpec`
+/// for every buffer and every length (`scripts/btungsten/wb001-saw/decode.saw`).
+/// It reads the first `MAX_ENV` input bytes and the true length; this wrapper
+/// supplies exactly those, zero filled past the input's end.
 pub fn decode(env: &[u8]) -> Result<Box<Intent>, Refusal> {
-    if env.len() < 8 {
-        return Err(Refusal::Short);
+    let mut buf = Box::new([0u8; MAX_ENV]);
+    let k = env.len().min(MAX_ENV);
+    buf[..k].copy_from_slice(&env[..k]);
+    let mut i = Box::new(Intent::ZERO);
+    match decode_core(&buf, env.len() as u64, &mut i) {
+        D_OK => Ok(i),
+        D_SHORT => Err(Refusal::Short),
+        D_MAGIC => Err(Refusal::Magic),
+        D_VERSION => Err(Refusal::Version),
+        D_TAG_ORDER => Err(Refusal::TagOrder),
+        D_LENGTH => Err(Refusal::Length),
+        D_UTF8 => Err(Refusal::Utf8),
+        D_TRAILING => Err(Refusal::Trailing),
+        v => unreachable!("decode_core verdict {v}: decodeSpec has only D_OK..=D_TRAILING"),
     }
-    if env[..7] != HEAD8[..7] {
-        return Err(Refusal::Magic);
-    }
-    if env[7] != HEAD8[7] {
-        return Err(Refusal::Version);
-    }
-    let mut at = 8usize;
-    let mut vals: Vec<&[u8]> = Vec::with_capacity(10);
-    for &(tag, kind, min, max) in FIELDS.iter() {
-        if at + 5 > env.len() {
-            return Err(Refusal::Short);
-        }
-        if env[at] != tag {
-            return Err(Refusal::TagOrder);
-        }
-        let len = u32::from_be_bytes([env[at + 1], env[at + 2], env[at + 3], env[at + 4]]);
-        if len < min || len > max {
-            return Err(Refusal::Length);
-        }
-        let len = len as usize;
-        if at + 5 + len > env.len() {
-            return Err(Refusal::Short);
-        }
-        let v = &env[at + 5..at + 5 + len];
-        if let Kind::Utf8 = kind {
-            let ok = if max == 64 {
-                well_formed_utf8_64(&padded::<64>(v))
-            } else {
-                well_formed_utf8_128(&padded::<128>(v))
-            };
-            if !ok {
-                return Err(Refusal::Utf8);
-            }
-        }
-        vals.push(v);
-        at += 5 + len;
-    }
-    if at != env.len() {
-        return Err(Refusal::Trailing);
-    }
-    let u64be = |v: &[u8]| u64::from_be_bytes(v.try_into().expect("length checked: 8"));
-    let i = Box::new(Intent {
-        domain_len: vals[0].len() as u32,
-        domain: padded(vals[0]),
-        nonce_len: 32,
-        nonce: padded(vals[1]),
-        epoch: u64be(vals[2]),
-        action_len: 32,
-        action: padded(vals[3]),
-        destination_len: vals[4].len() as u32,
-        destination: padded(vals[4]),
-        capability_len: vals[5].len() as u32,
-        capability: padded(vals[5]),
-        amount: u64be(vals[6]),
-        expiry: u64be(vals[7]),
-        payer_len: vals[8].len() as u32,
-        payer: padded(vals[8]),
-        payload_len: vals[9].len() as u32,
-        payload: padded(vals[9]),
-    });
-    Ok(i)
 }
 
 /// Ed25519 public key for a 32-byte seed (RFC 8032 secret key).
