@@ -34,7 +34,8 @@ try {
     if(Date.now()-started-lastProgress>=15000){
       lastProgress=Date.now()-started;
       console.log(JSON.stringify({elapsedMs:lastProgress,source:e.source?.kind,received:!!e.sha,
-        playhead:e.playhead,duration:e.video?.duration,paused:e.video?.paused,directStatus:e.direct?.status}));
+        bytes:e.bytes,size:e.size,chunksCompleted:e.direct?.completed,chunksTotal:e.direct?.chunks,
+        playhead:e.playhead,duration:e.video?.duration,paused:e.video?.paused,holds:e.holds,holdMs:e.holdMs,directStatus:e.direct?.status}));
     }
     if(e.sha && receivedAtMs===null)receivedAtMs=Date.now()-started;
     if(e.video?.ended){endedAtMs=Date.now()-started;break;}

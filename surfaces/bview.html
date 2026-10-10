@@ -1789,8 +1789,11 @@ document.addEventListener('DOMContentLoaded',function(){
         if (data.type === Hls.ErrorTypes.MEDIA_ERROR && receipt.recoveries < 1) { receipt.recoveries++; hls.recoverMediaError(); }
         else fail(); // Never an unbounded application retry loop.
       });
-      v.addEventListener('pause', () => { if (alive() && metrics.playStartMs != null && !v.ended) hls.stopLoad(); }, { signal });
-      v.addEventListener('play', () => { if (alive()) hls.startLoad(-1); }, { signal });
+      let loadingPaused = false;
+      v.addEventListener('pause', () => { if (alive() && metrics.playStartMs != null && !v.ended) { loadingPaused = true; hls.stopLoad(); } }, { signal });
+      // Initial loading is already active. Restart only a load we actually paused;
+      // restarting on first play aborts/refetches the next in-flight segment.
+      v.addEventListener('play', () => { if (alive() && loadingPaused) { loadingPaused = false; hls.startLoad(-1); } }, { signal });
       v.addEventListener('progress', () => { if (alive()) receipt.peakAhead = Math.max(receipt.peakAhead, videoFacts().ahead); }, { signal });
       hls.loadSource(url); hls.attachMedia(v); window.__bviewSrcAssigns++;
     } else if (v.canPlayType('application/vnd.apple.mpegurl')) {

@@ -1,0 +1,29 @@
+# request failure net::ERR_ABORTED
+✖ paused and cancelled streams stop demand; replacement ignores old callbacks (9943.6598ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14281.6347
+
+✖ failing tests:
+
+test at e2e\bview-adaptive.test.mjs:100:1
+✖ paused and cancelled streams stop demand; replacement ignores old callbacks (9943.6598ms)
+  AssertionError [ERR_ASSERTION]: initial play does not abort and refetch a segment
+  
+  2 !== 3
+  
+      at TestContext.<anonymous> (file:///C:/Users/travi/.codex/worktrees/0d0c/wt-codex-shu003/e2e/bview-adaptive.test.mjs:105:12)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 3,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
