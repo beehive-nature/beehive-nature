@@ -140,6 +140,17 @@ On stop, queued bytes describe the queue at termination, not retained memory.
 Late reads cannot change a terminated run's counters. Direct-only still stops;
 the fallback route still uses the relay. No retry fanout or concurrency increase.
 
+October 9 recovery adds up to three attempts per chunk and twelve retries per
+transfer, with 250/1000 ms backoff after settled read failures. Six lanes and the
+relay route's 45-second ordered-wait deadline are unchanged. Direct-only allows
+120 seconds for the needed chunk; later chunks never reset it. Unsettled reads are never retried:
+the SDK's JavaScript abort is not proof that its underlying WASM call stopped.
+The capture retains attempt/arrival/emission timestamps and terminal states in
+one bounded `chunkReceipts` array for the latest direct attempt. Peer attribution
+stays null. Aggregate data-channel receive counters are distinct from plaintext
+bytes and full wire traffic. Explicit direct-only startup now allows 30 seconds
+of quiet and 90 seconds total; relay-fallback keeps 12 seconds/30 seconds.
+
 Recommended provisional acceptance, agreed before runs: retain the browse gain
 on equal workloads; no additional failures; paired median first-frame regression
 no more than 0.5 seconds; paired median stall regression no more than 1 second;
