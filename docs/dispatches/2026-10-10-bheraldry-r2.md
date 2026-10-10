@@ -116,6 +116,22 @@ the render receipt).
 - CI receipts for this push: see the PR checks (all suites) — quoted in the
   PR and verified before merge.
 
+### 6a. The red the tree named, and its cure (commit 4439845ca)
+
+The first CI wave failed two tree-following beats, honestly recorded:
+the static job's **Engine Room** step (the surface directory needed
+regeneration for the new page — `build-stack-surfaces.mjs`, 130 surfaces)
+and the eternal job's **bottom-half ratchet** (390px × three registers found
+WIDE/CAPS/FAINT/SMALL/TINY on the new page). The ratchet findings were real
+UX faults and were FIXED, not baselined: fixed-layout tables with
+overflow-wrap (the 719px sideways scroll is gone), no forced capitals on
+section labels, chip text at --sk-ink-soft (hue kept on borders), a 12px
+type floor in every register, and 32px touch-target table links. Local
+receipt after the fix: `node e2e/footer-audit.mjs --only bheraldry.html` →
+**3 views, 0 findings** — zero is the floor, so nothing enters
+footer-audit.baseline.json and the ratchet itself polices the page from now
+on.
+
 ## 7. Boundaries not crossed
 
 - The record still authenticates nothing about history or rights; the
