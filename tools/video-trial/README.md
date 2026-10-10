@@ -1,5 +1,10 @@
 # Video trial: browse, playback, and return visits
 
+For the separately supplied bView v0.1.2 comparison, see
+[Benchmark 003](benchmark-003.md) and its
+[reported observations](shu-benchmark-003.json). It is a different corpus/report
+from the October 7 two-arm scorecard below; do not combine their results.
+
 This is a measurement kit, not a bTunGsTeN conformance result. Its companion
 bView repair bounds recovery when a needed chunk is missing; it does not claim
 higher network throughput. It follows SPEC-BTUNGSTEN-1's observation/evidence boundary.

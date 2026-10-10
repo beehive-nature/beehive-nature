@@ -1,0 +1,45 @@
+{
+  "schema": "reported-video-benchmark/1",
+  "evidence": "reported-transcription",
+  "source": "Founder-supplied bView v0.1.2 - Shu Benchmark 003 assessment, received 2026-10-09 America/Denver",
+  "observedAt": null,
+  "followup": {
+    "source": "Founder-relayed Shu 11:00 PM message; calendar date unspecified",
+    "mobile": "Minimal mobile emulation setup ready; benchmarks planned, no results supplied",
+    "dialCapHypothesis": "Shu thinks 500 is an SDK upper cap encountered by two sites; source and sites not identified in this message",
+    "playbackArchitectureHypothesis": "Shu believes bView uses MSE without SW and the other sites use SW; current bView source instead uses progressive Blobs; tested build unknown"
+  },
+  "context": "Reported same browser-side perspective, high-bandwidth LAN-connected computer, approximately 30-minute comparison window; not a controlled multi-run benchmark",
+  "buildPins": null,
+  "contentManifest": null,
+  "rawTrace": null,
+  "rows": [
+    {"size":"large","implementation":"ants.tube","firstFrameSeconds":18.3,"completeSeconds":84,"completion":"complete-reported","stallCount":3,"stallSeconds":6},
+    {"size":"large","implementation":"bView v0.1.2","firstFrameSeconds":53.8,"completeSeconds":null,"completion":"incomplete-reported","chunksRetrieved":16,"chunksTotal":52,"stallCount":0,"stallSeconds":0},
+    {"size":"large","implementation":"try.autonomi.com","firstFrameSeconds":33.8,"completeSeconds":111,"completion":"complete-reported","stallCount":4,"stallSeconds":52},
+    {"size":"medium","implementation":"ants.tube","firstFrameSeconds":8.3,"completeSeconds":52,"completion":"complete-reported","stallCount":0,"stallSeconds":0},
+    {"size":"medium","implementation":"bView v0.1.2","firstFrameSeconds":43.3,"completeSeconds":49,"completion":"complete-reported","stallCount":0,"stallSeconds":0},
+    {"size":"medium","implementation":"try.autonomi.com","firstFrameSeconds":19,"completeSeconds":77,"completion":"complete-reported","stallCount":0,"stallSeconds":0},
+    {"size":"short","implementation":"ants.tube","firstFrameSeconds":5.3,"completeSeconds":14,"completion":"complete-reported","stallCount":0,"stallSeconds":0},
+    {"size":"short","implementation":"bView v0.1.2","firstFrameSeconds":22,"completeSeconds":24,"completion":"complete-reported","stallCount":0,"stallSeconds":0},
+    {"size":"short","implementation":"try.autonomi.com","firstFrameSeconds":12,"completeSeconds":31,"completion":"complete-reported","stallCount":1,"stallSeconds":7}
+  ],
+  "largeTransport": [
+    {"implementation":"ants.tube","dials":452,"peakConcurrent":78,"distinctNodes":67,"endedDead":373,"receivedMB":338.1},
+    {"implementation":"bView v0.1.2","dials":500,"peakConcurrent":41,"distinctNodes":72,"endedDead":498,"receivedMB":205.2}
+  ],
+  "reportedRanges": {
+    "bviewPeakConcurrentPeers":[35,41],
+    "bviewFirstPeerSeconds":[4.5,5.7],
+    "antsFirstPeerSeconds":[0.6,0.7]
+  },
+  "bviewAggregateReceiveRatios": {"large":0.96,"medium":2.19,"short":1.65},
+  "boundaries": [
+    "Zero recorded stalls does not establish successful sustained playback.",
+    "16 retrieved chunks does not identify the missing chunk index or establish ordered emission.",
+    "Ended-dead terminology does not distinguish normal closure from failure before useful data.",
+    "Aggregate WebRTC receive ratios are not duplicate-payload counts; incomplete large transfer is not a wire-efficiency success.",
+    "Completion times describe reported retrieval, not independently verified playback ending.",
+    "No network repair, production readiness, or bTunGsTeN certification is established."
+  ]
+}
