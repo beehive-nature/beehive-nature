@@ -851,7 +851,7 @@ jobs:
       # the bitrate plays early; a mid-play slowdown brings the countdown back and resumes by
       # itself; mediaCapabilities smooth=false shows the plain warning row.
       - name: Watch from Autonomi — plays through today's door and an upgraded one (mocked door)
-        timeout-minutes: 3 # measured: max 105s in run 36750205672 (+71% headroom)
+        timeout-minutes: 6 # 41 sequential checks measured 243.2s on 2026-10-10; retain headroom
         if: always()
         working-directory: e2e
         # The 214 MB recovery fixture must not contend with the paced relay's wall-clock assertions.
