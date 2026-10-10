@@ -226,6 +226,22 @@ device's signature made on the device. (B) is closed: no phrase goes onto the de
   to the order (no working wallet, no real seed, non-debug as a requirement, attestation
   evidence local, divergence at exact revisions, obligations with owners). No image was
   installed anywhere; nothing here authorizes installing one.
+- **Closeout, 2026-10-10 (Seat 3, session archived).** Final shas: fork `bpq-safe7-7a8709b` at
+  `bc8bb2e75` (gate `7dab5f939`, oracle move `967fddb3d`, receipts `bc8bb2e75`; the candidate
+  image `dfc5d2a4…`, 2,396,672 B, two pinned builds byte-identical); public main carries the
+  oracle crate (`92c035635`), the receipt `docs/receipts/bpq-safe7-hardware-candidate-2026-10-09.json`,
+  the corrected plan, the zCode request, and a rustfmt-only fix of the oracle crate for the CI
+  formatter (the `tests` workflow had failed `Check formatting` on the two step-2 pushes under
+  stable rustfmt 1.99 while the pinned 1.98.1 accepted the file; no code changed, tests 38+1
+  pass). The other `tests` red on those pushes, the bDroP bottom-half ratchet, was repaired by
+  the bDroP lane at `299c3f139` before this closeout. Unresolved gates and their owners, routed:
+  gate 1 upstream security reconciliation, gate 2 native transport on a development unit, and
+  gate 4 recovery tests on the emulator → the firmware seat; gate 5 binding, replay, downgrade
+  and rotation evidence → the PQ lane; the 13 `dev@beehive-nature` fork commits → the founder;
+  the independent review of the candidate → zCode. No firmware was installed, no device
+  touched, no credential exposed, no ceremony begun; gate 6 keeps its requirement of the
+  founder's explicit informed consent, asked only after those receipts exist. The next phase
+  starts in a fresh session after the independent review.
 - **Next, 2026-10-09 (evening):** zCode's independent review
   (`docs/dispatches/2026-10-09-zcode-review-request-safe7-step2.md`); then the firmware seat's
   gates 1 (upstream security reconciliation), 2 (native transport on a development unit) and 4
