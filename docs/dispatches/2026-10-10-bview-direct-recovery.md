@@ -99,3 +99,69 @@ Initial narrow filtered probes were cancelled by Node with "Promise resolution
 is still pending but the event loop has already resolved" before exercising
 the player. Including the suite's initial personal-video cases kept its setup
 alive for both valid baseline/release probes above.
+
+PR #383 merged as `37dca585a`. The final sequential browser, recovery and scorecard
+run passed **41/41**, with no skipped tests, in 243186.8141 ms; see
+`release-acceptance.log`. Its PR static checks and secret scanning passed.
+Superseded tests for this lane were cancelled in favor of the final main run;
+the unchanged proof workflows were also cancelled as described above. Full
+repository CI is reported separately from the completed bView checks.
+
+The browser CI step's former three-minute limit was inherited from the smaller
+parallel suite. The measured sequential 41-test run takes 243.2 seconds here,
+so its step budget is now six minutes. This changes the job allowance, not any
+player timeout or test assertion. No repeat of unchanged tests was needed to
+establish that 243.2 seconds exceeds a 180-second job budget.
+
+## Published acceptance
+
+[bView](https://skaists.dev/surfaces/bview.html) served exactly the merged
+`37dca585a` source. Pages run `38031144249` succeeded. The public HTML SHA-256 is
+`7d3792cbc06040a50e91cb01662f9d1eaa2ae3cca7daac2cf0861db037cb6276`. <!-- PUBLIC-CONSTANT -->
+The byte-comparison receipt is `deployment.json`.
+
+At 2026-10-10 06:40:20 UTC, fresh Chrome 153.0.8010.53 on the deployed public
+page completed the pinned video through direct-only retrieval. The published
+file hash matched, all fourteen application chunks were emitted, and the video
+reached its actual 231.340408-second end. No relay request or page error occurred.
+`direct-deployed.json` preserves all 1105 sampled observations and fourteen chunk
+timelines; samples use actual timestamps and are not assumed evenly spaced.
+
+| Observation | Deployed direct run |
+| --- | ---: |
+| File size | 54903201 bytes |
+| First observed open channel, relative to play mark | 4.405 s |
+| Connect wait / file-open wait | 4.381 / 15.780 s |
+| First useful read / first ordered byte | 26.386 / 45.691 s |
+| First decoded preview | 46.246 s |
+| First observed advancing, unpaused playhead | 69.403 s |
+| Full retrieval observed | 84.623 s |
+| Playback end observed | 301.343 s |
+| Playback stalls | 1 / 4.1 ms |
+| Application reads / retries | 14 / 0 |
+| Peak queued application bytes | 16760832 |
+| Data-channel received payload | 90483236 bytes / 1.648 times file size |
+| Dials / opened / closed after opening / failed before open | 200 / 106 / 64 / 94 |
+| Sampled peak open channels | 45 |
+| Settled endpoints reachable / unreachable | 94 / 92 |
+| Failed dial stages: before ICE / before DTLS / before channel | 93 / 1 / 0 |
+| Dial-to-open p50 / p95 | 4.077 / 12.921 s |
+| Source changes | 3 |
+| Final-source frames / dropped | 2260 / 0 |
+
+The payload ratio excludes transport framing and does not establish duplicate
+plaintext. Closed-after-open does not prove a graceful close or useful delivery.
+Sampled peaks can miss brief connections. Frame counters describe the
+current media source. These are measurements of one run, not a comparison with
+Shu's unknown corpus, a latency guarantee, or proof of network-level healing.
+
+The same deployed source also passed Chromium Pixel 7 emulation at 412 px:
+52/52 chunks, two injected failures recovered, one recovered chunk, verified
+whole-file hash, zero relay/page errors, and viewport equal to scroll width.
+`mobile-deployed.json` records the served digest and explicitly labels its mocked
+network and nonphysical device. This establishes the browser recovery path under
+the injected failures; the real network run above did not encounter a read retry.
+
+Post-merge main build/test, static, formal and secret-scan checks passed. The
+remaining broad browser/meter/wallet jobs were still running while final receipts
+were saved. The receipt and CI-budget follow-up changes no published player code.

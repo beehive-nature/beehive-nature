@@ -784,7 +784,7 @@ jobs:
         working-directory: e2e
         run: node i18n-coverage.mjs --selftest
       - name: Language — coverage measure on the arrival set, floors enforced
-        timeout-minutes: 3 # measured: max 105s in run 36750205672 (+71% headroom)
+        timeout-minutes: 6 # 41 sequential checks measured 243.2s on 2026-10-10; retain headroom
         if: always()
         working-directory: e2e
         run: node i18n-coverage.mjs --set lang-coverage-set.json ru --floors
