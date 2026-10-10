@@ -5,6 +5,24 @@ For the separately supplied bView v0.1.2 comparison, see
 [reported observations](shu-benchmark-003.json). It is a different corpus/report
 from the October 7 two-arm scorecard below; do not combine their results.
 
+## Owned public acceptance
+
+`corpus-2026-10-09.json` pins the public featured video, its size and published
+digest. This is an independent acceptance sample; its relationship to Shu's
+original corpus is unknown. With `npm ci --prefix e2e` and installed Chrome:
+
+```sh
+node e2e/bview-live.mjs --route direct --out /absolute/new-receipt.json
+```
+
+The explicit live command uses the public site and real network. It creates a
+fresh browser context, requires both matching bytes and playback ending, stops
+after ten minutes at most, and writes an exclusive-create receipt including the
+served HTML digest, browser version, timings, stalls, source path, chunk timeline
+and data-channel counters. A failure is preserved and exits nonzero. Optional
+`--candidate /absolute/bview.html` substitutes only candidate HTML on the public
+origin. No user browser profile, wallet, service, or local server is needed.
+
 This is a measurement kit, not a bTunGsTeN conformance result. Its companion
 bView repair bounds recovery when a needed chunk is missing; it does not claim
 higher network throughput. It follows SPEC-BTUNGSTEN-1's observation/evidence boundary.

@@ -62,3 +62,21 @@ The measured public sample is the current `try.autonomi.com/featured.json` video
 did not open before timeout; the next opened in 21.44 s after a 5.87 s connect but
 timed out awaiting the head with 1/14 chunks complete. Zero recorded stalls in
 these unsuccessful attempts is not a success. Final release receipts follow.
+
+Final stable focused suite at production source `a95e1c7fc`: 18/18 passed,
+160885.4137 ms. The corrected height probe passed 2/2 with each 199.125 px
+replacement matching the immediately preceding player geometry. A capture
+privacy probe rejected peer IDs, arbitrary error text and nonnumeric endpoint
+values while retaining allowed measurements.
+
+Candidate live direct-with-relay: all 54903201 bytes matched the public digest,
+one relay request, first frame 36.782 s, transfer observed complete at 65.534 s,
+three engine stalls totalling 0.499 s, no page errors. This first live receipt
+ended on transfer completion; it does not assert the video reached its end.
+`e2e/bview-live.mjs` now owns repeatable acceptance and requires both integrity
+and playback ending, captures the served HTML digest and browser version, and
+writes all allowlisted observations to a new receipt without overwriting a run.
+
+Duplicate push workflows for this branch were cancelled to preserve runner
+capacity; the PR workflows remain authoritative. Cancelled duplicates are not
+passes. No workflow for another lane was cancelled.
