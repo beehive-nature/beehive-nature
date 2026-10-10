@@ -8,6 +8,8 @@
 //!   resolved `aes` (`lanes::rb02`).
 //! - RB03: Crux-MIR properties of the actual `ops/ant-extsig` budget
 //!   arithmetic (`lanes::rb03`).
+//! - RB04: a Daedalus-generated Rust parser of the WB001 intent envelope
+//!   against BNR's own decoder, with planted-fault TEETH (`lanes::rb04`).
 //!
 //! The library is the harness: subprocess measurement, host and toolchain
 //! identity, verdict recognition, receipts. The `rbench` binary runs a lane.
@@ -26,4 +28,5 @@ pub mod lanes {
     pub mod rb01;
     pub mod rb02;
     pub mod rb03;
+    pub mod rb04;
 }
