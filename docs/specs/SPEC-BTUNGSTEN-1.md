@@ -183,6 +183,14 @@ config's reading). First receipted instance: the Jungle4 follower
 admission gated the zkreceipts live v4 verification run
 (`docs/dispatches/2026-10-08-zkr-live-v4-confirmation.md`).
 
+**Class extension — BT-WORKTREE-ISOLATION (SPECIFIED / NOT BUILT /
+NOT RUN):** autonomous-seat contamination resistance, its own class
+record opened in-tree 2026-10-09 as SPEC-BT-WORKTREE-ISOLATION-1 —
+the three-claim taxonomy (detection / prevention / publication
+integrity), the paired-observation acceptance receipt, the
+canonical-admission boundary hierarchy, and the epoch/TOCTOU rule.
+Detection is the only claim the estate's Git layer can make today.
+
 ## §watch — government-procurement relevance
 
 The procurement watch treats as bTunGsTeN-relevant requirements:
