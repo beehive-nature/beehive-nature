@@ -60,6 +60,12 @@ ALL of:
 
 PASS means: to the pinned families, π distinguishes REAL from SIM no
 better than chance — reported as exactly that, nothing stronger.
+**CORRECTED SCOPE (founder order 2026-10-10): failure to reject the null
+at n=10+10 is NOT proof of indistinguishability — it is an absence of
+evidence at this sample size. The pinned learner's observed accuracy
+(e.g. 0.70) remains a potential signal requiring larger-sample testing;
+the CI width at n=20 cannot resolve it from chance. A future run at
+n=50+50 is the named follow-up.**
 FAIL means: the separating family, the statistic, and the effect size
 are reported; no repair follows within this experiment without a new
 pre-registration.

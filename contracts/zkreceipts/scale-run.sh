@@ -35,7 +35,11 @@ if [ ! -f pot${POT}_final.ptau ]; then
 fi
 
 echo "[3] setup + vk"
-npx snarkjs plonk setup $W/$TAG/main_$TAG.r1cs pot${POT}_final.ptau $W/$TAG/scale.zkey
+# PTAU selects the ceremony: default = local rehearsal; override with a
+# verified public transcript (e.g. PTAAU=hez21.ptau — blake2b matched)
+PTAUU=${PTAU:-pot${POT}_final.ptau}
+echo "    ceremony: $PTAUU"
+npx snarkjs plonk setup $W/$TAG/main_$TAG.r1cs $PTAUU $W/$TAG/scale.zkey
 npx snarkjs zkey export verificationkey $W/$TAG/scale.zkey $W/$TAG/vk.json
 
 echo "[4] witness (timed)"

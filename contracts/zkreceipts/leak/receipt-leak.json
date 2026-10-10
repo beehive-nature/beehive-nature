@@ -38,5 +38,12 @@
   "REAL": 10,
   "SIM": 10
  },
- "claim_scoping": "given (π, C) only — root M withheld (M separates classes BY DESIGN as the public commitment); PASS means: to the pinned families, π distinguishes REAL from SIM no better than chance; it is NOT a zero-knowledge proof (crypto-language law)"
+ "claim_scoping": "given (π, C) only — root M withheld (M separates classes BY DESIGN as the public commitment); PASS means: to the pinned families, π distinguishes REAL from SIM no better than chance; it is NOT a zero-knowledge proof (crypto-language law)",
+
+"CONCLUSION_CORRECTED_2026-10-10": {
+  "founder_order": "failure to reject at n=10+10 is not proof of indistinguishability; the learner's 0.70 accuracy remains a potential signal requiring larger-sample testing",
+  "original_verdict_scope": "PASS means: to the pinned families, π distinguishes REAL from SIM no better than chance at n=10+10 — which is correctly reported as 'no better than chance' but was at risk of being read as 'indistinguishable'",
+  "corrected": "the statistical families' non-rejection at this sample size is absence of evidence, not evidence of absence; the F5 point estimate (0.70) with CI [0.48, 0.86] cannot be resolved from chance at n=20 but remains a potential signal",
+  "named_followup": "larger-sample testing (n=50+50 or n=100+100) needed before the tungsten-2 gate can be called closed with confidence"
+}
 }
