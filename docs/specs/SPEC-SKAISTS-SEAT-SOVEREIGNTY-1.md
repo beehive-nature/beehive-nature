@@ -123,7 +123,8 @@ The four verbs of the identity layer, and where each boundary sits:
 | `scripts/btungsten/sk001.test.mjs` — the battery: 6⁵ derivation + no-equal-fifths exhaustion, weight⊥population over adversarial vectors, double-seat/seat-taken refusals + bijection, malformed-type refusals, the five predicates frozen-shape, evidence byte-scan of proof and era export, full-cap fill + the 7,777th refused + one breath, exact COMPRESS fold at 7,776 votes, TEETH (population governor + float weights convicted) | LIVE in CI — rides the `scripts/btungsten/*.test.mjs` glob; green 10/10 |
 | a LIVE proof system (real uniqueness proofs against real humans) | NOT BUILT — future beat, UNVERIFIED |
 | a hiding commitment scheme | NOT BUILT — the model's sha256 commitment is a BINDING placeholder only; hiding is NOT claimed (sha256 is not a hiding commitment against low-entropy evidence). A live deployment binds a hiding+binding scheme |
-| SETTLE on Antelope/Vaulta | NOT BUILT — named, not claimed |
+| SETTLE (model scale) — the COMPRESS verdict drives the WB004 epochal engine's bounded msig and lands as an immutable receipt: `crates/btungsten-wb004/tests/skaists_bridge.rs` (6⁵ organism, exact integer 1/5 weights, constant-size execution layer, population governor convicted by disagreement) | MODELED 2026-10-09 — model scale only |
+| SETTLE on a live Antelope/Vaulta chain | NOT BUILT — named, not claimed; does not inherit the model receipt (non-inheritance law) |
 
 Per SPEC-BTUNGSTEN-1 §measurability: the battery receipts the MODEL.
 Model-green is a receipt about the model, not about the world; every
