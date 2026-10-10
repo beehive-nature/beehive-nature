@@ -111,12 +111,12 @@
   // Hosted storage purchasing lives beside the existing quote-only chooser.
   // It uses the same bundled Autonomi client and AntPay wire implementation.
   function purchasePanel(){
-    return '<details id="ant-purchase"><summary>Pay ANT to store a public file</summary><p>Anyone with its address can read this file. Storage cannot be deleted. Your browser wallet pays ANT on Arbitrum One; ETH network fees have a separate limit. The storage ceiling is 100 ANT for this file.</p><p>Keep this browser’s saved data and resume here after an interruption. Another browser or device does not share this payment record.</p><label for="ant-buy-file">Public file (3 bytes to 32 MiB)</label><input id="ant-buy-file" type="file" style="display:block;max-width:100%;margin:8px 0"><label for="ant-buy-gas">Maximum total network fee (ETH, including approvals and all attempts)</label><input id="ant-buy-gas" inputmode="decimal" placeholder="Enter your ETH limit" style="display:block;max-width:100%;margin:8px 0"><button id="ant-buy-start" type="button">Prepare storage invoice / resume</button> <button id="ant-buy-stop" type="button" hidden>Stop waiting</button><div id="ant-buy-status" role="status" aria-live="polite"></div><div id="ant-buy-invoice"></div><pre id="ant-buy-receipt" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details>';
+    return '<details id="ant-purchase"><summary>Pay ANT to store a public file</summary><p>Anyone with its address can read this file. Storage cannot be deleted. Your browser wallet pays ANT on Arbitrum One; ETH network fees have a separate limit. The storage ceiling is 100 ANT for this file.</p><p>Keep this browser’s saved data and resume here after an interruption. Another browser or device does not share this payment record.</p><label for="ant-buy-file">Public file (3 bytes to 32 MiB)</label><input id="ant-buy-file" type="file" style="display:block;max-width:100%;margin:8px 0"><label for="ant-buy-gas">Maximum total network fee (ETH, including approvals and all attempts)</label><input id="ant-buy-gas" inputmode="decimal" placeholder="Enter your ETH limit" style="display:block;max-width:100%;margin:8px 0"><button id="ant-buy-start" type="button">Prepare storage invoice / resume</button> <button id="ant-buy-stop" type="button" hidden>Stop waiting</button><div id="ant-buy-status" role="status" aria-live="polite"></div><div id="ant-buy-invoice"></div><div id="ant-buy-download"></div><details id="ant-buy-proof" hidden><summary>Receipt and verified hash</summary><pre id="ant-buy-receipt" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details></details>';
   }
   function bindPurchase(){
     var start=document.getElementById('ant-buy-start'),stop=document.getElementById('ant-buy-stop'),status=document.getElementById('ant-buy-status'),view=document.getElementById('ant-buy-invoice'),receipt=document.getElementById('ant-buy-receipt');
     if(!start)return;
-    var active=null;
+    var active=null,downloadUrl=null;
     stop.onclick=function(){if(active)active.abort();view.replaceChildren();status.textContent='Stopped waiting. Any submitted payment may still settle; resume the same file to reconcile.';};
     start.onclick=async function(){
       if(active)return;
@@ -126,7 +126,7 @@
       var parts=gas.split('.'),gasWei=(BigInt(parts[0])*10n**18n+BigInt((parts[1]||'').padEnd(18,'0'))).toString();
       if(gasWei==='0'){status.textContent='The ETH network-fee limit must be greater than zero.';return;}
       if(!navigator.locks||!window.AntPay){status.textContent='This browser cannot safely coordinate storage payments. No payment was requested.';return;}
-      active=new AbortController();var signal=active.signal;start.disabled=true;stop.hidden=false;receipt.textContent='';
+      active=new AbortController();var signal=active.signal;start.disabled=true;stop.hidden=false;receipt.textContent='';document.getElementById('ant-buy-proof').hidden=true;document.getElementById('ant-buy-download').replaceChildren();if(downloadUrl){URL.revokeObjectURL(downloadUrl);downloadUrl=null;}
       try{
         await navigator.locks.request('bnr-ant-purchase-v1',{mode:'exclusive',ifAvailable:true},async function(lock){
           if(!lock)throw new Error('Another tab is handling a storage purchase. Resume after it finishes.');
@@ -177,7 +177,9 @@
           status.textContent='Retrieving the stored file and checking its original SHA-256…';
           var downloaded=await session.client.download(result.file,{signal:signal});
           var reconciled=await payer.reconcile(downloaded.bytes);
-          receipt.textContent=JSON.stringify(reconciled,null,2);
+          receipt.textContent=JSON.stringify(reconciled,null,2);document.getElementById('ant-buy-proof').hidden=false;
+          downloadUrl=URL.createObjectURL(new Blob([downloaded.bytes],{type:file.type||'application/octet-stream'}));
+          var download=document.createElement('a');download.href=downloadUrl;download.download=file.name;download.textContent='Download verified file';document.getElementById('ant-buy-download').append(download);
           view.replaceChildren();status.textContent='Stored and retrieved: all '+reconciled.retrievedBytes+' bytes match the original SHA-256. Receipt reconciled.';
         });
       }catch(error){status.textContent='Storage stopped: '+(error&&error.message||error)+'. Keep this browser’s saved data and resume the same file; do not start a second payment elsewhere.';}

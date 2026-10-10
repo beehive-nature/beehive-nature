@@ -46,7 +46,7 @@ try{
   await page.locator('#ant-buy-start').click();await page.getByRole('button',{name:'Authorize this invoice and ask my wallet'}).click();
   await until(async()=>{const text=await page.locator('#ant-buy-status').innerText();if(text.startsWith('Storage stopped:'))throw Error(text);return text.startsWith('Stored and retrieved:');});
   assert.equal(await page.evaluate(()=>window.__sends),2);
-  const receipt=JSON.parse(await page.locator('#ant-buy-receipt').innerText());assert.equal(receipt.retrievedBytes,bytes.length);assert.equal(receipt.transactions.length,2);
+  const receipt=JSON.parse(await page.locator('#ant-buy-receipt').textContent());assert.equal(receipt.retrievedBytes,bytes.length);assert.equal(receipt.transactions.length,2);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   await page.locator('#ant-buy-start').click();await until(()=>page.locator('#ant-buy-start').isEnabled());assert.equal(await page.evaluate(()=>window.__sends),2);
   console.log('PASS '+reg+': explicit authorization, cancellation, two bounded sends, retrieved hash, retry without duplicate, 390px layout');

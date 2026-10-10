@@ -39,3 +39,9 @@ The missing live authorization is the key holder's confirmation of a fresh hoste
 
 - Full wallet regression rerun: **201/201 checks passed**, all three registers at 320/390/1280px; public-account import/export/following and quote-only behavior preserved.
 - Reference invoice and chooser fixtures: **18/18 and 19/19 passed**, respectively.
+
+## Live baseline before deployment
+
+The existing public wallet was checked from a fresh 390px browser at `2026-10-10T23:51:01Z`. The keyless probe reached "Asking Autonomi storage nodes for a price" but returned no quote within 90 seconds; it was cancelled without payment authorization. The new purchase panel was correctly absent before deployment. Receipt: `docs/receipts/agent20-ant-baseline-live-2026-10-10.json`. Reproducible probe: `node e2e/ant-hosted-live.mjs <output.json>`. This timeout is an unresolved live network observation, not a successful quote or a storage purchase.
+
+Mobile inspection moved raw receipt JSON into a disclosure and provides a direct download of the bytes already retrieved and hash-verified. Fixture purchases remain distinct from live acceptance.
