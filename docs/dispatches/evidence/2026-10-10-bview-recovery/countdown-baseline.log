@@ -1,0 +1,14 @@
+✔ personal videos: save, name, deduplicate across reloads and tabs, then remove (1960.6073ms)
+✔ personal videos: actual playback is recorded; replay works; removal survives resume (1895.2711ms)
+✔ personal videos: blocked and unreadable storage never claim a successful save (1209.1451ms)
+# slow: rule plays at >= 759 KiB of 1160; page played at 768 KiB; countdown 9 8 7 6 7 6 5 4 3 2 1 (said ~9 s, took 8.5 s)
+# slow: longest stop after start 164 ms; reached 9.74 s of 10.00 s
+✔ slow door (0.5x bitrate): an honest countdown, no play before the computed threshold, then no freeze (24560.0859ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 30299.2068

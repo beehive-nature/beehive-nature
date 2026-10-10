@@ -851,10 +851,11 @@ jobs:
       # the bitrate plays early; a mid-play slowdown brings the countdown back and resumes by
       # itself; mediaCapabilities smooth=false shows the plain warning row.
       - name: Watch from Autonomi — plays through today's door and an upgraded one (mocked door)
-        timeout-minutes: 3 # measured: max 105s in run 36750205672 (+71% headroom)
+        timeout-minutes: 6 # 41 sequential checks measured 243.2s on 2026-10-10; retain headroom
         if: always()
         working-directory: e2e
-        run: node --test bview.test.mjs bview-direct.test.mjs ../tools/video-trial/scorecard.test.mjs
+        # The 214 MB recovery fixture must not contend with the paced relay's wall-clock assertions.
+        run: node --test --test-concurrency=1 bview.test.mjs bview-direct.test.mjs ../tools/video-trial/scorecard.test.mjs
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest
