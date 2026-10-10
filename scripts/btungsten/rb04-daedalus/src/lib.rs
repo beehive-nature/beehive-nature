@@ -17,9 +17,10 @@
 //!   consumes a shorter prefix that BNR itself accepts with equal values,
 //!   and `Exact` fails; under any other refusal no complete envelope
 //!   starts the input, so `Envelope` fails too;
-//! - reencode: every parser that accepts has decoded values whose canonical
-//!   encoding (`btungsten_wb001::canonical`, the SAW-proven encoder) is the
-//!   input itself.
+//! - reencode: wherever BNR's decode or `Exact` accepts, its decoded values'
+//!   canonical encoding (`btungsten_wb001::canonical`, the SAW-proven
+//!   encoder) is the input itself (`Envelope`'s prefix values are held to
+//!   `decode` of the prefix under consumed).
 //!
 //! A panic in either parser is caught and counted as a disagreement.
 

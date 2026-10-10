@@ -23,7 +23,7 @@ ranges, not BNR's DFA).
 | acceptance | the grammar's `Exact` entry accepts exactly when `decode` does |
 | values | where both accept, every decoded field is equal |
 | consumed | the whole input where `decode` accepts; where it refuses with `bt-wb01:trailing`, the `Envelope` entry consumes a shorter prefix that `decode` itself accepts with equal values, and `Exact` fails; under any other refusal neither entry accepts |
-| reencode | every accepting parser's values re-encode, through BNR's SAW-proven encoder, to the input bytes |
+| reencode | wherever BNR or `Exact` accepts, its values re-encode, through BNR's SAW-proven encoder, to the input bytes (`Envelope`'s prefix values are held to `decode` of the prefix under consumed) |
 
 Corpora: the pinned WB001 vectors (positives, envelope refusals, bridge
 terms) plus constructed boundary inputs, each with an expected BNR answer

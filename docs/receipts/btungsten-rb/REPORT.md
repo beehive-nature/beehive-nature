@@ -45,19 +45,22 @@ execution after the memory-accounting repair was run `37906620036` at BNR
 `f43ffdcd3f756b983289a692fdf1576240510d78` (all three lanes PASS, receipts not
 committed); RB01 then gained its operator notice — disclosure text only — and
 the lanes ran again in full as run `37923430005`, the receipts committed here.
-Pull-request runs of this workflow execute only the `changes` and `fast`
-jobs; the three lanes run only on `workflow_dispatch` with `plan=full`. A
-green PR check is therefore never a lane execution, and none is cited as one
-here.
+Push and pull-request runs of this workflow run `changes` and `fast`, and
+every lane whose inputs the change touches runs with `--quick` (PR #374's
+pull-request run 37984740018 ran all four). Only full-plan runs
+(`workflow_dispatch`, `plan=full`) produce the receipts cited here; a green
+push or pull-request check is at most a quick-plan execution, and none is
+cited as a receipt.
 
-The tested-to-head comparison at this report's final commit covers every
-input a lane reads, not only files bearing an RB name:
-`git diff 073697abb HEAD -- crates/ ops/ant-extsig Cargo.toml Cargo.lock
-rust-toolchain rust-toolchain.toml .cargo .github scripts/btungsten` is
-empty except documentation lines in `scripts/btungsten/README.md`. No
-production source, dependency version, toolchain, workflow, verifier
-binary or pinned digest changed after the receipts' commit, so nothing was
-rerun: the committed receipts stand for the final head. Logs and
+The RB01-RB03 receipts were measured at `073697abb`. When this text was
+written (`4a257bdef`), the comparison over every input those lanes read,
+`git diff 073697abb 4a257bdef -- crates/ ops/ant-extsig Cargo.toml
+Cargo.lock rust-toolchain rust-toolchain.toml .cargo .github
+scripts/btungsten`, was empty except documentation lines in
+`scripts/btungsten/README.md`, so nothing was rerun. Later commits change
+inputs these lanes read (RB04's additions to `rbench.rs`, `lib.rs` and the
+workflow; other lanes' crates and the workspace lock on `main`): the
+receipts describe `073697abb`, not any later head. Logs and
 input files are committed beside each receipt, except 24 RB01 fixture
 files (up to 512 KiB each): the receipt records each one's SHA-256, and
 `rbench` regenerates them byte for byte. The development host (Windows, WSL2 x86_64) ran
@@ -435,8 +438,9 @@ decoded values where both accept; consumed length (the whole input where BNR
 accepts; where BNR refuses with `bt-wb01:trailing`, `Envelope` must consume a
 shorter prefix that BNR itself accepts with equal values, and `Exact` must
 fail; under any other refusal neither entry may accept); and canonical
-re-encoding (every accepting parser's values, re-encoded by BNR's SAW-proven
-encoder, equal the input). A panic in either parser counts as a
+re-encoding (BNR's and `Exact`'s values wherever they accept, re-encoded by BNR's SAW-proven
+encoder, equal the input; `Envelope`'s prefix values are held to
+`decode` of the prefix under consumed length). A panic in either parser counts as a
 disagreement. Corpora: the pinned WB001 vectors (10 positives, 5 envelope
 refusals, 8 bridge terms) and 468 constructed boundary inputs, each with an
 expected BNR answer that is checked too; and 200,000 seeded adversarial
@@ -510,7 +514,10 @@ dimension too. Code generation is deterministic (ten runs per grammar,
 byte-identical) and reproduces the committed `src/generated/*.rs` byte for
 byte; t1's generated parser differs from the honest one in one literal
 (`64u64` to `65u64`). The generator, built from an empty cabal store, has the
-same SHA-256 as the one built in run 37909426450.
+same SHA-256 as the one built in run 37909426450
+(`sha256:LpzmRM08nmyE8MuW1Ct3_-39_rD3PtL8-vOgAXeAHCw`, the receipt's
+`generator.daedalus_binary`); run 37909426450's value was read from its
+receipt artifact, which is not committed and expires.
 
 The per-input times are wall-clock medians inside one process on a shared
 runner; they describe this harness's use of each parser (the generated
@@ -556,6 +563,34 @@ are never edited: `logs/002-prep-cabal-update.stderr` (371 bytes, sha256:Ru8qnX5
   `A`, which the secret scan reads as key-shaped hex. A receipt is not edited
   after its run; `rb04-diff` now writes witnesses in dot-separated groups of
   32 characters, and the full plan ran again (37923091082).
+
+**Closeout after the independent review.** zCode reviewed `d0d6926e5`
+(`docs/dispatches/2026-10-09-zcode-rb04-review.md`, `main` `0108c334d`): no
+blocking defect. It accepted a proxy read-only review's findings F1-F9 and F11;
+F10 (the grammar shares its field table with `decode`) needs no action beyond
+this section's assumption. The closeout commit applies them:
+
+- F1, F2: two RB01-RB03 sentences above, scoped to their commit and corrected.
+- F3: RB04's change filter includes the root `Cargo.lock` and `rust-toolchain*`.
+- F4: `correspondence-parser` also requires the harness lock's `btungsten-wb001`
+  entry to be the path package, and the harness to call `decode` and
+  `canonical`.
+- F5: the README's per-input times are labelled harness call time, with no ratio.
+- F6: re-encoding is stated for BNR and `Exact`.
+- F7: run 37909426450's generator digest is recorded.
+- F8: the honest rows also require zero panics and exceptions, every vector's
+  answer checked, and summaries that name their variant and corpus; the TEETH
+  rows require the latter too.
+- F9: a dispatch that selects no lane, or names an unknown one, fails.
+- F11: the receipt's `bnr` section hashes the model core
+  (`crates/btungsten-wb001-core/src/lib.rs`) as well.
+
+The committed receipt (run 37923091082) was written by the lane before these
+conditions existed. Its own summaries satisfy every added condition: 0 panics
+and 0 exceptions, 491 of 491 vectors checked, every summary naming its run, the
+lock entry without a source, both calls present. It does not carry the core
+digest. The closeout head's pull-request run executes the lane with the new
+conditions.
 
 **Development host.** The harness and its tests ran in WSL with the
 generator binary built by CI (copied from run 37909426450's artifact,

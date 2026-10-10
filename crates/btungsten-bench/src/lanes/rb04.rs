@@ -48,6 +48,8 @@ pub const ENTRIES: &[&str] = &["Envelope", "Exact"];
 pub const STDLIB_NAME: &str = "Daedalus.ddl";
 /// The BNR parser the generated one is compared with.
 pub const BNR_PARSER: &str = "crates/btungsten-wb001/src/lib.rs";
+/// Its UTF-8 DFA and canonical encoder (the SAW-proven model core).
+pub const BNR_CORE: &str = "crates/btungsten-wb001-core/src/lib.rs";
 
 /// A planted fault: the grammar with exactly one textual substitution.
 pub struct Teeth {
@@ -225,7 +227,7 @@ pub fn run(
     let index_flag = format!("--index-state={INDEX_STATE}");
 
     let mut r = Receipt::new("RB04", "daedalus-rust-vs-bnr-wb001-decode", out);
-    r.section("bnr", json!({ "checkout": git_identity(&root), "parser": BNR_PARSER, "parser_sha256": file_tag(&root.join(BNR_PARSER)).ok().map(|(t, _)| t), "provenance_review_commit": "a3419732c0c06d1d24c8bca2d4cb70e5022971cf" }));
+    r.section("bnr", json!({ "checkout": git_identity(&root), "parser": BNR_PARSER, "parser_sha256": file_tag(&root.join(BNR_PARSER)).ok().map(|(t, _)| t), "core": BNR_CORE, "core_sha256": file_tag(&root.join(BNR_CORE)).ok().map(|(t, _)| t), "provenance_review_commit": "a3419732c0c06d1d24c8bca2d4cb70e5022971cf" }));
     r.section("host", host());
     let load_before = loadavg();
 
@@ -588,7 +590,16 @@ pub fn run(
             mismatched.push(json!({ "package": p.name, "harness": p.version, "workspace": ws.iter().map(|q| q.version.clone()).collect::<Vec<_>>() }));
         }
     }
-    let corr_ok = manifest.contains(dep_line) && mismatched.is_empty();
+    // the dependency is declared on a line of its own, resolves to the path
+    // package (no lock source), and the harness calls BNR's own functions
+    let dep_declared = manifest.lines().any(|l| l.trim() == dep_line);
+    let bnr_lock: Vec<_> = find(&hlock, "btungsten-wb001");
+    let path_resolved = bnr_lock.len() == 1 && bnr_lock[0].source.is_none();
+    let harness_src =
+        std::fs::read_to_string(harness.join("src/lib.rs")).map_err(|e| e.to_string())?;
+    let calls = ["btungsten_wb001::decode(", "btungsten_wb001::canonical("];
+    let calls_ok = calls.iter().all(|c| harness_src.contains(c));
+    let corr_ok = dep_declared && path_resolved && calls_ok && mismatched.is_empty();
     r.row(
         Row::new(
             "correspondence-parser",
@@ -598,7 +609,7 @@ pub fn run(
         .expect(json!({ "dependency": dep_line }))
         .observe(
             if corr_ok { O::Pass } else { O::Fail },
-            json!({ "path_dependency_present": manifest.contains(dep_line), "same_version_and_checksum": shared, "mismatched": mismatched }),
+            json!({ "path_dependency_declared": dep_declared, "lock_entries": bnr_lock.iter().map(|p| crate::upstream::pkg_json(p)).collect::<Vec<_>>(), "resolved_to_the_path_package": path_resolved, "harness_calls": calls, "harness_calls_present": calls_ok, "same_version_and_checksum": shared, "mismatched": mismatched }),
         ),
     );
     let cargo_home = work.join("cargo-home-rb04");
@@ -743,11 +754,11 @@ pub fn run(
                 ("vectors", "acceptance") => "on the pinned WB001 vectors and the constructed boundary inputs, the generated parser accepts exactly what BNR's decode accepts, and BNR's answers are the pinned ones",
                 ("vectors", "values") => "where both accept a vector, every decoded field is equal",
                 ("vectors", "consumed") => "consumed length agrees on every vector: the whole input where BNR accepts, and BNR's own envelope end where it refuses trailing bytes",
-                ("vectors", "reencode") => "the canonical encoder re-encodes each parser's decoded values to the input bytes on every accepted vector",
+                ("vectors", "reencode") => "the canonical encoder re-encodes BNR's and the whole-input parser's decoded values to the input bytes on every vector either accepts",
                 (_, "acceptance") => "on seeded adversarial inputs (mutations of random valid envelopes, framed field and UTF-8 boundary cases, random bytes), the two parsers agree on acceptance",
                 (_, "values") => "where both accept a sampled input, every decoded field is equal",
                 (_, "consumed") => "consumed length agrees on every sampled input",
-                _ => "the canonical encoder re-encodes each parser's decoded values to the input bytes on every accepted sampled input",
+                _ => "the canonical encoder re-encodes BNR's and the whole-input parser's decoded values to the input bytes on every sampled input either accepts",
             };
             let mut row = Row::new(&id, class, claim).expect(json!({ "disagree": 0 }));
             row = match j {
@@ -756,9 +767,19 @@ pub fn run(
                     let vectors_ok = *corpus != "vectors"
                         || *dim != "acceptance"
                         || v["expected"]["mismatched"] == 0;
-                    let ok =
-                        d["disagree"] == 0 && d["compared"].as_u64().unwrap_or(0) > 0 && vectors_ok;
-                    row.observe(if ok { O::Pass } else { O::Fail }, json!({ "dimension": d, "inputs": v["inputs"], "expected_answers": v["expected"], "panics": v["ddl"]["panics"], "seed": v["seed"] }))
+                    // the summary is the run asked for, nothing panicked or raised,
+                    // and on the vectors every input had its answer checked
+                    let clean = v["variant"] == "honest"
+                        && v["corpus"] == *corpus
+                        && v["ddl"]["exceptions"] == 0
+                        && v["ddl"]["panics"] == 0
+                        && v["bnr"]["panics"] == 0
+                        && (*corpus != "vectors" || v["expected"]["checked"] == v["inputs"]);
+                    let ok = d["disagree"] == 0
+                        && d["compared"].as_u64().unwrap_or(0) > 0
+                        && vectors_ok
+                        && clean;
+                    row.observe(if ok { O::Pass } else { O::Fail }, json!({ "dimension": d, "inputs": v["inputs"], "expected_answers": v["expected"], "bnr_panics": v["bnr"]["panics"], "ddl_panics": v["ddl"]["panics"], "ddl_exceptions": v["ddl"]["exceptions"], "summary_names": { "variant": v["variant"], "corpus": v["corpus"] }, "seed": v["seed"] }))
                 }
                 None => row.observe(
                     O::Inconclusive,
@@ -775,11 +796,13 @@ pub fn run(
     for (t, per) in &teeth_runs {
         let mut convicted = None;
         let mut same_corpus = true;
+        let mut echoes = true;
         let mut seen = Vec::new();
         for (k, (corpus, (o, j))) in per.iter().enumerate() {
             same_corpus &= digest_of(j).unwrap_or(Value::Null) == honest_digests[k];
             match j {
                 Some(v) => {
+                    echoes &= v["variant"] == t.module && v["corpus"] == *corpus;
                     let d = &v["dims"][t.dimension];
                     seen.push(json!({ "corpus": corpus, "dimension": d, "all_dimensions": v["dims"] }));
                     if convicted.is_none()
@@ -793,7 +816,7 @@ pub fn run(
             }
         }
         let complete = per.iter().all(|(_, (_, j))| j.is_some());
-        let outcome = if !same_corpus {
+        let outcome = if !same_corpus || !echoes {
             O::Inconclusive
         } else if convicted.is_some() {
             O::Pass
@@ -805,7 +828,7 @@ pub fn run(
         r.row(
             Row::new(t.id, Class::Teeth, t.claim)
                 .expect(json!({ "dimension": t.dimension, "disagreements": "at least one, on an input where the honest parser agrees with BNR on every dimension" }))
-                .observe(outcome, json!({ "convicted_by": convicted, "runs": seen, "same_corpus_as_honest": same_corpus }))
+                .observe(outcome, json!({ "convicted_by": convicted, "runs": seen, "same_corpus_as_honest": same_corpus, "summaries_name_this_variant": echoes }))
                 .evidence(&per.iter().map(|(_, (o, _))| rel(&o.stdout)).collect::<Vec<_>>().iter().map(String::as_str).collect::<Vec<_>>()),
         );
     }
