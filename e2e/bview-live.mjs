@@ -1,15 +1,16 @@
 // Explicit opt-in public-network acceptance. Not included in the offline test suite.
-// node e2e/bview-live.mjs --route direct --out /absolute/receipt.json [--candidate /absolute/bview.html]
+// node e2e/bview-live.mjs --route direct --out /absolute/receipt.json [--candidate /absolute/bview.html] [--corpus /absolute/corpus.json]
 import { chromium } from 'playwright';
 import { readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-const { values } = parseArgs({ options: { route:{type:'string',default:'direct'},out:{type:'string'},candidate:{type:'string'} } });
+const { values } = parseArgs({ options: { route:{type:'string',default:'direct'},out:{type:'string'},candidate:{type:'string'},corpus:{type:'string'} } });
 if (!values.out || !['direct','direct-only','relay'].includes(values.route)) throw Error('Provide --out and a valid --route');
 const root=new URL('../',import.meta.url), origin='https://skaists.dev/surfaces/bview.html';
-const corpus=JSON.parse(await readFile(new URL('tools/video-trial/corpus-2026-10-09.json',root),'utf8'));
+const corpus=JSON.parse(await readFile(values.corpus ? resolve(values.corpus) : new URL('tools/video-trial/corpus-2026-10-09.json',root),'utf8'));
 const fixture=corpus.files[0], output=resolve(values.out);
+if (!fixture || !/^[0-9a-f]{64}$/i.test(fixture.address) || !/^[0-9a-f]{64}$/i.test(fixture.sha256) || !(fixture.size > 0)) throw Error('Corpus requires a public address, expected SHA256 and size');
 const browser=await chromium.launch({channel:'chrome'});
 const context=await browser.newContext({viewport:{width:1280,height:900}}),page=await context.newPage();
 let pageErrors=0,relayRequests=0;
@@ -60,7 +61,7 @@ try {
     elapsedMs:Date.now()-started,receivedAtMs,endedAtMs,playbackStartObservedMs,integrityMatches,
     ttffMs:e.ttffMs,ttfbMs:e.ttfbMs,source:e.source?.kind,actualSize:e.size,
     duration:e.video?.duration,playhead:e.playhead,ended:e.video?.ended,
-    stalls:e.stalls,stallMs:e.stallMs,relayRequests,pageErrors,transportSummary,routeMatches,
+    stalls:e.stalls,stallMs:e.stallMs,playStartMs:e.playStartMs,holds:e.holds,holdMs:e.holdMs,relayRequests,pageErrors,transportSummary,routeMatches,
     accepted:integrityMatches===true&&routeMatches&&e.video?.ended===true&&e.video?.duration>0&&e.playhead>=e.video.duration-0.5&&pageErrors===0,
     capture,'PUBLIC-CONSTANT':'htmlSha256 is a public source digest; no addresses or private peer IDs in capture'};
   await writeFile(output,JSON.stringify(result)+'\n',{flag:'wx'});

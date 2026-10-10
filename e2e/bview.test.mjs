@@ -710,6 +710,8 @@ test('door slows mid-play (2x then 0.4x): the Blob runs dry, the countdown retur
   assert.ok(told.ms <= 1000, `never a silent freeze: the row came up ${told.ms} ms after the clock stopped`);
   assert.ok(told.bar, 'still downloading while it waits');
   assert.ok(told.n >= 1 && told.text.length > 20, 'a number of seconds and a plain sentence');
+  const held = await p.evaluate(() => window.__bviewEngine());
+  assert.ok(held.playStartMs > 0 && held.holds > 0 && held.stalls > 0, 'an application hold is counted after actual playback');
   // It resumes on its own (no tap), from where it stopped, and finishes without a failure row.
   await p.waitForFunction(t => document.getElementById('v').currentTime > t + 0.05, told.t, { timeout: 40000, polling: 100 });
   const waited = (Date.now() - told.at) / 1000, n = told.n;
@@ -717,6 +719,9 @@ test('door slows mid-play (2x then 0.4x): the Blob runs dry, the countdown retur
   assert.ok(Math.abs(waited - n) <= Math.max(2, 0.35 * n), `the countdown was honest: said ~${n} s, it took ${waited.toFixed(1)} s`);
   await p.waitForFunction(t => document.getElementById('v').currentTime > t + 0.5, told.t, { timeout: 10000, polling: 100 });
   const back = await probe(p);
+  const resumed = await p.evaluate(() => window.__bviewEngine());
+  assert.ok(resumed.holdMs >= Math.max(0, waited * 1000 - 1000), 'hold time survives application pause and source swap');
+  assert.ok(resumed.stallMs >= Math.max(0, waited * 1000 - 1000), 'total rebuffer time includes the application hold');
   assert.ok(back.t > told.t, `resumed by itself from ${told.t.toFixed(2)} s`);
   assert.ok(back.t < told.t + 3, `resumed from the same place, not the start or the end (${back.t.toFixed(2)} s)`);
   await p.waitForFunction(d => { const v = document.getElementById('v'); return v.ended || v.currentTime >= d - 0.3; }, PLAN.dur, { timeout: 40000, polling: 200 });
