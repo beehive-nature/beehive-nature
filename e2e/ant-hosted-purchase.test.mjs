@@ -78,9 +78,10 @@ test('partial overlap and second wave gas accumulation refuse duplicate/excess e
  const f=fixture({approved:true}),inv=await authorized(f);await f.payer.provider(inv.id).pay(network,quotes,{});await assert.rejects(f.payer.invoice(network,[...quotes,{...quotes[0],quoteHash:hash('d')}],'20000000'),/overlaps/);await assert.rejects(f.payer.invoice(network,[{...quotes[0],quoteHash:hash('d')}],'1'),/original aggregate/);assert.equal(f.sends,1);
 });
 test('interrupted approval-only plan reprices without losing gas or duplicating approval',async()=>{
- const f=fixture();const inv=await authorized(f);f.payer.checkpoint({fixture:true});
+ const options={approved:false},f=fixture(options);const inv=await authorized(f);f.payer.checkpoint({fixture:true});
  f.failSend(true);await assert.rejects(f.payer.provider(inv.id).pay(network,quotes,{}));assert.equal(f.sends,1);
  f.failSend(false);await f.payer.retryUnpaid();assert.equal(f.payer.snapshot().checkpoint,null);assert.equal(f.payer.snapshot().plans[0].txs[0].actualWei,'100000');assert.equal(f.sends,1);
+ options.approved=true;const fresh=await authorized(f);await f.payer.provider(fresh.id).pay(network,quotes,{});f.payer.uploaded({file:{address:'fixture-only'}});assert.equal((await f.payer.reconcile(bytes)).gasWei,'200000');assert.equal(f.sends,2);
 });
 test('quote claims prevent a second file reusing the same quote',async()=>{
  const f=fixture({approved:true}),inv=await authorized(f);await f.payer.provider(inv.id).pay(network,quotes,{});
