@@ -2,7 +2,9 @@
 //! The adversarial suite (adversarial.rs) shows the refusals; this file
 //! shows the guarantees the refusals protect.
 
-use bheraldry::specimen::{bulgaria_national_arms, house_achievement, successor};
+use bheraldry::specimen::{
+    bulgaria_national_arms, bulgaria_national_arms_v1, house_achievement, successor,
+};
 use bheraldry::*;
 use language_authority::TranslationAttestation;
 use std::io::Read;
@@ -168,7 +170,10 @@ fn house_asset_binding_is_live() {
 
 #[test]
 fn revisions_succeed_without_rewriting_history() {
-    let rev1 = bulgaria_national_arms().seal().unwrap();
+    // the synthetic correction path starts from the immutable rev1 (the real
+    // rev2 — the shipped gazette pass — is exercised in adversarial a08 and
+    // the vector tests)
+    let rev1 = bulgaria_national_arms_v1().seal().unwrap();
     let rev2_record = successor(&rev1, "demonstrating the correction path");
     let rev2 = rev2_record.seal().unwrap();
     let chain = RevisionChain::build(vec![rev1.clone(), rev2.clone()]).unwrap();

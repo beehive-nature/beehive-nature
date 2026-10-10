@@ -54,6 +54,16 @@ evidence of another.
 - No state-insignia image bytes are committed (the law's приложения 1–2 are
   integral to the law but were offered only as blob URLs, and this lane does
   not reproduce state insignia).
-- No surface consumes the crate yet; JS surfaces may become consumers later.
+- The primary gazette scan (ДВ бр.62/1997) is located but NOT machine-read —
+  the official portal's deep links are JSF flows; both transport renderings
+  of Чл. 2 (1) are retained as a dispute until a scan closes it.
 - No adjudication: disputes are retained with ≥2 sourced positions, and
   there is no operation that picks a winner.
+
+## The surface (2026-10-10)
+
+`surfaces/bheraldry.html` renders the records read-only from
+`surfaces/bheraldry-records.json` (deterministic export of this crate,
+verified against the fresh seals by `tests/artifact.rs`). Three registers
+via the shared control, external links open a new tab, the standing boundary
+is pinned to the top of the page.
