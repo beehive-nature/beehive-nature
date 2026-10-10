@@ -71,7 +71,7 @@ HUMAN INTERACTION: NONE.
   `wire a @ p == byteAt a p` for p < 4626 — the compositional
   comprehension-index step between the PROVEN position-wise zero tail
   (`zeroTailAtPosition`, 1.3s) and the composed/enum forms. It is now
-  двe-facts hard: it times out (120s class) AND exhausts 6 GiB (rc=251
+  two-facts hard: it times out (120s class) AND exhausts 6 GiB (rc=251
   class). The named lever: per-block index lemmas (prove the identity
   block-by-block over position ranges), then the field-recovery
   argument toward `wireInjective` (equal wires ⇒ equal length words ⇒
