@@ -7522,14 +7522,28 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     names.forEach(function (n) { var x = dist(String(want), String(n)); if (x < bd) { bd = x; best = n } });
     return best;
   }
+  /* the newest show-its-parts read. The composer boots with the estate's own action in cypherpunk, and
+     choosing the test network reads its parts at once; a person who then types another account, action
+     and args before that answer lands must keep what they typed. A read that lands after the composer
+     moved on (its account or action changed, or a newer read went out) is dropped: it draws no parts of
+     the old action and never rewrites the args typed since */
+  var ABI_READ = 0;
   async function loadAbiUi() {
     var out = $('tx-out'); out.style.display = 'block'; out.removeAttribute('data-fail'); out.style.color = '';
     var contract = $('tx-contract').value.trim(), action = $('tx-action').value.trim();
     if (!contract) { wlSay(out, ['type the account that runs the action first, like kingbeelovis.']); $('tx-contract').focus(); return }
     if (!action) { wlSay(out, ['type what the action does, like renew.']); $('tx-action').focus(); return }
     wlSay(out, ['reading what ' + action + ' needs…', { cy: 'fetching the live ABI of ' + contract + (netIsJ4() ? ' (Jungle4)…' : '…') }]);
+    var read = ++ABI_READ;
+    function movedOn() {
+      if (read === ABI_READ && $('tx-contract').value.trim() === contract && $('tx-action').value.trim() === action) return false;
+      /* the "reading…" line is this read's own: with no newer read out it says nothing true any more */
+      if (read === ABI_READ && /^reading what /.test(out.textContent)) out.style.display = 'none';
+      return true;
+    }
     try {
       var abi = await composerAbi(contract);
+      if (movedOn()) return;
       if (!abi) throw new Error('no ABI on ' + contract + ' on ' + (netIsJ4() ? 'Jungle4' : 'mainnet'));
       var names = abi.actions.map(function (a) { return a.name; });
       var act = abi.actions.filter(function (a) { return a.name === action; })[0];
@@ -7565,7 +7579,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var args = buildArgsFromFields();
       $('tx-data').value = JSON.stringify(args);
       preview(contract, action, args, composerSigner());
-    } catch (e) { wlSay(out, ['could not read what this action needs just now, so nothing was signed. ', { btn: 'try again', on: loadAbiUi }, { cy: 'ABI error: ' + ((e && e.message) || e) }]) }
+    } catch (e) { if (movedOn()) return; wlSay(out, ['could not read what this action needs just now, so nothing was signed. ', { btn: 'try again', on: loadAbiUi }, { cy: 'ABI error: ' + ((e && e.message) || e) }]) }
   }
   $('tx-abi').onclick = loadAbiUi;
   $('tx-net').onchange = function () {
