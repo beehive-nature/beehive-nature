@@ -899,6 +899,16 @@
    "descriptionKey": "s.blanguage.name"
   },
   {
+   "id": "bheraldry",
+   "family": "bnature",
+   "home": "bnature.social",
+   "path": "surfaces/bheraldry.html",
+   "state": "LIVE",
+   "gloss": "a symbol is evidence, not artwork",
+   "org": "beehive-nature",
+   "descriptionKey": "s.bheraldry.name"
+  },
+  {
    "id": "bsymposium",
    "family": "bnature",
    "home": "bnature.social",
@@ -1465,8 +1475,8 @@
   }
  ],
  "counts": {
-  "surfaces": 111,
-  "listed": 120,
+  "surfaces": 112,
+  "listed": 121,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
@@ -1476,17 +1486,17 @@
    "beehivenature": 45,
    "plur": 7,
    "skaists": 28,
-   "bnature": 18,
+   "bnature": 19,
    "beehivebiomass": 5,
    "beehivebuds": 0,
    "midi": 5,
    "bnr": 3
   },
   "byState": {
-   "LIVE": 120
+   "LIVE": 121
   },
   "byOrg": {
-   "beehive-nature": 64,
+   "beehive-nature": 65,
    "skaists": 42,
    "beehive-biomass": 5
   }

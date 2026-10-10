@@ -5,7 +5,9 @@
 //! that only showed a clean process exit would be a decoration; every one
 //! here ends in a refusal with a name.
 
-use bheraldry::specimen::{bulgaria_national_arms, house_achievement, successor, ACCESS_DATE};
+use bheraldry::specimen::{
+    bulgaria_national_arms, bulgaria_national_arms_v1, house_achievement, successor, ACCESS_DATE,
+};
 use bheraldry::*;
 
 /// Attack 1 — alter the motto after the translations were made.
@@ -246,14 +248,16 @@ fn a07_living_person_named_is_detected() {
 
 /// Attack 8 — present a stale source revision as current. The chain names
 /// the current revision; the predecessor presented as current is refused.
+/// Exercised BOTH on the synthetic successor and on the REAL revision pair
+/// (rev1 frozen forever, rev2 the gazette pass that supersedes it).
 #[test]
 fn a08_stale_revision_as_current_is_detected() {
-    let rev1 = bulgaria_national_arms().seal().unwrap();
+    // synthetic pair
+    let rev1 = bulgaria_national_arms_v1().seal().unwrap();
     let rev2 = successor(&rev1, "a correction that must not rewrite history")
         .seal()
         .unwrap();
     let chain = RevisionChain::build(vec![rev1.clone(), rev2]).unwrap();
-
     match chain.assert_current(&rev1) {
         Err(LawViolation::StaleRevision { id, revision, .. }) => {
             assert_eq!(id, "bg/national-arms");
@@ -262,6 +266,92 @@ fn a08_stale_revision_as_current_is_detected() {
         other => panic!("wrong detector: {other:?}"),
     }
     assert!(chain.current().record().revision == 2);
+
+    // the real pair: immutable rev1 vs the shipped rev2
+    let v1 = bulgaria_national_arms_v1().seal().unwrap();
+    let v2 = bulgaria_national_arms().seal().unwrap();
+    let real = RevisionChain::build(vec![v1.clone(), v2]).unwrap();
+    match real.assert_current(&v1) {
+        Err(LawViolation::StaleRevision {
+            revision,
+            superseded_by,
+            ..
+        }) => {
+            assert_eq!(revision, 1);
+            assert_eq!(superseded_by, real.current().digest().hex());
+        }
+        other => panic!("real revision pair must detect the stale presentation: {other:?}"),
+    }
+    assert_eq!(real.current().record().revision, 2);
+}
+
+// ── round-2 regressions (the gazette pass) ────────────────────────────────────
+
+/// Regression r1 — swap the working text while keeping the source's verbatim
+/// quote (the metadata/working-text split). Detected by the V9 law.
+#[test]
+fn r01_blazon_text_swapped_keeping_verbatim_is_detected() {
+    let sealed = bulgaria_national_arms().seal().unwrap();
+    let mut r: SymbolRecord = serde_json::from_slice(&sealed.record().canonical_bytes()).unwrap();
+    // one word changed in the working text, verbatim quote untouched
+    r.blazon.text = r.blazon.text.replacen("плодове", "желуди", 1);
+    assert_eq!(
+        r.validate().unwrap_err(),
+        LawViolation::BlazonTextDivergesFromSourceVerbatim
+    );
+    // and the frozen digest refuses the swap even without validation
+    assert!(!sealed.digest_matches(&r.canonical_bytes()));
+}
+
+/// Regression r2 — swap the gazette-portal claim's URL (source-metadata
+/// surgery on the NEW claim class): digest drift + named mismatch.
+#[test]
+fn r02_gazette_claim_url_swap_is_detected() {
+    let sealed = bulgaria_national_arms().seal().unwrap();
+    let mut r: SymbolRecord = serde_json::from_slice(&sealed.record().canonical_bytes()).unwrap();
+    let portal = r
+        .sources
+        .iter_mut()
+        .find(|s| s.url.contains("dv.parliament.bg"))
+        .expect("the gazette portal claim is present in rev2");
+    portal.url = "https://evil.example/gazette".into();
+    let tampered = r.canonical_bytes();
+    assert!(!sealed.digest_matches(&tampered));
+    assert!(matches!(
+        SealedRecord::from_bytes(&tampered, sealed.digest()),
+        Err(LawViolation::DigestMismatch { .. })
+    ));
+}
+
+/// Regression r3 — resurrect the withdrawn amendment line in a rev2 claim:
+/// the corrective discipline's corpse stays buried, checkably.
+#[test]
+fn r03_withdrawal_rollback_is_detected() {
+    let sealed = bulgaria_national_arms().seal().unwrap();
+    let mut r: SymbolRecord = serde_json::from_slice(&sealed.record().canonical_bytes()).unwrap();
+    let adoption = r
+        .sources
+        .iter_mut()
+        .find(|s| s.label.contains("adoption and promulgation"))
+        .expect("the r2 adoption claim is present");
+    adoption.verbatim = Some(format!(
+        "{} изм. - ДВ. бр. 100 от 29 Декември 2017г.",
+        adoption.verbatim.clone().unwrap()
+    ));
+    // the resurrection is a NEW canonical form: the frozen vector test pins
+    // rev2's true bytes, and any hand-off checking digests sees this drift;
+    // the detector here is the digest itself
+    assert!(
+        !sealed.digest_matches(&r.canonical_bytes()),
+        "a rolled-back withdrawal must not verify as the shipped rev2"
+    );
+    // and the record it produces still round-trips — the point is that it is
+    // NOT the shipped record, which only the digest can prove
+    let _ = SealedRecord::from_bytes(
+        &r.canonical_bytes(),
+        bheraldry::SymbolRecord::digest_of_bytes(&r.canonical_bytes()),
+    )
+    .expect("decodes; it is simply a different, unshipped record");
 }
 
 /// Attack 9 — drop critical heraldic distinctions during translation. Two

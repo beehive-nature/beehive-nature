@@ -3,9 +3,59 @@
 //! crate's tests), secrets asserted absent, boundaries stated per claim.
 //!
 //! Run: `cargo run -p bheraldry --bin specimen`
+//!
+//! `--export-json` prints the records JSON artifact instead (deterministic —
+//! same bytes for the same code; consumed by surfaces/bheraldry.html and
+//! verified against the freshly built seals by tests/artifact.rs):
+//!   cargo run -p bheraldry --bin specimen -- --export-json \
+//!     > surfaces/bheraldry-records.json
 
 use bheraldry::specimen::{bulgaria_national_arms, house_achievement, ACCESS_DATE};
-use bheraldry::{SealedRecord, TranslationRelationship};
+use bheraldry::{SealedRecord, SymbolRecord, TranslationRelationship};
+use serde::Serialize;
+
+#[derive(Serialize)]
+struct ArtifactRecord {
+    id: String,
+    revision: u32,
+    supersedes: Option<String>,
+    digest: String,
+    canonical_bytes: usize,
+    record: SymbolRecord,
+}
+
+#[derive(Serialize)]
+struct Artifact {
+    schema: String,
+    note: String,
+    records: Vec<ArtifactRecord>,
+}
+
+fn export_json(bg: &SealedRecord, house: &SealedRecord) {
+    let art = Artifact {
+        schema: "bheraldry/records-json/1".into(),
+        note: "Deterministic export of the bHERALDRY specimens at their current revisions. \
+               Digests are sha256(bheraldry/record/1 ‖ NUL ‖ canonical JSON of `record`); \
+               verify before trusting, and remember: unofficial translations are visibly \
+               unattested machine drafts, and nothing here is reproduction permission."
+            .into(),
+        records: vec![bg, house]
+            .into_iter()
+            .map(|s| ArtifactRecord {
+                id: s.record().id.clone(),
+                revision: s.record().revision,
+                supersedes: s.record().supersedes.map(|d| d.hex()),
+                digest: s.digest().hex(),
+                canonical_bytes: s.record().canonical_bytes().len(),
+                record: s.record().clone(),
+            })
+            .collect(),
+    };
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&art).expect("artifact JSON cannot fail")
+    );
+}
 
 fn main() {
     let bg = bulgaria_national_arms()
@@ -16,6 +66,11 @@ fn main() {
         .expect("the house record must seal");
     let bg_bytes = bg.record().canonical_bytes();
     let house_bytes = house.record().canonical_bytes();
+
+    if std::env::args().nth(1).as_deref() == Some("--export-json") {
+        export_json(&bg, &house);
+        return;
+    }
 
     println!("bHERALDRY specimen receipt — access date {ACCESS_DATE}");
     println!();
