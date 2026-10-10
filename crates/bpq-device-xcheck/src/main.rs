@@ -23,14 +23,20 @@ use sha2::{Digest, Sha256};
 use std::io::Read;
 
 fn unhex(s: &str) -> Vec<u8> {
-    (0..s.len()).step_by(2).map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap()).collect()
+    (0..s.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap())
+        .collect()
 }
 
 fn b64u(b: &[u8]) -> String {
     const A: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
     let mut out = String::new();
     for c in b.chunks(3) {
-        let n = c.iter().enumerate().fold(0u32, |acc, (i, &x)| acc | (x as u32) << (16 - 8 * i));
+        let n = c
+            .iter()
+            .enumerate()
+            .fold(0u32, |acc, (i, &x)| acc | (x as u32) << (16 - 8 * i));
         for i in 0..=c.len() {
             out.push(A[(n >> (18 - 6 * i) & 63) as usize] as char);
         }
@@ -49,7 +55,10 @@ fn unb64u(s: &str) -> Vec<u8> {
     };
     let mut out = Vec::new();
     for c in s.as_bytes().chunks(4) {
-        let n = c.iter().enumerate().fold(0u32, |acc, (i, &x)| acc | (v(x) as u32) << (18 - 6 * i));
+        let n = c
+            .iter()
+            .enumerate()
+            .fold(0u32, |acc, (i, &x)| acc | (v(x) as u32) << (18 - 6 * i));
         for i in 0..c.len() - 1 {
             out.push((n >> (16 - 8 * i)) as u8);
         }
@@ -74,9 +83,15 @@ fn main() {
     let card_succ = unb64u(card["succ"].as_str().unwrap());
     let keys: Vec<(&str, bool)> = vec![
         ("dsa_equal", b64u(&k.dsa_public) == card_dsa),
-        ("kem_equal", b64u(&k.kem_public) == card["kem"].as_str().unwrap()),
+        (
+            "kem_equal",
+            b64u(&k.kem_public) == card["kem"].as_str().unwrap(),
+        ),
         ("succ_equal", b64u(&succ) == card["succ"].as_str().unwrap()),
-        ("id_equal", bpq::id_from(&k.dsa_public, &succ).as_deref() == card["id"].as_str()),
+        (
+            "id_equal",
+            bpq::id_from(&k.dsa_public, &succ).as_deref() == card["id"].as_str(),
+        ),
         (
             "id_from_device_succ_equal",
             bpq::id_from(&k.dsa_public, &card_succ).as_deref() == card["id"].as_str(),
@@ -87,9 +102,18 @@ fn main() {
     let verify: Vec<(&str, bool)> = vec![
         ("verify_card_device", bpq::verify_card(card)),
         ("verify_bind_device", bpq::verify_bind(&input["binding"])),
-        ("verify_detached_device", bpq::verify_detached(&input["detached"], &file).is_some()),
-        ("verify_bind_wallet", bpq::verify_bind(&input["wallet_binding"])),
-        ("wallet_binding_names_device", input["wallet_binding"]["claims"]["bsafe-pq"] == card["id"]),
+        (
+            "verify_detached_device",
+            bpq::verify_detached(&input["detached"], &file).is_some(),
+        ),
+        (
+            "verify_bind_wallet",
+            bpq::verify_bind(&input["wallet_binding"]),
+        ),
+        (
+            "wallet_binding_names_device",
+            input["wallet_binding"]["claims"]["bsafe-pq"] == card["id"],
+        ),
         (
             "device_binding_names_wallet",
             input["binding"]["claims"]["bzpq-wallet"] == input["wallet_binding"]["id"],
@@ -107,12 +131,19 @@ fn main() {
     longer.push(b'x');
     let controls: Vec<(&str, bool)> = vec![
         ("control_card_bitflip_refused", !bpq::verify_card(&flipped)),
-        ("control_binding_claim_changed_refused", !bpq::verify_bind(&changed)),
-        ("control_file_changed_refused", bpq::verify_detached(&input["detached"], &longer).is_none()),
+        (
+            "control_binding_claim_changed_refused",
+            !bpq::verify_bind(&changed),
+        ),
+        (
+            "control_file_changed_refused",
+            bpq::verify_detached(&input["detached"], &longer).is_none(),
+        ),
     ];
 
     let all = |v: &[(&str, bool)]| v.iter().all(|(_, b)| *b);
-    let (keys_equal, signatures_verify, controls_refused) = (all(&keys), all(&verify), all(&controls));
+    let (keys_equal, signatures_verify, controls_refused) =
+        (all(&keys), all(&verify), all(&controls));
     let ok = keys_equal && signatures_verify && controls_refused;
     let checks: serde_json::Map<String, Value> = keys
         .iter()
@@ -148,9 +179,10 @@ mod tests {
     /// If bsigner's derivation ever drifts from the device's, this fails.
     #[test]
     fn public_fixture_prk_gives_the_emulator_id() {
-        let prk: [u8; 32] = unhex("ce023ae3b0a9b3bc670c52195fd83ea2cc9308b79acd278e595a036f1ef90081") // PUBLIC-CONSTANT: the public BIP-39 test vector's device PRK
-            .try_into()
-            .unwrap();
+        let prk: [u8; 32] =
+            unhex("ce023ae3b0a9b3bc670c52195fd83ea2cc9308b79acd278e595a036f1ef90081") // PUBLIC-CONSTANT: the public BIP-39 test vector's device PRK
+                .try_into()
+                .unwrap();
         let k = bpq::keys(&prk, "pq:bsafe").unwrap();
         let (slh_pk, _) = bpq::succession_keys(&prk, "pq:bsafe").unwrap();
         let succ = bpq::succession_commit(&slh_pk.into_bytes());
