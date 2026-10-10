@@ -1,5 +1,10 @@
 # Solana settlement evaluation with SAFE 7 / bSAFE 7
 
+The [current integration map](../../tools/solana-tungsten/CURRENT.md) connects
+this bench to the private-chain Groth16/PLONK lab and bTungsten workbenches.
+This crate's transfer-plus-memo format does not yet accept that lab's
+proof-plus-transfer transaction.
+
 This is an **offline evaluation bench**, not production bPay authorization or a
 live settlement service. It takes public data, composes a native SOL transfer
 plus an intent-hash memo, verifies an external Ed25519 signature, and reconciles
