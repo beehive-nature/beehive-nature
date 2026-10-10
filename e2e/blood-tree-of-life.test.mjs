@@ -37,16 +37,17 @@ test('Austras koks is the primary world and connects branch navigation to resear
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.goto(`http://127.0.0.1:${PORT}/surfaces/blood.html`, { waitUntil: 'load' });
-  await page.waitForSelector('#lifeTree .tol-stage');
+  await page.waitForSelector('#lifeTree .tol-space');
   await page.waitForSelector('#ppanel[data-pp-mounted="1"]', { state: 'attached' });
 
   assert.equal(await page.getAttribute('#viewlife', 'aria-pressed'), 'true');
   assert.equal(await page.isVisible('#treeoflife'), true);
   assert.equal(await page.isVisible('#atlas'), false);
-  assert.ok(await page.locator('#lifeTree .tol-node[data-person]').count() >= 4);
-  assert.ok(await page.locator('#lifeTree .tol-limb[data-focus]').count() >= 4);
+  assert.ok(await page.locator('#lifeTree .tol-orbit-person').count() >= 4);
+  assert.equal(await page.locator('#lifeTree .tol-node.is-held, #lifeTree .tol-climb').count(), 0, 'living relatives never enter the tree UI');
+  assert.equal(await page.locator('#lifeTree [data-person]').evaluateAll(nodes => nodes.some(n => /living/i.test(n.textContent || '') || /living/i.test(n.getAttribute('aria-label') || ''))), false);
 
-  const person = page.locator('#lifeTree .tol-node[data-person]').first();
+  const person = page.locator('#lifeTree .tol-orbit-person').first();
   const id = await person.getAttribute('data-person');
   await person.click();
   assert.equal(await page.isVisible('#lifeTree .tol-card'), true);

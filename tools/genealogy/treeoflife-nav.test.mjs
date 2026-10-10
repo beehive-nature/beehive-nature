@@ -21,30 +21,44 @@ test("state round-trips through the hash; junk and unsafe ids are dropped", () =
   assert.deepEqual(decodeState(""), { l: null, f: null, p: null });
 });
 
-test("a line view starts at the line's own root and climbs to the depth", () => {
+test("a public line starts at its first deceased blood relatives and climbs from there", () => {
   const v = lineView(corpus, "spouse-1", null, 4);
-  assert.equal(v.focus, "spouse");
-  assert.deepEqual(v.nodes.map((n) => n.id).sort(), ["s-a", "s-aa", "s-aaa", "s-ab", "s-aba", "s-b", "spouse"]);
-  const shallow = lineView(corpus, "spouse-1", null, 2);
-  assert.equal(shallow.nodes.find((n) => n.id === "s-aa").above, 1, "the cut-off generation says how many more wait above");
+  assert.equal(v.focus, null);
+  assert.deepEqual(v.nodes.filter(n => n.gen === 0).map(n => n.id).sort(), ["s-aa", "s-aba", "s-b"]);
+  assert.ok(v.nodes.every(n => !n.living), "no living stub reaches the renderer");
+  assert.ok(!v.nodes.some(n => ["spouse", "s-a", "s-ab"].includes(n.id)), "living bridge ids stay out of the UI view");
+  const shallow = lineView(corpus, "spouse-1", "s-aa", 1);
+  assert.equal(shallow.nodes.find((n) => n.id === "s-aaa").gen, 1);
   assert.equal(lineView(corpus, "nope", null), null);
 });
 
-test("living nodes in a view carry no name, dates, standing, or claims", () => {
-  const v = lineView(corpus, "spouse-1", null, 4);
-  for (const n of v.nodes.filter((x) => x.living)) {
-    assert.equal(n.name, null);
-    assert.equal(n.lifespan, null);
-    assert.equal(n.support, null);
-    assert.equal(n.claims, 0);
-  }
+test("living focus ids are rejected while the held-generation count remains available as aggregate text", () => {
+  const v = lineView(corpus, "spouse-1", "spouse", 4);
+  assert.equal(v.focus, null);
+  assert.ok(v.nodes.every(n => !n.living));
   assert.equal(v.held, 3);
 });
 
-test("focus moves the climb without changing the corpus", () => {
+test("hidden living ancestors do not appear but do not break the deceased bloodline above them", () => {
+  const c = {
+    persons: {
+      d: { name: "Deceased Child", living: false },
+      l: { name: "Living", living: true },
+      g: { name: "Deceased Grandparent", living: false },
+    },
+    edges: { d: ["l"], l: ["g"] },
+    lines: [{ key: "founder", label: "Founder line", root: "l", entries: ["d"], bridge: 1 }],
+  };
+  const v = lineView(c, "founder", null, 3);
+  assert.deepEqual(v.nodes.map(n => n.id), ["d", "g"]);
+  assert.deepEqual(v.links, [{ child: "d", parent: "g" }]);
+  assert.ok(!JSON.stringify(v).includes('"id":"l"'));
+});
+
+test("focus moves the climb only for a deceased person and never changes the corpus", () => {
   const before = JSON.stringify(corpus);
-  const v = lineView(corpus, "spouse-1", "s-ab", 4);
-  assert.deepEqual(v.nodes.map((n) => n.id), ["s-ab", "s-aba"]);
+  const v = lineView(corpus, "spouse-1", "s-aa", 4);
+  assert.deepEqual(v.nodes.map((n) => n.id), ["s-aa", "s-aaa"]);
   assert.equal(JSON.stringify(corpus), before);
 });
 
