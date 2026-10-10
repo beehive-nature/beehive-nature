@@ -1,0 +1,25 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ03 — TOOTH for hkdf.saw: agree_bent_21, the shipped
+// expand against the reference over info with its first byte flipped, on the
+// all-zero PRK and info. It MUST fail with a counterexample, or the agree
+// PROVEN lines could not tell inputs apart. The inputs are passed concretely:
+// a symbolic pair makes the solver search two different HMAC computations.
+//
+// usage (from this directory): saw hkdf-teeth-agree.saw
+
+enable_experimental;
+m <- mir_load_module "../../../target/saw-pq03-hkdf/pq03_hkdf.linked-mir.json";
+ov_soft <- mir_unsafe_assume_spec m "sha2::sha256::x86::shani_cpuid::get" (do {
+  mir_execute_func [];
+  mir_return (mir_term {{ False }});
+});
+
+print "PQ03-SAW-TEETH obligation agree_bent_21 returns true on the zero inputs";
+mir_verify m "pq03_hkdf::agree_bent_21" [ov_soft] false (do {
+  pp <- mir_alloc (mir_array 32 mir_u8);
+  mir_points_to pp (mir_term {{ zero : [32][8] }});
+  ip <- mir_alloc (mir_array 21 mir_u8);
+  mir_points_to ip (mir_term {{ zero : [21][8] }});
+  mir_execute_func [pp, ip];
+  mir_return (mir_term {{ True }});
+}) (w4_unint_bitwuzla []);
+print "PQ03-SAW-TEETH UNEXPECTED-PROVEN agree_bent_21 returns true on the zero inputs";

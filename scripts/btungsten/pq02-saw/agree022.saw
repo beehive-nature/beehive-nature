@@ -1,0 +1,22 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ02 — keccak 0.2.2 (under sha3 0.11): the shipped 24-round permutation
+// (soft::keccak_p::<u64, 24>, what sha3 0.11's soft backend runs) equal to pq02_harness022::composed, the crate's own round body run
+// once per round constant in FIPS 202 order, for every state. Nothing
+// stands in: both run the same MIR body, so the solver meets equal terms
+// (every direct 24-round comparison against the spec ran out of time).
+// With shipped022.saw (each round body = keccakRound k, and composed =
+// keccakF), the shipped permutation is Keccak-f[1600] for every state: two
+// proofs joined by equality. Tooth: loop-teeth022.saw.
+//
+// usage (from this directory): saw agree022.saw   with MIR at ../../../target/saw-pq02/
+
+enable_experimental;
+m <- mir_load_module "../../../target/saw-pq02/pq02_harness022.linked-mir.json";
+
+mir_verify m "pq02_harness022::agree" [] false (do {
+  st <- mir_fresh_var "st" (mir_array 25 mir_u64);
+  r <- mir_alloc (mir_array 25 mir_u64);
+  mir_points_to r (mir_term st);
+  mir_execute_func [r];
+  mir_return (mir_term {{ True }});
+}) (w4_unint_bitwuzla []);
+print "PQ02-SAW PROVEN keccak022.agree";

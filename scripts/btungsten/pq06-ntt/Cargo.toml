@@ -1,0 +1,17 @@
+# SPEC-BTUNGSTEN-PQ-1 PQ06 — the proof harness for ML-DSA's NTT. It links
+# ml-dsa 0.1.1 itself, from crates.io under the committed Cargo.lock, whose
+# checksums ../pq06-ntt-check.sh holds equal to the workspace Cargo.lock's.
+# Built by cargo-saw-build (mir-json), never by the workspace.
+[package]
+name = "pq06_ntt"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+ml-dsa = { version = "=0.1.1", default-features = false }
+
+[workspace]

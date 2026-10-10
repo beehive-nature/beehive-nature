@@ -1,0 +1,33 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ02 — TOOTH for the composition step: keccak
+// 0.2.2's composed (the 24 round bodies, each standing in by its round
+// proof, assumed here) against FIPS 202 with rounds 5 and 6 swapped. It
+// MUST fail with a counterexample: holding keccakRound opaque still reads
+// the order and the index of every round.
+//
+// usage (from this directory): saw order-teeth.saw
+
+enable_experimental;
+import "../pq02-cryptol/KeccakF1600.cry";
+m <- mir_load_module "../../../target/saw-pq02/pq02_harness022.linked-mir.json";
+
+let shipped_spec ir = do {
+  st <- mir_fresh_var "st" (mir_array 25 mir_u64);
+  r <- mir_alloc_mut (mir_array 25 mir_u64);
+  mir_points_to r (mir_term st);
+  mir_execute_func [r];
+  mir_points_to r (mir_term {{ keccakRound (`ir : Integer) st }});
+};
+ovs <- for (eval_list {{ [0 .. 23] : [24][8] }}) (\t -> do {
+  let ir = eval_int t;
+  mir_unsafe_assume_spec m (str_concat "pq02_harness022::shipped_round_" (show ir)) (shipped_spec ir);
+});
+
+print "PQ02-SAW-TEETH obligation composed against FIPS 202 with rounds 5 and 6 swapped";
+mir_verify m "pq02_harness022::composed" ovs false (do {
+  st <- mir_fresh_var "st" (mir_array 25 mir_u64);
+  r <- mir_alloc_mut (mir_array 25 mir_u64);
+  mir_points_to r (mir_term st);
+  mir_execute_func [r];
+  mir_points_to r (mir_term {{ foldl (\s ir -> keccakRound ir s) st ([0, 1, 2, 3, 4, 6, 5] # [7 .. 23] : [24]Integer) }});
+}) (w4_unint_z3 ["keccakRound"]);
+print "PQ02-SAW-TEETH UNEXPECTED-PROVEN composed against FIPS 202 with rounds 5 and 6 swapped";

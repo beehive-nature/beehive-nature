@@ -1,0 +1,75 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ03 — HKDF-Expand(SHA-256) as RFC 5869 defines it,
+// over HMAC-SHA-256 (RFC 2104) and SHA-256 (FIPS 180-4) of any length, built
+// on Sha256.cry's compression function, so a proof can hold `compress`
+// opaque and match the shipped code block by block.
+//
+// The key is the 32-byte masterPrk bsigner holds (zero-padded to the 64-byte
+// block, RFC 2104 §2) and the output is one HKDF block (L <= 32), which is
+// every expand_label call bsigner makes.
+module Hkdf where
+
+import Sha256
+
+// §5.1.1 padding (0x80, zeros, the 64-bit big-endian bit length), then
+// §6.2.2 over every 64-byte block from H0
+sha256 : {n} (fin n, 64 >= width (8 * n)) => [n][8] -> [8][32]
+sha256 msg = foldl compress H0 [ split (join b) | b <- blocks ]
+  where
+    padded = take`{((n + 8) / 64 + 1) * 64 - 8} (msg # [0x80] # (zero : [64][8])) # split (`(8 * n) : [64])
+    blocks = split padded : [(n + 8) / 64 + 1][64][8]
+
+digestBytes : [8][32] -> [32][8]
+digestBytes h = split (join h)
+
+// RFC 2104 with a 32-byte key and pad bytes ip, op:
+// H((K ^ op) ‖ H((K ^ ip) ‖ m)); RFC 2104 has ip = 0x36, op = 0x5c (a tooth
+// swaps them)
+hmacWith : {n} (fin n, 64 >= width (8 * (64 + n))) => [8] -> [8] -> [32][8] -> [n][8] -> [32][8]
+hmacWith ip op k m = digestBytes (sha256 ((kb ^ repeat op) # digestBytes (sha256 ((kb ^ repeat ip) # m))))
+  where
+    kb = k # zero : [64][8]
+
+hmacSha256 : {n} (fin n, 64 >= width (8 * (64 + n))) => [32][8] -> [n][8] -> [32][8]
+hmacSha256 = hmacWith 0x36 0x5c
+
+// RFC 5869 §2.3 with L <= 32: T(1) = HMAC-Hash(PRK, T(0) ‖ info ‖ 0x01), T(0) empty
+hkdfExpand32 : {n} (fin n, 64 >= width (8 * (64 + (n + 1)))) => [32][8] -> [n][8] -> [32][8]
+hkdfExpand32 prk info = hmacSha256 prk (info # [0x01])
+
+// ---- closed checks ---------------------------------------------------------
+
+digestWords32 : [32][8] -> [4][64]
+digestWords32 d = split (join d)
+
+// the any-length SHA-256 agrees with Sha256.cry's one-block digest and with
+// FIPS 180-4's two-block example
+sha256AgreesOneBlock : Bit
+property sha256AgreesOneBlock = sha256 "abc" == digestShort "abc"
+
+sha256TwoBlockExample : Bit
+property sha256TwoBlockExample =
+  sha256 ("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq" : [56][8]) ==
+    [0x248d6a61, 0xd20638b8, 0xe5c02693, 0x0c3e6039, 0xa33ce459, 0x64ff2167, 0xf6ecedd4, 0x19db06c1]
+
+// RFC 5869 Appendix A.1 (test case 1): the PRK and info given there; T(1)
+// is the first 32 bytes of the published OKM
+hkdfRfc5869Case1 : Bit
+property hkdfRfc5869Case1 = digestWords32 (hkdfExpand32 prk info) ==
+  [0x3cb25f25faacd57a, 0x90434f64d0362f2a, 0x2d2d0a90cf1a5a4c, 0x5db02d56ecc4c5bf]
+  where
+    prk = split (0x077709362c2e32df0ddc3f0dc47bba63 # 0x90b6c73bb50f9c3122ec844ad7c2b3e5) : [32][8]
+    info = [0xf0 .. 0xf9] : [10][8]
+
+// bsigner's three info shapes, PRK = bytes 0 .. 31 (computed by Python's
+// hmac and hashlib, an independent implementation)
+hkdfShape21 : Bit
+property hkdfShape21 = digestWords32 (hkdfExpand32 [0 .. 31] ("BDID-v1/vault-keyroot" : [21][8])) ==
+  [0xf17d278082cae590, 0xad0b9c73bfbcfb98, 0xfbe7ccd65cff26bf, 0x07ba110449432ede]
+
+hkdfShape55 : Bit
+property hkdfShape55 = digestWords32 (hkdfExpand32 [0 .. 31] (("BDID-v1/ml-dsa-65-record-key" : [28][8]) # repeat 0x63 : [55][8])) ==
+  [0x481faf2db28886fd, 0x1e0192fb50fa5206, 0xe8e75193bd10f7cc, 0xc50c2f6de427a697]
+
+hkdfShape101 : Bit
+property hkdfShape101 = digestWords32 (hkdfExpand32 [0 .. 31] (("BDID-v1/slh-dsa-shake-256f-succession" : [37][8]) # repeat 0x78 : [101][8])) ==
+  [0x429c31351c561fc1, 0x43e5523622175108, 0x6c9ffd5e56403847, 0xe5e67e3767772da7]
