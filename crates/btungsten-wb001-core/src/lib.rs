@@ -14,9 +14,26 @@
 //! | [`byte_at`]               | `byteAt`                            |
 //! | [`encode`]                | `wire` (and returns `envLen`)       |
 //!
+//! and the decoder core, against `scripts/btungsten/wb001-cryptol/WB001Decode.cry`
+//! (`scripts/btungsten/wb001-saw/decode.saw`):
+//!
+//! | Rust                      | Cryptol (`WB001Decode`)             |
+//! |---------------------------|-------------------------------------|
+//! | [`byte_at_pos`]           | `byteAtPos`                         |
+//! | [`byte_from`]             | `byteFrom`                          |
+//! | `bytes_from_{32,64,128,4096}` | `bytesFrom`                     |
+//! | [`chunk_64`]              | `chunk64`                           |
+//! | [`be32_from`], [`be64_from`] | `be32From`, `be64From`           |
+//! | [`block_code`]            | `blockCode`                         |
+//! | [`decode_core`]           | `decodeSpec`                        |
+//!
 //! The encoder emits the envelope by position dispatch (`out[k] = byte_at(k)`)
 //! instead of by concatenation. Same bytes (the shared vectors pin them), and
-//! the shape SAW can verify: every write lands at a concrete index.
+//! the shape SAW can verify: every write lands at a concrete index. The
+//! decoder core reads a fixed `MAX_ENV` buffer and the true input length for
+//! the same reason: SAW cannot run the slice decoder with a symbolic length
+//! (a 900 s probe at inputs of at most 200 bytes never left symbolic
+//! simulation, 2026-10-10), and every loop here has a concrete trip count.
 //!
 //! Arithmetic on offsets is `u32` wrapping, exactly Cryptol's `[32]`.
 //! [`encode`] and [`byte_at`] require `valid_intent` (bounded lengths); on an
@@ -53,6 +70,29 @@ pub struct Intent {
     pub payer: [u8; 128],
     pub payload_len: u32,
     pub payload: [u8; 4096],
+}
+
+impl Intent {
+    /// Every length and byte zero (not a valid intent: lengths below the bounds).
+    pub const ZERO: Intent = Intent {
+        domain_len: 0,
+        domain: [0; 64],
+        nonce_len: 0,
+        nonce: [0; 32],
+        epoch: 0,
+        action_len: 0,
+        action: [0; 32],
+        destination_len: 0,
+        destination: [0; 128],
+        capability_len: 0,
+        capability: [0; 64],
+        amount: 0,
+        expiry: 0,
+        payer_len: 0,
+        payer: [0; 128],
+        payload_len: 0,
+        payload: [0; 4096],
+    };
 }
 
 // ---- the UTF-8 DFA (Cryptol `step`) -------------------------------------
@@ -327,4 +367,267 @@ pub fn encode(i: &Intent, out: &mut [u8; MAX_ENV]) -> u32 {
         k += 1;
     }
     o.env
+}
+
+// ---- the decoder core (Cryptol `WB001Decode`) -----------------------------
+
+/// Verdicts of [`decode_core`]: accepted, or the first refusal in the order
+/// the pinned vectors record (`btungsten_wb001::Refusal` maps them).
+pub const D_OK: u8 = 0;
+pub const D_SHORT: u8 = 1;
+pub const D_MAGIC: u8 = 2;
+pub const D_VERSION: u8 = 3;
+pub const D_TAG_ORDER: u8 = 4;
+pub const D_LENGTH: u8 = 5;
+pub const D_UTF8: u8 = 6;
+pub const D_TRAILING: u8 = 7;
+
+/// Cryptol `byteAtPos`: the input byte at position `p`; zero outside the
+/// buffer. Every read the decoder core makes at a computed position goes
+/// through here, so SAW proves one symbolic read, once; total, so a call
+/// leaves SAW no side goal (no read [`decode_core`] falls outside).
+pub fn byte_at_pos(buf: &[u8; MAX_ENV], p: u32) -> u8 {
+    if p < MAX_ENV as u32 {
+        buf[p as usize]
+    } else {
+        0
+    }
+}
+
+/// Cryptol `byteFrom`: byte `j` of the `len` value bytes starting at `q`;
+/// zero past `len` (canonical padding).
+pub fn byte_from(buf: &[u8; MAX_ENV], q: u32, len: u32, j: u32) -> u8 {
+    if j < len {
+        byte_at_pos(buf, q.wrapping_add(j))
+    } else {
+        0
+    }
+}
+
+macro_rules! bytes_from {
+    ($name:ident, $cap:expr) => {
+        /// Cryptol `bytesFrom`: the `len` value bytes starting at `q`, in the
+        /// formal shape (zero padded to the field's capacity).
+        pub fn $name(buf: &[u8; MAX_ENV], q: u32, len: u32) -> [u8; $cap] {
+            let mut a = [0u8; $cap];
+            let mut j = 0;
+            while j < $cap {
+                a[j] = byte_from(buf, q, len, j as u32);
+                j += 1;
+            }
+            a
+        }
+    };
+}
+bytes_from!(bytes_from_32, 32);
+bytes_from!(bytes_from_64, 64);
+bytes_from!(bytes_from_128, 128);
+
+/// Cryptol `chunk64`: bytes `base` .. `base + 63` of the `len` value bytes
+/// starting at `q` (zero padded), one chunk of the payload.
+pub fn chunk_64(buf: &[u8; MAX_ENV], q: u32, len: u32, base: u32) -> [u8; 64] {
+    let mut a = [0u8; 64];
+    let mut i = 0;
+    while i < 64 {
+        a[i] = byte_from(buf, q, len, base.wrapping_add(i as u32));
+        i += 1;
+    }
+    a
+}
+
+/// Cryptol `bytesFrom` at the payload's capacity, in 64 chunks: SAW applies
+/// the chunk override 64 times instead of the byte override 4,096 times.
+pub fn bytes_from_4096(buf: &[u8; MAX_ENV], q: u32, len: u32) -> [u8; 4096] {
+    let mut a = [0u8; 4096];
+    let mut c = 0;
+    while c < 64 {
+        let k = chunk_64(buf, q, len, (c * 64) as u32);
+        let mut i = 0;
+        while i < 64 {
+            a[c * 64 + i] = k[i];
+            i += 1;
+        }
+        c += 1;
+    }
+    a
+}
+
+/// Cryptol `be32From`: the big-endian u32 at `q`.
+pub fn be32_from(buf: &[u8; MAX_ENV], q: u32) -> u32 {
+    u32::from_be_bytes([
+        byte_at_pos(buf, q),
+        byte_at_pos(buf, q.wrapping_add(1)),
+        byte_at_pos(buf, q.wrapping_add(2)),
+        byte_at_pos(buf, q.wrapping_add(3)),
+    ])
+}
+
+/// Cryptol `be64From`: the big-endian u64 at `q`.
+pub fn be64_from(buf: &[u8; MAX_ENV], q: u32) -> u64 {
+    u64::from_be_bytes([
+        byte_at_pos(buf, q),
+        byte_at_pos(buf, q.wrapping_add(1)),
+        byte_at_pos(buf, q.wrapping_add(2)),
+        byte_at_pos(buf, q.wrapping_add(3)),
+        byte_at_pos(buf, q.wrapping_add(4)),
+        byte_at_pos(buf, q.wrapping_add(5)),
+        byte_at_pos(buf, q.wrapping_add(6)),
+        byte_at_pos(buf, q.wrapping_add(7)),
+    ])
+}
+
+/// Cryptol `blockCode`: the refusal the block header at `at` raises, in the
+/// decoder's order (short header, tag, length bounds, short value); `D_OK`
+/// when the header is well formed and its value fits in the `n` input bytes.
+pub fn block_code(buf: &[u8; MAX_ENV], n: u64, at: u32, tag: u8, lo: u32, hi: u32) -> u8 {
+    if (at as u64) + 5 > n {
+        D_SHORT
+    } else if byte_at_pos(buf, at) != tag {
+        D_TAG_ORDER
+    } else {
+        let len = be32_from(buf, at.wrapping_add(1));
+        if len < lo || len > hi {
+            D_LENGTH
+        } else if (at as u64) + 5 + (len as u64) > n {
+            D_SHORT
+        } else {
+            D_OK
+        }
+    }
+}
+
+/// Cryptol `decodeSpec`: the strict decode of an input of `n` bytes whose
+/// first `MAX_ENV` bytes are `buf` (no accepted block reaches position
+/// `MAX_ENV`, so the rest can only be counted, never read). Returns the
+/// verdict; writes `out` on `D_OK` only.
+pub fn decode_core(buf: &[u8; MAX_ENV], n: u64, out: &mut Intent) -> u8 {
+    if n < 8 {
+        return D_SHORT;
+    }
+    let mut magic = true;
+    let mut k = 0;
+    while k < 7 {
+        magic &= buf[k] == HEAD8[k];
+        k += 1;
+    }
+    if !magic {
+        return D_MAGIC;
+    }
+    if buf[7] != HEAD8[7] {
+        return D_VERSION;
+    }
+
+    let a_dom: u32 = 8;
+    let c = block_code(buf, n, a_dom, 0x01, 1, 64);
+    if c != D_OK {
+        return c;
+    }
+    let l_dom = be32_from(buf, a_dom.wrapping_add(1));
+    let domain = bytes_from_64(buf, a_dom.wrapping_add(5), l_dom);
+    if !well_formed_utf8_64(&domain) {
+        return D_UTF8;
+    }
+
+    let a_non = a_dom.wrapping_add(5).wrapping_add(l_dom);
+    let c = block_code(buf, n, a_non, 0x02, 32, 32);
+    if c != D_OK {
+        return c;
+    }
+    let l_non = be32_from(buf, a_non.wrapping_add(1));
+    let nonce = bytes_from_32(buf, a_non.wrapping_add(5), l_non);
+
+    let a_epo = a_non.wrapping_add(5).wrapping_add(l_non);
+    let c = block_code(buf, n, a_epo, 0x03, 8, 8);
+    if c != D_OK {
+        return c;
+    }
+    let epoch = be64_from(buf, a_epo.wrapping_add(5));
+
+    let a_act = a_epo.wrapping_add(5).wrapping_add(8);
+    let c = block_code(buf, n, a_act, 0x04, 32, 32);
+    if c != D_OK {
+        return c;
+    }
+    let l_act = be32_from(buf, a_act.wrapping_add(1));
+    let action = bytes_from_32(buf, a_act.wrapping_add(5), l_act);
+
+    let a_dst = a_act.wrapping_add(5).wrapping_add(l_act);
+    let c = block_code(buf, n, a_dst, 0x05, 1, 128);
+    if c != D_OK {
+        return c;
+    }
+    let l_dst = be32_from(buf, a_dst.wrapping_add(1));
+    let destination = bytes_from_128(buf, a_dst.wrapping_add(5), l_dst);
+    if !well_formed_utf8_128(&destination) {
+        return D_UTF8;
+    }
+
+    let a_cap = a_dst.wrapping_add(5).wrapping_add(l_dst);
+    let c = block_code(buf, n, a_cap, 0x06, 1, 64);
+    if c != D_OK {
+        return c;
+    }
+    let l_cap = be32_from(buf, a_cap.wrapping_add(1));
+    let capability = bytes_from_64(buf, a_cap.wrapping_add(5), l_cap);
+    if !well_formed_utf8_64(&capability) {
+        return D_UTF8;
+    }
+
+    let a_amt = a_cap.wrapping_add(5).wrapping_add(l_cap);
+    let c = block_code(buf, n, a_amt, 0x07, 8, 8);
+    if c != D_OK {
+        return c;
+    }
+    let amount = be64_from(buf, a_amt.wrapping_add(5));
+
+    let a_exp = a_amt.wrapping_add(5).wrapping_add(8);
+    let c = block_code(buf, n, a_exp, 0x08, 8, 8);
+    if c != D_OK {
+        return c;
+    }
+    let expiry = be64_from(buf, a_exp.wrapping_add(5));
+
+    let a_pay = a_exp.wrapping_add(5).wrapping_add(8);
+    let c = block_code(buf, n, a_pay, 0x09, 1, 128);
+    if c != D_OK {
+        return c;
+    }
+    let l_pay = be32_from(buf, a_pay.wrapping_add(1));
+    let payer = bytes_from_128(buf, a_pay.wrapping_add(5), l_pay);
+    if !well_formed_utf8_128(&payer) {
+        return D_UTF8;
+    }
+
+    let a_pld = a_pay.wrapping_add(5).wrapping_add(l_pay);
+    let c = block_code(buf, n, a_pld, 0x0a, 0, 4096);
+    if c != D_OK {
+        return c;
+    }
+    let l_pld = be32_from(buf, a_pld.wrapping_add(1));
+    let payload = bytes_from_4096(buf, a_pld.wrapping_add(5), l_pld);
+
+    let a_end = a_pld.wrapping_add(5).wrapping_add(l_pld);
+    if a_end as u64 != n {
+        return D_TRAILING;
+    }
+    *out = Intent {
+        domain_len: l_dom,
+        domain,
+        nonce_len: l_non,
+        nonce,
+        epoch,
+        action_len: l_act,
+        action,
+        destination_len: l_dst,
+        destination,
+        capability_len: l_cap,
+        capability,
+        amount,
+        expiry,
+        payer_len: l_pay,
+        payer,
+        payload_len: l_pld,
+        payload,
+    };
+    D_OK
 }

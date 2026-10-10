@@ -38,7 +38,7 @@ fn bytes(r: &mut Rng, n: usize) -> Vec<u8> {
     (0..n).map(|_| r.next() as u8).collect()
 }
 
-fn random_intent(r: &mut Rng) -> IntentIn {
+pub(crate) fn random_intent(r: &mut Rng) -> IntentIn {
     let payload_len = match r.below(4) {
         0 => 0,
         1 => 4096,

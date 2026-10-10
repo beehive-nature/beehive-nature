@@ -64,6 +64,23 @@ close. Every call site and message is unchanged, and RB03's
 `correspondence-split` row holds the new function to the old one on 74,536
 inputs.
 
+**RB05 (2026-10-10): the RB04 grammar is the WB001 decoder on every input.**
+Proofs replace RB04's sampling on two links. `decode_core`, the decision
+inside `btungsten_wb001::decode`, equals the decoder spec
+`wb001-cryptol/WB001Decode.cry` for every buffer and every input length
+(`wb001-saw/decode.saw`, 14 obligations). The grammar, read into Cryptol
+definition by definition (`rb05-grammar/WB001Grammar.cry`), equals that spec
+on acceptance, decoded values and the prefix entry's consumed length
+(`rb05-grammar/grammar.saw`, 25 obligations; UTF-8 by a simulation at 64 and
+128 bytes). RB04's four TEETH substitutions, applied to the reading, each
+make the same proof fail with a counterexample. Not proven: the generated
+Rust (still held to the grammar by RB04's sampling), the reading's
+faithfulness to Daedalus (by eye and by the TEETH), and the six-line slice
+wrapper in `decode` (tested). The decoder changed shape for SAW and refuses in
+the same order with the same codes; `tests/wb001/legacy.rs` holds it to the
+old decoder. Details: `rb05-grammar/README.md`. Runner:
+`rb05-saw-check.sh`, in the WB001 SAW workflow.
+
 ## PQ — proofs for the post-quantum stack (founder order 2026-10-08)
 
 Design: `docs/specs/SPEC-BTUNGSTEN-PQ-1.md` (every algorithm: what is proven,
@@ -447,11 +464,12 @@ stay accepted, byte-exact. Red-first receipt in
 | artifact | status |
 |---|---|
 | `crates/btungsten-wb001-core` — **the model** (Rust-first rule, 2026-10-08): canonical envelope encoder, UTF-8 DFA, validity predicate, offsets, byte dispatch; `no_std`, no dependencies, written function-for-function against `BTungstenWB001.cry` so SAW can prove each one | RUNS — `cargo test` (workspace job); PROVEN equal to the spec by SAW (below) |
-| `crates/btungsten-wb001` — refusal codes, strict decoder (refuses malformed UTF-8 through the SAW-proven DFA), UTF-16 input boundary, Ed25519 binding via `libcrux-ed25519` =0.0.9 (safe Rust compiled from HACL*, which is F*-verified for memory safety, functional correctness against RFC 8032 and secret independence) | RUNS — `cargo test -p btungsten-wb001` |
-| `crates/btungsten-wb001/tests/wb001/` — **the battery, driving the model itself** (ported row for row from the retired JS battery): injectivity corpus (25), 21 field-move mutants, 1,640 one-bit envelope mutants, 512 one-bit signature mutants, 5 structural forgeries, domain/nonce/epoch/expiry participation, cross-key, the naive-encoder TEETH row; boundary suite (32 lone-surrogate refusals, surrogate-class crossings, 8 international round trips, 9 malformed-UTF-8 refusals, malformed-wire verify refusal); pinned vectors; bridge; 4,000 random valid intents round-tripped and pairwise distinct; Ed25519 three-way agreement | RUNS in CI — 20 tests |
+| `crates/btungsten-wb001` — refusal codes, strict decoder (a wrapper over the SAW-proven `decode_core`; refuses malformed UTF-8 through the SAW-proven DFA), UTF-16 input boundary, Ed25519 binding via `libcrux-ed25519` =0.0.9 (safe Rust compiled from HACL*, which is F*-verified for memory safety, functional correctness against RFC 8032 and secret independence) | RUNS — `cargo test -p btungsten-wb001` |
+| `crates/btungsten-wb001/tests/wb001/` — **the battery, driving the model itself** (ported row for row from the retired JS battery): injectivity corpus (25), 21 field-move mutants, 1,640 one-bit envelope mutants, 512 one-bit signature mutants, 5 structural forgeries, domain/nonce/epoch/expiry participation, cross-key, the naive-encoder TEETH row; boundary suite (32 lone-surrogate refusals, surrogate-class crossings, 8 international round trips, 9 malformed-UTF-8 refusals, malformed-wire verify refusal); pinned vectors; bridge; 4,000 random valid intents round-tripped and pairwise distinct; Ed25519 three-way agreement | RUNS in CI — 21 tests, with the `legacy` leg holding `decode` to the pre-RB05 decoder (kept verbatim) on 20,000 seeded inputs, every refusal class present |
 | `wb001-vectors.json`, `wb001-bridge.json` — pinned: 10 positives byte-for-byte, 9 refusals by code; the 8 constructed terms. Derived by `tests/wb001/pin.rs` from the model; the drift gate requires the committed bytes to EQUAL a fresh derivation (full file) | PINNED — the Rust model reproduced every byte the retired JS twin pinned (only the provenance text changed) |
 | `wb001-cryptol/BTungstenWB001.cry` — the spec: meaningful lengths, canonical padding, the concrete UTF-8 DFA, the true variable-length `wire`, closed-term bridge to the model's bytes | TYPECHECK + CHECK-SAMPLED gate the CI formal job; budgeted `:prove` rows recorded there |
 | `wb001-saw/rust.saw` (+ `rust-teeth.saw`) — EQUIVALENCE: 11 `mir_verify` obligations, the Rust model equal to the spec for every input in each domain: `utf8_step`, `well_formed_utf8_{64,128}`, `pad_ok_{32,64,128,4096}`, `valid_intent` (all intents), `offsets` (all intents), `byte_at` and `encode` (all length-bounded intents) | PROVEN — `wb001-saw.yml` (SAW 1.6, mir-json at SAW 1.6's pin); TEETH: `byte_at` against the spec one position off is refuted with a counterexample |
+| `wb001-cryptol/WB001Decode.cry` + `wb001-saw/decode.saw` (+ `decode-teeth.saw`) — DECODE-EQUIVALENCE (RB05): `decode_core`, with `byte_at_pos` (the one symbolic read), `byte_from`, `bytes_from_{32,64,128,4096}`, `chunk_64`, `be32_from`, `be64_from` and `block_code` beneath it, equal to `decodeSpec` for every buffer and every input length, writing the intent exactly on `dOk`; `decode` hands it the first 4,626 input bytes and the true length | PROVEN — 14 obligations, every one required by name; TEETH: `block_code` against the spec with the length-bound and value-fit refusals swapped is refuted with a counterexample |
 | `wb001-saw/injective.saw` + `WB001Injective.cry` (+ `injective-teeth.saw`) — PROVE-UNIVERSAL `wireInjective` by the first-difference ladder: a constructed witness `kStar` (first differing envelope position), ten per-field cases, `validImpliesBounded`/`validImpliesPadded`, `wireIndexDef` with `byteAt` opaque, composed by explicit instantiation (`goal_insert_and_specialize`) | PROVEN — 21 rungs, every one required by name; TEETH: the first case without the padding premise is refuted with a counterexample |
 | `wb001-cryptol/Ed25519.cry` — **the missing algorithm artifact**: RFC 8032 §5.1 Ed25519 as an executable Cryptol spec, SHA-512 included, its 80 round constants and initial hash COMPUTED from the FIPS 180-4 definitions (no transcribed table) | SPEC-CHECK PASS — SHA-512("abc"), all four RFC 8032 §7.1 vectors (key, signature, verify), two model envelopes signed by OpenSSL, verifier refuses flipped signature/message/key |
 | `wb001-ed25519-oracle.json` (+ `wb001-ed25519-oracle.mjs`) — 24 rows signed by OpenSSL (node:crypto), refused unless OpenSSL first reproduces the RFC vectors; the model's signer (libcrux/HACL*), `ed25519-dalek` and the Cryptol spec must each match byte-for-byte | PINNED — libcrux, dalek and OpenSSL agree on 24/24 |
