@@ -16,6 +16,21 @@ These are user-reported observations, not a fresh independent reproduction.
 The public address, expected digest and size are now pinned in `tools/video-trial/corpus-2026-10-10.json`.
 The live runner accepts `--corpus`; collecting repeatable evidence is owned by the agent, not delegated to the user.
 
+An independent candidate run subsequently completed the exact file and matched the reported SHA256:
+52/52 chunks, zero retries, zero relay requests, zero page errors, duration 52.488 s and full playback to its end.
+First media bytes: **75.31 s**; preview: **81.06 s**; actual playback start: **434.31 s**;
+complete-file receipt observed: **465.95 s**; playback ended: **487.78 s**.
+The new counters captured one application hold/rebuffer of **400 ms**.
+This is successful retrieval and integrity, **poor startup performance**, and no speedup claim.
+It was not a controlled A/B: network conditions varied and other local browser verification overlapped part of the run.
+The candidate preceded the final adaptive-library timeout adjustment; the direct playback code was unchanged by that adjustment.
+
+Transport capture: 1,148 dials, 728 opened, 420 dead (415 before ICE), 328/714 endpoints reachable,
+49 peak sampled open channels, 376,668,007 received data-channel payload bytes (1.759x file size),
+8.20 s median / 17.38 s p95 dial-open latency, and 25,141,248 B peak ordered-read queue.
+Peer IDs, URLs and free-text network errors are excluded. Payload is not full wire traffic; the queue is not total browser memory.
+Raw result: `evidence/2026-10-10-bview-scale/original-direct-candidate.json`.
+
 ## Implemented
 
 - Existing Autonomi reads retain the three-lane bounded-retry implementation.
@@ -58,6 +73,12 @@ The first Windows packaging attempt misplaced the fMP4 init file; FFmpeg now run
 with relative playlist/segment paths, and the completed package passes playback and digest checks.
 Early segment-byte receipts incorrectly read a detached payload as zero; fragment statistics now provide the byte count,
 with a browser regression requiring nonzero bytes and measured first-media-byte timing.
+An additional paced-demand check then found a real startup inefficiency: first play called `startLoad()` while
+loading was already active, aborting and requesting the next segment again (three requests for two unique media paths).
+The player now restarts loading only after its own pause handler stopped it. The regression also exercises
+resume from the paused playhead and requires initial media requests to be unique.
+After this correction the adaptive/package/capacity suite passed **6/6** again (127.7 s overall;
+browser cases 37.8/11.5/33.8/5.6 s). The prior failure and corrected receipt are retained alongside the original suite.
 
 ## Capacity and remaining boundary
 
@@ -76,6 +97,13 @@ production CDN allocation or new relay capacity in this dispatch. A GitHub Pages
 Upstream check: dirvine's current x0x #504 directs efficiency measurement toward per-kind/delivered-vs-published evidence
 and folds earlier #622 work into the active tracker; #505 remains a separate fragmentation field-evidence history.
 No mesh acceptance, SDK-wide 500 cap, or throughput improvement is inferred from an issue's closed badge.
+
+## Release
+
+PR #390 merged as `7f339bb0b`. The changed playback and fixture files match post-merge main.
+The PR secret scan passed. Broader CI and GitHub Pages were still queued at the first release check;
+the then-public HTML was still the previous build, so no deployment claim was made from the merge alone.
+Only this lane's duplicate push jobs and unchanged proof jobs were canceled; other seats' jobs were preserved.
 
 References: [hls.js API](https://github.com/video-dev/hls.js/blob/v1.6.15/docs/API.md),
 [FFmpeg HLS muxer](https://ffmpeg.org/ffmpeg-formats.html#hls-2),

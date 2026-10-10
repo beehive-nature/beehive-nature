@@ -101,9 +101,15 @@ test('paused and cancelled streams stop demand; replacement ignores old callback
   const { context, page, errors, hits, stray } = await open({ slow: true });
   try {
     await watch(page); await page.waitForFunction(() => document.getElementById('v').currentTime > 1, null, { timeout: 20000 });
+    const initialSegments = hits.filter(h => h.path.endsWith('.m4s')).map(h => h.path);
+    assert.equal(new Set(initialSegments).size, initialSegments.length, 'initial play does not abort and refetch a segment');
     await page.evaluate(() => document.getElementById('v').pause());
     await page.waitForTimeout(500); const pausedRequests = hits.length;
     await page.waitForTimeout(2200); assert.equal(hits.length, pausedRequests, 'paused playback does not keep fetching');
+    const pausedAt = await page.evaluate(() => document.getElementById('v').currentTime);
+    await page.evaluate(() => document.getElementById('v').play());
+    await page.waitForFunction(t => document.getElementById('v').currentTime > t + 1, pausedAt, { timeout: 10000 });
+    assert.ok(hits.length > pausedRequests, 'resume restarts demand at the current playhead');
     await page.fill('#addr', 'bad'); await page.locator('#f button').click();
     const cancelledRequests = hits.length; await page.waitForTimeout(2200);
     assert.equal(hits.length, cancelledRequests); assert.equal((await snapshot(page)).adaptive, null);
