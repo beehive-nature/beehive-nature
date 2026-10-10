@@ -15,6 +15,39 @@ RELAYED = founder briefing 2026-10-09, sources as cited, not re-fetched.
 
 ---
 
+## 2026-10-10 — reconciliation entry: deadline board standing, receipts reconciled, no engagement
+
+Not a new signal — a dated reconciliation against current main (founder
+order 2026-10-10), so the ledger's next reader sees the state as of
+today without re-deriving it.
+
+**The deadline board (re-stated, dates as banked):**
+- Indonesia liveness EME registration closes **Oct 13 2026, 11:59 P.M.
+  Jakarta (UTC+7)** [FIRST-HAND 2026-10-09 — three days from this
+  entry]. Engagement remains founder-class; NO registration, submission,
+  or outreach has been made or is made by this entry (standing order).
+- Cyprus 609805-2026 closes Oct 13 [RELAYED]. DHS RIVR-2 first-track
+  applications Oct 16 [RELAYED]. Relayed rows stay relayed — none was
+  re-fetched (the verification-timing law: fresh verification only
+  immediately before an authorized action or on material change; no
+  action is authorized).
+
+**Receipts reconciliation (verified this date against GitHub + main):**
+the ledger's name-your-receipts posture leans on canon that moved since
+the 10-09 entry landed — #374 (RB04: Daedalus-generated Rust vs BNR's
+WB001 decoder; CI receipts in-tree under `docs/receipts/btungsten-rb/`),
+#379 (the L5 boot-gate law — "configuration intent is never runtime
+evidence"; dispatch `2026-10-09-btungsten-l5-boot-gate.md`), and #380
+(this ledger + the BT-WORKTREE-ISOLATION class record) all MERGED with
+zero non-green check-runs at their merge commits. The 10-09 dispatch's
+"merge order" next-owner line is resolved by those events. #378
+(skaists×wb004 SETTLE bridge) remains OPEN with a VERIFIED
+non-implication of its own change — see
+`docs/dispatches/2026-10-10-btungsten-watch-reconciliation.md` for the
+diagnosis and routing.
+
+---
+
 ## 2026-10-09 — nine signals (founder briefing, three verified first-hand)
 
 ### The three highest-value bTunGsTeN specimens (founder ranking, concurred)
