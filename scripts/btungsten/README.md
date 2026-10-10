@@ -529,6 +529,15 @@ runtime byte.
    Ed25519 RFC 8032 Cryptol spec (`wb001-cryptol/Ed25519.cry`).
    Open: a SAW proof that `libcrux-ed25519` equals `Ed25519.cry` (its
    own correctness proof is HACL*'s F* development).
+   **ROUTED (founder order 2026-10-10):** the Cryptol-side PROVE-
+   UNIVERSAL of `wireInjective` (with `wireIndexDef` and
+   `wireZeroTail` beneath it — currently NOT-PROVEN by memory-cap
+   under z3, honestly recorded) is OWNED by the active RB05
+   grammar-equivalence lane (`claude-LoVis/rb05-grammar-equivalence`;
+   decode_core == decodeSpec for every buffer and length). No other
+   seat proofings toward that obligation — the SAW result above and
+   the Cryptol leg are separate result classes and stay separately
+   recorded; neither is ever written down as the other.
 4. **Distributed leg:** the bounded BNR job through a hostile P2P
    workflow — kill services, reroute, replay, fake peer, partition,
    heal — final result must still satisfy this invariant and produce the

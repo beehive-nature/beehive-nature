@@ -54,3 +54,39 @@ Merge main after this lands and rerun the failed formal job — the
 runner your PR carries will no longer die with the host.
 
 HUMAN INTERACTION: NONE.
+
+## CLOSE-OUT (founder order 2026-10-08: finalize and archive; no new work)
+
+- **Merge and CI verified**: PR #370 MERGED at `6872ee690`
+  (2026-10-08T06:06:24Z); every workflow on main at that SHA concluded
+  success — tests, secret-scan, pages, ant-reach, and the WB002 WASM
+  corpus.
+- **Classification law, preserved as landed**: OOM and timeout deaths
+  are `NOT-PROVEN` classes and can NEVER read as PROVEN. On main the
+  runner prints `NOT-PROVEN (memory …)` (two sites: the RTS rc=251 /
+  "cryptol: out of memory" branch and the SIGKILL-at-cap branch) and
+  `NOT-PROVEN (timeout …)`; PROVEN is printed only for a `Q.E.D.`
+  verdict line, and UNKNOWN-VERDICT / external SIGTERM stay red.
+- **Standing obligation recorded for future work**: `wireIndexDef` —
+  `wire a @ p == byteAt a p` for p < 4626 — the compositional
+  comprehension-index step between the PROVEN position-wise zero tail
+  (`zeroTailAtPosition`, 1.3s) and the composed/enum forms. It is now
+  two-facts hard: it times out (120s class) AND exhausts 6 GiB (rc=251
+  class). The named lever: per-block index lemmas (prove the identity
+  block-by-block over position ranges), then the field-recovery
+  argument toward `wireInjective` (equal wires ⇒ equal length words ⇒
+  equal offsets ⇒ equal meaningful bytes ⇒ equal records). Rust-twin +
+  SAW EQUIVALENCE remains its own later class.
+- **#367**: already MERGED at `31ce0cd52`'s lineage (2026-10-08T08:14:55Z,
+  20/20 checks green, AFTER the memcap landed) — the owner already rode
+  the capped runner; the rebase-and-rerun notice is moot and no
+  notification was needed.
+- **Session archive**: this dispatch is the lane's closing record;
+  carry-overs live above and in the lane memory. Lane state at archive:
+  WB001 executable battery + boundary suite + bridge + 5 universal
+  lemmas PROVEN (offsetsOrdered, validImpliesBounded, zeroTailAtPosition
+  + the two historical scoped receipts), 1 executed refutation gated,
+  wireIndexDef / wireZeroTail / wireInjective honestly open with named
+  levers, formal job runner hardened (memory cap, honest classes).
+
+HUMAN INTERACTION: NONE.
