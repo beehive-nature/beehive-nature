@@ -24,7 +24,15 @@ jobs:
         run: cargo build --workspace --locked
       - name: Test workspace
         if: always()
-        run: cargo test --workspace --locked
+        env:
+          # ORDER BZDID-002 Phase 1: crates/bzdid's organ suite signs a
+          # rotation through the REAL frozen bsigner CLI and verifies it
+          # locally. The gate below is the settle-nerve precedent: a
+          # skipped suite is not a pass.
+          BZDID_BSIGNER_BIN: ${{ github.workspace }}/target/debug/bsigner
+        run: |
+          test -x "$BZDID_BSIGNER_BIN" || { echo "bsigner binary missing for bzdid's organ suite: a skipped suite is not a pass"; exit 1; }
+          cargo test --workspace --locked
       # the same SETTLE contract on a second rail: the binary this job just built
       - name: bPay SETTLE — Solana native carrier through the built settle-solana binary
         if: always()
@@ -866,7 +874,7 @@ jobs:
         if: always()
         working-directory: e2e
         # GitHub's Ubuntu image includes codec-capable Chrome; bundled Chromium lacks H264.
-        run: node --test bview-adaptive.test.mjs bview-published.test.mjs ../tools/video-trial/capacity.test.mjs ../tools/video-trial/package-hls.test.mjs
+        run: node --test bview-adaptive.test.mjs bview-published.test.mjs ant-hls.test.mjs bview-ant-hls.test.mjs ../tools/video-trial/capacity.test.mjs ../tools/video-trial/package-hls.test.mjs
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest

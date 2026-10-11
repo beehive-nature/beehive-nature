@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded',function(){
             <input id="addr" name="addr" inputmode="url" spellcheck="false" dir="ltr" translate="no" placeholder="autonomi://…">
             <button type="submit" class="primary"><span data-reg="bee" data-i18n="bview.bee.go">watch</span><span data-reg="raver" aria-hidden="true">▶</span><span data-reg="raver" class="sr" data-i18n="bview.raver.go">play</span><span data-reg="cypherpunk" data-i18n="bview.cy.go">fetch</span></button>
           </form>
-          <p class="stream-help">You can also paste an HTTPS video playlist ending in .m3u8. Picture quality then adapts to your connection; the playlist's host supplies the video. <a href="#https%3A%2F%2Fskaists.dev%2Ffixtures%2Fbview%2Fadaptive%2Fmaster.m3u8">Try a 48-second test pattern with sound.</a></p>
+          <p class="stream-help">Paste an ant-hls:// video pack address for adaptive playback directly from Autonomi. HTTPS playlists ending in .m3u8 also work; their host supplies the video. <a href="#https%3A%2F%2Fskaists.dev%2Ffixtures%2Fbview%2Fadaptive%2Fmaster.m3u8">Try a 48-second test pattern with sound.</a></p>
           <div class="playback-route"><label for="playback-route">Playback route</label>
             <select id="playback-route"><option value="adaptive">Adaptive when available</option><option value="relay">Original · relay only</option><option value="direct-only">Original · direct Autonomi only</option><option value="direct">Original · direct + relay fallback</option></select>
             <p>Adaptive uses a published HTTPS copy with picture quality that follows your connection. Without a published copy it uses the original through the relay. Direct only never asks the relay or a playlist host. Applies when you press Watch. Every run names where its bytes came from.</p>
@@ -540,6 +540,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // Where this run's bytes came from, said once for every front and every receipt.
   const sourceOf = () => {
     const dr = metrics.direct, p = metrics.path;
+    if (p === 'ant-hls') return { kind: 'direct', text: 'adaptive video · direct Autonomi storage reads · no HTTPS media or estate relay fallback' };
     if (p === 'hls') return { kind: 'https', text: (metrics.adaptive?.published ? 'published adaptive copy' : 'adaptive video') + ' · HTTPS playlist host · no Autonomi or estate relay requests' };
     if (p === 'cache') return { kind: 'cache', text: 'cache · this device · neither the relay nor Autonomi was asked' };
     if (dr && dr.stopped) return { kind: 'direct', text: 'direct only · stopped: ' + dr.stopped + ' · ' + dr.uniqueBytes + ' B arrived · relay not used' };
@@ -1833,16 +1834,17 @@ document.addEventListener('DOMContentLoaded',function(){
     try { const u = new URL(raw); return u.protocol === 'https:' && !u.username && !u.password && /\.m3u8$/i.test(u.pathname) ? u.href : null; }
     catch { return null; }
   };
-  async function playAdaptive(url, my, signal, publication = null) {
-    closePool(); // This route owns no storage-node connection pool.
-    metrics.path = 'hls'; metrics.route = publication ? 'adaptive' : 'https';
+  async function playAdaptive(url, my, signal, publication = null, antSession = null) {
+    if (!antSession) closePool();
+    metrics.path = antSession ? 'ant-hls' : 'hls'; metrics.route = antSession ? 'ant-hls' : publication ? 'adaptive' : 'https';
     const receipt = metrics.adaptive = { mode: null, segments: 0, mediaBytes: 0, errors: 0, recoveries: 0,
       switches: 0, level: null, bitrate: null, bandwidth: null, peakAhead: 0,
       forwardTargetSeconds: 20, backTargetSeconds: 10, bufferTargetBytes: 24 * 1024 * 1024,
-      published: !!publication, bundleId: publication?.bundleId || null };
+      published: !!publication, bundleId: publication?.bundleId || antSession?.manifest.bundleId || null,
+      transport: antSession ? 'autonomi' : 'https', delivery: antSession ? { ...antSession.stats } : null };
     const alive = () => my === job && !signal.aborted;
-    routeStatus(publication ? 'Published adaptive copy from skaists.dev. Quality adjusts automatically. Choose an Original route to fetch the original file.' : 'Adaptive video from the playlist host. Quality adjusts automatically.');
-    const fail = () => { if (!alive()) return; adaptivePlayer?.destroy(); adaptivePlayer = null; endHold(); say('s-fail'); };
+    routeStatus(antSession ? 'Adaptive video directly from Autonomi. No hosted media or relay fallback. Quality adjusts automatically.' : publication ? 'Published adaptive copy from skaists.dev. Quality adjusts automatically. Choose an Original route to fetch the original file.' : 'Adaptive video from the playlist host. Quality adjusts automatically.');
+    const fail = () => { if (!alive()) return; adaptivePlayer?.destroy(); adaptivePlayer = null; antSession?.close(); endHold(); say('s-fail'); };
     const loaded = () => { if (alive()) { markFirstFrame(); playing = my; say(null); goSound(my); } };
     v.addEventListener('loadeddata', loaded, { once: true, signal });
     if (!window.Hls) {
@@ -1862,6 +1864,7 @@ document.addEventListener('DOMContentLoaded',function(){
       const retry = { maxNumRetry: 2, retryDelayMs: 500, maxRetryDelayMs: 2000, backoff: 'exponential' };
       const policy = { default: { maxTimeToFirstByteMs: 10000, maxLoadTimeMs: 20000, timeoutRetry: { ...retry }, errorRetry: { ...retry } } };
       const hls = adaptivePlayer = new Hls({
+        ...(antSession ? { loader: antSession.Loader } : {}),
         enableWorker: true, lowLatencyMode: false, startLevel: 0, testBandwidth: false,
         capLevelToPlayerSize: true, capLevelOnFPSDrop: true, maxDevicePixelRatio: 1,
         maxBufferLength: 20, maxMaxBufferLength: 20, backBufferLength: 10, frontBufferFlushThreshold: 20,
@@ -1875,7 +1878,7 @@ document.addEventListener('DOMContentLoaded',function(){
         // The transmux worker can detach payload before this listener runs. Fragment
         // stats survive transfer; never mistake a detached ArrayBuffer for zero bytes.
         const stats = data.frag?.stats, n = stats?.loaded || 0;
-        if (metrics.ttfbMs == null && stats?.loading?.first > 0) metrics.ttfbMs = Math.max(0, stats.loading.first - metrics.t0);
+        if (metrics.ttfbMs == null && stats?.loading?.first > 0) metrics.ttfbMs = Math.max(0, (antSession ? stats.loading.end : stats.loading.first) - metrics.t0);
         receipt.segments++; receipt.mediaBytes += n; metrics.bytes = receipt.mediaBytes;
         receipt.bandwidth = Number.isFinite(hls.bandwidthEstimate) ? hls.bandwidthEstimate : null;
         paintNerd();
@@ -1900,7 +1903,7 @@ document.addEventListener('DOMContentLoaded',function(){
       v.addEventListener('play', () => { if (alive() && loadingPaused) { loadingPaused = false; hls.startLoad(-1); } }, { signal });
       v.addEventListener('progress', () => { if (alive()) receipt.peakAhead = Math.max(receipt.peakAhead, videoFacts().ahead); }, { signal });
       hls.loadSource(url); hls.attachMedia(v); window.__bviewSrcAssigns++;
-    } else if (v.canPlayType('application/vnd.apple.mpegurl')) {
+    } else if (!antSession && v.canPlayType('application/vnd.apple.mpegurl')) {
       receipt.mode = 'native'; // Native buffering/network metrics are unavailable to this page.
       receipt.forwardTargetSeconds = receipt.backTargetSeconds = receipt.bufferTargetBytes = null;
       receipt.segments = receipt.mediaBytes = receipt.errors = null;
@@ -1911,6 +1914,7 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   async function view(raw, options = {}) {
     if (options.relay && options.reason) holdDecodedFrame();
+    const antAddress = /^ant-hls:\/\/([a-f0-9]{64})$/i.exec(String(raw).trim())?.[1].toLowerCase();
     const stream = playlistURL(raw), a = parse(raw), my = ++job;
     if (options.relay && options.reason && !heldFrame.hidden) savedFrameJob = my;
     restorePause = !!options.paused;
@@ -1931,12 +1935,38 @@ document.addEventListener('DOMContentLoaded',function(){
     resetMetrics(); paintNerd();
     if(options.directReceipt)metrics.direct=options.directReceipt;
     metrics.route = routeOf();
-    if (!a && !stream) { delete $('out').dataset.addr; document.body.removeAttribute('data-watching'); renderInst(); $('out').hidden = true; v.removeAttribute('src'); v.load(); say('s-bad'); return; }
-    metrics.addr = a || stream; metrics.t0 = performance.now();
+    if (!a && !stream && !antAddress) { delete $('out').dataset.addr; document.body.removeAttribute('data-watching'); renderInst(); $('out').hidden = true; v.removeAttribute('src'); v.load(); say('s-bad'); return; }
+    metrics.addr = a || stream || 'ant-hls://' + antAddress; metrics.t0 = performance.now();
     routeStatus(options.reason ? options.reason + '. Continuing through the relay.' : '');
     note('open · route ' + metrics.route + (options.relay ? ' · relay fallback' : ''));
-    $('out').dataset.addr = stream ? 'HTTPS playlist' : 'autonomi://' + a; document.body.setAttribute('data-watching', ''); $('out').hidden = false; say('s-slow'); if (tap) tap.hidden = true;
+    $('out').dataset.addr = antAddress ? 'ant-hls://' + antAddress : stream ? 'HTTPS playlist' : 'autonomi://' + a; document.body.setAttribute('data-watching', ''); $('out').hidden = false; say('s-slow'); if (tap) tap.hidden = true;
     paintNerd();
+    if (antAddress) {
+      frameGen++; v.removeAttribute('src'); v.load(); dropOpen();
+      metrics.path = metrics.route = 'ant-hls';
+      routeStatus('Opening adaptive video pack directly from Autonomi. No hosted media fallback.');
+      try {
+        const { createAntSession } = await import('../tools/autonomous-delivery/ant-hls.mjs');
+        const pool = openPool();
+        const client = await new Promise((resolve, reject) => {
+          const aborted = () => { cleanup(); reject(new DOMException('Cancelled', 'AbortError')); };
+          const timer = setTimeout(() => { cleanup(); if (directPool === pool) closePool(); reject(Error('Autonomi connection timed out')); }, 30000);
+          const cleanup = () => { clearTimeout(timer); signal.removeEventListener('abort', aborted); };
+          signal.addEventListener('abort', aborted, { once: true });
+          if (signal.aborted) { aborted(); return; }
+          pool.client.then(value => { cleanup(); resolve(value); }, error => { cleanup(); reject(error); });
+        });
+        if (my !== job || signal.aborted) return;
+        const session = await createAntSession({ address: antAddress, client, signal, onReceipt: delivery => {
+          if (my === job && !signal.aborted && metrics.adaptive) metrics.adaptive.delivery = delivery;
+        } });
+        if (my !== job || signal.aborted) { session.close(); return; }
+        await playAdaptive(session.url, my, signal, null, session);
+      } catch (error) {
+        if (my === job && !signal.aborted) { routeStatus('Direct adaptive playback stopped: ' + error.message + '. No hosted media or relay fallback.'); say('s-fail'); }
+      }
+      return;
+    }
     if (stream) { frameGen++; v.removeAttribute('src'); v.load(); await playAdaptive(stream, my, signal); return; }
     const published = routeOf() === 'adaptive' && publishedURL(a);
     if (published) {
@@ -2029,8 +2059,8 @@ document.addEventListener('DOMContentLoaded',function(){
   function read(){
     var E=window.__bviewEngine?window.__bviewEngine():null; if(!E) return;
     var u=new URL(E.door); D.door.host=u.host; D.door.base=u.pathname; D.rule=E.rule; D.cache=E.cache; D.live=E;
-    D.door.network=E.adaptive?'HTTPS':'Autonomi';
-    if(E.adaptive){D.door.host='playlist host';D.door.base='';}
+    D.door.network=E.adaptive&&E.adaptive.transport!=='autonomi'?'HTTPS':'Autonomi';
+    if(E.adaptive){D.door.host=E.adaptive.transport==='autonomi'?'Autonomi storage nodes':'playlist host';D.door.base='';}
     if(E.path==='webrtc' || E.path==='webrtc-connecting'){D.door.host='Autonomi storage nodes';D.door.base='';}
     var s=!E.has?(E.bad?'refused':'idle'):E.fail?'failed':E.doneMs!=null?'done':E.stalled?'stalled':(E.waitS&&!(E.sounded&&!E.stalled))?'waiting':(E.sounded?'playing':'fetching');
     if(E.adaptive&&!E.fail)s=E.video.ended?'ended':E.playStartMs==null?'fetching':E.video.paused?'paused':'playing';
@@ -2070,7 +2100,7 @@ document.addEventListener('DOMContentLoaded',function(){
       ['sofar',T('et.bview.b.sofar','so far'),'<span data-et="arrived">'+esc(D.view.arrived)+'</span>',T('et.bview.b.sofarSay','the rest keeps arriving while you watch.')],
       ['next',T('et.bview.b.next','next time'),esc(T('et.bview.b.nextV','opens at once')),T('et.bview.b.nextSay','this device keeps a copy of what you watched.')]
     ];
-    if(D.live&&D.live.adaptive){rows[0][2]='HTTPS playlist host';rows[0][3]='The playlist and segment hosts supply this video. Autonomi and the estate relay are not asked.';rows[1][3]='Playback starts at a small picture size and adjusts quality as delivery speed changes.';rows[3][2]='streams again';rows[3][3]='Only a moving window is buffered. Availability depends on the playlist and segment hosts.';}
+    if(D.live&&D.live.adaptive){var ant=D.live.adaptive.transport==='autonomi';rows[0][2]=ant?'Autonomi storage nodes':'HTTPS playlist host';rows[0][3]=ant?'One Autonomi video pack supplies verified media ranges. No HTTPS media or estate relay fallback.':'The playlist and segment hosts supply this video. Autonomi and the estate relay are not asked.';rows[1][3]='Playback starts at a small picture size and adjusts quality as delivery speed changes.';rows[3][2]='streams again';rows[3][3]=ant?'A bounded window is cached on this device. Availability depends on Autonomi storage nodes.':'Only a moving window is buffered. Availability depends on the playlist and segment hosts.';}
     box.innerHTML=rows.map(function(r){var o=!!R.open[r[0]];
       return '<button type="button" class="et-b-row" data-row="'+r[0]+'" aria-expanded="'+o+'"><span>'+esc(r[1])+'</span><small>'+r[2]+'<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>'+
         '<p class="et-b-say" data-say="'+r[0]+'"'+(o?'':' hidden')+'>'+esc(r[3])+'</p>';}).join('');
@@ -2148,6 +2178,11 @@ document.addEventListener('DOMContentLoaded',function(){
       ['rolling buffer','20 s forward / 10 s behind targets in MSE mode · seek may retain existing forward data',E.playStartMs!=null?'done':'todo'],
       ['integrity and cache','HTTPS delivery · no whole-file SHA or offline-copy claim','skip']
     ];
+    if(E.adaptive&&E.adaptive.transport==='autonomi'){
+      steps[0]=['parse · ANT video pack','one public storage object · embedded playlists and indexed media ranges','done'];
+      steps[2]=['range delivery','quality follows complete-range throughput · at most three reads admitted · no hosted media fallback',E.playStartMs!=null?'done':'todo'];
+      steps[4]=['integrity and cache','SHA-256 verified media ranges · bounded device cache · no whole-file offline-copy claim',E.adaptive.delivery&&E.adaptive.delivery.verifiedBytes?'done':'todo'];
+    }
     if(E.fail) steps[2][2]=steps[2][2]==='todo'?'guard':steps[2][2];
     var now=steps.findIndex(function(s){return s[2]==='todo';});
     $('etPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===now&&E.has?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
@@ -2169,7 +2204,8 @@ document.addEventListener('DOMContentLoaded',function(){
     rows.push(['application holds',esc(E.holds?E.holds+' · '+ms(E.holdMs)+' including pauses made by the player':'none yet')]);
     if(E.streaming){rows.push(['direct media stream',esc('MSE · '+E.streaming.fragments+' fragments · '+E.streaming.appendedBytes+' B appended · original file retained for integrity/cache'+(E.streaming.fallback?' · file-player fallback':''))]);rows.push(['direct buffer policy',esc(E.streaming.forwardTargetSeconds+' s / '+(E.streaming.bufferTargetBytes/1048576)+' MiB forward targets · '+E.streaming.backTargetSeconds+' s history · can overshoot by arriving chunks · original file and hashing memory are additional')]);}
     if(E.adaptive){var a=E.adaptive;rows.push(['adaptive video',esc(a.mode+' · quality '+(a.level==null?'not yet':a.level)+' · '+(a.bitrate?(a.bitrate/1e6).toFixed(2)+' Mb/s':'not yet')+' · '+a.switches+' quality changes')]);rows.push(['buffer policy',esc(a.mode==='native'?'browser managed · network and buffer limits unavailable':'20 s forward / 10 s behind targets · 24 MiB compressed-buffer target, not total browser memory')]);}
-    rows.push(['first response',esc((direct?'first chunk in order · ':'HTTP response headers · ')+ms(E.ttfbMs))],['first frame',esc(ms(E.ttffMs))]);
+    rows.push(['first response',esc((E.adaptive&&E.adaptive.transport==='autonomi'?'first verified segment · ':direct?'first chunk in order · ':'HTTP response headers · ')+ms(E.ttfbMs))],['first frame',esc(ms(E.ttffMs))]);
+    if(E.adaptive&&E.adaptive.delivery){var dl=E.adaptive.delivery;rows.push(['ANT range reads',esc(dl.opens+' open · '+dl.requests+' reads · '+dl.readBytes+' B returned · '+dl.verifiedBytes+' B hash-verified · '+dl.cacheHits+' cache hits')],['measurement boundary',esc(dl.boundary+' · not a payment receipt')]);}
     if(vf){
       rows.push(['playhead',esc(E.playhead.toFixed(2)+' s'+(vf.duration!=null?' / '+vf.duration.toFixed(2)+' s':'')+' · '+(vf.ended?'ended':vf.paused?'paused':'playing'))],
         ['picture',esc(vf.width?vf.width+'×'+vf.height:'not yet')],
