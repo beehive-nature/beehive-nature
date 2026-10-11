@@ -4,6 +4,13 @@ The billion-viewer figure is a design target, not measured or deployed capacity.
 The static page, video delivery, storage discovery, publisher encoding and telemetry have separate budgets.
 One browser or a local simulation cannot certify their combined capacity.
 
+The estate's architecture is serverless. Use the [direct ANT pack reader and
+resource model](../autonomous-delivery/README.md) for that direction. The HTTPS
+hosting, origin, regional cache and edge calculations below describe the
+already published HTTPS route and a comparison baseline; they are not a mandate
+to provision an estate video service. A direct ANT pack still needs its own
+upload, retrieval and live playback evidence before replacing that route.
+
 ## Playback and publishing
 
 bView accepts public Autonomi addresses as before. It also accepts an HTTPS URL whose path ends in `.m3u8`.
@@ -63,21 +70,29 @@ Each master bandwidth value comes from measured segment sizes with 10% headroom.
 A failed encode leaves inspectable partial output and no completed `package.json`.
 Only publish complete packages, under a unique version/content path such as its `bundleId`; never overwrite immutable segments.
 
-Publisher hosting requirements: HTTPS, correct MIME types, CORS for GET/HEAD from the player origin,
+For publishers choosing the HTTPS route: correct MIME types, CORS for GET/HEAD from the player origin,
 immutable long-lived caching for versioned VOD playlists/init/segments, and no per-viewer cache-busting URLs.
 Private media requires a separate authorization design; do not put secrets in public playlist links.
-Use regional caches, origin shielding, coalesced cache fills, capacity-based admission, and multiple failure domains.
-Those deployment controls are requirements, **not infrastructure installed by this change**.
+An HTTP operator would need regional caches, origin shielding, coalesced cache fills,
+capacity-based admission and multiple failure domains. These describe that optional
+hosting model, **not infrastructure installed or required by the direct ANT route**.
 GitHub Pages can demonstrate a small fixture; it is not the billion-viewer delivery tier.
 
 The committed synthetic fixture is 48 seconds of FFmpeg `testsrc2` (640x360, 30 fps) plus a 440 Hz tone,
 encoded first at CRF 18 and then packaged by this tool. It is test media, not a visual-quality benchmark.
 
-## Capacity envelope
+## HTTPS baseline capacity envelope
 
 ### ZK validator boundary
 
-The current `tools/solana-tungsten/src/lib.rs:Worker::prove` proves the square-job relation;
+The recovered Rust funded wallet and Vaulta native validator are documented in
+[the serverless source study](../../docs/dispatches/2026-10-11-serverless-ant-video.md).
+That BLS12-381 Groth16 suite, the estate's BN254 PLONK receipt suite, and the
+following square-job lab prove different statements and use different encodings.
+The founder-reported 50x paired benchmark remains unlocated; no such multiplier
+is applied to either capacity model.
+
+`tools/solana-tungsten/src/lib.rs:Worker::prove` proves the square-job relation;
 `LocalGate::plan` separately checks an authorized job, verifier key, ceilings, expiry, rail and replay key.
 The circuit is `tools/solana-tungsten/lab/square.circom:SquareJob`. It contains no video-delivery statement.
 The private Solana/Vaulta fixtures are not production delivery infrastructure or a billion-viewer capacity result.
@@ -131,7 +146,7 @@ Capture rendition switches, payload, dropped frames, buffer ahead/back, request/
 origin fill concurrency, regional throughput, startup p50/p95/p99, and successful completed viewing minutes.
 The existing capture stays local and allowlisted; no per-viewer telemetry upload is introduced.
 
-Next distributed acceptance must establish provisioned per-region capacity and then ramp representative traffic
+For the HTTPS baseline, distributed acceptance must establish provisioned per-region capacity and then ramp representative traffic
 through cold/warm cache, popular/long-tail content, simultaneous startup, origin failure and regional loss.
 Measure delivered video and QoE at each tier; stop increases when the measured budget is exceeded.
 Do not treat extrapolation, synthetic mocks, green CI or the public demo as one billion successful sessions.
@@ -154,6 +169,9 @@ Initial engineering acceptance targets for that future distributed qualification
 
 These are test targets, not measured achievements, existing service guarantees or authorization to incur infrastructure charges.
 File integrity and eventual completion, such as the recorded 434 s direct startup, are insufficient to satisfy this qualification.
+The direct ANT route needs its own cold/warm discovery, SDK wire-byte, node-read,
+retry, device-memory and completed-playback measurements. The same QoE targets
+remain useful, but HTTP edge-unit counts do not qualify an ANT node network.
 
 Implementation references: [hls.js 1.6.15 API](https://github.com/video-dev/hls.js/blob/v1.6.15/docs/API.md),
 [FFmpeg HLS muxer](https://ffmpeg.org/ffmpeg-formats.html#hls-2),
