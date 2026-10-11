@@ -1709,7 +1709,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </section>
 <script src="adapter-seam.js" defer></script>
 <script src="ant-pay.js?v=10" defer></script>
-<script src="bpay-invoice.js?v=10" defer></script>
+<script src="bpay-invoice.js?v=11" defer></script>
 <script>if(window.ResizeObserver)new ResizeObserver(function(entries){document.documentElement.style.setProperty('--wallet-offset',Math.ceil(entries[0].target.getBoundingClientRect().height+12)+'px')}).observe(document.getElementById('wallet-identity'));document.querySelector('[data-wallet-store]').addEventListener('click',function(e){e.preventDefault();e.stopPropagation();document.querySelector('#wl-dock [data-wl-go="keep"]').click();document.querySelectorAll('main>section[data-wl-open]').forEach(function(s){s.removeAttribute('data-wl-open')});document.getElementById('wallet-storage').scrollIntoView({block:'start'});});</script>
 
 <!-- ══ THE VOUCHER — prepaid compute, the money engine with a face ══ -->
@@ -10195,7 +10195,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   window.addEventListener('hashchange', openGenealogyConsent);
   openGenealogyConsent();
   window.BNRHIVE={amount:hiveAmount,ser:hiveSer,digest:function(b){return hexS(hiveDigest(b))},sign:function(wif,b){ return hiveSign(wif,hiveDigest(b)) },pubOf:hivePubOf,bound:function(){return hiveBound()}};
-  window.BNRPAY={rlp:rlp,evmSendRaw:evmSendRaw,antStorageSigner:antStorageSigner,parseWif:parseWifAny,
+  window.BNRPAY={rlp:rlp,evmSendRaw:evmSendRaw,antStorageSigner:antStorageSigner,receiveQr:function(address){if(!/^0x[0-9a-fA-F]{40}$/.test(address))throw Error('Invalid receive address');return qrSvg(address);},parseWif:parseWifAny,
     antStorageState:function(){return {connected:!!MPRK,hasName:!!SOUL,coreReady:!!CORE};},
     rails:EVM_RAILS,evmChecksumOk:evmChecksumOk,
     ripemd160:ripemd160,hash160:hash160,p2wpkhAddress:p2wpkhAddress,solanaAddress:solanaAddress,
