@@ -115,6 +115,22 @@ try{
       localStorage.removeItem('bnr-spend-cap');return errors;
     });
     assert.deepEqual(refusals,Array(8).fill('refused'));
+    // The daily cap holds one reservation per payer nonce: the same nonce re-signed under a
+    // second invoice counts once; a different nonce past the cap is refused.
+    const reuse=await page.evaluate(()=>{
+      const ledger=JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k=>k.startsWith('bnr.ant.purchase.v1:'))));
+      const p=ledger.plans[0];p.authorization={invoice:p.id,scope:p.scope,payer:p.payer,artifactSha256:ledger.artifact.sha256,expiresAt:p.expiresAt,gasCeilingWei:p.gasCeilingWei};
+      const t=p.txs[0];t.state='sending';t.nonce='0x0';
+      const signer=BNRPAY.antStorageSigner(),kept=localStorage.getItem('bnr-cap-ledger');
+      localStorage.removeItem('bnr-cap-ledger');localStorage.setItem('bnr-spend-cap',JSON.stringify({ETH:Number(BigInt(t.reservedWei))/1e18}));
+      const sign=inv=>{const x=inv.txs[0];try{signer.signTransaction({from:inv.payer,to:x.to,data:x.data,gas:x.gas,nonce:x.nonce,maxFeePerGas:x.maxFeePerGas,maxPriorityFeePerGas:'0x0',value:'0x0',chainId:'0xa4b1'},{artifact:ledger.artifact,network:ledger.network,invoice:inv,kind:x.kind});return 'signed';}catch{return 'refused';}};
+      const again=structuredClone(p);again.id='0x'+'1'.repeat(64);again.authorization.invoice=again.id;
+      const next=structuredClone(p);next.txs[0].nonce='0x1';
+      const out=[sign(p),sign(again),sign(next)];
+      localStorage.removeItem('bnr-spend-cap');if(kept===null)localStorage.removeItem('bnr-cap-ledger');else localStorage.setItem('bnr-cap-ledger',kept);
+      return out;
+    });
+    assert.deepEqual(reuse,['signed','signed','refused']);
   }
   await page.locator('#ant-buy-stop').click();await until(()=>page.locator('#ant-buy-start').isEnabled());assert.equal(await page.evaluate(()=>window.__sends),0);
   await page.locator('#ant-buy-start').click();await page.getByRole('button',{name:'Authorize this invoice and ask my wallet'}).click();

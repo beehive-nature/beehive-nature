@@ -57,25 +57,32 @@ function fixture(options={}){
 }
 async function authorized(f,q=quotes){const inv=await f.payer.invoice(network,q,'20000000');f.payer.authorize(inv);return inv;}
 function nativeFixture(options={}){
- const f=fixture({approved:true}),base=f.cfg.rpc;let broadcasts=0;
+ const f=fixture({approved:true}),base=f.cfg.rpc;let broadcasts=0,signs=0,unsent=null;
  f.cfg.verify=verify;
  f.cfg.signer={address:()=>PAYER,signTransaction:async(tx,bound)=>{
   assert.equal(bound.invoice.authorization.invoice,bound.invoice.id);
   if(options.refuse)throw Error('keychain locked');
   if(options.expire)f.time(bound.invoice.expiresAt);
+  signs++;
   const signed=envelope(tx,options.change); // Real secp256k1 envelopes; the Rust core is exercised in ant-hosted-browser.
-  f.txs.set(signed.hash,{...tx,input:tx.data,hash:signed.hash});
+  const mined={...tx,input:tx.data,hash:signed.hash};
+  if(options.lostSend)unsent=mined;else f.txs.set(signed.hash,mined);
   return signed;
  }};
  f.cfg.rpc=async(method,p)=>{
+  // lostSend: no node has the envelope until it is offered again, so only known hashes have receipts
+  if(method==='eth_getTransactionReceipt'&&options.lostSend&&!f.txs.has(p[0]))return null;
+  if(method==='eth_getTransactionCount'&&p[1]==='latest'&&options.latestNonce)return options.latestNonce;
   if(method!=='eth_sendRawTransaction')return base(method,p);
   broadcasts++;
   const kept=JSON.parse(f.storage.getItem('bnr.ant.purchase.v1:'+artifact.sha256)).plans[0].txs[0];
   assert.equal(kept.raw,p[0]);assert.equal(kept.hash,'0x'+hexOf(B.keccak_256(bytesOf(p[0].slice(2)))));assert.equal(kept.state,'sending');
+  if(options.lostSend&&broadcasts===1)throw Error('network down before any node took it');
+  if(unsent)f.txs.set(unsent.hash,unsent);
   if(options.lostReply)throw Error('reply lost after broadcast');
   return kept.hash;
  };
- f.reload();return {f,get broadcasts(){return broadcasts;}};
+ f.reload();return {f,options,get broadcasts(){return broadcasts;},get signs(){return signs;}};
 }
 const keptTx=f=>JSON.parse(f.storage.getItem('bnr.ant.purchase.v1:'+artifact.sha256)).plans[0].txs[0];
 test('native envelope is decoded, compared, hashed and its sender recovered before anything is kept or broadcast',async()=>{
@@ -91,6 +98,30 @@ test('native envelope is decoded, compared, hashed and its sender recovered befo
  }
  const good=nativeFixture(),inv=await authorized(good.f);await good.f.payer.provider(inv.id).pay(network,quotes,{});
  assert.equal(good.broadcasts,1);assert.equal(keptTx(good.f).state,'confirmed');
+});
+test('a kept envelope no node took is offered again unchanged while authorized, never re-signed',async()=>{
+ const n=nativeFixture({lostSend:true}),inv=await authorized(n.f);
+ await assert.rejects(n.f.payer.provider(inv.id).pay(network,quotes,{}),/network down/);
+ assert.equal(keptTx(n.f).state,'sending');n.f.reload();
+ await n.f.payer.provider(null).recover(network,quotes,{},{});
+ assert.equal(n.broadcasts,2);assert.equal(n.signs,1);assert.equal(keptTx(n.f).state,'confirmed');
+});
+test('a kept envelope whose nonce another transaction used is dropped and releases its reservations',async()=>{
+ const n=nativeFixture({lostSend:true}),inv=await authorized(n.f);
+ await assert.rejects(n.f.payer.provider(inv.id).pay(network,quotes,{}),/network down/);
+ n.f.txs.set(hash('9'),{from:PAYER,nonce:'0x0',hash:hash('9'),to:addr('9'),input:'0x',value:'0x0'});n.options.latestNonce='0x1';n.f.reload();
+ await assert.rejects(n.f.payer.provider(null).recover(network,quotes,{},{}),/never ran/);
+ const s=n.f.payer.snapshot(),t=s.plans[0].txs[0];
+ assert.equal(t.state,'dropped');assert.equal(t.usedBy,hash('9'));assert.equal(s.plans[0].superseded,true);assert.equal(n.broadcasts,1);assert.equal(n.signs,1);
+ const fresh=await n.f.payer.invoice(network,[{...quotes[0],quoteHash:hash('d')}],'20000000');assert.ok(fresh.id);
+});
+test('an expired kept envelope no node took stays reserved and is not sent',async()=>{
+ const n=nativeFixture({lostSend:true}),inv=await authorized(n.f);
+ await assert.rejects(n.f.payer.provider(inv.id).pay(network,quotes,{}),/network down/);
+ n.f.time(inv.expiresAt+1);n.f.reload();
+ await assert.rejects(n.f.payer.provider(null).recover(network,quotes,{},{}),/has not reached the network/);
+ assert.equal(n.broadcasts,1);assert.equal(keptTx(n.f).state,'sending');
+ await assert.rejects(n.f.payer.invoice(network,[{...quotes[0],quoteHash:hash('d')}],'20000000'),/reconciled/);
 });
 test('the native signer path refuses to start without an independent verifier',()=>{
  const f=fixture();assert.equal(globalThis.BnrSign,undefined);

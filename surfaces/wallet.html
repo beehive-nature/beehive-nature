@@ -10120,12 +10120,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(!same(tx.to,t.kind==='approval'?n.paymentTokenAddress:n.paymentVaultAddress)||!same(tx.data,expected))refuse();
       var fee=BigInt(tx.gas)*BigInt(tx.maxFeePerGas);
       if(fee<=0n||fee!==BigInt(t.reservedWei)||fee>BigInt(p.gasCeilingWei))refuse();
-      var ledger=capLedger(),id='ant:'+p.id+':'+t.kind+':'+tx.nonce;
-      var counted=ledger.some(function(e){return e.id===id;});
+      // One reservation per payer nonce: only one transaction can ever use a nonce, so a
+      // payment re-signed or re-invoiced at the same nonce counts only what exceeds the
+      // reservation already held for it today, never the whole amount again.
+      var ledger=capLedger(),today=capToday(),id='ant:'+String(p.payer).toLowerCase()+':'+BigInt(tx.nonce);
       var antAmount=t.kind==='payment'?Number(fromBaseUnits(total,18)):0;
       var ethAmount=Number(fromBaseUnits(fee,18));
-      if(!counted){
-        for(var charge of [['ANT',antAmount],['ETH',ethAmount]]){
+      var held=function(u){return ledger.reduce(function(s,e){return (e.id===id&&e.u===u&&e.d===today)?s+e.a:s;},0);};
+      var extra={ANT:Math.max(0,antAmount-held('ANT')),ETH:Math.max(0,ethAmount-held('ETH'))};
+      {
+        for(var charge of [['ANT',extra.ANT],['ETH',extra.ETH]]){
+          if(!charge[1])continue;
           capAssert(charge[0],charge[1]);
           // Storage fees can be smaller than the legacy transfer display's
           // tolerance. In particular, a zero daily cap must refuse any fee.
@@ -10142,11 +10147,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         if(parity<0n||parity>1n)refuse();
         var raw=concatB(new Uint8Array([2]),rlp(unsigned.concat([parity,BigInt('0x'+hexS(sig.slice(1,33))),BigInt('0x'+hexS(sig.slice(33,65)))])));
         var hash='0x'+hexS(BN.keccak_256(raw));
-        // Keep daily-cap reservations once per invoice transaction. A failed RPC never
-        // refunds them: it may have accepted the signed envelope.
-        if(!counted){
-          if(antAmount)ledger.push({d:capToday(),u:'ANT',a:antAmount,id:id});
-          ledger.push({d:capToday(),u:'ETH',a:ethAmount,id:id});
+        // A failed RPC never refunds a reservation: it may have accepted the envelope.
+        if(extra.ANT||extra.ETH){
+          if(extra.ANT)ledger.push({d:today,u:'ANT',a:extra.ANT,id:id});
+          if(extra.ETH)ledger.push({d:today,u:'ETH',a:extra.ETH,id:id});
           localStorage.setItem(CAP_LEDGER,JSON.stringify(ledger));
           if(localStorage.getItem(CAP_LEDGER)!==JSON.stringify(ledger))throw new Error('Cannot persist storage fee reservations');
           capView();
