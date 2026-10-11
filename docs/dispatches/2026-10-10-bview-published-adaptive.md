@@ -83,3 +83,56 @@ Dirvine's current x0x #504/#622/#505 discussion was checked before implementatio
 The outstanding efficiency measurement is still per-kind delivered-versus-published
 evidence, with ObserveOnly defaults and separate ADR requirements for changes.
 This lane changes no x0x backend, SDK, proof circuit, chain or paid storage.
+
+
+## Public release acceptance
+
+PR [#395](https://github.com/beehive-nature/beehive-nature/pull/395) merged at
+03:57:02 UTC on October 11 (October 10 locally). The
+[Pages deployment](https://github.com/beehive-nature/beehive-nature/actions/runs/38110015294)
+completed successfully. A public-byte audit checked **69 files / 32,607,447 bytes**:
+the exact candidate HTML, HLS runtime, master, publication/package manifests,
+all variant playlists, init files and media segments. Every HTTP status and
+digest matched. The server reported its actual cache headers in the raw receipt;
+no immutable-header claim is inferred from content-versioned paths.
+
+All three complete, real public playback runs passed. Each used a fresh Chrome
+context with browser HTTP caching disabled. Edge caches may be warm because the
+asset audit ran first. Phone means Pixel 7 emulation, not physical-device evidence.
+The constrained run used Chrome network shaping at 700 kb/s with 80 ms latency.
+
+| Public run | Page ready observed | Watch-to-play | Final quality | Media payload bytes | Rebuffering | Dropped / total frames |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| desktop | 1.437 s | 2.920 s | 1080p | 16,205,393 | 0 | 0 / 1575 |
+| phone | 0.833 s | 1.010 s | 1080p | 16,424,554 | 0 | 0 / 1570 |
+| phone-700 | 1.735 s | 3.976 s | 240p | 2,475,154 | 0 | 0 / 1575 |
+
+The three runs finished at 56.319 s, 54.954 s, 57.462 s
+after Watch respectively. Every requested media asset matched its package hash.
+Each run used one MSE source, with **zero SDK requests, relay requests, WebRTC
+dials, media recoveries, failed media requests or page errors**. Desktop and
+unconstrained phone each changed quality once; the constrained run remained at
+240p. Media payload fell by 92.43%, 92.33%, 98.84%
+relative to the 214 MB original. This is body-payload accounting, not total wire
+traffic; playlist/init body totals are recorded separately.
+
+The earlier direct-original observation had 338.433 seconds of rebuffering.
+These adaptive runs had **zero**. This is the same source content encoded and
+delivered through a different route; it is not a claimed speedup of raw Autonomi
+discovery or original-file transfer. It is three successful observed sessions,
+not a p95/population guarantee or audience-capacity test.
+
+The runner now also records navigation-to-ready and navigation-to-Watch timing;
+those are separate from the engine's Watch-to-play measurement. This adds only
+measurement fields. Production player/media bytes are unchanged after the PR.
+
+At this receipt checkpoint, the new PR and main integration workflows still have
+queued or running jobs; they are not reported as successful.
+The previous direct-startup release's post-merge workflow 38108411478 did finish
+with all seven jobs successful. Own superseded/duplicate branch runs and unchanged
+proof jobs on owned merge commits were cancelled after checking their inputs;
+those cancellations are recorded, not counted as passes. Final receipt/measurement
+edits skip redundant CI. Live verification and the local focused checks above
+remain tied to the exact published runtime bytes.
+
+[Watch the published adaptive version](https://skaists.dev/surfaces/bview.html?route=adaptive#7c4f61ed1c7b950a3043b8a2d1aa9974a24ac6ca274c330e4da1b3a6a61bbb78). <!-- PUBLIC-CONSTANT: public original content address -->
