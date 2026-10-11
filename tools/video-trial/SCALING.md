@@ -21,6 +21,26 @@ Retries are capped at two per load; a fatal media error gets one recovery attemp
 Native HLS fallback is browser managed; unavailable network/buffering statistics stay null.
 Ordinary Autonomi visits do not load hls.js.
 
+Direct fast-start MP4 files now use MP4Box.js 2.4.1 to remux arriving samples into MSE locally.
+Playback begins on decoded samples; discovery delay and subsequent native rebuffering remain visible.
+This preserves the original encoding, so it cannot make a 32.6 Mb/s file sustainable on a 4 Mb/s delivery path.
+Unsupported layouts/codecs retain the file player. No service worker or on-chain call is involved.
+Direct MSE targets 20 seconds and 24 MiB ahead, with 10 seconds of history. Arriving chunks may overshoot.
+A quota error gets one append retry after shortening history to two seconds and reducing the byte target;
+an unrecoverable remux error finishes from retained original bytes without another download.
+Seeking before evicted history also uses the retained file; if the file is incomplete, that recovery waits for completion.
+The original file is retained as a Blob for integrity, seeking and cache. Whole-file hashing, SDK buffers,
+ordered chunks and browser/decoder allocations are additional memory, not included in the MSE targets.
+
+The Cache API uses a same-origin HTTPS key, without fetching that virtual URL.
+A cached reload avoids SDK import, network connection and public-file resolution. Warm playback and cold
+Autonomi retrieval are measured separately; a cache hit is not evidence of network speed.
+`e2e/bview-live.mjs --route direct-only --corpus tools/video-trial/corpus-2026-10-10.json --warm --out new-receipt.json`
+records the real source, complete-file hash, startup, stalls, end time, transport and warm reload.
+The opt-in `--save-video` option saves only a hash-matching copy for repeatable local acceptance with
+`node e2e/bview-file.mjs --media original.mp4 --out new-file-receipt.json`.
+These are single-viewer measurements, not audience load tests.
+
 Prepare a **local** source with FFmpeg and FFprobe on PATH (or `FFMPEG` / `FFPROBE` set to their executable paths):
 
 ```sh
@@ -47,6 +67,21 @@ The committed synthetic fixture is 48 seconds of FFmpeg `testsrc2` (640x360, 30 
 encoded first at CRF 18 and then packaged by this tool. It is test media, not a visual-quality benchmark.
 
 ## Capacity envelope
+
+### ZK validator boundary
+
+The current `tools/solana-tungsten/src/lib.rs:Worker::prove` proves the square-job relation;
+`LocalGate::plan` separately checks an authorized job, verifier key, ceilings, expiry, rail and replay key.
+The circuit is `tools/solana-tungsten/lab/square.circom:SquareJob`. It contains no video-delivery statement.
+The private Solana/Vaulta fixtures are not production delivery infrastructure or a billion-viewer capacity result.
+
+A future, separately specified circuit could aggregate authenticated service-accounting claims for asynchronous
+settlement. First define what was observed, who attests it, how content/rendition commitments bind it,
+and how replay and fabricated service are rejected. Proving supplied receipts were processed correctly
+does not establish that a viewer received or watched a video. Ordinary hashes already verify content bytes;
+ZK must justify its additional cost through a specific privacy or batching requirement.
+Keep proof generation, aggregation and chain finality off the manifest, segment and first-frame paths.
+Network demand reduction, adaptive encoding, shared cache fills and measured regional capacity remain necessary.
 
 ```sh
 node tools/video-trial/capacity.mjs

@@ -856,6 +856,11 @@ jobs:
         working-directory: e2e
         # The 214 MB recovery fixture must not contend with the paced relay's wall-clock assertions.
         run: node --test --test-concurrency=1 bview.test.mjs bview-direct.test.mjs ../tools/video-trial/scorecard.test.mjs
+      - name: bView direct MSE — early playback, retained-byte recovery and offline warm reload
+        timeout-minutes: 3
+        if: always()
+        working-directory: e2e
+        run: node --test bview-mse.test.mjs
       - name: bView adaptive video — decode, buffer eviction, seek, cancellation and outage budgets
         timeout-minutes: 3
         if: always()
