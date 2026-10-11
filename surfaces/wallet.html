@@ -10069,6 +10069,23 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      returns, or transmits a seed. This is also the gate's handle on the rail
      core — every primitive below is proven against a published vector in
      e2e/wallet-signer.mjs before it is trusted with an address or an amount. */
+  // Genealogy consent uses the existing record key, with an explicit review
+  // and signing press. No payment method or general signing global is exposed.
+  async function openGenealogyConsent() {
+    if (location.hash !== '#genealogy-consent' || document.getElementById('genealogyConsent')) return;
+    var host = document.createElement('section'); host.id = 'genealogyConsent';
+    host.setAttribute('aria-label', 'preservation consent');
+    document.getElementById('kc-sec').before(host);
+    try {
+      var consent = await import('../tools/genealogy/consent.mjs');
+      await consent.mountConsent(host, { getRecord: function() {
+        return MPRK ? BZDIDKEY.deriveRecordKey(MPRK, 'bnr.b') : null;
+      }});
+      host.scrollIntoView({ block: 'start' });
+    } catch (e) { host.textContent = 'Consent review unavailable. Nothing was signed.'; }
+  }
+  window.addEventListener('hashchange', openGenealogyConsent);
+  openGenealogyConsent();
   window.BNRHIVE={amount:hiveAmount,ser:hiveSer,digest:function(b){return hexS(hiveDigest(b))},sign:function(wif,b){ return hiveSign(wif,hiveDigest(b)) },pubOf:hivePubOf,bound:function(){return hiveBound()}};
   window.BNRPAY={rlp:rlp,evmSendRaw:evmSendRaw,antStorageSigner:antStorageSigner,parseWif:parseWifAny,
     rails:EVM_RAILS,evmChecksumOk:evmChecksumOk,
