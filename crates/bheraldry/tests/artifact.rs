@@ -39,11 +39,13 @@ fn expected() -> Vec<(String, SealedRecord)> {
     vec![
         (
             "bg/national-arms".into(),
-            bulgaria_national_arms().seal().expect("bg rev2 seals"),
+            bulgaria_national_arms().seal().expect("bg rev3 seals"),
         ),
         (
             "bnr/house-achievement".into(),
-            house_achievement().seal().expect("house rev2 seals"),
+            house_achievement()
+                .seal()
+                .expect("house rev2 seals (unchanged this round)"),
         ),
     ]
 }

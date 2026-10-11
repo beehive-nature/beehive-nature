@@ -4,15 +4,15 @@
   "records": [
     {
       "id": "bg/national-arms",
-      "revision": 2,
-      "supersedes": "0bd62b1cbc01bf44f724ceb77cf89b1d15ba61d21f22a8d7ba7b9f04926d627c",
-      "digest": "fd991cf4e2f6d86d5b4b9d1bc07d3a3b3b5d134b6b920ce15e6d07c61f70a759",
-      "canonical_bytes": 60787,
+      "revision": 3,
+      "supersedes": "fd991cf4e2f6d86d5b4b9d1bc07d3a3b3b5d134b6b920ce15e6d07c61f70a759",
+      "digest": "4101baf1709175003f039fb49839d04ce7460251e74703d2503c9b7e0f917bc4",
+      "canonical_bytes": 84085,
       "record": {
         "id": "bg/national-arms",
-        "revision": 2,
-        "supersedes": "0bd62b1cbc01bf44f724ceb77cf89b1d15ba61d21f22a8d7ba7b9f04926d627c",
-        "title": "Coat of arms of the Republic of Bulgaria (1997) — gazette pass",
+        "revision": 3,
+        "supersedes": "fd991cf4e2f6d86d5b4b9d1bc07d3a3b3b5d134b6b920ce15e6d07c61f70a759",
+        "title": "Coat of arms of the Republic of Bulgaria (1997) — portal read",
         "classification": "OfficialStateInsignia",
         "entity": {
           "Jurisdiction": {
@@ -24,11 +24,11 @@
         "period": {
           "from": "1997-08-05",
           "to": null,
-          "note": "in force since promulgation (ДВ бр.62, 5 August 1997); adopted by the XXXVIII Народно събрание on 31 July 1997 per the law's own § 1. The 2017 amendment line of the first extraction is WITHDRAWN as a transport artifact (see notes)."
+          "note": "in force since promulgation (ДВ бр.62, 5 August 1997). The three 1997 dates are now all primary-named: adopted by the XXXVIII Народно събрание on 31 July 1997 (the law's own § 1); promulgation decree УКАЗ № 304 issued in Sofia on 4 August 1997; published ДВ бр. 62 of 5 August 1997. The 2017 amendment line of the first extraction remains WITHDRAWN as a transport artifact."
         },
         "blazon": {
           "lang": "bg",
-          "text": "Чл. 2. (1) Гербът на Република България е изправен златен коронован лъв на тъмночервено поле във формата на щит. Над щита има голяма корона, първообраз на която са короните на българските владетели от Втората българска държава, с пет кръста и отделно разположен кръст над самата корона. Щитът е поддържан от два златни короновани изправени лъва, обърнати към щита от лява и дясна хералдическа страна. Те стоят върху две кръстосани дъбови клонки с плодове. Под щита върху прехвърлена през краищата на дъбовите клонки бяла лента с трикольорен кант е изписано със златни букви „Съединението прави силата“.",
+          "text": "Чл. 2. (1) Гербът на Република България е изправен златен коронован лъв на тъмночервено поле във формата на щит. Над щита има голяма корона, първообраз на която са корони на български владетели от Втората българска държава, с пет кръста и отделно кръст над самата корона. Щитът е поддържан от два златни короновани изправени лъва, обърнати към щита от лява и дясна хералдическа страна. Те стоят върху две кръстосани дъбови клонки с плодове. Под щита върху прехвърлена през краищата на дъбовите клонки бяла лента с трикольорен кант е изписано със златни букви “Съединението прави силата”.",
           "gloss": "Gules, a lion rampant Or crowned; above the shield a great crown modelled on those of the rulers of the Second Bulgarian State with five crosses and one cross above it; two golden crowned lions rampant supporting the shield from the dexter and sinister heraldic sides, standing on two crossed fruited oak branches; below the shield a white band with a tricolour border carries the motto in golden letters.",
           "achievement": {
             "shield": {
@@ -78,16 +78,16 @@
             }
           },
           "source": {
-            "label": "Закон за герба на Република България — lex.bg, second extraction",
-            "url": "https://lex.bg/laws/ldoc/2134146564",
-            "publisher": "lex.bg (Национално издателство / National Publishing House)",
+            "label": "Държавен вестник брой 62, 5.VIII.1997 — official portal PDF edition",
+            "url": "https://dv.parliament.bg/DVWeb/fileUploadShowing.jsp?&idFileAtt=191101&allowCache=true&openDirectly=false",
+            "publisher": "Народно събрание на Република България — Държавен вестник portal",
             "lang": "bg",
             "accessed": "2026-10-10",
             "kind": "Legal",
-            "truth": "Authority",
+            "truth": "SourceAuthenticity",
             "grade": "PrimaryLegal",
-            "verbatim": "Чл. 2. (1) Гербът на Република България е изправен златен коронован лъв на тъмночервено поле във формата на щит. Над щита има голяма корона, първообраз на която са короните на българските владетели от Втората българска държава, с пет кръста и отделно разположен кръст над самата корона. Щитът е поддържан от два златни короновани изправени лъва, обърнати към щита от лява и дясна хералдическа страна. Те стоят върху две кръстосани дъбови клонки с плодове. Под щита върху прехвърлена през краищата на дъбовите клонки бяла лента с трикольорен кант е изписано със златни букви „Съединението прави силата“.",
-            "access_note": "webReader extraction, 2026-10-10. This rendering is corroborated on its diverging phrases by an independent commercial rendering of the same instrument (ciela.net issue page, search-snippet mediated) and its opening sentence by the Bulgarian Wikipedia. Transport variance against the 2026-10-09 extraction is RETAINED as a dispute; the header on THIS read shows no amendment line."
+            "verbatim": "Чл. 2. (1) Гербът на Република България е изправен златен коронован лъв на тъмночервено поле във формата на щит. Над щита има голяма корона, първообраз на която са корони на български владетели от Втората българска държава, с пет кръста и отделно кръст над самата корона. Щитът е поддържан от два златни короновани изправени лъва, обърнати към щита от лява и дясна хералдическа страна. Те стоят върху две кръстосани дъбови клонки с плодове. Под щита върху прехвърлена през краищата на дъбовите клонки бяла лента с трикольорен кант е изписано със златни букви “Съединението прави силата”.",
+            "access_note": "obtained through the portal's own issue-download gesture after walking its JSF flow (date filter 1–10.08.1997 → issue row 62, idObj 5036 → 302 to fileUploadShowing.jsp idFileAtt=191101, Content-Disposition filename=62_1997.pdf, 1,461,387 bytes, sha256 a08ec6f1…337074d — the bytes are NOT committed; the issue's приложения carry the state insignia images). The PDF is a re-typeset MACHINE-TEXT edition: zero image XObjects (verified by object inspection), glyphs mapped through a CP1251-flavoured encoding that had to be reversed to read the text. The verbatim above is whitespace-normalized (line-break hyphens joined, extraction item-boundary spaces restored); no characters were changed, and the quote glyphs are the portal PDF's own “…” pair. The 1997 INK PRINT itself remains unread — this edition is one step from it, which is why the residual word-level divergences stay a retained dispute rather than a ruling."
           }
         },
         "motto": {
@@ -203,6 +203,48 @@
               "translates_original": "093c7f16e653779342ca2af98b08f4522d2d9f6ca2799fc1328a406429d12f29",
               "authority_basis": null,
               "note": "UNATTESTED machine draft (⚙); exercises the RTL direction field at the data layer only — no RTL rendering surface exists in the estate yet (honest absence)"
+            },
+            {
+              "lang": "lv",
+              "direction": "Ltr",
+              "text": "Vienotība dod spēku",
+              "relationship": "DocumentedVariant",
+              "attestation": {
+                "SpeakerProvided": {
+                  "speaker": "Latvian Wikipedia contributors (user-edited, tertiary)"
+                }
+              },
+              "translates_original": "093c7f16e653779342ca2af98b08f4522d2d9f6ca2799fc1328a406429d12f29",
+              "authority_basis": null,
+              "note": "documented variant, advanced through the bLANGUAGEdock tier from machine-only: differs from the ⚙ machine draft („rada“ → „dod“). NOT an official rendering; the original remains the only authority."
+            },
+            {
+              "lang": "zh-Hant",
+              "direction": "Ltr",
+              "text": "團結就是力量",
+              "relationship": "DocumentedVariant",
+              "attestation": {
+                "SpeakerProvided": {
+                  "speaker": "Chinese Wikipedia contributors (user-edited, tertiary)"
+                }
+              },
+              "translates_original": "093c7f16e653779342ca2af98b08f4522d2d9f6ca2799fc1328a406429d12f29",
+              "authority_basis": null,
+              "note": "documented variant, tertiary speaker: the article's traditional-script form; its own simplified gloss (团结就是力量) is the exact string of the ⚙ zh-Hans machine draft, which stays beside it. NOT an official rendering."
+            },
+            {
+              "lang": "ar",
+              "direction": "Rtl",
+              "text": "الوحدة تولد القوة",
+              "relationship": "DocumentedVariant",
+              "attestation": {
+                "SpeakerProvided": {
+                  "speaker": "Arabic Wikipedia contributors (user-edited, tertiary)"
+                }
+              },
+              "translates_original": "093c7f16e653779342ca2af98b08f4522d2d9f6ca2799fc1328a406429d12f29",
+              "authority_basis": null,
+              "note": "documented variant, advanced through the bLANGUAGEdock tier from machine-only: differs from the ⚙ machine draft (تصنع → تولد). NOT an official rendering; RTL is a data-layer fact here, not a surface claim."
             }
           ],
           "glossary": {
@@ -546,6 +588,90 @@
             "grade": "InternalTree",
             "verbatim": null,
             "access_note": "carries the WITHDRAWAL: the „изм. - ДВ. бр. 100 от 29 Декември 2017г.“ line of the 2026-10-09 extraction is withdrawn as a transport artifact — no independent rendering carries an amendment, and the 2017 act that exists (Решение № 480) is a CoM consent, not a statute change."
+          },
+          {
+            "label": "Държавен вестник брой 62, 5.VIII.1997 — official portal PDF edition",
+            "url": "https://dv.parliament.bg/DVWeb/fileUploadShowing.jsp?&idFileAtt=191101&allowCache=true&openDirectly=false",
+            "publisher": "Народно събрание на Република България — Държавен вестник portal",
+            "lang": "bg",
+            "accessed": "2026-10-10",
+            "kind": "Legal",
+            "truth": "SourceAuthenticity",
+            "grade": "PrimaryLegal",
+            "verbatim": "Чл. 2. (1) Гербът на Република България е изправен златен коронован лъв на тъмночервено поле във формата на щит. Над щита има голяма корона, първообраз на която са корони на български владетели от Втората българска държава, с пет кръста и отделно кръст над самата корона. Щитът е поддържан от два златни короновани изправени лъва, обърнати към щита от лява и дясна хералдическа страна. Те стоят върху две кръстосани дъбови клонки с плодове. Под щита върху прехвърлена през краищата на дъбовите клонки бяла лента с трикольорен кант е изписано със златни букви “Съединението прави силата”.",
+            "access_note": "obtained through the portal's own issue-download gesture after walking its JSF flow (date filter 1–10.08.1997 → issue row 62, idObj 5036 → 302 to fileUploadShowing.jsp idFileAtt=191101, Content-Disposition filename=62_1997.pdf, 1,461,387 bytes, sha256 a08ec6f1…337074d — the bytes are NOT committed; the issue's приложения carry the state insignia images). The PDF is a re-typeset MACHINE-TEXT edition: zero image XObjects (verified by object inspection), glyphs mapped through a CP1251-flavoured encoding that had to be reversed to read the text. The verbatim above is whitespace-normalized (line-break hyphens joined, extraction item-boundary spaces restored); no characters were changed, and the quote glyphs are the portal PDF's own “…” pair. The 1997 INK PRINT itself remains unread — this edition is one step from it, which is why the residual word-level divergences stay a retained dispute rather than a ruling."
+          },
+          {
+            "label": "УКАЗ № 304 от 4 август 1997 г. — promulgation decree (in the portal PDF)",
+            "url": "https://dv.parliament.bg/DVWeb/fileUploadShowing.jsp?&idFileAtt=191101&allowCache=true&openDirectly=false",
+            "publisher": "Президентът на Република България, published in ДВ бр. 62, 5.VIII.1997",
+            "lang": "bg",
+            "accessed": "2026-10-10",
+            "kind": "Legal",
+            "truth": "Authority",
+            "grade": "PrimaryLegal",
+            "verbatim": "УКАЗ № 304 На основание чл. 98, т. 4 от Конституцията на Република България ПОСТАНОВЯВАМ: Да се обнародва в “Държавен вестник” Законът за герб на Република България, приет от ХХХVIII Народно събрание на 31 юли 1997 г. Издаден в София на 4 август 1997 г. и подпечатан с държавния печат.",
+            "access_note": "read in the portal PDF's own text (page 10); whitespace normalized as with Чл. 2 (1); the signature block is intentionally not carried (no-living-person law — the record names offices and instruments, not officeholders). This decree dissolves the adoption-date dispute: adoption 31 юли 1997 (the law's § 1), decree issued 4 август 1997, promulgation ДВ бр. 62 от 5 август 1997 — three events, all primary-named now."
+          },
+          {
+            "label": "Решение № 1 от 4 април 1995 г. по к.д. № 5/1995 — Конституционен съд (own site)",
+            "url": "https://www.constcourt.bg/bg/act-1785",
+            "publisher": "Конституционен съд на Република България",
+            "lang": "bg",
+            "accessed": "2026-10-10",
+            "kind": "Legal",
+            "truth": "HistoricalInterpretation",
+            "grade": "PrimaryOfficial",
+            "verbatim": "Изброяването им в чл. 164 на Конституцията не е и не може да бъде изчерпателно. … Липсата или наличието на корона в държавния герб още не означава утвърждаването на формата на държавно устройство. Корони съществуват в републиканските гербове на Австрия, Армения, Полша, Русия, Чехия, Унгария, Финландия и др. Така че няма пречка в държавния герб на една република да има корона. … РЕШИ: Разпоредбата на чл. 164 от Конституцията определя основните елементи на държавния герб на Република България. Не съществува конституционна забрана Народното събрание да приеме други елементи към основните при утвърждаване на държавния герб.",
+            "access_note": "direct fetch of the court's own act page (act-1785; case page case-200); the full ruling was read. Brought by a petition of 74 deputies of the 37th Народно събрание (10.03.1995); the deputies' supplementary brief explicitly raised whether the lion may be crowned. Published обн., ДВ бр. 35 от 14 април 1995 г. per the ruling's own header. Separate and dissenting opinions exist (особено мнение, становище); their authors are not named here — the no-living-person boundary applies to them too. The ruling interprets the constitutional article, which predates the 1997 statute: carried as historical interpretation of constitutional permissibility."
+          },
+          {
+            "label": "Решение № 480 от 28 август 2017 г. — Министерски съвет (portal material page)",
+            "url": "https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=117459",
+            "publisher": "Министерски съвет, published in ДВ бр. 71 от 1.9.2017 г., стр. 14",
+            "lang": "bg",
+            "accessed": "2026-10-10",
+            "kind": "Authority",
+            "truth": "Authority",
+            "grade": "PrimaryOfficial",
+            "verbatim": "РЕШЕНИЕ № 480 ОТ 28 АВГУСТ 2017 Г. за даване на съгласие изображението на герба на Република България да бъде включено в марката на „Държавен вестник“ На основание чл. 3, ал. 2 от Закона за герб на Република България във връзка с чл. 11, ал. 3 от Закона за марките и географските означения МИНИСТЕРСКИЯТ СЪВЕТ РЕШИ: Дава съгласие изображението на герба на Република България да бъде включено в марката на „Държавен вестник“.",
+            "access_note": "direct fetch of the portal's material page (issue 71/2017 content list → material 117459). The organization elided in rev 2's snippet is now named by the act itself: „Държавен вестник“ — the Council of Ministers consented to the arms' image in the mark of the STATE GAZETTE ITSELF, on the explicit basis of чл. 3, ал. 2 (the usage mechanism this record carries) and чл. 11, ал. 3 ЗМГО. The signature block (ministër-premier, chief secretary) is deliberately not quoted — no-living-person law; the act is the act regardless of who signed it."
+          },
+          {
+            "label": "Bulgārijas ģerbonis — Latvian Wikipedia",
+            "url": "https://lv.wikipedia.org/wiki/Bulgārijas_ģerbonis",
+            "publisher": "Wikipedia contributors (user-edited)",
+            "lang": "lv",
+            "accessed": "2026-10-10",
+            "kind": "Translation",
+            "truth": "LanguageEquivalence",
+            "grade": "Tertiary",
+            "verbatim": "devīzi „Vienotība dod spēku“ (bulgāru: Съединението прави силата)",
+            "access_note": "assistant-mediated fetch, 2026-10-10; quote-level fidelity UNVERIFIED — recheck before scholarly citation. NOT an official rendering: the Republic of Bulgaria has published no Latvian text of the motto; this is a tertiary rendering with its own provenance, advanced through the bLANGUAGEdock tier (SpeakerProvided, tertiary speaker). It differs from this record's machine draft („Vienotība rada spēku“) in one verb — both are retained, the original remains the only authority."
+          },
+          {
+            "label": "保加利亚国徽 — Chinese Wikipedia",
+            "url": "https://zh.wikipedia.org/wiki/保加利亚国徽",
+            "publisher": "Wikipedia contributors (user-edited)",
+            "lang": "zh",
+            "accessed": "2026-10-10",
+            "kind": "Translation",
+            "truth": "LanguageEquivalence",
+            "grade": "Tertiary",
+            "verbatim": "下有橡樹枝條和書有「團結就是力量」的綬帶 … (团结就是力量)",
+            "access_note": "assistant-mediated fetch, 2026-10-10; quote-level fidelity UNVERIFIED — recheck before scholarly citation. The article served the phrase in traditional characters (團結就是力量) with a simplified gloss (团结就是力量 — the exact string of this record's zh-Hans machine draft). Same phrase, two scripts; both retained. NOT an official rendering."
+          },
+          {
+            "label": "شعار بلغاريا — Arabic Wikipedia",
+            "url": "https://ar.wikipedia.org/wiki/شعار_بلغاريا",
+            "publisher": "Wikipedia contributors (user-edited)",
+            "lang": "ar",
+            "accessed": "2026-10-10",
+            "kind": "Translation",
+            "truth": "LanguageEquivalence",
+            "grade": "Tertiary",
+            "verbatim": "وشريط أبيض مكتوب عليه الشعار الوطني «الوحدة تولد القوة»",
+            "access_note": "assistant-mediated fetch, 2026-10-10; quote-level fidelity UNVERIFIED — recheck before scholarly citation. NOT an official rendering. Differs from this record's machine draft (الوحدة تصنع القوة) in one verb (تولد „gives birth to“ vs تصنع „makes“); both retained, the original remains the only authority. The RTL direction field it exercises is the data layer's own — no estate RTL surface claim is made."
           }
         ],
         "usage": [
@@ -598,19 +724,19 @@
             }
           },
           {
-            "statement": "Решение № 480 от 28.08.2017 (ДВ, 1 септември 2017): the Council of Ministers gave consent for the arms' image to be included in an organization's mark — the Чл. 3 (2) mechanism in force. Search-snippet mediated; recheck the act before quotation.",
+            "statement": "Решение № 480 от 28.08.2017 (ДВ бр. 71 от 1.9.2017 г., стр. 14), на основание чл. 3, ал. 2 от Закона за герб на Република България във връзка с чл. 11, ал. 3 от Закона за марките и географските означения: the Council of Ministers consented to the arms' image being included in the mark of „Държавен вестник“ — the state gazette itself. Quote-verified from the portal's own material page this revision.",
             "kind": "Legal",
             "source": {
-              "label": "Решение № 480 от 28 август 2017 г. — Министерски съвет",
-              "url": "https://dv.parliament.bg",
-              "publisher": "Министерски съвет, published in Държавен вестник (1 септември 2017 г.)",
+              "label": "Решение № 480 от 28 август 2017 г. — Министерски съвет (portal material page)",
+              "url": "https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=117459",
+              "publisher": "Министерски съвет, published in ДВ бр. 71 от 1.9.2017 г., стр. 14",
               "lang": "bg",
               "accessed": "2026-10-10",
               "kind": "Authority",
               "truth": "Authority",
               "grade": "PrimaryOfficial",
-              "verbatim": "РЕШЕНИЕ № 480 ОТ 28 АВГУСТ 2017 Г. за даване на съгласие изображението на герба на Република България да бъде включено в марката на …",
-              "access_note": "search-snippet mediated (the gazette portal's own indexed snippet); direct fetch of the act not completed by this seat. This is a Council of Ministers CONSENT under Чл. 3 (2) — an act of the usage mechanism, NOT an amendment of the law. The organization named in the elided tail was not extracted."
+              "verbatim": "РЕШЕНИЕ № 480 ОТ 28 АВГУСТ 2017 Г. за даване на съгласие изображението на герба на Република България да бъде включено в марката на „Държавен вестник“ На основание чл. 3, ал. 2 от Закона за герб на Република България във връзка с чл. 11, ал. 3 от Закона за марките и географските означения МИНИСТЕРСКИЯТ СЪВЕТ РЕШИ: Дава съгласие изображението на герба на Република България да бъде включено в марката на „Държавен вестник“.",
+              "access_note": "direct fetch of the portal's material page (issue 71/2017 content list → material 117459). The organization elided in rev 2's snippet is now named by the act itself: „Държавен вестник“ — the Council of Ministers consented to the arms' image in the mark of the STATE GAZETTE ITSELF, on the explicit basis of чл. 3, ал. 2 (the usage mechanism this record carries) and чл. 11, ал. 3 ЗМГО. The signature block (ministër-premier, chief secretary) is deliberately not quoted — no-living-person law; the act is the act regardless of who signed it."
             }
           }
         ],
@@ -737,6 +863,21 @@
                   "verbatim": "Решение № 1 от 4 април 1995 г., дело № 5/1995: списъкът в чл. 164 не е изчерпателен и короната е допустима (the list of elements in Art. 164 is not exhaustive and a crown is permissible).",
                   "access_note": "the ruling PREDATES the 1997 law and concerns the constitutional article, not the statute; carried as historical interpretation of the crown's constitutional permissibility. Ruling text not fetched directly (constcourt.bg unattempted) — tertiary channel, recheck before scholarly citation."
                 }
+              },
+              {
+                "statement": "Решение № 1/1995, own text: „Изброяването им в чл. 164 на Конституцията не е и не може да бъде изчерпателно“; on the crown specifically — „няма пречка в държавния герб на една република да има корона“, citing the republican arms of Austria, Armenia, Poland, Russia, Czechia, Hungary and Finland.",
+                "source": {
+                  "label": "Решение № 1 от 4 април 1995 г. по к.д. № 5/1995 — Конституционен съд (own site)",
+                  "url": "https://www.constcourt.bg/bg/act-1785",
+                  "publisher": "Конституционен съд на Република България",
+                  "lang": "bg",
+                  "accessed": "2026-10-10",
+                  "kind": "Legal",
+                  "truth": "HistoricalInterpretation",
+                  "grade": "PrimaryOfficial",
+                  "verbatim": "Изброяването им в чл. 164 на Конституцията не е и не може да бъде изчерпателно. … Липсата или наличието на корона в държавния герб още не означава утвърждаването на формата на държавно устройство. Корони съществуват в републиканските гербове на Австрия, Армения, Полша, Русия, Чехия, Унгария, Финландия и др. Така че няма пречка в държавния герб на една република да има корона. … РЕШИ: Разпоредбата на чл. 164 от Конституцията определя основните елементи на държавния герб на Република България. Не съществува конституционна забрана Народното събрание да приеме други елементи към основните при утвърждаване на държавния герб.",
+                  "access_note": "direct fetch of the court's own act page (act-1785; case page case-200); the full ruling was read. Brought by a petition of 74 deputies of the 37th Народно събрание (10.03.1995); the deputies' supplementary brief explicitly raised whether the lion may be crowned. Published обн., ДВ бр. 35 от 14 април 1995 г. per the ruling's own header. Separate and dissenting opinions exist (особено мнение, становище); their authors are not named here — the no-living-person boundary applies to them too. The ruling interprets the constitutional article, which predates the 1997 statute: carried as historical interpretation of constitutional permissibility."
+                }
               }
             ],
             "note": "RETAINED as competing evidence layers: a legal first-image claim and an art-historical observation about the drawn form. Neither erases the other."
@@ -773,15 +914,30 @@
                   "verbatim": "1991 Constitution, Art. 164: \"The coat of arms of the Republic of Bulgaria shall depict a gold lion rampant on a dark gules shield.\" … the crown \"significantly differs from the crowns known from medieval portraits\" such as those in the Tetraevangelia of Tsar Ivan Alexander … motto renderings \"Unity makes strength\" and \"Strength through Unity\".",
                   "access_note": "Assistant-mediated extraction of the live article; quote-level fidelity to the page at access time is UNVERIFIED — recheck before scholarly citation. Article history (1879 Tarnovo Constitution Art. 21; 1927 middle form legitimated excluding dynastic elements; 1946–1990 socialist emblems; 1991 restoration; 1997 law after partisan controversy; Stemmatographia 1741 ← Vitezović colour reversal ← Korenich-Neorich 1595 lineage) is recorded here as tertiary historical interpretation, not as established fact."
                 }
+              },
+              {
+                "statement": "УКАЗ № 304 (in the portal PDF of ДВ бр. 62 itself): „Издаден в София на 4 август 1997 г.“ — the 4 August date is the promulgation DECREE's issue date; adoption was 31 July (§ 1) and publication 5 August (ДВ бр. 62).",
+                "source": {
+                  "label": "УКАЗ № 304 от 4 август 1997 г. — promulgation decree (in the portal PDF)",
+                  "url": "https://dv.parliament.bg/DVWeb/fileUploadShowing.jsp?&idFileAtt=191101&allowCache=true&openDirectly=false",
+                  "publisher": "Президентът на Република България, published in ДВ бр. 62, 5.VIII.1997",
+                  "lang": "bg",
+                  "accessed": "2026-10-10",
+                  "kind": "Legal",
+                  "truth": "Authority",
+                  "grade": "PrimaryLegal",
+                  "verbatim": "УКАЗ № 304 На основание чл. 98, т. 4 от Конституцията на Република България ПОСТАНОВЯВАМ: Да се обнародва в “Държавен вестник” Законът за герб на Република България, приет от ХХХVIII Народно събрание на 31 юли 1997 г. Издаден в София на 4 август 1997 г. и подпечатан с държавния печат.",
+                  "access_note": "read in the portal PDF's own text (page 10); whitespace normalized as with Чл. 2 (1); the signature block is intentionally not carried (no-living-person law — the record names offices and instruments, not officeholders). This decree dissolves the adoption-date dispute: adoption 31 юли 1997 (the law's § 1), decree issued 4 август 1997, promulgation ДВ бр. 62 от 5 август 1997 — three events, all primary-named now."
+                }
               }
             ],
-            "note": "RETAINED. The two dates may name different events (parliamentary adoption vs. promulgation ДВ бр.62 on 5 August 1997); the record does not pick one."
+            "note": "RESOLVED BY PRIMARY EVIDENCE this revision (УКАЗ № 304, read in the portal PDF): the three dates name three different events — parliamentary adoption 31.07.1997, decree issued 4.08.1997, promulgation 5.08.1997. The English Wikipedia's „4 August 1997“ is the decree date. The positions are retained as the dispute's history; nothing is erased, the conclusion is revised on the record."
           },
           {
-            "topic": "Exact wording of Чл. 2 (1) across transport renderings",
+            "topic": "Exact wording of Чл. 2 (1): residual divergences after the portal read",
             "positions": [
               {
-                "statement": "2026-10-09 lex.bg extraction (rev 1's working text): „е разположена голяма корона … с желуди … трикольорна кантова ивичка … написано“.",
+                "statement": "2026-10-09 lex.bg extraction (rev 1's working text): „е разположена голяма корона … с желуди … трикольорна кантова ивичка … написано“ — every one of these wordings is now CONTRADICTED by the portal PDF.",
                 "source": {
                   "label": "Закон за герба на Република България — lex.bg",
                   "url": "https://lex.bg/laws/ldoc/2134146564",
@@ -796,7 +952,7 @@
                 }
               },
               {
-                "statement": "2026-10-10 lex.bg extraction (rev 2's working text), corroborated by ciela.net's rendering of the same instrument: „има голяма корона … с плодове … трикольорен кант … изписано“.",
+                "statement": "2026-10-10 lex.bg extraction (rev 2's working text): „има голяма корона … с плодове … трикольорен кант … изписано“ — corroborated on every one of these wordings by the portal PDF.",
                 "source": {
                   "label": "Закон за герба на Република България — lex.bg, second extraction",
                   "url": "https://lex.bg/laws/ldoc/2134146564",
@@ -811,7 +967,22 @@
                 }
               },
               {
-                "statement": "The primary gazette scan (ДВ бр.62/1997) — NOT yet machine-read by this seat; the portal is located but its deep links are JSF flows. No scan-based position exists yet.",
+                "statement": "The official portal PDF edition (THIS revision's working text), read 2026-10-10: agrees with the 2026-10-10 lex.bg rendering on all originally disputed wordings, and differs from it in four word-level details: „първообраз на която са корони на български владетели“ (lex.bg: „на които са короните на българските владетели“) and „отделно кръст“ without „разположен“ (lex.bg: „отделно разположен кръст“).",
+                "source": {
+                  "label": "Държавен вестник брой 62, 5.VIII.1997 — official portal PDF edition",
+                  "url": "https://dv.parliament.bg/DVWeb/fileUploadShowing.jsp?&idFileAtt=191101&allowCache=true&openDirectly=false",
+                  "publisher": "Народно събрание на Република България — Държавен вестник portal",
+                  "lang": "bg",
+                  "accessed": "2026-10-10",
+                  "kind": "Legal",
+                  "truth": "SourceAuthenticity",
+                  "grade": "PrimaryLegal",
+                  "verbatim": "Чл. 2. (1) Гербът на Република България е изправен златен коронован лъв на тъмночервено поле във формата на щит. Над щита има голяма корона, първообраз на която са корони на български владетели от Втората българска държава, с пет кръста и отделно кръст над самата корона. Щитът е поддържан от два златни короновани изправени лъва, обърнати към щита от лява и дясна хералдическа страна. Те стоят върху две кръстосани дъбови клонки с плодове. Под щита върху прехвърлена през краищата на дъбовите клонки бяла лента с трикольорен кант е изписано със златни букви “Съединението прави силата”.",
+                  "access_note": "obtained through the portal's own issue-download gesture after walking its JSF flow (date filter 1–10.08.1997 → issue row 62, idObj 5036 → 302 to fileUploadShowing.jsp idFileAtt=191101, Content-Disposition filename=62_1997.pdf, 1,461,387 bytes, sha256 a08ec6f1…337074d — the bytes are NOT committed; the issue's приложения carry the state insignia images). The PDF is a re-typeset MACHINE-TEXT edition: zero image XObjects (verified by object inspection), glyphs mapped through a CP1251-flavoured encoding that had to be reversed to read the text. The verbatim above is whitespace-normalized (line-break hyphens joined, extraction item-boundary spaces restored); no characters were changed, and the quote glyphs are the portal PDF's own “…” pair. The 1997 INK PRINT itself remains unread — this edition is one step from it, which is why the residual word-level divergences stay a retained dispute rather than a ruling."
+                }
+              },
+              {
+                "statement": "The ink print of ДВ бр. 62 (5 August 1997) — still unread: the portal serves a re-typeset machine-text edition, not a photograph of the print. The print alone can close the residual four.",
                 "source": {
                   "label": "Държавен вестник — official archive portal (dv.parliament.bg/DVWeb)",
                   "url": "https://dv.parliament.bg/DVWeb/broeveList.faces",
@@ -826,7 +997,7 @@
                 }
               }
             ],
-            "note": "RETAINED, not adjudicated. Revision 2 carries the corroborated rendering as WORKING TEXT only — that is a choice of which transport to read from, not a ruling on what the ДВ print says. Only the scan can close this."
+            "note": "REVISED CONCLUSION this revision: the seven originally disputed wordings are settled by the portal PDF edition in the direction of the 2026-10-10 lex.bg rendering — which is why rev 2 chose it and why this revision keeps that choice. What remains open is narrowed to the four word-level details where the portal edition itself differs from BOTH lex.bg renderings; the ink print stays the only adjudicator, and it has not been read. The working text of THIS revision is the portal edition's own bytes."
           }
         ],
         "asset": null,
@@ -838,7 +1009,10 @@
           "REVISION 2 (2026-10-10): working text switched to the 2026-10-10 lex.bg rendering after a second extraction of the same page disagreed with the first in ~7 wordings and an independent rendering (ciela.net) corroborated the second; both renderings are RETAINED in the transport-variance dispute. Revision 1's bytes are immutable and its frozen digest still pins them.",
           "WITHDRAWN: the „изм. - ДВ. бр. 100 от 29 Декември 2017г.“ line of the 2026-10-09 extraction. No independent rendering carries an amendment — the 2026-10-10 lex.bg header has no such line, the Bulgarian Wikipedia records no amendment history, and the 2017 act that exists (Решение № 480 от 28.08.2017) is a Council of Ministers consent under Чл. 3 (2), not a statute change. Withdrawn as a transport artifact, named here per the corrective discipline.",
           "The depictions the law annexes (приложения 1–2 per Чл. 2 (2)) were given approved forms by Постановление № 476 от 17.12.1997 (search-snippet mediated, UNVERIFIED at quote level) — still deliberately not captured in this record.",
-          "Constitutional layer: чл. 164 (1991) fixes the shield; Решение № 1/1995 held the article's element list non-exhaustive, permitting the crown. Carried as historical interpretation via a tertiary channel."
+          "Constitutional layer: чл. 164 (1991) fixes the shield; Решение № 1/1995 held the article's element list non-exhaustive, permitting the crown. Carried as historical interpretation via a tertiary channel.",
+          "REVISION 3 (2026-10-10, order bHERALDRY-003): the portal read. The gazette portal's own PDF edition of ДВ бр. 62/1997 was read (JSF flow walked; sha256 of the served PDF a08ec6f1…337074d, bytes deliberately not committed — the приложения carry state insignia images). Working text moved to the portal edition's Чл. 2 (1); the seven originally disputed wordings are settled in the direction of the 2026-10-10 lex.bg rendering; four residual word-level divergences remain a retained dispute whose only adjudicator is the unread ink print. Revisions 1 and 2 are immutable — their frozen digests still pin them.",
+          "The portal PDF is a re-typeset MACHINE-TEXT edition (zero image objects, verified): honest about what was read — an official electronic edition one step from the 1997 print, not the print itself. УКАЗ № 304 was read in the same edition and resolves the adoption-date dispute into three named events (adoption 31.07.1997, decree 4.08.1997, publication 5.08.1997).",
+          "Решение № 1/1995 and Решение № 480/2017 were read from their publishers' own pages this revision (constcourt.bg act-1785; dv.parliament.bg material 117459). No signature blocks are carried anywhere in this record — offices and instruments are named, officeholders are not."
         ]
       }
     },

@@ -894,8 +894,10 @@ fn internal_claim_r2() -> SourceClaim {
 
 /// The Bulgarian national arms, revision 2 — the gazette pass. Revision 1 is
 /// immutable ([`bulgaria_national_arms_v1`], digest frozen in the vector
-/// test); this revision supersedes it by that exact digest.
-pub fn bulgaria_national_arms() -> SymbolRecord {
+/// test); this revision supersedes it by that exact digest. Revision 3 (the
+/// portal read) supersedes THIS in turn — the public constructor moved to
+/// [`bulgaria_national_arms`]; these bytes stay pinned by the vector test.
+pub fn bulgaria_national_arms_r2() -> SymbolRecord {
     let v1 = bulgaria_national_arms_v1();
     let v1_digest = SymbolRecord::digest_of_bytes(&v1.canonical_bytes());
     let law_r2 = law_claim_r2();
@@ -1025,6 +1027,480 @@ pub fn bulgaria_national_arms() -> SymbolRecord {
     r
 }
 
+// ── revision 3: the portal read (2026-10-10, order bHERALDRY-003) ─────────────
+//
+// What happened, in one breath: the gazette portal's own PDF edition of ДВ
+// бр. 62/1997 was READ (the JSF flow walked: date filter → issue 62 → the
+// issue-download gesture → fileUploadShowing.jsp idFileAtt=191101, sha256
+// a08ec6f1…337074d). It corroborates the 2026-10-10 lex.bg rendering on every
+// wording the two lex.bg extractions had disputed, and it carries УКАЗ № 304,
+// which dissolves the adoption-date dispute into three named events. The
+// Constitutional Court's own text of Решение № 1/1995 and the portal's own
+// text of Решение № 480/2017 were also read directly. The portal PDF is a
+// re-typeset machine-text edition (zero image objects — verified), so the
+// 1997 ink print remains unread; four residual word-level divergences
+// between the portal text and BOTH lex.bg renderings are retained as the
+// shrunken remainder of the transport-variance dispute.
+
+pub const ACCESS_DATE_R3: &str = "2026-10-10";
+
+/// sha256 of the portal PDF (62_1997.pdf) as served by dv.parliament.bg on
+/// ACCESS_DATE_R3. The bytes themselves are deliberately NOT committed — the
+/// issue's приложения carry the state insignia images, and this record
+/// commits no state-insignia bytes. The digest pins the evidence channel.
+pub const DV62_PDF_SHA256: &str =
+    "a08ec6f10a8834b34fab55a205166c9e8d64a086339ab0707fe20beec337074d"; // PUBLIC-CONSTANT (sha256 of dv.parliament.bg's 62_1997.pdf, fetched 2026-10-10)
+
+/// Чл. 2 (1) as carried by the portal's own PDF edition of the issue —
+/// whitespace-normalized (line-break hyphens joined, pdfjs item-boundary
+/// spaces restored); no characters changed. This is rev 3's working text.
+pub const PORTAL_ART2_VERBATIM: &str = "Чл. 2. (1) Гербът на Република България е изправен златен коронован лъв на тъмночервено поле във формата на щит. Над щита има голяма корона, първообраз на която са корони на български владетели от Втората българска държава, с пет кръста и отделно кръст над самата корона. Щитът е поддържан от два златни короновани изправени лъва, обърнати към щита от лява и дясна хералдическа страна. Те стоят върху две кръстосани дъбови клонки с плодове. Под щита върху прехвърлена през краищата на дъбовите клонки бяла лента с трикольорен кант е изписано със златни букви “Съединението прави силата”.";
+
+/// The official portal's PDF edition of the issue itself. PrimaryLegal: it
+/// is the National Assembly's own publication channel serving the issue —
+/// but an ELECTRONIC re-typeset edition, not a photograph of the print.
+fn dv_portal_pdf_claim() -> SourceClaim {
+    SourceClaim {
+        label: "Държавен вестник брой 62, 5.VIII.1997 — official portal PDF edition".into(),
+        url: "https://dv.parliament.bg/DVWeb/fileUploadShowing.jsp?&idFileAtt=191101&allowCache=true&openDirectly=false".into(),
+        publisher: "Народно събрание на Република България — Държавен вестник portal".into(),
+        lang: "bg".into(),
+        accessed: ACCESS_DATE_R3.into(),
+        kind: ClaimKind::Legal,
+        truth: TruthKind::SourceAuthenticity,
+        grade: ProvenanceGrade::PrimaryLegal,
+        verbatim: Some(PORTAL_ART2_VERBATIM.into()),
+        access_note: Some(
+            "obtained through the portal's own issue-download gesture after walking its JSF \
+             flow (date filter 1–10.08.1997 → issue row 62, idObj 5036 → 302 to \
+             fileUploadShowing.jsp idFileAtt=191101, Content-Disposition filename=62_1997.pdf, \
+             1,461,387 bytes, sha256 a08ec6f1…337074d — the bytes are NOT committed; the issue's \
+             приложения carry the state insignia images). The PDF is a re-typeset MACHINE-TEXT \
+             edition: zero image XObjects (verified by object inspection), glyphs mapped through \
+             a CP1251-flavoured encoding that had to be reversed to read the text. The verbatim \
+             above is whitespace-normalized (line-break hyphens joined, extraction item-boundary \
+             spaces restored); no characters were changed, and the quote glyphs are the portal \
+             PDF's own “…” pair. The 1997 INK PRINT itself remains unread — this edition is one \
+             step from it, which is why the residual word-level divergences stay a retained \
+             dispute rather than a ruling."
+                .into(),
+        ),
+    }
+}
+
+/// УКАЗ № 304 — the promulgation decree, carried in the same portal PDF
+/// (issue page 10). The decree body names all three dates; the presidential
+/// signature line is deliberately not quoted (the record's no-living-person
+/// boundary — the office acts, the officeholder's name is not carried).
+fn ukaz304_claim() -> SourceClaim {
+    SourceClaim {
+        label: "УКАЗ № 304 от 4 август 1997 г. — promulgation decree (in the portal PDF)".into(),
+        url: "https://dv.parliament.bg/DVWeb/fileUploadShowing.jsp?&idFileAtt=191101&allowCache=true&openDirectly=false".into(),
+        publisher: "Президентът на Република България, published in ДВ бр. 62, 5.VIII.1997".into(),
+        lang: "bg".into(),
+        accessed: ACCESS_DATE_R3.into(),
+        kind: ClaimKind::Legal,
+        truth: TruthKind::Authority,
+        grade: ProvenanceGrade::PrimaryLegal,
+        verbatim: Some(
+            "УКАЗ № 304 На основание чл. 98, т. 4 от Конституцията на Република България \
+             ПОСТАНОВЯВАМ: Да се обнародва в “Държавен вестник” Законът за герб на Република \
+             България, приет от ХХХVIII Народно събрание на 31 юли 1997 г. Издаден в София на 4 \
+             август 1997 г. и подпечатан с държавния печат."
+                .into(),
+        ),
+        access_note: Some(
+            "read in the portal PDF's own text (page 10); whitespace normalized as with Чл. 2 \
+             (1); the signature block is intentionally not carried (no-living-person law — the \
+             record names offices and instruments, not officeholders). This decree dissolves \
+             the adoption-date dispute: adoption 31 юли 1997 (the law's § 1), decree issued \
+             4 август 1997, promulgation ДВ бр. 62 от 5 август 1997 — three events, all \
+             primary-named now."
+                .into(),
+        ),
+    }
+}
+
+/// Решение № 1/1995, read from the Constitutional Court's own site — the
+/// tertiary channel of rev 2 replaced by the court's own text.
+fn constcourt_r3_claim() -> SourceClaim {
+    SourceClaim {
+        label: "Решение № 1 от 4 април 1995 г. по к.д. № 5/1995 — Конституционен съд (own site)"
+            .into(),
+        url: "https://www.constcourt.bg/bg/act-1785".into(),
+        publisher: "Конституционен съд на Република България".into(),
+        lang: "bg".into(),
+        accessed: ACCESS_DATE_R3.into(),
+        kind: ClaimKind::Legal,
+        truth: TruthKind::HistoricalInterpretation,
+        grade: ProvenanceGrade::PrimaryOfficial,
+        verbatim: Some(
+            "Изброяването им в чл. 164 на Конституцията не е и не може да бъде изчерпателно. … \
+             Липсата или наличието на корона в държавния герб още не означава утвърждаването на \
+             формата на държавно устройство. Корони съществуват в републиканските гербове на \
+             Австрия, Армения, Полша, Русия, Чехия, Унгария, Финландия и др. Така че няма \
+             пречка в държавния герб на една република да има корона. … РЕШИ: Разпоредбата на \
+             чл. 164 от Конституцията определя основните елементи на държавния герб на \
+             Република България. Не съществува конституционна забрана Народното събрание да \
+             приеме други елементи към основните при утвърждаване на държавния герб."
+                .into(),
+        ),
+        access_note: Some(
+            "direct fetch of the court's own act page (act-1785; case page case-200); the full \
+             ruling was read. Brought by a petition of 74 deputies of the 37th Народно събрание \
+             (10.03.1995); the deputies' supplementary brief explicitly raised whether the lion \
+             may be crowned. Published обн., ДВ бр. 35 от 14 април 1995 г. per the ruling's own \
+             header. Separate and dissenting opinions exist (особено мнение, становище); their \
+             authors are not named here — the no-living-person boundary applies to them too. \
+             The ruling interprets the constitutional article, which predates the 1997 statute: \
+             carried as historical interpretation of constitutional permissibility."
+                .into(),
+        ),
+    }
+}
+
+/// Решение № 480/2017, read from the portal's own material page — the
+/// snippet-mediated claim of rev 2 upgraded to quote-level, direct fetch.
+fn decision480_r3_claim() -> SourceClaim {
+    SourceClaim {
+        label: "Решение № 480 от 28 август 2017 г. — Министерски съвет (portal material page)"
+            .into(),
+        url: "https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=117459".into(),
+        publisher: "Министерски съвет, published in ДВ бр. 71 от 1.9.2017 г., стр. 14".into(),
+        lang: "bg".into(),
+        accessed: ACCESS_DATE_R3.into(),
+        kind: ClaimKind::Authority,
+        truth: TruthKind::Authority,
+        grade: ProvenanceGrade::PrimaryOfficial,
+        verbatim: Some(
+            "РЕШЕНИЕ № 480 ОТ 28 АВГУСТ 2017 Г. за даване на съгласие изображението на герба на \
+             Република България да бъде включено в марката на „Държавен вестник“ На основание \
+             чл. 3, ал. 2 от Закона за герб на Република България във връзка с чл. 11, ал. 3 от \
+             Закона за марките и географските означения МИНИСТЕРСКИЯТ СЪВЕТ РЕШИ: Дава съгласие \
+             изображението на герба на Република България да бъде включено в марката на \
+             „Държавен вестник“."
+                .into(),
+        ),
+        access_note: Some(
+            "direct fetch of the portal's material page (issue 71/2017 content list → material \
+             117459). The organization elided in rev 2's snippet is now named by the act \
+             itself: „Държавен вестник“ — the Council of Ministers consented to the arms' image \
+             in the mark of the STATE GAZETTE ITSELF, on the explicit basis of чл. 3, ал. 2 \
+             (the usage mechanism this record carries) and чл. 11, ал. 3 ЗМГО. The signature \
+             block (ministër-premier, chief secretary) is deliberately not quoted — \
+             no-living-person law; the act is the act regardless of who signed it."
+                .into(),
+        ),
+    }
+}
+
+/// The Latvian Wikipedia rendering of the motto — a DOCUMENTED VARIANT that
+/// differs from this record's own machine draft („dod“ vs „rada“): exactly
+/// the variant-relationship the record models for English.
+fn lv_wiki_claim() -> SourceClaim {
+    SourceClaim {
+        label: "Bulgārijas ģerbonis — Latvian Wikipedia".into(),
+        url: "https://lv.wikipedia.org/wiki/Bulgārijas_ģerbonis".into(),
+        publisher: "Wikipedia contributors (user-edited)".into(),
+        lang: "lv".into(),
+        accessed: ACCESS_DATE_R3.into(),
+        kind: ClaimKind::Translation,
+        truth: TruthKind::LanguageEquivalence,
+        grade: ProvenanceGrade::Tertiary,
+        verbatim: Some("devīzi „Vienotība dod spēku“ (bulgāru: Съединението прави силата)".into()),
+        access_note: Some(
+            "assistant-mediated fetch, 2026-10-10; quote-level fidelity UNVERIFIED — recheck \
+             before scholarly citation. NOT an official rendering: the Republic of Bulgaria has \
+             published no Latvian text of the motto; this is a tertiary rendering with its own \
+             provenance, advanced through the bLANGUAGEdock tier (SpeakerProvided, tertiary \
+             speaker). It differs from this record's machine draft („Vienotība rada spēku“) in \
+             one verb — both are retained, the original remains the only authority."
+                .into(),
+        ),
+    }
+}
+
+/// The Chinese Wikipedia rendering (served in traditional characters, with a
+/// simplified twin in the article's own gloss).
+fn zh_wiki_claim() -> SourceClaim {
+    SourceClaim {
+        label: "保加利亚国徽 — Chinese Wikipedia".into(),
+        url: "https://zh.wikipedia.org/wiki/保加利亚国徽".into(),
+        publisher: "Wikipedia contributors (user-edited)".into(),
+        lang: "zh".into(),
+        accessed: ACCESS_DATE_R3.into(),
+        kind: ClaimKind::Translation,
+        truth: TruthKind::LanguageEquivalence,
+        grade: ProvenanceGrade::Tertiary,
+        verbatim: Some("下有橡樹枝條和書有「團結就是力量」的綬帶 … (团结就是力量)".into()),
+        access_note: Some(
+            "assistant-mediated fetch, 2026-10-10; quote-level fidelity UNVERIFIED — recheck \
+             before scholarly citation. The article served the phrase in traditional characters \
+             (團結就是力量) with a simplified gloss (团结就是力量 — the exact string of this \
+             record's zh-Hans machine draft). Same phrase, two scripts; both retained. NOT an \
+             official rendering."
+                .into(),
+        ),
+    }
+}
+
+/// The Arabic Wikipedia rendering of the motto.
+fn ar_wiki_claim() -> SourceClaim {
+    SourceClaim {
+        label: "شعار بلغاريا — Arabic Wikipedia".into(),
+        url: "https://ar.wikipedia.org/wiki/شعار_بلغاريا".into(),
+        publisher: "Wikipedia contributors (user-edited)".into(),
+        lang: "ar".into(),
+        accessed: ACCESS_DATE_R3.into(),
+        kind: ClaimKind::Translation,
+        truth: TruthKind::LanguageEquivalence,
+        grade: ProvenanceGrade::Tertiary,
+        verbatim: Some("وشريط أبيض مكتوب عليه الشعار الوطني «الوحدة تولد القوة»".into()),
+        access_note: Some(
+            "assistant-mediated fetch, 2026-10-10; quote-level fidelity UNVERIFIED — recheck \
+             before scholarly citation. NOT an official rendering. Differs from this record's \
+             machine draft (الوحدة تصنع القوة) in one verb (تولد „gives birth to“ vs تصنع \
+             „makes“); both retained, the original remains the only authority. The RTL \
+             direction field it exercises is the data layer's own — no estate RTL surface \
+             claim is made."
+                .into(),
+        ),
+    }
+}
+
+/// The Bulgarian national arms, revision 3 — the portal read. Revisions 1
+/// and 2 are immutable (digests frozen in the vector test); this revision
+/// supersedes rev 2 by exactly its frozen digest.
+pub fn bulgaria_national_arms() -> SymbolRecord {
+    let r2 = bulgaria_national_arms_r2();
+    let r2_digest = SymbolRecord::digest_of_bytes(&r2.canonical_bytes());
+    let portal = dv_portal_pdf_claim();
+    let ukaz304 = ukaz304_claim();
+    let constcourt_r3 = constcourt_r3_claim();
+    let decision480_r3 = decision480_r3_claim();
+    let lv_wiki = lv_wiki_claim();
+    let zh_wiki = zh_wiki_claim();
+    let ar_wiki = ar_wiki_claim();
+
+    let original_digest = r2.motto.original.digest();
+
+    let mut r = r2.clone();
+    r.revision = 3;
+    r.supersedes = Some(r2_digest);
+    r.title = "Coat of arms of the Republic of Bulgaria (1997) — portal read".into();
+
+    // the working text moves to the portal PDF's own rendering — the
+    // best-evidenced machine text of the issue this record has read — and the
+    // blazon source moves with it (the blazon-verbatim consistency law).
+    r.blazon.text = PORTAL_ART2_VERBATIM.into();
+    r.blazon.source = portal.clone();
+
+    r.period.note = Some(
+        "in force since promulgation (ДВ бр.62, 5 August 1997). The three 1997 dates are now \
+         all primary-named: adopted by the XXXVIII Народно събрание on 31 July 1997 (the law's \
+         own § 1); promulgation decree УКАЗ № 304 issued in Sofia on 4 August 1997; published \
+         ДВ бр. 62 of 5 August 1997. The 2017 amendment line of the first extraction remains \
+         WITHDRAWN as a transport artifact."
+            .into(),
+    );
+
+    r.sources.extend([
+        portal.clone(),
+        ukaz304.clone(),
+        constcourt_r3.clone(),
+        decision480_r3.clone(),
+        lv_wiki.clone(),
+        zh_wiki.clone(),
+        ar_wiki.clone(),
+    ]);
+
+    // the Решение № 480 usage condition: the snippet-mediated form is replaced
+    // by the quote-verified act (found by position in rev 2's usage vec —
+    // Чл. 3 (1), Чл. 3 (2), the BNR boundary, then Решение № 480).
+    let idx480 = r
+        .usage
+        .iter()
+        .position(|u| u.statement.contains("Решение № 480"))
+        .expect("rev 2 carries the Решение № 480 usage condition");
+    r.usage[idx480] = UsageCondition {
+        statement: "Решение № 480 от 28.08.2017 (ДВ бр. 71 от 1.9.2017 г., стр. 14), на \
+                    основание чл. 3, ал. 2 от Закона за герб на Република България във връзка с \
+                    чл. 11, ал. 3 от Закона за марките и географските означения: the Council of \
+                    Ministers consented to the arms' image being included in the mark of \
+                    „Държавен вестник“ — the state gazette itself. Quote-verified from the \
+                    portal's own material page this revision."
+            .into(),
+        kind: ClaimKind::Legal,
+        source: decision480_r3,
+    };
+
+    // the crown dispute gains the court's own words (rev 2 carried them via a
+    // tertiary channel; the position added here cites the court directly).
+    r.disputes[1].positions.push(DisputePosition {
+        statement: "Решение № 1/1995, own text: „Изброяването им в чл. 164 на Конституцията не \
+                    е и не може да бъде изчерпателно“; on the crown specifically — „няма \
+                    пречка в държавния герб на една република да има корона“, citing the \
+                    republican arms of Austria, Armenia, Poland, Russia, Czechia, Hungary and \
+                    Finland."
+            .into(),
+        source: constcourt_r3,
+    });
+
+    // the adoption-date dispute: the primary evidence that names all three
+    // events, and the note that records the resolution (revised conclusion,
+    // not an erasure — the positions stay for history).
+    r.disputes[2].positions.push(DisputePosition {
+        statement: "УКАЗ № 304 (in the portal PDF of ДВ бр. 62 itself): „Издаден в София на 4 \
+                    август 1997 г.“ — the 4 August date is the promulgation DECREE's issue \
+                    date; adoption was 31 July (§ 1) and publication 5 August (ДВ бр. 62)."
+            .into(),
+        source: ukaz304,
+    });
+    r.disputes[2].note = Some(
+        "RESOLVED BY PRIMARY EVIDENCE this revision (УКАЗ № 304, read in the portal PDF): the \
+         three dates name three different events — parliamentary adoption 31.07.1997, decree \
+         issued 4.08.1997, promulgation 5.08.1997. The English Wikipedia's „4 August 1997“ is \
+         the decree date. The positions are retained as the dispute's history; nothing is \
+         erased, the conclusion is revised on the record."
+            .into(),
+    );
+
+    // the transport-variance dispute, revised: the portal PDF has been read —
+    // it corroborates the rev 2 rendering on every originally disputed
+    // wording — and its own four word-level divergences from lex.bg become
+    // the shrunken retained remainder.
+    r.disputes[3] = Dispute {
+        topic: "Exact wording of Чл. 2 (1): residual divergences after the portal read".into(),
+        positions: vec![
+            DisputePosition {
+                statement: "2026-10-09 lex.bg extraction (rev 1's working text): „е разположена \
+                            голяма корона … с желуди … трикольорна кантова ивичка … написано“ — \
+                            every one of these wordings is now CONTRADICTED by the portal PDF."
+                    .into(),
+                source: r2.sources[0].clone(),
+            },
+            DisputePosition {
+                statement: "2026-10-10 lex.bg extraction (rev 2's working text): „има голяма \
+                            корона … с плодове … трикольорен кант … изписано“ — corroborated on \
+                            every one of these wordings by the portal PDF."
+                    .into(),
+                source: r2.sources[8].clone(),
+            },
+            DisputePosition {
+                statement: "The official portal PDF edition (THIS revision's working text), \
+                            read 2026-10-10: agrees with the 2026-10-10 lex.bg rendering on \
+                            all originally disputed wordings, and differs from it in four \
+                            word-level details: „първообраз на която са корони на български \
+                            владетели“ (lex.bg: „на които са короните на българските \
+                            владетели“) and „отделно кръст“ without „разположен“ (lex.bg: \
+                            „отделно разположен кръст“)."
+                    .into(),
+                source: portal,
+            },
+            DisputePosition {
+                statement: "The ink print of ДВ бр. 62 (5 August 1997) — still unread: the \
+                            portal serves a re-typeset machine-text edition, not a photograph \
+                            of the print. The print alone can close the residual four."
+                    .into(),
+                source: r2.sources[14].clone(),
+            },
+        ],
+        note: Some(
+            "REVISED CONCLUSION this revision: the seven originally disputed wordings are \
+             settled by the portal PDF edition in the direction of the 2026-10-10 lex.bg \
+             rendering — which is why rev 2 chose it and why this revision keeps that choice. \
+             What remains open is narrowed to the four word-level details where the portal \
+             edition itself differs from BOTH lex.bg renderings; the ink print stays the only \
+             adjudicator, and it has not been read. The working text of THIS revision is the \
+             portal edition's own bytes."
+                .into(),
+        ),
+    };
+
+    // lv / zh / ar advance through the bLANGUAGEdock tiers: each gains a
+    // DOCUMENTED VARIANT with a tertiary speaker. The ⚙ machine drafts are
+    // NOT replaced and never become official — the variants sit beside them,
+    // exactly as the two English variants sit beside the state's own.
+    r.motto.translations.extend([
+        MottoTranslation {
+            lang: "lv".into(),
+            direction: Direction::Ltr,
+            text: "Vienotība dod spēku".into(),
+            relationship: TranslationRelationship::DocumentedVariant,
+            attestation: TranslationAttestation::SpeakerProvided {
+                speaker: "Latvian Wikipedia contributors (user-edited, tertiary)".into(),
+            },
+            translates_original: original_digest,
+            authority_basis: None,
+            note: Some(
+                "documented variant, advanced through the bLANGUAGEdock tier from \
+                        machine-only: differs from the ⚙ machine draft („rada“ → „dod“). NOT an \
+                        official rendering; the original remains the only authority."
+                    .into(),
+            ),
+        },
+        MottoTranslation {
+            lang: "zh-Hant".into(),
+            direction: Direction::Ltr,
+            text: "團結就是力量".into(),
+            relationship: TranslationRelationship::DocumentedVariant,
+            attestation: TranslationAttestation::SpeakerProvided {
+                speaker: "Chinese Wikipedia contributors (user-edited, tertiary)".into(),
+            },
+            translates_original: original_digest,
+            authority_basis: None,
+            note: Some(
+                "documented variant, tertiary speaker: the article's traditional-script \
+                        form; its own simplified gloss (团结就是力量) is the exact string of the \
+                        ⚙ zh-Hans machine draft, which stays beside it. NOT an official \
+                        rendering."
+                    .into(),
+            ),
+        },
+        MottoTranslation {
+            lang: "ar".into(),
+            direction: Direction::Rtl,
+            text: "الوحدة تولد القوة".into(),
+            relationship: TranslationRelationship::DocumentedVariant,
+            attestation: TranslationAttestation::SpeakerProvided {
+                speaker: "Arabic Wikipedia contributors (user-edited, tertiary)".into(),
+            },
+            translates_original: original_digest,
+            authority_basis: None,
+            note: Some(
+                "documented variant, advanced through the bLANGUAGEdock tier from \
+                        machine-only: differs from the ⚙ machine draft (تصنع → تولد). NOT an \
+                        official rendering; RTL is a data-layer fact here, not a surface claim."
+                    .into(),
+            ),
+        },
+    ]);
+
+    r.notes.extend([
+        "REVISION 3 (2026-10-10, order bHERALDRY-003): the portal read. The gazette portal's \
+         own PDF edition of ДВ бр. 62/1997 was read (JSF flow walked; sha256 of the served PDF \
+         a08ec6f1…337074d, bytes deliberately not committed — the приложения carry state \
+         insignia images). Working text moved to the portal edition's Чл. 2 (1); the seven \
+         originally disputed wordings are settled in the direction of the 2026-10-10 lex.bg \
+         rendering; four residual word-level divergences remain a retained dispute whose only \
+         adjudicator is the unread ink print. Revisions 1 and 2 are immutable — their frozen \
+         digests still pin them."
+            .into(),
+        "The portal PDF is a re-typeset MACHINE-TEXT edition (zero image objects, verified): \
+         honest about what was read — an official electronic edition one step from the 1997 \
+         print, not the print itself. УКАЗ № 304 was read in the same edition and resolves \
+         the adoption-date dispute into three named events (adoption 31.07.1997, decree \
+         4.08.1997, publication 5.08.1997)."
+            .into(),
+        "Решение № 1/1995 and Решение № 480/2017 were read from their publishers' own pages \
+         this revision (constcourt.bg act-1785; dv.parliament.bg material 117459). No \
+         signature blocks are carried anywhere in this record — offices and instruments are \
+         named, officeholders are not."
+            .into(),
+    ]);
+
+    r
+}
 /// The house achievement, revision 2 — a claim restructure demanded by the
 /// blazon-verbatim consistency law (added with this revision): the motto
 /// quote that rev 1's blazon source carried belongs to the motto's
