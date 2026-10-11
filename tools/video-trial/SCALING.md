@@ -9,7 +9,14 @@ One browser or a local simulation cannot certify their combined capacity.
 bView accepts public Autonomi addresses as before. It also accepts an HTTPS URL whose path ends in `.m3u8`.
 The latter uses the bundled hls.js 1.6.15 player with MSE and automatic bitrate selection.
 An HLS link is a different delivery route: the playlist host and its segment hosts supply bytes.
-It does not automatically convert or republish an existing Autonomi video, seed peers, or use the estate relay.
+It does not encode in the browser, seed peers, or use the estate relay.
+For explicitly published originals, the default `Adaptive when available` route resolves the original
+address to a versioned HTTPS bundle under `media/bview/`. The source is labelled as a published copy.
+Its package and publication manifests bind the encoded assets to the verified original address/hash;
+the player does not claim that encoded bytes retain the original file hash.
+Original routes remain selectable and saved preferences are preserved. A `?route=adaptive` share link
+selects adaptive playback for that visit without overwriting a saved original-route preference.
+Unknown addresses use the relay in adaptive mode; direct-only never substitutes the published copy.
 Remote playlist URLs are not added to the address-only saved-video list.
 
 For the adaptive route, bView starts at the lowest rendition and limits quality by the player size and frame drops.
@@ -19,7 +26,7 @@ Seeking backward may retain already downloaded forward data beyond the forward t
 Pause stops fetching after playback has started. A new address destroys the old player and aborts its HTTP requests.
 Retries are capped at two per load; a fatal media error gets one recovery attempt per session.
 Native HLS fallback is browser managed; unavailable network/buffering statistics stay null.
-Ordinary Autonomi visits do not load hls.js.
+Original-only Autonomi visits do not load hls.js. Published copies use the same adaptive engine.
 
 Direct fast-start MP4 files now use MP4Box.js 2.4.1 to remux arriving samples into MSE locally.
 Playback begins on decoded samples; discovery delay and subsequent native rebuffering remain visible.

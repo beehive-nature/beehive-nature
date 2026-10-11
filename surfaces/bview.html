@@ -276,9 +276,9 @@ document.addEventListener('DOMContentLoaded',function(){
             <button type="submit" class="primary"><span data-reg="bee" data-i18n="bview.bee.go">watch</span><span data-reg="raver" aria-hidden="true">▶</span><span data-reg="raver" class="sr" data-i18n="bview.raver.go">play</span><span data-reg="cypherpunk" data-i18n="bview.cy.go">fetch</span></button>
           </form>
           <p class="stream-help">You can also paste an HTTPS video playlist ending in .m3u8. Picture quality then adapts to your connection; the playlist's host supplies the video. <a href="#https%3A%2F%2Fskaists.dev%2Ffixtures%2Fbview%2Fadaptive%2Fmaster.m3u8">Try a 48-second test pattern with sound.</a></p>
-          <div class="playback-route"><label for="playback-route">Autonomi playback route</label>
-            <select id="playback-route"><option value="relay">Relay only</option><option value="direct-only">Direct Autonomi only</option><option value="direct">Direct Autonomi + relay fallback</option></select>
-            <p>Direct connects to storage nodes without a wallet. Direct only never asks the relay, so a slow or failed run stays slow or failed. Applies when you press Watch. Every run names where its bytes came from.</p>
+          <div class="playback-route"><label for="playback-route">Playback route</label>
+            <select id="playback-route"><option value="adaptive">Adaptive when available</option><option value="relay">Original · relay only</option><option value="direct-only">Original · direct Autonomi only</option><option value="direct">Original · direct + relay fallback</option></select>
+            <p>Adaptive uses a published HTTPS copy with picture quality that follows your connection. Without a published copy it uses the original through the relay. Direct only never asks the relay or a playlist host. Applies when you press Watch. Every run names where its bytes came from.</p>
             <p id="playback-status" role="status" aria-live="polite"></p>
           </div>
           <details class="my-videos" id="my-videos">
@@ -510,7 +510,7 @@ document.addEventListener('DOMContentLoaded',function(){
   });
   // Record actual playback, rather than failed downloads or malformed addresses.
   $('v').addEventListener('playing', () => {
-    if (!metrics.addr || metrics.adaptive || $('v').paused || $('v').readyState < 2 || recordedJob === job) return;
+    if (!metrics.addr || (metrics.adaptive && !metrics.adaptive.published) || $('v').paused || $('v').readyState < 2 || recordedJob === job) return;
     recordedJob = job; saveVideo(metrics.addr);
   });
   addEventListener('storage', event => {
@@ -540,7 +540,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // Where this run's bytes came from, said once for every front and every receipt.
   const sourceOf = () => {
     const dr = metrics.direct, p = metrics.path;
-    if (p === 'hls') return { kind: 'https', text: 'adaptive video · HTTPS playlist host · no Autonomi or estate relay requests' };
+    if (p === 'hls') return { kind: 'https', text: (metrics.adaptive?.published ? 'published adaptive copy' : 'adaptive video') + ' · HTTPS playlist host · no Autonomi or estate relay requests' };
     if (p === 'cache') return { kind: 'cache', text: 'cache · this device · neither the relay nor Autonomi was asked' };
     if (dr && dr.stopped) return { kind: 'direct', text: 'direct only · stopped: ' + dr.stopped + ' · ' + dr.uniqueBytes + ' B arrived · relay not used' };
     if (p === 'webrtc' || p === 'webrtc-connecting') return { kind: 'direct', text: 'direct · Autonomi storage nodes over WebRTC · no relay bytes' };
@@ -1546,7 +1546,11 @@ document.addEventListener('DOMContentLoaded',function(){
     return t && t.dials && !t.opened && !t.waiting ? 'none of the ' + t.dials + ' storage nodes it dialled could be reached from this network' : 'storage nodes went quiet';
   };
   const directCapable = () => isSecureContext && 'RTCPeerConnection' in window;
-  // Three routes: relay only, direct only (never the relay), direct with relay fallback.
+  // Publisher-curated derivatives, bound to the hash-verified original in publication.json.
+  // This is an HTTPS delivery option, never a claim that encoded bytes have the original hash.
+  const PUBLISHED = Object.freeze({'7c4f61ed1c7b950a3043b8a2d1aa9974a24ac6ca274c330e4da1b3a6a61bbb78':'d020828d0f3feca7123581fb71ed00c2d37350ff3eb3a3f88f5c068aa284e8af'}); // PUBLIC-CONSTANT: public source address and immutable rendition bundle
+  const publishedURL = address => PUBLISHED[address] ? new URL('../media/bview/'+PUBLISHED[address]+'/master.m3u8',location.href).href : null;
+  // Explicit original routes always preserve their transport choice.
   const routeOf = () => $('playback-route').value;
   const wantsDirect = () => routeOf() === 'direct' || routeOf() === 'direct-only';
   // A valid address on the direct route starts finding the video before Watch is pressed.
@@ -1583,11 +1587,16 @@ document.addEventListener('DOMContentLoaded',function(){
   };
   // Only an uncached, valid address opens the network. Remember the route without
   // dialing hundreds of nodes on a cached reload or an empty page.
-  try { const saved = localStorage.getItem(ROUTE_KEY); if (saved === 'direct' || saved === 'direct-only') $('playback-route').value = saved; } catch {}
+  const validRoute = value => ['adaptive','relay','direct','direct-only'].includes(value);
+  try { const saved = localStorage.getItem(ROUTE_KEY); if (validRoute(saved)) $('playback-route').value = saved; } catch {}
+  // A share link can explicitly select adaptive playback without rewriting a saved preference.
+  const linkedRoute = new URL(location.href).searchParams.get('route');
+  if (validRoute(linkedRoute)) $('playback-route').value = linkedRoute;
   $('playback-route').addEventListener('change', () => {
     const route = $('playback-route').value;
     try { localStorage.setItem(ROUTE_KEY, route); } catch {}
     if (wantsDirect() && directCapable()) preOpen($('addr').value);
+    else closePool();
   });
   $('addr').addEventListener('input', () => preOpen($('addr').value));
   addEventListener('pagehide', () => { stopDirect(); if(ctl)ctl.abort(); if(directPlayer)directPlayer.destroy(); closePool(); });
@@ -1824,14 +1833,15 @@ document.addEventListener('DOMContentLoaded',function(){
     try { const u = new URL(raw); return u.protocol === 'https:' && !u.username && !u.password && /\.m3u8$/i.test(u.pathname) ? u.href : null; }
     catch { return null; }
   };
-  async function playAdaptive(url, my, signal) {
+  async function playAdaptive(url, my, signal, publication = null) {
     closePool(); // This route owns no storage-node connection pool.
-    metrics.path = 'hls'; metrics.route = 'https';
+    metrics.path = 'hls'; metrics.route = publication ? 'adaptive' : 'https';
     const receipt = metrics.adaptive = { mode: null, segments: 0, mediaBytes: 0, errors: 0, recoveries: 0,
       switches: 0, level: null, bitrate: null, bandwidth: null, peakAhead: 0,
-      forwardTargetSeconds: 20, backTargetSeconds: 10, bufferTargetBytes: 24 * 1024 * 1024 };
+      forwardTargetSeconds: 20, backTargetSeconds: 10, bufferTargetBytes: 24 * 1024 * 1024,
+      published: !!publication, bundleId: publication?.bundleId || null };
     const alive = () => my === job && !signal.aborted;
-    routeStatus('Adaptive video from the playlist host. Quality adjusts automatically.');
+    routeStatus(publication ? 'Published adaptive copy from skaists.dev. Quality adjusts automatically. Choose an Original route to fetch the original file.' : 'Adaptive video from the playlist host. Quality adjusts automatically.');
     const fail = () => { if (!alive()) return; adaptivePlayer?.destroy(); adaptivePlayer = null; endHold(); say('s-fail'); };
     const loaded = () => { if (alive()) { markFirstFrame(); playing = my; say(null); goSound(my); } };
     v.addEventListener('loadeddata', loaded, { once: true, signal });
@@ -1928,6 +1938,11 @@ document.addEventListener('DOMContentLoaded',function(){
     $('out').dataset.addr = stream ? 'HTTPS playlist' : 'autonomi://' + a; document.body.setAttribute('data-watching', ''); $('out').hidden = false; say('s-slow'); if (tap) tap.hidden = true;
     paintNerd();
     if (stream) { frameGen++; v.removeAttribute('src'); v.load(); await playAdaptive(stream, my, signal); return; }
+    const published = routeOf() === 'adaptive' && publishedURL(a);
+    if (published) {
+      frameGen++; v.removeAttribute('src'); v.load();
+      await playAdaptive(published, my, signal, {bundleId:PUBLISHED[a]}); return;
+    }
     const hit = await cacheGet(a);
     if (hit && my === job) {
       metrics.path = 'cache';

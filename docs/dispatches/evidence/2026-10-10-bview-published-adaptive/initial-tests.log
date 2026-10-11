@@ -1,0 +1,37 @@
+✔ one front per register, each in its own dress, and the one real action inside it (5076.4812ms)
+✔ the same facts in all three: the door, the state, what has arrived — from the one data layer (5175.2502ms)
+✔ honest gestures: rows, ring and tiles read the data; they never fetch, play or claim (3246.7913ms)
+✔ the laws hold on the front: no dash for a value, no forced capitals, 44 px actions (2080.6433ms)
+✔ published package is bound to the verified original and every immutable byte (1123.6015ms)
+✖ original address defaults to adaptive copy, completes, and retains the saved original address (29390.1931ms)
+✔ explicit direct-only and saved transport choice never fetch a published copy (1186.0833ms)
+✔ adaptive share link selects this viewing mode without overwriting a saved original route (905.7403ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 35953.7415
+
+✖ failing tests:
+
+test at e2e\bview-published.test.mjs:58:1
+✖ original address defaults to adaptive copy, completes, and retains the saved original address (29390.1931ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - '7c4f61ed1c7b950a3043b8a2d1aa9974a24ac6ca274c330e4da1b3a6a61bbb78' # PUBLIC-CONSTANT: public fixture identifier
+  
+      at TestContext.<anonymous> (file:///C:/Users/travi/.codex/worktrees/0d0c/wt-codex-shu003/e2e/bview-published.test.mjs:67:10)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: '7c4f61ed1c7b950a3043b8a2d1aa9974a24ac6ca274c330e4da1b3a6a61bbb78', # PUBLIC-CONSTANT: public fixture identifier
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

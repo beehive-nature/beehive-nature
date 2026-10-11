@@ -866,7 +866,7 @@ jobs:
         if: always()
         working-directory: e2e
         # GitHub's Ubuntu image includes codec-capable Chrome; bundled Chromium lacks H264.
-        run: node --test bview-adaptive.test.mjs ../tools/video-trial/capacity.test.mjs ../tools/video-trial/package-hls.test.mjs
+        run: node --test bview-adaptive.test.mjs bview-published.test.mjs ../tools/video-trial/capacity.test.mjs ../tools/video-trial/package-hls.test.mjs
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest
