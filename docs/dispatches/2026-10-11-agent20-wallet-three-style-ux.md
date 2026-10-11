@@ -26,6 +26,16 @@ Source fixtures only: no local listener, real passkey, live funds or public uplo
 
 This branch is not yet a hosted release. Merge requires the exact final head's workflows and a fresh deployment/actual public-byte receipt. No receipt-only main push will be used to record progress while Pages waits.
 
+### Hosted release verified, 12:13 UTC
+
+The pending statement above records the pre-release state. PR #402 merged as `24570db7e` at 11:58:55 UTC after all eight PR workflows passed on `088d16516`. Pages run 38137540597 attempt 1 completed successfully on that merge. The source head is its ancestor. At 12:13:46 UTC, actual public bytes matched that deployment for wallet.html, bpay-invoice.js?v=10, ant-pay.js?v=9, stack.html, bnr-keys.js?v=1 and bnr-keys.wasm?v=1. The wallet also contains main's genealogy consent changes; its whole blob differs from the PR source and is not represented as the identical tested source blob.
+
+The preserved hosted Codex tab had an expired, unanswered identity check and no open keychain. Reloading brought in the new UX without clearing saved data. Actual UI navigation through the storage provider chooser was checked in Bee, Raver and Cypherpunk: the native sign-in action is visible, invoice preparation remains disabled while locked, and the separate ETH ceiling and no-signing notice are present. The Rust core reports its self-test passed. No new passkey prompt was triggered, identity created, secret exported or payment sent. Isolated Rust custody remains UNVERIFIED.
+
+Machine release evidence: `docs/receipts/agent20-wallet-ux-hosted-2026-10-11.json`. Reproducible public-byte probe: `docs/receipts/agent20-wallet-ux-deployment-verify-2026-10-11.mjs`. Screenshots remain in `tools/agent20-ux-hosted-{bee,raver,cypherpunk}.png`. This receipt is banked on the owned branch only, with no receipt-only main release.
+
+The remaining user action is to press **Open my wallet**, complete the existing passkey and confirm the displayed public identity if it is theirs; connect the existing .b name when asked. No fresh payer-bound ANT amount exists until that gate is complete. No funds are authorized. #400 must be rechecked before live signing.
+
 ## Ownership and continuation
 
 ### Exact-head CI correction, 10:58 UTC
