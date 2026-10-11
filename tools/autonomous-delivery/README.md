@@ -37,6 +37,8 @@ suppress delivery but retain active read slots until completion, so a sequence
 of cancels cannot bypass concurrency admission. Uncertain byte reservations
 are not refunded. SDK wire buffers and raw transport work are outside these
 application counters; this is not a total-memory or wire-traffic ceiling.
+ABR estimates include the complete range-read time: the SDK exposes no
+HTTP-style first-byte timestamp that can safely be subtracted from throughput.
 
 `__bviewEngine().adaptive.delivery` records opens, requests, reserved/read/
 verified bytes, cache hits and peak concurrency locally. It explicitly records

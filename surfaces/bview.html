@@ -1878,7 +1878,7 @@ document.addEventListener('DOMContentLoaded',function(){
         // The transmux worker can detach payload before this listener runs. Fragment
         // stats survive transfer; never mistake a detached ArrayBuffer for zero bytes.
         const stats = data.frag?.stats, n = stats?.loaded || 0;
-        if (metrics.ttfbMs == null && stats?.loading?.first > 0) metrics.ttfbMs = Math.max(0, stats.loading.first - metrics.t0);
+        if (metrics.ttfbMs == null && stats?.loading?.first > 0) metrics.ttfbMs = Math.max(0, (antSession ? stats.loading.end : stats.loading.first) - metrics.t0);
         receipt.segments++; receipt.mediaBytes += n; metrics.bytes = receipt.mediaBytes;
         receipt.bandwidth = Number.isFinite(hls.bandwidthEstimate) ? hls.bandwidthEstimate : null;
         paintNerd();
@@ -2178,6 +2178,11 @@ document.addEventListener('DOMContentLoaded',function(){
       ['rolling buffer','20 s forward / 10 s behind targets in MSE mode · seek may retain existing forward data',E.playStartMs!=null?'done':'todo'],
       ['integrity and cache','HTTPS delivery · no whole-file SHA or offline-copy claim','skip']
     ];
+    if(E.adaptive&&E.adaptive.transport==='autonomi'){
+      steps[0]=['parse · ANT video pack','one public storage object · embedded playlists and indexed media ranges','done'];
+      steps[2]=['range delivery','quality follows complete-range throughput · at most three reads admitted · no hosted media fallback',E.playStartMs!=null?'done':'todo'];
+      steps[4]=['integrity and cache','SHA-256 verified media ranges · bounded device cache · no whole-file offline-copy claim',E.adaptive.delivery&&E.adaptive.delivery.verifiedBytes?'done':'todo'];
+    }
     if(E.fail) steps[2][2]=steps[2][2]==='todo'?'guard':steps[2][2];
     var now=steps.findIndex(function(s){return s[2]==='todo';});
     $('etPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===now&&E.has?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
@@ -2199,7 +2204,8 @@ document.addEventListener('DOMContentLoaded',function(){
     rows.push(['application holds',esc(E.holds?E.holds+' · '+ms(E.holdMs)+' including pauses made by the player':'none yet')]);
     if(E.streaming){rows.push(['direct media stream',esc('MSE · '+E.streaming.fragments+' fragments · '+E.streaming.appendedBytes+' B appended · original file retained for integrity/cache'+(E.streaming.fallback?' · file-player fallback':''))]);rows.push(['direct buffer policy',esc(E.streaming.forwardTargetSeconds+' s / '+(E.streaming.bufferTargetBytes/1048576)+' MiB forward targets · '+E.streaming.backTargetSeconds+' s history · can overshoot by arriving chunks · original file and hashing memory are additional')]);}
     if(E.adaptive){var a=E.adaptive;rows.push(['adaptive video',esc(a.mode+' · quality '+(a.level==null?'not yet':a.level)+' · '+(a.bitrate?(a.bitrate/1e6).toFixed(2)+' Mb/s':'not yet')+' · '+a.switches+' quality changes')]);rows.push(['buffer policy',esc(a.mode==='native'?'browser managed · network and buffer limits unavailable':'20 s forward / 10 s behind targets · 24 MiB compressed-buffer target, not total browser memory')]);}
-    rows.push(['first response',esc((direct?'first chunk in order · ':'HTTP response headers · ')+ms(E.ttfbMs))],['first frame',esc(ms(E.ttffMs))]);
+    rows.push(['first response',esc((E.adaptive&&E.adaptive.transport==='autonomi'?'first verified segment · ':direct?'first chunk in order · ':'HTTP response headers · ')+ms(E.ttfbMs))],['first frame',esc(ms(E.ttffMs))]);
+    if(E.adaptive&&E.adaptive.delivery){var dl=E.adaptive.delivery;rows.push(['ANT range reads',esc(dl.opens+' open · '+dl.requests+' reads · '+dl.readBytes+' B returned · '+dl.verifiedBytes+' B hash-verified · '+dl.cacheHits+' cache hits')],['measurement boundary',esc(dl.boundary+' · not a payment receipt')]);}
     if(vf){
       rows.push(['playhead',esc(E.playhead.toFixed(2)+' s'+(vf.duration!=null?' / '+vf.duration.toFixed(2)+' s':'')+' · '+(vf.ended?'ended':vf.paused?'paused':'playing'))],
         ['picture',esc(vf.width?vf.width+'×'+vf.height:'not yet')],

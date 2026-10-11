@@ -107,7 +107,7 @@ network work, and no unmeasured network capacity is declared.
 
 ## Local closeout
 
-The full actual-video fixture run finished with **2,388 ms first frame, zero
+The final actual-video fixture run finished with **1,897 ms first frame, zero
 stalls / zero stall milliseconds, zero adaptive errors, one open and 2,489,222
 plaintext bytes read**. Pause/seek/resume then completed from the bounded cache.
 All four existing published-package/route checks passed alongside it. Six
@@ -115,6 +115,14 @@ range-integrity, cancellation, timeout and budget checks passed. Receipt:
 `docs/receipts/serverless-ant-video-browser-2026-10-11.json` (Chrome 153,
 390px viewport, real media, fixture transport). This does not replace the live
 ANT rerun still required after publication.
+
+The final adapter pass corrected hls.js throughput accounting: because the SDK
+returns a complete range, treating its arrival as HTTP-style TTFB would subtract
+nearly the whole transfer from ABR sampling. The loader now includes the full
+range wait; the displayed first-response time remains the actual verified
+segment arrival. The cypherpunk diagnostics name ANT ranges and SHA-256 checks,
+and the browser regression checks those labels. All seven focused checks pass
+after this correction; the four HTTPS publication regressions passed earlier.
 
 The pack SHA-256 and prepared-only state are saved in
 `docs/receipts/serverless-ant-video-pack-2026-10-11.json`. The binary stays an

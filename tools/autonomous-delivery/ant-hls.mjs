@@ -161,7 +161,11 @@ export async function createAntSession({ address, client, signal, limits = {}, o
       load(context.url, this.controller.signal).then(bytes => {
         if (this.stats.aborted) return;
         this.stats.loaded = this.stats.total = bytes.length; this.stats.chunkCount = 1;
-        this.stats.loading.first = this.stats.loading.end = performance.now();
+        this.stats.loading.end = performance.now();
+        // SDK returns a whole range, without an observable HTTP-style first byte.
+        // Charge all waiting time to ABR throughput; otherwise hls.js subtracts
+        // the entire transfer as TTFB and estimates a nearly instantaneous link.
+        this.stats.loading.first = this.stats.loading.start;
         callbacks.onSuccess({ url: context.url, data: context.responseType === 'arraybuffer' ? bytes.buffer : new TextDecoder().decode(bytes) }, this.stats, context, null);
       }).catch(error => { if (!this.stats.aborted) callbacks.onError({ code: 0, text: error.message }, context, null, this.stats); });
     }

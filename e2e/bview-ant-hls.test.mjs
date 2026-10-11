@@ -43,6 +43,11 @@ test('ANT pack: actual video decodes, seeks and ends using one reader and no med
     assert.equal(final.adaptive.delivery.opens, 1); assert.equal(await page.evaluate(() => window.fixtureOpens), 1);
     assert.equal(final.adaptive.delivery.paid, false); assert.ok(final.adaptive.delivery.peakConcurrent <= 3);
     assert.ok(final.adaptive.delivery.cacheBytes <= 24 * 1024 * 1024); assert.deepEqual(errors, []); assert.deepEqual(stray, []);
+    await page.evaluate(() => { document.body.dataset.reg = 'cypherpunk'; document.dispatchEvent(new Event('bregister')); });
+    await page.waitForFunction(() => document.querySelector('#etPipe').textContent.includes('ANT video pack'));
+    assert.match(await page.locator('#etPipe').textContent(), /SHA-256 verified media ranges/);
+    assert.match(await page.locator('#etReceipt').textContent(), /first verified segment/);
+    assert.doesNotMatch(await page.locator('#etReceipt').textContent(), /HTTP response headers/);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
     const output = { schema: 'bview-ant-hls-browser/1', constant: 'PUBLIC-CONSTANT',
       boundary: 'actual video decoded in Chrome at 390px; simulated ANT reads, no payment, public upload or live capacity claim',
