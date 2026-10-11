@@ -84,6 +84,7 @@ await page.waitForTimeout(1200);
 const sec = () => page.$('#bpay-sec');
 
 check('chooser renders (Choose how this is shared)', !!(await sec()) && (await (await sec()).innerText()).includes('Public'));
+await page.getByText('Private sharing · not available yet',{exact:true}).click();
 const unavail = await page.$$eval('#bpay-sec [data-bpay-unavailable]', els => els.map(e => ({ id: e.dataset.bpayUnavailable, tag: e.tagName, cursor: getComputedStyle(e).cursor, struck: getComputedStyle(e).textDecorationLine.includes('line-through'), aria: e.getAttribute('aria-disabled'), text: e.innerText.replace(/\s+/g, ' ') })));
 check('unavailable audience modes are PLAIN ROWS — never buttons, never struck (dead affordances are banned)',
   unavail.length === 2 && unavail.every(u => u.tag !== 'BUTTON' && u.cursor !== 'pointer' && !u.struck && u.aria === 'true' && ['only-me', 'selected-people'].includes(u.id)),
@@ -111,6 +112,7 @@ check('resolved policy recorded in localStorage', !!lsPolicy && JSON.parse(lsPol
 
 // the quote-service now points at the mock (seeded pre-boot); expose it in cypherpunk view
 await page.click('#breg-cypherpunk');
+await page.locator('#ant-quote-only > summary').click();
 const bridgeVisible = await page.$eval('#bpay-bridge', e => e.value);
 check('cypherpunk sees the chosen-at time', /chosen at/i.test(await (await sec()).innerText()));
 check('quote-service field visible in cypherpunk view', bridgeVisible.includes('/mock-bridge'), bridgeVisible);
