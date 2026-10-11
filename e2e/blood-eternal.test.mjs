@@ -167,6 +167,14 @@ test('cypherpunk offers exact-edition consent review separately from payment', a
   assert.equal(await host.getByRole('link').getAttribute('href'), 'wallet.html#genealogy-consent');
   assert.equal(await host.getByRole('button', { name: 'download signed consent' }).isVisible(), false);
   assert.match(await p.textContent('#etReceipt'), /paid\s*not yet/);
+  await ctx.addInitScript(() => {
+    localStorage.setItem('bnr_soul', 'gatesoul');
+    window.__consentCredentialPrompts = 0;
+    Object.defineProperty(navigator.credentials, 'get', { configurable: true, value: async () => {
+      window.__consentCredentialPrompts++;
+      throw new Error('test refuses any automatic credential prompt');
+    }});
+  });
   await host.getByRole('link').click();
   const walletConsent = p.locator('#genealogyConsent');
   await walletConsent.getByRole('button', { name: 'review signing key' }).waitFor();
@@ -174,6 +182,7 @@ test('cypherpunk offers exact-edition consent review separately from payment', a
   await walletConsent.getByRole('button', { name: 'review signing key' }).click();
   assert.match(await walletConsent.textContent(), /Connect your existing keychain/);
   assert.equal(await walletConsent.getByRole('checkbox').isEnabled(), false, 'no key means no consent press');
+  assert.equal(await p.evaluate(() => window.__consentCredentialPrompts), 0, 'reviewing consent must not automatically open a passkey prompt');
   assert.equal(errs.length, 0, errs.join(' | '));
   await ctx.close();
 });

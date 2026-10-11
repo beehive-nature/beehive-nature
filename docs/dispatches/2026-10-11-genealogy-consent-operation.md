@@ -41,3 +41,13 @@ A wallet-lane coordination message requests a pause on receipt-only main
 pushes and Pages reruns during its live acceptance. This lane keeps its
 evidence with the feature branch and does not cancel or rerun that deployment.
 Hosted consent acceptance is recorded in the PR once its deployment lands.
+
+Candidate browser acceptance: rendered PR commit `2f3a6527f` with same-origin
+development interception in a temporary skaists.dev tab, retaining the
+wallet's CSP. Exact-edition review and wallet mounting passed; pressing
+review with no connected key leaves both acknowledgment and signing disabled.
+The existing wallet auto-connect handler now excludes this panel, so review
+cannot trigger an unrelated passkey prompt. This last guard was included in
+the preview and is asserted by the hosted regression. Interception was cleared
+and the temporary tab closed. The original live genealogy tab stays open.
+This candidate preview is not a Pages deployment receipt.
