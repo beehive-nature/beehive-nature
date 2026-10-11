@@ -28,6 +28,12 @@ This branch is not yet a hosted release. Merge requires the exact final head's w
 
 ## Ownership and continuation
 
+### Exact-head CI correction, 10:58 UTC
+
+The first product head's tests run 38130953386 failed only the wallet job. Its three vault batteries each reported `FAIL primary keychain CTA is passkey connect (not paste)` (83 passed, 1 failed per style). This was this lane's regression: after locking, the status offered `open it again`, which the new duplicate-action observer treated as an error action and used to hide the primary sign-in button. The observer now treats that normal reopen action like the initial connect action, keeping one primary passkey button. Error-specific actions still remain available.
+
+The original Cypherpunk vault battery now passes 84/84 using its local synthetic WebAuthn test server; no real wallet or funds were used. The guided source fixture passes all nine style/width combinations, additionally checking lock, visible primary action, hidden duplicate and reopening via a second synthetic passkey request in each style. The generated surface directory is unchanged by this correction. Fresh exact-head CI is required again; the failed first run is not counted as green.
+
 Current main was fetched and merged into the owned worktree before changes. #400 remains the independent envelope/vault/authorization-hardening lane; coordination is recorded at https://github.com/beehive-nature/beehive-nature/pull/400#issuecomment-6107827204 . bView was notified that this lane owns the three-style wallet UX, while its separate artifact and payment authority remain its own. Its wallet tab was not touched.
 
 After this product release is hosted and verified, continue the original exact 49-byte probe using the existing bzDiD identity. Show a fresh ANT amount and separate aggregate ETH ceiling before any payment authorization. Historical quotes and 0.0002 ETH are not authorization. Retrieve and compare the original hash only after an explicitly authorized purchase; reconcile canonical receipts without duplicate payment. The existing hosted session is preserved during development.

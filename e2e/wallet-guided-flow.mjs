@@ -57,6 +57,16 @@ try {
       assert.equal(await page.locator('#ant-buy-file').evaluate(e=>e.files[0].size),49);
       assert.equal(await page.locator('#ant-buy-gas').inputValue(),'0.0002');
     }
+    // Locking returns to the same primary passkey action, without a competing retry.
+    await page.locator('#breg-'+reg).click();
+    await page.evaluate(()=>{location.hash='kc-sec';});
+    await page.locator('#kc-out').click();
+    await page.waitForFunction(()=>!BNRPAY.antStorageState().connected);
+    assert.equal(await page.locator('#kc-pass').isVisible(),true);
+    assert.equal(await page.locator('#kc-stat button').isVisible(),false);
+    await page.locator('#kc-pass').click();
+    await page.waitForFunction(()=>BNRPAY.antStorageState().connected);
+    assert.equal(await page.evaluate(()=>window.__passkeyGets),2);
     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1);
     assert.equal(overflow,false,`${reg}/${width} must fit the viewport`);
     assert.deepEqual(errors,[]);

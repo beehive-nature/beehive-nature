@@ -5927,7 +5927,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     kcProgress(KC_ASK?'confirm':MPRK?'ready':'passkey');
     var action=$('kc-stat').querySelector('button');
     if(!MPRK&&!KC_ASK&&action){
-      if(action.textContent==='connect keychain')action.hidden=true;
+      if(action.textContent==='connect keychain'||action.textContent==='open it again')action.hidden=true;
       else $('kc-pass').hidden=true;
     }
     var stat=$('kc-stat'),raw=stat.querySelector(':scope > span.wl-cyd');
