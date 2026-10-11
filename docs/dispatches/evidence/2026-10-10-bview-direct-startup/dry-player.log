@@ -1,0 +1,10 @@
+{"startupMs":656,"stallMs":1542.7000000476837,"srcChanges":1,"fragments":62,"warmReads":0}
+✔ a dry MSE player reads the next chunk even when estimated forward bytes exceed its target (14895.3744ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 16073.2855

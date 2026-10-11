@@ -1,0 +1,39 @@
+# direct chunk lanes: three boundary reads per file, Blob playback, no service worker, one connection across two addresses, readers closed, no relay
+✔ direct: chunks read on their boundaries, real MSE frames, one connection, no relay (2213.8287ms)
+✔ direct setup rejection automatically uses the existing relay (854.208ms)
+✔ a direct connection that never opens reaches the relay after the quiet limit (12931.9948ms)
+✔ an open file whose chunks never arrive reaches the relay and cancels the stuck reads (46241.1744ms)
+✔ large-file relay startup records a first-frame receipt when early preview is skipped (2641.4045ms)
+✔ direct only: a failed direct start stops, records why, and never asks the relay (2444.0709ms)
+✔ direct only: a clean run is labelled direct with no relay bytes (1015.7008ms)
+✔ relay only: every byte is labelled relay and no direct connection opens (873.0017ms)
+✔ later chunks cannot postpone recovery from a missing playable head (2274.196ms)
+✔ head progress renews the next demand deadline and completes ordered delivery (2279.8561ms)
+✔ ordered starvation on the fallback route asks the relay exactly once (1499.4471ms)
+✔ retry-once: a settled failed head recovers without relay or duplicate bytes (1060.9833ms)
+✔ retry-short: a settled failed head recovers without relay or duplicate bytes (1194.2287ms)
+✔ retry exhaustion is bounded on direct-only (1975.0053ms)
+✔ retry exhaustion is bounded on direct (1905.2533ms)
+✔ cancelling during backoff launches no retry and late reads cannot change its receipt (3024.2115ms)
+# 52 chunks: 54 attempts, two settled failures, same-byte SHA-256, <=3 reads, no duplicate in-flight range
+✔ 52-chunk transfer recovers chunk 16 twice, preserves order and verifies every byte (7507.1547ms)
+✔ a widespread failure cannot exceed the twelve-retry transfer budget (2203.0157ms)
+{"startupMs":409.2999999523163,"stallMs":1961.7000000476837,"srcChanges":1,"fragments":62,"warmReads":0}
+✔ direct MSE starts from the first chunk, retains one source through gaps, and caches a genuine warm replay (14892.9954ms)
+{"startupMs":242.79999995231628,"stallMs":2178.0999999046326,"srcChanges":1,"fragments":62,"warmReads":0}
+✔ a dry MSE player reads the next chunk even when estimated forward bytes exceed its target (14841.7128ms)
+✔ MSE append failure recovers at the same playhead from retained bytes without another read (15622.7111ms)
+✔ MSE quota pressure retries the same bytes once after freeing history (13337.4177ms)
+✔ unsupported MSE codec keeps the file player and performs one set of reads (16145.0702ms)
+✔ poster gain does not erase long-clip stall regression or invent warm results (2.8922ms)
+✔ zero baseline is not an infinite percentage or a missing value (1.9103ms)
+✔ bad inputs and misleading provenance fail closed (2.7265ms)
+✔ capture preserves unknowns, distinguishes cache, bounds samples and excludes sensitive fields (380.2578ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 174425.7097

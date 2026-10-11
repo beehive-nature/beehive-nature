@@ -19,7 +19,7 @@ const server = createServer(async (req, res) => {
       res.end();return;
     }
     const body = path === '/media.mp4' ? MEDIA : await readFile(path === '/surfaces/bview.html' && process.env.BVIEW_HTML ? process.env.BVIEW_HTML : ROOT + path);
-    res.writeHead(200, { 'content-type': path.endsWith('.js') ? 'text/javascript' : path.endsWith('.html') ? 'text/html' : path.endsWith('.css') ? 'text/css' : 'application/octet-stream' }); res.end(body);
+    res.writeHead(200, { 'content-type': /\.m?js$/.test(path) ? 'text/javascript' : path.endsWith('.html') ? 'text/html' : path.endsWith('.css') ? 'text/css' : 'application/octet-stream' }); res.end(body);
   } catch { res.writeHead(404); res.end(); }
 });
 before(async () => { await new Promise(r => server.listen(8941, '127.0.0.1', r)); browser = await chromium.launch(); });
@@ -76,11 +76,11 @@ async function open(reject = false, slow = false, hang = null, large = false, ro
   await page.selectOption('#playback-route',route); await page.fill('#addr',ADDRESS); await page.click('button[type=submit]');
   return {ctx,page,errors,relay};
 }
-test('direct: chunks read on their boundaries, real frames from a Blob, one connection, no relay', async () => {
+test('direct: chunks read on their boundaries, real MSE frames, one connection, no relay', async () => {
   const {ctx,page,errors,relay}=await open();
   try {
     await page.waitForFunction(()=>document.querySelector('#v').videoWidth>0 && window.__bviewEngine().path==='webrtc',null,{timeout:20000});
-    await page.waitForFunction(()=>!!window.__bviewEngine().sha,null,{timeout:20000});
+    await page.waitForFunction(()=>{const e=window.__bviewEngine();return !!e.sha&&e.ttffMs>0;},null,{timeout:20000});
     assert.match(await page.evaluate(()=>document.querySelector('#v').currentSrc),/^blob:/);
     assert.equal(relay.length,0);
     assert.equal(await page.evaluate(()=>navigator.serviceWorker.getRegistrations().then(r=>r.length)),0,'direct playback registers no service worker');
@@ -94,6 +94,7 @@ test('direct: chunks read on their boundaries, real frames from a Blob, one conn
     assert.equal(facts.e.direct.size,MEDIA.length);assert.equal(facts.e.direct.uniqueBytes,MEDIA.length);assert.ok(facts.e.bytes>0);
     assert.equal(facts.e.direct.startupBudgetMs,12000);assert.equal(facts.e.direct.startupCapMs,30000);
     assert.ok(facts.e.direct.firstReadMs>=0);assert.ok(facts.e.ttffMs>0);assert.equal(facts.e.direct.fallback,null);
+    assert.equal(facts.e.direct.firstFrameMs,facts.e.ttffMs);assert.equal(facts.e.streaming.mode,'mse');assert.equal(facts.e.video.srcChanges,1);
     assert.match(facts.receipt,/chunk reads/);assert.match(facts.receipt,/unique plaintext/);assert.match(facts.receipt,/wire traffic(?=not measured · no WebRTC dial in this page)/);
     assert.match(facts.pipe,/chunk lanes/);assert.match(facts.pipe,/3 of 3 chunks/);
     assert.ok(facts.wide<=facts.vw+1,'direct metrics must fit the mobile cypherpunk front');
@@ -263,7 +264,7 @@ for (const route of ['direct-only','direct']) test('retry exhaustion is bounded 
 test('cancelling during backoff launches no retry and late reads cannot change its receipt',async()=>{
   const {ctx,page,errors,relay}=await open(false,false,'retry-cancel',false,'direct-only');
   try {
-    await page.waitForFunction(()=>!!window.__bviewEngine().direct?.stopped);
+    await page.waitForFunction(()=>window.__bviewEngine().direct?.status==='cancelled'&&window.closedReaders>0);
     await page.evaluate(()=>{window.stoppedReceipt=JSON.stringify(window.__bviewEngine().direct);});
     await page.waitForTimeout(2200);
     const d=await page.evaluate(()=>window.__bviewEngine().direct);
