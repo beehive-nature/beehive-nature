@@ -9,7 +9,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname, extname } from 'node:path';
@@ -123,6 +123,19 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     const live = await one.page.inputValue('#livehash');
     ok('edition 0001 loads and verifies byte-exact against the reported digest', live === GENESIS_SHA, live.slice(0, 16) + '…');
     ok('verdict reads MATCH', /MATCH/.test(await one.page.textContent('#hashverdict')));
+
+    /* the incident artifact: an uploaded file went SILENT on v1 — the file
+       input itself is now exercised, with multi-byte content so byte-true
+       hashing (not char counting) is what passes */
+    const uploadPath = join(dir1, 'upload-check.md');
+    const UPLOAD = 'bDroP file-input check \u2014 harmless test bytes for the regression suite \u00b7 \u2014 \u{1F41D}\n';
+    const UPLOAD_SHA = createHash('sha256').update(UPLOAD, 'utf8').digest('hex');
+    await writeFile(uploadPath, UPLOAD, 'utf8');
+    await one.page.fill('#expected', UPLOAD_SHA);
+    await one.page.setInputFiles('#bodyfile', uploadPath);
+    await step('uploaded file hashes to its own digest', () => one.page.waitForFunction(
+      (sha) => document.getElementById('livehash').value === sha, UPLOAD_SHA, { timeout: 8000 }));
+    ok('the file path answers with MATCH (the v1 silence is regression-covered)', /MATCH/.test(await one.page.textContent('#hashverdict')));
 
     await one.page.fill('#body', BODY);
     await one.page.fill('#expected', BODY_SHA);
