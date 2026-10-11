@@ -1,6 +1,6 @@
 # Agent 20 — hosted ANT storage purchasing
 
-Date: 2026-10-10 (America/Denver). Status: implementation and fixture acceptance; real purchase acceptance remains OPEN. This is payment for Autonomi storage with ANT, not an ANT-token purchase.
+Date: 2026-10-10 (America/Denver). Status: PR #391 MERGED, hosted bytes and non-spending controls/quote VERIFIED; real purchase acceptance remains OPEN. This is payment for Autonomi storage with ANT, not an ANT-token purchase.
 
 ## Delivered path
 
@@ -56,3 +56,18 @@ The same keyless hosted quote probe was allowed 300 seconds after the first 90-s
 PR #391's first full current-source test run (`38097285561`, source `7e124126fff66531a76ef5f1c61735a539f96468`) exposed a wallet-register gate failure: the new help text said "open the storage invoice below", violating the rule against positional directions. A local reproduction named line 1629 with that exact text. The correction names the actual "Pay ANT to store a public file" control. The source has also incorporated newer main `b9c75cd7b7a568fa29760acd89152c67d17aa585`; fresh CI is required for the resulting head. This record does not label the failed run green.
 
 The local register gate completed **127/128**, with that wording assertion its sole failure. CI also exposed a missing generated dependency-directory update: `node scripts/build-stack-surfaces.mjs --check` returned `Surface directory needs regeneration`. Regenerating `surfaces/stack.html` changed only the wallet row, adding the new `ant-pay.js` reference and current bPay query version. Both Engine Room generator checks pass after regeneration. The full register correction and final head remain subject to fresh CI.
+
+## Final merge, deployment and hosted receipts
+
+- [PR #391](https://github.com/beehive-nature/beehive-nature/pull/391) merged at `2026-10-11T03:19:50Z` as `42c466b56feaf94796da828302d01cdc714b0156`.
+- Tested source: `57c5c4d0083e15570e4e3a3e9cdc96bbb95a60d8`. All **eight PR workflows completed successfully**. The corrected local register gate passed **128/128**. The failed predecessor remains failed; the raw logs confirmed exactly the two omissions documented above.
+- [Tests 38100139931](https://github.com/beehive-nature/beehive-nature/actions/runs/38100139931): all seven shards passed, including wallet, node, formal, static, meter, eternal and Rust. The hosted ANT fixture and corrected register/dependency checks passed in that run.
+- Other successful source runs: secret-scan `38100139902`; WB001 SAW `38100139906`; WB002 SAW `38100139789`; WB002 WASM `38100140021`; RB `38100139816`; PQ `38100139908`; PQ SAW `38100139891`.
+- The first Pages run `38108026422` was cancelled when a newer main deployment queued. Deployed descendant: `ee4893383b0cab7cfb8953fed79f55f755bfdbac`, containing the #391 merge and subsequent bView work. [Pages 38108411515](https://github.com/beehive-nature/beehive-nature/actions/runs/38108411515) completed successfully. Git ancestry and unchanged product blobs were verified.
+- At `2026-10-11T03:30:52Z`, public HTTP 200 responses for `wallet.html`, `ant-pay.js?v=8`, `bpay-invoice.js?v=8` and `stack.html` matched the tested Git blobs byte-for-byte. Exact SHA-256 values and byte counts are in the release receipt.
+- The actual [hosted wallet](https://skaists.dev/surfaces/wallet.html#bpay-sec), without routed fixtures, passed control checks at 390px in bee, raver and cypherpunk: purchase panel visible, ETH limit blank, missing file and missing ETH limit refused before any invoice, and no horizontal overflow. Screenshots were visually inspected for the bee view.
+- A fresh post-deployment quote returned **0.329302634765625 ANT for 49 bytes** at approximately `2026-10-11T03:36:21Z`. ETH remains separate. No wallet signature, payment, upload or retrieval occurred. The final probe samples status and completion together; an earlier capture sampled them separately and retained stale progress text, so that capture is not used as a quote receipt.
+
+Durable machine receipt: `docs/receipts/agent20-ant-hosted-release-2026-10-10.json`. Reproducible non-spending probes: `docs/receipts/agent20-ant-hosted-live-probe-2026-10-10.mjs` and `docs/receipts/agent20-ant-hosted-controls-probe-2026-10-10.mjs`.
+
+The closeout changes only this dispatch and receipt/probe files; it does not change product bytes. Broad CI is skipped for that receipt-only commit because the probes have already run against the deployed site and the product source has the eight green runs above. Later main CI is a separate result and is not claimed green here. The remaining live purchase gate is still the exact bounded hosted invoice and the key holder's wallet confirmations described above; **no funds spent**.

@@ -420,7 +420,10 @@ document.addEventListener('DOMContentLoaded',function(){
    read, bitrate = mdat bytes / duration; playback starts (and resumes
    after running dry) only when the rest of the media, at the measured
    rate, lands before the playhead needs it. Until then the viewer sees
-   "ready to play in ~N s". No MSE: never reassign video.src mid-play
+   "ready to play in ~N s". This remains the fallback for unsupported files.
+   Direct fast-start MP4 uses incremental MSE remuxing and starts as soon as
+   decoded samples arrive, preserving one source and counting native stalls.
+   The fallback never reassigns video.src mid-play
    (that was the rapid flicker). Hold the playhead at the Blob edge; one paint resumes, or finishBinary closes.
    Three-temp progressive disclosure (register.js / data-reg): New bee =
    calm paste->Open->video; Raver = softer pulse copy; Cypherpunk =
@@ -518,7 +521,7 @@ document.addEventListener('DOMContentLoaded',function(){
   const v = $('v'), pg = $('pg');
   const tap = $('tap');
   const CACHE = 'ant-bview-v1';
-  const cacheKey = a => 'ant-bview://' + a;
+  const cacheKey = a => new URL('../__bview_cache/' + a, location.href).href;
   // Language for dynamic text; an unknown value is said, never drawn as a dash (brand law).
   const lang = (k, en) => window.BNRLanguage && typeof window.BNRLanguage.text === 'function' ? window.BNRLanguage.text(k, en) : en;
   const notYet = () => lang('bview.notYet', 'not yet');
@@ -532,7 +535,7 @@ document.addEventListener('DOMContentLoaded',function(){
     metrics.bytes = 0; metrics.rateMbs = null; metrics.sha = null; metrics.t0 = 0; metrics.doneMs = null;
     metrics.direct = null; metrics.srcStart = window.__bviewSrcAssigns || 0; metrics.route = '';
     metrics.stalls = 0; metrics.stallMs = 0; metrics.stallAt = 0;
-    metrics.playStartMs = null; metrics.holds = 0; metrics.holdMs = 0; metrics.holdAt = 0; metrics.adaptive = null;
+    metrics.playStartMs = null; metrics.holds = 0; metrics.holdMs = 0; metrics.holdAt = 0; metrics.adaptive = null; metrics.streaming = null;
   };
   // Where this run's bytes came from, said once for every front and every receipt.
   const sourceOf = () => {
@@ -631,7 +634,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if (tap) tap.addEventListener('click', () => { v.muted = false; v.volume = 1; v.play().then(() => { tap.hidden = true; }).catch(() => {}); });
 
   let job = 0, ctl = null, blobUrl = null, playing = 0;
-  let adaptivePlayer = null, adaptiveLibrary = null;
+  let adaptivePlayer = null, adaptiveLibrary = null, directPlayer = null, directMediaLibrary = null;
   // Application holds do not dispatch `waiting`. Count the union with native stalls,
   // retaining the interval across the pause/src-change events caused by our own hold.
   const beginStall = () => {
@@ -653,7 +656,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // The live download (one per job): its parts, the time plan read from moov, and where the
   // playing Blob ends. Media-element events reach it here; a newer job replaces it.
   let feed = null;
-  const needsFinalTail = st => !!(st && st.done && st.plan && st.paintedAt < st.plan.m1);
+  const needsFinalTail = st => !!(st && !st.mse && st.done && st.plan && st.paintedAt < st.plan.m1);
   const newFeed = my => (feed = {
     my, parts: [], bytes: 0, mime: '', early: false, me: 0, plan: null, planless: false,
     preview: false, previewTried: false, srcLocked: false, sounded: false, stalled: false, busy: false, done: false,
@@ -715,6 +718,7 @@ document.addEventListener('DOMContentLoaded',function(){
   v.addEventListener('timeupdate', () => {
     if (playing !== job) return;
     const st = feed, t = v.currentTime;
+    if (st && (st.mse || st.mseFailed)) { keepAt = t; renderInst(); return; }
     if (st && st.my === job && st.plan && (!pg.hidden || needsFinalTail(st))) {
       if (st.busy || st.stalled) return;
       // Past what the running Blob can hold = Chrome's end-of-data yank, never the viewer's playhead.
@@ -737,6 +741,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if (v.currentTime > 0.05 && !(dur > 0 && v.currentTime > dur - 0.75)) keepAt = v.currentTime;
   });
   v.addEventListener('ended', () => {
+    if (feed && feed.mse) return;
     if (playing !== job || (pg.hidden && !needsFinalTail(feed))) return;
     const st = feed;
     if (st && st.my === job && st.plan) {
@@ -925,6 +930,11 @@ document.addEventListener('DOMContentLoaded',function(){
     const say = $('map-say'), rule = $('rule');
     if (!say || !rule) return;
     if (!st) { say.textContent = notYet(); return; }
+    if (st.mse) {
+      say.textContent = 'original bytes arrived ' + fmtMb(metrics.bytes) + ' · continuous MSE source · playhead ' + v.currentTime.toFixed(1) + ' s';
+      rule.textContent = 'start on decoded samples · wait when the next samples have not arrived · 20 s forward target';
+      return;
+    }
     say.textContent = (st.me > 0 ? 'moov ' + (st.me / 1024).toFixed(1) + ' KB · ' : '') + (pl ? 'mdat ' + fmtMb(pl.m1 - pl.m0) + ' · ' : '')
       + 'arrived ' + fmtMb(st.bytes) + (size ? ' of ' + fmtMb(size) : '') + ' · playing copy ' + (st.paintedAt ? fmtMb(st.paintedAt) : '0 MB')
       + (pl && st.sounded ? ' · playhead ' + v.currentTime.toFixed(1) + ' s' : '');
@@ -1055,6 +1065,7 @@ document.addEventListener('DOMContentLoaded',function(){
     captureDecodedFrame();
     if (metrics.ttffMs == null && metrics.t0) {
       metrics.ttffMs = performance.now() - metrics.t0;
+      if (metrics.direct && metrics.path === 'webrtc') metrics.direct.firstFrameMs = metrics.ttffMs;
       note('first frame');
       paintNerd();
     }
@@ -1294,15 +1305,71 @@ document.addEventListener('DOMContentLoaded',function(){
   // Consume an already-open /stream body as binary progressive Blobs.
   async function readBinaryStream(rd, seed, total, signal, my, a) {
     const state = newFeed(my), parts = state.parts;
-    let bytes = 0;
+    let bytes = 0, attemptedMSE = metrics.path !== 'webrtc';
+    const recoverFile = async () => {
+      const resumeAt=keepAt, full=snap(state);
+      const ok=await paintBlob(full,BLOB_WAIT_FULL,state);
+      if(my!==job)return;
+      if(ok){v.currentTime=resumeAt;playing=my;markFirstFrame();say(null);if(state.resumeAfterFallback)await goSound(my);}
+      else say('s-fail');
+    };
+    const fileFallback = () => {
+      if(state.mseFailed || signal.aborted || my!==job)return;
+      // Keep every original byte. A remux/decoder failure must not restart the
+      // network download or leave a partially initialized source locked in place.
+      const wasPlaying = !v.paused;
+      keepAt = Number.isFinite(v.currentTime) ? v.currentTime : keepAt;
+      if (directPlayer) directPlayer.destroy();
+      directPlayer = null; state.mse = false; state.mseFailed = true;
+      state.resumeAfterFallback = wasPlaying || metrics.playStartMs == null;
+      if (metrics.streaming) metrics.streaming.fallback = true;
+      if (wasPlaying) beginHold();
+      v.pause();
+      note('MSE unavailable · finish from retained original bytes');
+      if(state.done)recoverFile().catch(()=>{if(my===job)say('s-fail');});
+    };
+    const consume = async value => {
+      state.bytes = bytes;
+      if (state.mseFailed) return;
+      if (!attemptedMSE && bytes >= 32) {
+        attemptedMSE = true;
+        if (kind(value) === 'video/mp4') {
+          try {
+            directMediaLibrary ||= import('../tools/video-trial/direct-mse.mjs');
+            const { createMP4Stream } = await bounded(directMediaLibrary,signal,10000);
+            directPlayer = await createMP4Stream(value,{video:v,signal,
+              onAttach:() => { state.mse = true; window.__bviewSrcAssigns++; },
+              onSeekOutside:fileFallback,
+              onReady:() => { if(my === job){state.early = true;state.sounded = true;playing = my;markFirstFrame();say(null);goSound(my);} }});
+            if(directPlayer){metrics.streaming = directPlayer.stats;note('direct MP4 → MSE · original samples · one continuous source');return;}
+          } catch(error) {
+            if(signal.aborted || my !== job)throw error;
+            if(state.mse){fileFallback();return;}
+            note('MSE unavailable · using the progressive file player');
+          }
+          state.mse = false;
+        }
+      } else if (directPlayer && state.mse) {
+        try { await directPlayer.append(value); return; }
+        catch(error) {
+          if(signal.aborted || my !== job)throw error;
+          fileFallback(); return;
+        }
+      }
+      await flushEarlyPaint(parts,bytes,state,my);
+    };
     if (seed && seed.length) { parts.push(seed); bytes = seed.length; }
     if (bytes && my === job) {
       showGot(bytes);
       if (total) pg.value = bytes / total;
-      await flushEarlyPaint(parts, bytes, state, my);
+      await consume(seed);
     }
     for (;;) {
       if (signal.aborted || my !== job) { try { rd.cancel(); } catch {} return state.early; }
+      if (directPlayer && state.mse) {
+        try { await directPlayer.capacity(); }
+        catch(error){if(signal.aborted || my !== job)throw error;fileFallback();}
+      }
       const { done, value } = await rd.read();
       if (done) break;
       parts.push(value);
@@ -1311,7 +1378,27 @@ document.addEventListener('DOMContentLoaded',function(){
         if (total) pg.value = bytes / total;
         showGot(bytes);
       }
-      await flushEarlyPaint(parts, bytes, state, my);
+      await consume(value);
+    }
+    if (directPlayer && state.mse && my === job) {
+      try { await directPlayer.finish(); }
+      catch(error){if(signal.aborted || my !== job)throw error;fileFallback();}
+    }
+    if ((state.mse || state.mseFailed) && my === job) {
+      state.done = true;
+      state.parts = parts; state.bytes = bytes; state.mime = 'video/mp4';
+      const full = snap(state);
+      // The immutable Blob owns these bytes now; release the duplicate JS arrays.
+      parts.length=0;state.folded=0;
+      metrics.bytes = bytes; metrics.doneMs = performance.now()-metrics.t0;
+      cachePut(a,full);
+      hashBlob(full).then(sha => {if(my === job){metrics.sha=sha;paintNerd();renderInst();}});
+      if(state.mseFailed){
+        await recoverFile();
+        if(my!==job)return true;
+      }
+      note(state.mse?'all original bytes arrived · MSE source retained':'all original bytes arrived · file-player recovery'); paintNerd();renderInst();
+      return true;
     }
     return finishBinary(parts, bytes, state, my, a);
   }
@@ -1470,7 +1557,14 @@ document.addEventListener('DOMContentLoaded',function(){
     dropOpen();
     const stop = new AbortController();
     const open = { address, stop, reader: null, heard: null };
-    const reader = open.reader = openPool().client.then(client => client.openFile(address, { signal: stop.signal, onProgress: event => { if (open.heard) open.heard(event); } }));
+    const reader = open.reader = (async () => {
+      let cached = false;
+      try { cached = !!(await (await caches.open(CACHE)).match(cacheKey(address))); } catch {}
+      if(cached || stop.signal.aborted)throw new DOMException('Cached or cancelled','AbortError');
+      const client = await openPool().client;
+      if(stop.signal.aborted)throw new DOMException('Cancelled','AbortError');
+      return client.openFile(address, { signal: stop.signal, onProgress: event => { if (open.heard) open.heard(event); } });
+    })();
     reader.catch(() => { if (directOpen === open) directOpen = null; });
     directOpen = open;
   };
@@ -1487,16 +1581,16 @@ document.addEventListener('DOMContentLoaded',function(){
     } else for (let at = 0; at < size; at += CHUNK) pieces.push([at, Math.min(CHUNK, size - at)]);
     return pieces;
   };
-  // Choosing the direct route connects at once. The choice is remembered on this device.
+  // Only an uncached, valid address opens the network. Remember the route without
+  // dialing hundreds of nodes on a cached reload or an empty page.
   try { const saved = localStorage.getItem(ROUTE_KEY); if (saved === 'direct' || saved === 'direct-only') $('playback-route').value = saved; } catch {}
-  if (wantsDirect() && directCapable()) openPool();
   $('playback-route').addEventListener('change', () => {
     const route = $('playback-route').value;
     try { localStorage.setItem(ROUTE_KEY, route); } catch {}
-    if (wantsDirect() && directCapable()) { openPool(); preOpen($('addr').value); }
+    if (wantsDirect() && directCapable()) preOpen($('addr').value);
   });
   $('addr').addEventListener('input', () => preOpen($('addr').value));
-  addEventListener('pagehide', () => { stopDirect(); closePool(); });
+  addEventListener('pagehide', () => { stopDirect(); if(ctl)ctl.abort(); if(directPlayer)directPlayer.destroy(); closePool(); });
   async function bounded(work, signal, milliseconds) {
     let timer, aborted;
     try {
@@ -1811,6 +1905,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if (options.relay && options.reason && !heldFrame.hidden) savedFrameJob = my;
     restorePause = !!options.paused;
     stopDirect();
+    if (directPlayer) { directPlayer.destroy(); directPlayer = null; }
     if (adaptivePlayer) { adaptivePlayer.destroy(); adaptivePlayer = null; }
     v.pause();
     if (options.relay && options.reason) holdDecodedFrame();
@@ -1837,8 +1932,8 @@ document.addEventListener('DOMContentLoaded',function(){
     if (hit && my === job) {
       metrics.path = 'cache';
       metrics.bytes = hit.size;
-      metrics.sha = await hashBlob(hit);
       metrics.doneMs = performance.now() - metrics.t0;
+      hashBlob(hit).then(sha=>{if(my===job){metrics.sha=sha;paintNerd();}});
       paintNerd();
       if (await paintBlob(hit, BLOB_WAIT, null)) {
         if (my === job) { playing = my; say(null); markFirstFrame(); await goSound(my); }
@@ -1877,11 +1972,11 @@ document.addEventListener('DOMContentLoaded',function(){
       rateMbs: metrics.rateMbs, rateBps: rateBps(), ttfbMs: metrics.ttfbMs, ttffMs: metrics.ttffMs, sha: metrics.sha, doneMs: metrics.doneMs,
       dec: metrics.dec || null, moov: st && st.me > 0 ? st.me : 0,
       plan: pl ? { dur: pl.dur, bps: 8 * (pl.m1 - pl.m0) / pl.dur, codec: pl.codec, w: pl.w, h: pl.h, fps: pl.fps, m0: pl.m0, m1: pl.m1 } : null,
-      planless: !!(st && st.planless), preview: !!(st && st.preview), sounded: !!(st && st.sounded), stalled: !!(st && st.stalled), done: !!(st && st.done),
+      planless: !!(st && st.planless), preview: !!(st && st.preview), sounded: !!(st && st.sounded), stalled: !!(st && (st.mse ? metrics.stallAt : st.stalled)), done: !!(st && st.done),
       paintedAt: st ? st.paintedAt : 0, waitS, playhead: v.currentTime || 0,
       direct:metrics.direct?{...metrics.direct,chunkReceipts:metrics.direct.chunkReceipts.map(c=>({...c,attempts:c.attempts.map(a=>({...a}))}))}:null,video:videoFacts(),
       stalls: metrics.stalls || 0, stallMs: (metrics.stallMs || 0) + (metrics.stallAt ? performance.now() - metrics.stallAt : 0),
-      playStartMs: metrics.playStartMs, holds: metrics.holds || 0,
+      streaming: metrics.streaming, playStartMs: metrics.playStartMs, holds: metrics.holds || 0,
       holdMs: (metrics.holdMs || 0) + (metrics.holdAt ? performance.now() - metrics.holdAt : 0),
       adaptive: metrics.adaptive ? { ...metrics.adaptive } : null,
       route: metrics.route || null, source: sourceOf(),
@@ -2027,6 +2122,10 @@ document.addEventListener('DOMContentLoaded',function(){
       dr&&dr.only?['relay recovery','off · direct only · a stall or failure stops here and is recorded',dr.stopped?'guard':'skip']:['relay recovery','12 s without progress before the file opens, or 45 s waiting for the next chunk in order · retain playhead and pause intent',dr&&dr.fallback?'guard':'skip'],
       steps[6]
     ];
+    if(direct && E.streaming && !E.streaming.fallback){
+      steps[5]=['MP4 → MSE','original samples remuxed locally · one continuous media source','done'];
+      steps[6]=['start rule','play when decoded samples arrive · network gaps count as stalls',E.playStartMs!=null?'done':'todo'];
+    }
     if(E.adaptive)steps=[
       ['parse · HTTPS playlist','public .m3u8 URL · source named separately from Autonomi','done'],
       ['adaptive player',E.adaptive.mode==='native'?'native HLS · browser manages buffers':'hls.js · MSE · lowest rendition first',E.adaptive.mode?'done':'todo'],
@@ -2053,6 +2152,7 @@ document.addEventListener('DOMContentLoaded',function(){
     rows.push(['playback start',esc(ms(E.playStartMs))]);
     rows.push(['stalls',esc(E.stalls?E.stalls+' · '+ms(E.stallMs)+' interrupted after playback began':'none yet')]);
     rows.push(['application holds',esc(E.holds?E.holds+' · '+ms(E.holdMs)+' including pauses made by the player':'none yet')]);
+    if(E.streaming){rows.push(['direct media stream',esc('MSE · '+E.streaming.fragments+' fragments · '+E.streaming.appendedBytes+' B appended · original file retained for integrity/cache'+(E.streaming.fallback?' · file-player fallback':''))]);rows.push(['direct buffer policy',esc(E.streaming.forwardTargetSeconds+' s / '+(E.streaming.bufferTargetBytes/1048576)+' MiB forward targets · '+E.streaming.backTargetSeconds+' s history · can overshoot by arriving chunks · original file and hashing memory are additional')]);}
     if(E.adaptive){var a=E.adaptive;rows.push(['adaptive video',esc(a.mode+' · quality '+(a.level==null?'not yet':a.level)+' · '+(a.bitrate?(a.bitrate/1e6).toFixed(2)+' Mb/s':'not yet')+' · '+a.switches+' quality changes')]);rows.push(['buffer policy',esc(a.mode==='native'?'browser managed · network and buffer limits unavailable':'20 s forward / 10 s behind targets · 24 MiB compressed-buffer target, not total browser memory')]);}
     rows.push(['first response',esc((direct?'first chunk in order · ':'HTTP response headers · ')+ms(E.ttfbMs))],['first frame',esc(ms(E.ttffMs))]);
     if(vf){
