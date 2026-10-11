@@ -81,3 +81,27 @@ test('unsupported MSE codec keeps the file player and performs one set of reads'
     assert.equal(e.streaming,null);assert.equal(e.direct.requests,3);assert.equal(e.direct.stopped,null);assert.equal(await page.evaluate(()=>window.testReads),3);
   }finally{await context.close();}
 });
+
+test('native waiting releases pressure even with HAVE_FUTURE_DATA and three seconds buffered',async()=>{
+  const context=await browser.newContext(),page=await context.newPage();
+  try{
+    await page.goto(origin+'/surfaces/bview.html');
+    const result=await page.evaluate(async()=>{
+      const {createMP4Stream}=await import('../tools/video-trial/direct-mse.mjs');
+      const bytes=new Uint8Array(await(await fetch('/media.mp4')).arrayBuffer());
+      const video=document.createElement('video');document.body.append(video);
+      const ctl=new AbortController(),stream=await createMP4Stream(bytes,{video,signal:ctl.signal});
+      // Observed on the original video: Chromium was waiting with a nonempty
+      // buffer while the estimated byte budget was already exceeded.
+      Object.defineProperties(video,{paused:{get:()=>false},currentTime:{get:()=>1},readyState:{get:()=>3},buffered:{get:()=>({length:1,start:()=>0,end:()=>4})}});
+      stream.stats.bufferTargetBytes=1;video.dispatchEvent(new Event('playing'));
+      let resolved=false;const work=stream.capacity().then(()=>{resolved=true;});
+      await new Promise(r=>setTimeout(r,100));const heldBeforeWaiting=!resolved;
+      video.dispatchEvent(new Event('waiting'));
+      const timeout=setTimeout(()=>ctl.abort(),1500);
+      try{await work;return {heldBeforeWaiting,released:resolved};}
+      finally{clearTimeout(timeout);ctl.abort();video.remove();}
+    });
+    assert.deepEqual(result,{heldBeforeWaiting:true,released:true});
+  }finally{await context.close();}
+});

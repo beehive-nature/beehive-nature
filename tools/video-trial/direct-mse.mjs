@@ -4,7 +4,7 @@ import { createFile } from '../../vendor/mp4box/2.4.1/mp4box.all.mjs';
 export async function createMP4Stream(first, { video, signal, onAttach = () => {}, onReady = () => {}, onSeekOutside = () => {} }) {
   if (!globalThis.MediaSource) return null;
   const file = createFile(true), queues = new Map();
-  let info, failure, offset = 0, stopped = false, finishing = false;
+  let info, failure, offset = 0, stopped = false, finishing = false, waitingForMedia = true;
   const stats = { mode:'mse', fragments:0, appendedBytes:0, initBytes:0, errors:0, queuedBytes:0, peakQueuedBytes:0, parserSampleBytes:0, peakParserSampleBytes:0, forwardTargetSeconds:20, backTargetSeconds:10, bufferTargetBytes:24<<20, forwardBytes:0, peakForwardBytes:0, quotaRecoveries:0, evictions:0, evictedUntil:0, peakAhead:0 };
   const fail = error => { failure = error instanceof Error ? error : new Error(String(error)); stats.errors++; };
   file.onError = fail;
@@ -29,8 +29,10 @@ export async function createMP4Stream(first, { video, signal, onAttach = () => {
     timer = setTimeout(no,10000);
     try { check(); action(); } catch (e) { clean(); reject(e); }
   });
-  const destroy = () => { if (stopped) return; stopped = true; file.stop(); queues.clear(); URL.revokeObjectURL(url); video.removeEventListener('loadeddata',ready); video.removeEventListener('seeking',seeking); video.removeEventListener('timeupdate',measureForward); video.removeEventListener('ended',measureForward); signal.removeEventListener('abort',destroy); };
+  const destroy = () => { if (stopped) return; stopped = true; file.stop(); queues.clear(); URL.revokeObjectURL(url); video.removeEventListener('loadeddata',ready); video.removeEventListener('seeking',seeking); video.removeEventListener('timeupdate',measureForward); video.removeEventListener('ended',measureForward); video.removeEventListener('waiting',waiting); video.removeEventListener('playing',playing); signal.removeEventListener('abort',destroy); };
   const ready = () => { if (alive()) onReady(); };
+  const waiting = () => { waitingForMedia = true; };
+  const playing = () => { waitingForMedia = false; };
   const seeking = () => {
     // Old samples have been released from both parser and MSE. The caller still
     // retains original bytes and can recover without another network request.
@@ -49,6 +51,8 @@ export async function createMP4Stream(first, { video, signal, onAttach = () => {
   video.addEventListener('seeking',seeking);
   video.addEventListener('timeupdate',measureForward);
   video.addEventListener('ended',measureForward);
+  video.addEventListener('waiting',waiting);
+  video.addEventListener('playing',playing);
   try {
     await event(source,'sourceopen',() => { onAttach(); video.src = url; video.load(); });
     check(); source.duration = info.duration / info.timescale;
@@ -116,7 +120,7 @@ export async function createMP4Stream(first, { video, signal, onAttach = () => {
         // Interleaved audio/video may need another chunk even when one track
         // already exceeds the byte target. Never apply backpressure to a dry
         // player: it would prevent the very bytes required to resume playback.
-        while(alive() && ((video.readyState>=3 && playableAhead()>2 && (stats.forwardBytes>stats.bufferTargetBytes || playableAhead()>stats.forwardTargetSeconds)) || video.paused && video.currentTime>0 && !video.ended)) {
+        while(alive() && ((!waitingForMedia && video.readyState>=3 && playableAhead()>2 && (stats.forwardBytes>stats.bufferTargetBytes || playableAhead()>stats.forwardTargetSeconds)) || video.paused && video.currentTime>0 && !video.ended)) {
           check();
           await new Promise(resolve=>{const done=()=>{clearTimeout(timer);signal.removeEventListener('abort',done);resolve();};const timer=setTimeout(done,250);signal.addEventListener('abort',done,{once:true});});
           measureForward();

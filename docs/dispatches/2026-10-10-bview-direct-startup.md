@@ -60,9 +60,22 @@ data. The byte budget, retained-file recovery, and dry-player exemption address
 those defects. The initial combined regression run was 42/44: its cancellation
 wait still expected a failure message after a true page cancellation, and its
 quota case still expected fallback after the newly successful bounded retry.
-Focused corrected cancellation/failure/quota checks passed 3/3; the added
-dry-player pressure check passed 1/1. Full current focused results and the
-corrected public-network result are pending at this candidate checkpoint.
+Focused corrected cancellation/failure/quota checks passed 3/3. The current
+direct/MSE/capture suite passed **27/27** in 174.426 seconds; the relay/storage
+portion of the earlier combined run passed all 19 cases. Adaptive playback
+regressions passed **4/4** in 90.222 seconds. The remaining current public-network
+acceptance is pending at this candidate checkpoint.
+
+The failed public candidate is preserved as `candidate-dry-buffer-failure.json`:
+50.779 s actual start, then stalled at 36.574 s of media; only 24 chunks were
+emitted although 30 had arrived. There was no pending head read: backpressure
+was blocking consumption. It timed out at 604.607 s, without complete-file
+integrity or playback acceptance. Its browser still reported 2.623 seconds
+buffered. The fix listens to native `waiting`/`playing`, because buffer duration
+or HAVE_FUTURE_DATA alone cannot establish that the player is actually moving.
+A separate regression recreates native waiting with three seconds buffered and
+requires consumption to resume. The corrected public run pins all loaded
+remuxer/runtime asset digests as well as the HTML digest.
 
 The public candidate rerun and release verification will be appended before
 claiming public acceptance. Faster startup does not erase network rebuffering;
@@ -96,4 +109,5 @@ MP4Box's runtime and license are verbatim from the integrity-checked npm package
 
 ## Release status
 
-Candidate work. Public acceptance and deployment are pending.
+Draft PR [#394](https://github.com/beehive-nature/beehive-nature/pull/394).
+Public acceptance and deployment are pending.
