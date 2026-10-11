@@ -168,3 +168,21 @@ single-payment mode, rather than extrapolating the archive's 72-chunk Merkle
 quote. The CLI estimate is not the hosted wallet's eventual exact invoice,
 whose node quotes, gas bounds and signature still belong to that existing flow.
 There is no per-view fee or recurring operator-egress charge asserted here.
+
+## Slow-link check and architecture alignment
+
+An additional run of the actual video used simulated SDK reads at **700 kb/s
+plus 100 ms per range**, Chrome 153 at 390px, and normal playback speed. It
+completed the full 52.49-second video with **2,731.8 ms first frame, zero stalls,
+zero stall milliseconds, zero adaptive errors, one reader, 17 reads and
+2,489,222 plaintext bytes**. The player remained at level 0. Receipt:
+`docs/receipts/serverless-ant-video-slow-2026-10-11.json`.
+This verifies the whole-range timing behavior under a paced fixture. Real SDK
+encrypted-chunk fetches, cache amplification, discovery and node contention are
+outside the fixture; it is not a live ANT bandwidth/startup measurement.
+
+The earlier `tools/video-trial/SCALING.md` now identifies CDN/origin provisioning
+as the HTTPS comparison model and links the serverless route and recovered
+wallet study. [Autonomi's current economics documentation](https://docs.autonomi.com/how-it-works/network-economics/key-properties)
+confirms one-time storage payment with no network retrieval fee. No automatic
+per-view payment is added; local counters still cannot authorize settlement.

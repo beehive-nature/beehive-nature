@@ -5,6 +5,10 @@ pinned Autonomi SDK. The application operator serves no video bytes on this rout
 The browser opens one ANT object, reads a small index, and feeds verified ranges
 to the existing adaptive player. Static application/library assets still load
 from the site. ANT nodes, device bandwidth and chain resources still have costs.
+Autonomi's [published economics](https://docs.autonomi.com/how-it-works/network-economics/key-properties)
+charge uploaders once for storage and impose no network retrieval fee. A viewer
+does not need a per-view payment to fetch this public pack. Device/ISP costs and
+network capacity remain separate from that fee policy.
 
 ## Package and playback
 
