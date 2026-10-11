@@ -1159,3 +1159,36 @@ jobs:
         # the honest timeout classification could print (learned run 37698302619).
         timeout-minutes: 19
         run: sh scripts/btungsten/wb001-formal-check.sh "$HOME/cryptol/bin/cryptol"
+
+  formal-cryptol-leg:
+    # WB001's Cryptol leg of universal wire injectivity and of the zero tail
+    # (README WB001 §cryptol-leg): 43 obligations, each its own cryptol
+    # :prove under the formal job's 6 GiB address-space cap and its own
+    # clock, 3 at a time; then 7 negative controls, each required to end in
+    # a counterexample. The composed lines print PROVEN only if every
+    # obligation they rest on printed Q.E.D. in the same run. A timeout or a
+    # memory death is NOT-PROVEN and green, by the formal ladder's law (an
+    # open obligation is a recorded state, never a wedge); a counterexample
+    # on an obligation, a control without its counterexample, or an unknown
+    # verdict is red. Its own job, so it runs beside `formal`, not after it.
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: install cryptol 3.6.0 (pinned, with bundled solvers) and GNU time
+        if: always()
+        timeout-minutes: 8
+        run: |
+          set -eu
+          cd "$HOME"
+          curl -fsSL -o cryptol.tar.gz https://github.com/GaloisInc/cryptol/releases/download/3.6.0/cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz
+          echo "cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz sha256: $(sha256sum cryptol.tar.gz | cut -d' ' -f1)"
+          mkdir -p cryptol && tar -xzf cryptol.tar.gz -C cryptol --strip-components=1
+          echo "$HOME/cryptol/bin" >> "$GITHUB_PATH"
+          # the receipt records each obligation's peak RSS through GNU time
+          [ -x /usr/bin/time ] || { sudo apt-get update -qq && sudo apt-get install -y -qq time; }
+          ./cryptol/bin/cryptol --version
+      - name: WB001 Cryptol leg — 43 :prove obligations, 2 compositions, 7 negative controls
+        if: always()
+        timeout-minutes: 50
+        run: sh scripts/btungsten/wb001-cryptol-leg-check.sh "$HOME/cryptol/bin/cryptol"

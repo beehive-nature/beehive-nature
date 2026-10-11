@@ -1,0 +1,248 @@
+// bTunGsTeN WB001 — the CRYPTOL LEG of universal wire injectivity.
+//
+// Every obligation in this file is discharged by Cryptol's own `:prove`
+// (cryptol 3.6.0: its evaluator, a solver it ships), one obligation per
+// process, under the formal job's 6 GiB address-space cap and a clock.
+// No SAW, no SAWCore. The SAW leg (wb001-saw/injective.saw) proves the
+// same theorem with SAW's lemma machinery; it is a separate result,
+// recorded separately, and nothing here cites it.
+//
+// THE THEOREM (BTungstenWB001.wireInjective, unchanged):
+//
+//   for all a, b : Intent,
+//     validIntent a && validIntent b && wire a == wire b  ==>  a == b
+//
+// Domain (validIntent): domain 1..64 bytes, destination and payer 1..128,
+// capability 1..64, each well-formed UTF-8 by the concrete DFA; nonce and
+// action exactly 32 bytes; payload 0..4096 bytes of anything; every Field
+// zero past its length word; epoch, amount, expiry any 64-bit value.
+// Equality: `a == b` is Cryptol's record equality, every field, every
+// length word and every capacity byte (padding included); `wire a == wire
+// b` is equality of the whole 4,626-byte wire, the deployed envelope
+// followed by its zero tail.
+//
+// WHY NOT ONE `:prove`: Cryptol has no lemma mechanism (a `primitive`
+// without a definition is an evaluation error, not an uninterpreted
+// function), so any query that names `wire a` builds all 4,626 dispatched
+// bytes, each with a symbolic lookup into the 4,096-byte payload. Measured
+// 2026-10-10, before any solver runs: the term for wireIndexDef alone
+// exhausts the 6 GiB cap (SBV backend) or the clock (What4); so does
+// wireInjective's. A 64-position slice of the wire also fails: relating a
+// wire byte at a concrete position to byteAt at a symbolic one is a
+// circuit-equivalence problem neither z3 nor bitwuzla closes in 280 s.
+// The SAW leg's witness function (first differing index over 4,096 bytes)
+// times out in Cryptol under z3 and yices, SBV and What4 alike.
+//
+// THE CRYPTOL-LEG PROOF: each lemma below names the differing byte as a
+// free variable, so no query builds the wire, a priority encoder, or a
+// symbolic index into the wire. The lemmas carry all of the encoding's
+// content (bounds, offsets, dispatch, tags, length words, padding); the
+// composition is first-order logic plus two equations of Cryptol's own
+// semantics, written out in full in the README (WB001 §cryptol-leg):
+//
+//   (D-eq)   record and sequence equality are fieldwise and elementwise;
+//   (D-wire) for c < 4626, (wire a) @ c is byteAt a c: `wire` is the
+//            comprehension [ byteAt a k | k <- take`{MaxEnv} [0 ...] ].
+//
+// In outline: suppose valid a, b with equal wires and a != b. The bounds
+// and the padding hold (validImpliesBounded, validImpliesPadded).
+// caseCover names the first differing field and whether its length word,
+// its value bytes or its u64 differ; (D-eq) gives a differing byte index,
+// and pad* puts a differing value byte inside the length. The case's
+// lemma gives a position c < 4626 where byteAt a and byteAt b differ;
+// by (D-wire) the wires differ at c, contradicting wire a == wire b.
+
+module WB001WireInjective where
+
+import BTungstenWB001
+
+//////////////////////////////////////////////////////////////////////////////
+// The premises validIntent supplies
+//////////////////////////////////////////////////////////////////////////////
+
+padded : Intent -> Bit
+padded a =
+     (canonicalPad a.domain.len a.domain.bytes == a.domain.bytes)
+  && (canonicalPad a.nonce.len a.nonce.bytes == a.nonce.bytes)
+  && (canonicalPad a.action.len a.action.bytes == a.action.bytes)
+  && (canonicalPad a.destination.len a.destination.bytes == a.destination.bytes)
+  && (canonicalPad a.capability.len a.capability.bytes == a.capability.bytes)
+  && (canonicalPad a.payer.len a.payer.bytes == a.payer.bytes)
+  && (canonicalPad a.payload.len a.payload.bytes == a.payload.bytes)
+
+// (validImpliesBounded is BTungstenWB001's, proven in the same job.)
+validImpliesPadded : Intent -> Bit
+property validImpliesPadded a = (validIntent a) ==> (padded a)
+
+// Both intents in bounds: every lemma below assumes exactly this.
+bounded2 : Intent -> Intent -> Bit
+bounded2 a b = lensBounded a && lensBounded b
+
+//////////////////////////////////////////////////////////////////////////////
+// (D-wire), checked position by position: for a bounded intent, wire
+// element c IS byteAt c, and evaluating it is error-free (Cryptol's :prove
+// also proves every read in range). Positions are concrete, 256 to a
+// chunk, chunk m covering 256m .. 256m+255; chunks 0..18 cover all 4,626
+// positions (18 * 256 = 4608; positions past 4625 are skipped, not read).
+// A symbolic position cannot be used here: the wire's term would be built
+// whole (the measured resource wall above).
+//////////////////////////////////////////////////////////////////////////////
+
+wireIsByteAt : {m} (fin m, m <= 18) => Intent -> Bit
+wireIsByteAt a =
+  (lensBounded a) ==>
+    and [ if c < 4626 then ((wire a) @ c == byteAt a c) else True
+        | c <- [ (`m : [32]) * 256 + i | i <- take`{256} [0 ...] ] ]
+
+//////////////////////////////////////////////////////////////////////////////
+// The case split: the first field (in wire order) in which two bounded,
+// distinct intents differ, and how it differs. Nonce and action have no
+// length case: lensBounded fixes both lengths at 32.
+//////////////////////////////////////////////////////////////////////////////
+
+eqToNonce, eqToEpoch, eqToAction, eqToDest, eqToCap, eqToAmount, eqToExpiry, eqToPayer, eqToPayload : Intent -> Intent -> Bit
+eqToNonce a b   = a.domain == b.domain
+eqToEpoch a b   = eqToNonce a b && (a.nonce == b.nonce)
+eqToAction a b  = eqToEpoch a b && (a.epoch == b.epoch)
+eqToDest a b    = eqToAction a b && (a.action == b.action)
+eqToCap a b     = eqToDest a b && (a.destination == b.destination)
+eqToAmount a b  = eqToCap a b && (a.capability == b.capability)
+eqToExpiry a b  = eqToAmount a b && (a.amount == b.amount)
+eqToPayer a b   = eqToExpiry a b && (a.expiry == b.expiry)
+eqToPayload a b = eqToPayer a b && (a.payer == b.payer)
+
+caseCover : Intent -> Intent -> Bit
+property caseCover a b =
+  (bounded2 a b && (a != b)) ==>
+    (   (a.domain.len != b.domain.len)
+     || ((a.domain.len == b.domain.len) && (a.domain.bytes != b.domain.bytes))
+     || (eqToNonce a b && (a.nonce.bytes != b.nonce.bytes))
+     || (eqToEpoch a b && (a.epoch != b.epoch))
+     || (eqToAction a b && (a.action.bytes != b.action.bytes))
+     || (eqToDest a b && (a.destination.len != b.destination.len))
+     || (eqToDest a b && (a.destination.len == b.destination.len) && (a.destination.bytes != b.destination.bytes))
+     || (eqToCap a b && (a.capability.len != b.capability.len))
+     || (eqToCap a b && (a.capability.len == b.capability.len) && (a.capability.bytes != b.capability.bytes))
+     || (eqToAmount a b && (a.amount != b.amount))
+     || (eqToExpiry a b && (a.expiry != b.expiry))
+     || (eqToPayer a b && (a.payer.len != b.payer.len))
+     || (eqToPayer a b && (a.payer.len == b.payer.len) && (a.payer.bytes != b.payer.bytes))
+     || (eqToPayload a b && (a.payload.len != b.payload.len))
+     || (eqToPayload a b && (a.payload.len == b.payload.len) && (a.payload.bytes != b.payload.bytes)) )
+
+//////////////////////////////////////////////////////////////////////////////
+// Canonical padding: a differing value byte lies inside the length.
+// (Index reads sit behind `==>`, which evaluates its right side only
+// under its left: Cryptol's :prove also proves every read in range.)
+//////////////////////////////////////////////////////////////////////////////
+
+padZero : {cap} (fin cap, 32 >= width cap) => [32] -> [cap][8] -> [32] -> Bit
+padZero n xs j = (canonicalPad n xs == xs) ==> (((n <= j) && (j < `cap)) ==> ((xs @ j) == 0))
+
+// A differing length word or u64 differs in one of its big-endian bytes.
+splitDiff32 : [32] -> [32] -> Bit
+property splitDiff32 x y = (x != y) ==> ((split x : [4][8]) != (split y : [4][8]))
+splitDiff64 : [64] -> [64] -> Bit
+property splitDiff64 x y = (x != y) ==> ((split x : [8][8]) != (split y : [8][8]))
+
+padZero64 : [32] -> [64][8] -> [32] -> Bit
+property padZero64 n xs j = padZero n xs j
+padZero128 : [32] -> [128][8] -> [32] -> Bit
+property padZero128 n xs j = padZero n xs j
+padZero4096 : [32] -> [4096][8] -> [32] -> Bit
+property padZero4096 n xs j = padZero n xs j
+
+//////////////////////////////////////////////////////////////////////////////
+// The position lemmas: a difference in the first differing field shows up
+// in byteAt at one position, in range. One per field and kind; the
+// differing index (j for value bytes, i for length-word bytes) is free.
+//
+// Each intent's position is written from ITS OWN block offset (bX a + .. for
+// a, bX b + .. for b) and the lemma proves the two positions equal. Written
+// from one offset for both, the lookup into b's field is at an index that
+// cancels only after the solver proves the offsets equal: the payload case
+// then times out (600 s under z3, yices and cvc5 alike, measured
+// 2026-10-10); written this way each lookup index cancels in the term itself.
+//////////////////////////////////////////////////////////////////////////////
+
+// ca and cb are one position, in the wire, where a and b differ.
+differs2 : Intent -> Intent -> [32] -> [32] -> Bit
+differs2 a b ca cb = (ca == cb) && (ca < 4626) && (byteAt a ca != byteAt b cb)
+
+// value bytes
+byteDiffDom : Intent -> Intent -> [32] -> Bit
+property byteDiffDom a b j =
+  (bounded2 a b && (a.domain.len == b.domain.len) && (j < a.domain.len))
+  ==> ((a.domain.bytes @ j != b.domain.bytes @ j) ==> differs2 a b (bDom a + 5 + j) (bDom b + 5 + j))
+
+byteDiffNon : Intent -> Intent -> [32] -> Bit
+property byteDiffNon a b j =
+  (bounded2 a b && eqToNonce a b && (j < a.nonce.len))
+  ==> ((a.nonce.bytes @ j != b.nonce.bytes @ j) ==> differs2 a b (bNon a + 5 + j) (bNon b + 5 + j))
+
+byteDiffAct : Intent -> Intent -> [32] -> Bit
+property byteDiffAct a b j =
+  (bounded2 a b && eqToAction a b && (j < a.action.len))
+  ==> ((a.action.bytes @ j != b.action.bytes @ j) ==> differs2 a b (bAct a + 5 + j) (bAct b + 5 + j))
+
+byteDiffDst : Intent -> Intent -> [32] -> Bit
+property byteDiffDst a b j =
+  (bounded2 a b && eqToDest a b && (a.destination.len == b.destination.len) && (j < a.destination.len))
+  ==> ((a.destination.bytes @ j != b.destination.bytes @ j) ==> differs2 a b (bDst a + 5 + j) (bDst b + 5 + j))
+
+byteDiffCap : Intent -> Intent -> [32] -> Bit
+property byteDiffCap a b j =
+  (bounded2 a b && eqToCap a b && (a.capability.len == b.capability.len) && (j < a.capability.len))
+  ==> ((a.capability.bytes @ j != b.capability.bytes @ j) ==> differs2 a b (bCap a + 5 + j) (bCap b + 5 + j))
+
+byteDiffPay : Intent -> Intent -> [32] -> Bit
+property byteDiffPay a b j =
+  (bounded2 a b && eqToPayer a b && (a.payer.len == b.payer.len) && (j < a.payer.len))
+  ==> ((a.payer.bytes @ j != b.payer.bytes @ j) ==> differs2 a b (bPay a + 5 + j) (bPay b + 5 + j))
+
+byteDiffPld : Intent -> Intent -> [32] -> Bit
+property byteDiffPld a b j =
+  (bounded2 a b && eqToPayload a b && (a.payload.len == b.payload.len) && (j < a.payload.len))
+  ==> ((a.payload.bytes @ j != b.payload.bytes @ j) ==> differs2 a b (bPld a + 5 + j) (bPld b + 5 + j))
+
+// length words (big-endian, 4 bytes)
+lenDiffDom : Intent -> Intent -> [32] -> Bit
+property lenDiffDom a b i =
+  (bounded2 a b && (i < 4))
+  ==> (((split a.domain.len : [4][8]) @ i != (split b.domain.len : [4][8]) @ i) ==> differs2 a b (bDom a + 1 + i) (bDom b + 1 + i))
+
+lenDiffDst : Intent -> Intent -> [32] -> Bit
+property lenDiffDst a b i =
+  (bounded2 a b && eqToDest a b && (i < 4))
+  ==> (((split a.destination.len : [4][8]) @ i != (split b.destination.len : [4][8]) @ i) ==> differs2 a b (bDst a + 1 + i) (bDst b + 1 + i))
+
+lenDiffCap : Intent -> Intent -> [32] -> Bit
+property lenDiffCap a b i =
+  (bounded2 a b && eqToCap a b && (i < 4))
+  ==> (((split a.capability.len : [4][8]) @ i != (split b.capability.len : [4][8]) @ i) ==> differs2 a b (bCap a + 1 + i) (bCap b + 1 + i))
+
+lenDiffPay : Intent -> Intent -> [32] -> Bit
+property lenDiffPay a b i =
+  (bounded2 a b && eqToPayer a b && (i < 4))
+  ==> (((split a.payer.len : [4][8]) @ i != (split b.payer.len : [4][8]) @ i) ==> differs2 a b (bPay a + 1 + i) (bPay b + 1 + i))
+
+lenDiffPld : Intent -> Intent -> [32] -> Bit
+property lenDiffPld a b i =
+  (bounded2 a b && eqToPayload a b && (i < 4))
+  ==> (((split a.payload.len : [4][8]) @ i != (split b.payload.len : [4][8]) @ i) ==> differs2 a b (bPld a + 1 + i) (bPld b + 1 + i))
+
+// the three u64 fields (big-endian, 8 bytes)
+u64DiffEpo : Intent -> Intent -> [32] -> Bit
+property u64DiffEpo a b j =
+  (bounded2 a b && eqToEpoch a b && (j < 8))
+  ==> (((split a.epoch : [8][8]) @ j != (split b.epoch : [8][8]) @ j) ==> differs2 a b (bEpo a + 5 + j) (bEpo b + 5 + j))
+
+u64DiffAmt : Intent -> Intent -> [32] -> Bit
+property u64DiffAmt a b j =
+  (bounded2 a b && eqToAmount a b && (j < 8))
+  ==> (((split a.amount : [8][8]) @ j != (split b.amount : [8][8]) @ j) ==> differs2 a b (bAmt a + 5 + j) (bAmt b + 5 + j))
+
+u64DiffExp : Intent -> Intent -> [32] -> Bit
+property u64DiffExp a b j =
+  (bounded2 a b && eqToExpiry a b && (j < 8))
+  ==> (((split a.expiry : [8][8]) @ j != (split b.expiry : [8][8]) @ j) ==> differs2 a b (bExp a + 5 + j) (bExp b + 5 + j))

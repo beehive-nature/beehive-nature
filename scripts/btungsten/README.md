@@ -471,6 +471,7 @@ stay accepted, byte-exact. Red-first receipt in
 | `wb001-saw/rust.saw` (+ `rust-teeth.saw`) — EQUIVALENCE: 11 `mir_verify` obligations, the Rust model equal to the spec for every input in each domain: `utf8_step`, `well_formed_utf8_{64,128}`, `pad_ok_{32,64,128,4096}`, `valid_intent` (all intents), `offsets` (all intents), `byte_at` and `encode` (all length-bounded intents) | PROVEN — `wb001-saw.yml` (SAW 1.6, mir-json at SAW 1.6's pin); TEETH: `byte_at` against the spec one position off is refuted with a counterexample |
 | `wb001-cryptol/WB001Decode.cry` + `wb001-saw/decode.saw` (+ `decode-teeth.saw`) — DECODE-EQUIVALENCE (RB05): `decode_core`, with `byte_at_pos` (the one symbolic read), `byte_from`, `bytes_from_{32,64,128,4096}`, `chunk_64`, `be32_from`, `be64_from` and `block_code` beneath it, equal to `decodeSpec` for every buffer and every input length, writing the intent exactly on `dOk`; `decode` hands it the first 4,626 input bytes and the true length | PROVEN — 14 obligations, every one required by name; TEETH: `block_code` against the spec with the length-bound and value-fit refusals swapped is refuted with a counterexample |
 | `wb001-saw/injective.saw` + `WB001Injective.cry` (+ `injective-teeth.saw`) — PROVE-UNIVERSAL `wireInjective` by the first-difference ladder: a constructed witness `kStar` (first differing envelope position), ten per-field cases, `validImpliesBounded`/`validImpliesPadded`, `wireIndexDef` with `byteAt` opaque, composed by explicit instantiation (`goal_insert_and_specialize`) | PROVEN — 21 rungs, every one required by name; TEETH: the first case without the padding premise is refuted with a counterexample |
+| `wb001-cryptol/WB001WireInjective.cry` + `wb001-cryptol-leg-check.sh` — the CRYPTOL LEG of `wireInjective` and `wireZeroTail` (§cryptol-leg): 24 lemmas and 19 wire chunks, each a separate Cryptol `:prove` under the formal job's 6 GiB cap, composed by the written argument in §cryptol-leg; 7 negative controls | PROVEN BY COMPOSITION when every obligation prints Q.E.D. in the run (CI receipt: `docs/dispatches/2026-10-10-btungsten-wb001-cryptol-leg.md`); never recorded as a single `:prove` verdict |
 | `wb001-cryptol/Ed25519.cry` — **the missing algorithm artifact**: RFC 8032 §5.1 Ed25519 as an executable Cryptol spec, SHA-512 included, its 80 round constants and initial hash COMPUTED from the FIPS 180-4 definitions (no transcribed table) | SPEC-CHECK PASS — SHA-512("abc"), all four RFC 8032 §7.1 vectors (key, signature, verify), two model envelopes signed by OpenSSL, verifier refuses flipped signature/message/key |
 | `wb001-ed25519-oracle.json` (+ `wb001-ed25519-oracle.mjs`) — 24 rows signed by OpenSSL (node:crypto), refused unless OpenSSL first reproduces the RFC vectors; the model's signer (libcrux/HACL*), `ed25519-dalek` and the Cryptol spec must each match byte-for-byte | PINNED — libcrux, dalek and OpenSSL agree on 24/24 |
 
@@ -483,7 +484,7 @@ recorded as another:
 |---|---|---|
 | TYPECHECK | the .cry parses and typechecks | **PASS in CI** — gates every push (cryptol 3.6.0, pinned asset) |
 | CHECK-SAMPLED | `:check` — adversarial arm (malformed classes rejected by `validIntent` BEFORE injectivity is evaluated) + constructed arm (closed terms: boundary-shift twins, astral Unicode, legitimate U+FFFD, combining sequences, near-collision payload pairs) + random arm | **WIRED IN CI** — all three arms gate the job |
-| PROVE-UNIVERSAL | `:prove` per obligation across the stated domain | **THEOREM CORRECTED 2026-10-08 (founder review, SHA 8b2ac34ae): the original `wireZeroTail` quantified over ALL intents while documented for valid ones — and was REFUTED, executed** (payload len `0xfffffff0` wraps the [32] offset arithmetic so envLen lands inside the later blocks; the witness is the permanent `zeroTailWrapRefuted` regression). The corrected theorem states its valid-intent premise; the proof is now DECOMPOSED into per-obligation lemmas with per-obligation budgets — `validImpliesBounded` (45s), `offsetsOrdered` (90s), `zeroTailFromBounds` (180s), then `wireZeroTail` and `wireInjective` (240s each; 240 not 300 because prove processes died by SIGTERM twice at 269s/289s before a 300s wrapper could classify — signal death is the fact, its sender unevidenced). Live verdicts are the run's own lines. A clean exit with NO recognized verdict is a diagnostic FAILURE (red), never a silent green |
+| PROVE-UNIVERSAL | `:prove` per obligation across the stated domain | **THEOREM CORRECTED 2026-10-08 (founder review, SHA 8b2ac34ae): the original `wireZeroTail` quantified over ALL intents while documented for valid ones — and was REFUTED, executed** (payload len `0xfffffff0` wraps the [32] offset arithmetic so envLen lands inside the later blocks; the witness is the permanent `zeroTailWrapRefuted` regression). The corrected theorem states its valid-intent premise; the proof is now DECOMPOSED into per-obligation lemmas with per-obligation budgets — `validImpliesBounded` (45s), `offsetsOrdered` (90s), `zeroTailFromBounds` (180s), then `wireZeroTail` and `wireInjective` (240s each; 240 not 300 because prove processes died by SIGTERM twice at 269s/289s before a 300s wrapper could classify — signal death is the fact, its sender unevidenced). Live verdicts are the run's own lines. A clean exit with NO recognized verdict is a diagnostic FAILURE (red), never a silent green. **CRYPTOL LEG 2026-10-10 (§cryptol-leg):** `wireZeroTail` and `wireInjective` PROVEN BY COMPOSITION from obligations each Q.E.D. by Cryptol's own `:prove`; the single-query rows keep their own verdicts (NOT-PROVEN, memory), and `wireIndexDef` left the prove list: as stated it is unsafe under Cryptol's semantics (executed counterexample, control C1) |
 | EQUIVALENCE | SAW: implementation == spec | **PROVEN 2026-10-08** — the Rust model (`crates/btungsten-wb001-core`) equals `BTungstenWB001.cry` for every input in each stated domain (`wb001-saw/rust.saw`, 11 obligations, with TEETH). And `wireInjective` is PROVEN universally in SAW (`wb001-saw/injective.saw`). Ed25519 is no longer only assumed: the signer is HACL*-verified code (`libcrux-ed25519`), checked byte-for-byte against OpenSSL, dalek and our own RFC 8032 Cryptol spec; a SAW proof of libcrux against `Ed25519.cry` is NOT claimed |
 
 A missing tool, a skipped obligation or a solver timeout is NOT-RUN,
@@ -495,6 +496,112 @@ abstract placeholder — or connected to the runtime validator by a
 separately proved refinement. A proof can be correct about the wrong
 accepted language; that class of mistake is what Beat 2 eliminated and
 this law keeps eliminated.
+
+### §cryptol-leg (2026-10-10): wireInjective and wireZeroTail by Cryptol's own `:prove`
+
+Routed by `f15649ce3` (founder order 2026-10-10) to the RB05 lane; done by
+its successor. Files: `wb001-cryptol/WB001WireInjective.cry` (the lemmas)
+and `wb001-cryptol-leg-check.sh` (the obligations, the two compositions and
+7 negative controls; a step of the CI formal job). The SAW leg
+(`wb001-saw/injective.saw`) is a separate result; nothing here reads it.
+
+**The theorem, unchanged** (`BTungstenWB001.wireInjective`): for all
+`a, b : Intent`, `validIntent a && validIntent b && wire a == wire b ==> a == b`.
+
+- *Domain* (`validIntent`): domain 1..64 bytes, destination and payer
+  1..128, capability 1..64, each well-formed UTF-8 under the concrete DFA;
+  nonce and action exactly 32 bytes; payload 0..4096 bytes of anything;
+  every Field zero past its length word; epoch, amount and expiry any 64-bit
+  value.
+- *Equality*: `a == b` is record equality on all ten fields, every length
+  word and every capacity byte (padding included); `wire a == wire b` is
+  equality of the whole 4,626-byte wire, the deployed envelope followed by
+  zeros.
+- `wireZeroTail`, unchanged: for valid `a`, every wire position at or past
+  `envLen a` is zero.
+
+**Why a composition (measured 2026-10-10, local WSL, the 6 GiB cap).**
+Cryptol has no lemma mechanism: a `primitive` without a definition is an
+evaluation error under `:prove`, not an uninterpreted function. So every
+query that names `wire a` builds all 4,626 dispatched bytes, each with a
+symbolic lookup into the 4,096-byte payload. Building the terms alone, no
+solver, exhausts the cap for `wireIndexDef` (SBV: `cryptol: out of memory`,
+271 s) or the clock (What4, 285 s), and the same for `wireInjective`; on CI
+the single queries die of memory in 33 to 59 s (run 38079290787). A
+64-position slice of the wire checked against `byteAt` at a symbolic
+position times out at 280 s under z3 and bitwuzla. The SAW leg's witness
+(the first differing index of 4,096 bytes: `fdIdx`, `fdInLen`) times out
+at 240 to 300 s under z3 and yices, SBV and What4 alike.
+
+**The obligations**, each a separate `:prove`, every read in range proven
+with it (Cryptol checks safety): `validImpliesBounded` and
+`zeroTailAtPosition` (BTungstenWB001, z3); `validImpliesPadded`;
+`caseCover` (two bounded, distinct intents differ first in one of 15
+named ways: the first differing field's length word, its value bytes, or
+its u64; nonce and action lengths are fixed at 32); `splitDiff32` and
+`splitDiff64` (a differing word differs in one big-endian byte);
+`padZero64`, `padZero128`, `padZero4096` (canonical padding: a byte past
+the length is zero); 15 position lemmas, `byteDiff*` (7), `lenDiff*` (5)
+and `u64Diff*` (3): in that case, for ANY differing index (a free
+variable: no witness function, no symbolic index into the wire), the two
+intents' bytes differ at one wire position `c < 4626`, written from each
+intent's own block offset and proven equal; and ``wireIsByteAt`{0..18}``:
+for a bounded intent, wire element `c` IS `byteAt c`, error-free, at all
+4,626 positions, 256 concrete positions per query. Yices for the leg's
+own lemmas: z3 timed out on `caseCover` (240 s), which yices closes in
+4 s, and took 185 s on the domain byte lemma, which yices closes in 6 s.
+
+**The composition**, written out. (D-eq): record and sequence equality are
+fieldwise and elementwise; that is Cryptol's definition of `==`, not a
+`:prove`. Let `a, b` be valid with `wire a == wire b`, and suppose
+`a != b`. `validImpliesBounded` and `validImpliesPadded` give the bounds
+and the padding for both; `caseCover` names the case. In a length-word or
+u64 case, `splitDiff32`/`splitDiff64` and (D-eq) give a byte index `i`
+where the big-endian bytes differ; in a value-byte case (D-eq) gives an
+index `j` where the bytes differ, and `padZero*` (both padded, equal
+lengths) puts `j` below the length (nonce and action: below 32, their
+length). The case's position lemma at that index gives `c < 4626` with
+`byteAt a c != byteAt b c`. `wireIsByteAt` at `c`'s chunk gives
+`(wire a) @ c == byteAt a c`, and the same for `b`, so the wires differ
+at `c` and, by (D-eq), `wire a != wire b`: a contradiction, so `a == b`.
+**wireZeroTail**: for valid `a` and `envLen a <= p < 4626`,
+`(wire a) @ p == byteAt a p == 0` (`validImpliesBounded`,
+`wireIsByteAt`, `zeroTailAtPosition`), so by (D-eq) `wireZeroTailRaw a`.
+The steps that are not a `:prove`: (D-eq), taking the index a sequence
+inequality provides, and instantiating proven universal statements.
+
+**Classes kept apart.** The runner prints
+`CRYPTOL-LEG-COMPOSED <theorem>: PROVEN BY COMPOSITION` only when every
+obligation it rests on printed Q.E.D. in the same run (wireInjective: 42,
+wireZeroTail: 21), and otherwise NOT-PROVEN naming the open ones. It is
+never printed as `FORMAL-PROVE-UNIVERSAL`: the single-query rows in
+`wb001-formal-check.sh` keep their own verdicts (`wireZeroTail`,
+`wireInjective`: NOT-PROVEN, memory).
+
+**Corollary for the deployed envelope.** Two valid intents whose emitted
+envelopes are byte-identical (same `envLen`, same bytes) have equal wires
+(`wireZeroTail`), hence are equal. That the runtime's envelope is `wire`'s
+first `envLen` bytes is the EQUIVALENCE class (`rust.saw`, SAW) plus the 8
+pinned bridge terms, not this leg.
+
+**Finding: `wireIndexDef` as stated is unsafe in Cryptol's semantics.** It
+quantifies over every intent with no bounds premise; for an intent whose
+length word exceeds its field's capacity, `byteAt` reads past the field,
+so `:prove` can never reach Q.E.D. Its single-query row printed NOT-PROVEN
+(memory), which hid that; the row is retired from `wb001-formal-check.sh`
+and the executed counterexample is control C1. The SAW leg's
+`wireIndexDef` result is its own and is not touched. In this leg the
+wire's definition is checked as `wireIsByteAt`, for bounded intents.
+
+**Negative controls**, each required to end in a Cryptol counterexample (a
+proof or a timeout is red): C1 `wireIndexDef` at position 3000 (safety:
+`invalid sequence index`); C2 the payload lemma without "every earlier
+field equal"; C3 the payload lemma with the index allowed past the length
+(why canonical padding is load-bearing); C4 the wire without its length
+words (one textual substitution in a copy of `BTungstenWB001.cry`):
+`lenDiffDst` fails; C5 the wire defined one position off:
+``wireIsByteAt`{0}`` fails; C6 the zero tail one byte early; C7
+`caseCover` without its payload-bytes case.
 
 ### §ladder (founder ruling 2026-10-07 — the default sequence for every workbench)
 
@@ -529,15 +636,16 @@ runtime byte.
    Ed25519 RFC 8032 Cryptol spec (`wb001-cryptol/Ed25519.cry`).
    Open: a SAW proof that `libcrux-ed25519` equals `Ed25519.cry` (its
    own correctness proof is HACL*'s F* development).
-   **ROUTED (founder order 2026-10-10):** the Cryptol-side PROVE-
-   UNIVERSAL of `wireInjective` (with `wireIndexDef` and
-   `wireZeroTail` beneath it — currently NOT-PROVEN by memory-cap
-   under z3, honestly recorded) is OWNED by the active RB05
-   grammar-equivalence lane (`claude-LoVis/rb05-grammar-equivalence`;
-   decode_core == decodeSpec for every buffer and length). No other
-   seat proofings toward that obligation — the SAW result above and
-   the Cryptol leg are separate result classes and stay separately
-   recorded; neither is ever written down as the other.
+   **DONE 2026-10-10 (routed to the RB05 lane by the founder order of
+   that day, `f15649ce3`):** the Cryptol leg of `wireInjective` and
+   `wireZeroTail`, PROVEN BY COMPOSITION (§cryptol-leg): every
+   obligation Q.E.D. by Cryptol's own `:prove` under the 6 GiB cap, the
+   single-query rows still NOT-PROVEN (memory), and `wireIndexDef`
+   retired from the Cryptol prove list as unsafe under Cryptol's
+   semantics (control C1). Receipt:
+   `docs/dispatches/2026-10-10-btungsten-wb001-cryptol-leg.md`. The SAW
+   result above and the Cryptol leg stay separate result classes;
+   neither is ever written down as the other.
 4. **Distributed leg:** the bounded BNR job through a hostile P2P
    workflow — kill services, reroute, replay, fake peer, partition,
    heal — final result must still satisfy this invariant and produce the
