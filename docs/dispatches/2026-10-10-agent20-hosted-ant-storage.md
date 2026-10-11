@@ -8,7 +8,7 @@ The existing wallet bPay chooser now has a separate public-file purchase action.
 
 `AntPay.createHosted` binds SHA-256, byte count, file name, payer, Arbitrum One chain, bundled token/vault, exact quote hashes/recipients/amounts, transaction calldata, separate aggregate ETH ceiling and a two-minute invoice expiry. The 100 ANT cap is per file; it is not authorization. Each wave requires an exact invoice confirmation. Contracts come from the SDK's compiled network profile. Only `eth_sendTransaction` asks the person's wallet to sign; no private-key export or terminal payer exists in this path.
 
-Gas reservations follow `ops/ant-extsig/src/budget.rs`: reserve before sending, retain uncertainty, reduce only against verified mined gas. Approval is exact. Payment reserves a disclosed 3,000,000-gas bound and must simulate within that bound before sending. A bound exceeding the person's aggregate ETH limit refuses before any approval. The journal persists before every wallet send, including approvals. Recovery verifies the transaction's sender, recipient, nonce, chain, value, calldata and fee bounds and its canonical block with one subsequent block. An unknown wallet response is searched by payer and nonce over up to 1,000 blocks; absence never permits another send. Reverts retain spent gas and are not retried automatically.
+Gas reservations follow `ops/ant-extsig/src/budget.rs`: reserve before sending, retain uncertainty, reduce only against verified mined gas. Approval is exact. Payment reserves a disclosed 3,000,000-gas bound and must simulate within that bound before sending. A bound exceeding the person's aggregate ETH limit refuses before any approval. The journal persists before every wallet send, including approvals. Recovery verifies the transaction's sender, recipient, nonce, chain, value, calldata and fee bounds and its canonical block with one subsequent block. An unknown wallet response is searched by payer and nonce in resumable pages of up to 1,000 blocks; absence never permits another send. Reverts retain spent gas and are not retried automatically.
 
 A Web Lock serializes purchase operations across this origin's tabs. A shared quote-claim index prevents another saved file from reusing a claimed quote. These are browser-local protections: another device, cleared site data or lost browser storage is not a distributed replay ledger. The UI says to preserve site data and resume in this browser. An expired invoice refuses further signing. If only approvals were attempted, recovery first verifies them, preserves their gas, discards only the unpaid checkpoint and obtains fresh quotes for a new explicit authorization. Any attempted storage payment stays on the reconciliation path and is never silently repaid.
 
@@ -23,7 +23,7 @@ After upload, the wallet saves the returned file reference, downloads the file, 
 
 ## Verification receipts
 
-- `node --test e2e/ant-hosted-purchase.test.mjs`: 15/15 pass. Fixture-only; exact binding, expiry/cancel, storage/gas ceilings, durable refusal, uncertain send/receipt, nonce recovery, reverts, reload, overlap, no duplicate charge and hash mismatch.
+- `node --test e2e/ant-hosted-purchase.test.mjs`: 16/16 pass. Fixture-only; exact binding, expiry/cancel, storage/gas ceilings, durable refusal, uncertain send/receipt, nonce recovery, reverts, reload, overlap, no duplicate charge and hash mismatch.
 - `node --test e2e/ant-pay.test.mjs`: 9/9 pre-existing shared payer tests pass.
 - `node e2e/ant-hosted-browser.mjs`: all three registers at 390px pass explicit authorization, cancellation with no signature, exact approval/payment, verified retrieval and retry without duplicate sends. Production-origin routes are fulfilled from source; chain/wallet/storage are fixtures. No local server.
 - `node scripts/estate-check.mjs`: pass. No surfaces added or moved.
@@ -46,3 +46,5 @@ The existing public wallet was checked from a fresh 390px browser at `2026-10-10
 
 Mobile inspection moved raw receipt JSON into a disclosure and provides a direct download of the bytes already retrieved and hash-verified. Fixture purchases remain distinct from live acceptance.
 - Live bundled payment profile and browser RPC check: Arbitrum One chain 42161, token `0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684`, vault `0x9a3ecac693b699fc0b2b6a50b5549e50c2320a26`; `https://arb1.arbitrum.io/rpc` returned HTTP 200 and `eth_chainId: 0xa4b1`. This read-only check confirms browser RPC reachability, not storage-node availability or a purchase.
+
+- Pre-release recovery review found and repaired an elapsed-history refusal: unknown broadcasts now search successive bounded history pages, preserving their cursor and never resubmitting. The delayed-return regression passes.

@@ -18,7 +18,7 @@ function fixture(options={}){
   if(method==='eth_getBalance')return '0xffffffffff';
   if(method==='eth_estimateGas')return '0xc350';
   if(method==='eth_getTransactionCount')return '0x'+nonce.toString(16);
-  if(method==='eth_blockNumber')return '0x65';
+  if(method==='eth_blockNumber')return options.latestBlock||'0x65';
   if(method==='eth_getBlockByNumber')return {hash:hash('f'),transactions:[...txs.values()]};
   if(method==='eth_getTransactionByHash'){const tx=txs.get(p[0]);return tamper?{...tx,input:'0xdead'}:tx;}
   if(method==='eth_getTransactionReceipt')return mined?{transactionHash:p[0],blockNumber:'0x64',blockHash:hash('f'),status:options.revert?'0x0':'0x1',gasUsed:'0xc350',effectiveGasPrice:'0x2'}:null;
@@ -87,4 +87,8 @@ test('quote claims prevent a second file reusing the same quote',async()=>{
  const f=fixture({approved:true}),inv=await authorized(f);await f.payer.provider(inv.id).pay(network,quotes,{});
  const other=createHosted({...f.cfg,artifact:{...artifact,sha256:'a'.repeat(64)}});
  await assert.rejects(other.invoice(network,quotes,'20000000'),/another saved file/);assert.equal(f.sends,1);
+});
+
+test('delayed unknown-broadcast recovery searches the original blocks instead of refusing old history',async()=>{
+ const options={approved:true},f=fixture(options),inv=await authorized(f);f.failSend(true);await assert.rejects(f.payer.provider(inv.id).pay(network,quotes,{}));options.latestBlock='0x9999';f.reload();await f.payer.provider(null).recover(network,quotes,{},{});assert.equal(f.sends,1);
 });

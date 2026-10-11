@@ -334,14 +334,17 @@
       // A provider can throw after broadcast. Discover the exact nonce on chain;
       // absence is never permission to broadcast again.
       if(!t.hash){
-        var end=BigInt(await rpc('eth_blockNumber',[])),start=BigInt(t.block);
-        if(end-start>1000n) fail('uncertain','Payment history exceeds this recovery window. No replacement payment was sent.');
+        var end=BigInt(await rpc('eth_blockNumber',[])),start=BigInt(t.recoveryNextBlock||t.block);
+        if(end-start>999n)end=start+999n;
         for(var b=start;b<=end;b++){
           var block=await rpc('eth_getBlockByNumber',[hx(b),true]);
           var found=(block?.transactions||[]).find(x=>same(x.from,p.payer)&&BigInt(x.nonce)===BigInt(t.nonce));
           if(found){t.hash=found.hash;save();break;}
         }
-        if(!t.hash) fail('uncertain','The wallet outcome is still unknown. Resume later; no duplicate transaction was sent.');
+        if(!t.hash){
+          t.recoveryNextBlock=hx(end>BigInt(t.block)+1n?end-1n:BigInt(t.block));save();
+          fail('uncertain','The wallet outcome is still unknown. Resume to continue checking history; no duplicate transaction was sent.');
+        }
       }
       for(var i=0;i<40;i++){
         stopped(signal);
