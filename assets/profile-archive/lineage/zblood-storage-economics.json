@@ -3,38 +3,38 @@
  "law": "FIVE DISTINCT STATES, never conflated: quoted ≠ purchased ≠ uploaded ≠ retrieved ≠ hash-verified. No synthetic projection may be labeled measured. Every price carries its timestamp and raw source.",
  "artifact": {
   "name": "zBlood interactive public preservation edition v3",
-  "manifestSha256": "45cc9ccba10c9509253035764d8fe9f7a5e47fdcac946ff743dbba2781c8c42c", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/preserve.mjs::verifyPackage",
-  "preparedAt": "2026-10-03T21:06:37.905Z",
+  "manifestSha256": "39c0e9fb2bc3683ef11e3452fecc37e8d047e2d893b09905558a24b3ee90ebf9", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/preserve.mjs::verifyPackage",
+  "preparedAt": "2026-10-11T03:39:23.379Z",
   "approvedAt": null,
   "approvedBy": null,
   "approvedDestination": null,
   "bindingIntact": false,
-  "files": 22153,
-  "bytes": 87268763,
-  "GiB": 0.081275,
+  "files": 22154,
+  "bytes": 266410635,
+  "GiB": 0.248114,
   "personObjects": 11041,
   "evidencePacks": 3,
   "uploadForm": "deterministic public tar; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
   "uploadObject": {
    "form": "tar",
-   "bytes": 107806720,
-   "sha256": "9efc8ed3ffbfc1d386136e26819145999a6102dd37a968891dc8d10e127058d2", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
-   "builtAt": "2026-10-03T21:07:03.523Z"
+   "bytes": 286801920,
+   "sha256": "e5e3b013adc3bcbb6967c552f73763b5fee5538d0b43504dca9f7eb57f02711e", "hexLawNote": "PUBLIC-CONSTANT; tools/genealogy/build-eternalization-tar.sh::verify_reproducible_eternalization_tar",
+   "builtAt": "2026-10-11T03:40:34.181Z"
   }
  },
  "quotes": {
   "arweave": {
    "state": "fresh size-based quote only; no transaction",
    "route": "surfaces/arweave.js::fee via https://arweave.net/price/{bytes}",
-   "queriedAt": "2026-10-03T21:08:33.949Z",
+   "queriedAt": "2026-10-11T03:44:44.828Z",
    "raw": [
     {
-     "bytes": 107806720,
-     "winston": "1355779919142"
+     "bytes": 286801920,
+     "winston": "3708064485204"
     }
    ],
    "computed": {
-    "fullArchiveAR": "1.355779919142",
+    "fullArchiveAR": "3.708064485204",
     "formula": "winston / 1e12"
    },
    "note": "public size-based fee estimate only; no wallet, signing or upload"
@@ -42,25 +42,26 @@
   "autonomi": {
    "state": "quoted; payment disabled",
    "route": "tools/genealogy/capture-ant-quote.mjs::captureAntQuote using ant 0.3.9",
-   "queriedAt": "2026-10-03T21:08:52.292Z",
+   "queriedAt": "2026-10-11T03:45:41.910Z",
    "raw": {
-    "file_size": 107806720,
-    "chunk_count": 29,
-    "storage_cost_atto": "2803560131835937500",
-    "estimated_gas_cost_wei": "150000000000000",
-    "payment_mode": "single",
+    "file_size": 286801920,
+    "chunk_count": 72,
+    "storage_cost_atto": "5009055375000000000",
+    "estimated_gas_cost_wei": "50000000000000",
+    "payment_mode": "merkle",
     "confidence": "priced_sample"
    },
    "qualifications": [
     "keyless quote on a private byte-verified snapshot; no wallet access, payment, or upload",
-    "2.803560131835937500 ANT is within the temporary 100 ANT storage ceiling",
+    "5.009055375000000000 ANT is within the temporary 100 ANT storage ceiling",
     "ant 0.3.9 file upload exposes no atomic ANT or ETH ceiling, so the paid path is code-disabled",
     "storage and gas are separate obligations",
+    "Hosted ANT purchase PR #391 is merged but its verified browser path caps files at 32 MiB; this archive exceeds that limit. No large-file payment or retrieval acceptance is claimed.",
     "PRs #324 and #341 merged ant-extsig 0.3.0; its gate/client mismatch, unbound send gas limit, concurrent-ledger and retry-accounting limitations remain documented. This receipt uses the existing ant 0.3.9 quote adapter and does not enable payment."
    ],
    "computed": {
-    "storageANT": "2.803560131835937500",
-    "gasETH": "0.000150000000000000",
+    "storageANT": "5.009055375000000000",
+    "gasETH": "0.000050000000000000",
     "formula": "storage_cost_atto / 1e18; estimated_gas_cost_wei / 1e18"
    },
    "ceilings": {
@@ -152,7 +153,7 @@
   "noHardcodedPerTBClaims": "none present; the old $747/TB Discord number is deliberately absent — every figure here is either a timestamped quote or an explicitly-labeled list-price assumption"
  },
  "demonstrationPath": "Albert Perry Rockwood (public entrance) → biography/records/lore → blood fractal → underlying archived evidence — the receipt's card rides beside this path in surfaces/blood.html",
- "generatedAt": "2026-10-03T21:08:52.292Z",
+ "generatedAt": "2026-10-11T03:45:41.910Z",
  "acceptanceOutcomes": {
   "archiveRetrievalRestoration": {
    "state": "pending",

@@ -1,6 +1,6 @@
 # Genealogy public edition refresh
 
-Current edition: the final pkg14 receipt below supersedes pkg13 and pkg12.
+Historical October 3 edition: pkg14 superseded pkg13 and pkg12. The current October 10 pkg15 receipt is recorded in 2026-10-10-genealogy-completion.md.
 Earlier sections are retained as historical evidence.
 
 Seat: Codex, `C:/Users/travi/wt-codex-genealogy-eternalization`.
