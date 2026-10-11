@@ -6046,7 +6046,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     // click handler tries, as a second pending request. That is why "create" only ever
     // looked for one. Same reasoning for the explicit disconnect, the recovery and
     // bridge inputs, and everything inside the vault.
-    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-pass,#kc-hw,#kc-out,#br-wif,#br-go,#vault-sec,#wallet-accounts,#arw-sec,#bpay-sec,#sign-sheet,#act-sheet,#pq-law'))return;
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-pass,#kc-hw,#kc-out,#br-wif,#br-go,#vault-sec,#wallet-accounts,#arw-sec,#bpay-sec,#sign-sheet,#act-sheet,#pq-law,#genealogyConsent'))return;
     // the keychain's own buttons run their own ceremony on click (connect, make, phone, hardware,
     // the status line's try again), and the recovery words, the device list and the phone sheet
     // are their own way in: a pointerdown there must not open a second prompt first
@@ -10069,6 +10069,23 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      returns, or transmits a seed. This is also the gate's handle on the rail
      core — every primitive below is proven against a published vector in
      e2e/wallet-signer.mjs before it is trusted with an address or an amount. */
+  // Genealogy consent uses the existing record key, with an explicit review
+  // and signing press. No payment method or general signing global is exposed.
+  async function openGenealogyConsent() {
+    if (location.hash !== '#genealogy-consent' || document.getElementById('genealogyConsent')) return;
+    var host = document.createElement('section'); host.id = 'genealogyConsent';
+    host.setAttribute('aria-label', 'preservation consent');
+    document.getElementById('kc-sec').before(host);
+    try {
+      var consent = await import('../tools/genealogy/consent.mjs');
+      await consent.mountConsent(host, { getRecord: function() {
+        return MPRK ? BZDIDKEY.deriveRecordKey(MPRK, 'bnr.b') : null;
+      }});
+      host.scrollIntoView({ block: 'start' });
+    } catch (e) { host.textContent = 'Consent review unavailable. Nothing was signed.'; }
+  }
+  window.addEventListener('hashchange', openGenealogyConsent);
+  openGenealogyConsent();
   window.BNRHIVE={amount:hiveAmount,ser:hiveSer,digest:function(b){return hexS(hiveDigest(b))},sign:function(wif,b){ return hiveSign(wif,hiveDigest(b)) },pubOf:hivePubOf,bound:function(){return hiveBound()}};
   window.BNRPAY={rlp:rlp,evmSendRaw:evmSendRaw,antStorageSigner:antStorageSigner,parseWif:parseWifAny,
     rails:EVM_RAILS,evmChecksumOk:evmChecksumOk,
