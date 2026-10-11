@@ -137,3 +137,34 @@ of aggregate media respectively, before protocol overhead. The illustrative
 10,000-receipt proof and 1,000-proof anchor grouping are **not implemented or
 capacity-qualified**; the model exposes that remaining demand rather than
 claiming ZK removes it.
+
+## Reused the completed genealogy lane
+
+The founder supplied `2026-10-10-genealogy-completion.md` during closeout.
+Fetched main and verified its PR #336 is merged as `eba793737`. Its deterministic
+packaging, declared dependencies, exact-artifact hashes and fresh keyless quote
+capture are useful shared infrastructure. Its local extraction checks do not
+substitute for storage retrieval, and its Merkle-mode archive payment boundary
+does not transfer to this smaller pack.
+
+Reused **`tools/genealogy/capture-ant-quote.mjs::captureAntQuote` unchanged** for
+the exact 31,908,755-byte pack and **`surfaces/arweave.js::fee` unchanged** for
+the same byte count. Fresh receipts, recorded October 11 UTC:
+
+| Adapter | Measured estimate | Scope |
+|---|---|---|
+| ant 0.3.9, 05:11:11Z | 0.665888566406250000 ANT storage; 0.000150000000000000 ETH estimated gas | 11 chunks, `single`, `priced_sample`; no wallet access, payment or upload |
+| Arweave, 05:11:30Z | 0.412844830950 AR | Full additional pack copy, not the cost of a future aggregate anchor; HTTP 200 from the existing fee adapter |
+
+Raw evidence: `docs/receipts/serverless-ant-video-quotes-2026-10-11.json`.
+The private snapshot's size and SHA-256 were checked before and after the ANT
+quote. The first Node invocation of the browser AR adapter refused with
+`ReferenceError: self is not defined`; adding only the browser-global alias in
+the capture harness allowed the unchanged adapter to run. Only allowlisted
+GET price requests were enabled; no signer or upload method was invoked.
+
+This establishes a priced pack inside the hosted wallet's 32 MiB limit and
+single-payment mode, rather than extrapolating the archive's 72-chunk Merkle
+quote. The CLI estimate is not the hosted wallet's eventual exact invoice,
+whose node quotes, gas bounds and signature still belong to that existing flow.
+There is no per-view fee or recurring operator-egress charge asserted here.
