@@ -1,0 +1,67 @@
+{
+  "schema": "skaists.public-edition-quote-receipt/1",
+  "edition": "v3 / pkg13",
+  "preparedAt": "2026-10-03T20:43:40.972Z",
+  "manifestSha256": "fb6950a0b8a2886f2db386a566888d23a99ce1820d9d551c05813efb99cb4039", "publicDigestNote": "PUBLIC-CONSTANT; public artifact digest",
+  "files": 22153,
+  "contentBytes": 87268661,
+  "tar": {
+    "tar": "/mnt/c/Users/travi/family-lineage/pkg13.tar",
+    "bytes": 107806720,
+    "sha256": "5cf5aaeb8eee0b37dd8d91393d0d5f262ee37af8e44994b1a3450d4077572947", "publicDigestNote": "PUBLIC-CONSTANT; public artifact digest",
+    "reproduced": true
+  },
+  "ant": {
+    "schema": "skaists.ant-quote-capture/1",
+    "capturedAt": "2026-10-03T20:45:11.494Z",
+    "command": [
+      "ant",
+      "--json",
+      "file",
+      "cost",
+      "<private snapshot>"
+    ],
+    "clientVersion": "ant 0.3.9",
+    "artifact": {
+      "path": "C:\\Users\\travi\\family-lineage\\pkg13.tar",
+      "bytes": 107806720,
+      "sha256": "5cf5aaeb8eee0b37dd8d91393d0d5f262ee37af8e44994b1a3450d4077572947", "publicDigestNote": "PUBLIC-CONSTANT; public artifact digest"
+    },
+    "quote": {
+      "file_size": 107806720,
+      "chunk_count": 29,
+      "storage_cost_atto": "3684167589843750000",
+      "estimated_gas_cost_wei": "150000000000000",
+      "payment_mode": "single",
+      "confidence": "priced_sample"
+    },
+    "boundary": "keyless quote on a private byte-verified snapshot; no wallet access, payment, or upload"
+  },
+  "ar": {
+    "schema": "skaists.ar-quote-capture/1",
+    "capturedAt": "2026-10-03T20:44:51.294Z",
+    "source": "surfaces/arweave.js::fee",
+    "artifact": {
+      "bytes": 107806720,
+      "sha256": "5cf5aaeb8eee0b37dd8d91393d0d5f262ee37af8e44994b1a3450d4077572947", "publicDigestNote": "PUBLIC-CONSTANT; public artifact digest"
+    },
+    "winston": "1355779919142",
+    "requests": [
+      {
+        "url": "https://arweave.net/price/107806720",
+        "status": 200
+      }
+    ],
+    "boundary": "public size-based fee estimate only; no wallet, signing or upload"
+  },
+  "states": {
+    "prepared": true,
+    "approved": false,
+    "quoted": "ANT and AR estimates captured for edition v3; no approval, purchase or upload",
+    "purchased": false,
+    "uploaded": false,
+    "retrieved": false,
+    "hashVerifiedFromStorage": false
+  },
+  "boundary": "Local package verification and reproducible construction only. No storage-network retrieval or live Hive publisher/indexer integration."
+}

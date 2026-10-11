@@ -73,6 +73,8 @@ function buildFixture() {
   }));
   file("assets/profile-archive/lineage/persons/pa1.json", '{"internalId":"pa1"}');
   file("assets/profile-archive/lineage/persons/pa2.json", '{"internalId":"pa2"}');
+  file("assets/profile-archive/lineage/persons/pa1.html", '<html>Published A</html>');
+  file("assets/profile-archive/lineage/persons/pa2.html", '<html>Published B</html>');
   file("assets/profile-archive/lineage/evidence/pack-a.json", '{"schema":"skaists.evidence/1"}');
   file("assets/profile-archive/house-crest-von-zutphen-DESIGN.svg", "<svg>crest</svg>");
   file("assets/profile-archive/house-crest-von-zutphen.json", '{"schema":"skaists.house-profile/1"}');
@@ -116,6 +118,25 @@ test('string CSS imports and both video dependencies must be declared', () => {
   const result = run(['prepare', join(root, 'pkg')], { cwd: root });
   assert.notEqual(result.code, 0);
   for (const name of ['missing-theme.css', 'missing-video.webm', 'missing-poster.jpg']) assert.ok(result.stderr.includes(name));
+});
+
+test('person pages follow the corpus and cannot smuggle stale directory entries', () => {
+  const root = buildFixture(), pkg = join(root, 'pkg');
+  writeFileSync(join(root, 'assets/profile-archive/lineage/persons/stale.html'), 'UNPUBLISHED');
+  assert.equal(run(['prepare', pkg], { cwd: root }).code, 0);
+  assert.equal(existsSync(join(pkg, 'assets/profile-archive/lineage/persons/stale.html')), false);
+  rmSync(join(root, 'assets/profile-archive/lineage/persons/pa1.html'));
+  const missing = run(['prepare', pkg], { cwd: root });
+  assert.notEqual(missing.code, 0);
+  assert.match(missing.stderr, /pa1\.html/);
+});
+
+test('person page runtime dependencies cannot be omitted from a preservation edition', () => {
+  const root = buildFixture();
+  writeFileSync(join(root, 'assets/profile-archive/lineage/persons/pa1.html'), '<script src="missing.js"></script>');
+  const result = run(['prepare', join(root, 'pkg')], { cwd: root });
+  assert.notEqual(result.code, 0);
+  assert.match(result.stderr, /persons\/missing\.js/);
 });
 
 test("probe 0 (control): crest-missing refusal stays", () => {
