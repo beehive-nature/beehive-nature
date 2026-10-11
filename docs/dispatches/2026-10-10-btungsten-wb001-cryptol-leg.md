@@ -145,7 +145,50 @@ and is not touched. In this leg the wire's definition is checked as
 - `scripts/btungsten/README.md`: WB001 artifact row, §result-classes,
   §cryptol-leg (new), §next item 3.
 
-## CI receipt
+## CI receipt (head `acb716f6a`)
 
-Appended at landing: the head SHA, the eight push workflows, and the
-`formal-cryptol-leg` job's verbatim verdict lines.
+The eight push workflows on `acb716f6a`, every one `completed success`:
+tests 38105540059, WB001 SAW proofs 38105540046, bTunGsTeN RB 38105540050,
+bTunGsTeN PQ 38105540045, bTunGsTeN PQ SAW 38105540036, WB002 SAW
+equivalence 38105540054, WB002 WASM corpus 38105540090, secret-scan
+38105540076.
+
+Workflow `tests`, run 38105540059, job `formal-cryptol-leg` 114370170505
+(2026-10-11T02:33:30Z to 02:40:08Z, success). Toolchain lines, verbatim:
+`cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz sha256:
+621860aa1dedc037e8fc8355bef3edf023e41e78efb7177146126f5a87309962` (PUBLIC-CONSTANT: the formal job's recorded digest), `Cryptol 3.6.0`,
+`Git commit 61dd17b0c45ddf8c5c1e952afd5e789c4dc4ec4b`, `yices: Yices
+2.6.5`, `Z3 version 4.8.14`, `caps: address space 6291456 KiB per
+process, 3 processes at once, a clock per obligation`, `pool wall time:
+381s`.
+
+| obligation | prover | wall | peak RSS (KiB) |
+|---|---|---|---|
+| validImpliesBounded | z3 | 11 s | 659480 |
+| zeroTailAtPosition | z3 | 2 s | 256064 |
+| validImpliesPadded | w4-yices | 8 s | 322052 |
+| caseCover | w4-yices | 2 s | 268512 |
+| splitDiff32, splitDiff64 | w4-yices | 1 s, 1 s | 253888, 254460 |
+| padZero64, padZero128, padZero4096 | w4-yices | 0 s, 1 s, 42 s | 254564, 254484, 356080 |
+| byteDiffDom, Non, Act, Dst, Cap | w4-yices | 3, 2, 4, 3, 7 s | 386792 to 410820 |
+| byteDiffPay, byteDiffPld | w4-yices | 27 s, 66 s | 400276, 408696 |
+| lenDiffDom, Dst, Cap, Pay, Pld | w4-yices | 2, 3, 4, 8, 11 s | 388772 to 412152 |
+| u64DiffEpo, Amt, Exp | w4-yices | 2, 7, 8 s | 396696 to 411588 |
+| wireIsByteAt`{0}`, `{1}` | w4-yices | 156 s, 105 s | 897216, 945816 |
+| wireIsByteAt`{2}` .. `{17}` | w4-yices | 30 to 46 s each | 933672 to 945572 |
+| wireIsByteAt`{18}` | w4-yices | 3 s | 334904 |
+
+Every one `PROVEN (Q.E.D., …)`. Controls: C1 0 s, C2 4 s, C3 5 s, C4 3 s,
+C5 27 s, C6 2 s, C7 2 s, each `PASS (counterexample, as required; …)`.
+Final lines, verbatim:
+
+    CRYPTOL-LEG-COMPOSED wireZeroTail: PROVEN BY COMPOSITION (21 obligations, every one Q.E.D. in this run; glue: (D-eq) and first-order logic, README WB001 §cryptol-leg; not a single :prove verdict)
+    CRYPTOL-LEG-COMPOSED wireInjective: PROVEN BY COMPOSITION (42 obligations, every one Q.E.D. in this run; glue: (D-eq) and first-order logic, README WB001 §cryptol-leg; not a single :prove verdict)
+    CRYPTOL-LEG CONTROLS: 7 of 7 ended in the required counterexample
+
+Same run, job `formal` 114370170525 (success): the `wireIndexDef` row no
+longer runs, and the single-query rows read, verbatim,
+`FORMAL-PROVE-UNIVERSAL wireZeroTail: NOT-PROVEN (memory — RTS exhausted
+the 6291456 KiB cap, rc=251; recorded, never success)` and the same line
+for `wireInjective`; `validImpliesBounded`, `offsetsOrdered`,
+`zeroTailAtPosition` PROVEN; `FORMAL-WIRE-ALIGNMENT: PASS`.

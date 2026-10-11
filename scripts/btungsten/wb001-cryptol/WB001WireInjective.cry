@@ -34,15 +34,14 @@
 // times out in Cryptol under z3 and yices, SBV and What4 alike.
 //
 // THE CRYPTOL-LEG PROOF: each lemma below names the differing byte as a
-// free variable, so no query builds the wire, a priority encoder, or a
-// symbolic index into the wire. The lemmas carry all of the encoding's
-// content (bounds, offsets, dispatch, tags, length words, padding); the
-// composition is first-order logic plus two equations of Cryptol's own
-// semantics, written out in full in the README (WB001 §cryptol-leg):
+// free variable, so no query builds the whole wire, a priority encoder, or
+// a symbolic index into the wire. The lemmas carry the encoding's content
+// (bounds, offsets, dispatch, length words, padding), and wireIsByteAt
+// checks the wire's definition at every one of its 4,626 positions. The
+// composition, written out in full in the README (WB001 §cryptol-leg), is
+// first-order logic plus one equation of Cryptol's own semantics:
 //
-//   (D-eq)   record and sequence equality are fieldwise and elementwise;
-//   (D-wire) for c < 4626, (wire a) @ c is byteAt a c: `wire` is the
-//            comprehension [ byteAt a k | k <- take`{MaxEnv} [0 ...] ].
+//   (D-eq)   record and sequence equality are fieldwise and elementwise.
 //
 // In outline: suppose valid a, b with equal wires and a != b. The bounds
 // and the padding hold (validImpliesBounded, validImpliesPadded).
@@ -50,7 +49,7 @@
 // its value bytes or its u64 differ; (D-eq) gives a differing byte index,
 // and pad* puts a differing value byte inside the length. The case's
 // lemma gives a position c < 4626 where byteAt a and byteAt b differ;
-// by (D-wire) the wires differ at c, contradicting wire a == wire b.
+// by wireIsByteAt the wires differ at c, contradicting wire a == wire b.
 
 module WB001WireInjective where
 
@@ -79,11 +78,12 @@ bounded2 : Intent -> Intent -> Bit
 bounded2 a b = lensBounded a && lensBounded b
 
 //////////////////////////////////////////////////////////////////////////////
-// (D-wire), checked position by position: for a bounded intent, wire
-// element c IS byteAt c, and evaluating it is error-free (Cryptol's :prove
-// also proves every read in range). Positions are concrete, 256 to a
-// chunk, chunk m covering 256m .. 256m+255; chunks 0..18 cover all 4,626
-// positions (18 * 256 = 4608; positions past 4625 are skipped, not read).
+// The wire's definition, checked position by position: for a bounded
+// intent, wire element c IS byteAt c, and evaluating it is error-free
+// (Cryptol's :prove also proves every read in range). Positions are
+// concrete, 256 to a chunk, chunk m covering 256m .. 256m+255; chunks
+// 0..18 cover all 4,626 positions (18 * 256 = 4608; positions past 4625
+// are skipped, not read).
 // A symbolic position cannot be used here: the wire's term would be built
 // whole (the measured resource wall above).
 //////////////////////////////////////////////////////////////////////////////
