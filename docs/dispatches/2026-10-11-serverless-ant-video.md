@@ -224,3 +224,21 @@ The original address continues to use the published HTTPS adaptive route;
 no nonexistent ANT pack address was installed. bView public acceptance was
 reported to the coordinating wallet lane before releasing its deployment hold.
 These closeout receipts are banked on this lane's branch without a main push.
+
+
+## ANT publication continuation, 03:49 America/Denver
+
+The in-app browser file chooser accepted the exact pack for preparation,
+resolving the external extension file-access blocker. Native invoice preparation
+stopped at the disconnected bzDiD signer. The existing passkey returned a soul
+that the browser asks the owner to confirm; the agent did not bind this identity,
+create a new one, export keys, authorize an invoice or spend funds. The old
+connected Brave session was preserved. The 0.0002 ETH preparation field is a
+proposal, not spending authorization.
+
+Refreshed exact-pack CLI estimate at 09:49:16 UTC: 0.66588856640625 ANT and
+0.00015 ETH estimated gas, 11 chunks, single payment, priced_sample. This is
+not a payer-bound invoice or settled cost. Actual spending remains zero;
+ANT startup, rebuffering and transport bytes remain unmeasured because no
+published pack address exists. Raw receipt:
+serverless-ant-video-publication-attempt-2026-10-11.json in docs/receipts.
