@@ -1,0 +1,107 @@
+# Core community moves here. Existing shared compute, voice, voucher and
+# experimental read services retain their Oracle origin during this migration.
+(oracle-service) {
+  reverse_proxy https://129.153.202.144 {
+    header_up Host {host}
+    transport http {
+      tls_server_name relay.skaists.dev
+    }
+  }
+}
+(skaists-app) {
+  encode zstd gzip
+  @shared path /compute/* /voucher/* /voice/*
+  handle @shared {
+    import oracle-service
+  }
+  @antApi {
+    host relay.skaists.dev
+    path /ant/*
+  }
+  handle @antApi {
+    header Access-Control-Allow-Origin https://skaists.dev
+    header Access-Control-Expose-Headers "Accept-Ranges, Content-Length, X-Ant-First-Chunk"
+    header Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+    @antOpts method OPTIONS
+    handle @antOpts {
+      respond 204
+    }
+    uri strip_prefix /ant
+    reverse_proxy buzz-prod-antd-1:8082
+  }
+  # Hostinger watch service: Docker-private only, on the existing HTTPS edge.
+  @watchLocal path /watch /watch/* /live/* /tokens.css
+  handle @watchLocal {
+    reverse_proxy watch-door:8094
+  }
+  @fallbackServices {
+    host relay.skaists.dev
+    path /ant-door.html
+  }
+  handle @fallbackServices {
+    import oracle-service
+  }
+  @modelRead {
+    host relay.skaists.dev
+    path /model/*
+    method GET
+  }
+  handle @modelRead {
+    import oracle-service
+  }
+  @door {
+    path /
+    header Accept text/html*
+  }
+  handle @door {
+    root * /srv/door
+    file_server
+  }
+  handle /join.json {
+    header Access-Control-Allow-Origin *
+    root * /srv/join
+    file_server
+  }
+  redir /join /join/ 301
+  handle_path /join/* {
+    root * /srv/join
+    try_files {path} /index.html
+    file_server
+  }
+  @publicFeed {
+    host relay.skaists.dev
+    path /hive/public/*
+  }
+  handle @publicFeed {
+    uri strip_prefix /hive/public
+    header Access-Control-Allow-Origin https://skaists.dev
+    header Content-Type application/json
+    root * /srv/hive/public
+    file_server
+  }
+  @hive {
+    host relay.skaists.dev
+    path /hive/*
+  }
+  handle @hive {
+    uri strip_prefix /hive
+    header Access-Control-Allow-Origin *
+    root * /srv/hive
+    file_server
+  }
+  handle /pair* {
+    reverse_proxy pair-relay:5000
+  }
+  handle {
+    reverse_proxy relay:3000 {
+      header_up Host skaists.buzz
+    }
+  }
+}
+skaists.buzz {
+  # Automatic HTTPS; existing certificates seeded into Caddy's managed storage.
+  import skaists-app
+}
+relay.skaists.dev {
+  import skaists-app
+}
