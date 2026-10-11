@@ -34,12 +34,14 @@ Backend health: PASS at that observation. This remote diagnostic shell does not 
 
 B1 remains BLOCKED. GitHub repository secret-scanning API returned empty open and resolved alert inventories, using metadata-only output (number/state/type/timestamps/resolution; no secret value field). These account-visible inventories neither identify the reported exposure nor prove it was revoked. No provider event ID or old-credential rejection/new-credential acceptance receipt is available. No unrelated credential was rotated. Owner: founder/service-account owner identifies the service and exposure from the original alert/provider audit evidence; Agent 23 verifies the redacted containment receipt.
 
-B4 source inspection is bounded to the deployed release. In upstream `v0.46.0`, `src/api/auth.rs` blob 66949d69c77b95a44ff8bd12149bb6e7bed02a99:
+B4 source inspection is bounded to the deployed release. In upstream `v0.46.0`, `src/server/auth.rs` blob 66949d69c77b95a44ff8bd12149bb6e7bed02a99:
 
 - `create_session` (lines 237-264) requires the durable token and issues an ordinary browser session. The inspected session record contains token hash, expiry and mint time, with no per-device identity or room scope (`AuthSession`, lines 509-515).
 - Session TTL is ten minutes, but refresh chains can extend for about twelve hours (`SESSION_TOKEN_TTL`, `SESSION_MAX_LIFETIME`, lines 497-503). Session TTL does not enforce the separate ten-minute transport rule.
 - `requires_durable_owner` (lines 349-376) reserves ACL/grant control, sync enrollment, Home seat changes and other owner acts for the durable token. Merely minting browser tokens is not evidence of separate enrolled device identities.
 - Local `auth --help` and `auth session --help` confirmed the supported command. An exploratory `auth mint --help` failed with `error: unrecognized subcommand 'mint'`; no session was issued. This failure was corrected by inspecting the actual command help.
+
+Source-path verification first queried `src/api/auth.rs` and returned HTTP 404. The corrected `src/server/auth.rs` path resolves to the exact inspected blob above; the content-based findings are unchanged.
 
 No mobile access service was deployed and no alternative transport was created. B4 still requires an authorized route plus implementation that authenticates each client, limits its room/actions, preserves attributable sessions, and records real reads. B1 and B2 must be resolved before issuing device credentials or deploying that route. Agent 23 owns implementation; the founder owns phone authentication and physical reconnect actions. This source inspection is not a claim that the gateway exists or has passed security/runtime acceptance.
 
