@@ -139,6 +139,12 @@ physical phone nor a public-network capacity test. The measurement script is
 preserved beside the receipt. Derivatives have not been uploaded; the immutable
 Autonomi address still selects the original file.
 
+At 4,000 kb/s paced segment bodies, the same local player completed with
+**1.410 s startup, zero stalls**, two quality switches ending at 720p, and
+9,135,100 media bytes. Peak concurrent media requests remained one; all requested
+assets matched their package hashes. `original-hls-4000.json` preserves this
+second observation under the same local/emulation boundary.
+
 At one billion concurrent viewers, even this 240p average implies about
 377 Tb/s of viewer-facing payload, before overhead. The 1080p rendition implies
 2.52 Pb/s. These are arithmetic planning figures, not measured fleet capacity.
@@ -171,12 +177,66 @@ MP4Box's runtime and license are verbatim from the integrity-checked npm package
 
 ## Release status
 
-PR [#394](https://github.com/beehive-nature/beehive-nature/pull/394).
+PR [#394](https://github.com/beehive-nature/beehive-nature/pull/394) merged at
+03:26:56 UTC on October 11 (October 10 locally). A fresh fetch confirmed its
+receipt-bearing head is an ancestor of main, and merged player/remuxer/vendor
+and acceptance-test bytes are unchanged from the accepted candidate.
 All seven jobs in the source commit's
 [tests workflow](https://github.com/beehive-nature/beehive-nature/actions/runs/38102668741)
 completed successfully: formal, static, test, node, wallet, meter and eternal.
 `source-ci.json` records the exact tested commit and step results. Subsequent
 receipt/document edits do not change runtime or test bytes. Own duplicate and
 superseded workflow runs were cancelled; those are not reported as passes.
-Public-network candidate acceptance is complete. Deployed-site acceptance is
-pending at this checkpoint.
+The [Pages deployment](https://github.com/beehive-nature/beehive-nature/actions/runs/38108411515)
+completed successfully. `deployment.json` verifies HTTP 200 and exact candidate
+digests for the hosted HTML, direct remuxer and all three MP4Box runtime files;
+`pages-ci.json` preserves the deployment result.
+
+The first deployed acceptance used the ordinary direct-with-fallback selection.
+Direct opening timed out, and the relay served the original file. It completed
+with matching integrity, **26.954 s actual startup, 5.333 s in three stalls**,
+hash observed at 64.767 s and playback end at 86.480 s. There was one relay
+request, four media source assignments and zero page errors. Cached reload
+started in **0.909 s**, with matching integrity and zero SDK requests, relay
+requests or dials. `deployed-auto-relay.json` is accepted for the automatic route;
+it is not evidence for direct-only transport.
+
+The fresh deployed **direct-only** run completed at 03:39:49 UTC on October 11
+(October 10 locally). `deployed-direct-only.json` records:
+
+| Deployed original, direct-only | Observed result |
+| --- | ---: |
+| First ordered media bytes | 38.412 s |
+| First decoded frame | 39.581 s |
+| Actual playback start | **39.734 s** |
+| Native stalls | 8 / **338.433 s** |
+| Application holds | 0 |
+| Complete original hash observed | 434.073 s |
+| Playback end observed | 437.184 s |
+| Warm reload actual startup | **0.682 s** |
+
+All 52 chunks arrived and the original hash matched. There was one MSE source,
+zero relay requests, page errors, remuxer errors, fallbacks or quota recoveries.
+Warm replay also matched the original hash and made **zero SDK requests, relay
+requests and WebRTC dials**. All loaded runtime digests match the accepted source.
+The browser reported 3147 frames / 92 dropped (2.92%). This passes integrity,
+route and completion acceptance; it does **not** meet the future startup,
+rebuffering or frame-drop qualification targets in `SCALING.md`.
+
+This observation has 90.9% less startup delay than the earlier 434.309-second
+observation, and 89.6% less than the fresh 380.340-second baseline. Those are
+descriptive comparisons under different network conditions, not guarantees or
+controlled causal estimates. Most waiting now occurs during playback. The
+original remains too demanding for this measured direct-delivery path.
+
+Transport: 1058 dials, 655 opened, 403 dead (402 before ICE, one after ICE),
+315/697 endpoints reachable, and 50 peak sampled open channels. Median / p95
+connect time was 8.239 / 16.395 s. Data-channel payload was 370,259,360 bytes,
+1.729 times the file size, excluding lower-layer framing. Estimated forward
+media peaked at 35,210,497 bytes; the fragment queue at 7,709,059 bytes and
+sampled parser allocation at 4,369,734 bytes. These are not total browser RAM.
+
+The final receipt commit changes documentation only. Its automated workflows
+are explicitly skipped to avoid repeating unchanged source suites. The seven
+source-commit jobs above passed; the post-merge integration workflow remains a
+separate observation and is not described as successful while pending.
