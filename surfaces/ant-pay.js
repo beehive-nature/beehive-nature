@@ -15,6 +15,10 @@
    - approve is for the EXACT quoted total, never unlimited.
    - contract addresses come from the bridge's own binary (/health → evm), never from a document or this file.
    - transaction hashes are persisted BEFORE finalize. a paid-but-unfinalized upload resumes; it never pays twice.
+   - a signed envelope is decoded and compared field by field by code that did not build it, and its sender
+     is recovered with noble secp256k1, not the Rust core that signed (checkEnvelope). keccak is the same
+     vendored noble build on both sides. an authorization names the digest of what it covers (scopeOf, a
+     serializer the signer shares), and the signer recomputes that digest with noble SHA-256.
    - wire facts are cited: selectors and tuple order are held to a real Arbitrum One transaction in
      e2e/ant-pay-vector.json (PaymentVaultV2.payForQuotes, verified source on Blockscout). */
 (function (root) {
@@ -36,7 +40,7 @@
     return SEL.payForQuotes + word(32) + word(payments.length) + payments.map(function (p) { return pad32(p.rewards_address) + word(p.amount_atto) + pad32(p.quote_hash); }).join('');
   }
 
-  /* ── RLP + the EIP-1559 envelope (only the Trezor path needs them: the device returns a signature, the page serialises and broadcasts) ── */
+  /* ── RLP + the EIP-1559 envelope (the Trezor path serialises the device's signature; checkEnvelope re-encodes what a signer returned) ── */
   function rlpBytes(hex) { hex = strip(hex); if (hex.length % 2) hex = '0' + hex; return hex; }
   function rlpInt(v) { var h = BigInt(v).toString(16); return BigInt(v) === 0n ? '' : (h.length % 2 ? '0' + h : h); }
   function rlpLen(len, base) { if (len < 56) return (base + len).toString(16).padStart(2, '0'); var l = len.toString(16); if (l.length % 2) l = '0' + l; return (base + 55 + l.length / 2).toString(16) + l; }
@@ -46,6 +50,76 @@
   }
   function serialize1559(tx, sig) {
     return '0x02' + rlp([rlpInt(CHAIN_ID), rlpInt(tx.nonce), rlpInt(tx.maxPriorityFeePerGas), rlpInt(tx.maxFeePerGas), rlpInt(tx.gasLimit), tx.to, '', tx.data, [], rlpInt(sig.v), rlpInt(sig.r), rlpInt(sig.s)]);
+  }
+
+  /* ── the signed envelope, checked by code that did not sign it ──
+     A signer's word for what it signed is not evidence. Before any broadcast the coordinator decodes
+     the exact bytes, compares every field with the authorized transaction, requires the canonical
+     encoding, recomputes the hash, and recovers the sender with the vendored noble secp256k1 — a
+     different implementation from the Rust core that signed. */
+  var SECP_N = BigInt('0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141'); // PUBLIC-CONSTANT: secp256k1 group order (SEC 2)
+  function rlpDecode(hex) {
+    var i = 0, bad = function () { throw refusal('binding', 'The signed envelope is not well-formed RLP'); };
+    function take(n) { if (n < 0 || i + 2 * n > hex.length) bad(); var s = hex.substr(i, 2 * n); i += 2 * n; return s; }
+    function size(n) { var s = take(n); if (!s || s.slice(0, 2) === '00') bad(); return parseInt(s, 16); }
+    function item(depth) {
+      if (depth > 4) bad(); // envelope → fields → access list → entry → storage keys
+      var b = parseInt(take(1), 16);
+      if (b < 0x80) return hex.substr(i - 2, 2);
+      if (b < 0xb8) return take(b - 0x80);
+      if (b < 0xc0) return take(size(b - 0xb7));
+      var len = b < 0xf8 ? b - 0xc0 : size(b - 0xf7), end = i + 2 * len, out = [];
+      if (end > hex.length) bad();
+      while (i < end) out.push(item(depth + 1));
+      if (i !== end) bad();
+      return out;
+    }
+    var out = item(0); if (i !== hex.length) bad(); return out;
+  }
+  function checkEnvelope(signed, tx, payer, verify) {
+    var refuse = function (what) { throw refusal('binding', 'The signed envelope differs from the authorized transaction: ' + what + '. Nothing was broadcast.'); };
+    var raw = String(signed && signed.raw || '').toLowerCase();
+    if (!/^0x02([0-9a-f]{2})+$/.test(raw) || !isH32(signed.hash)) refuse('no type-2 envelope and hash');
+    var f = rlpDecode(raw.slice(4));
+    if (!Array.isArray(f) || f.length !== 12 || f.slice(0, 8).concat(f.slice(9)).some(Array.isArray)) refuse('field count');
+    var n = function (h, what) { if (h.slice(0, 2) === '00') refuse(what + ' encoding'); return h ? BigInt('0x' + h) : 0n; };
+    var want = [['chain', CHAIN_ID], ['nonce', tx.nonce], ['priority fee', tx.maxPriorityFeePerGas], ['fee cap', tx.maxFeePerGas], ['gas', tx.gas]];
+    want.forEach(function (w, k) { if (n(f[k], w[0]) !== BigInt(w[1])) refuse(w[0]); });
+    if (f[5] !== strip(tx.to)) refuse('recipient');
+    if (n(f[6], 'value') !== 0n) refuse('value');
+    if (f[7] !== strip(tx.data)) refuse('calldata');
+    if (!Array.isArray(f[8]) || f[8].length) refuse('access list');
+    var v = n(f[9], 'parity'), r = n(f[10], 'r'), s = n(f[11], 's');
+    if (v > 1n || r <= 0n || r >= SECP_N || s <= 0n || s > SECP_N / 2n) refuse('signature range');
+    var body = [rlpInt(CHAIN_ID), rlpInt(tx.nonce), rlpInt(tx.maxPriorityFeePerGas), rlpInt(tx.maxFeePerGas), rlpInt(tx.gas), strip(tx.to), '', strip(tx.data), []];
+    if ('0x02' + rlp(body.concat([rlpInt(v), rlpInt(r), rlpInt(s)])) !== raw) refuse('canonical encoding');
+    var bytes = function (h) { var o = new Uint8Array(h.length / 2); for (var k = 0; k < o.length; k++) o[k] = parseInt(h.substr(2 * k, 2), 16); return o; };
+    var hexOf = function (b) { return Array.from(b, function (x) { return x.toString(16).padStart(2, '0'); }).join(''); };
+    if (hexOf(verify.keccak256(bytes(raw.slice(2)))) !== strip(signed.hash)) refuse('hash');
+    var from = verify.recover(verify.keccak256(bytes('02' + rlp(body))), r, s, Number(v));
+    if (String(from).toLowerCase() !== String(payer).toLowerCase()) refuse('signer is not the payer');
+  }
+  /* the independent verifier: the page's vendored noble build (window.BnrSign), never the signer */
+  function nobleVerifier(B) {
+    if (!B || !B.secp || !B.secp.Signature || typeof B.keccak_256 !== 'function') return null;
+    return {
+      keccak256: function (b) { return B.keccak_256(b); },
+      recover: function (digest, r, s, parity) {
+        var P = new B.secp.Signature(r, s).addRecoveryBit(parity).recoverPublicKey(digest);
+        var pub = P.toRawBytes ? P.toRawBytes(false) : P.toBytes(false), h = B.keccak_256(pub.slice(1)).slice(12);
+        return '0x' + Array.from(h, function (x) { return x.toString(16).padStart(2, '0'); }).join('');
+      }
+    };
+  }
+  /* what an authorization covers: the file, contracts, payer, every quote and every planned
+     transaction's fixed fields. Nonce and broadcast state are assigned later and are not in it. */
+  function scopeOf(artifact, network, p) {
+    return { v: 1,
+      artifact: { name: artifact.name, sha256: artifact.sha256, bytes: artifact.bytes },
+      network: { chainId: network.chainId, paymentTokenAddress: String(network.paymentTokenAddress).toLowerCase(), paymentVaultAddress: String(network.paymentVaultAddress).toLowerCase() },
+      payer: p.payer, payments: p.payments.map(function (q) { return { quote_hash: q.quote_hash, rewards_address: q.rewards_address, amount_atto: q.amount_atto }; }),
+      total: p.total, expiresAt: p.expiresAt, gasCeilingWei: p.gasCeilingWei,
+      plan: p.txs.map(function (t) { return { kind: t.kind, to: t.to, data: t.data, gas: t.gas, maxFeePerGas: t.maxFeePerGas, maxPriorityFeePerGas: t.maxPriorityFeePerGas, reservedWei: t.reservedWei }; }) };
   }
 
   /* ── the chain, asked directly (a public RPC — never the wallet's word for a balance) ── */
@@ -240,9 +314,11 @@
      Clearing site data or using another device removes this local protection. */
   function createHosted(cfg) {
     var storage = cfg.storage, rpc = cfg.rpc, eth = cfg.ethereum, signer = cfg.signer;
+    var verify = cfg.verify || nobleVerifier(root.BnrSign);
     var clock = cfg.now || Date.now, pause = cfg.sleep || (ms => new Promise(r => setTimeout(r, ms)));
     var key = 'bnr.ant.purchase.v1:' + cfg.artifact.sha256;
     var fail = (code, message) => { throw refusal(code, message); };
+    if (signer && !verify) fail('binding', 'The independent envelope verifier did not load; reload this wallet');
     var dec = v => { if (typeof v !== 'string' || !/^(0|[1-9]\d*)$/.test(v)) fail('binding', 'Invalid decimal amount'); return BigInt(v); };
     var hx = v => '0x' + BigInt(v).toString(16);
     var same = (a,b) => String(a).toLowerCase() === String(b).toLowerCase();
@@ -281,11 +357,14 @@
       });
     }
     function checkedNetwork(n){ if(n.chainId!==network.chainId || !same(n.paymentTokenAddress,network.paymentTokenAddress) || !same(n.paymentVaultAddress,network.paymentVaultAddress)) fail('binding','Payment network or contracts changed'); }
-    function gasExposure(){ return ledger.plans.reduce((sum,p)=>sum+p.txs.reduce((s,t)=>s+BigInt(t.actualWei ?? t.reservedWei),0n),0n); }
-    function storageExposure(){ return ledger.plans.reduce((sum,p)=>sum+(p.txs.some(t=>t.kind==='payment'&&t.state!=='planned')?BigInt(p.total):0n),0n); }
+    // 'dropped': a kept envelope whose nonce another transaction used on chain. It never ran.
+    var live = t => t.state!=='planned' && t.state!=='dropped';
+    function gasExposure(){ return ledger.plans.reduce((sum,p)=>sum+p.txs.reduce((s,t)=>s+(t.state==='dropped'?0n:BigInt(t.actualWei ?? t.reservedWei)),0n),0n); }
+    function storageExposure(){ return ledger.plans.reduce((sum,p)=>sum+(p.txs.some(t=>t.kind==='payment'&&live(t))?BigInt(p.total):0n),0n); }
     function authorized(p, signal){
       stopped(signal);
       if (!p.authorization || p.authorization.invoice !== p.id || p.authorization.payer !== p.payer || p.authorization.expiresAt !== p.expiresAt || clock() >= p.expiresAt) fail('expired','The invoice is not authorized or has expired. No new transaction was requested.');
+      if (!p.scope || p.authorization.scope !== p.scope) fail('binding','The authorization does not name this invoice’s contents. Prepare a new invoice; no new transaction was requested.');
       if (BigInt(p.total)+storageExposure()-(p.txs.some(t=>t.kind==='payment'&&t.state!=='planned')?BigInt(p.total):0n)>100n*10n**18n) fail('over-ceiling','The file would exceed the 100 ANT storage ceiling');
       if (gasExposure()>BigInt(p.authorization.gasCeilingWei)) fail('gas-ceiling','Aggregate gas exposure exceeds the authorized ETH limit');
     }
@@ -324,6 +403,7 @@
       if(exposure>ceiling) fail('gas-ceiling','This plan needs up to '+exposure+' wei in aggregate network fees, above your limit');
       if(BigInt(await rpc('eth_getBalance',[payer,'latest']))<exposure) fail('no-gas','The account cannot cover this plan’s bounded network fee');
       var p={binding,id:await digest({binding,payer,txs,gasCeilingWei,created:clock()}),payer,payments,total,expiresAt:quoteExpiresAt,gasCeilingWei,txs,authorization:null};
+      p.scope=await digest(scopeOf(artifact,network,p));
       if(clock()>=quoteExpiresAt)fail('expired','The quote expired while preparing the invoice');
       if(prior)ledger.plans.splice(ledger.plans.indexOf(prior),1);
       ledger.plans.push(p);ledger.gasCeilingWei=gasCeilingWei;save();return copy(p);
@@ -331,25 +411,29 @@
     function authorize(shown){
       var p=ledger.plans.find(x=>x.id===shown.id);
       if(!p || JSON.stringify(copy(p))!==JSON.stringify(shown) || clock()>=p.expiresAt) fail('binding','The displayed invoice changed or expired');
-      p.authorization={invoice:p.id,payer:p.payer,expiresAt:p.expiresAt,gasCeilingWei:p.gasCeilingWei,artifactSha256:artifact.sha256,at:clock()};save();
+      p.authorization={invoice:p.id,scope:p.scope,payer:p.payer,expiresAt:p.expiresAt,gasCeilingWei:p.gasCeilingWei,artifactSha256:artifact.sha256,at:clock()};save();
       return p.id;
     }
-    async function observe(p,t,signal){
+    // The transaction that used this payer nonce on chain, searched in resumable pages.
+    async function nonceOwner(p,t){
+      var end=BigInt(await rpc('eth_blockNumber',[])),start=BigInt(t.recoveryNextBlock||t.block);
+      if(end-start>999n)end=start+999n;
+      for(var b=start;b<=end;b++){
+        var block=await rpc('eth_getBlockByNumber',[hx(b),true]);
+        var found=(block?.transactions||[]).find(x=>same(x.from,p.payer)&&BigInt(x.nonce)===BigInt(t.nonce));
+        if(found)return found.hash;
+      }
+      t.recoveryNextBlock=hx(end>BigInt(t.block)+1n?end-1n:BigInt(t.block));save();
+      return null;
+    }
+    async function observe(p,t,signal,offered){
       await chain();
       // A provider can throw after broadcast. Discover the exact nonce on chain;
       // absence is never permission to broadcast again.
       if(!t.hash){
-        var end=BigInt(await rpc('eth_blockNumber',[])),start=BigInt(t.recoveryNextBlock||t.block);
-        if(end-start>999n)end=start+999n;
-        for(var b=start;b<=end;b++){
-          var block=await rpc('eth_getBlockByNumber',[hx(b),true]);
-          var found=(block?.transactions||[]).find(x=>same(x.from,p.payer)&&BigInt(x.nonce)===BigInt(t.nonce));
-          if(found){t.hash=found.hash;save();break;}
-        }
-        if(!t.hash){
-          t.recoveryNextBlock=hx(end>BigInt(t.block)+1n?end-1n:BigInt(t.block));save();
-          fail('uncertain','The wallet outcome is still unknown. Resume to continue checking history; no duplicate transaction was sent.');
-        }
+        var owner=await nonceOwner(p,t);
+        if(!owner)fail('uncertain','The wallet outcome is still unknown. Resume to continue checking history; no duplicate transaction was sent.');
+        t.hash=owner;save();
       }
       for(var i=0;i<40;i++){
         stopped(signal);
@@ -367,19 +451,38 @@
         }
         await pause(1500);
       }
+      // A kept envelope that no node knows: the broadcast failed, or an earlier build
+      // kept it without sending. The identical bytes can only ever run once, so while
+      // the invoice is still authorized they are offered again. Once another
+      // transaction has used the nonce on chain, this one can never run: it is dropped,
+      // and its gas and storage reservations end with it.
+      if(t.raw&&verify&&!(await rpc('eth_getTransactionByHash',[t.hash]))){
+        if(BigInt(await rpc('eth_getTransactionCount',[p.payer,'latest']))>BigInt(t.nonce)){
+          var used=await nonceOwner(p,t);
+          if(used&&!same(used,t.hash)){t.state='dropped';t.usedBy=used;p.superseded=true;save();return;}
+        }else if(!offered&&p.authorization&&clock()<p.expiresAt){
+          checkEnvelope({raw:t.raw,hash:t.hash},{to:t.to,data:t.data,nonce:t.nonce,gas:t.gas,maxFeePerGas:t.maxFeePerGas,maxPriorityFeePerGas:t.maxPriorityFeePerGas},p.payer,verify);
+          try{await rpc('eth_sendRawTransaction',[t.raw]);}catch(e){/* already known or nonce used: the chain answers next */}
+          return observe(p,t,signal,true);
+        }else{
+          fail('uncertain','This signed payment has not reached the network and its invoice has expired. It stays reserved until another transaction from this account uses its place; nothing new was sent.');
+        }
+      }
       fail('uncertain','Confirmation is pending. Resume this file to check again without paying twice.');
     }
     async function settle(id,signal,recoverOnly){
       var p=ledger.plans.find(p=>p.id===id); if(!p)fail('binding','No such invoice');
       await chain();
       for(var t of p.txs){
-        if(t.state!=='planned'){await observe(p,t,signal);continue;}
+        if(t.state==='dropped')fail('expired','This payment never ran. Prepare a new invoice; nothing was sent.');
+        if(t.state!=='planned'){await observe(p,t,signal);if(t.state==='dropped')fail('expired','This payment never ran. Prepare a new invoice; nothing was sent.');continue;}
         if(recoverOnly)fail('uncertain','This invoice still needs an explicitly authorized transaction; recovery sends nothing');
         authorized(p,signal);
         if(await account(false)!==p.payer)fail('binding','The wallet account changed');
         var estimated=BigInt(await rpc('eth_estimateGas',[{from:p.payer,to:t.to,data:t.data,value:'0x0'}]));
         if(estimated>BigInt(t.gas))fail('gas-ceiling','Gas estimate exceeds the authorized transaction limit');
         t.nonce=await rpc('eth_getTransactionCount',[p.payer,'pending']);t.block=await rpc('eth_blockNumber',[]);
+        if(await digest(scopeOf(artifact,network,p))!==p.scope)fail('binding','The invoice changed after it was authorized. Nothing was signed.');
         // Repeat expiry/cancellation after asynchronous checks, immediately before
         // the durable send marker. This marker is never removed on a send error.
         authorized(p,signal);
@@ -395,11 +498,15 @@
           // The bzDiD adapter signs only: it cannot broadcast. Keep the exact
           // signed envelope and its locally computed hash before any RPC send.
           var signed;
-          try{signed=await signer.signTransaction(request,{artifact:copy(artifact),network:copy(network),invoice:copy(p),kind:t.kind});}
-          catch(error){t.state='planned';save();throw error;}
-          if(!signed||!/^0x02[0-9a-f]+$/i.test(signed.raw)||!isH32(signed.hash))fail('binding','The bzDiD signer returned no valid signed envelope');
-          t.raw=signed.raw;t.hash=signed.hash;save();
-          authorized(p,signal);
+          try{
+            signed=await signer.signTransaction(request,{artifact:copy(artifact),network:copy(network),invoice:copy(p),kind:t.kind});
+            checkEnvelope(signed,request,p.payer,verify);
+            authorized(p,signal);
+          }catch(error){
+            // Nothing has left this page: the envelope is dropped and its nonce stays free.
+            t.state='planned';save();throw error;
+          }
+          t.raw=signed.raw.toLowerCase();t.hash=signed.hash.toLowerCase();save();
           h=await rpc('eth_sendRawTransaction',[t.raw]);
           if(!same(h,t.hash))fail('binding','The RPC returned a different signed transaction hash');
         }else{
@@ -417,10 +524,10 @@
     };}
     return {invoice,authorize,provider,snapshot:()=>copy(ledger),
       retryUnpaid:async signal=>{
-        if(!ledger.checkpoint || ledger.result || ledger.plans.some(p=>p.txs.some(t=>t.kind==='payment'&&t.state!=='planned')))return false;
+        if(!ledger.checkpoint || ledger.result || ledger.plans.some(p=>p.txs.some(t=>t.kind==='payment'&&live(t))))return false;
         // If only approvals were attempted, reconcile them before discarding the
         // unpaid SDK checkpoint. Preserve their gas and obtain fresh quotes.
-        for(var p of ledger.plans)for(var t of p.txs)if(t.state!=='planned')await observe(p,t,signal);
+        for(var p of ledger.plans)for(var t of p.txs)if(live(t))await observe(p,t,signal);
         for(var p of ledger.plans){p.txs=p.txs.filter(t=>t.state!=='planned');p.superseded=true;}
         ledger.checkpoint=null;save();return true;
       },
@@ -429,13 +536,14 @@
       reconcile:async bytes=>{
         var hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
         if(!ledger.result||hash!==artifact.sha256||bytes.byteLength!==artifact.bytes)fail('hash-mismatch','Retrieved bytes do not match the original file');
-        for(var p of ledger.plans)for(var t of p.txs)if(t.state!=='planned')await observe(p,t,null);
-        ledger.receipt={schema:'bpay.ant.reconciled/1',artifact,network,file:ledger.result.file,storageAtto:storageExposure().toString(),gasWei:ledger.plans.reduce((sum,p)=>sum+p.txs.reduce((s,t)=>s+BigInt(t.actualWei||'0'),0n),0n).toString(),gasExposureWei:gasExposure().toString(),gasCeilingWei:ledger.gasCeilingWei||'0',invoices:ledger.plans.filter(p=>p.authorization).map(p=>p.id),transactions:ledger.plans.flatMap(p=>p.txs.filter(t=>t.hash).map(t=>({kind:t.kind,hash:t.hash,gasWei:t.actualWei}))),retrievedSha256:hash,retrievedBytes:bytes.byteLength,reconciledAt:new Date(clock()).toISOString()};save();return copy(ledger.receipt);
+        for(var p of ledger.plans)for(var t of p.txs)if(live(t))await observe(p,t,null);
+        ledger.receipt={schema:'bpay.ant.reconciled/1',artifact,network,file:ledger.result.file,storageAtto:storageExposure().toString(),gasWei:ledger.plans.reduce((sum,p)=>sum+p.txs.reduce((s,t)=>s+BigInt(t.actualWei||'0'),0n),0n).toString(),gasExposureWei:gasExposure().toString(),gasCeilingWei:ledger.gasCeilingWei||'0',invoices:ledger.plans.filter(p=>p.authorization).map(p=>p.id),transactions:ledger.plans.flatMap(p=>p.txs.filter(t=>t.hash&&t.state!=='dropped').map(t=>({kind:t.kind,hash:t.hash,gasWei:t.actualWei}))),retrievedSha256:hash,retrievedBytes:bytes.byteLength,reconciledAt:new Date(clock()).toISOString()};save();return copy(ledger.receipt);
       }};
   }
 
   var api = { createHosted: createHosted, create: create, injectedSigner: injectedSigner, trezorSigner: trezorSigner, loadTrezorConnect: loadTrezorConnect, CHAIN_ID: CHAIN_ID,
-    _wire: { encodeApprove: encodeApprove, encodePayForQuotes: encodePayForQuotes, rlp: rlp, serialize1559: serialize1559, SEL: SEL } };
+    _wire: { encodeApprove: encodeApprove, encodePayForQuotes: encodePayForQuotes, rlp: rlp, serialize1559: serialize1559, SEL: SEL, scopeOf: scopeOf },
+    _envelope: { check: checkEnvelope, decode: rlpDecode, nobleVerifier: nobleVerifier } };
   if (typeof module === 'object' && module.exports) module.exports = api;
   if (typeof window === 'object') root.AntPay = api;
 })(typeof window === 'object' ? window : globalThis);
