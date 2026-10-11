@@ -111,7 +111,7 @@
   // Hosted storage purchasing lives beside the existing quote-only chooser.
   // It uses the same bundled Autonomi client and AntPay wire implementation.
   function purchasePanel(){
-    return '<details id="ant-purchase"><summary>Pay ANT to store a public file</summary><p>Anyone with its address can read this file. Storage cannot be deleted. Your browser wallet pays ANT on Arbitrum One; ETH network fees have a separate limit. The storage ceiling is 100 ANT for this file.</p><p>Keep this browser’s saved data and resume here after an interruption. Another browser or device does not share this payment record.</p><label for="ant-buy-file">Public file (3 bytes to 32 MiB)</label><input id="ant-buy-file" type="file" style="display:block;max-width:100%;margin:8px 0"><label for="ant-buy-gas">Maximum total network fee (ETH, including approvals and all attempts)</label><input id="ant-buy-gas" inputmode="decimal" placeholder="Enter your ETH limit" style="display:block;max-width:100%;margin:8px 0"><button id="ant-buy-start" type="button">Prepare storage invoice / resume</button> <button id="ant-buy-stop" type="button" hidden>Stop waiting</button><div id="ant-buy-status" role="status" aria-live="polite"></div><div id="ant-buy-invoice"></div><div id="ant-buy-download"></div><details id="ant-buy-proof" hidden><summary>Receipt and verified hash</summary><pre id="ant-buy-receipt" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details></details>';
+    return '<details id="ant-purchase"><summary>Pay ANT to store a public file</summary><p>Anyone with its address can read this file. Storage cannot be deleted. Your bzDiD keychain pays ANT on Arbitrum One; ETH network fees have a separate limit. The storage ceiling is 100 ANT for this file.</p><p><a href="#kc-sec">Connect your bzDiD keychain</a> before preparing an invoice.</p><p>Keep this browser’s saved data and resume here after an interruption. Another browser or device does not share this payment record.</p><label for="ant-buy-file">Public file (3 bytes to 32 MiB)</label><input id="ant-buy-file" type="file" style="display:block;max-width:100%;margin:8px 0"><label for="ant-buy-gas">Maximum total network fee (ETH, including approvals and all attempts)</label><input id="ant-buy-gas" inputmode="decimal" placeholder="Enter your ETH limit" style="display:block;max-width:100%;margin:8px 0"><button id="ant-buy-start" type="button">Prepare storage invoice / resume</button> <button id="ant-buy-stop" type="button" hidden>Stop waiting</button><div id="ant-buy-status" role="status" aria-live="polite"></div><div id="ant-buy-invoice"></div><div id="ant-buy-download"></div><details id="ant-buy-proof" hidden><summary>Receipt and verified hash</summary><pre id="ant-buy-receipt" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details></details>';
   }
   function bindPurchase(){
     var start=document.getElementById('ant-buy-start'),stop=document.getElementById('ant-buy-stop'),status=document.getElementById('ant-buy-status'),view=document.getElementById('ant-buy-invoice'),receipt=document.getElementById('ant-buy-receipt');
@@ -130,13 +130,16 @@
       try{
         await navigator.locks.request('bnr-ant-purchase-v1',{mode:'exclusive',ifAvailable:true},async function(lock){
           if(!lock)throw new Error('Another tab is handling a storage purchase. Resume after it finishes.');
+          if(!window.BNRPAY||!BNRPAY.antStorageSigner)throw new Error('The bzDiD storage signer is not ready; reload this wallet');
+          var signer=BNRPAY.antStorageSigner();
+          await signer.address(); // Public identity only; no key or signature leaves the keychain.
           status.textContent='Hashing the original file and opening Autonomi…';
           var bytes=new Uint8Array(await file.arrayBuffer());
           var sha=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
           var session=await antSession(signal),defaults=await session.sdk.getNetworkDefaults({signal:signal});
           var requestId=0;
           var rpc=async function(method,params){var r=await fetch(defaults.rpcUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:++requestId,method:method,params:params})});if(!r.ok)throw new Error('Payment RPC unavailable');var j=await r.json();if(j.error)throw new Error('Payment RPC refused '+method);return j.result;};
-          var payer=AntPay.createHosted({artifact:{name:file.name,sha256:sha,bytes:file.size},network:defaults.payment,storage:localStorage,rpc:rpc,ethereum:window.ethereum});
+          var payer=AntPay.createHosted({artifact:{name:file.name,sha256:sha,bytes:file.size},network:defaults.payment,storage:localStorage,rpc:rpc,signer:signer});
           await payer.retryUnpaid(signal);
           var prior=payer.snapshot();
           if(prior.gasCeilingWei&&prior.gasCeilingWei!==gasWei)throw new Error('Use this file’s original ETH limit: '+ant(prior.gasCeilingWei)+' ETH.');
@@ -148,7 +151,7 @@
               if(inv.txs.some(t=>t.state==='sending'||t.state==='submitted'||t.state==='failed'))return payer.provider(inv.id).recover(network,quotes,{},context);
               status.textContent='Review this invoice. Nothing new is signed until you confirm.';
               view.replaceChildren();
-              var text=document.createElement('p');text.textContent=ant(inv.total)+' ANT for this part of '+file.name+' · account '+inv.payer+' · '+inv.txs.filter(t=>t.state==='planned').length+' wallet confirmations · aggregate ETH limit '+gas+' · expires '+new Date(inv.expiresAt).toLocaleTimeString()+'. Additional parts require another invoice confirmation. Current maximum gas exposure: '+ant(inv.txs.reduce((s,t)=>s+BigInt(t.actualWei||t.reservedWei),0n).toString())+' ETH.';view.append(text);
+              var text=document.createElement('p');text.textContent=ant(inv.total)+' ANT for this part of '+file.name+' · account '+inv.payer+' · '+inv.txs.filter(t=>t.state==='planned').length+' bounded transactions · aggregate ETH limit '+gas+' · expires '+new Date(inv.expiresAt).toLocaleTimeString()+'. Additional parts require another invoice confirmation. Current maximum gas exposure: '+ant(inv.txs.reduce((s,t)=>s+BigInt(t.actualWei||t.reservedWei),0n).toString())+' ETH.';view.append(text);
               var details=document.createElement('details'),summary=document.createElement('summary'),raw=document.createElement('pre');summary.textContent='Invoice and contract bindings';raw.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere';raw.textContent=JSON.stringify({invoice:inv.id,sha256:sha,network:defaults.payment,quotes:inv.payments,transactions:inv.txs},null,2);details.append(summary,raw);view.append(details);
               await new Promise(function(resolve,reject){
                 var done=false,button=document.createElement('button');button.type='button';button.textContent='Authorize this invoice and ask my wallet';
@@ -159,7 +162,7 @@
                 button.onclick=function(){try{if(signal.aborted)return abort();payer.authorize(inv);end();}catch(e){end(e);}};
                 view.append(button);if(signal.aborted)abort();
               });
-              status.textContent='Waiting for your wallet and chain confirmation. Keep this page open.';
+              status.textContent='Signing with your bzDiD keychain and waiting for chain confirmation. Keep this page open.';
               return payer.provider(inv.id).pay(network,quotes,context);
             },
             recover:function(network,quotes,attempt,context){return payer.provider(null).recover(network,quotes,attempt,context);}

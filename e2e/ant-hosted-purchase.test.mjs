@@ -35,6 +35,40 @@ function fixture(options={}){
  return {get payer(){return payer;},get sends(){return sends;},rpc,storage,cfg,txs,reload(){payer=createHosted(cfg);return payer;},time:n=>time=n,account:n=>account=n,chain:n=>chain=n,failSend:n=>failSend=n,mined:n=>mined=n,tamper:n=>tamper=n,throwSave:n=>throwSave=n};
 }
 async function authorized(f,q=quotes){const inv=await f.payer.invoice(network,q,'20000000');f.payer.authorize(inv);return inv;}
+function nativeFixture(options={}){
+ const f=fixture({approved:true}),base=f.cfg.rpc;let broadcasts=0;
+ f.cfg.signer={address:()=>addr('e'),signTransaction:async(tx,bound)=>{
+  assert.equal(bound.invoice.authorization.invoice,bound.invoice.id);
+  if(options.refuse)throw Error('keychain locked');
+  if(options.expire)f.time(bound.invoice.expiresAt);
+  f.txs.set(hash('1'),{...tx,input:tx.data,hash:hash('1')});
+  return {raw:'0x0201',hash:hash('1')}; // Stub envelope: real Rust signatures are tested in ant-hosted-browser.
+ }};
+ f.cfg.rpc=async(method,p)=>{
+  if(method!=='eth_sendRawTransaction')return base(method,p);
+  broadcasts++;
+  const kept=JSON.parse(f.storage.getItem('bnr.ant.purchase.v1:'+artifact.sha256)).plans[0].txs[0];
+  assert.equal(kept.raw,p[0]);assert.equal(kept.hash,hash('1'));assert.equal(kept.state,'sending');
+  if(options.lostReply)throw Error('reply lost after broadcast');
+  return hash('1');
+ };
+ f.reload();return {f,get broadcasts(){return broadcasts;}};
+}
+test('native signer persists envelope and hash before broadcast, then recovers a lost reply without another send',async()=>{
+ const n=nativeFixture({lostReply:true}),inv=await authorized(n.f);
+ await assert.rejects(n.f.payer.provider(inv.id).pay(network,quotes,{}),/reply lost/);
+ assert.equal(n.broadcasts,1);assert.equal(n.f.sends,0);
+ n.f.reload();await n.f.payer.provider(inv.id).recover(network,quotes,{},{});
+ assert.equal(n.broadcasts,1);assert.equal(n.f.payer.snapshot().plans[0].txs[0].state,'confirmed');
+});
+test('native keychain refusal and expiry during signing never broadcast',async()=>{
+ for(const options of [{refuse:true},{expire:true}]){
+  const n=nativeFixture(options),inv=await authorized(n.f);
+  await assert.rejects(n.f.payer.provider(inv.id).pay(network,quotes,{}));
+  assert.equal(n.broadcasts,0);assert.equal(n.f.sends,0);
+  if(options.refuse)assert.equal(n.f.payer.snapshot().plans[0].txs[0].state,'planned');
+ }
+});
 test('invoice binds file, network, payer, quotes, separate gas; exact approval and verified retrieval',async()=>{
  const f=fixture(),inv=await authorized(f);const receipt=await f.payer.provider(inv.id).pay(network,quotes,{});assert.equal(f.sends,2);assert.equal(receipt.totalAmount,'100');assert.ok(f.payer.snapshot().plans[0].txs.every(t=>t.state==='confirmed'));f.payer.uploaded({file:{address:'fixture-only'}});const result=await f.payer.reconcile(bytes);assert.equal(result.retrievedSha256,artifact.sha256);assert.equal(result.gasWei,'200000');assert.equal(result.storageAtto,'100');
 });

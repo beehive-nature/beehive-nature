@@ -3,8 +3,8 @@
    prepare (keyless bridge) → the person's OWN wallet signs on Arbitrum One → finalize (bridge) → receipt.
 
    THE LAWS THIS FILE KEEPS
-   - the page never holds an EVM key. a signer is something that SIGNS: Trezor Connect from our own page
-     (founder ruling 2026-08-21, SPEC-AUTONOMI-TREZOR-1 §2) or an injected EIP-1193 wallet. nothing here
+   - this coordinator never holds an EVM key. the native bzDiD keychain owns its Rust signing path;
+     legacy adapters also support Trezor Connect and injected EIP-1193 wallets. nothing here
      accepts, derives, stores or asks for key material — there is no such parameter.
    - the press is the person's (FOUNDER-GESTURE-UX-LAW). pay() will not sign until confirmPlan() — the
      surface's own button — has been shown the exact plan: token, spender, ANT total, and the exact number
@@ -239,7 +239,7 @@
      to one file hash. Web Locks serializes all purchase flows in this origin.
      Clearing site data or using another device removes this local protection. */
   function createHosted(cfg) {
-    var storage = cfg.storage, rpc = cfg.rpc, eth = cfg.ethereum;
+    var storage = cfg.storage, rpc = cfg.rpc, eth = cfg.ethereum, signer = cfg.signer;
     var clock = cfg.now || Date.now, pause = cfg.sleep || (ms => new Promise(r => setTimeout(r, ms)));
     var key = 'bnr.ant.purchase.v1:' + cfg.artifact.sha256;
     var fail = (code, message) => { throw refusal(code, message); };
@@ -259,6 +259,11 @@
     function stopped(signal){ if (signal && signal.aborted) fail('cancelled','Request stopped. Submitted transactions may still settle; resume this file to reconcile.'); }
     async function chain(){ if (BigInt(await rpc('eth_chainId',[])) !== BigInt(CHAIN_ID)) fail('wrong-chain','The payment RPC is not Arbitrum One'); }
     async function account(prompt){
+      if(signer){
+        var address=await signer.address();
+        if(!isAddr(address))fail('no-wallet','Connect your bzDiD keychain to prepare this invoice');
+        return address.toLowerCase();
+      }
       if (!eth || typeof eth.request !== 'function') fail('no-wallet','Connect an Arbitrum One browser wallet to pay for storage');
       if (BigInt(await eth.request({method:'eth_chainId'})) !== BigInt(CHAIN_ID)) fail('wrong-chain','Select Arbitrum One in your browser wallet');
       var accounts = await eth.request({method:prompt?'eth_requestAccounts':'eth_accounts'});
@@ -385,7 +390,21 @@
         p.payments.forEach(q=>{claims[q.quote_hash]=artifact.sha256;});
         storage.setItem('bnr.ant.quote-claims.v1',JSON.stringify(claims));
         t.state='sending';save();
-        var h=await eth.request({method:'eth_sendTransaction',params:[{from:p.payer,to:t.to,data:t.data,value:'0x0',chainId:CHAIN_HEX,nonce:t.nonce,gas:t.gas,maxFeePerGas:t.maxFeePerGas,maxPriorityFeePerGas:t.maxPriorityFeePerGas}]});
+        var request={from:p.payer,to:t.to,data:t.data,value:'0x0',chainId:CHAIN_HEX,nonce:t.nonce,gas:t.gas,maxFeePerGas:t.maxFeePerGas,maxPriorityFeePerGas:t.maxPriorityFeePerGas},h;
+        if(signer){
+          // The bzDiD adapter signs only: it cannot broadcast. Keep the exact
+          // signed envelope and its locally computed hash before any RPC send.
+          var signed;
+          try{signed=await signer.signTransaction(request,{artifact:copy(artifact),network:copy(network),invoice:copy(p),kind:t.kind});}
+          catch(error){t.state='planned';save();throw error;}
+          if(!signed||!/^0x02[0-9a-f]+$/i.test(signed.raw)||!isH32(signed.hash))fail('binding','The bzDiD signer returned no valid signed envelope');
+          t.raw=signed.raw;t.hash=signed.hash;save();
+          authorized(p,signal);
+          h=await rpc('eth_sendRawTransaction',[t.raw]);
+          if(!same(h,t.hash))fail('binding','The RPC returned a different signed transaction hash');
+        }else{
+          h=await eth.request({method:'eth_sendTransaction',params:[request]});
+        }
         if(!isH32(h))fail('uncertain','The wallet returned no transaction hash. Resume to reconcile; do not start another payment.');
         t.hash=h;t.state='submitted';save();await observe(p,t,signal);
       }
