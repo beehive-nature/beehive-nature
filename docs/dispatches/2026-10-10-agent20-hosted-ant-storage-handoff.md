@@ -14,6 +14,8 @@ The 49-byte public probe remains unpaid. Its earlier 0.0002 ETH fee ceiling was 
 
 Latest deployment observation: Pages run `38120141518` on descendant `48c8d2416f7ad4bd46ca1054646b6a66d313a183` was queued. A public-byte check at `2026-10-11T07:31:45Z` failed for the new wallet/adapters; the site still served the older release. Five runtime/core files are unchanged between tested source and this descendant; the stack inventory has an unrelated bDrop change. Hold receipt-only main pushes while this deployment waits, to avoid superseding it again. Recheck deployment and actual bytes rather than treating this paragraph as a current receipt.
 
+Deployment coordination update: follow **38120141518 attempt 2**, rerun by bView at `2026-10-11T08:55:40Z`; attempt 1 and the documentation-only successor run `38126402218` are cancelled. Main `7a9d6e1ab` differs from the selected release only in the bDrop dispatch. bView acknowledged the founder-directed hold and the single deployment; genealogy and #400 were notified. Coordination record: https://github.com/beehive-nature/beehive-nature/pull/396#issuecomment-6107356404 . No further reruns/cancellations or receipt-only main pushes while this attempt waits. Keep checking actual run attempt, not the legacy Pages latest-build status or an old cancellation snapshot.
+
 ## User order, preserved
 
 Start a new session from current main. Finish hosted Autonomi storage purchasing through heART WALLet, reusing existing bPay and ANT adapters. This means paying for storage with ANT, not buying ANT tokens. Check ownership first and coordinate with active backend owners instead of duplicating their work.
