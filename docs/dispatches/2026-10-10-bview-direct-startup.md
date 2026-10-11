@@ -63,8 +63,8 @@ quota case still expected fallback after the newly successful bounded retry.
 Focused corrected cancellation/failure/quota checks passed 3/3. The current
 direct/MSE/capture suite passed **27/27** in 174.426 seconds; the relay/storage
 portion of the earlier combined run passed all 19 cases. Adaptive playback
-regressions passed **4/4** in 90.222 seconds. The remaining current public-network
-acceptance is pending at this candidate checkpoint.
+regressions passed **4/4** in 90.222 seconds. Those checks preceded the corrected
+public-network acceptance recorded below.
 
 The failed public candidate is preserved as `candidate-dry-buffer-failure.json`:
 50.779 s actual start, then stalled at 36.574 s of media; only 24 chunks were
@@ -77,11 +77,73 @@ A separate regression recreates native waiting with three seconds buffered and
 requires consumption to resume. The corrected public run pins all loaded
 remuxer/runtime asset digests as well as the HTML digest.
 
-The public candidate rerun and release verification will be appended before
-claiming public acceptance. Faster startup does not erase network rebuffering;
-the receipt retains startup, stalls, transfer completion and playback end.
+The corrected public-network candidate completed at 01:45:58 UTC on October 11
+(October 10 locally). Its HTML and four loaded remuxer/runtime digests match
+the committed candidate exactly. `candidate.json` retains the raw observation:
+
+| Observation | Fresh old player | Corrected MSE candidate |
+| --- | ---: | ---: |
+| First ordered media bytes | 53.627 s | 45.179 s |
+| First decoded frame | 55.753 s | 48.725 s |
+| Actual playback start | 380.340 s | 49.031 s |
+| Rebuffering after start | 21.155 s | 298.169 s |
+| Complete-file hash observed | 446.573 s | 406.016 s |
+| Playback end observed | 455.769 s | 407.043 s |
+
+All 52 chunks matched the expected original hash; one media source, zero MSE
+errors/fallbacks/quota retries, zero relay requests and page errors. The browser
+reported 3147 frames / 35 dropped. There were eight native stalls and no
+application holds. Warm reload: **0.319 s actual startup**, matching hash,
+**zero SDK requests, relay requests and WebRTC dials**.
+
+This fixes the deliberate near-whole-file startup wait, but much of that wait
+now appears as honest rebuffering. It is **not** smooth playback on this path.
+The 87.1% startup difference and 10.7% observed end-time difference against the
+fresh baseline are descriptive, not controlled treatment effects: network
+conditions varied and local browser checks overlapped parts of the observations.
+
+Transport: 1133 dials, 685 opened, 447 dead (445 before ICE, two after ICE),
+339/763 endpoints reachable, 48 peak sampled open channels, 4.406 s median /
+11.817 s p95 dial-open time. Data-channel payload was 382,559,489 bytes,
+**1.787 times the original file size**; this excludes lower-layer framing.
+Ordered-read queue peaked at 25,141,248 bytes. MSE fragment queue peaked at
+7,709,059 bytes, estimated forward media at 41,386,611 bytes, and sampled parser
+sample allocation at 4,369,734 bytes. Dry-player progress takes precedence over
+the forward target; none of these figures is a total-memory measurement.
+
+After the native-wait correction, all six MSE cases and four mobile-width front
+checks passed **10/10** in 96.707 seconds. All three register conformance scores
+remain 100%; estate registration passes. Deployed-site acceptance is still
+pending at this checkpoint.
 
 ## Scaling and the ZK question
+
+The same hash-verified original was encoded locally by the existing
+`tools/video-trial/package-hls.mjs`, using 30 fps H264/AAC and four-second
+segments. These derivatives reduce resolution and frame rate; visual-quality
+equivalence is not claimed. `original-adaptive-package.json` binds their bytes
+and hashes; `original-hls-700.json` binds playback to the original content hash.
+
+| Rendition | Media bytes | Average Mb/s | Reduction from original bytes |
+| --- | ---: | ---: | ---: |
+| 374 x 240 | 2,475,154 | 0.377 | 98.84% |
+| 560 x 360 | 3,797,466 | 0.579 | 98.23% |
+| 1120 x 720 | 9,077,374 | 1.383 | 95.76% |
+| 1680 x 1080 | 16,540,534 | 2.520 | 92.27% |
+
+One local Chrome viewer with Pixel 7 emulation and segment bodies paced at
+700 kb/s completed the 240p rendition: **2.743 s actual startup, zero stalls**,
+2,475,154 media bytes, one MSE source, zero errors and exact hashes for every
+requested asset. Peak concurrent media requests was one. This is neither a
+physical phone nor a public-network capacity test. The measurement script is
+preserved beside the receipt. Derivatives have not been uploaded; the immutable
+Autonomi address still selects the original file.
+
+At one billion concurrent viewers, even this 240p average implies about
+377 Tb/s of viewer-facing payload, before overhead. The 1080p rendition implies
+2.52 Pb/s. These are arithmetic planning figures, not measured fleet capacity.
+Distributed delivery, shared immutable caches and prepackaged renditions remain
+necessary; a faster player alone cannot supply that bandwidth.
 
 Cache hits now remove an entire reader/discovery operation from repeat views.
 Cold direct delivery retains three application lanes, ordered buffering and
@@ -109,5 +171,12 @@ MP4Box's runtime and license are verbatim from the integrity-checked npm package
 
 ## Release status
 
-Draft PR [#394](https://github.com/beehive-nature/beehive-nature/pull/394).
-Public acceptance and deployment are pending.
+PR [#394](https://github.com/beehive-nature/beehive-nature/pull/394).
+All seven jobs in the source commit's
+[tests workflow](https://github.com/beehive-nature/beehive-nature/actions/runs/38102668741)
+completed successfully: formal, static, test, node, wallet, meter and eternal.
+`source-ci.json` records the exact tested commit and step results. Subsequent
+receipt/document edits do not change runtime or test bytes. Own duplicate and
+superseded workflow runs were cancelled; those are not reported as passes.
+Public-network candidate acceptance is complete. Deployed-site acceptance is
+pending at this checkpoint.
