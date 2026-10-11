@@ -1050,7 +1050,7 @@ jobs:
         timeout-minutes: 12 # measured: max 491s in run 36755721413 (+47% headroom)
         if: always()
         working-directory: e2e
-        run: node --test blood-eternal.test.mjs bigen-eternal.test.mjs bfood-eternal.test.mjs bearth-eternal.test.mjs blongevity-eternal.test.mjs austras-koks-eternal.test.mjs buzz-directory-eternal.test.mjs bnames-eternal.test.mjs bnamesday-eternal.test.mjs bdata-eternal.test.mjs vending-eternal.test.mjs profile-eternal.test.mjs bview-eternal.test.mjs museum-eternal.test.mjs watch-eternal.test.mjs music-eternal.test.mjs listening-eternal.test.mjs festival-eternal.test.mjs plur-eternal.test.mjs plur-festival-entry.test.mjs blight-museum-eternal.test.mjs blight-index-eternal.test.mjs blight-gallery-eternal.test.mjs blight-market-eternal.test.mjs read-eternal.test.mjs blanguage-eternal.test.mjs review-eternal.test.mjs university-eternal.test.mjs onboarding-eternal.test.mjs receive-eternal.test.mjs myspace-eternal.test.mjs kandi-eternal.test.mjs fleet-eternal.test.mjs acid-cascade-eternal.test.mjs indigo-index-eternal.test.mjs resonance-eternal.test.mjs bnr-dashboard-eternal.test.mjs blight-midi-eternal.test.mjs blight-midi-organ-eternal.test.mjs blight-midiroom-eternal.test.mjs blight-midivault-eternal.test.mjs blight-studio-music-eternal.test.mjs hardware-index-eternal.test.mjs hardware-build-eternal.test.mjs hardware-lab-eternal.test.mjs hardware-security-eternal.test.mjs stack-eternal.test.mjs blight-pixelrefiner-eternal.test.mjs blight-studio-gate-eternal.test.mjs blight-inscription-explorer-eternal.test.mjs blight-compare-eternal.test.mjs blight-bnri-gallery-eternal.test.mjs doors-index-eternal.test.mjs doors-beehivenature-eternal.test.mjs doors-skaists-eternal.test.mjs doors-plur-eternal.test.mjs doors-bnature-social-eternal.test.mjs bnature-bio-eternal.test.mjs beehivebiomass-eternal.test.mjs beehivenature-buzz-eternal.test.mjs skaists-buzz-eternal.test.mjs ant-door-eternal.test.mjs forge-index-eternal.test.mjs forge-hexfield-eternal.test.mjs forge-huddle-eternal.test.mjs forge-room-eternal.test.mjs comb-eternal.test.mjs recover-eternal.test.mjs addresses-eternal.test.mjs royalguard-eternal.test.mjs privacy-lens-eternal.test.mjs attest-eternal.test.mjs intake-tracker-eternal.test.mjs flower-lab-eternal.test.mjs edible-tracker-eternal.test.mjs spliff-lab-eternal.test.mjs blend-lab-eternal.test.mjs dock-eternal.test.mjs fieldnotes-eternal.test.mjs law-of-the-sea-eternal.test.mjs design-system-eternal.test.mjs blight-pulse-eternal.test.mjs blight-hearth-eternal.test.mjs blight-farmers-eternal.test.mjs blight-coop-eternal.test.mjs blight-c1-aid-eternal.test.mjs blight-profile-eternal.test.mjs biq-eternal.test.mjs bqueenbee-live-eternal.test.mjs local-agent-eternal.test.mjs or-board-eternal.test.mjs devroom-eternal.test.mjs bset-eternal.test.mjs bchat-eternal.test.mjs record-eternal.test.mjs btranslated-eternal.test.mjs buzz-studio-eternal.test.mjs bsymposium-eternal.test.mjs blight-demo-eternal.test.mjs blight-qrroses-eternal.test.mjs blight-qrroses-smil-eternal.test.mjs blight-qrtree-eternal.test.mjs blight-vaulta-reader-eternal.test.mjs blight-workbench-eternal.test.mjs b4b-eternal.test.mjs bantfarm-eternal.test.mjs bfactory-eternal.test.mjs bmeshasi-eternal.test.mjs dao-dashboard-eternal.test.mjs
+        run: node --test blood-eternal.test.mjs bigen-eternal.test.mjs bfood-eternal.test.mjs bearth-eternal.test.mjs blongevity-eternal.test.mjs austras-koks-eternal.test.mjs buzz-directory-eternal.test.mjs bnames-eternal.test.mjs bnamesday-eternal.test.mjs bdata-eternal.test.mjs vending-eternal.test.mjs profile-eternal.test.mjs bview-eternal.test.mjs museum-eternal.test.mjs watch-eternal.test.mjs music-eternal.test.mjs listening-eternal.test.mjs festival-eternal.test.mjs plur-eternal.test.mjs plur-festival-entry.test.mjs blight-museum-eternal.test.mjs blight-index-eternal.test.mjs blight-gallery-eternal.test.mjs blight-market-eternal.test.mjs read-eternal.test.mjs blanguage-eternal.test.mjs review-eternal.test.mjs university-eternal.test.mjs onboarding-eternal.test.mjs receive-eternal.test.mjs myspace-eternal.test.mjs kandi-eternal.test.mjs fleet-eternal.test.mjs acid-cascade-eternal.test.mjs indigo-index-eternal.test.mjs resonance-eternal.test.mjs bnr-dashboard-eternal.test.mjs blight-midi-eternal.test.mjs blight-midi-organ-eternal.test.mjs blight-midiroom-eternal.test.mjs blight-midivault-eternal.test.mjs blight-studio-music-eternal.test.mjs hardware-index-eternal.test.mjs hardware-build-eternal.test.mjs hardware-lab-eternal.test.mjs hardware-security-eternal.test.mjs stack-eternal.test.mjs blight-pixelrefiner-eternal.test.mjs blight-studio-gate-eternal.test.mjs blight-inscription-explorer-eternal.test.mjs blight-compare-eternal.test.mjs blight-bnri-gallery-eternal.test.mjs doors-index-eternal.test.mjs doors-beehivenature-eternal.test.mjs doors-skaists-eternal.test.mjs doors-plur-eternal.test.mjs doors-bnature-social-eternal.test.mjs bnature-bio-eternal.test.mjs beehivebiomass-eternal.test.mjs beehivenature-buzz-eternal.test.mjs skaists-buzz-eternal.test.mjs ant-door-eternal.test.mjs forge-index-eternal.test.mjs forge-hexfield-eternal.test.mjs forge-huddle-eternal.test.mjs forge-room-eternal.test.mjs comb-eternal.test.mjs recover-eternal.test.mjs addresses-eternal.test.mjs royalguard-eternal.test.mjs privacy-lens-eternal.test.mjs attest-eternal.test.mjs intake-tracker-eternal.test.mjs flower-lab-eternal.test.mjs edible-tracker-eternal.test.mjs spliff-lab-eternal.test.mjs blend-lab-eternal.test.mjs dock-eternal.test.mjs fieldnotes-eternal.test.mjs law-of-the-sea-eternal.test.mjs design-system-eternal.test.mjs blight-pulse-eternal.test.mjs blight-hearth-eternal.test.mjs blight-farmers-eternal.test.mjs blight-coop-eternal.test.mjs blight-c1-aid-eternal.test.mjs blight-profile-eternal.test.mjs biq-eternal.test.mjs bqueenbee-live-eternal.test.mjs local-agent-eternal.test.mjs or-board-eternal.test.mjs devroom-eternal.test.mjs bset-eternal.test.mjs bchat-eternal.test.mjs bdrop-eternal.test.mjs record-eternal.test.mjs btranslated-eternal.test.mjs buzz-studio-eternal.test.mjs bsymposium-eternal.test.mjs blight-demo-eternal.test.mjs blight-qrroses-eternal.test.mjs blight-qrroses-smil-eternal.test.mjs blight-qrtree-eternal.test.mjs blight-vaulta-reader-eternal.test.mjs blight-workbench-eternal.test.mjs b4b-eternal.test.mjs bantfarm-eternal.test.mjs bfactory-eternal.test.mjs bmeshasi-eternal.test.mjs dao-dashboard-eternal.test.mjs
       # SKAISTS, THE DESIGN SYSTEM IN CODE (founder, 2026-09-26: "there is real UX/UI/standards metrics").
       # surfaces/skaists.css is compiled from docs/design/skaists/tokens.json (graded A- 2026-09-19) and must
       # stay fresh; a three-UI front must score 100% on the standards meter per register: every painted
@@ -1168,3 +1168,36 @@ jobs:
         # the honest timeout classification could print (learned run 37698302619).
         timeout-minutes: 19
         run: sh scripts/btungsten/wb001-formal-check.sh "$HOME/cryptol/bin/cryptol"
+
+  formal-cryptol-leg:
+    # WB001's Cryptol leg of universal wire injectivity and of the zero tail
+    # (README WB001 §cryptol-leg): 43 obligations, each its own cryptol
+    # :prove under the formal job's 6 GiB address-space cap and its own
+    # clock, 3 at a time; then 7 negative controls, each required to end in
+    # a counterexample. The composed lines print PROVEN only if every
+    # obligation they rest on printed Q.E.D. in the same run. A timeout or a
+    # memory death is NOT-PROVEN and green, by the formal ladder's law (an
+    # open obligation is a recorded state, never a wedge); a counterexample
+    # on an obligation, a control without its counterexample, or an unknown
+    # verdict is red. Its own job, so it runs beside `formal`, not after it.
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: install cryptol 3.6.0 (pinned, with bundled solvers) and GNU time
+        if: always()
+        timeout-minutes: 8
+        run: |
+          set -eu
+          cd "$HOME"
+          curl -fsSL -o cryptol.tar.gz https://github.com/GaloisInc/cryptol/releases/download/3.6.0/cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz
+          echo "cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz sha256: $(sha256sum cryptol.tar.gz | cut -d' ' -f1)"
+          mkdir -p cryptol && tar -xzf cryptol.tar.gz -C cryptol --strip-components=1
+          echo "$HOME/cryptol/bin" >> "$GITHUB_PATH"
+          # the receipt records each obligation's peak RSS through GNU time
+          [ -x /usr/bin/time ] || { sudo apt-get update -qq && sudo apt-get install -y -qq time; }
+          ./cryptol/bin/cryptol --version
+      - name: WB001 Cryptol leg — 43 :prove obligations, 2 compositions, 7 negative controls
+        if: always()
+        timeout-minutes: 50
+        run: sh scripts/btungsten/wb001-cryptol-leg-check.sh "$HOME/cryptol/bin/cryptol"

@@ -1,0 +1,35 @@
+services:
+  watch-door:
+    image: buzz-watch:agent23-hostinger
+    container_name: buzz-watch-door
+    restart: unless-stopped
+    env_file: /etc/buzz-watch/live.env
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    volumes:
+      - watch-live:/var/lib/watch/live
+      - watch-data:/opt/buzz-watch/data
+    networks:
+      buzz:
+        aliases:
+          - watch-door
+    cpus: 2
+    mem_limit: 1g
+    pids_limit: 128
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8094/live/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+networks:
+  buzz:
+    external: true
+    name: buzz-prod_buzz-net
+volumes:
+  watch-live:
+  watch-data:

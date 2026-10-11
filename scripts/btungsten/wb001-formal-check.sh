@@ -196,10 +196,16 @@ prove() {
 prove validImpliesBounded 45
 prove offsetsOrdered 90
 # zeroTailFromBounds (the composed enumeration form) stays CHECK-SAMPLED only:
-# its content is the two lemmas below plus the bridge sampling — re-proving
-# the 4,626-way enumeration would burn budget the pieces already close.
+# its content is zeroTailAtPosition below plus the wire's definition, which
+# the Cryptol leg (wb001-cryptol-leg-check.sh) composes into wireZeroTail.
 prove zeroTailAtPosition 120
-prove wireIndexDef 120
+# wireIndexDef is no longer attempted here (2026-10-10). As stated it has no
+# bounds premise, and under Cryptol's semantics it is unsafe: an intent whose
+# length word exceeds its field's capacity makes byteAt read past the field,
+# so :prove can never reach Q.E.D. This row's NOT-PROVEN (memory) hid that.
+# The executed counterexample is control C1 of wb001-cryptol-leg-check.sh,
+# and the wire's definition is checked there position by position, for
+# bounded intents (wireIsByteAt).
 prove wireZeroTail "$PROVE_BUDGET_S"
 prove wireInjective "$PROVE_BUDGET_S"
 

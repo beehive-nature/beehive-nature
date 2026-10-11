@@ -1,0 +1,9 @@
+{
+  "name": "buzz-watch-hostinger",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "dependencies": {
+    "node-media-server": "4.3.2"
+  }
+}

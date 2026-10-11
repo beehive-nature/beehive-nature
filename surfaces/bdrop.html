@@ -104,6 +104,15 @@ a{color:var(--ink)}
     </div>
   </div>
 
+  <h2>approved editions</h2>
+  <div class="card">
+    <div id="editions" class="law">reading the estate's approved editions…</div>
+    <p class="law">an edition appears here only after its bytes verified against the reported
+    sha-256 (read same-origin from the estate tree, never a founder shuttling files between
+    sessions). loading one fills the desk with its exact bytes. corrections fork new editions;
+    an approved edition is never silently rewritten.</p>
+  </div>
+
   <h2>the drop</h2>
   <div class="card">
     <div class="grid2">
@@ -184,8 +193,14 @@ a{color:var(--ink)}
         <input id="rpc" value="https://api.hive.blog" spellcheck="false">
       </div>
     </div>
-    <p class="law">the key lives in this tab's memory for one gesture: it signs here, in your
-    browser, and is never stored, never logged, never sent. wipe it yourself any time:</p>
+    <p class="law">the key lives in this tab's memory, held as zeroable bytes and bound to the
+    current scope — author, permlink, body digest, disclosure version, endpoint. it signs here,
+    in your browser, and is never stored, never logged, never sent. within the bound scope it
+    signs repeatedly without asking again; any change to the scope requires the key again —
+    authority never expands silently. erasure is honest, not theatrical: the field is cleared
+    and the held bytes zeroed, but javascript cannot prove every transient string copy is gone,
+    so this desk claims wiped-by-construction, never proven-erasure. wipe it yourself any time:</p>
+    <div class="verdict" id="keysession" hidden></div>
     <div class="row">
       <button class="primary" id="publish">sign + broadcast the drop</button>
       <button id="wipe">wipe the key now</button>
@@ -198,6 +213,21 @@ a{color:var(--ink)}
     </details>
   </div>
 
+  <h2>the outbox — recoverable state</h2>
+  <div class="card">
+    <div class="log" id="outbox">reading the outbox…</div>
+    <p class="law">this browser keeps the desk's recoverable state — scope, body bytes, the
+    signed transaction, the event log — persisted in local storage <b>before</b> anything is
+    submitted, and never a secret. a restart or a lost response reconciles against the chain
+    first: a drop that already landed is confirmed, never re-published; a permlink that exists
+    with different bytes is reported as diverged and never edited; an unexpired signed
+    transaction can be re-broadcast byte-identically without the key.</p>
+    <div class="row">
+      <button id="reconcile">reconcile now</button>
+      <button id="rebroadcast" hidden>re-broadcast the signed bytes (no key needed)</button>
+    </div>
+  </div>
+
   <h2>the receipt</h2>
   <div class="card">
     <div class="log" id="receipt">no drop published from this tab yet.</div>
@@ -206,9 +236,24 @@ a{color:var(--ink)}
       <span class="law" id="permwrap" hidden><a id="permlinkurl" target="_blank" rel="noopener noreferrer">the drop on hive.blog (opens a new tab)</a></span>
     </div>
     <p class="law" style="margin-top:var(--s2)">the receipt records what the gesture did: the
-    transaction id, the block that landed it, and the byte-compare of the published body
-    against what you signed. land it in the estate's tree — the publication is proven by the
-    chain, never by prose.</p>
+    event log (bMeter shape — events and references, never contents), the transaction id, the
+    block that landed it, and the byte-compare of the published body against what you signed.
+    the chain itself is the primary durable record — the edition's bytes live on it once
+    confirmed; this tree mirrors, it is never the indispensable copy.</p>
+  </div>
+
+  <h2>preservation beyond the chain</h2>
+  <div class="card">
+    <div id="preserve" class="law">after a drop is confirmed, this panel composes the
+    preservation bundle — the receipt and the edition, with manifest sha-256s — and can store
+    it on Autonomi through the estate's hosted ANT purchaser (Agent 20's shared module,
+    bound invoices, 100-ANT per-file ceiling, your wallet signs the priced invoice; nothing is
+    ever spent silently).</div>
+    <div class="row" style="margin-top:var(--s3)">
+      <button id="bundle" hidden>download the preservation bundle</button>
+      <button id="preserve-ant" hidden class="primary">preserve on autonomi (priced, my wallet signs)</button>
+    </div>
+    <div class="log" id="pstatus" hidden></div>
   </div>
 </main>
 <footer>
@@ -226,7 +271,8 @@ a{color:var(--ink)}
 if(typeof Number.prototype.unref!=='function'){Number.prototype.unref=function(){};Number.prototype.ref=function(){}}
 </script>
 <script src="onboarding/vendor/hive-tx.min.js?v=1"></script>
-<script src="bdrop.js?v=1"></script>
+<script src="ant-pay.js?v=1"></script>
+<script src="bdrop.js?v=2"></script>
 <script src="tour.js?v=42"></script>
 </body>
 </html>
