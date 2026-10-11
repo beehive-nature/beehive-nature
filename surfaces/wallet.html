@@ -1709,7 +1709,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </section>
 <script src="adapter-seam.js" defer></script>
 <script src="ant-pay.js?v=10" defer></script>
-<script src="bpay-invoice.js?v=11" defer></script>
+<script src="keychain-client.js?v=1" defer></script>
+<script src="bpay-invoice.js?v=12" defer></script>
 <script>if(window.ResizeObserver)new ResizeObserver(function(entries){document.documentElement.style.setProperty('--wallet-offset',Math.ceil(entries[0].target.getBoundingClientRect().height+12)+'px')}).observe(document.getElementById('wallet-identity'));document.querySelector('[data-wallet-store]').addEventListener('click',function(e){e.preventDefault();e.stopPropagation();document.querySelector('#wl-dock [data-wl-go="keep"]').click();document.querySelectorAll('main>section[data-wl-open]').forEach(function(s){s.removeAttribute('data-wl-open')});document.getElementById('wallet-storage').scrollIntoView({block:'start'});});</script>
 
 <!-- ══ THE VOUCHER — prepaid compute, the money engine with a face ══ -->

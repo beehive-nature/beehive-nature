@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+<title>bzDiD keychain</title>
+<style>
+:root{color-scheme:light dark;--fg:#1b1b1b;--bg:#fbfaf6;--dim:#5d5d5d;--line:#d9d4c7;--go:#1f6f43}
+@media (prefers-color-scheme:dark){:root{--fg:#ececec;--bg:#141414;--dim:#a6a6a6;--line:#333;--go:#7fd1a2}}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+main{padding:14px 16px;max-width:560px}
+h1{font-size:15px;margin:0 0 8px}
+p{margin:6px 0}
+.dim{color:var(--dim);font-size:13px}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;overflow-wrap:anywhere}
+button{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer;margin:6px 6px 0 0}
+button.go{border-color:var(--go);color:var(--go);font-weight:600}
+button:disabled{opacity:.45;cursor:not-allowed}
+input{font:inherit;padding:7px 9px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);max-width:100%}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:8px 0}
+dt{color:var(--dim)}
+dd{margin:0;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<main id="kc" aria-live="polite"><p class="dim">Opening your keychain…</p></main>
+<script src="vendor/bzdid-key.js" integrity="sha384-+f2tkS83+fTj+lZgOtkG4CRwaWmNtMwRtYu60i6SyJnvl0UO9dRUd8X3HlzRlt7C" ></script>
+<script src="vendor/bnr-sign.js" integrity="sha384-x5Z8k8eZEZtvWIrwD3DNfHpOlujYg7yGIgWGKT3o0YJuHC2zKgk3oQW1dxnMgxWI" ></script>
+<script src="genesis.js"></script>
+<script src="keychain.js"></script>
+</body>
+</html>
