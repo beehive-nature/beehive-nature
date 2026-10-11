@@ -49,6 +49,9 @@ test('missing artifact bindings and unsigned or extra-field receipts are refused
   assert.equal(await verifyConsent(null, economics), false);
   const key = record(), receipt = await signConsent(economics, key);
   key.seed.fill(0);
+  receipt.paymentAuthorized = true;
+  assert.equal(await verifyConsent(receipt, economics), false);
+  delete receipt.paymentAuthorized;
   receipt.document.paymentAuthorized = true;
   assert.equal(await verifyConsent(receipt, economics), false);
 });

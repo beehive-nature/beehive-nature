@@ -24,7 +24,7 @@ export function consentDocument(economics, publicKey, signedAt, nonce) {
 export const signingBytes = doc => new TextEncoder().encode(SCHEMA + '\n' + JSON.stringify(doc));
 export async function verifyConsent(receipt, economics) {
   try {
-    if (receipt?.algorithm !== 'Ed25519') return false;
+    if (receipt?.algorithm !== 'Ed25519' || Object.keys(receipt).sort().join(',') !== 'algorithm,document,signature') return false;
     const d = receipt.document;
     const expected = consentDocument(economics, d.publicKey, d.signedAt, d.nonce);
     if (JSON.stringify(expected) !== JSON.stringify(d)) return false;
@@ -116,6 +116,7 @@ export async function mountConsent(host, { getRecord } = {}) {
       let record;
       try {
         const current = await loadEconomics();
+        if (!check.checked) throw new Error('Consent was unchecked while the edition was being rechecked');
         if (JSON.stringify(artifactIdentity(current)) !== JSON.stringify(identity)) throw new Error('The edition changed. Reload and review the new edition before signing');
         record = getRecord();
         if (!record) throw new Error('Connect your existing keychain below, then return here and press sign');
