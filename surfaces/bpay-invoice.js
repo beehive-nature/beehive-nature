@@ -122,6 +122,7 @@
       '<div id="ant-buy-keychain"></div>'+
       '<div class="ant-fields"><div><label for="ant-buy-file">Public file (3 bytes to 32 MiB)</label><input id="ant-buy-file" type="file" aria-describedby="ant-file-help"><small id="ant-file-help">Choose the file you want to keep.</small></div>'+
       '<div><label for="ant-buy-gas">ETH network-fee ceiling</label><input id="ant-buy-gas" inputmode="decimal" placeholder="Your ETH ceiling" aria-describedby="ant-gas-help"><small id="ant-gas-help">Covers approvals and all attempts. ANT storage is priced separately. This limit does not authorize payment.</small></div></div>'+
+      '<button id="ant-fund" type="button">Fund this wallet · ETH / ANT</button><div id="ant-funding" hidden></div>'+
       '<button id="ant-buy-start" class="ant-primary" type="button">Prepare storage invoice / resume</button> <button id="ant-buy-stop" type="button" hidden>Stop waiting</button>'+
       '<div id="ant-buy-status" role="status" aria-live="polite">Prepare an invoice to see the exact ANT total. Nothing is signed at this step.</div><div id="ant-buy-invoice" tabindex="-1"></div><div id="ant-buy-download"></div>'+
       '<details class="wallet-secondary"><summary>Limits &amp; resuming an interrupted purchase</summary><div class="ant-help">The storage ceiling is 100 ANT per file. Your wallet pays on Arbitrum One. The ETH ceiling covers approvals and all attempts. Keep this browser’s saved data and resume with the same file after an interruption; another browser or device does not share this payment record.</div></details>'+
@@ -132,6 +133,18 @@
     if(!start)return;
     var active=null,downloadUrl=null;
     var input=document.getElementById('ant-buy-file'),fee=document.getElementById('ant-buy-gas');
+    document.getElementById('ant-fund').onclick=async function(){
+      var box=document.getElementById('ant-funding');box.hidden=false;box.replaceChildren();
+      try{
+        var address=await BNRPAY.antStorageSigner().address();
+        var title=document.createElement('h3');title.textContent='Receive ETH and ANT · Arbitrum One';box.append(title);
+        var note=document.createElement('div');note.textContent='Send on Arbitrum One (chain 42161). ETH pays network fees; ANT pays storage. Scan this address, or click the QR to copy it.';box.append(note);
+        var qr=document.createElement('button');qr.type='button';qr.setAttribute('aria-label','Copy Arbitrum funding address');qr.innerHTML=BNRPAY.receiveQr(address);box.append(qr);
+        var text=document.createElement('div');text.style.overflowWrap='anywhere';text.textContent=address;box.append(text);
+        var copied=document.createElement('div');copied.setAttribute('role','status');box.append(copied);
+        qr.onclick=async function(){try{await navigator.clipboard.writeText(address);copied.textContent='Address copied. Use Arbitrum One for ETH or ANT.';}catch(e){copied.textContent='Copy the address shown above.';}};
+      }catch(e){box.textContent='Open your existing bzDiD wallet and connect your .b name to show its funding address.';}
+    };
     function progress(step){document.querySelectorAll('[data-ant-step]').forEach(function(el){if(el.dataset.antStep===step)el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');});}
     function walletState(){return window.BNRPAY&&BNRPAY.antStorageState?BNRPAY.antStorageState():{connected:false,hasName:false,coreReady:false};}
     // The isolated keychain (keys.skaists.dev) pays when it is open: its key never enters this page.
@@ -191,7 +204,20 @@
           var tasks=[];
           var payment={
             pay:async function(network,quotes,context){
-              var inv=await payer.invoice(network,quotes,gasWei,signal);
+              var inv;
+              try{inv=await payer.invoice(network,quotes,gasWei,signal);}
+              catch(error){
+                // These refusals occur after the adapter validates the quote and
+                // network. Keep the price visible without creating a payable plan.
+                if(['short-ant','no-gas','gas-ceiling'].includes(error&&error.refusal)&&Array.isArray(quotes)&&quotes.length&&quotes.every(q=>typeof q.amount==='string'&&/^(0|[1-9]\d*)$/.test(q.amount))){
+                  view.replaceChildren();view.className='ant-bill';
+                  var heading=document.createElement('h3');heading.textContent='Storage price · payment unavailable';view.append(heading);
+                  var costs=document.createElement('dl');
+                  [['ANT total · this quoted part',ant(quotes.reduce((s,q)=>s+BigInt(q.amount),0n).toString())+' ANT','ant-invoice-total'],['Proposed ETH ceiling · whole file',ant(gasWei)+' ETH','ant-invoice-eth']].forEach(function(row){var group=document.createElement('div'),label=document.createElement('dt'),value=document.createElement('dd');label.textContent=row[0];value.textContent=row[1];value.id=row[2];group.append(label,value);costs.append(group);});view.append(costs);
+                  var reason=document.createElement('div');reason.textContent=error.message+'. No payment was authorized or sent. This price is not a payable invoice; prepare again after resolving the funding or fee limit.';view.append(reason);
+                }
+                throw error;
+              }
               if(inv.txs.every(t=>t.state==='confirmed'))return payer.provider(inv.id).recover(network,quotes,{},context);
               if(inv.txs.some(t=>t.state==='sending'||t.state==='submitted'||t.state==='failed'))return payer.provider(inv.id).recover(network,quotes,{},context);
               status.textContent='Review this invoice. Nothing new is signed until you confirm.';

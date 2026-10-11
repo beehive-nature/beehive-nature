@@ -34,11 +34,11 @@ try{
    localStorage.setItem('bregister',reg);localStorage.setItem('bnr_soul','gatesoul');localStorage.setItem('bpay-policy-v1',JSON.stringify({audience:'public'}));window.__sends=0;window.__txs={};
    window.ethereum={request:async()=>{throw Error('Native bzDiD storage must never request an extension wallet');}};
   },reg);
-  let page=await context.newPage();
+  let page=await context.newPage(),shortAnt=true;
   await context.route('https://fixture.invalid/rpc',async route=>{
    const {method,params:p}=route.request().postDataJSON();let result;
    if(method==='eth_chainId')result='0xa4b1';
-   else if(method==='eth_call')result=p[0].data.startsWith('0xdd62ed3e')?'0x0':'0xffff';
+   else if(method==='eth_call')result=p[0].data.startsWith('0xdd62ed3e')?'0x0':shortAnt?'0x0':'0xffff';
    else if(method==='eth_getBalance')result='0xffffffffff';
    else if(method==='eth_gasPrice')result='0x2';
    else if(method==='eth_estimateGas')result='0xc350';
@@ -93,6 +93,20 @@ try{
   if(!await page.locator('#ant-purchase').count())await page.locator('[data-audience="public"]').click();
   if(!await page.locator('#ant-purchase').evaluate(el=>el.open))await page.locator('#ant-purchase summary').first().click();
   await page.locator('#ant-buy-file').setInputFiles({name:'fixture.txt',mimeType:'text/plain',buffer:bytes});await page.locator('#ant-buy-gas').fill('0.00000000002');
+  await page.getByRole('button',{name:'Fund this wallet · ETH / ANT',exact:true}).click();
+  assert.match(await page.locator('#ant-funding').innerText(),/Arbitrum One/);
+  const receiveAddress=await page.evaluate(()=>BNRPAY.antStorageSigner().address());
+  assert.match(await page.locator('#ant-funding').innerText(),new RegExp(receiveAddress));
+  assert.equal(await page.getByRole('button',{name:'Copy Arbitrum funding address',exact:true}).locator('svg').count(),1);
+  assert.equal(await page.evaluate(()=>window.__sends),0);
+  await page.locator('#ant-buy-start').click();
+  await until(async()=>await page.locator('#ant-buy-start').isEnabled());
+  assert.equal(await page.locator('#ant-invoice-total').innerText(),'0.0000000000000001 ANT');
+  assert.equal(await page.locator('#ant-invoice-eth').innerText(),'0.00000000002 ETH');
+  assert.match(await page.locator('#ant-buy-invoice').innerText(),/not a payable invoice/);
+  assert.equal(await page.getByRole('button',{name:'Authorize this invoice and ask my wallet'}).count(),0);
+  assert.equal(await page.evaluate(()=>window.__sends),0);
+  shortAnt=false;
   await page.locator('#ant-buy-start').click();await page.getByRole('button',{name:'Authorize this invoice and ask my wallet'}).waitFor();
   assert.equal(await page.evaluate(()=>window.__sends),0);
   assert.equal(await page.locator('#ant-invoice-total').innerText(),'0.0000000000000001 ANT');
