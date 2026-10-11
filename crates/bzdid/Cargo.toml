@@ -2,10 +2,21 @@
 name = "bzdid"
 version = "0.1.0"
 edition = "2021"
-description = "The self-certifying did:b: root and its local verifier — bzDiD = hash(genesis op), the sovereign identity root (moat, BUSL-1.1)"
+description = "The self-certifying did:b: root, its local verifier, and the signed succession/rotation chain (sovereign identity core, moat, BUSL-1.1)"
 
 [dependencies]
 sha2 = "0.10"
+# Succession verification dispatches on the key card's algorithm id. ml-dsa
+# is the SAME crate/version bsigner signs with (workspace lock pins the
+# family together — one implementation, no second opinion to drift);
+# ed25519-dalek verify_strict covers the registry's classical arm.
+# This crate VERIFIES ONLY: it holds no keys, no custody, no organ code.
+ml-dsa = "0.1"
+ed25519-dalek = "2"
 
 [dev-dependencies]
 atmirror = { path = "../atmirror" }
+# tests/bsigner_organ.rs signs through the real frozen organ CLI and reads
+# its bheart.signature/1 envelope JSON (base64url signature extraction)
+serde_json = "1"
+tempfile = "3"

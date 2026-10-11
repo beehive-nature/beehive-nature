@@ -16,10 +16,13 @@
 //! serves the proof** (the order's design principle, made mechanical).
 //!
 //! WHAT THIS INCREMENT IS NOT (named, so nobody reads more into it): no
-//! succession/rotation signatures yet (next increment), no `.b` name
-//! binding, no BEELOG, no Merkle proofs, no Vaulta epoch root. The root
-//! alone already carries its value: a free-tier identity that costs
-//! nothing, exists offline, and verifies in anyone's hands.
+//! `.b` name binding, no Vaulta epoch root yet. Signed succession/rotation
+//! (ORDER BZDID-002 Phase 1) IS here — `succession::resolve_did` walks
+//! the signed op chain with priority arbitration and fails closed on
+//! every ambiguity. The root alone already carries its value: a
+//! free-tier identity that costs nothing, exists offline, and verifies
+//! in anyone's hands; the chain keeps that identity SOVEREIGN across key
+//! changes — the did never moves, only the keys do.
 //!
 //! FAIL CLOSED everywhere: unknown algorithms refused, non-canonical
 //! encodings refused, structural doubts refused. A verifier that answers
@@ -29,9 +32,14 @@
 pub mod dagcbor;
 pub mod did;
 pub mod genesis;
+pub mod succession;
 
 pub use did::BzDid;
 pub use genesis::{GenesisOp, KeyAlg, KeyCard};
+pub use succession::{
+    resolve_did, rotate_body_bytes, DidState, LostFork, ResolvedDid, RotateOp, SuccessionError,
+    ROTATE_DOMAIN, ROTATE_TYPE,
+};
 
 /// Everything that can go wrong, named — refusals are self-describing.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -47,6 +55,9 @@ pub enum BzDidError {
     BadRotationCount(usize),
     DuplicateRotationKey,
     BadValidUntil(u64),
+    /// A signature does not verify under the key card it was checked
+    /// against (bad bytes, wrong key, or a key since revoked).
+    SignatureRejected,
     /// The handed bytes are a well-formed op — for a DIFFERENT identity.
     DidMismatch {
         claimed: String,
@@ -75,6 +86,10 @@ impl std::fmt::Display for BzDidError {
                 write!(f, "the same rotation key appears twice — malformed, refused")
             }
             BzDidError::BadValidUntil(v) => write!(f, "validUntil must be a nonzero unix second, got {v}"),
+            BzDidError::SignatureRejected => write!(
+                f,
+                "the signature does not verify under the key card it names — refuse, never guess"
+            ),
             BzDidError::DidMismatch { claimed, computed } => write!(
                 f,
                 "these bytes are not that identity: claimed {claimed}, bytes hash to {computed} — refuse, never guess"
@@ -121,6 +136,23 @@ mod tests {
             services: vec!["https://demo.example".into()],
             also_known_as: vec![],
             valid_until: 4_102_444_800,
+        }
+    }
+
+    /// A structurally valid rotation op with placeholder signature bytes —
+    /// for canon-shape tests only; resolution tests sign for real.
+    pub(crate) fn demo_rotate() -> succession::RotateOp {
+        succession::RotateOp {
+            seq: 1,
+            prev: [0x11; 32],
+            at: 1_800_000_000,
+            signed_by: 0,
+            rotation_keys: vec![KeyCard::new(KeyAlg::Ed25519, vec![0xE4; 32]).unwrap()],
+            signing_key: KeyCard::new(KeyAlg::Ed25519, vec![0x5E; 32]).unwrap(),
+            services: vec!["https://demo.example".into()],
+            also_known_as: vec![],
+            valid_until: 4_102_444_801,
+            sig: vec![0x5A; 64],
         }
     }
 

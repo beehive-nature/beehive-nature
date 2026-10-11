@@ -24,7 +24,15 @@ jobs:
         run: cargo build --workspace --locked
       - name: Test workspace
         if: always()
-        run: cargo test --workspace --locked
+        env:
+          # ORDER BZDID-002 Phase 1: crates/bzdid's organ suite signs a
+          # rotation through the REAL frozen bsigner CLI and verifies it
+          # locally. The gate below is the settle-nerve precedent: a
+          # skipped suite is not a pass.
+          BZDID_BSIGNER_BIN: ${{ github.workspace }}/target/debug/bsigner
+        run: |
+          test -x "$BZDID_BSIGNER_BIN" || { echo "bsigner binary missing for bzdid's organ suite: a skipped suite is not a pass"; exit 1; }
+          cargo test --workspace --locked
       # the same SETTLE contract on a second rail: the binary this job just built
       - name: bPay SETTLE — Solana native carrier through the built settle-solana binary
         if: always()

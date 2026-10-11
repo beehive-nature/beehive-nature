@@ -684,7 +684,11 @@ name = "bzdid"
 version = "0.1.0"
 dependencies = [
  "atmirror",
+ "ed25519-dalek",
+ "ml-dsa",
+ "serde_json",
  "sha2 0.10.9",
+ "tempfile",
 ]
 
 [[package]]
