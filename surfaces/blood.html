@@ -516,6 +516,8 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
     <table class="et-c-tab"><thead><tr><th>gen</th><th>rel</th><th>slots</th><th>state</th></tr></thead><tbody id="etManifest"></tbody></table>
     <h3 class="et-c-h">seal pipeline · public path</h3>
     <ol class="et-c-pipe" id="etPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCyConsent">review preservation consent</button>
+    <section id="genealogyConsent" hidden aria-label="preservation consent"></section>
     <button type="button" class="et-c-primary" id="etCySign">view eternalization status</button>
     <h3 class="et-c-h">receipt</h3>
     <table class="et-c-kv" id="etReceipt"></table>
@@ -2026,7 +2028,7 @@ try {
     var steps=[
       ['draft','edition packed from the lineage corpus · mutable until sealed',st.prepared?'done':'todo'],
       ['guard · living = exclude',D.living+' records refused · they never reach the manifest','guard'],
-      ['consent · '+(st.approved?'bound':'not yet'),st.approved?String(st.approved):'no manifest bound yet',st.approved?'consent':'todo'],
+      ['consent · '+(st.approved?'bound':'not yet'),st.approved?String(st.approved):'no published consent receipt · review and sign below; browser-held signatures remain separate',st.approved?'consent':'todo'],
       ['quote · Autonomi',an&&an.computed?('storage '+an.computed.storageANT+' ANT + gas '+an.computed.gasETH+' ETH · '+(an.raw&&an.raw.confidence||'estimate')+' @ '+date(an.queriedAt)+' · source '+an.route):'not quoted yet',st.quoted?'done':'todo'],
       ['settle · ANT · pay once',st.purchased?'settled':'blocked · '+(an&&an.computed&&C&&(Number(an.computed.storageANT)>Number(C.storageMaxANT)||Number(an.computed.gasETH)>Number(C.gasMaxETH))?'quote exceeds ceiling · ':'')+(C?'payment client cannot enforce both ceilings':'required ceiling data unavailable'),st.purchased?'done':'todo'],
       ['address · immutable · public',st.uploaded?'uploaded':'not yet · anyone fetches → hashes → compares',st.uploaded?'done':'todo']
@@ -2037,7 +2039,7 @@ try {
     $('etReceipt').innerHTML=[
       ['address',st.uploaded?esc(st.address||'uploaded'):'<span class="no">not yet · no upload before settlement</span>'],
       ['manifest',mid?'sha256 '+esc(mid)+'…':'<span class="no">not bound</span>'],
-      ['consent',st.approved?'<span class="sig">bound</span> · '+esc(st.approved):'<span class="no">not yet</span>'],
+      ['consent',st.approved?'<span class="sig">bound</span> · '+esc(st.approved):'<span class="no">not yet published · review browser-held consent above</span>'],
       ['guard',esc(D.living)+' living records refused · 0 in manifest'],
       ['paid',yn(st.purchased,'settled')],
       ['retrieved',yn(st.retrieved)],
@@ -2122,6 +2124,17 @@ try {
   wire(); boot(); peek();
   window.__eternal={data:D,raver:R};
 })();
+</script>
+<script type="module">
+import { mountConsent } from '../tools/genealogy/consent.mjs';
+const consentHost = document.getElementById('genealogyConsent');
+async function openConsentReview() {
+  consentHost.hidden = false;
+  await mountConsent(consentHost);
+  consentHost.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+document.getElementById('etCyConsent').addEventListener('click', openConsentReview);
+if (location.hash === '#consent') openConsentReview();
 </script>
 <script src="tour.js?v=42"></script>
 </body>

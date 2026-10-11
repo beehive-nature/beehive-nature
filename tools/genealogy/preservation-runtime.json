@@ -28,6 +28,7 @@
     "surfaces/archive-core.mjs",
     "tools/genealogy/model.mjs",
     "tools/genealogy/lifespan.mjs",
+    "tools/genealogy/consent.mjs",
     "surfaces/rails-badge.js",
     "surfaces/fonts/eternal-fonts.css",
     "assets/seals/house-crest-von-zutphen-DESIGN.svg",

@@ -67,15 +67,15 @@ body[data-reg="cypherpunk"] section.record{border-radius:var(--sk-radius-sm)}
 <body>
 <main data-register-host>
   <h1>bHERALDRY</h1>
-  <p class="lede">A symbol is evidence, not artwork. These records carry a symbol's meaning,
+  <p class="lede" data-i18n="bher.lede.what">A symbol is evidence, not artwork. These records carry a symbol's meaning,
   grammar, sources, uses and translations as separate, typed claims — the four truths:
   source authenticity, historical interpretation, language equivalence, authority.</p>
-  <p class="lede">Read-only. The data is <span class="digest">bheraldry-records.json</span>,
+  <p class="lede" data-i18n="bher.lede.data">Read-only. The data is <span class="digest">bheraldry-records.json</span>,
   generated from <span class="digest">crates/bheraldry</span> and digest-pinned to the code.</p>
 
   <div class="banner" id="standing-banner">
-    <h2>Standing boundary</h2>
-    <p>A research and conformance specimen. Not government endorsement. Not reproduction
+    <h2 data-i18n="bher.banner.h">Standing boundary</h2>
+    <p data-i18n="bher.banner.p">A research and conformance specimen. Not government endorsement. Not reproduction
     rights: reproducing elements of the Bulgarian arms requires an act of the Council of
     Ministers (Чл.&nbsp;3&nbsp;(2)). Unofficial translations are visibly marked machine
     drafts (⚙, unattested). No living person is named — living subjects are pseudonyms by law.</p>
@@ -85,7 +85,7 @@ body[data-reg="cypherpunk"] section.record{border-radius:var(--sk-radius-sm)}
   <div id="err" class="errorbox hidden"></div>
 
   <footer class="pagenote">
-    <p>External links (lex.bg, government.bg, Wikipedia, dv.parliament.bg) open in a new tab;
+    <p data-i18n="bher.footer.p">External links (lex.bg, government.bg, Wikipedia, dv.parliament.bg) open in a new tab;
     same-estate pages stay in this one. Record digests are
     sha256(<span class="digest">bheraldry/record/1</span> ‖ canonical bytes) — verify before trusting.
     Integrity of these renderings lives in the crate's tests, not in this page's paint.</p>

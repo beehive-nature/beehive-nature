@@ -156,6 +156,37 @@ test('cypherpunk: the instrument is complete at first paint and verifiable', asy
   assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
 });
 
+test('cypherpunk offers exact-edition consent review separately from payment', async () => {
+  const { ctx, p, errs } = await open('cypherpunk');
+  await p.click('#etCyConsent');
+  const host = p.locator('#genealogyConsent');
+  await host.getByRole('link', { name: 'review and sign with your keychain' }).waitFor();
+  assert.match(await host.textContent(), new RegExp(RECEIPT.artifact.manifestSha256));
+  assert.match(await host.textContent(), new RegExp(RECEIPT.artifact.uploadObject.sha256));
+  assert.match(await host.textContent(), /authorizes no payment/);
+  assert.equal(await host.getByRole('link').getAttribute('href'), 'wallet.html#genealogy-consent');
+  assert.equal(await host.getByRole('button', { name: 'download signed consent' }).isVisible(), false);
+  assert.match(await p.textContent('#etReceipt'), /paid\s*not yet/);
+  await ctx.addInitScript(() => {
+    localStorage.setItem('bnr_soul', 'gatesoul');
+    window.__consentCredentialPrompts = 0;
+    Object.defineProperty(navigator.credentials, 'get', { configurable: true, value: async () => {
+      window.__consentCredentialPrompts++;
+      throw new Error('test refuses any automatic credential prompt');
+    }});
+  });
+  await host.getByRole('link').click();
+  const walletConsent = p.locator('#genealogyConsent');
+  await walletConsent.getByRole('button', { name: 'review signing key' }).waitFor();
+  assert.equal(await walletConsent.getByRole('button', { name: 'sign preservation consent', exact: true }).isEnabled(), false);
+  await walletConsent.getByRole('button', { name: 'review signing key' }).click();
+  assert.match(await walletConsent.textContent(), /Connect your existing keychain/);
+  assert.equal(await walletConsent.getByRole('checkbox').isEnabled(), false, 'no key means no consent press');
+  assert.equal(await p.evaluate(() => window.__consentCredentialPrompts), 0, 'reviewing consent must not automatically open a passkey prompt');
+  assert.equal(errs.length, 0, errs.join(' | '));
+  await ctx.close();
+});
+
 test('settlement separates changing quote limits from the payment capability stop', async () => {
   for (const [storage, gas, over] of [['1', '0.0001', false], ['3', '0.0001', true], ['1', '0.0003', true]]) {
     const receipt = structuredClone(RECEIPT);
