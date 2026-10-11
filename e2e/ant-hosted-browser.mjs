@@ -91,10 +91,12 @@ try{
   await page.waitForFunction(()=>/keychain live/.test(document.getElementById('kc-stat').textContent));
   await page.locator('[data-wallet-store]').click();await page.locator('.wallet-storage-options a[href="#bpay-sec"]').click();
   if(!await page.locator('#ant-purchase').count())await page.locator('[data-audience="public"]').click();
-  await page.locator('#ant-purchase summary').first().click();
+  if(!await page.locator('#ant-purchase').evaluate(el=>el.open))await page.locator('#ant-purchase summary').first().click();
   await page.locator('#ant-buy-file').setInputFiles({name:'fixture.txt',mimeType:'text/plain',buffer:bytes});await page.locator('#ant-buy-gas').fill('0.00000000002');
   await page.locator('#ant-buy-start').click();await page.getByRole('button',{name:'Authorize this invoice and ask my wallet'}).waitFor();
   assert.equal(await page.evaluate(()=>window.__sends),0);
+  assert.equal(await page.locator('#ant-invoice-total').innerText(),'0.0000000000000001 ANT');
+  assert.equal(await page.locator('#ant-invoice-eth').innerText(),'0.00000000002 ETH');
   if(reg==='bee'){
     const refusals=await page.evaluate(()=>{
       const ledger=JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k=>k.startsWith('bnr.ant.purchase.v1:'))));

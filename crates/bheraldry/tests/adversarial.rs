@@ -267,22 +267,29 @@ fn a08_stale_revision_as_current_is_detected() {
     }
     assert!(chain.current().record().revision == 2);
 
-    // the real pair: immutable rev1 vs the shipped rev2
+    // the real chain: immutable rev1 and rev2 vs the shipped rev3
     let v1 = bulgaria_national_arms_v1().seal().unwrap();
-    let v2 = bulgaria_national_arms().seal().unwrap();
-    let real = RevisionChain::build(vec![v1.clone(), v2]).unwrap();
-    match real.assert_current(&v1) {
-        Err(LawViolation::StaleRevision {
-            revision,
-            superseded_by,
-            ..
-        }) => {
-            assert_eq!(revision, 1);
-            assert_eq!(superseded_by, real.current().digest().hex());
+    let v2 = bheraldry::specimen::bulgaria_national_arms_r2()
+        .seal()
+        .unwrap();
+    let v3 = bulgaria_national_arms().seal().unwrap();
+    let real = RevisionChain::build(vec![v1.clone(), v2.clone(), v3.clone()]).unwrap();
+    // each stale revision is named as superseded by its IMMEDIATE successor
+    // (v1 by v2, v2 by v3), while only v3 is the chain's current
+    for (stale, superseder) in [(&v1, v2.digest()), (&v2, v3.digest())] {
+        match real.assert_current(stale) {
+            Err(LawViolation::StaleRevision {
+                revision,
+                superseded_by,
+                ..
+            }) => {
+                assert!(revision == 1 || revision == 2);
+                assert_eq!(superseded_by, superseder.hex());
+            }
+            other => panic!("real revision chain must detect the stale presentation: {other:?}"),
         }
-        other => panic!("real revision pair must detect the stale presentation: {other:?}"),
     }
-    assert_eq!(real.current().record().revision, 2);
+    assert_eq!(real.current().record().revision, 3);
 }
 
 // ── round-2 regressions (the gazette pass) ────────────────────────────────────
@@ -431,4 +438,139 @@ fn a10_lossy_migration_is_detected() {
         migrated.validate().unwrap_err(),
         LawViolation::OfficialClassNeedsLegalUsage
     );
+}
+
+// ── round-3 regressions (the portal read) ─────────────────────────────────────
+
+/// Regression r4 — present the lex.bg rendering as the working text while
+/// citing the portal PDF as the source: the exact transport-misattribution
+/// the portal read could have enabled. Detected by the V9 law, and by the
+/// frozen digest refusing the swap.
+#[test]
+fn r04_portal_claim_paired_with_lex_text_is_detected() {
+    let sealed = bulgaria_national_arms().seal().unwrap();
+    let mut r: SymbolRecord = serde_json::from_slice(&sealed.record().canonical_bytes()).unwrap();
+    // the rev2 lex.bg text, spliced in as the working text under the portal claim
+    let lex = bheraldry::specimen::bulgaria_national_arms_r2();
+    r.blazon.text = lex.blazon.text.clone();
+    assert_eq!(
+        r.validate().unwrap_err(),
+        LawViolation::BlazonTextDivergesFromSourceVerbatim,
+        "the blazon must carry exactly the portal edition's bytes it claims to read from"
+    );
+    assert!(!sealed.digest_matches(&r.canonical_bytes()));
+}
+
+/// Regression r5 — roll back the adoption-date resolution: strip the УКАЗ №
+/// 304 position and the resolution note, quietly re-opening the dispute the
+/// primary evidence closed. No `LawViolation` fires here BY DESIGN and this
+/// test says so on its face: dispute notes are not law-protected state, so
+/// the FROZEN DIGEST is the only guard — the rolled-back record still
+/// validates cleanly (asserted below, so the guard's solitude is itself
+/// checkable), and only the digest refuses it as the shipped rev3.
+#[test]
+fn r05_resolution_rollback_is_detected() {
+    let sealed = bulgaria_national_arms().seal().unwrap();
+    let mut r: SymbolRecord = serde_json::from_slice(&sealed.record().canonical_bytes()).unwrap();
+    let d = r
+        .disputes
+        .iter_mut()
+        .find(|d| d.topic.contains("adopted"))
+        .expect("the adoption-date dispute is present");
+    // roll the resolution back: drop the УКАЗ № 304 position and the note
+    let before = d.positions.len();
+    d.positions.retain(|p| !p.statement.contains("УКАЗ № 304"));
+    assert_eq!(d.positions.len(), before - 1, "the position was removed");
+    d.note = Some("RETAINED, not adjudicated.".into());
+    // the rolled-back record is structurally lawful — the digest is the ONLY
+    // thing standing between it and a reader (independent-review finding 1
+    // made checkable instead of hidden)
+    assert!(
+        r.validate().is_ok(),
+        "the rollback passes the laws — only the frozen digest catches it"
+    );
+    assert!(
+        !sealed.digest_matches(&r.canonical_bytes()),
+        "a rolled-back resolution must not verify as the shipped rev3"
+    );
+    // and the shipped record itself carries the decree's date line, so the
+    // corpse of the resolution is checkable while it lives
+    let shipped = String::from_utf8_lossy(&sealed.record().canonical_bytes()).into_owned();
+    assert!(shipped.contains("Издаден в София на 4 август 1997 г."));
+    assert!(shipped.contains("RESOLVED BY PRIMARY EVIDENCE"));
+}
+
+/// Regression r6 — launder a machine draft into an official rendering, three
+/// ways: machine attestation under the official relationship; a speaker
+/// claim without any authority basis; and a speaker claim whose "basis" is a
+/// tertiary wiki page. All three are named refusals — the bLANGUAGEdock
+/// tier can be carried honestly, never forged into authority.
+#[test]
+fn r06_machine_draft_laundered_into_official_is_detected() {
+    use language_authority::TranslationAttestation;
+    let sealed = bulgaria_national_arms().seal().unwrap();
+
+    // (a) the ⚙ machine draft, relabelled OfficialRendering as-is
+    let mut r: SymbolRecord = serde_json::from_slice(&sealed.record().canonical_bytes()).unwrap();
+    let t = r
+        .motto
+        .translations
+        .iter_mut()
+        .find(|t| t.lang == "lv" && matches!(t.attestation, TranslationAttestation::Machine { .. }))
+        .expect("the lv machine draft is present");
+    t.relationship = TranslationRelationship::OfficialRendering;
+    // graft a legal-grade basis FIRST, so what remains wrong is exactly the
+    // machine attestation under the official relationship
+    let legal = r
+        .sources
+        .iter()
+        .find(|s| s.grade == ProvenanceGrade::PrimaryLegal)
+        .expect("a primary-legal source is present")
+        .clone();
+    t.authority_basis = Some(legal);
+    assert!(matches!(
+        r.validate().unwrap_err(),
+        LawViolation::MachineCannotBeOfficial { lang } if lang == "lv"
+    ));
+    assert!(!sealed.digest_matches(&r.canonical_bytes()));
+
+    // (b) the documented variant, promoted with NO basis at all
+    let mut r: SymbolRecord = serde_json::from_slice(&sealed.record().canonical_bytes()).unwrap();
+    let t = r
+        .motto
+        .translations
+        .iter_mut()
+        .find(|t| t.lang == "ar" && t.text.contains("تولد"))
+        .expect("the ar documented variant is present");
+    t.relationship = TranslationRelationship::OfficialRendering;
+    t.authority_basis = None;
+    assert!(matches!(
+        r.validate().unwrap_err(),
+        LawViolation::OfficialRenderingNeedsAuthorityBasis { lang } if lang == "ar"
+    ));
+    assert!(!sealed.digest_matches(&r.canonical_bytes()));
+
+    // (c) the documented variant, promoted with a TERTIARY wiki "basis" —
+    // grade is a fact about the channel, and a wiki page is not authority
+    let mut r: SymbolRecord = serde_json::from_slice(&sealed.record().canonical_bytes()).unwrap();
+    let t = r
+        .motto
+        .translations
+        .iter_mut()
+        .find(|t| t.lang == "ar" && t.text.contains("تولد"))
+        .expect("the ar documented variant is present");
+    t.relationship = TranslationRelationship::OfficialRendering;
+    let wiki_basis = r
+        .sources
+        .iter()
+        .find(|s| s.label.contains("Arabic Wikipedia"))
+        .expect("the ar wiki claim is in sources")
+        .clone();
+    t.authority_basis = Some(wiki_basis);
+    assert!(matches!(
+        r.validate().unwrap_err(),
+        LawViolation::OfficialRenderingNeedsAuthorityBasis { lang } if lang == "ar"
+    ));
+    // and the launder drifts the digest — none of the three ships as rev3
+    assert!(!sealed.digest_matches(&r.canonical_bytes()));
 }

@@ -705,6 +705,66 @@ body[data-reg="cypherpunk"] main>section>h2[data-wl-n]::after{content:"§" attr(
   #wl-dock .g{transition:none}
 }
 </style>
+<style id="wallet-guided-flow">
+/* Shared state, three reading styles. Critical instructions never disappear in Raver. */
+.wallet-steps{display:flex;gap:10px;list-style:none;padding:0;margin:20px 0 24px}
+.wallet-steps li{flex:1;display:flex;align-items:center;gap:8px;padding:10px;border-bottom:2px solid var(--line);font-size:14px}
+.wallet-steps b{display:grid;place-items:center;flex:none;width:28px;height:28px;border:1px solid currentColor;border-radius:50%}
+.wallet-steps [aria-current="step"]{border-color:var(--ink);font-weight:700}
+.wallet-step-title{font-size:22px;font-weight:700;line-height:1.3;margin-bottom:14px}
+.kc-fingerprint{display:block;margin:12px 0;padding:14px;border:1px solid var(--line2);border-radius:10px;font-size:20px;line-height:1.6;word-spacing:4px;color:var(--ink)}
+.kc-entry{padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--bg-card)}
+#kc-stat{margin-top:16px;line-height:1.7;overflow-wrap:anywhere}
+#kc-stat .wl-act{display:block;margin-top:12px;width:100%;min-height:48px}
+#kc-stat .wl-act:first-of-type{font-weight:700;border-width:2px}
+#kc-stat .wl-act[hidden],#kc-pass[hidden]{display:none!important}
+.kc-entry #kc-pass{width:100%;min-height:48px;font-weight:700}
+#kc-stat>span.wl-cyd{display:none!important}
+#kc-stat>details.wl-cyd{display:block!important}
+#kc-stat details{margin-top:16px;font-size:14px;font-weight:400}
+#kc-stat details[open] .wl-cyd{display:block!important}
+#kc-stat details:not([open]) .wl-cyd{display:none!important}
+#kc-return{margin-top:20px} #kc-return a{display:inline-flex;align-items:center;min-height:48px;font-weight:700}
+.wallet-secondary{margin:18px 0}.wallet-secondary>summary{min-height:44px;cursor:pointer;line-height:1.5;padding:10px 0}
+.kc-secondary-note,.kc-welcome{line-height:1.6;font-size:16px;margin-bottom:14px}
+#kc-sec .ring-wrap{align-items:flex-start}
+#kc-sec .ring-wrap>svg,#kc-sec .ring-key{display:none!important}
+#kc-sec .ring-wrap>div{min-width:0!important;width:100%}
+#kc-sec[data-wl-more] .ring-wrap>svg{display:block!important}
+#kc-sec[data-wl-more] .ring-key{display:flex!important}
+.ant-stage{margin:18px 0;padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--bg-card)}
+.ant-stage>summary{font-size:21px;font-weight:700;cursor:pointer;min-height:44px}
+.ant-intro,.ant-help{line-height:1.6;margin:12px 0;font-size:15px}
+.ant-session{padding:14px;border-left:3px solid var(--ink);margin:16px 0;background:var(--well)}
+.ant-session a{display:inline-flex;min-height:44px;align-items:center;font-weight:700}
+.ant-fields{display:grid;gap:18px;margin:18px 0}
+.ant-fields label{display:block;font-weight:700;line-height:1.5}
+.ant-fields input{display:block;width:100%;max-width:100%;box-sizing:border-box;margin-top:8px;min-height:48px;font-size:16px}
+.ant-fields small{display:block;font-size:14px;line-height:1.5;margin-top:6px}
+.ant-stage button{min-height:48px}.ant-primary{width:100%;font-weight:700}
+#ant-buy-status{margin-top:16px;line-height:1.6;overflow-wrap:anywhere}
+.ant-bill{margin:20px 0;padding:20px;border:2px solid var(--ink);border-radius:16px}
+.ant-bill h3{font-size:22px;margin:0 0 16px}.ant-bill dl{margin:0;display:grid;gap:16px}
+.ant-bill dl>div{padding-bottom:14px;border-bottom:1px solid var(--line)}
+.ant-bill dt{font-size:14px}.ant-bill dd{margin:6px 0 0;font-size:24px;font-weight:700;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.ant-bill .ant-meta{font-size:14px;line-height:1.7;overflow-wrap:anywhere}
+.ant-bill button{margin-top:18px;width:100%;font-weight:700}
+.ant-bill pre{max-height:300px;overflow:auto;font-size:13px}
+.ant-stage:focus,.kc-entry:focus{outline:2px solid var(--ink);outline-offset:4px}
+body[data-reg="bee"] :is(.kc-entry,.ant-stage,.ant-bill){box-shadow:0 5px 18px #00000008}
+body[data-reg="raver"] :is(.kc-entry,.ant-stage){border-radius:28px;border-color:var(--cyan);padding:24px}
+body[data-reg="raver"] .wallet-steps{justify-content:center}
+body[data-reg="raver"] .wallet-steps li{flex-direction:column;text-align:center;border:0}
+body[data-reg="raver"] .wallet-steps [aria-current="step"] b{box-shadow:0 0 20px var(--cyan)}
+body[data-reg="raver"] .ant-bill{border-color:var(--cyan);border-radius:24px}
+body[data-reg="cypherpunk"] :is(.kc-entry,.ant-stage,.ant-bill){border-radius:4px;padding:16px}
+body[data-reg="cypherpunk"] .wallet-steps li{font-size:13px;padding:8px 0}
+body[data-reg="cypherpunk"] .wallet-steps b{border-radius:3px;width:24px;height:24px}
+body[data-reg="cypherpunk"] .ant-bill dl{grid-template-columns:1fr 1fr}
+body[data-reg="cypherpunk"] .ant-bill dd{font-size:20px}
+@media(min-width:700px){body[data-reg="bee"] .ant-fields{grid-template-columns:1fr 1fr}}
+@media(max-width:380px){.wallet-steps{gap:4px}.wallet-steps li{padding:6px 2px;font-size:12px;gap:4px}.wallet-steps b{width:22px;height:22px}.kc-entry,.ant-stage,.ant-bill{padding:14px!important}.ant-bill dd{font-size:20px}body[data-reg="cypherpunk"] .ant-bill dl{grid-template-columns:1fr}}
+</style>
 </head>
 <body data-bee-theme="custom" data-reg-dress="contract">
 <script>
@@ -736,7 +796,7 @@ document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|pro
 window.wlRead=function(el,ok){if(!el)return;if(ok)el.removeAttribute('data-read-failed');else el.setAttribute('data-read-failed','true');};
 /* a state is one calm sentence and its one action: parts are text, a link
    {to,t}, a button {btn,on}, and the raw detail {cy}, which only cypherpunk shows */
-window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(function(p){if(p==null||p==='')return;if(typeof p==='string')el.appendChild(document.createTextNode(p));else if(p.cy!=null){var s=document.createElement('span');s.className='wl-cyd';s.textContent=' '+p.cy;el.appendChild(s);}else if(p.btn){var b=document.createElement('button');b.type='button';b.className='wl-act';b.textContent=p.btn;if(p.on)b.addEventListener('click',p.on);el.appendChild(b);}else{var a=document.createElement('a');a.href='#'+p.to;a.textContent=p.t;el.appendChild(a);}});};
+window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(function(p){if(p==null||p==='')return;if(typeof p==='string')el.appendChild(document.createTextNode(p));else if(p.fingerprint){var f=document.createElement('strong');f.className='kc-fingerprint';f.textContent=p.fingerprint;el.appendChild(f);}else if(p.cy!=null){var s=document.createElement('span');s.className='wl-cyd';s.textContent=' '+p.cy;el.appendChild(s);}else if(p.btn){var b=document.createElement('button');b.type='button';b.className='wl-act';b.textContent=p.btn;if(p.on)b.addEventListener('click',p.on);el.appendChild(b);}else{var a=document.createElement('a');a.href='#'+p.to;a.textContent=p.t;el.appendChild(a);}});};
 </script>
 <main>
 <div id="wallet-identity">
@@ -891,15 +951,14 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </section>
 
 <section id="kc-sec" data-wl-task="key">
-  <h2>🗝 the keychain: <span data-i18n="wl.h.keychain">your bzDiD holds every key</span></h2>
-  <div class="law" data-wl-tech><b>Automatic, once your name is connected:</b> your first tap or keypress on this page connects the
-  keychain by itself, except inside the vault, your accounts, storage, bPay, the sign sheets and the keychain's own buttons, and moving between its parts does not count (the WebAuthn ceremony needs one touch of yours: browsers' law, not ours).
-  The PRF ceremony re-derives your <b>masterPRK</b> in this tab's memory (never stored, never
-  sent). From it we derive: the <b>ed25519 soul record key</b> (context <b>bnr.b</b>, same as
-  onboarding), the <b>Vaulta K1 signing key</b> (context <b>vaulta:yourname</b>), your <b>0x/EVM</b>
-  and <b>nostr npub</b> rails (<a href="keys/addresses.html">your two addresses</a>), and as many
-  more as you forge below. Gold path is <b>connect keychain / create passkey / derive</b>: never paste a secret.
-  A recovery phrase paste stays under <b>scaffold · recovery</b> for import only (same soul, same keys).</div>
+  <h2>🗝 <span>Open your wallet</span></h2>
+  <div class="kc-welcome">Use your existing bzDiD passkey. Signing in never approves a payment.</div>
+  <ol id="kc-progress" class="wallet-steps" aria-label="Wallet sign-in progress">
+    <li data-kc-step="passkey" aria-current="step"><b>1</b><span>Open passkey</span></li>
+    <li data-kc-step="confirm"><b>2</b><span>Check identity</span></li>
+    <li data-kc-step="ready"><b>3</b><span>Wallet ready</span></li>
+  </ol>
+
   <div class="ring-wrap">
     <svg width="230" height="230" viewBox="0 0 230 230" aria-hidden="true" focusable="false">
       <circle cx="115" cy="115" r="86" fill="none" stroke="#243026" stroke-width="1"/>
@@ -942,12 +1001,22 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <li><b>1</b> masterPRK</li><li><b>2</b> soul · ed25519</li><li><b>3</b> vaulta · K1</li><li><b>4</b> eth · next</li><li><b>5</b> chain authority</li>
     </ol>
     <div style="flex:1;min-width:250px">
+      <div class="kc-entry">
+      <div id="kc-phase-title" class="wallet-step-title">Sign in with your existing passkey</div>
       <div class="row" style="margin-top:0">
-        <button id="kc-pass" class="gold">🗝 connect keychain (passkey)</button>
+        <button id="kc-pass" class="gold">Open my wallet</button>
+      </div>
+      <div class="law" id="kc-stat" role="status" aria-live="polite" aria-atomic="true" tabindex="-1">Your device will ask you to unlock your passkey.</div>
+      <div id="kc-return" hidden><a href="#bpay-sec">Continue to storage invoice →</a></div>
+      </div>
+      <details id="kc-alternatives" class="wallet-secondary"><summary>Other ways to sign in · new wallet</summary>
+      <div class="kc-secondary-note">Already have a bzDiD? Use your passkey or phone. Creating a new bzDiD makes a separate identity.</div>
+      <div class="row" style="margin-top:0">
         <button id="kc-create" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ make a new bzDiD on this device</button>
         <button id="kc-qr" class="gold" style="background:#231a0e;color:var(--amber);border-color:#4a3a1d">📷 sign in with your phone</button>
         <button id="kc-hw" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🔑 make a new bzDiD on a hardware key</button>
       </div>
+      </details>
       <div id="qr-sec" style="display:none;margin-top:10px;border:1px solid #4a3a1d;border-radius:10px;padding:12px;background:#140f06">
         <div class="row" style="justify-content:space-between;align-items:center;margin-top:0">
           <b style="color:var(--amber)" id="qr-title">📷 sign in with your phone</b>
@@ -997,7 +1066,6 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
           <button id="kc-recgo">recover</button>
         </div>
       </details>
-      <div class="law" id="kc-stat" style="margin-top:6px;min-height:20px">your keychain opens with one touch of your passkey.</div>
       <div class="law" id="kc-born" style="margin-top:6px;display:none"></div>
       <div id="kc-cards" style="display:none;gap:10px;flex-wrap:wrap;margin-top:8px">
         <div class="keycard" style="flex:1 1 100%">
@@ -1017,6 +1085,16 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       </div>
     </div>
   </div>
+  <details class="wallet-secondary"><summary>How your bzDiD keys work</summary>
+  <div class="law"><b>Automatic, once your name is connected:</b> your first tap or keypress on this page connects the
+  keychain by itself, except inside the vault, your accounts, storage, bPay, the sign sheets and the keychain's own buttons, and moving between its parts does not count (the WebAuthn ceremony needs one touch of yours: browsers' law, not ours).
+  The PRF ceremony re-derives your <b>masterPRK</b> in this tab's memory (never stored, never
+  sent). From it we derive: the <b>ed25519 soul record key</b> (context <b>bnr.b</b>, same as
+  onboarding), the <b>Vaulta K1 signing key</b> (context <b>vaulta:yourname</b>), your <b>0x/EVM</b>
+  and <b>nostr npub</b> rails (<a href="keys/addresses.html">your two addresses</a>), and as many
+  more as you forge below. Gold path is <b>connect keychain / create passkey / derive</b>: never paste a secret.
+  A recovery phrase paste stays under <b>scaffold · recovery</b> for import only (same soul, same keys).</div>
+  </details>
 </section>
 
 <section id="vault-sec" data-wl-task="key" style="border-color:var(--cyan)">
@@ -1631,7 +1709,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </section>
 <script src="adapter-seam.js" defer></script>
 <script src="ant-pay.js?v=10" defer></script>
-<script src="bpay-invoice.js?v=9" defer></script>
+<script src="bpay-invoice.js?v=10" defer></script>
 <script>if(window.ResizeObserver)new ResizeObserver(function(entries){document.documentElement.style.setProperty('--wallet-offset',Math.ceil(entries[0].target.getBoundingClientRect().height+12)+'px')}).observe(document.getElementById('wallet-identity'));document.querySelector('[data-wallet-store]').addEventListener('click',function(e){e.preventDefault();e.stopPropagation();document.querySelector('#wl-dock [data-wl-go="keep"]').click();document.querySelectorAll('main>section[data-wl-open]').forEach(function(s){s.removeAttribute('data-wl-open')});document.getElementById('wallet-storage').scrollIntoView({block:'start'});});</script>
 
 <!-- ══ THE VOUCHER — prepaid compute, the money engine with a face ══ -->
@@ -5830,6 +5908,32 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      also the signature. A check that ends without a yes rewrites its lines,
      unless another check has taken its place. */
   var KC_ASK=null;
+  var KC_RETURN_STORAGE=false;
+  document.addEventListener('click',function(e){
+    if(e.target.closest&&e.target.closest('[data-kc-return="storage"]')){
+      KC_RETURN_STORAGE=true; kcProgress(MPRK?'ready':'passkey');
+    }
+  });
+  function kcProgress(step){
+    var progress=$('kc-progress');if(!progress)return;
+    progress.querySelectorAll('[data-kc-step]').forEach(function(item){
+      if(item.dataset.kcStep===step)item.setAttribute('aria-current','step');else item.removeAttribute('aria-current');
+    });
+    $('kc-phase-title').textContent=step==='confirm'?'One last check: is this your identity?':step==='ready'?'Your wallet is open':'Sign in with your existing passkey';
+    $('kc-return').hidden=!(step==='ready'&&KC_RETURN_STORAGE);
+    $('kc-pass').hidden=step==='ready'||step==='confirm';
+  }
+  /* Keep diagnostics inspectable without burying the identity decision in them. */
+  new MutationObserver(function(){
+    kcProgress(KC_ASK?'confirm':MPRK?'ready':'passkey');
+    var action=$('kc-stat').querySelector('button');
+    if(!MPRK&&!KC_ASK&&action){
+      if(action.textContent==='connect keychain'||action.textContent==='open it again')action.hidden=true;
+      else $('kc-pass').hidden=true;
+    }
+    var stat=$('kc-stat'),raw=stat.querySelector(':scope > span.wl-cyd');
+    if(raw){var details=document.createElement('details'),summary=document.createElement('summary');details.className='wl-cyd';summary.textContent='Technical details';details.append(summary,raw);stat.append(details);}
+  }).observe($('kc-stat'),{childList:true});
   /* nothing is open: the keychain's line and the glance say so, with the way in */
   function kcNotAll(){
     kcNot();
@@ -5862,7 +5966,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         identityFromDiscoverable(where).then(resolve,function(e){ if(!MPRK&&!KC_ASK)kcNotAll(); reject(e) });   // inside the press, so the browser lets the prompt open
       }
       function show(lead){
-        say([(lead||'')+'this opens the soul '+fp+'. is it yours? ',{btn:'yes, open it',on:yes},{btn:'no, try another passkey',on:no},
+        kcProgress('confirm');
+        say([(lead||'')+'this opens the soul ',{fingerprint:fp},'. is it yours? ',{btn:'yes, open it',on:yes},{btn:'no, try another passkey',on:no},
           {cy:'the '+how+' ('+String(credId||'?').slice(0,12)+'…) opened soul "'+fp+'", and this browser keeps no soul yet to hold it to: nothing opens and nothing is bound (bnr_bind, bnr_cred_fp) until you say yes; it is wiped if nobody answers within 2 minutes'}]);
         var g=$('sum-kc'); if(g){ wlSay(g,['one check before your keychain opens. ',{to:'kc-sec',t:'open my keychain'}]); g.style.color='var(--amber)' }
       }
@@ -5870,6 +5975,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       KC_ASK=ask;
       timer=setTimeout(function(){ drop('nobody answered within 2 minutes') },120000);
       show();
+      if(!where||where===$('kc-stat'))$('kc-stat').focus({preventScroll:true});
     });
   }
   /* the picker path (no remembered founding passkey): the same PRF ceremony as
@@ -6008,8 +6114,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       $('qr-sec').style.display='block'; qrGrantUI(rq); }
   }
   /* the keychain's resting lines: one calm sentence and the way on */
-  function kcLive(){ wlSay($('kc-stat'),['your keychain is open on this page and closes when you leave. ',{to:'bal-sec',t:'see your accounts'},{cy:'keychain live · keys in tab memory only, never stored in the clear (a permanent device keeps the soul sealed under its own passkey, bnr_seal)'}]) }
-  function kcNot(){ wlSay($('kc-stat'),['your keychain opens with one touch of your passkey. ',{btn:'connect keychain',on:kcConnect},{cy:'keychain not connected · masterPRK not in tab memory'}]) }
+  function kcLive(){ kcProgress('ready');wlSay($('kc-stat'),['your keychain is open on this page and closes when you leave. ',{to:KC_RETURN_STORAGE?'bpay-sec':'bal-sec',t:KC_RETURN_STORAGE?'Continue to storage invoice':'see your accounts'},{cy:'keychain live · keys in tab memory only, never stored in the clear (a permanent device keeps the soul sealed under its own passkey, bnr_seal)'}]) }
+  function kcNot(){ kcProgress('passkey');wlSay($('kc-stat'),['your keychain opens with one touch of your passkey. ',{btn:'connect keychain',on:kcConnect},{cy:'keychain not connected · masterPRK not in tab memory'}]) }
   function kcIdle(){ if(MPRK)kcLive(); else kcNot() }
   function kcQrLabel(){ var q=$('kc-qr'); if(q)q.textContent=MPRK?'📷 let a desktop sign in':'📷 sign in with your phone' }
   function kcReload(t){ return {btn:t||'reload',on:function(){ location.reload() }} }
@@ -6031,6 +6137,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     }catch(e){
       /* another way opened the keychain while this waited, or a newer check now asks: their lines stand */
       if((MPRK&&MPRK!==before)||KC_ASK)return;
+      kcProgress('passkey');
       wlSay($('kc-stat'),passkeyFallbackMsg(e,kcConnect));
     }finally{ CEREMONY=false }
   };
@@ -6047,7 +6154,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     // click handler tries, as a second pending request. That is why "create" only ever
     // looked for one. Same reasoning for the explicit disconnect, the recovery and
     // bridge inputs, and everything inside the vault.
-    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-pass,#kc-hw,#kc-out,#br-wif,#br-go,#vault-sec,#wallet-accounts,#arw-sec,#bpay-sec,#sign-sheet,#act-sheet,#pq-law'))return;
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-pass,#kc-hw,#kc-out,#br-wif,#br-go,#vault-sec,#wallet-accounts,#arw-sec,#bpay-sec,#sign-sheet,#act-sheet,#pq-law,#genealogyConsent'))return;
     // the keychain's own buttons run their own ceremony on click (connect, make, phone, hardware,
     // the status line's try again), and the recovery words, the device list and the phone sheet
     // are their own way in: a pointerdown there must not open a second prompt first
@@ -10070,8 +10177,26 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      returns, or transmits a seed. This is also the gate's handle on the rail
      core — every primitive below is proven against a published vector in
      e2e/wallet-signer.mjs before it is trusted with an address or an amount. */
+  // Genealogy consent uses the existing record key, with an explicit review
+  // and signing press. No payment method or general signing global is exposed.
+  async function openGenealogyConsent() {
+    if (location.hash !== '#genealogy-consent' || document.getElementById('genealogyConsent')) return;
+    var host = document.createElement('section'); host.id = 'genealogyConsent';
+    host.setAttribute('aria-label', 'preservation consent');
+    document.getElementById('kc-sec').before(host);
+    try {
+      var consent = await import('../tools/genealogy/consent.mjs');
+      await consent.mountConsent(host, { getRecord: function() {
+        return MPRK ? BZDIDKEY.deriveRecordKey(MPRK, 'bnr.b') : null;
+      }});
+      host.scrollIntoView({ block: 'start' });
+    } catch (e) { host.textContent = 'Consent review unavailable. Nothing was signed.'; }
+  }
+  window.addEventListener('hashchange', openGenealogyConsent);
+  openGenealogyConsent();
   window.BNRHIVE={amount:hiveAmount,ser:hiveSer,digest:function(b){return hexS(hiveDigest(b))},sign:function(wif,b){ return hiveSign(wif,hiveDigest(b)) },pubOf:hivePubOf,bound:function(){return hiveBound()}};
   window.BNRPAY={rlp:rlp,evmSendRaw:evmSendRaw,antStorageSigner:antStorageSigner,parseWif:parseWifAny,
+    antStorageState:function(){return {connected:!!MPRK,hasName:!!SOUL,coreReady:!!CORE};},
     rails:EVM_RAILS,evmChecksumOk:evmChecksumOk,
     ripemd160:ripemd160,hash160:hash160,p2wpkhAddress:p2wpkhAddress,solanaAddress:solanaAddress,
     toBaseUnits:toBaseUnits,fromBaseUnits:fromBaseUnits,

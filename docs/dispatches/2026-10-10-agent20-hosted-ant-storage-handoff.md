@@ -1,6 +1,24 @@
 # Agent 20 — Hosted ANT Storage Purchasing
 
-Status: HANDOFF / IMPLEMENTATION OPEN. Archiving the old wallet-unification chat is housekeeping, not acceptance of ANT purchasing.
+Status: #391 and native bzDiD follow-up #396 MERGED AND DEPLOYED. Native public bytes and non-spending controls VERIFIED. Fresh bound invoice and live paid retrieval remain OPEN, awaiting the founder's existing-passkey sign-in and then explicit bounded payment authorization.
+
+## Current continuation, 2026-10-11
+
+Latest accepted deployment: Pages `38127860473` attempt 1 completed successfully on `ae4a554cd13b14185112d958d4de3cd6c476b12e`; deploy finished at `2026-10-11T09:36:57Z`. The six public asset checks passed at `09:39:17Z`. Five runtime/core files match tested #396 source byte-for-byte; stack.html matches deployment in full and its wallet row matches the tested source. The actual Codex wallet was reloaded only after confirming it was idle and disconnected; native invoice controls and the visible Rust self-test passed badge were observed.
+
+The exact 49-byte probe was selected with a proposed, unapproved `0.0002 ETH` aggregate fee ceiling. Preparation refused because the existing bzDiD keychain is disconnected. The existing-passkey sign-in was opened, and user presence requested once. Do not create a new identity or request any recovery secret. The file input reset after refusal: reselect `tools/agent20-public-probe.txt` after sign-in before retrying. ANT total remains null; no signature, payment, uploaded file or retrieval receipt exists. Durable release receipt: `docs/receipts/agent20-ant-native-hosted-release-2026-10-10.json`. Older queued-deployment notes below are historical.
+
+PR #391 merged as `42c466b56feaf94796da828302d01cdc714b0156`; all eight source workflows and all eight merge-commit workflows succeeded. Its v8 public release and non-spending hosted controls were verified. A quote alone did not establish a bound payable invoice or purchased retrieval.
+
+The founder selected the estate's own bzDiD wallet and clarified that the Rust kernel is the root. PR #396 merged as `283babc42dbb7caffb1872e4fd82565d2db7edc8` after all eight workflows succeeded on source `54d8e96c4c5511fb39835da36d3390757b07034d`. The storage panel requires the first-party Rust signer, with no extension or JavaScript signing fallback. Six real-Rust fixture purchases passed across three registers and two phone widths. These are mocked-network receipts, not mainnet payments.
+
+Custody correction: Rust computes the signature, but key material and policy still share the wallet page's JavaScript realm. There is no isolated keychain frame. Independent Rust authority over custody, aggregate authorization and cross-device replay is UNVERIFIED. Claude's competing provider will not land; its PR #400 adds envelope validation, a vault pin and scoped authorization, but does not establish isolated custody. Inspect its current status before any live payment; do not duplicate or modify that owner's worktree.
+
+The 49-byte public probe remains unpaid. Its earlier 0.0002 ETH fee ceiling was only a proposal. No standing genealogy or bView budget authorizes this file. The public page's keychain was disconnected on the latest read, and a fresh payable ANT invoice has not been prepared. Connect the existing bzDiD keychain through the hosted UI, obtain a fresh bound invoice, show ANT and aggregate ETH separately, and obtain the founder's explicit bounded authorization before spending. Never request or export a seed.
+
+Latest deployment observation: Pages run `38120141518` on descendant `48c8d2416f7ad4bd46ca1054646b6a66d313a183` was queued. A public-byte check at `2026-10-11T07:31:45Z` failed for the new wallet/adapters; the site still served the older release. Five runtime/core files are unchanged between tested source and this descendant; the stack inventory has an unrelated bDrop change. Hold receipt-only main pushes while this deployment waits, to avoid superseding it again. Recheck deployment and actual bytes rather than treating this paragraph as a current receipt.
+
+Deployment coordination update: follow **38120141518 attempt 2**, rerun by bView at `2026-10-11T08:55:40Z`; attempt 1 and the documentation-only successor run `38126402218` are cancelled. Main `7a9d6e1ab` differs from the selected release only in the bDrop dispatch. bView acknowledged the founder-directed hold and the single deployment; genealogy and #400 were notified. Coordination record: https://github.com/beehive-nature/beehive-nature/pull/396#issuecomment-6107356404 . No further reruns/cancellations or receipt-only main pushes while this attempt waits. Keep checking actual run attempt, not the legacy Pages latest-build status or an old cancellation snapshot.
 
 ## User order, preserved
 

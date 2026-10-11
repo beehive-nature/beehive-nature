@@ -105,6 +105,7 @@ try {
     const quote=async()=>{await page.locator('#ant-quote-go').click();await waitForCondition(page,()=>!document.querySelector('#ant-quote-go').disabled);};
     const idle=async()=>await page.locator('#ant-quote-go').isEnabled()&&await page.locator('#ant-quote-file').isEnabled()&&await page.locator('#ant-quote-cancel').isHidden();
     await page.locator('[data-audience="public"]').click();
+    await page.locator('#ant-quote-only > summary').click();
     const fileLabel=await page.locator('label[for="ant-quote-file"]').innerText();
     check(label+' file limit comes from the Autonomi browser kit '+JSON.stringify(fileLabel),fileLabel.includes('3 bytes to 1 GB')&&fileLabel.includes("the Autonomi browser kit's limits")&&!/MiB/.test(fileLabel));
     check(label+' quote words name only addresses and sizes leaving',(await page.locator('#bpay-card').innerText()).includes('asks Autonomi storage nodes for a price using only addresses and sizes'));
@@ -142,6 +143,7 @@ try {
     await bare.goto(origin+'/surfaces/wallet.html');
     await waitForCondition(bare,()=>window.BNRWALLET&&document.querySelector('#ant-quote-file'),null,{timeout:15000});
     await bare.locator('[data-wallet-store]').click();await bare.locator('#wallet-storage a[href="#bpay-sec"]').click();
+    await bare.locator('#ant-quote-only > summary').click();
     await bare.locator('#ant-quote-file').setInputFiles({name:'public-fixture.txt',mimeType:'text/plain',buffer:Buffer.from('fixture')});
     await bare.locator('#ant-quote-go').click();await waitForCondition(bare,()=>!document.querySelector('#ant-quote-go').disabled);
     check(label+' a kit that does not load restores the controls',(await bare.locator('#ant-quote-status').innerText())==='Quote unavailable: the Autonomi browser kit did not load. Reload and try again.'&&await bare.locator('#ant-quote-file').isEnabled());

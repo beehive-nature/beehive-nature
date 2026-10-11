@@ -6,6 +6,7 @@
   "bearth.html",
   "bfactory.html",
   "bfood.html",
+  "bheraldry.html",
   "bigen.html",
   "biq.html",
   "blanguage.html",
@@ -70,12 +71,15 @@
   "kandi.html",
   "keys/addresses.html",
   "listening.html",
+  "mission-room.html",
+  "missions.html",
   "music.html",
   "onboarding/index.html",
   "onboarding/receive.html",
   "or-board.html",
   "plur.html",
   "profile.html",
+  "receipts.html",
   "recover.html",
   "review.html",
   "royalguard.html",
@@ -83,8 +87,5 @@
   "university/index.html",
   "vending.html",
   "wallet.html",
-  "watch.html",
-  "missions.html",
-  "mission-room.html",
-  "receipts.html"
+  "watch.html"
 ]
