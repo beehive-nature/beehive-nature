@@ -103,14 +103,14 @@ pub struct GenesisOp {
     pub valid_until: u64,
 }
 
-fn card_to_value(c: &KeyCard) -> DagValue {
+pub(crate) fn card_to_value(c: &KeyCard) -> DagValue {
     DagValue::Map(vec![
         ("alg".into(), DagValue::text(c.alg.id())),
         ("key".into(), DagValue::Bytes(c.key.clone())),
     ])
 }
 
-fn card_from_value(v: &DagValue) -> Result<KeyCard, BzDidError> {
+pub(crate) fn card_from_value(v: &DagValue) -> Result<KeyCard, BzDidError> {
     let m = v
         .as_map()
         .ok_or_else(|| BzDidError::NotAGenesisOp("a key card is not a map".into()))?;
@@ -132,7 +132,7 @@ fn card_from_value(v: &DagValue) -> Result<KeyCard, BzDidError> {
     KeyCard::new(KeyAlg::parse(alg)?, key.to_vec())
 }
 
-fn strings_from_value(v: &DagValue, what: &str) -> Result<Vec<String>, BzDidError> {
+pub(crate) fn strings_from_value(v: &DagValue, what: &str) -> Result<Vec<String>, BzDidError> {
     let arr = v
         .as_array()
         .ok_or_else(|| BzDidError::NotAGenesisOp(format!("{what} is not an array")))?;
@@ -157,31 +157,31 @@ fn strings_from_value(v: &DagValue, what: &str) -> Result<Vec<String>, BzDidErro
 }
 
 impl DagValue {
-    fn as_map(&self) -> Option<&[(String, DagValue)]> {
+    pub(crate) fn as_map(&self) -> Option<&[(String, DagValue)]> {
         match self {
             DagValue::Map(m) => Some(m),
             _ => None,
         }
     }
-    fn as_array(&self) -> Option<&[DagValue]> {
+    pub(crate) fn as_array(&self) -> Option<&[DagValue]> {
         match self {
             DagValue::Array(a) => Some(a),
             _ => None,
         }
     }
-    fn as_text(&self) -> Option<&str> {
+    pub(crate) fn as_text(&self) -> Option<&str> {
         match self {
             DagValue::Text(s) => Some(s),
             _ => None,
         }
     }
-    fn as_bytes(&self) -> Option<&[u8]> {
+    pub(crate) fn as_bytes(&self) -> Option<&[u8]> {
         match self {
             DagValue::Bytes(b) => Some(b),
             _ => None,
         }
     }
-    fn as_u64(&self) -> Option<u64> {
+    pub(crate) fn as_u64(&self) -> Option<u64> {
         match self {
             DagValue::UInt(n) => Some(*n),
             _ => None,

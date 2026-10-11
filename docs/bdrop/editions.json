@@ -1,0 +1,20 @@
+{
+  "v": 1,
+  "what": "approved bDroP editions — the desk reads this index same-origin; a founder never shuttles files between sessions",
+  "law": "an edition lands here only after its bytes verify against the reported SHA-256; publication status lives on the chain and in the desk's outbox, never silently rewritten here; corrections fork new editions, never mutate an approved one",
+  "editions": [
+    {
+      "id": "0001",
+      "title": "bDroP 0001 — Genesis: Public Evidence, Informed Consent",
+      "author": "loviswater",
+      "permlink": "bdrop-0001-genesis-public-evidence-informed-consent",
+      "tags": ["hive"],
+      "path": "docs/bdrop/0001-genesis.md",
+      "sha256": "9fa6998d548e8f4afd0a7e17fa2a11ea50a0db18b1808d74f985931ff6d825e9", "scan": "PUBLIC-CONSTANT: public edition digest, reported by the preparing session and verified at intake",
+      "bytes": 9735,
+      "disclosure_version": "bdrop-0001-disclosure-v1",
+      "provenance": "recovered by the reviewer from the founder's Library 2026-10-10; verified byte-exact (9,735 bytes, SHA-256 equals the digest reported by the preparing session and embedded in surfaces/bdrop.html since 6119d104a)",
+      "status": "approved — awaiting the founder's publication gesture"
+    }
+  ]
+}

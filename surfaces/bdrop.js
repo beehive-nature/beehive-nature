@@ -1,29 +1,39 @@
-/* bdrop.js — the drop desk's hands. No storage, no telemetry, no gating:
-   the page informs at the point of use, the founder's single click executes.
-   The posting key signs in this tab and is wiped the moment the signature
-   exists; only the signed transaction travels, to the endpoint named on the page. */
+/* bdrop.js v2 — the drop desk's durable lifecycle.
+   prepared → authorized → signed → submitted → confirmed → reconciled.
+   The browser is a client, never the sole keeper: recoverable state (scope,
+   body bytes, the signed transaction, the event log) persists in localStorage
+   BEFORE submission and never contains a secret; a restart or a lost RPC
+   response reconciles against the chain first — a landed drop is confirmed,
+   never re-published; a diverged permlink is reported, never edited; an
+   unexpired signed transaction re-broadcasts byte-identically without the key.
+   Key custody follows the estate's wallet law: held as zeroable bytes in tab
+   memory, bound to one authorization scope, never persisted, never logged,
+   never sent — only the signed transaction travels. */
 (function(){
 'use strict';
 var $=function(id){return document.getElementById(id)};
 if(!window.hiveTx){
-  var pb=$('publish');if(pb)pb.disabled=true;
+  var pb0=$('publish');if(pb0)pb0.disabled=true;
   var st0=$('status');
   if(st0)st0.innerHTML='<span class="bad">the signing library did not load (onboarding/vendor/hive-tx.min.js). the desk cannot act — nothing was attempted.</span>';
   return;
 }
 var H=window.hiveTx;
 var DISCLOSURE_VERSION='bdrop-0001-disclosure-v1';
-var receiptState=null;
-
-function log(msg,cls){
-  var box=$('status');
-  var line=document.createElement('div');
-  if(cls)line.className=cls;
-  line.textContent=new Date().toISOString().slice(11,19)+' '+msg;
-  box.appendChild(line);box.scrollTop=box.scrollHeight;
+var OUTBOX_KEY='bnr.bdrop.outbox.v1';
+var EDITIONS_URL='../docs/bdrop/editions.json';
+var ANT_KIT='/vendor/ant-browser-sdk/0.1.1/';
+var RECEIPT_NEVER=['content','text','payload','plaintext','wif','key','secret'];
+/* bMeter shape: events and references, never contents (bchat-core law) */
+function ev(event,ref,meta){
+  var r={event:event,ref:ref,ts:Date.now()};
+  if(meta&&typeof meta==='object')Object.keys(meta).forEach(function(k){
+    if(RECEIPT_NEVER.indexOf(k)<0)r[k]=meta[k];
+  });
+  return r;
 }
 
-/* bytes: a loaded file is hashed verbatim; a paste is hashed as its UTF-8 bytes */
+/* ─── storage: bytes verbatim from a file, UTF-8 from a paste ─── */
 var bodyBytes=null, bodyFrom=null;
 function currentBytes(){
   if(bodyFrom==='file'&&bodyBytes)return bodyBytes;
@@ -34,6 +44,108 @@ async function sha256Hex(buf){
   var d=await crypto.subtle.digest('SHA-256',buf);
   return Array.prototype.map.call(new Uint8Array(d),function(b){return('0'+b.toString(16)).slice(-2)}).join('');
 }
+function log(msg,cls){
+  var box=$('status');
+  var line=document.createElement('div');
+  if(cls)line.className=cls;
+  line.textContent=new Date().toISOString().slice(11,19)+' '+msg;
+  box.appendChild(line);box.scrollTop=box.scrollHeight;
+}
+
+/* ─── the key session: zeroable bytes + one bound scope ─── */
+var KEY={bytes:null,pub:null,scopeHash:null};
+function canonicalScope(scope){
+  return JSON.stringify(Object.keys(scope).sort().map(function(k){return[k,scope[k]]}));
+}
+async function currentScope(bodyHash){
+  return {
+    author:$('author').value.trim().toLowerCase(),
+    permlink:slug($('permlink').value),
+    title:$('title').value.trim(),
+    parent_permlink:($('tags').value.split(/[\s,]+/).filter(Boolean)[0]||'hive'),
+    tags:$('tags').value.split(/[\s,]+/).filter(Boolean).join(','),
+    body_sha256:bodyHash,
+    body_bytes:currentBytes()?currentBytes().length:0,
+    disclosure_version:DISCLOSURE_VERSION,
+    rpc:$('rpc').value.trim().replace(/\/+$/,'')
+  };
+}
+async function bindKey(wif,scope){
+  var pk;
+  try{pk=H.PrivateKey.from(wif);}
+  catch(e){return{err:'the key does not read as a WIF ('+e.message+') — nothing was sent.'};}
+  var bytes=pk.key;               /* raw 32-byte seed, held zeroable */
+  var pub=String(pk.createPublic());
+  KEY.bytes=bytes;KEY.pub=pub;
+  KEY.scopeHash=await sha256Hex(new TextEncoder().encode(canonicalScope(scope)));
+  $('wif').value='';               /* the string copy dies with the field */
+  return{pub:pub};
+}
+async function scopeMatches(scope){
+  if(!KEY.bytes)return false;
+  return KEY.scopeHash===await sha256Hex(new TextEncoder().encode(canonicalScope(scope)));
+}
+function wipe(){
+  if(KEY.bytes){KEY.bytes.fill(0);KEY.bytes=null;}
+  KEY.pub=null;KEY.scopeHash=null;
+  $('wif').value='';
+  renderKeySession();
+  log('key session wiped: held bytes zeroed, references dropped. wiped-by-construction, not proven-erasure.','dim');
+}
+function renderKeySession(){
+  var v=$('keysession');
+  if(!KEY.bytes){v.hidden=true;return;}
+  v.hidden=false;
+  v.className='verdict match';
+  v.textContent='key session live · '+KEY.pub+' · bound to this scope (permlink + body digest + disclosure version + endpoint). a scope change requires the key again.';
+}
+
+/* ─── the outbox: recoverable state, persisted before submission ─── */
+function loadOutbox(){
+  try{var a=JSON.parse(localStorage.getItem(OUTBOX_KEY)||'[]');return Array.isArray(a)?a:[];}
+  catch(e){return[];}
+}
+function saveOutbox(a){localStorage.setItem(OUTBOX_KEY,JSON.stringify(a));}
+function findRec(a,scope){return a.find(function(r){return r.id==='@'+scope.author+'/'+scope.permlink;});}
+function upsert(a,scope,mut){
+  var r=findRec(a,scope);
+  if(!r){r={v:1,id:'@'+scope.author+'/'+scope.permlink,created_at:new Date().toISOString(),stage:'prepared',events:[],signed_tx:null,body:null,receipt:null,attempts:0,last_error:null};a.push(r);}
+  r.scope=scope;r.updated_at=new Date().toISOString();
+  if(mut)mut(r);
+  saveOutbox(a);
+  renderOutbox(a);
+  return r;
+}
+function renderOutbox(a){
+  a=a||loadOutbox();
+  var box=$('outbox');
+  if(!a.length){box.innerHTML='<span class="dim">the outbox is empty — no recoverable state yet.</span>';$('rebroadcast').hidden=true;return;}
+  box.innerHTML='';
+  a.forEach(function(r){
+    var line=document.createElement('div');
+    var tone=r.stage==='confirmed'||r.stage==='reconciled'?'ok':(r.stage==='diverged'?'bad':'dim');
+    if(tone)line.className=tone;
+    line.textContent=r.id+' · '+r.stage+(r.receipt&&r.receipt.block_num?' · block '+r.receipt.block_num:'')+' · '+r.events.length+' events · updated '+String(r.updated_at||'').slice(11,19)+(r.last_error?' · last error: '+r.last_error:'');
+    box.appendChild(line);
+  });
+  var pend=a.find(function(r){return (r.stage==='signed'||r.stage==='submitted')&&r.signed_tx&&!expired(r.signed_tx);});
+  $('rebroadcast').hidden=!pend;
+}
+function expired(signedTx){
+  try{return Date.parse((signedTx&&signedTx.expiration||'')+'Z')<Date.now();}catch(e){return true;}
+}
+
+/* ─── rpc ─── */
+async function rpcCall(endpoint,method,params){
+  var r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({jsonrpc:'2.0',id:1,method:method,params:params})});
+  if(!r.ok)throw new Error('rpc http '+r.status);
+  var j=await r.json();
+  if(j.error)throw new Error('rpc error: '+(j.error.message||JSON.stringify(j.error)));
+  return j.result;
+}
+
+/* ─── hash verdict ─── */
 var lastHash='';
 async function rehash(){
   var b=currentBytes(),v=$('hashverdict'),lh=$('livehash');
@@ -46,134 +158,358 @@ async function rehash(){
   else if(exp===lastHash){v.textContent='MATCH · '+b.length.toLocaleString()+' bytes · sha-256 '+lastHash+sizeNote;v.className='verdict match';}
   else{v.textContent='DIFFERS · '+b.length.toLocaleString()+' bytes · computed '+lastHash+' ≠ expected '+exp+' · publishing stays your call'+sizeNote;v.className='verdict differs';}
 }
-$('body').addEventListener('input',function(){bodyFrom='paste';bodyBytes=null;rehash();});
-$('expected').addEventListener('input',rehash);
-$('bodyfile').addEventListener('change',function(ev){
-  var f=ev.target.files&&ev.target.files[0];
-  if(!f)return;
-  f.arrayBuffer().then(function(ab){
-    bodyBytes=ab;bodyFrom='file';
-    $('body').value=new TextDecoder().decode(ab);
-    rehash();
-  }).catch(function(e){log('file read failed: '+e.message,'bad');});
-});
 
-function wipe(){
-  $('wif').value='';
-  log('posting key wiped from the field.','dim');
+/* ─── approved editions, discoverable through the surface ─── */
+async function loadEditions(){
+  var box=$('editions');
+  try{
+    var r=await fetch(EDITIONS_URL);
+    if(!r.ok)throw new Error('http '+r.status);
+    var j=await r.json();
+    box.innerHTML='';
+    (j.editions||[]).forEach(function(e){
+      var row=document.createElement('div');row.className='row';row.style.margin='var(--s2) 0';
+      var txt=document.createElement('span');txt.className='law';
+      txt.textContent=e.id+' · '+e.title+' · '+e.bytes.toLocaleString()+' bytes · sha-256 '+String(e.sha256).slice(0,16)+'… · '+e.status;
+      var b=document.createElement('button');b.type='button';b.textContent='load into the desk';
+      b.onclick=async function(){
+        try{
+          var rr=await fetch('../'+e.path.replace(/^docs\//,'docs/'));
+          if(!rr.ok)throw new Error('http '+rr.status);
+          var ab=await rr.arrayBuffer();
+          bodyBytes=new Uint8Array(ab);bodyFrom='file';
+          $('body').value=new TextDecoder().decode(ab);
+          $('author').value=e.author;$('permlink').value=e.permlink;$('title').value=e.title;$('tags').value=(e.tags||['hive']).join(',');
+          $('expected').value=e.sha256;
+          await rehash();
+          log('edition '+e.id+' loaded — '+e.bytes.toLocaleString()+' bytes, hashed verbatim against the approved digest.','dim');
+        }catch(err){log('edition load failed: '+err.message,'bad');}
+      };
+      row.appendChild(txt);row.appendChild(b);
+      box.appendChild(row);
+    });
+    if(!(j.editions||[]).length)box.textContent='no approved editions yet.';
+  }catch(e){box.textContent='the editions index did not load ('+e.message+'). the paste and file paths still work.';}
 }
-$('wipe').addEventListener('click',wipe);
-window.addEventListener('beforeunload',wipe);
 
+/* ─── reconciliation: the chain is read FIRST, never re-signed blind ─── */
+async function reconcileOne(a,r,quiet){
+  var s=r.scope;
+  var c;
+  try{c=await rpcCall(s.rpc,'condenser_api.get_content',{author:s.author,permlink:s.permlink});}
+  catch(e){r.last_error='reconcile lookup failed: '+e.message;if(!quiet)log(r.id+' — reconcile lookup failed: '+e.message,'bad');saveOutbox(a);return r;}
+  if(c&&c.body&&c.body.length){
+    var pubHash=await sha256Hex(new TextEncoder().encode(c.body));
+    if(pubHash===s.body_sha256){
+      r.stage='confirmed';
+      r.receipt=assembleReceipt(r,c,pubHash,null);
+      r.events.push(ev('reconciled','chain:'+c.block_num,{from:'recovery',body_byte_compare:'MATCH'}));
+      r.last_error=null;
+      if(!quiet)log(r.id+' — reconciled against the chain: landed in block '+c.block_num+', byte-compare MATCH. no re-publication.','ok');
+    }else{
+      r.stage='diverged';
+      r.events.push(ev('diverged','chain:'+c.block_num,{body_sha256_chain:pubHash}));
+      if(!quiet)log(r.id+' — DIVERGED: the permlink exists with different bytes. the desk refuses to edit; both digests ride the record.','bad');
+    }
+  }else{
+    if(!quiet)log(r.id+' — not landed on the chain. '+(r.signed_tx?(expired(r.signed_tx)?'the signed transaction expired; a fresh signature needs the key.':'an unexpired signed transaction is held — re-broadcast needs no key.'):'no signed transaction held.'),'dim');
+  }
+  r.updated_at=new Date().toISOString();
+  saveOutbox(a);renderOutbox(a);
+  return r;
+}
+async function reconcileAll(quiet){
+  var a=loadOutbox();
+  for(var i=0;i<a.length;i++){
+    var r=a[i];
+    if(r.stage==='signed'||r.stage==='submitted'||(r.stage==='confirmed'&&!r.receipt)){
+      await reconcileOne(a,r,quiet);
+    }else if(r.stage==='diverged'){
+      if(!quiet)log(r.id+' — diverged. the desk will not edit an existing edition; fork a new permlink for corrections.','dim');
+    }
+  }
+  return a;
+}
+
+function assembleReceipt(r,c,pubHash,txid){
+  return {
+    v:2,what:'bDroP publication receipt',chain:'hive-mainnet',
+    author:r.scope.author,permlink:r.scope.permlink,title:r.scope.title,
+    body_sha256_signed:r.scope.body_sha256,body_sha256_published:pubHash,
+    body_bytes:r.scope.body_bytes,
+    body_byte_compare:(pubHash===r.scope.body_sha256)?'MATCH':'DIFFERS',
+    txid:txid||(r.receipt&&r.receipt.txid)||'not returned by endpoint',
+    block_num:c?c.block_num:null,created:c?c.created:null,
+    rpc_endpoint:r.scope.rpc,disclosure_version:r.scope.disclosure_version,
+    surface:'surfaces/bdrop.html',signed_at:r.created_at,
+    events:r.events
+  };
+}
+
+/* ─── the gesture ─── */
 function slug(s){return s.toLowerCase().trim().replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'');}
-function firstTag(){return $('tags').value.split(/[\s,]+/).filter(Boolean)[0]||'hive';}
-function jsonMetadata(){
-  var tags=$('tags').value.split(/[\s,]+/).filter(Boolean);
-  return JSON.stringify({tags:tags.length?tags:['hive'],app:'bnr/bdrop/1.0',format:'markdown',disclosure_version:DISCLOSURE_VERSION});
+function jsonMetadata(tags){
+  return JSON.stringify({tags:tags&&tags.length?tags:['hive'],app:'bnr/bdrop/2.0',format:'markdown',disclosure_version:DISCLOSURE_VERSION});
 }
-async function rpcCall(endpoint,method,params){
-  var r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({jsonrpc:'2.0',id:1,method:method,params:params})});
-  if(!r.ok)throw new Error('rpc http '+r.status);
-  var j=await r.json();
-  if(j.error)throw new Error('rpc error: '+(j.error.message||JSON.stringify(j.error)));
-  return j.result;
-}
-
 $('publish').addEventListener('click',async function(){
   $('status').innerHTML='';
-  var author=$('author').value.trim().toLowerCase();
-  var permlink=slug($('permlink').value)||('bdrop-'+Date.now());
-  var title=$('title').value.trim();
   var body=$('body').value;
-  var rpc=$('rpc').value.trim().replace(/\/+$/,'');
   var wif=$('wif').value.trim();
   if(!body){log('no body — nothing to publish, nothing attempted.','bad');return;}
-  if(!wif){log('no posting key given — nothing attempted, nothing sent.','bad');return;}
-  var key;
-  try{
-    key=H.PrivateKey.from(wif);
-    log('key read locally; derived public key '+String(key.createPublic())+' — shown once, never stored.','dim');
-  }catch(e){
-    log('the key does not read as a WIF ('+e.message+'). nothing was sent.','bad');return;
-  }
   if(!lastHash)await rehash();
-  var bodyHash=lastHash, bodyLen=currentBytes().length;
-  log('gesture accepted — body hashed before your eyes: sha-256 '+bodyHash+' · '+bodyLen.toLocaleString()+' bytes.');
-  var op=['comment',{parent_author:'',parent_permlink:firstTag(),author:author,permlink:permlink,
-    title:title,body:body,json_metadata:jsonMetadata()}];
+  var bodyHash=lastHash;
+  var scope=await currentScope(bodyHash);
+  if(!scope.permlink)scope.permlink='bdrop-'+Date.now();
+  var a=loadOutbox();
+  var existing=findRec(a,scope);
+  if(existing&&existing.stage==='diverged'){
+    log('this permlink diverged already — the desk refuses to edit an existing edition. fork a new permlink.','bad');return;
+  }
+  /* prepared: recoverable state persists before any network step or key */
+  upsert(a,scope,function(r){r.body=body;if(!r.events.length)r.events.push(ev('prepared',scope.body_sha256));});
+  /* pre-flight: the chain is read before any signature — duplicates reconcile, divergences refuse */
+  var pre;
+  try{pre=await rpcCall(scope.rpc,'condenser_api.get_content',{author:scope.author,permlink:scope.permlink});}
+  catch(e){log('pre-flight lookup failed ('+e.message+'). the desk will not sign blind — retry when the endpoint answers.','bad');return;}
+  if(pre&&pre.body&&pre.body.length){
+    var preHash=await sha256Hex(new TextEncoder().encode(pre.body));
+    if(preHash===scope.body_sha256){
+      var rr=upsert(a,scope,function(r){r.stage='confirmed';r.receipt=assembleReceipt(r,pre,preHash,null);r.events.push(ev('reconciled','chain:'+pre.block_num,{from:'preflight-duplicate'}));});
+      log('already published — identical bytes confirmed in block '+pre.block_num+'. no new signature, no re-publication.','ok');
+      renderReceipt(rr);return;
+    }
+    upsert(a,scope,function(r){r.stage='diverged';r.events.push(ev('diverged','chain:'+pre.block_num,{body_sha256_chain:preHash}));});
+    log('the permlink exists with DIFFERENT bytes — the desk refuses to edit an existing edition. fork a new permlink for corrections.','bad');
+    return;
+  }
+  if(!wif&&!KEY.bytes){log('no posting key given — nothing attempted, nothing sent.','bad');return;}
+  if(KEY.bytes&&!(await scopeMatches(scope))){
+    log('the key session is bound to a different scope (permlink, body, endpoint or disclosure changed) — present the key again for the new scope. authority never expands silently.','bad');return;
+  }
+  var keyObj=null;
+  if(wif){
+    var bnd=await bindKey(wif,scope);
+    if(bnd.err){log(bnd.err,'bad');return;}
+    log('key accepted locally; derived public key '+bnd.pub+' — shown once, never stored.','dim');
+  }
+  try{keyObj=H.PrivateKey.from(KEY.bytes);}catch(e){log('held key bytes failed to reconstruct ('+e.message+').','bad');return;}
+  renderKeySession();
+  log('gesture accepted — body hashed before your eyes: sha-256 '+scope.body_sha256+' · '+scope.body_bytes.toLocaleString()+' bytes.');
+  var rec=upsert(a,scope,function(r){r.body=body;r.stage='authorized';r.events.push(ev('authorized',KEY.scopeHash,{pub:KEY.pub}));});
+  var op=['comment',{parent_author:'',parent_permlink:scope.parent_permlink,author:scope.author,permlink:scope.permlink,
+    title:scope.title,body:body,json_metadata:jsonMetadata(scope.tags?scope.tags.split(','):null)}];
   $('opjson').textContent=JSON.stringify(op,null,1);
-  H.config.node=rpc;
+  H.config.node=scope.rpc;
   var tx=new H.Transaction([op]);
   try{
-    log('building the transaction against '+rpc+' (reference block, expiration)…');
+    log('building the transaction against '+scope.rpc+' (reference block, expiration)…');
     await tx.create([op]);
     log('signing in this tab…');
-    tx.sign(key);
-    var txidLocal=tx.txId||null; /* computed client-side over the serialized bytes */
-    $('txjson').textContent=JSON.stringify(tx.signedTransaction||tx.transaction,null,1);
-    $('wif').value=''; /* the key dies the moment the signature exists */
-    log('posting key wiped. broadcasting the signed transaction — the key does not travel.','dim');
-    var res=await tx.broadcast();
+    tx.sign(keyObj);
+    var txidLocal=tx.txId||null;
+    var signedTx=JSON.parse(JSON.stringify(tx.signedTransaction||tx.transaction));
+    /* persist BEFORE submission — the outbox is the record, not this page's memory */
+    rec=upsert(a,scope,function(r){r.signed_tx=signedTx;r.stage='signed';r.events.push(ev('signed',txidLocal||'held',{expiration:signedTx.expiration}));});
+    $('txjson').textContent=JSON.stringify(signedTx,null,1);
+    log('signed transaction persisted to the outbox BEFORE submission — a restart reconciles instead of losing or duplicating the gesture.','dim');
+    rec=upsert(a,scope,function(r){r.attempts=(r.attempts||0)+1;});
+    log('broadcasting the signed transaction — the key does not travel.','dim');
+    var res;
+    try{res=await tx.broadcast();}
+    catch(e){
+      rec=upsert(a,scope,function(r){r.stage='submitted';r.last_error='broadcast: '+(e&&e.message?e.message:e);r.events.push(ev('submitted','outcome-unknown',{error:r.last_error}));});
+      log('the broadcast ANSWER was lost or refused ('+(e&&e.message?e.message:e)+'). the state is submitted-outcome-unknown — reconciliation reads the chain before anything is signed again.','bad');
+      await confirmFromChain(a,rec,scope);
+      return;
+    }
     var txid=txidLocal||((typeof res==='string'&&res)?res:((res&&(res.id||res.result))||null));
+    rec=upsert(a,scope,function(r){r.stage='submitted';r.last_error=null;r.events.push(ev('submitted',txid||'no-id'));});
     if(txid)log('broadcast accepted. transaction id '+txid,'ok');
-    else log('broadcast accepted (endpoint returned no id — the block lookup below is the receipt).','ok');
-    await confirm(author,permlink,title,bodyHash,bodyLen,txid,rpc);
+    else log('broadcast accepted (endpoint returned no id — the chain lookup below is the receipt).','ok');
+    await confirmFromChain(a,rec,scope,txid);
   }catch(e){
-    $('wif').value='';
+    upsert(a,scope,function(r){r.last_error='gesture: '+(e&&e.message?e.message:e);});
     log('the gesture failed: '+(e&&e.message?e.message:e)+' — nothing further attempted. the desk never claims a send it cannot see.','bad');
   }
 });
 
-async function confirm(author,permlink,title,bodyHash,bodyLen,txid,rpc){
+async function confirmFromChain(a,rec,scope,txid){
   var box=$('receipt');
+  var fast=(location.hash||'').indexOf('fast')>=0; /* the committed regression suite runs the same loop on a fast clock */
+  var tries=fast?15:30, delay=fast?300:4000;
   box.innerHTML='<span class="dim">waiting for the chain to land the drop…</span>';
-  for(var i=1;i<=30;i++){
-    await new Promise(function(r){setTimeout(r,4000)});
+  for(var i=1;i<=tries;i++){
+    await new Promise(function(r){setTimeout(r,delay)});
     var c;
-    try{c=await rpcCall(rpc,'condenser_api.get_content',{author:author,permlink:permlink});}
+    try{c=await rpcCall(scope.rpc,'condenser_api.get_content',{author:scope.author,permlink:scope.permlink});}
     catch(e){log('lookup '+i+' failed: '+e.message,'dim');continue;}
     if(c&&c.body&&c.body.length){
       var pubHash=await sha256Hex(new TextEncoder().encode(c.body));
-      var match=pubHash===bodyHash;
-      receiptState={v:1,what:'bDroP publication receipt',chain:'hive-mainnet',author:author,permlink:permlink,
-        title:title,body_sha256_signed:bodyHash,body_sha256_published:pubHash,body_bytes:bodyLen,
-        body_byte_compare:match?'MATCH':'DIFFERS',txid:txid||'not returned by endpoint',block_num:c.block_num,
-        created:c.created,rpc_endpoint:rpc,disclosure_version:DISCLOSURE_VERSION,
-        surface:'surfaces/bdrop.html',signed_at:new Date().toISOString()};
-      var u='https://hive.blog/@'+author+'/'+permlink;
-      $('permlinkurl').href=u;
-      $('permlinkurl').textContent='the drop on hive.blog — '+u+' (opens a new tab)';
-      $('permwrap').hidden=false;$('download').hidden=false;
-      box.innerHTML='';
-      var ok=document.createElement('div');ok.className='ok';
-      ok.textContent='LANDED · block '+c.block_num+' · created '+c.created+' · published body sha-256 '+pubHash+' · byte-compare '+(match?'MATCH':'DIFFERS');
-      box.appendChild(ok);
-      if(!match){
-        var bad=document.createElement('div');bad.className='bad';
-        bad.textContent='the published bytes differ from the signed bytes — both digests ride the receipt; the signed digest is the edition\u2019s.';
-        box.appendChild(bad);
+      var match=pubHash===scope.body_sha256;
+      var done=upsert(a,scope,function(r){
+        r.stage=match?'confirmed':'diverged';
+        r.receipt=assembleReceipt(r,c,pubHash,txid);
+        r.events.push(ev('confirmed','chain:'+c.block_num,{body_byte_compare:match?'MATCH':'DIFFERS'}));
+      });
+      renderReceipt(done);
+      if(match){
+        var u='https://hive.blog/@'+scope.author+'/'+scope.permlink;
+        $('permlinkurl').href=u;
+        $('permlinkurl').textContent='the drop on hive.blog — '+u+' (opens a new tab)';
+        $('permwrap').hidden=false;$('download').hidden=false;$('bundle').hidden=false;$('preserve-ant').hidden=false;
+        log('receipt complete. the chain — not prose — is the proof; the outbox and the tree are mirrors.','ok');
+      }else{
+        log('the published bytes DIFFER from the signed bytes — both digests ride the record; the signed digest is the edition\u2019s.','bad');
       }
-      var meta=document.createElement('div');meta.className='dim';
-      meta.textContent='transaction id: '+(txid||'not returned by this endpoint — the block number and permlink are the durable receipt');
-      box.appendChild(meta);
-      log('receipt complete. land it in the estate tree — the chain, not prose, is the proof.','ok');
       return;
     }
     log('lookup '+i+': not landed yet ('+(30-i)+' tries left).','dim');
   }
-  box.innerHTML='<span class="bad">not seen in 30 lookups (about two minutes). this is a lookup timeout, NOT proof of failure or success — check the permlink by hand before retrying: after a landing, a retry edits the post, it does not repost it.</span>';
+  box.innerHTML='<span class="bad">not seen in 30 lookups (about two minutes). this is a lookup timeout, NOT proof of failure or success — reconcile now or after a restart; the chain is read before anything is signed again.</span>';
 }
 
+function renderReceipt(r){
+  var box=$('receipt');
+  box.innerHTML='';
+  var rc=r.receipt;if(!rc){box.textContent='no receipt on this record yet.';return;}
+  var head=document.createElement('div');
+  head.className=(rc.body_byte_compare==='MATCH')?'ok':'bad';
+  head.textContent=(r.stage==='diverged'?'DIVERGED':'LANDED')+' · block '+rc.block_num+' · created '+rc.created+' · body sha-256 '+rc.body_sha256_published+' · byte-compare '+rc.body_byte_compare;
+  box.appendChild(head);
+  var meta=document.createElement('div');meta.className='dim';
+  meta.textContent='transaction id: '+rc.txid+' · events: '+r.events.map(function(e){return e.event;}).join(' → ');
+  box.appendChild(meta);
+}
+
+/* ─── re-broadcast: the held signed bytes, no key needed ─── */
+$('rebroadcast').addEventListener('click',async function(){
+  var a=loadOutbox();
+  var r=a.find(function(x){return (x.stage==='signed'||x.stage==='submitted')&&x.signed_tx&&!expired(x.signed_tx);});
+  if(!r){log('no unexpired signed transaction to re-broadcast.','bad');return;}
+  var s=r.scope;
+  H.config.node=s.rpc;
+  var tx=new H.Transaction([]);
+  tx.created=true;tx.transaction=r.signed_tx;tx.signedTransaction=r.signed_tx;tx.txId=r.signed_tx.txId||null;
+  try{
+    log('re-broadcasting the held signed bytes for '+r.id+' — byte-identical, no key involved.','dim');
+    await tx.broadcast();
+    r.stage='submitted';r.events.push(ev('submitted','rebroadcast'));r.updated_at=new Date().toISOString();
+    saveOutbox(a);renderOutbox(a);
+    await confirmFromChain(a,r,s,null);
+  }catch(e){
+    r.last_error='rebroadcast: '+(e&&e.message?e.message:e);saveOutbox(a);renderOutbox(a);
+    log('re-broadcast failed: '+r.last_error,'bad');
+  }
+});
+$('reconcile').addEventListener('click',async function(){$('status').innerHTML='';await reconcileAll(false);});
+
+/* ─── receipt download + the preservation bundle ─── */
+var lastRec=null;
+var _renderReceipt=renderReceipt;
+renderReceipt=function(r){lastRec=r;_renderReceipt(r);};
 $('download').addEventListener('click',function(){
-  if(!receiptState)return;
-  var blob=new Blob([JSON.stringify(receiptState,null,2)],{type:'application/json'});
+  if(!lastRec||!lastRec.receipt)return;
+  var blob=new Blob([JSON.stringify(lastRec.receipt,null,2)],{type:'application/json'});
   var a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download='bdrop-receipt-'+receiptState.permlink+'.json';
+  a.download='bdrop-receipt-'+lastRec.scope.permlink+'.json';
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href)},2000);
+});
+function bundleBytes(rec){
+  var manifest={
+    v:1,what:'bDroP preservation bundle',
+    edition:{permlink:rec.scope.permlink,sha256:rec.scope.body_sha256,bytes:rec.scope.body_bytes,disclosure_version:rec.scope.disclosure_version},
+    receipt_sha256:null,edition_body_sha256:rec.scope.body_sha256,composed_at:new Date().toISOString()
+  };
+  var receiptJson=JSON.stringify(rec.receipt,null,2);
+  return {manifest:manifest,receipt:receiptJson,edition_body:rec.body,
+    all:JSON.stringify({manifest:manifest,receipt:rec.receipt,edition_body:rec.body},null,2)};
+}
+$('bundle').addEventListener('click',function(){
+  if(!lastRec||!lastRec.receipt)return;
+  var b=bundleBytes(lastRec);
+  var blob=new Blob([b.all],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='bdrop-bundle-'+lastRec.scope.permlink+'.json';
   a.click();
   setTimeout(function(){URL.revokeObjectURL(a.href)},2000);
 });
 
+/* hosted ANT preservation — Agent 20's shared module (ant-pay.js), the
+   bpay-invoice pattern: priced invoice, the founder's wallet signs, ceilings
+   enforced by the module, nothing spent silently. */
+$('preserve-ant').addEventListener('click',async function(){
+  var ps=$('pstatus');ps.hidden=false;
+  var line=function(t,cls){ps.innerHTML='';var d=document.createElement('div');if(cls)d.className=cls;d.textContent=t;ps.appendChild(d);};
+  if(!lastRec||!lastRec.receipt||lastRec.stage!=='confirmed'){line('preservation needs a confirmed drop first.','bad');return;}
+  if(!window.AntPay){line('the hosted purchaser module (ant-pay.js) did not load — preservation unavailable, nothing attempted.','bad');return;}
+  if(!window.ethereum){line('no EVM wallet detected — the hosted ANT purchase needs your wallet to sign the priced invoice. nothing was attempted or spent.','bad');return;}
+  var rec=lastRec;
+  try{
+    line('composing the bundle and loading the Autonomi browser kit…','dim');
+    var b=bundleBytes(rec);
+    var bytes=new Text8ToU8(b.all);
+    var sha=await sha256Hex(bytes);
+    var file=new File([bytes],'bdrop-bundle-'+rec.scope.permlink+'.json',{type:'application/json'});
+    var kit=await import(ANT_KIT+'index.js');
+    var defaults=await kit.getNetworkDefaults({});
+    var client=await kit.AutonomiClient.connect({});
+    var requestId=0;
+    var rpc=async function(method,params){
+      var r=await fetch(defaults.rpcUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:++requestId,method:method,params:params})});
+      if(!r.ok)throw new Error('payment rpc unavailable');
+      var j=await r.json();if(j.error)throw new Error('payment rpc refused '+method);return j.result;
+    };
+    var payer=window.AntPay.createHosted({artifact:{name:file.name,sha256:sha,bytes:file.size},network:defaults.payment,storage:localStorage,rpc:rpc,ethereum:window.ethereum});
+    await payer.retryUnpaid();
+    line('asking Autonomi for the price of '+file.size.toLocaleString()+' bytes — nothing is signed yet.','dim');
+    var paid=await client.upload(file,{visibility:'public',paymentMode:'single',payment:{
+      pay:async function(network,quotes,context){
+        var inv=await payer.invoice(network,quotes,'20000000000000000',null);
+        line('invoice ready: review it in your wallet before signing. aggregate ceilings are enforced by the shared module.','dim');
+        var out=await payer.provider(inv.id).pay(network,quotes,context);
+        return out;
+      },
+      recover:function(network,quotes,attempt,context){return payer.provider(null).recover(network,quotes,attempt,context);}
+    },onCheckpoint:function(v){payer.checkpoint(v);}});
+    payer.uploaded(paid);
+    var back=await client.download(paid.file,{});
+    var reconciled=await payer.reconcile(back.bytes);
+    var a2=loadOutbox();
+    var r2=a2.find(function(x){return x.id===rec.id;});
+    if(r2){r2.stage='reconciled';r2.events.push(ev('reconciled','bpay.ant.reconciled/1',{addr:String((paid.file&&paid.file.addr)||paid)}));saveOutbox(a2);renderOutbox(a2);}
+    line('stored and retrieved on Autonomi: '+reconciled.retrievedBytes+' bytes match the bundle\u2019s sha-256. receipt reconciled; the record\u2019s durable copy no longer depends on this browser or on github.','ok');
+  }catch(e){
+    line('preservation stopped: '+(e&&e.message?e.message:e)+'. nothing further attempted; the bundle download and the chain record remain.','bad');
+  }
+});
+function Text8ToU8(s){return new TextEncoder().encode(s);}
+
+/* ─── wiring ─── */
+$('body').addEventListener('input',function(){bodyFrom='paste';bodyBytes=null;rehash();});
+$('expected').addEventListener('input',rehash);
+$('bodyfile').addEventListener('change',function(ev2){
+  var f=ev2.target.files&&ev2.target.files[0];
+  if(!f)return;
+  f.arrayBuffer().then(function(ab){
+    bodyBytes=new Uint8Array(ab);bodyFrom='file';
+    $('body').value=new TextDecoder().decode(ab);
+    rehash();
+  }).catch(function(e){log('file read failed: '+e.message,'bad');});
+});
+$('wipe').addEventListener('click',wipe);
+window.addEventListener('beforeunload',wipe);
+window.addEventListener('pagehide',wipe);
+
+renderKeySession();
+renderOutbox();
+loadEditions();
 rehash();
+reconcileAll(true).then(function(a){
+  var pend=a.filter(function(r){return r.stage==='signed'||r.stage==='submitted';});
+  if(pend.length)log('recovered state: '+pend.length+' drop(s) in flight — reconciled against the chain on load; nothing was re-signed or re-published blind.','dim');
+  renderOutbox(a);
+});
 })();
