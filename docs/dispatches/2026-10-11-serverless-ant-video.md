@@ -186,3 +186,41 @@ as the HTTPS comparison model and links the serverless route and recovered
 wallet study. [Autonomi's current economics documentation](https://docs.autonomi.com/how-it-works/network-economics/key-properties)
 confirms one-time storage payment with no network retrieval fee. No automatic
 per-view payment is added; local counters still cannot authorize settlement.
+
+
+## PR 397 deployment and public playback acceptance
+
+All eight pull-request workflows passed on f298a97b. PR #397 merged as
+48c8d2416. Pages run 38127860473 attempt 1 deployed descendant ae4a554cd on
+2026-10-11 at 09:36:57 UTC (03:36:57 America/Denver). The canonical public
+player and ANT reader bytes matched both the merged source and current main
+at 09:42:06 UTC; the reader served with JavaScript MIME type. Earlier queued
+Pages attempts were superseded; they are not deployment receipts.
+
+Full original-content video playback through the public HTTPS adaptive route
+passed in fresh Chrome contexts with browser cache disabled:
+
+| Profile | Startup | Rebuffering | Dropped frames | Media bytes |
+|---|---:|---:|---:|---:|
+| Desktop | 1,301.3 ms | 0 ms | 0% | 16,424,554 |
+| Pixel 7 emulation, 700 kb/s and 80 ms latency | 4,129.9 ms | 0 ms | 0% | 2,475,154 |
+
+Both completed the full 52.49-second video with matching media hashes, zero
+adaptive/page errors and zero failed media requests. Phone emulation is not
+physical-device acceptance; edge caches may be warm. Neither is an audience
+capacity test or a live ANT retrieval result.
+
+Raw receipts in docs/receipts:
+- serverless-ant-video-deployment-2026-10-11.json
+- serverless-ant-video-live-desktop-2026-10-11.json
+- serverless-ant-video-live-phone-700-2026-10-11.json
+
+The 31,908,755-byte pack remains unpublished to ANT. Browser upload was refused
+by the extension's file-access permission; the CLI has no configured signing
+key. No payment, upload, key export or signature occurred. The wallet lane's
+separate 49-byte probe and proposed ETH ceiling do not authorize this video.
+A fresh exact-pack invoice and authorized signing flow remain prerequisites.
+The original address continues to use the published HTTPS adaptive route;
+no nonexistent ANT pack address was installed. bView public acceptance was
+reported to the coordinating wallet lane before releasing its deployment hold.
+These closeout receipts are banked on this lane's branch without a main push.
