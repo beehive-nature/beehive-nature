@@ -29,6 +29,8 @@ Transport capture: 1,148 dials, 728 opened, 420 dead (415 before ICE), 328/714 e
 49 peak sampled open channels, 376,668,007 received data-channel payload bytes (1.759x file size),
 8.20 s median / 17.38 s p95 dial-open latency, and 25,141,248 B peak ordered-read queue.
 Peer IDs, URLs and free-text network errors are excluded. Payload is not full wire traffic; the queue is not total browser memory.
+There were three video-source assignments; the final source reported 1/697 dropped frames.
+That last-source frame counter is not a cumulative decode-quality measurement across all source changes.
 Raw result: `evidence/2026-10-10-bview-scale/original-direct-candidate.json`.
 
 ## Implemented
@@ -100,10 +102,20 @@ No mesh acceptance, SDK-wide 500 cap, or throughput improvement is inferred from
 
 ## Release
 
-PR #390 merged as `7f339bb0b`. The changed playback and fixture files match post-merge main.
-The PR secret scan passed. Broader CI and GitHub Pages were still queued at the first release check;
-the then-public HTML was still the previous build, so no deployment claim was made from the merge alone.
-Only this lane's duplicate push jobs and unchanged proof jobs were canceled; other seats' jobs were preserved.
+PR [#390](https://github.com/beehive-nature/beehive-nature/pull/390) merged as `7f339bb0b`.
+The initial-fetch correction and independent direct-video evidence landed in
+PR [#392](https://github.com/beehive-nature/beehive-nature/pull/392), merged as `b9c75cd7b`.
+The changed playback and fixture files match that post-merge main, including the intervening other lane's changes.
+Post-merge estate registration, generated stack inventories, R5 surface audit and diff whitespace checks pass.
+The main secret scan passed; the earlier PR's interface-conformance job also passed.
+The complete Linux workflow is not yet green: main run `38096910617` remains queued.
+
+Only this lane's duplicate push jobs, unchanged proof jobs and superseded test runs were canceled;
+other seats' jobs were preserved. Superseded test run IDs: `38096223107`, `38096339364`, `38096820309`.
+The latest main tests, secret scan and Pages deployment were retained.
+The first 20-minute public-byte sampling window expired while the old HTML remained public.
+Pages run `38096910682` has completed its build, with deployment still queued at the next check.
+No deployment claim is made from a merge or successful build alone.
 
 References: [hls.js API](https://github.com/video-dev/hls.js/blob/v1.6.15/docs/API.md),
 [FFmpeg HLS muxer](https://ffmpeg.org/ffmpeg-formats.html#hls-2),

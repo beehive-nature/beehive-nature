@@ -63,6 +63,8 @@ It does not send synthetic audience traffic to any public server.
 For one billion concurrent viewers, 4-second multiplexed A/V segments, 15% byte overhead,
 99.9% byte and request cache hits, 100 regions and 100 Gb/s edge units at 60% utilization:
 
+`videoMbps` means combined media bitrate including audio; the separate overhead multiplier is an assumption about delivery overhead.
+
 | Assumed average video rate | Delivery | Delivery per hour | Origin miss traffic | Edge units |
 | --- | --- | --- | --- | --- |
 | 32.6 Mb/s from the reported source | 37.49 Pb/s | 16,870.5 PB | 37,490 Gb/s | 624,834 |
@@ -91,6 +93,25 @@ Next distributed acceptance must establish provisioned per-region capacity and t
 through cold/warm cache, popular/long-tail content, simultaneous startup, origin failure and regional loss.
 Measure delivered video and QoE at each tier; stop increases when the measured budget is exceeded.
 Do not treat extrapolation, synthetic mocks, green CI or the public demo as one billion successful sessions.
+
+Initial engineering acceptance targets for that future distributed qualification are explicit:
+
+- Actual moving playback startup: p95 at most 3 s with warm edge caches, 10 s with cold caches,
+  on supported devices with enough throughput for at least the lowest rendition. Preview pixels do not count.
+- At least 99.9% completed eligible sessions. Retain failures and timed-out sessions in the denominator;
+  report unsupported devices separately instead of silently dropping them.
+- Rebuffer time below 0.5% of requested active viewing time in aggregate, and below 1% at the session p95.
+  Include application holds, exclude deliberate user pause/seek time, and report startup separately.
+- Selected-rendition frame drops below 1% at session p95 on real target devices. Measure browser memory separately
+  from compressed-buffer targets; no device-memory threshold is claimed validated by this release.
+- Measured edge utilization at most the model's 60% planning allowance, with admission and load shedding before
+  tested origin/connection limits. Count request cache hits and byte cache hits separately.
+- Qualify successive cohorts (1,000; 10,000; 100,000; 1 million; 10 million; 100 million; 1 billion)
+  for at least 30 minutes each, including a five-minute start wave. Repeat cold-cache and regional-loss cases
+  within the provisioned failure budget before increasing audience size.
+
+These are test targets, not measured achievements, existing service guarantees or authorization to incur infrastructure charges.
+File integrity and eventual completion, such as the recorded 434 s direct startup, are insufficient to satisfy this qualification.
 
 Implementation references: [hls.js 1.6.15 API](https://github.com/video-dev/hls.js/blob/v1.6.15/docs/API.md),
 [FFmpeg HLS muxer](https://ffmpeg.org/ffmpeg-formats.html#hls-2),
