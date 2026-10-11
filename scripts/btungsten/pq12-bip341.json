@@ -1,0 +1,20 @@
+{
+  "about": "SPEC-BTUNGSTEN-PQ-1 PQ12: the official vectors bsigner's Taproot and PSBT code must reproduce, all from bitcoin/bips at one commit. Top level: BIP-341's wallet-test-vectors.json (crates/bsigner/src/taproot.rs: every intermediary hash, signature message, sighash, tweak, output key, address, control block and witness). psbt: the BIP-174 and BIP-371 texts, whose test-vector sections crates/bsigner/src/psbt.rs reads case by case. Fetched by CI job pq12-taproot at this commit, checked by size and SHA-256 (base64url, no padding) inside the tests, never committed.",
+  "repo": "https://github.com/bitcoin/bips",
+  "commit": "200f9b26fe0a2f235a2af8b30c4be9f12f6bc9cb",
+  "url": "https://raw.githubusercontent.com/bitcoin/bips/200f9b26fe0a2f235a2af8b30c4be9f12f6bc9cb/bip-0341/wallet-test-vectors.json",
+  "size": 29296,
+  "sha256": "QD4Z-4HdHzHnRWmSFjCPYftAN3SyqvqHtjG498BC038",
+  "psbt": {
+    "bip174": {
+      "url": "https://raw.githubusercontent.com/bitcoin/bips/200f9b26fe0a2f235a2af8b30c4be9f12f6bc9cb/bip-0174.mediawiki",
+      "size": 132652,
+      "sha256": "iw0JGxICKYs-039jrXnmm77GdqF3sNfPkDotzwl028k"
+    },
+    "bip371": {
+      "url": "https://raw.githubusercontent.com/bitcoin/bips/200f9b26fe0a2f235a2af8b30c4be9f12f6bc9cb/bip-0371.mediawiki",
+      "size": 33884,
+      "sha256": "J4eeDnxKW6nbIovpuFC7nb-hl6hhVCH3hUZTFu_0cTc"
+    }
+  }
+}

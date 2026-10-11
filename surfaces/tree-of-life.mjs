@@ -35,6 +35,91 @@
    Pure helpers are exported for Node tests (tools/genealogy/treeoflife-nav.test.mjs). */
 
 export const TOL_VERSION = 'tree-of-life/1';
+
+// A perspective camera over real XYZ coordinates. The four limbs preserve
+// pedigree order; decoration never adds a person or a parent-child edge.
+export function treeSpace(view) {
+  const depth = Math.max(1, ...view.nodes.map(n => n.gen));
+  return view.nodes.map(n => {
+    const limb = Math.min(3, Math.floor(n.pos * 4));
+    const spread = n.gen / depth;
+    return { ...n, limb, x: (n.pos - .5) * 2.6 * spread,
+      y: .95 - spread * 1.8,
+      z: n.gen < 2 ? 0 : (limb < 2 ? -.48 : .48) * spread + Math.sin(n.pos * Math.PI * 8) * .12 };
+  });
+}
+export function projectTree(point, camera, width, height) {
+  const c = Math.cos(camera.yaw), s = Math.sin(camera.yaw);
+  const x = point.x * c + point.z * s, z = -point.x * s + point.z * c;
+  const y = point.y * Math.cos(camera.pitch) - z * Math.sin(camera.pitch);
+  const depth = point.y * Math.sin(camera.pitch) + z * Math.cos(camera.pitch);
+  const scale = Math.min(width, height) * .34 * camera.zoom / (1 + depth * .22);
+  return { x: width / 2 + x * scale, y: height / 2 + y * scale, depth, scale };
+}
+
+function mountTreeSpace(host, view, selected, camera, onSelect) {
+  const doc = host.ownerDocument, win = doc.defaultView;
+  const canvas = doc.createElement('canvas');
+  canvas.setAttribute('aria-hidden', 'true');
+  host.append(canvas);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) { host.textContent = '3D drawing is unavailable. Choose the flat tree above.'; return () => {}; }
+  const points = treeSpace(view), byId = new Map(points.map(p => [p.id, p]));
+  const buttons = new Map();
+  for (const p of points.filter(p => !p.living)) {
+    const b = doc.createElement('button');
+    b.type = 'button'; b.className = 'tol-orbit-person';
+    b.dataset.person = p.id; b.setAttribute('aria-label', p.name);
+    b.setAttribute('aria-pressed', String(p.id === selected));
+    b.title = p.name + (p.lifespan ? ' · ' + p.lifespan : '');
+    const label = doc.createElement('span'); label.textContent = p.name; b.append(label);
+    host.append(b); buttons.set(p.id, b);
+  }
+  const colors = ['#c98cff','#65c5f1','#f4b66a','#7adca0'];
+  let frame = 0, drag = null, moved = false;
+  function draw() {
+    frame = 0;
+    const width = host.clientWidth, height = host.clientHeight;
+    if (!width || !height) return;
+    const dpr = Math.min(win.devicePixelRatio || 1, 2);
+    canvas.width = width * dpr; canvas.height = height * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,width,height);
+    const ink = win.getComputedStyle(host).getPropertyValue('--tol-sov').trim() || '#bd99e8';
+    const projected = new Map(points.map(p => [p.id, projectTree(p,camera,width,height)]));
+    // Angular forked branches evoke the Austras koks rather than a sphere.
+    for (const edge of [...view.links].sort((a,b) => projected.get(b.parent).depth - projected.get(a.parent).depth)) {
+      const parent = byId.get(edge.parent), child = byId.get(edge.child);
+      const bend = {x:child.x,y:(child.y+parent.y)/2,z:child.z};
+      const a = projected.get(child.id), m = projectTree(bend,camera,width,height), b = projected.get(parent.id);
+      ctx.strokeStyle = parent.gen < 2 ? ink : colors[parent.limb];
+      ctx.lineWidth = Math.max(1.5, 5 - parent.gen * .65); ctx.globalAlpha = .8;
+      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(m.x,m.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    for (const p of [...points].sort((a,b)=>projected.get(b.id).depth-projected.get(a.id).depth)) {
+      const q = projected.get(p.id), color = p.gen < 2 ? ink : colors[p.limb];
+      ctx.fillStyle = color; ctx.beginPath();ctx.arc(q.x,q.y,p.id === selected ? 9 : p.living ? 4 : 6,0,Math.PI*2);ctx.fill();
+      const b = buttons.get(p.id);
+      if (b) { b.style.left=q.x+'px';b.style.top=q.y+'px';b.style.zIndex=String(100-Math.round(q.depth*10));
+        b.classList.toggle('show-label',p.id===selected); b.style.setProperty('--branch-color',color); }
+    }
+  }
+  function schedule() { if (!frame) frame=win.requestAnimationFrame(draw); }
+  function down(e) { if(e.target.closest('button'))return; drag={x:e.clientX,y:e.clientY};moved=false;host.setPointerCapture(e.pointerId); }
+  function move(e) { if(!drag)return; const dx=e.clientX-drag.x,dy=e.clientY-drag.y; moved ||= Math.abs(dx)+Math.abs(dy)>2;
+    camera.yaw+=dx*.008;camera.pitch=Math.max(-.9,Math.min(.9,camera.pitch+dy*.006));drag={x:e.clientX,y:e.clientY};schedule(); }
+  function up(){drag=null;}
+  function key(e){if(e.target!==host)return;const d={ArrowLeft:[-.12,0],ArrowRight:[.12,0],ArrowUp:[0,-.1],ArrowDown:[0,.1]}[e.key];if(d){e.preventDefault();camera.yaw+=d[0];camera.pitch=Math.max(-.9,Math.min(.9,camera.pitch+d[1]));schedule();}}
+  function controls(e){const action=e.target.closest('[data-camera]')?.dataset.camera;if(!action)return;
+    if(action==='left')camera.yaw-=.2;if(action==='right')camera.yaw+=.2;
+    if(action==='in')camera.zoom=Math.min(2.5,camera.zoom*1.2);if(action==='out')camera.zoom=Math.max(.5,camera.zoom/1.2);
+    if(action==='reset')Object.assign(camera,{yaw:.32,pitch:-.12,zoom:1});schedule();}
+  host.addEventListener('pointerdown',down);host.addEventListener('pointermove',move);host.addEventListener('pointerup',up);host.addEventListener('pointercancel',up);host.addEventListener('keydown',key);
+  host.parentElement.addEventListener('click',controls);
+  const parent=host.parentElement;
+  const resize=new ResizeObserver(schedule);resize.observe(host);schedule();
+  return ()=>{resize.disconnect();if(frame)win.cancelAnimationFrame(frame);parent.removeEventListener('click',controls);};
+}
 export const DEPTH = 4; // generations shown above the focus
 export const ROW_PX = 140; // one generation's band in the row readings
 
@@ -294,6 +379,8 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
   };
   const lines = corpus.lines || [];
   let st = { l: null, f: null, p: null };
+  let spatial = true, disposeSpace = null;
+  const camera = {yaw:.32,pitch:-.12,zoom:1};
 
   function normalize(s) {
     const l = lines.some((x) => x.key === s.l) ? s.l : (lines[0] && lines[0].key) || null;
@@ -323,6 +410,7 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
   }
 
   function render() {
+    if (disposeSpace) { disposeSpace(); disposeSpace=null; }
     const r = reg();
     const view = st.l ? lineView(corpus, st.l, st.f, opts.depth || pickDepth(host.clientWidth)) : null;
     if (!view) { host.innerHTML = `<p class="tol-note">${esc(words.noLine)}</p>`; return; }
@@ -367,12 +455,15 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
 
     host.innerHTML = `
       <nav class="tol-lines" aria-label="${esc(words.lines)}">${tabs}</nav>
-      <p class="tol-note">Green dot: sourced language or culture details. Choose a name to open their research; choose a branch to climb.</p>
+      <div class="tol-lines" aria-label="Tree presentation"><button type="button" class="tol-tab" data-spatial="3d" aria-pressed="${spatial}">3D Austras koks</button><button type="button" class="tol-tab" data-spatial="flat" aria-pressed="${!spatial}">Flat tree</button></div>
+      <p class="tol-note">${spatial ? 'Drag the tree to turn it. Use the arrow keys or rotation buttons. Choose a person to explore their family.' : 'Choose a name to open their research; choose a branch to climb.'}</p>
       ${focusLine}
-      <div class="tol-stage" data-reading="${r}"${stageStyle}>${svg}${nodes}</div>
+      ${spatial ? '<div class="tol-camera"><button type="button" data-camera="left" aria-label="Rotate left">↶</button><button type="button" data-camera="right" aria-label="Rotate right">↷</button><button type="button" data-camera="in" aria-label="Zoom in">+</button><button type="button" data-camera="out" aria-label="Zoom out">−</button><button type="button" data-camera="reset">Reset view</button></div><div class="tol-space" tabindex="0" role="group" aria-label="3D family tree; arrow keys rotate"></div>' : `<div class="tol-stage" data-reading="${r}"${stageStyle}>${svg}${nodes}</div>`}
+      ${spatial ? '<div class="tol-family-key" aria-label="Family branches">' + view.nodes.filter(n => n.gen === 2 && !n.living).map(n => '<button type="button" data-person="' + esc(n.id) + '"><span aria-hidden="true" style="color:' + ['#c98cff','#65c5f1','#f4b66a','#7adca0'][Math.min(3,Math.floor(n.pos*4))] + '">●</span> ' + esc(n.name) + '</button>').join('') + '</div>' : ''}
       <div class="tol-guard" role="note"><span class="tol-lock" aria-hidden="true"></span><span>${esc(heldText(view.line.bridge, words))}</span></div>
       ${entryNames.length ? `<p class="tol-note">${esc(fill(words.emerges, { names: entryNames.join(' · ') }))}</p>` : ''}
       ${card}`;
+    if (spatial) disposeSpace=mountTreeSpace(host.querySelector('.tol-space'),view,st.p,camera);
   }
 
   function personCard(p, id) {
@@ -396,6 +487,8 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
   }
 
   function onClick(e) {
+    const mode=e.target.closest('[data-spatial]');
+    if(mode && host.contains(mode)){spatial=mode.dataset.spatial==='3d';render();return;}
     const t = e.target.closest('[data-line],[data-person],[data-focus],[data-story],[data-close],[data-whole]');
     if (!t || !host.contains(t)) return;
     if (t.dataset.line) go({ l: t.dataset.line, f: null, p: null });
@@ -425,6 +518,7 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
     go: (s, options) => go(s, options),
     state: () => Object.assign({}, st),
     destroy() {
+      if (disposeSpace) disposeSpace();
       host.removeEventListener('click', onClick);
       host.removeEventListener('keydown', onKey);
       if (useHistory) window.removeEventListener('popstate', onPop);

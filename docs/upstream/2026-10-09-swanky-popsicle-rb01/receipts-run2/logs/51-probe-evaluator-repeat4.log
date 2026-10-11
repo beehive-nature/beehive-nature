@@ -1,0 +1,12 @@
+NOTICE: this program runs popsicle circuit PSI from Swanky, which its README calls research software,
+not for production or sensitive data. The two parties are threads of this one process,
+joined by an in-process socket pair. Data: synthetic keys made by this program; nothing is read
+from or written to disk, and results print to this terminal only. Limits: one case per run; the process ends after 10 s and keeps one CPU core busy until then.
+It reproduces upstream behaviour at a pinned commit and establishes no security property.
+It creates no persistent state.
+evaluator-repeat4: no result after 10 s
+  evaluator: 138722 RNG draws
+  garbler: 393 RNG draws
+  evaluator: 33 samples at
+        <popsicle::psi::circuit_psi::base_psi::receiver::OpprfReceiver as popsicle::psi::circuit_psi::base_psi::BasePsi>::hash_data (popsicle/src/psi/circuit_psi/base_psi/receiver.rs:110:36)
+        <- <popsicle::psi::circuit_psi::base_psi::receiver::OpprfReceiver as popsicle::psi::circuit_psi::base_psi::BasePsi>::base_psi (popsicle/src/psi/circuit_psi/base_psi/mod.rs:90:15)

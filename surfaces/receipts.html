@@ -17,186 +17,227 @@
 <meta name="color-scheme" content="dark light">
 <title>the receipt ledger · LOVErnment</title>
 <link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="skaists.css">
 <style>
-  :root {
-    --human:#9C6FD6; --human-soft:#B79FE0; --ai:#45C2DC; --biomass:#86CC72; --gold:#E8B54B;
-    --bg:#070D0A; --panel:#0F1713; --well:#0B120F; --line:#1E2B25; --line-hi:#31463C;
-    --ink:#E9F2EC; --dim:#8FA79C; --dimmer:#5B7368; --void:#070D0A; --lift:#16211C;
-    --ember:#E25822;
-    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  /* THE CHOSEN DRESS (the founder's chosen UI, his My Space screens 2026-10-04; surfaces/myspace.html;
+     standing order 2026-10-05 "just follow the rules for each of the three seperate ui/ux's"). One DOM,
+     three registers, as built: the page's own variables are mapped per register onto skaists tokens
+     (skaists.css, compiled from docs/design/skaists/tokens.json), every size sits on that register's
+     type scale and every corner is a radius token. The BNR color law stays a data encoding in every
+     register (purple = humans, teal = Ai, green = biomass), each on its register's own token. Each
+     register keeps its own structure: new bee hides the hash column, raver opens on the hero with the
+     chain art and the motion switch, cypherpunk reads the boundary card first in one dense column.
+     NEW BEE: paper, ink, bold system sans, white cards with soft large corners, forest green for the
+     one filled pill (export, white label) and for the selected state, outlined pills for every second
+     press, a red outline on the one press that drops local edits; the fixture chip wears the guard
+     (lavender, never red). */
+  body {
+    --human:var(--sk-sovereign); --human-soft:var(--sk-sovereign); --ai:var(--sk-ai); --biomass:var(--sk-verified);
+    --gold:var(--sk-cat-bug); --ember:var(--sk-rose); --ember-wash:rgba(163,18,43,.07); --danger:var(--sk-rose);
+    --bg:var(--sk-bg); --panel:var(--sk-bg-card); --well:var(--sk-bg-well); --void:var(--sk-bg-well);
+    --line:var(--sk-line); --line-hi:rgba(106,115,110,.4); --field:var(--sk-ink-dim); --lift:var(--sk-bg-well);
+    --ink:var(--sk-ink); --dim:var(--sk-ink-mut); --dimmer:var(--sk-ink-mut); --kick:var(--sk-ink-mut); --lede:var(--sk-ink);
+    --primary:var(--sk-forest); --on-primary:var(--sk-on-primary); --sel:var(--sk-forest); --glow:none;
+    --guard:var(--sk-guard); --guard-wash:var(--sk-guard-wash);
+    --font:var(--sk-font-ui); --hfont:var(--sk-font-ui); --code:var(--sk-font-mono);
+    --r-card:var(--sk-radius-xl); --r-in:var(--sk-radius-md); --r-btn:var(--sk-radius-pill); --r-field:var(--sk-radius-md);
   }
   * { box-sizing:border-box; margin:0; }
   html { scroll-behavior:smooth; }
-  body { min-height:100vh; color:var(--ink); background:var(--bg); font:14px/1.65 var(--mono);
+  body { min-height:100vh; color:var(--ink); background:var(--bg); font:400 16px/1.6 var(--font); color-scheme:light;
     padding-bottom:70px; }
-  a { color:var(--ai); text-decoration:none; }
-  a:hover { color:var(--human-soft); }
-  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline:3px solid var(--ai); outline-offset:3px; }
-  button, select, input { font:600 12px var(--mono); }
+  a { color:var(--sk-link); text-decoration:none; }
+  a:hover { color:var(--sk-link-hover); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline:2px solid var(--sk-focus); outline-offset:3px; }
+  button, select, input { font:inherit; color:inherit; }
   .wrap { width:min(1100px, calc(100% - 32px)); margin:0 auto; }
 
-  header { position:relative; overflow:hidden; padding:54px 0 34px; border-bottom:1px solid var(--line); }
-  .eyebrow { position:relative; color:var(--human-soft); letter-spacing:.25em; text-transform:uppercase; font-size:10px; }
-  h1 { position:relative; margin-top:10px; font:800 clamp(2.2rem,8vw,5.3rem)/.95 var(--sans); letter-spacing:-.055em; }
-  h1 span { color:var(--biomass); }
-  .lead { position:relative; max-width:44ch; margin-top:17px; font:600 clamp(1.05rem,2.6vw,1.5rem)/1.35 var(--sans);
-    letter-spacing:-.015em; color:var(--ink); }
-  .intro { position:relative; max-width:66ch; color:var(--dim); margin-top:14px; }
+  header { position:relative; overflow:hidden; padding:28px 0 24px; border-bottom:1px solid var(--line); }
+  .eyebrow { position:relative; color:var(--kick); font:700 14px/1.4 var(--font); letter-spacing:.04em; }
+  h1 { position:relative; margin-top:6px; font:700 32px/1.12 var(--hfont); letter-spacing:-.025em; color:var(--ink); }
+  h1 span { color:inherit; }
+  .lead { position:relative; max-width:44ch; margin-top:12px; font:600 18px/1.4 var(--hfont); letter-spacing:-.01em; color:var(--lede); }
+  .intro { position:relative; max-width:66ch; color:var(--dim); margin-top:10px; font-size:16px; line-height:1.55; }
   .intro b { color:var(--ink); }
-  .nav { position:relative; display:flex; gap:8px; flex-wrap:wrap; margin-top:24px; }
-  .nav a, button.pill { border:1px solid var(--line-hi); border-radius:999px; padding:11px 15px; color:var(--ink);
-    background:var(--panel); font:600 11px var(--mono); cursor:pointer; min-height:44px; display:inline-flex; align-items:center; }
-  .nav a:hover, button.pill:hover { border-color:var(--human); background:var(--lift); }
-  .statusline { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:24px; color:var(--dim); font-size:11px; }
-  .dot { width:9px; height:9px; border-radius:50%; background:var(--gold); }
-  .dot.ok { background:var(--biomass); box-shadow:0 0 13px var(--biomass); }
-  .dot.bad { background:var(--ember); box-shadow:0 0 13px var(--ember); }
-  .fx { border:1px dashed var(--gold); border-radius:99px; padding:2px 9px; color:var(--gold); font-size:9px;
-    letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; }
+  .nav { position:relative; display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
+  .nav a, button.pill { display:inline-flex; align-items:center; min-height:44px; padding:8px 16px; border:1.5px solid var(--line-hi);
+    border-radius:var(--r-btn); background:transparent; color:var(--ink); font:700 16px/1.2 var(--font); cursor:pointer; }
+  .nav a:hover, button.pill:hover { border-color:var(--sel); color:var(--ink); }
+  .statusline { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:20px; color:var(--dim); font:600 15px/1.4 var(--font); }
+  .dot { width:9px; height:9px; border-radius:50%; background:var(--dim); }
+  .dot.ok { background:var(--biomass); }
+  .dot.bad { background:var(--ember); }
+  .fx { border:1.5px dashed var(--guard); border-radius:var(--sk-radius-pill); padding:2px 10px; color:var(--guard); background:var(--guard-wash);
+    font:600 14px/1.4 var(--font); white-space:nowrap; }
 
-  main { padding-top:24px; }
+  main { padding-top:20px; }
   .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:14px; }
-  .card { grid-column:span 12; padding:20px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
+  .card { grid-column:span 12; padding:18px 16px; border:1px solid var(--line); border-radius:var(--r-card); background:var(--panel); }
   .card.half { grid-column:span 6; }
   .card.third { grid-column:span 4; }
-  .card h2 { color:var(--human-soft); font-size:13px; letter-spacing:.14em; text-transform:uppercase; }
-  .sub { color:var(--dim); font-size:11px; margin-top:6px; }
-  @media(max-width:720px){ .card.half,.card.third { grid-column:span 12; } .wrap { width:min(100% - 22px, 1100px); } }
+  .card h2 { color:var(--ink); font:700 17px/1.35 var(--hfont); letter-spacing:-.01em; }
+  .sub { color:var(--dim); font-size:15px; line-height:1.5; margin-top:6px; }
+  @media(max-width:720px){ .card.half,.card.third { grid-column:span 12; } }
 
   .chainart { display:none; }
   #motion { display:none; }
-  #motion[aria-pressed="true"] { color:var(--human-soft); border-color:var(--human); }
+  #motion[aria-pressed="true"] { color:var(--sel); border-color:var(--sel); }
 
-  .colorlaw { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:14px;
-    padding:11px 14px; border:1px solid var(--line); border-radius:10px; color:var(--dim); font-size:10.5px; }
-  .colorlaw .sw { display:inline-flex; align-items:center; gap:5px; }
+  .colorlaw { display:flex; align-items:center; gap:6px 14px; flex-wrap:wrap; margin-top:14px;
+    padding:10px 14px; border:1px solid var(--line); border-radius:var(--r-in); color:var(--dim); font-size:14px; line-height:1.5; }
+  .colorlaw .sw { display:inline-flex; align-items:center; gap:6px; }
   .colorlaw .sw i { width:10px; height:10px; border-radius:50%; display:inline-block; }
   .colorlaw .sw.human i { background:var(--human); } .colorlaw .sw.ai i { background:var(--ai); }
   .colorlaw .sw.biomass i { background:var(--biomass); }
 
-  /* the chain banner */
-  .chainbar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:14px; padding:14px 16px;
-    border:1px solid var(--line-hi); border-radius:12px; background:var(--well); }
-  .chainbar .word { font:800 15px var(--sans); letter-spacing:.02em; }
+  /* the chain banner: a well inside the card */
+  .chainbar { display:flex; align-items:center; gap:8px 12px; flex-wrap:wrap; padding:14px 16px;
+    border:1px solid var(--line); border-radius:var(--r-in); background:var(--well); }
+  .chainbar .word { font:700 17px/1.3 var(--hfont); letter-spacing:.02em; }
   .chainbar.ok .word { color:var(--biomass); }
-  .chainbar.bad { border-color:rgba(226,88,34,.55); }
+  .chainbar.bad { border-color:var(--ember); }
   .chainbar.bad .word { color:var(--ember); }
-  .chainbar small { color:var(--dim); font-size:10px; }
-  .chainbar code { color:var(--gold); font-size:10px; overflow-wrap:anywhere; }
+  .chainbar small { color:var(--dim); font-size:15px; line-height:1.45; }
+  .chainbar code { color:var(--dim); font:400 14px/1.45 var(--code); overflow-wrap:anywhere; }
 
   /* filters */
-  .filters { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
-  .filters select, .filters input { padding:9px 11px; border:1px solid var(--line-hi); border-radius:9px;
-    background:var(--well); color:var(--ink); min-height:40px; }
-  .filters input { flex:1 1 160px; }
+  .filters { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  .filters select, .filters input { min-height:44px; padding:9px 14px; border:1.5px solid var(--field); border-radius:var(--r-field);
+    background:var(--panel); color:var(--ink); font:400 16px/1.3 var(--font); }
+  .filters select:focus, .filters input:focus { border-color:var(--sel); }
+  .filters input::placeholder { color:var(--dim); opacity:1; }
+  .filters input { flex:1 1 160px; min-width:0; }
 
   /* the table */
-  .tablewrap { overflow:auto; margin-top:12px; border:1px solid var(--line); border-radius:10px; }
-  table.ledger { width:100%; border-collapse:collapse; font-size:10.5px; min-width:720px; }
-  table.ledger th { position:sticky; top:0; text-align:start; color:var(--dimmer); font-weight:400; font-size:9px;
-    text-transform:uppercase; letter-spacing:.12em; padding:8px 9px; border-bottom:1px solid var(--line); background:var(--panel); }
-  table.ledger td { padding:7px 9px; border-bottom:1px solid var(--line); color:var(--dim); vertical-align:top; }
-  table.ledger tr:hover td { background:var(--lift); }
+  .tablewrap { overflow:auto; margin-top:12px; border:1px solid var(--line); border-radius:var(--r-in); }
+  table.ledger { width:100%; border-collapse:collapse; font-size:15px; min-width:720px; }
+  table.ledger th { position:sticky; top:0; text-align:start; color:var(--dim); font-weight:600; font-size:14px; padding:8px 10px; border-bottom:1px solid var(--line); background:var(--panel); }
+  table.ledger td { padding:8px 10px; border-bottom:1px solid var(--line); color:var(--dim); vertical-align:top; font-size:15px; line-height:1.5; }
+  @media (hover:hover) { table.ledger tr:hover td { background:var(--lift); } }
   table.ledger td.num { text-align:end; font-variant-numeric:tabular-nums; color:var(--ink); white-space:nowrap; }
-  table.ledger td .k { color:var(--ai); white-space:nowrap; }
+  table.ledger td .k { color:var(--ai); white-space:nowrap; font-weight:600; }
   table.ledger tr.human td .k { color:var(--human-soft); }
   table.ledger tr.law td .k { color:var(--biomass); }
   table.ledger td .a { color:var(--human-soft); white-space:nowrap; }
   table.ledger td .m { color:var(--ink); }
-  table.ledger td .h { color:var(--dimmer); font-size:9px; }
-  table.ledger td.cost-pos { color:var(--gold); }
-  table.ledger tr.broken td { background:rgba(226,88,34,.08); }
-  .sumline { display:flex; justify-content:flex-end; gap:16px; color:var(--dim); font-size:11px; margin-top:10px; }
+  table.ledger td .h { color:var(--dimmer); font-size:14px; }
+  table.ledger td.hashcol .h { font-family:var(--code); }
+  table.ledger td.cost-pos { color:var(--ink); font-weight:700; }
+  table.ledger tr.broken td { background:var(--ember-wash); }
+  .sumline { display:flex; justify-content:flex-end; gap:16px; color:var(--dim); font-size:15px; margin-top:10px; }
   .sumline b { color:var(--ink); font-variant-numeric:tabular-nums; }
 
-  .rep { display:grid; gap:8px; margin-top:12px; }
-  .rep .r { display:grid; grid-template-columns:130px 1fr 44px; align-items:center; gap:10px; font-size:10.5px; color:var(--dim); }
-  .rep .r .track { height:8px; border-radius:99px; background:var(--void); border:1px solid var(--line); overflow:hidden; }
+  .rep { display:grid; gap:10px; margin-top:12px; }
+  .rep .r { display:grid; grid-template-columns:130px 1fr 44px; align-items:center; gap:10px; font-size:15px; line-height:1.4; color:var(--dim); }
+  .rep .r .track { height:8px; border-radius:var(--sk-radius-pill); background:var(--void); border:1px solid var(--line); overflow:hidden; }
   .rep .r .track i { display:block; height:100%; background:var(--biomass); }
   .rep .r b { text-align:end; color:var(--ink); font-variant-numeric:tabular-nums; }
 
-  .actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
-  .act { border:1px solid var(--line-hi); border-radius:99px; padding:9px 14px; background:var(--panel); color:var(--ink);
-    font:600 11px var(--mono); cursor:pointer; min-height:40px; }
-  .act:hover { border-color:var(--human); }
+  /* the presses: one filled primary (export), outlined pills for the rest, the restore outlined in danger */
+  .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .act { min-height:44px; padding:8px 16px; border:1.5px solid var(--line-hi); border-radius:var(--r-btn); background:transparent; color:var(--ink);
+    font:700 16px/1.2 var(--font); cursor:pointer; }
+  .act:hover { border-color:var(--sel); }
+  #export-dl { background:var(--primary); border-color:var(--primary); color:var(--on-primary); box-shadow:var(--glow); }
+  #reset { border-color:var(--danger); color:var(--danger); }
 
-  .boundary-dl { margin-top:12px; display:grid; grid-template-columns:130px 1fr; gap:7px 12px; font-size:10.5px; }
-  .boundary-dl dt { color:var(--ai); }
+  .boundary-dl { margin-top:12px; display:grid; grid-template-columns:130px 1fr; gap:7px 12px; font-size:15px; }
+  .boundary-dl dt { color:var(--ai); font-weight:600; }
   .boundary-dl dd { margin:0; color:var(--dim); overflow-wrap:anywhere; }
   @media(max-width:720px){ .boundary-dl { grid-template-columns:1fr; gap:2px; } .boundary-dl dd { margin-bottom:8px; } }
 
   .law { margin-top:20px; padding:14px 16px; border:1px solid var(--line); border-left:2px solid var(--biomass);
-    border-radius:10px; color:var(--dim); font-size:10.5px; line-height:1.8; }
+    border-radius:var(--r-in); color:var(--dim); font-size:15px; line-height:1.7; }
   .law b { color:var(--ink); }
   footer { width:min(1100px, calc(100% - 32px)); margin:30px auto 0; padding-top:18px; border-top:1px solid var(--line);
-    color:var(--dimmer); font-size:10px; line-height:1.8; }
-  footer a { color:var(--dim); }
+    color:var(--dim); font-size:15px; line-height:1.7; }
+  footer a { display:inline-flex; align-items:center; min-height:44px; color:var(--ink); font-weight:700; text-decoration:underline; text-underline-offset:.2em; }
 
   /* ═══ NEW BEE ═══════════════════════════════════════════════════════ */
-  body[data-reg="bee"] {
-    --human:#65509A; --human-soft:#65509A; --ai:#176879; --biomass:#326b39; --gold:#855b0b;
-    --bg:#f6f7f2; --panel:#fff; --well:#edf2eb; --line:#ccd7cf; --line-hi:#a9bcad;
-    --ink:#18362a; --dim:#435f4e; --dimmer:#52695b; --void:#f6f7f2; --lift:#e2eadf; --ember:#9f362c;
-    font-family:var(--sans); font-size:15px; color-scheme:light;
-  }
-  body[data-reg="bee"] header { background:linear-gradient(180deg,#eef2e9,#f6f7f2); }
-  body[data-reg="bee"] h1 span { color:var(--human); }
-  body[data-reg="bee"] .dot.bad { box-shadow:none; }
-  body[data-reg="bee"] .card h2 { color:var(--human); }
-  body[data-reg="bee"] table.ledger { min-width:640px; font-size:11.5px; }
+  body[data-reg="bee"] table.ledger { min-width:640px; }
   body[data-reg="bee"] .hashcol { display: none; }
 
-  /* ═══ RAVER ═════════════════════════════════════════════════════════ */
+  /* ═══ RAVER ═════════════════════════════════════════════════════════
+     the same ledger after dark: the night purple ground (the sovereign wash into the tint), plain
+     white bold titles, lavender for the quiet words, round everything, the cards in the wash with a
+     lavender line, the magenta pill with its soft glow and a dark label for export, magenta outlined
+     pills for every second press. The sk tokens switch on body[data-reg], so the mappings above
+     resolve to raver's own values here. */
   body[data-reg="raver"] {
-    --human:#9C6FD6; --human-soft:#C9A7F5; --ai:#45C2DC; --biomass:#86CC72; --gold:#E8B54B;
-    --bg:#0E0817; --panel:#1A1226; --well:#140E1F; --line:#3A2C4E; --line-hi:#544070;
-    --ink:#F5EFFA; --dim:#C4B9D5; --dimmer:#9C8FB8; --void:#0E0817; --lift:#241A35;
+    --human-soft:var(--sk-sovereign-soft); --biomass:var(--sk-biomass);
+    --ember:var(--sk-you); --ember-wash:rgba(214,85,187,.1); --danger:var(--sk-you);
+    --bg:var(--sk-sovereign-tint); --panel:var(--sk-sovereign-wash); --well:var(--sk-sovereign-tint); --void:var(--sk-sovereign-tint);
+    --line:rgba(156,111,214,.34); --line-hi:rgba(214,85,187,.6); --field:rgba(156,111,214,.55); --lift:rgba(156,111,214,.12);
+    --dim:var(--sk-sovereign-soft); --dimmer:var(--sk-sovereign-soft); --kick:var(--sk-sovereign-soft); --lede:var(--sk-sovereign-strong);
+    --primary:var(--sk-primary); --sel:var(--sk-you); --glow:0 0 28px rgba(214,85,187,.38);
+    --r-in:var(--sk-radius-lg); --r-field:var(--sk-radius-pill);
+    color-scheme:dark; font-size:15px;
+    background-color:var(--sk-sovereign-tint);
+    background-image:radial-gradient(120% 55% at 0% 100%,rgba(111,169,224,.09),transparent 60%),linear-gradient(180deg,var(--sk-sovereign-wash),var(--sk-sovereign-tint) 42%);
+    background-attachment:fixed;
   }
   body[data-reg="raver"] header { padding:0; border-bottom:0; }
   body[data-reg="raver"] .hero-open { position:relative; min-height:min(58vh,520px); display:flex; flex-direction:column;
     justify-content:center; padding:84px 0 54px; overflow:hidden;
     background:
-      radial-gradient(ellipse 62% 48% at 18% 32%, rgba(156,111,214,.28), transparent 62%),
-      radial-gradient(ellipse 55% 45% at 86% 22%, rgba(69,194,220,.16), transparent 60%),
-      radial-gradient(ellipse 80% 40% at 50% 108%, rgba(134,204,114,.14), transparent 66%),
-      linear-gradient(180deg,#0E0817,#150C24 58%,#0E0817); }
+      radial-gradient(ellipse 62% 48% at 18% 32%, rgba(156,111,214,.22), transparent 62%),
+      radial-gradient(ellipse 55% 45% at 86% 22%, rgba(214,85,187,.1), transparent 60%); }
   body[data-reg="raver"] .hero-open .wrap { position:relative; }
-  body[data-reg="raver"] .eyebrow { color:var(--human-soft); }
-  body[data-reg="raver"] h1 { font-size:clamp(2.6rem,10vw,6.8rem); }
-  body[data-reg="raver"] h1 span {
-    background:linear-gradient(94deg,#C9A7F5,#45C2DC 55%,#86CC72);
-    -webkit-background-clip:text; background-clip:text; color:transparent; }
-  body[data-reg="raver"] .lead { font:500 clamp(1.5rem,4.2vw,2.7rem)/1.14 var(--sans);
-    letter-spacing:-.035em; max-width:20ch; margin-top:22px; text-wrap:balance; }
-  body[data-reg="raver"] .intro { max-width:52ch; font-size:13px; }
-  body[data-reg="raver"] .nav { margin-top:30px; }
-  body[data-reg="raver"] .statusline { margin-top:26px; }
+  body[data-reg="raver"] .eyebrow { font-size:13px; }
+  body[data-reg="raver"] h1 { font-size:30px; letter-spacing:-.03em; }
+  body[data-reg="raver"] .lead { font:700 22px/1.25 var(--hfont); letter-spacing:-.02em; max-width:20ch; margin-top:14px; text-wrap:balance; }
+  body[data-reg="raver"] .intro { max-width:52ch; font-size:15px; }
+  @media (min-width:720px) {
+    body[data-reg="raver"] h1 { font-size:60px; line-height:1; letter-spacing:-.035em; }
+    body[data-reg="raver"] .lead { font-size:30px; line-height:1.15; }
+  }
+  body[data-reg="raver"] .nav { margin-top:26px; }
+  body[data-reg="raver"] .statusline { margin-top:22px; }
   body[data-reg="raver"] .chainart { display:block; position:absolute; inset:auto -3% -6% auto; width:min(56%,580px);
     pointer-events:none; }
   body[data-reg="raver"] #motion { display:inline-flex; }
-  body[data-reg="raver"] .card { border-radius:18px; }
+  body[data-reg="raver"] .dot.ok { box-shadow:0 0 13px var(--biomass); }
+  body[data-reg="raver"] .dot.bad { box-shadow:0 0 13px var(--ember); }
+  body[data-reg="raver"] :is(.nav a, button.pill, .act, .filters select, .filters input) { font-size:15px; }
+  body[data-reg="raver"] .filters :is(select, input) { padding-inline:18px; }
+  body[data-reg="raver"] :is(.statusline, .colorlaw, .sub, .chainbar small, table.ledger td, .sumline, .rep .r, .boundary-dl, .law, footer) { font-size:14px; }
+  body[data-reg="raver"] :is(.fx, .chainbar code, table.ledger th, table.ledger td .h) { font-size:13px; }
+  body[data-reg="raver"] :is(.card h2, .chainbar .word) { font-size:18px; }
+  /* the chain art's own words sit on raver's scale; HEAD is the magenta now, the human cell lavender */
+  .chainart text { font-size:12px; }
+  .chainart .c3 text { fill:var(--sk-sovereign-soft); }
+  .chainart .c5 path, .chainart .c5 text { fill:var(--sk-you); }
   .chainart .cellpulse { animation:cellpulse 2.6s var(--ease, ease) infinite; }
   .chainart .cellpulse.c2 { animation-delay:.5s; } .chainart .cellpulse.c3 { animation-delay:1s; }
   .chainart .cellpulse.c4 { animation-delay:1.5s; } .chainart .cellpulse.c5 { animation-delay:2s; }
   @keyframes cellpulse { 0%,100%{opacity:.35} 50%{opacity:1} }
 
-  /* ═══ CYPHERPUNK ════════════════════════════════════════════════════ */
+  /* ═══ CYPHERPUNK ════════════════════════════════════════════════════
+     the instrument: near-black ground, IBM Plex Mono throughout, dense, thin grey borders, 6px
+     corners, the cyan primary with a dark label, an orange outline on the restore. */
   body[data-reg="cypherpunk"] {
-    --human:#C9A7F5; --human-soft:#C9A7F5; --ai:#80CDDD; --biomass:#8CD98C; --gold:#E8B54B;
-    --bg:#0E141A; --panel:#151E26; --well:#101820; --line:#3F5260; --line-hi:#58707F;
-    --ink:#D8F0D9; --dim:#A4C0A8; --dimmer:#8AA690; --void:#0E141A; --lift:#1B2833; --ember:#E25822;
-    font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;
+    --human-soft:var(--sk-sovereign-soft); --biomass:var(--sk-biomass);
+    --gold:var(--sk-b-value); --ember:var(--sk-cat-bug); --ember-wash:rgba(192,127,28,.1); --danger:var(--sk-cat-bug);
+    --bg:var(--sk-bg); --panel:var(--sk-bg-card); --well:var(--sk-bg); --void:var(--sk-bg);
+    --line:var(--sk-line); --line-hi:rgba(100,129,118,.7); --field:rgba(100,129,118,.7); --lift:rgba(100,129,118,.14);
+    --primary:var(--sk-primary); --sel:var(--sk-ai);
+    --font:var(--sk-font-mono); --hfont:var(--sk-font-mono);
+    --r-card:var(--sk-radius-sm); --r-in:var(--sk-radius-sm); --r-btn:var(--sk-radius-sm); --r-field:var(--sk-radius-sm);
+    color-scheme:dark; font-size:13px; line-height:1.55;
   }
-  body[data-reg="cypherpunk"] header { padding:40px 0 26px; }
-  body[data-reg="cypherpunk"] h1 { font:700 clamp(1.5rem,3.4vw,2.3rem)/1.1 inherit; letter-spacing:-.02em; }
-  body[data-reg="cypherpunk"] h1 span { color:var(--biomass); }
-  body[data-reg="cypherpunk"] .lead { font:600 1rem/1.5 inherit; max-width:78ch; }
-  body[data-reg="cypherpunk"] .nav a, body[data-reg="cypherpunk"] button.pill,
-  body[data-reg="cypherpunk"] .act { border-radius:3px; }
-  body[data-reg="cypherpunk"] .card, body[data-reg="cypherpunk"] .chainbar, body[data-reg="cypherpunk"] .tablewrap,
-  body[data-reg="cypherpunk"] .law, body[data-reg="cypherpunk"] .colorlaw, body[data-reg="cypherpunk"] .fx { border-radius:3px; }
-  body[data-reg="cypherpunk"] .card h2 { color:var(--ai); }
+  body[data-reg="cypherpunk"] header { padding:22px 0 20px; }
+  body[data-reg="cypherpunk"] .eyebrow { font:600 12px/1.45 var(--font); letter-spacing:.06em; }
+  body[data-reg="cypherpunk"] h1 { font:600 22px/1.3 var(--hfont); letter-spacing:0; }
+  body[data-reg="cypherpunk"] .lead { font:600 15px/1.45 var(--hfont); letter-spacing:0; max-width:78ch; }
+  body[data-reg="cypherpunk"] .intro { font-size:13px; line-height:1.55; }
+  body[data-reg="cypherpunk"] :is(.nav a, button.pill, .act) { border-width:1px; font-size:14px; font-weight:600; }
+  body[data-reg="cypherpunk"] .filters :is(select, input) { border-width:1px; background:var(--sk-bg); font-size:13px; }
+  body[data-reg="cypherpunk"] :is(.statusline, .boundary-dl) { font-size:13px; }
+  body[data-reg="cypherpunk"] :is(.fx, .colorlaw, .sub, .chainbar small, .chainbar code, table.ledger th, table.ledger td, table.ledger td .h, .sumline, .rep .r, .law, footer) { font-size:12px; }
+  body[data-reg="cypherpunk"] :is(.card h2, .chainbar .word) { font-size:15px; font-weight:600; letter-spacing:0; }
+  body[data-reg="cypherpunk"] .fx { border-width:1px; border-radius:var(--sk-radius-sm); }
+  body[data-reg="cypherpunk"] .card { padding:14px; }
+  body[data-reg="cypherpunk"] .chainbar { padding:12px 14px; }
   body[data-reg="cypherpunk"] .grid { display:flex; flex-direction:column; }
   body[data-reg="cypherpunk"] #boundary-card { order:-1; }
 
@@ -205,6 +246,12 @@
     html { scroll-behavior:auto; }
     .cellpulse { animation:none; }
   }
+
+  /* estate floors: nothing under 12px; new bee reads at 16px with 14px labels; no forced capitals */
+  body[data-reg="bee"] { --fmin:14px; font-size:16px; }
+  body[data-reg="bee"] .intro, body[data-reg="bee"] .steplist li, body[data-reg="bee"] .sub,
+  body[data-reg="bee"] .law, body[data-reg="bee"] footer, body[data-reg="bee"] dd,
+  body[data-reg="bee"] .mobj, body[data-reg="bee"] td { font-size:16px; }
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom">
@@ -215,19 +262,19 @@
     <div class="eyebrow" data-i18n="ledger.eyebrow">the receipt ledger · machine-readable</div>
     <h1>the receipt <span>ledger</span></h1>
 
-    <p class="lead" data-reg="bee" data-i18n="ledger.beeLead">Every meaningful action, on one line you can check.</p>
-    <p class="lead" data-reg="raver" data-i18n="ledger.raverLead">The receipts never stop.</p>
-    <p class="lead" data-reg="cypherpunk" data-i18n="ledger.cypherLead">Hash-chained. Verify, don't trust.</p>
+    <p class="lead" data-reg="bee" data-i18n="ledger.beeLead">every meaningful action, on one line you can check.</p>
+    <p class="lead" data-reg="raver" data-i18n="ledger.raverLead">the receipts never stop.</p>
+    <p class="lead" data-reg="cypherpunk" data-i18n="ledger.cypherLead">hash-chained. verify, don't trust.</p>
 
-    <p class="intro" data-reg="bee" data-i18n="ledger.beeIntro">Each row is one action some agent or human took on a mission — what it was, who did it, what it cost, and the hash that ties it to the row before it. Change anything quietly and the chain breaks where everyone can see. The whole ledger exports as one machine-readable file.</p>
-    <p class="intro" data-reg="raver" data-i18n="ledger.raverIntro">The beat the estate dances to is honesty — every drop the crew lands writes itself here, chained to the last, so the morning-after story can never be remixed. Export it, check it, love it: the receipt is the track list of the night.</p>
-    <p class="intro" data-reg="cypherpunk" data-i18n="ledger.cypherIntro">sha-256 over prev-hash + a fixed-order canonical record; the browser recomputes every link on load and the generator (node:crypto, same engine) wrote them. A tampered row breaks the chain at its sequence. Export and verify offline — the ledger is data, not a promise.</p>
+    <p class="intro" data-reg="bee" data-i18n="ledger.beeIntro">each row is one action some agent or human took on a mission — what it was, who did it, what it cost, and the hash that ties it to the row before it. change anything quietly and the chain breaks where everyone can see. the whole ledger exports as one machine-readable file.</p>
+    <p class="intro" data-reg="raver" data-i18n="ledger.raverIntro">the beat the estate dances to is honesty — every drop the crew lands writes itself here, chained to the last, so the morning-after story can never be remixed. export it, check it, love it: the receipt is the track list of the night.</p>
+    <p class="intro" data-reg="cypherpunk" data-i18n="ledger.cypherIntro">sha-256 over prev-hash + a fixed-order canonical record; the browser recomputes every link on load and the generator (node:crypto, same engine) wrote them. A tampered row breaks the chain at its sequence. export and verify offline — the ledger is data, not a promise.</p>
 
     <nav class="nav" aria-label="ledger links">
       <a href="missions.html">the mission desk</a>
       <a href="mission-room.html">the mission room</a>
       <a href="or-board.html" data-i18n="missions.navOr">the OR board, live</a>
-      <button class="pill" id="motion" type="button" hidden aria-pressed="false" data-i18n="ux.pause">Pause motion</button>
+      <button class="pill" id="motion" type="button" hidden aria-pressed="false" data-i18n="ux.pause">pause motion</button>
     </nav>
 
     <div class="statusline"><span class="dot" id="status-dot"></span><span id="status">loading the ledger…</span><span class="fx" data-i18n="missions.fixture">seed ledger · fixture figures</span></div>
@@ -267,7 +314,7 @@
       <button class="act" id="reverify" type="button">re-verify the chain</button>
       <button class="act" id="reset" type="button">restore the seed ledger</button>
     </div>
-    <p class="sub" id="export-note" style="margin-top:8px">The export is the whole ledger — missions, receipts, chain — exactly as verified. Local edits live in this browser only.</p>
+    <p class="sub" id="export-note" style="margin-top:8px">the export is the whole ledger — missions, receipts, chain — exactly as verified. local edits live in this browser only.</p>
   </section>
 
   <div class="grid" style="margin-top:14px">
@@ -293,7 +340,7 @@
 
     <section class="card third" id="boundary-card" data-reg="cypherpunk">
       <h2>boundary · what this ledger does</h2>
-      <p class="sub">Named by the code that runs it.</p>
+      <p class="sub">named by the code that runs it.</p>
       <dl class="boundary-dl">
         <dt>chain</dt><dd>surfaces/mission-core.js receiptHash() — sha-256(prev + '|' + canonical), fixed field order; verified on every load and on demand</dd>
         <dt>seed</dt><dd>scripts/build-missions-seed.mjs writes surfaces/mission-seed.js through node:crypto using the same engine — the two hash paths cannot diverge</dd>
@@ -304,19 +351,19 @@
 
     <section class="card third">
       <h2>team reputation — earned in receipts</h2>
-      <p class="sub">From final reports only: delivery, cost accuracy, truthful reporting.</p>
+      <p class="sub">from final reports only: delivery, cost accuracy, truthful reporting.</p>
       <div class="rep" id="rep"></div>
       <p class="sub" id="rep-note" style="margin-top:8px"></p>
     </section>
 
     <section class="card third">
       <h2>spend by mission</h2>
-      <p class="sub">Receipt sums against approved ceilings — the envelope, measured.</p>
+      <p class="sub">receipt sums against approved ceilings — the envelope, measured.</p>
       <div class="rep" id="spends"></div>
     </section>
   </div>
 
-  <div class="law"><b>Ledger law.</b> <span>A machine-readable receipt for every meaningful action — task, handoff, artifact, tool cost, decision, gate. The chain is verified, not believed: any quiet edit breaks it at the exact sequence. Reputation follows delivery quality, cost accuracy and truthful reporting, never promises.</span></div>
+  <div class="law"><b>ledger law.</b> <span>A machine-readable receipt for every meaningful action — task, handoff, artifact, tool cost, decision, gate. the chain is verified, not believed: any quiet edit breaks it at the exact sequence. reputation follows delivery quality, cost accuracy and truthful reporting, never promises.</span></div>
 </main>
 
 <footer>the receipt ledger · LOVErnment · sha-256 chained by mission-core.js, seed by node:crypto through the same engine · every figure is a testnet-accounting fixture · <a href="missions.html">file a mission at the desk</a></footer>

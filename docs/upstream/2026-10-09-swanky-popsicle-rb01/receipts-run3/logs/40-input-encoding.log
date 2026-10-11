@@ -1,0 +1,12 @@
+NOTICE: this program runs popsicle circuit PSI from Swanky, which its README calls research software,
+not for production or sensitive data. The two parties are threads of this one process,
+joined by an in-process socket pair. Data: synthetic keys made by this program; nothing is read
+from or written to disk, and results print to this terminal only. Limits: three encoding comparisons and one short session; a watchdog ends the process after 60 s.
+It deliberately shows an encoding collision in upstream.
+Unresolved: results are samples from one host and one target (x86_64); behaviour elsewhere is untested, and no result here establishes a security property of Swanky.
+It reproduces upstream behaviour at a pinned commit and establishes no security property.
+It creates no persistent state.
+compress_and_hash_inputs([01]) == compress_and_hash_inputs([01, 00]): true
+compress_and_hash_inputs([]) == compress_and_hash_inputs([00]): true
+compress_and_hash_inputs([61, 6c, 69, 63, 65]) == compress_and_hash_inputs([61, 6c, 69, 63, 65, 00, 00, 00]): true
+circuit PSI cardinality of A = {[01]}, B = {[01 00]}: 1 (byte-string answer 0)

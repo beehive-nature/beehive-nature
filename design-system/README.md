@@ -41,7 +41,7 @@ two axes, and both are law.
 
 ## type
 
-- **the house hand is burti** (`house`) — the original latvian letterform of the .a/.b names: one round-capped line, circles for bowls, the whole latvian court, and the dot is a cell. its round shape holds weight in every register — name, titles, wordmarks, signs — even where the reading face is mono. set names through `Wordmark` and the `house-*` styles. never set sentences in it.
+- **the house hand is skaists** (`house`) — the founder's own face: capitals are carved, small letters are written; every curve a straight chord, the dots weave diamonds. burti — the original latvian letterform of the .a/.b names, one round-capped line, circles for bowls, the dot a cell — stands behind it in the stack for any glyph skaists lacks. the house hand holds weight in every register — name, titles, wordmarks, signs — even where the reading face is mono. set names through `Wordmark` and the `house-*` styles. never set sentences in it.
 - new bee reads in `bee-serif` (titles) over `bee-sans` (everything else). raver shouts in `raver-display` and talks in `raver-body`. cypherpunk is `mono` from top to bottom. the font files travel with this system.
 - estate surfaces fetch nothing: when a live page cannot carry a face, it sets the same sizes in the `ui` and `mono` stacks.
 - addresses, hashes and amounts are shown whole at the moment of confirmation (`bee-address`). an ellipsis beside a pay button is a defect.
@@ -79,7 +79,7 @@ two axes, and both are law.
 - no words live inside art. the trees carry numerals and `g1…g4` only; their captions are text.
 - lay out with logical properties (`inline-start`, `text-align: start`) so a right-to-left tongue mirrors; take angles from `flow` and `hatch`.
 - leave room: a label may run 40% longer than its english. pills and rows wrap; nothing is clipped, nothing is `nowrap` but a name.
-- burti carries latin and the latvian court. a name in another script falls through to the reading face whole — never half in one face.
+- skaists carries latin, the latvian court, norse, german, spanish and russian (its specimen's gene law); burti covers what it lacks. a name in another script falls through to the reading face whole — never half in one face.
 - the founder's casing and people's names are not translated.
 
 ## motion
@@ -88,4 +88,4 @@ motion is honest: it never implies progress that is not happening. 140ms for a p
 
 ## not synced
 
-from `beehive-nature/beehive-nature` at `main@f7465f4`: the entity sheet `docs/tokens.css` is carried whole except `ai-deep` (the canvas never uses it); from the macro sheet `surfaces/tokens.css` only the categorical set is carried — its accent family (`gold`, `cyan`, `violet`, `leaf`, `amber`) is the drift the reconciliation report names, and the entity tokens stand in for it; its 4px spacing, 9.5–13px type scale and motion durations are not tokens here (motion is prose above). the live hub's new bee (`#f6f7f2` ground, `#18362a` ink, in `surfaces/register.js`) is not carried: new bee here is the face ruled on 2026-09-19 — paper `#fbf7f0`, ink `#0c1412`, human purple, magenta action. components are hand-written from the graded canvas "bData · three registers", not built from a library. burti's small letters, latvian court and cell dot are the founder's dna unchanged; its capitals, ü ö ä and sigils are new cuts on the same grid. skaists v1.0 (the chord cut) stays in `assets/Font/` and is not used. the crest itself is not in this system — only its tree and signs.
+from `beehive-nature/beehive-nature` at `main@f7465f4`: the entity sheet `docs/tokens.css` is carried whole except `ai-deep` (the canvas never uses it); from the macro sheet `surfaces/tokens.css` only the categorical set is carried — its accent family (`gold`, `cyan`, `violet`, `leaf`, `amber`) is the drift the reconciliation report names, and the entity tokens stand in for it; its 4px spacing, 9.5–13px type scale and motion durations are not tokens here (motion is prose above). the live hub's new bee (`#f6f7f2` ground, `#18362a` ink, in `surfaces/register.js`) is not carried: new bee here is the face ruled on 2026-09-19 — paper `#fbf7f0`, ink `#0c1412`, human purple, magenta action. components are hand-written from the graded canvas "bData · three registers", not built from a library. burti's small letters, latvian court and cell dot are the founder's dna unchanged; its capitals, ü ö ä and sigils are new cuts on the same grid. skaists v1.0 (the chord cut) is the house hand: its source stays in `assets/Font/`, and the estate serves it as `surfaces/fonts/skaists.woff2`. the crest itself is not in this system — only its tree and signs.

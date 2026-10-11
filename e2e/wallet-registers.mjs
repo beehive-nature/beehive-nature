@@ -18,7 +18,7 @@
 // this surface's own contribution, measured after it.
 //
 //   node e2e/wallet-registers.mjs
-import { createServer } from 'node:http';
+import {installWalletFixture,WALLET_ORIGIN} from './lib/wallet-source-fixture.mjs';
 import { readFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname } from 'node:path';
@@ -34,21 +34,11 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.
 const results = [];
 const ok = (name, pass, detail = '') => { results.push({ name, pass }); console.log(`${pass ? '✓' : '✗'} ${name}${detail ? ' — ' + detail : ''}`); };
 
-const server = createServer(async (req, res) => {
-  const url = (req.url || '/').split('?')[0];
-  const p = (url === '/' ? '/wallet.html' : url.indexOf('/surfaces/') === 0 ? url.slice('/surfaces'.length) : url);
-  try {
-    const body = await readFile(join(SURFACES, ...p.split('/').filter(Boolean)));
-    res.writeHead(200, { 'content-type': MIME[extname(p)] || 'application/octet-stream' });
-    res.end(body);
-  } catch { res.writeHead(404); res.end('not found'); }
-});
-await new Promise(r => server.listen(0, '127.0.0.1', r));
-// localhost, not the bare IP: the wallet's origin guard (rightly) bannered an
-// IP origin, and the receipts should show the page a person gets
-const origin = `http://localhost:${server.address().port}`;
+// Production-origin source fixture; all services remain mocked or blocked.
+const origin = WALLET_ORIGIN;
 
 const browser = await chromium.launch();
+const fixtureHtml=await installWalletFixture(browser,join(SURFACES,'..'));
 const pageErrors = [];
 const REGS = ['bee', 'raver', 'cypherpunk'];
 // identical data for every register: the network is cut (no live chain can
@@ -118,10 +108,15 @@ const arrival = page => page.evaluate(() => {
       return { beeText: bee.vis ? bee.text : '', raverText: raver.vis ? raver.text : '', beeFact: bee.h1, raverFact: raver.h1 };
     },
   });
-  ok('bee reads in SERIF titles over SANS body', /Instrument Serif|Georgia/.test(seen.bee.h1Font) && /system-ui/.test(seen.bee.bodyFont), seen.bee.h1Font.split(',')[0]);
-  ok('bee corners are SOFT (18px radius-xl cards, 12px controls — the sheet)', seen.bee.cardRadius === '18px' && seen.bee.btnRadius === '12px', seen.bee.cardRadius);
-  ok('bee action is the ONE magenta (rgb(168, 35, 140))', seen.bee.btnColor === 'rgb(168, 35, 140)', seen.bee.btnColor);
-  ok('raver shouts in a heavy display title', parseInt(seen.raver.h1Weight, 10) >= 700, 'weight ' + seen.raver.h1Weight);
+  // the founder's chosen UI (his My Space screens, 2026-10-04; the wallet 2026-10-05):
+  // bee's titles are BOLD SYSTEM SANS over the same sans, its controls pills, its action forest
+  const SANS = 'ui-sans-serif,system-ui,SegoeUI,Roboto,Helvetica,Arial,sans-serif';
+  const flat = s => String(s).replace(/["'\s]/g, '');
+  ok('bee reads in BOLD SYSTEM SANS titles (≥ 700) over the same system sans body (the chosen UI)',
+    flat(seen.bee.h1Font) === SANS && flat(seen.bee.bodyFont) === SANS && parseInt(seen.bee.h1Weight, 10) >= 700, seen.bee.h1Font.split(',').slice(0, 3).join(',') + ' · ' + seen.bee.h1Weight);
+  ok('bee corners are SOFT (18px radius-xl cards) and its controls are PILLS (999px) — the chosen UI', seen.bee.cardRadius === '18px' && seen.bee.btnRadius === '999px', seen.bee.cardRadius + ' · ' + seen.bee.btnRadius);
+  ok('bee action is the ONE forest green (rgb(38, 77, 54), --sk-forest)', seen.bee.btnColor === 'rgb(38, 77, 54)', seen.bee.btnColor);
+  ok('raver shouts in a heavy title, bold system sans (the chosen UI)', parseInt(seen.raver.h1Weight, 10) >= 700 && flat(seen.raver.h1Font) === SANS && flat(seen.raver.bodyFont) === SANS, 'weight ' + seen.raver.h1Weight + ' · ' + seen.raver.h1Font.split(',').slice(0, 3).join(','));
   ok('raver controls are PILLS (999px)', seen.raver.btnRadius === '999px', seen.raver.btnRadius);
   ok('raver carries glow-sovereign (the ONE glow) and the purples-as-light wash', seen.raver.glow !== 'none' && /gradient/.test(seen.raver.bgImage), (seen.raver.glow || '').slice(0, 60));
   ok('raver action is you magenta (rgb(214, 85, 187))', seen.raver.btnColor === 'rgb(214, 85, 187)', seen.raver.btnColor);
@@ -143,8 +138,8 @@ ok('bee arrives on its home list, no section open (one question at a time)',
   arr.bee.view === 'home' && arr.bee.visibleSections === 0 && arr.bee.own.bee && !arr.bee.own.raver && !arr.bee.own.cypherpunk, JSON.stringify(arr.bee));
 ok('raver arrives on the stage and the dock, no section open (image first)',
   arr.raver.visibleSections === 0 && arr.raver.own.raver && !arr.raver.own.bee && !arr.raver.own.cypherpunk, JSON.stringify(arr.raver));
-ok('cypherpunk arrives with the whole pipeline open (18 sections, every note) and its console among them',
-  arr.cypherpunk.visibleSections >= 18 && arr.cypherpunk.own.cypherpunk && !arr.cypherpunk.own.bee && !arr.cypherpunk.own.raver &&
+ok('cypherpunk arrives with the whole pipeline open (17 sections, every note) and its console among them',
+  arr.cypherpunk.visibleSections === 17 && arr.cypherpunk.own.cypherpunk && !arr.cypherpunk.own.bee && !arr.cypherpunk.own.raver &&
   arr.cypherpunk.notesOpen === arr.cypherpunk.notes && arr.cypherpunk.notes >= 14, JSON.stringify(arr.cypherpunk));
 ok('bee and raver keep every technical note folded (one tap away, never deleted)', arr.bee.notesOpen === 0 && arr.raver.notesOpen === 0 && arr.bee.notes === arr.cypherpunk.notes);
 // not "which block is flagged" (that differs by construction): what KIND of
@@ -255,34 +250,10 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   // own order, so it is true in every register. A new one fails until someone
   // reviews it: across tasks, a message names its target as a link instead.
   const REVIEWED = [
-    ['the glyphs above open each part', 'raver stage: the dock sits above it'],
     ['more as you forge below', 'keychain → key forge, same task, after it'],
-        ['Any device in the list above', 'within the vault'],
-    ['connect your keychain above to see your derived keys', 'key forge ← keychain, same task, before it'],
-    ['rge new ones below', 'within the key forge'],
-    ['(live price below)', 'within the account forge'],
-    ['addresses below are yours to hand out', 'within pay'],
-    ['Each address above falls out of the', 'within pay'],
-    ['choose a lane above', 'within pay'],
     ['(rate cited below)', 'within the voucher'],
-    ['The key in the config below is', 'within fund'],
-    ['its Base address below is a bare', 'within fiat in'],
-    ['data block below the fold', 'the chain matrix names its own source-code data block'],
-    ['no contexts yet — forge one below', 'within the key forge'],
-    ['NOT YET on chain — bridge below', 'keychain → bridge, same task, after it'],
-    ['use the recovery lane below', 'within the keychain'],
-    ['create one here, or use recovery below', 'within the keychain'],
-    ['(passkey above or recovery below)', 'within the keychain (the QR bridge)'],
-    ['first (above)', 'account forge ← bridge, same task, before it'],
     ['(the 12-char test actor above)', 'within the composer'],
     ['the TESTNET key you paste below', 'within the composer'],
-    ['Raise or clear it above', 'within pay (the spend cap)'],
-    ['set one above and this lane obeys it too', 'within pay (the sats cap)'],
-    ['filled into both fields below', 'within the vault'],
-    ['connect your keychain above to use it', 'vault → keychain, same task, before it'],
-    ['bridge field below', 'vault → bridge, same task, after it'],
-    ['select the text above and copy it manually', 'within the vault'],
-    ['unlock with a keypass below', 'within the vault'],
   ];
   const blank = m => m.replace(/[^\n]/g, ' ');
   let code = src.replace(/\/\*[\s\S]*?\*\//g, blank).replace(/<!--[\s\S]*?-->/g, blank);
@@ -332,7 +303,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
 // the visible words, the visible controls, and any engineering left showing.
 {
   const TASKS = { have: ['connect-sec', 'bal-sec', 'summary-sec'], move: ['pay-sec', 'outbox-sec'], add: ['voucher-sec', 'peer-sec'],
-    keep: ['bpay-sec', 'insc-sec', 'arw-sec'], key: ['kc-sec', 'vault-sec', 'forge-sec', 'acct-sec'], proof: ['receipts-sec', 'composer-sec', 'matrix-sec'] };
+    keep: ['bpay-sec', 'arw-sec'], key: ['kc-sec', 'vault-sec', 'forge-sec', 'acct-sec'], proof: ['receipts-sec', 'composer-sec', 'matrix-sec'] };
   const measure = (page, id) => page.evaluate(i => {
     // shown = it has boxes AND no closed <details> folds it (this Chromium keeps boxes for a closed note's content)
     const folded = e => { for (let d = e.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) { const sm = d.querySelector(':scope>summary'); if (!d.open && !(sm && sm.contains(e))) return true; } return false; };
@@ -359,10 +330,10 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
       if (reg === 'raver') await page.click(`#wl-dock [data-wl-go="${task}"]`);
       await page.waitForTimeout(350);
       const shownSecs = await page.evaluate(() => [...document.querySelectorAll('main>section[data-wl-task]')].filter(s => s.getClientRects().length).map(s => s.id));
-      const cardsShown = await page.evaluate(() => [...document.querySelectorAll('#wl-cards .wlr-card')].filter(c => c.getClientRects().length).length);
+      const cardsShown = await page.evaluate(() => [...document.querySelectorAll('#wl-cards .wlr-card, body[data-reg="raver"] #wallet-storage a')].filter(c => c.getClientRects().length).length);
       const sec = {};
       for (const id of ids) {
-        const card = `#wl-cards .wlr-card[data-wl-card-for="${id}"]`;
+        const card = task === 'keep' ? `#wallet-storage a[href="#${id}"]` : `#wl-cards .wlr-card[data-wl-card-for="${id}"]`;
         if (reg === 'raver') { if (!await page.isVisible(card)) { sec[id] = null; continue; } await page.click(card); await page.waitForTimeout(250); }
         sec[id] = await measure(page, id);
         if (reg === 'raver') { await page.click(card); await page.waitForTimeout(150); }
@@ -378,7 +349,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     tasks.map(t => `${t}: bee ${bodies.bee[t].shownSecs.length} sections · raver ${bodies.raver[t].cardsShown} cards`).join(' · '));
   const all = [].concat(...tasks.map(t => TASKS[t]));
   const m = (reg, id) => bodies[reg][tasks.find(t => TASKS[t].includes(id))].sec[id];
-  const folded = ['kc-sec', 'forge-sec', 'pay-sec', 'insc-sec', 'receipts-sec', 'composer-sec', 'outbox-sec', 'matrix-sec'];
+  const folded = ['kc-sec', 'forge-sec', 'pay-sec', 'receipts-sec', 'composer-sec', 'outbox-sec', 'matrix-sec'];
   ok('each section with engineering reads as three bodies by visible words: cypherpunk > bee (engineering folded) > raver (words folded)',
     folded.every(id => m('cypherpunk', id).words.length > m('bee', id).words.length && m('bee', id).words.length > m('raver', id).words.length),
     folded.map(id => `${id} ${m('cypherpunk', id).words.length}/${m('bee', id).words.length}/${m('raver', id).words.length}`).join(' · '));
@@ -422,13 +393,13 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   for (const go of ['have', 'move', 'add', 'keep', 'key', 'proof', 'all']) {
     await page.click(`#wl-dock [data-wl-go="${go}"]`); await page.waitForTimeout(250);
     leads[go] = await page.evaluate(() => {
-      const first = [...document.querySelectorAll('main>*')].filter(e => e.getClientRects().length && e.id !== 'wl-dock').sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0];
+      const first = [...document.querySelectorAll('main>*')].filter(e => e.getClientRects().length && !['wl-dock','wallet-identity'].includes(e.id)).sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0];
       const g = [...document.querySelectorAll('#wl-deck [data-wl-for]')].filter(s => s.getClientRects().length).map(s => s.textContent).join();
       return (first && first.id) + (g ? ':' + g : '');
     });
   }
-  ok('raver: EVERY deck opens on art before any section (have on the stage, the rest on their lit glyph)',
-    leads.have === 'wl-rave' && ['move', 'add', 'keep', 'key', 'proof', 'all'].every(g => leads[g].startsWith('wl-deck:')), JSON.stringify(leads));
+  ok('raver: storage opens on its network chooser; other decks keep their stage or glyph',
+    leads.have === 'wl-rave' && leads.keep === 'wallet-storage' && ['move', 'add', 'key', 'proof', 'all'].every(g => leads[g].startsWith('wl-deck:')), JSON.stringify(leads));
   await page.click('#wl-dock [data-wl-go="add"]'); await page.waitForTimeout(600);
   const filled = async () => page.evaluate(() => {
     const probe = document.createElement('i'); probe.style.color = getComputedStyle(document.body).getPropertyValue('--reg-primary').trim(); document.body.appendChild(probe);
@@ -482,7 +453,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   const idx = await page.evaluate(() => [...document.querySelectorAll('#wl-cy-idx a')].map(a => ({ sec: a.getAttribute('href').slice(1), shown: a.getClientRects().length > 0, h: Math.round(a.getBoundingClientRect().height) })));
   const live = idx.filter(i => i.shown);
   ok('cypherpunk: the index has a row for every section it can show (each a ≥ 44px press), none pointing at a hidden one',
-    idx.length === 19 && live.every(i => i.h >= 44) && live.length === 18 && !idx.find(i => i.sec === 'bridge-sec').shown,
+    idx.length === 18 && live.every(i => i.h >= 44) && live.length === 17 && !idx.find(i => i.sec === 'bridge-sec').shown,
     `${idx.length} rows · ${live.length} live · bridge ${idx.find(i => i.sec === 'bridge-sec').shown ? 'SHOWN (dead)' : 'held until the page shows it'}`);
   const rail = await page.evaluate(() => { const c = document.getElementById('wl-cy'), m = document.getElementById('bal-sec'); return { pos: getComputedStyle(c).position, left: c.getBoundingClientRect().right <= m.getBoundingClientRect().left, top: Math.round(c.getBoundingClientRect().top), fold: innerHeight }; });
   ok('cypherpunk (desktop): the console is a sticky rail beside the pipeline, in the first screen', rail.pos === 'sticky' && rail.left && rail.top < rail.fold, JSON.stringify(rail));
@@ -501,8 +472,8 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   ok('cypherpunk: j moves to the next section, k back (focus follows)', j1 === 'connect-sec' && j2 === 'kc-sec' && k1 === 'connect-sec', `${j1} → ${j2} → ${k1}`);
   await page.click('#wl-cy-idx a[href="#fund-sec"]');
   await page.waitForTimeout(500);
-  const landed = await page.evaluate(() => Math.round(document.getElementById('fund-sec').getBoundingClientRect().top));
-  ok('cypherpunk: an index row lands on its section', landed >= 0 && landed < 40, 'top ' + landed + 'px');
+  const landed = await page.evaluate(() => Math.round(document.getElementById('fund-sec').getBoundingClientRect().top-document.getElementById('wallet-identity').getBoundingClientRect().bottom));
+  ok('cypherpunk: an index row lands on its section', landed >= 0 && landed < 40, 'below wallet bar ' + landed + 'px');
   await page.keyboard.press('o');
   const folded = await page.evaluate(() => [...document.querySelectorAll('details[data-reg-disclose]')].every(d => !d.open));
   await page.keyboard.press('o');
@@ -679,7 +650,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     const secs = [...document.querySelectorAll('main>section')];
     return { n: secs.length, orphans: secs.filter(s => !rows.has(s.dataset.wlTask) || !glyphs.has(s.dataset.wlTask)).map(s => s.id || s.querySelector('h2').textContent) };
   });
-  ok('every one of the 19 sections belongs to a task a bee row and a raver glyph can open', reach.n === 19 && reach.orphans.length === 0, reach.orphans.join(', '));
+  ok('every one of the 18 sections belongs to a task a bee row and a raver glyph can open', reach.n === 18 && reach.orphans.length === 0, reach.orphans.join(', '));
   const map = await page.evaluate(() => {
     const dom = Object.fromEntries([...document.querySelectorAll('main>section[data-wl-task]')].map(s => [s.id, s.dataset.wlTask]));
     const early = window.WL_TASK_OF || {};
@@ -721,8 +692,8 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   ok('bee\'s task carries into raver (the have glyph is lit, the same field shows)', await page.evaluate(() => document.body.dataset.wlView === 'have' && document.querySelector('#wl-dock [data-wl-go="have"]').getAttribute('aria-pressed') === 'true') && await page.isVisible('#wq'));
   await page.click('#breg-cypherpunk');
   await page.waitForTimeout(500);
-  const place = await page.evaluate(() => Math.round(document.getElementById('connect-sec').getBoundingClientRect().top));
-  ok('and back in cypherpunk the reader is placed at that task\'s first section', place >= 0 && place < 60, 'connect top ' + place + 'px');
+  const place = await page.evaluate(() => Math.round(document.getElementById('connect-sec').getBoundingClientRect().top-document.getElementById('wallet-identity').getBoundingClientRect().bottom));
+  ok('and back in cypherpunk the reader is placed at that task\'s first section', place >= 0 && place < 60, 'connect below wallet bar ' + place + 'px');
   await ctx.close();
 }
 
@@ -739,7 +710,9 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   const VOUCHER = { balance: '12.5000', topup: { rail_a: { send_to: 'bnrvoucher11', memo: 'gatekey' }, rail_usdc: { send_to: '0x' + '1'.repeat(40), rate_a_per_usdc: '4.2', rate_ref: 'RATE-REF-FIXTURE' } },
     spent_total: '1.0000', deposited_total: '13.5000', tithe_total: '0.1000', receipts: [], source: 'SOURCE-FIXTURE-HOST' };
   const ENG = { voucher: ['SOURCE-FIXTURE-HOST', 'hash-chained ledger', 'RATE-REF-FIXTURE'], fund: ['BNR_MELD_PUBLIC_KEY', 'data-meld-public-key', 'sb.meldcrypto.com'], footer: ['PBKDF2+AES-GCM', 'crates/bnr-keys', 'vendored eosjs'] };
-  const PLAIN = { voucher: ['12.5000', 'no memo, no credit'], fund: ['not wired to bPay', 'card checkout is not switched on here yet'], footer: ['the BNR wallet', 'how this page is built'] };
+  // the top up is one press from this wallet in bee and raver; the copy recipe for paying from
+  // elsewhere (account, memo, its "no memo, no credit" warning) is cypherpunk's alone
+  const PLAIN = { voucher: ['12.5000'], fund: ['not wired to bPay', 'card checkout is not switched on here yet'], footer: ['skaists heART WALLet', 'how this page is built'] };
   const seen = (page, sel) => page.evaluate(sel => {
     const folded = e => { for (let d = e.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) { const sm = d.querySelector(':scope>summary'); if (!d.open && !(sm && sm.contains(e))) return true; } return false; };
     const root = document.querySelector(sel), w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let t = '', n;
@@ -769,7 +742,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     if (reg === 'raver') await page.click('#wl-dock [data-wl-go="add"]');
     await page.waitForTimeout(350);
     for (const [part, id] of [['voucher', 'voucher-sec']]) {
-      if (reg === 'raver') { await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(300); }
+      if (reg === 'raver') { await page.click(['bpay-sec','arw-sec'].includes(id) ? `#wallet-storage a[href="#${id}"]` : `#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(300); }
       if (part === 'voucher') { await page.fill('#vc-key', 'gatekey'); await page.click('#vc-go'); await page.waitForFunction(() => document.getElementById('vc-panel').style.display === 'block', null, { timeout: 5000 }); }
       r[part] = await seen(page, '#' + id);
       // the voucher panel a lookup opens, read as words: no dash, no capitals-as-shout
@@ -782,7 +755,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
         return out;
       });
       if (reg !== 'cypherpunk') { await page.click(`#${id} .wl-more`); await page.waitForTimeout(150); r[part + 'Tap'] = await seen(page, '#' + id); await page.click(`#${id} .wl-more`); await page.waitForTimeout(100); }
-      if (reg === 'raver') { await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(150); }
+      if (reg === 'raver') { await page.click(['bpay-sec','arw-sec'].includes(id) ? `#wallet-storage a[href="#${id}"]` : `#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(150); }
     }
     // receipts: the add task one tap deep, stripped and in colour (to tell a real overlap from a strip artefact)
     if (reg === 'raver') { await page.click('#wl-cards .wlr-card[data-wl-card-for="peer-sec"]'); await page.waitForTimeout(300); }
@@ -809,7 +782,9 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     leak('bee').length === 0 && leak('raver').length === 0, `bee ${leak('bee').join(', ') || 'none'} · raver ${leak('raver').join(', ') || 'none'}`);
   const missing = reg => parts.flatMap(p => ENG[p].filter(m => [390, 1280].some(W => !resW[W][reg][p].includes(m))).map(m => p + ':' + m));
   ok('cypherpunk shows every one of those engineering strings open, with no tap', missing('cypherpunk').length === 0, missing('cypherpunk').join(', ') || 'all open');
-  const far = reg => parts.flatMap(p => ENG[p].filter(m => [390, 1280].some(W => !resW[W][reg][p + 'Tap'].includes(m))).map(m => p + ':' + m));
+  // the rate citation travels with the USDC way, which is cypherpunk's alone (bee and raver top up from the wallet)
+  const ENG_FAR = { ...ENG, voucher: ENG.voucher.filter(m => m !== 'RATE-REF-FIXTURE') };
+  const far = reg => parts.flatMap(p => ENG_FAR[p].filter(m => [390, 1280].some(W => !resW[W][reg][p + 'Tap'].includes(m))).map(m => p + ':' + m));
   ok('in bee and raver each one is ONE tap away (the section\'s own toggle, the footer\'s summary): moved, never deleted',
     far('bee').length === 0 && far('raver').length === 0, `bee ${far('bee').join(', ') || 'all reached'} · raver ${far('raver').join(', ') || 'all reached'}`);
   const lost = reg => parts.flatMap(p => PLAIN[p].filter(m => [390, 1280].some(W => !resW[W][reg][p].includes(m))).map(m => p + ':' + m));
@@ -822,6 +797,11 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   }
   ok('the voucher panel a lookup opens reads as words in every register at 390 and 1280: no dash as punctuation, no capitals-as-shout (a lone "—" empty value and the oracle’s own values excepted)',
     vcBad.length === 0 && REGS.every(r => (resW[390][r].voucherCopy || []).length > 0), vcBad.slice(0, 4).join(' · ') || 'clean');
+  const TOPUP = { bee: ['top up from my wallet', 'the memo is filled in for you'], raver: ['top up from my wallet', 'the memo is filled in for you'], cypherpunk: ['top up from my wallet', 'no memo, no credit', 'bnrvoucher11', 'gatekey'] };
+  const topLost = REGS.flatMap(reg => TOPUP[reg].filter(m => [390, 1280].some(W => !resW[W][reg].voucher.includes(m))).map(m => reg + ':' + m));
+  const recipeLeak = ['bee', 'raver'].flatMap(reg => ['bnrvoucher11', '0x' + '1'.repeat(40), 'copy memo', 'no memo, no credit'].filter(m => [390, 1280].some(W => resW[W][reg].voucher.includes(m) || resW[W][reg].voucherTap.includes(m))).map(m => reg + ':' + m));
+  ok('the voucher tops up from this wallet in one press (bee and raver see the press and no copy recipe that sends them elsewhere); cypherpunk keeps the account, the memo and its warning',
+    topLost.length === 0 && recipeLeak.length === 0, [topLost.join(', '), recipeLeak.join(', ')].filter(Boolean).join(' · ') || 'press shown, recipe cypherpunk only');
   ok('the plain facts show at rest in every register: the voucher balance, the memo warning, the card route\'s own "not wired to bPay", the checkout state, the footer\'s name and its way in',
     REGS.every(r => lost(r).length === 0), REGS.map(r => `${r} ${lost(r).join(', ') || 'all shown'}`).join(' · '));
 }
@@ -866,9 +846,9 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     await ctx.close();
   }
   ok('new bee\'s opening copy, dress stripped at 390 and 1280: every section a task opens reads with no capitals-as-shout, no dash and none of the machine words (heading and the intro under it)',
-    // 17 sections per width, EXACTLY: the 18 the pipeline shows, less the card route, held out of
+    // 16 sections per width, EXACTLY: the 17 the pipeline shows, less the card route, held out of
     // bee's tasks (4i reads it, in "show me everything"); the bridge waits hidden until needed
-    found.length === 0 && seenOpen.length === 2 * 17 && !seenOpen.some(s => s.endsWith(':fund-sec')), found.length ? found.slice(0, 5).join(' · ') : `${seenOpen.length} openings read clean`);
+    found.length === 0 && seenOpen.length === 2 * 16 && !seenOpen.some(s => s.endsWith(':fund-sec')), found.length ? found.slice(0, 5).join(' · ') : `${seenOpen.length} openings read clean`);
 }
 
 // 4g · THE HEADINGS READ AS WORDS: no visible section heading shouts in capitals, in
@@ -957,7 +937,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
       // raver: every card its add deck deals, opened one at a time
       if (reg === 'raver') {
         r.opened = [];
-        for (const id of r.add.cards) { await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(300); r.opened.push(await read(page)); await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(150); }
+        for (const id of r.add.cards) { await page.click(['bpay-sec','arw-sec'].includes(id) ? `#wallet-storage a[href="#${id}"]` : `#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(300); r.opened.push(await read(page)); await page.click(['bpay-sec','arw-sec'].includes(id) ? `#wallet-storage a[href="#${id}"]` : `#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(150); }
       }
       // "show me everything": the one bee and raver view that still shows the card route
       if (reg === 'bee') { await page.click('#wl-bar [data-wl-go="home"]'); await page.waitForTimeout(350); await page.click('#wl-bee [data-wl-go="all"]'); }
@@ -981,7 +961,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     [390, 1280].map(W => W + ': ' + at[W].raver.add.cards.join(',')).join(' · ') + (rvMeld.length ? ' · ' + rvMeld.slice(0, 3).join(' · ') : ''));
   // 2 · moved, not deleted; a reason in words, never a dead button
   const src = await readFile(join(SURFACES, 'wallet.html'), 'utf8');
-  const kept = ['id="fund-go"', 'id="fund-asset"', 'id="fund-addr"', 'BNR_MELD_PUBLIC_KEY', "Meld's hosted checkout", 'buy USDC (opens Meld)', 'transactionType'].filter(m => !src.includes(m));
+  const kept = ['id="fund-go"', 'id="fund-asset"', 'id="fund-addr"', 'BNR_MELD_PUBLIC_KEY', "Meld's hosted checkout", 'buy USDC with a card', '(opens Meld)', 'transactionType'].filter(m => !src.includes(m));
   ok('2 · the card route\'s code and words stay in the file (moved, not deleted)', kept.length === 0, kept.join(', ') || 'launch, asset, address, key config, note, label, checkout builder all present');
   const says = both(a => ['cypherpunk', 'bee', 'raver'].filter(r => !(r === 'cypherpunk' ? a[r].add : a[r].all).sections.includes('fund-sec') || !a[r].fundAll.includes('not wired to bPay yet') || !a[r].fundAll.includes('card checkout is not switched on here yet')));
   ok('2 · wherever the card route still shows (cypherpunk\'s pipeline, bee\'s and raver\'s "show me everything") it says it is a separate card route not wired to bPay yet, and why checkout is off, in words',
@@ -993,7 +973,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     await ctx.addInitScript(() => { try { localStorage.setItem('bregister', 'cypherpunk'); } catch (e) {} });
     await ctx.route(url => !url.href.startsWith(origin), r => r.abort());
-    await ctx.route(/\/wallet\.html$/, async route => { const resp = await route.fetch(); await route.fulfill({ response: resp, body: (await resp.text()).replace('data-meld-public-key=""', 'data-meld-public-key="GATE-PUBLIC-PLACEHOLDER"') }); });
+    await ctx.route(/\/wallet\.html$/, async route => { const resp = {text:async()=>fixtureHtml}; await route.fulfill({ contentType: 'text/html', body: (await resp.text()).replace('data-meld-public-key=""', 'data-meld-public-key="GATE-PUBLIC-PLACEHOLDER"') }); });
     const page = await ctx.newPage();
     await page.goto(origin + '/wallet.html', { waitUntil: 'load' }); await page.waitForTimeout(600);
     const armed = await page.evaluate(() => ({ go: document.getElementById('fund-go').getClientRects().length > 0, off: document.getElementById('fund-off').getClientRects().length > 0, dis: document.getElementById('fund-go').getAttribute('aria-disabled') }));
@@ -1027,20 +1007,20 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
 // 10 · deep links land in the task that holds their target, in every register
 {
   const a = await open('bee', { path: '/wallet.html?compose=' + encodeURIComponent('kingbeelovis:registeracc'), fixture: false });
-  const c = await a.page.evaluate(() => ({ view: document.body.dataset.wlView, shown: document.getElementById('composer-sec').getClientRects().length > 0, contract: document.getElementById('tx-contract').value, top: Math.round(document.getElementById('composer-sec').getBoundingClientRect().top) }));
-  ok('?compose= opens bee ON the composer (its task, scrolled to it) with the contract prefilled', c.view === 'proof' && c.shown && c.contract === 'kingbeelovis' && c.top >= 0 && c.top < 120, JSON.stringify(c));
+  const c = await a.page.evaluate(() => ({ view: document.body.dataset.wlView, shown: document.getElementById('composer-sec').getClientRects().length > 0, contract: document.getElementById('tx-contract').value, top: Math.round(document.getElementById('composer-sec').getBoundingClientRect().top), headerBottom: Math.round(document.getElementById('wallet-identity').getBoundingClientRect().bottom) }));
+  ok('?compose= opens bee ON the composer (its task, scrolled to it) with the contract prefilled', c.view === 'proof' && c.shown && c.contract === 'kingbeelovis' && c.top >= c.headerBottom - 1 && c.top <= c.headerBottom + 24, JSON.stringify(c));
   await a.ctx.close();
   // raver lands on the composer's own card, cypherpunk on the composer in the open pipeline
   for (const reg of ['raver', 'cypherpunk']) {
     const r = await open(reg, { path: '/wallet.html?compose=' + encodeURIComponent('kingbeelovis:registeracc'), fixture: false });
     await r.page.waitForTimeout(800);
-    const c2 = await r.page.evaluate(() => ({ view: document.body.dataset.wlView, shown: document.getElementById('composer-sec').getClientRects().length > 0, contract: document.getElementById('tx-contract').value, top: Math.round(document.getElementById('composer-sec').getBoundingClientRect().top) }));
-    ok(`?compose= lands ${reg} ON the composer, painted, with the contract prefilled`, c2.shown && c2.contract === 'kingbeelovis' && c2.top >= 0 && c2.top < 160, JSON.stringify(c2));
+    const c2 = await r.page.evaluate(() => ({ view: document.body.dataset.wlView, shown: document.getElementById('composer-sec').getClientRects().length > 0, contract: document.getElementById('tx-contract').value, top: Math.round(document.getElementById('composer-sec').getBoundingClientRect().top), headerBottom: Math.round(document.getElementById('wallet-identity').getBoundingClientRect().bottom) }));
+    ok(`?compose= lands ${reg} ON the composer, painted, with the contract prefilled`, c2.shown && c2.contract === 'kingbeelovis' && c2.top >= c2.headerBottom - 1 && c2.top <= c2.headerBottom + 24, JSON.stringify(c2));
     await r.ctx.close();
   }
   // the desktop's QR (#qr=<request>) lands on the waiting sheet, painted, in every register
   {
-    const q = Buffer.alloc(49, 7); q[16] = 2;
+    const q = Buffer.alloc(81, 7); q[16] = 2;   // v2: sid(16) ‖ secp256k1 pub(33) ‖ SHA-256 of the X-Wing key(32)
     const got = {};
     for (const reg of REGS) {
       const r = await open(reg, { path: '/wallet.html#qr=' + q.toString('base64url'), fixture: false });
@@ -1086,6 +1066,20 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   }
 }
 
+// Brand navigation must preserve the Bee history stack.
+{
+  const { ctx, page } = await open('bee', { fixture: false });
+  await page.click('#wl-bee [data-wl-go="have"]');
+  await page.waitForFunction(() => document.body.dataset.wlView === 'have');
+  await page.click('#wallet-identity .wallet-brand');
+  await page.waitForFunction(() => document.body.dataset.wlView === 'home');
+  ok('brand returns home without native fragment navigation', await page.evaluate(() => !location.hash && history.state.wlView === 'home'));
+  await page.goForward();
+  await page.waitForFunction(() => document.body.dataset.wlView === 'have');
+  ok('brand back preserves the original forward task', await page.evaluate(() => history.state.wlView === 'have'));
+  await ctx.close();
+}
+
 // 11 · persistence, casing, receipts at desktop width
 {
   const { ctx, page } = await open('bee', { fixture: false });
@@ -1107,7 +1101,7 @@ ok('receipts banked: arrival with read balances at 390 and 1280 for each registe
 ok('no page errors across all three registers', pageErrors.length === 0, pageErrors.slice(0, 2).join(' | ').slice(0, 200));
 
 await browser.close();
-server.close();
+
 const failed = results.filter(r => !r.pass);
 console.log(failed.length
   ? `\nWALLET REGISTERS GATE: ${failed.length} FAILED of ${results.length}`

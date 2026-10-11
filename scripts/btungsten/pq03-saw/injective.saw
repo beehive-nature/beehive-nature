@@ -1,0 +1,28 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ03 — PROVE-UNIVERSAL on the Cryptol spec
+// (../pq03-cryptol/BpqDerive.cry). derive.saw proves crates/bpq-core equal
+// to that spec, so each theorem here holds of the Rust model.
+//
+//   labelsPrefixFree  no derivation label is a byte prefix of another
+//   infoFits          every admitted info string is 1 to 105 bytes
+//   infoPadded        the padded string is zero past its length
+//   rootIsolated      the vault's "root" context is never a pq: context
+//   deriveInjective   for ALL admitted (label, context, counter) pairs:
+//                     equal info strings imply equal triples
+//
+// usage (from this directory): saw injective.saw
+
+import "../pq03-cryptol/BpqDerive.cry";
+
+let proven name = print (str_concat "PQ03-SAW PROVEN " name);
+let bw = w4_unint_bitwuzla [];
+
+prove_print bw {{ labelsPrefixFree }};
+proven "labelsPrefixFree";
+prove_print bw {{ \l c k -> infoFits l c k }};
+proven "infoFits";
+prove_print bw {{ \l c k -> infoPadded l c k }};
+proven "infoPadded";
+prove_print bw {{ \c -> rootIsolated c }};
+proven "rootIsolated";
+prove_print bw {{ \l1 c1 ka l2 c2 kb -> deriveInjective l1 c1 ka l2 c2 kb }};
+proven "deriveInjective";

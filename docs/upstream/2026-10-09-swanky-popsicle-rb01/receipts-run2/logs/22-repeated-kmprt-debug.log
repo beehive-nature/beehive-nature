@@ -1,0 +1,12 @@
+NOTICE: this program runs popsicle circuit PSI (psi) or the swanky-oprf-kmprt OPPRF (kmprt) from Swanky, which its README calls research software,
+not for production or sensitive data. The two parties are threads of this one process,
+joined by an in-process socket pair. Data: synthetic keys made by this program; nothing is read
+from or written to disk, and results print to this terminal only. Limits: one case per run; a watchdog ends the process after 60 s, and until then a case that does not complete keeps one CPU core busy.
+It reproduces upstream behaviour at a pinned commit and establishes no security property.
+It creates no persistent state.
+
+thread 'main' (43365) panicked at edge/oprf-kmprt/src/lib.rs:202:9:
+assertion `left == right` failed
+  left: 2
+ right: 3
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

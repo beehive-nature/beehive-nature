@@ -4,12 +4,12 @@
 // JWK — never a literal key in this file, per the fixture-refinement law), the
 // publish flow end-to-end with a MOCKED gateway, and the honest unfunded path.
 // Run:  cd e2e && node wallet-arweave.mjs     (exit 0 = green)
-import { createServer } from 'node:http';
+import {installWalletFixture,WALLET_ORIGIN} from './lib/wallet-source-fixture.mjs';
 import { readFile } from 'node:fs/promises';
 import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { pinRegister } from './wallet-register-pin.mjs';
+import { pinRegister, REG } from './wallet-register-pin.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
@@ -17,15 +17,6 @@ const URL_ = '/surfaces/wallet.html';
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
 
-const server = createServer(async (req, res) => {
-  try {
-    const p = join(ROOT, decodeURIComponent(req.url.split('?')[0]).replace(/^\//, ''));
-    const body = await readFile(p);
-    res.writeHead(200, { 'Content-Type': MIME[extname(p)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
-    res.end(body);
-  } catch { res.writeHead(404); res.end('nf'); }
-});
-await new Promise(r => server.listen(8892, '127.0.0.1', r));
 
 let pass = 0, fail = 0;
 const ok = (name, cond, detail) => {
@@ -47,7 +38,7 @@ function mockGateways(ctx, tally, txAnswer) {
     if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
     if (tally) { const h = u.host; tally[h] = (tally[h] || 0) + 1; }
     const json = (obj, status = 200) => route.fulfill({ status, headers: cors, contentType: 'application/json', body: JSON.stringify(obj) });
-    if (u.pathname.endsWith('/price/1926')) return json(FEE);
+    if (/\/price\/\d+$/.test(u.pathname)) return json(FEE);
     if (u.pathname.endsWith('/spot_price')) return json(SPOT);
     if (u.pathname.endsWith('/tx_anchor')) return json('yfE5XWLIT5U0dwMJanchorMOCK0000000000000000000');
     if (u.pathname.includes('/wallet/')) return json('0'); // unfunded
@@ -60,6 +51,7 @@ function mockGateways(ctx, tally, txAnswer) {
 }
 
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
+const fixtureHtml=await installWalletFixture(browser,ROOT);
 // the register this battery reads in: WALLET_REG (see wallet-register-pin.mjs)
 pinRegister(browser);
 try {
@@ -69,7 +61,7 @@ try {
   {
     const ctx = await browser.newContext();
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     const v = await page.evaluate(async (FEE) => {
       const A = window.BNRAR;
       const payload = new Uint8Array(await (await fetch('/surfaces/forge/orbit-manifests.md')).arrayBuffer());
@@ -98,7 +90,7 @@ try {
     const ctx = await browser.newContext();
     mockGateways(ctx);
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     const r = await page.evaluate(async () => {
       // generate a THROWAWAY RSA-4096 key IN THE PAGE (construct-at-runtime law)
       const kp = await crypto.subtle.generateKey({ name: 'RSA-PSS', modulusLength: 4096,
@@ -130,7 +122,7 @@ try {
     const ctx = await browser.newContext();
     mockGateways(ctx, tally);
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     for (let i = 0; i < 12; i++) await page.evaluate(() => window.BNRAR.fee(1926));
     const hosts = Object.keys(tally);
     const total = hosts.reduce((s, h) => s + tally[h], 0);
@@ -153,7 +145,11 @@ try {
     const page = await ctx.newPage();
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => document.body.dataset.reg, null, { timeout: 10000 });
+    ok('the estate anchor (and the JWK scaffold) are cypherpunk controls: ' + REG + (REG === 'cypherpunk' ? ' shows them' : ' never offers them'),
+      REG === 'cypherpunk' ? await page.locator('#arw-anchor').isVisible() : !(await page.locator('#arw-go').isVisible()) && !(await page.locator('#arw-jwk-scaffold').isVisible()));
+    if (REG !== 'cypherpunk') await page.evaluate(() => document.getElementById('breg-cypherpunk').click());
     await page.evaluate(async () => {
       const kp = await crypto.subtle.generateKey({ name: 'RSA-PSS', modulusLength: 4096,
         publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign']);
@@ -166,10 +162,10 @@ try {
     // vault section where a reader can reach it, clear of that banner, never under it
     await page.evaluate(() => window.scrollBy(0, document.getElementById('vault-sec').getBoundingClientRect().top - 240));
     await page.locator('#vault-sec').click({ position: { x: 8, y: 8 } }); // wakes the panel's vault hook
-    await page.waitForFunction(() => /short by/.test(document.getElementById('arw-stat').textContent), null, { timeout: 8000 });
+    await page.waitForFunction(() => /publishing needs/.test(document.getElementById('arw-stat').textContent), null, { timeout: 8000 });
     await page.waitForTimeout(600);
     const armed = await page.locator('#arw-stat').innerText();
-    ok('panel armed with fee + shortfall honesty (unfunded)', /short by/.test(armed) && /AR/.test(armed), armed.slice(0, 90));
+    ok('panel armed with fee + shortfall honesty (unfunded), in one sentence and its one link', /publishing needs [0-9.]+ AR/.test(armed) && await page.evaluate(() => !!document.querySelector('#arw-stat a[href="#ch-arweave"]')), armed.slice(0, 120));
     ok('publish control disabled while unfunded', await page.locator('#arw-go').isDisabled());
     // arm the funds: balance mock flips to funded, publish should go through
     await page.evaluate(() => { window.__flipFunded = true; });
@@ -180,12 +176,26 @@ try {
       if (u.pathname.includes('/wallet/')) return route.fulfill({ contentType: 'application/json', body: '"100000000000"' });
       await route.fallback();
     });
-    await page.locator('#arw-go').evaluate(b => { b.disabled = false; }); // panel state machine re-reads on click
+    // Production refresh owns enablement; Playwright supplies trusted input.
+    await page.evaluate(() => document.dispatchEvent(new Event('vault-unlocked')));
+    await page.waitForFunction(() => !document.getElementById('arw-go').disabled);
+    await page.evaluate(() => document.getElementById('arw-go').addEventListener('click', e => { window.__publishTrusted = e.isTrusted; }, { once: true }));
     await page.locator('#arw-go').click();
-    await page.waitForFunction(() => document.getElementById('arw-stat').textContent.includes('expected verdict'), null, { timeout: 10000 })
+    ok('publication starts with trusted browser input', await page.evaluate(() => window.__publishTrusted === true));
+    // the anchor is reviewed like a file: fee, the paying address and "cannot be undone", before any signature
+    await page.locator('#arw-file-dialog').waitFor({ state: 'visible', timeout: 20000 });
+    const anchorPlan = await page.locator('#arw-file-plan').textContent();
+    const vaultAddr = await page.evaluate(() => (window.BNRVAULT.list().filter(e => e.type === 'arweave')[0] || { meta: {} }).meta.address);
+    ok('the anchor waits for review: exact fee, the paying address, cannot be undone, nothing posted yet',
+      /Exact fee: [0-9.]+ AR/.test(anchorPlan) && anchorPlan.includes('Paying address: ' + vaultAddr) && /cannot be undone/.test(anchorPlan) && posted.length === 0 &&
+      await page.locator('#arw-file-confirm').isVisible() && /estate anchor/.test(await page.locator('#arw-file-dialog-title').textContent()), anchorPlan.slice(0, 160));
+    ok('both publish buttons wait while the review is open', await page.locator('#arw-go').isDisabled() && await page.locator('#arw-file-review').isDisabled());
+    await page.locator('#arw-file-confirm').click();
+    await page.waitForFunction(() => /does not hold enough AR/.test(document.getElementById('arw-stat').innerText), null, { timeout: 10000 })
       .catch(() => {});
     const after = await page.locator('#arw-stat').innerText();
-    ok('unfunded verdict explained honestly (arweave-js identical)', /expected verdict/.test(after), after.slice(0, 120));
+    ok('unfunded verdict said calmly where the reader pressed, the gateway\'s own words kept for cypherpunk', /does not hold enough AR for the fee, so nothing was published/.test(after) &&
+      await page.evaluate(() => /FAILED: .*verification/i.test((document.querySelector('#arw-stat .wl-cyd') || {}).textContent || '') && (document.getElementById('tx-out').textContent || '') === ''), after.slice(0, 160));
     ok('tx actually POSTed (built + signed + sent)', posted.length === 1, 'posted=' + posted.length);
     if (posted[0]) {
       const tx = posted[0];
@@ -215,7 +225,7 @@ try {
     const page = await ctx.newPage();
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
-    await page.addInitScript(() => {
+    const arWalletMock = () => {
       let _jwk = null, _addr = null, _key = null;
       const b64uDec = (s) => {
         s = String(s).replace(/-/g, '+').replace(/_/g, '/');
@@ -244,17 +254,19 @@ try {
       };
       window.arweaveWallet = {
         connect: async () => {},
-        getActiveAddress: async () => { if (!_addr) await window.__arInjectBoot(); return _addr; },
+        getActiveAddress: async () => { window.__arAddressCount=(window.__arAddressCount||0)+1;if (!_addr) await window.__arInjectBoot(); return _addr; },
         getActivePublicKey: async () => { if (!_jwk) await window.__arInjectBoot(); return _jwk.n; },
         signature: async (data, alg) => {
+          window.__arSignCount=(window.__arSignCount||0)+1;
           if (!_key) await window.__arInjectBoot();
           const u8 = data instanceof Uint8Array ? data : new Uint8Array(data);
           return new Uint8Array(await crypto.subtle.sign(
             { name: 'RSA-PSS', saltLength: (alg && alg.saltLength) || 32 }, _key, u8));
         }
       };
-    });
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    };
+    await page.addInitScript(arWalletMock);
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => window.BNRWALLET && BNRWALLET.arInject && window.BNRAR, null, { timeout: 15000 });
     ok('arInject API exposed on BNRWALLET', await page.evaluate(() =>
       !!(BNRWALLET.arInject && BNRWALLET.arInject.present && BNRWALLET.arInject.present())));
@@ -266,6 +278,7 @@ try {
       const t = document.getElementById('arw-stat').textContent || '';
       return /extension|connect|Arweave|address|reading|AR/i.test(t) && !/seal your JWK/i.test(t);
     }), await page.locator('#arw-stat').innerText().then(t => t.slice(0, 100)));
+    ok('opening the page never asks the Arweave extension for an address',await page.evaluate(()=>(window.__arAddressCount||0)===0));
     await page.locator('#arw-connect').click();
     await page.waitForFunction(() => {
       const a = document.getElementById('arw-addr');
@@ -281,14 +294,23 @@ try {
       if (u.pathname.includes('/wallet/')) return route.fulfill({ contentType: 'application/json', body: '"100000000000"' });
       await route.fallback();
     });
-    await page.locator('#arw-go').evaluate(b => { b.disabled = false; });
+    // Production refresh owns enablement; Playwright supplies trusted input.
+    await page.evaluate(() => document.dispatchEvent(new Event('vault-unlocked')));
+    await page.waitForFunction(() => !document.getElementById('arw-go').disabled);
+    if (REG !== 'cypherpunk') await page.evaluate(() => document.getElementById('breg-cypherpunk').click());   // the anchor is cypherpunk's control
+    await page.evaluate(() => document.getElementById('arw-go').addEventListener('click', e => { window.__publishTrusted = e.isTrusted; }, { once: true }));
     await page.locator('#arw-go').click();
+    ok('publication starts with trusted browser input', await page.evaluate(() => window.__publishTrusted === true));
+    await page.locator('#arw-file-dialog').waitFor({ state: 'visible', timeout: 20000 });
+    ok('the extension is not asked to sign before the review is confirmed', await page.evaluate(() => (window.__arSignCount || 0) === 0) && posted.length === 0 &&
+      (await page.locator('#arw-file-plan').textContent()).includes('Paying address: ' + addr));
+    await page.locator('#arw-file-confirm').click();
     await page.waitForFunction(() => {
       const a = document.getElementById('arw-stat').textContent || '';
       const o = (document.getElementById('tx-out') || {}).textContent || '';
-      return /expected verdict|ANCHORED|signed|outbox|verification|FAILED|SUBMITTED|arweaveWallet/i.test(a + o);
+      return /does not hold enough AR|said no|confirmed|did not answer|could not sign/i.test(a + o);   // a settled state, not a step on the way
     }, null, { timeout: 25000 }).catch(() => {});
-    ok('inject path POSTed a signed tx (no vault JWK)', posted.length >= 1, 'posted=' + posted.length);
+    ok('inject path POSTed a signed tx (no vault JWK)', posted.length >= 1, 'posted=' + posted.length + ' · ' + await page.locator('#arw-stat').textContent());
     if (posted[0]) {
       ok('inject-signed tx format 2', posted[0].format === 2);
       ok('inject signature 512-byte RSA-PSS', unb64len(posted[0].signature) === 512);
@@ -296,9 +318,244 @@ try {
     }
     const txOut = await page.locator('#tx-out').innerText().catch(() => '');
     const arwStat = await page.locator('#arw-stat').innerText();
-    ok('inject sign path spoke honestly', /arweaveWallet|expected verdict|signed|FAILED|verification|outbox/i.test(txOut + ' ' + arwStat), (txOut + ' ' + arwStat).slice(0, 140));
+    ok('inject sign path spoke honestly, in the Arweave panel and nowhere else', /enough AR|said no|confirmed|sent/i.test(arwStat) && txOut === '', (txOut + ' ' + arwStat).slice(0, 140));
     ok('no page errors on inject path', errors.length === 0, errors.join(' | ').slice(0, 120));
-    ok('vault JWK option labeled scaffold', await page.locator('#vlt-type option[value="arweave"]').textContent().then(t => /scaffold/i.test(t)));
+    ok('vault JWK option reads as an Arweave key file, its scaffold tag kept for cypherpunk',
+      await page.locator('#vlt-type option[value="arweave"]').textContent().then(t => /Arweave key file/.test(t))
+      && await page.locator('#vlt-scaffold-law').textContent().then(t => /JWK paste is scaffold · advanced/.test(t)));
+    // a publish still on its way is never signed twice: a second press points to it instead
+    {
+      const signs0 = await page.evaluate(() => window.__arSignCount || 0), posts0 = posted.length;
+      await page.waitForFunction(() => !document.getElementById('arw-go').disabled, null, { timeout: 15000 });
+      await page.evaluate(() => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'); const e = l.filter(x => x.rail === 'arweave').at(-1); if (e) { e.phase = 'submitted'; localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); } });
+      await page.locator('#arw-go').click();
+      await page.waitForFunction(() => /still on its way/.test(document.getElementById('arw-stat').innerText), null, { timeout: 8000 }).catch(() => {});
+      ok('a second press while the first is on its way signs nothing and names where it waits',
+        /still on its way, so nothing new was signed/.test(await page.locator('#arw-stat').innerText()) && await page.evaluate(() => [...document.querySelectorAll('#arw-stat button.wl-act')].some(b => b.textContent === 'check again')) &&
+        await page.evaluate(() => window.__arSignCount || 0) === signs0 && posted.length === posts0 && !(await page.locator('#arw-file-dialog').isVisible()));
+      await page.evaluate(() => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'); l.filter(x => x.rail === 'arweave').forEach(x => { if (x.phase === 'submitted') x.phase = 'failed'; }); localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); });
+    }
+    // the extension now pays from another account than the one shown: the review stops it before signing
+    {
+      const signs0 = await page.evaluate(() => window.__arSignCount || 0), posts0 = posted.length;
+      await page.evaluate(() => window.__arInjectBoot());   // the extension switches to another account
+      await page.waitForFunction(() => !document.getElementById('arw-go').disabled, null, { timeout: 15000 });
+      await page.locator('#arw-go').click();
+      await page.locator('#arw-file-dialog').waitFor({ state: 'visible', timeout: 20000 });
+      ok('another paying account is named and cannot be confirmed', /not the one your wallet showed/.test(await page.locator('#arw-file-plan').innerText()) && !(await page.locator('#arw-file-confirm').isVisible()));
+      await page.locator('#arw-file-cancel').click();
+      await page.waitForFunction(() => /nothing was signed/.test(document.getElementById('arw-stat').innerText), null, { timeout: 8000 }).catch(() => {});
+      ok('closing it says why, and nothing was signed or sent', /not the one your wallet showed/.test(await page.locator('#arw-stat').innerText()) &&
+        await page.evaluate(() => window.__arSignCount || 0) === signs0 && posted.length === posts0);
+    }
+    if (REG !== 'cypherpunk') { await page.evaluate(r => document.getElementById('breg-' + r).click(), REG); await page.waitForFunction(r => document.body.dataset.reg === r, REG); }   // the file flow runs in the register under test
+    await page.setViewportSize({width:390,height:844});
+    const beforeFilePosts=posted.length, beforeFileSigns=await page.evaluate(()=>window.__arSignCount||0);
+    const fileBytes=Buffer.from('Wallet publication fixture. No real upload.');
+    await page.locator('#arw-file').setInputFiles({name:'<img src=x onerror=alert(1)>.txt',mimeType:'text/plain',buffer:fileBytes});
+    await page.locator('#arw-file-review').click();
+    await page.locator('#arw-file-dialog').waitFor({state:'visible'});
+    ok('file review displays exact fee before signing',/Exact fee: [0-9.]+ AR/.test(await page.locator('#arw-file-plan').textContent())&&/for [0-9.]+ AR, paid from your Arweave address ending in .{6}\. it is public for good and cannot be undone/.test(await page.locator('#arw-file-plan').innerText())&&posted.length===beforeFilePosts&&await page.evaluate(()=>window.__arSignCount||0)===beforeFileSigns);
+    ok('mobile review keeps its title and both decisions visible',await page.locator('#arw-file-dialog-title').isVisible()&&await page.locator('#arw-file-dialog').evaluate(el=>{const box=el.getBoundingClientRect();return box.left>=0&&box.right<=innerWidth&&box.top>=0&&box.bottom<=innerHeight})&&await page.locator('#arw-file-cancel').isVisible()&&await page.locator('#arw-file-confirm').isVisible());
+    ok('hostile filename is text, never markup',await page.locator('#arw-file-plan img').count()===0&&(await page.locator('#arw-file-plan').innerText()).includes('<img'));
+    await page.locator('#arw-file-cancel').click();
+    await page.waitForFunction(()=>document.querySelector('#arw-file-status').textContent.includes('cancelled before signing'));
+    ok('cancel refuses signing and publication',posted.length===beforeFilePosts&&await page.evaluate(()=>window.__arSignCount||0)===beforeFileSigns);
+    // a balance read already on its way when a publish starts never wakes the anchor button in the middle of it
+    {
+      let slow = true;
+      await ctx.route(GW_RE, async route => {
+        if (slow && route.request().method() === 'GET' && new URL(route.request().url()).pathname.includes('/wallet/')) await new Promise(r => setTimeout(r, 1500));
+        await route.fallback();
+      });
+      await page.evaluate(() => document.dispatchEvent(new Event('vault-unlocked')));   // the panel starts reading the balance
+      await page.waitForTimeout(150);
+      await page.locator('#arw-file').setInputFiles({ name: 'wait.txt', mimeType: 'text/plain', buffer: Buffer.from('a read in flight, then a publish') });
+      await page.locator('#arw-file-review').click();
+      await page.locator('#arw-file-dialog').waitFor({ state: 'visible', timeout: 20000 });
+      await page.waitForTimeout(900);   // the read that was already on its way has answered by now
+      ok('a balance read that answers in the middle of a publish leaves the anchor button waiting',
+        await page.evaluate(() => document.getElementById('arw-go').disabled && document.getElementById('arw-file-review').disabled && document.getElementById('arw-file-dialog').open));
+      await page.locator('#arw-file-cancel').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      slow = false;
+      await page.locator('#arw-file').setInputFiles({name:'<img src=x onerror=alert(1)>.txt',mimeType:'text/plain',buffer:fileBytes});
+    }
+    await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});
+    await page.locator('#arw-file-confirm').click();
+    await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
+    ok('confirmed file uses the existing signed publication adapter',posted.length>beforeFilePosts&&Buffer.from(posted.at(-1).data,'base64url').equals(fileBytes));
+    // a reload or a second tab starts with no memory of its own: the outbox is the record, so a publish
+    // that is signed or sent and not settled is never signed again, the anchor or the file
+    {
+      const setArPhase = (pg, phase) => pg.evaluate(p => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'); l.filter(x => x.rail === 'arweave').forEach(x => { x.phase = p; }); localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); }, phase);
+      const posts0 = posted.length;
+      await setArPhase(page, 'submitted');   // the anchor and the file are both still on their way
+      const tab2 = await ctx.newPage();
+      tab2.on('pageerror', e => errors.push(e.message));
+      await tab2.addInitScript(arWalletMock);
+      await tab2.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
+      await tab2.waitForFunction(() => window.BNRWALLET && BNRWALLET.arInject && window.BNRAR, null, { timeout: 15000 });
+      await tab2.waitForFunction(() => !document.getElementById('arw-connect').hidden, null, { timeout: 15000 });
+      await tab2.evaluate(() => document.getElementById('arw-connect').click());
+      await tab2.waitForFunction(() => !document.getElementById('arw-go').disabled, null, { timeout: 20000 });
+      await tab2.evaluate(() => document.getElementById('arw-go').click());
+      await tab2.waitForFunction(() => /still on its way/.test(document.getElementById('arw-stat').textContent) || document.getElementById('arw-file-dialog').open, null, { timeout: 15000 }).catch(() => {});
+      ok('in a second tab (or after a reload) the anchor still on its way is not signed again',
+        /still on its way, so nothing new was signed/.test(await tab2.locator('#arw-stat').textContent()) && await tab2.evaluate(() => (window.__arSignCount || 0) === 0 && !document.getElementById('arw-file-dialog').open && [...document.querySelectorAll('#arw-stat button.wl-act')].some(b => b.textContent === 'check again')) && posted.length === posts0,
+        await tab2.locator('#arw-stat').textContent());
+      if (await tab2.evaluate(() => document.getElementById('arw-file-dialog').open)) { await tab2.evaluate(() => document.getElementById('arw-file-cancel').click()); await tab2.waitForTimeout(500); }
+      await tab2.locator('#arw-file').setInputFiles({ name: 'again.txt', mimeType: 'text/plain', buffer: fileBytes });
+      await tab2.evaluate(() => document.getElementById('arw-file-review').click());
+      await tab2.waitForFunction(() => /still on its way/.test(document.getElementById('arw-file-status').textContent) || document.getElementById('arw-file-dialog').open, null, { timeout: 15000 }).catch(() => {});
+      ok('and the same file still on its way is not signed again there either',
+        /this file is still on its way, so nothing new was signed/.test(await tab2.locator('#arw-file-status').textContent()) && await tab2.evaluate(() => (window.__arSignCount || 0) === 0 && !document.getElementById('arw-file-dialog').open && [...document.querySelectorAll('#arw-file-status button.wl-act')].some(b => b.textContent === 'check again')) && posted.length === posts0,
+        await tab2.locator('#arw-file-status').textContent());
+      await tab2.close();
+      // two tabs reviewing the same file at once: the one confirmed second finds the first already signed, and signs nothing
+      await setArPhase(page, 'failed');
+      await page.locator('#arw-file-review').click(); await page.locator('#arw-file-dialog').waitFor({ state: 'visible' });
+      await page.evaluate(b64 => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'); const e = l.filter(x => x.rail === 'arweave' && JSON.parse(JSON.parse(x.signed_bytes).wire).data === b64).at(-1); if (e) { e.phase = 'signed'; localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); } }, fileBytes.toString('base64url'));
+      const signs1 = await page.evaluate(() => window.__arSignCount || 0), posts1 = posted.length;
+      await page.locator('#arw-file-confirm').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      ok('a file another tab signed while this review was open is not signed again on confirm',
+        /this file is still on its way, so nothing new was signed/.test(await page.locator('#arw-file-status').innerText()) && await page.evaluate(() => window.__arSignCount || 0) === signs1 && posted.length === posts1,
+        await page.locator('#arw-file-status').innerText());
+      // a copy is on its way only while its anchor can still be mined (50 blocks; the wallet allows 3 hours from
+      // created_at). past that, every gateway is read: a copy is settled, as expired with maybe_in (never failed),
+      // only when none holds it, one answered 404, and any other has been silent for the whole silent span (an
+      // hour, across two reads). inside the window the press is held and "check again" reads the network
+      let statusMode = null; const statusHosts = [];
+      await ctx.route(GW_RE, async route => {
+        const u = new URL(route.request().url());
+        if (statusMode && route.request().method() === 'GET' && /^\/tx\/[^/]+\/status$/.test(u.pathname)) {
+          statusHosts.push(u.host);
+          const cors = { 'access-control-allow-origin': '*' };
+          if (statusMode === 'nxdomain-one' && u.host === 'ar-io.dev') return route.abort('namenotresolved');   // a gateway whose name does not resolve
+          if (statusMode === '202') return route.fulfill({ status: 202, headers: cors, body: 'Pending' });
+          if (statusMode === 'confirmed') return route.fulfill({ status: 200, headers: cors, contentType: 'application/json', body: JSON.stringify({ block_height: 1600000, block_indep_hash: 'B'.repeat(64), number_of_confirmations: 3 }) });
+          return route.fulfill({ status: 404, headers: cors, body: 'Not Found.' });
+        }
+        await route.fallback();
+      });
+      const fileB64 = fileBytes.toString('base64url');
+      const entryOf = (pg, b64) => pg.evaluate(d => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]').filter(x => x.rail === 'arweave' && JSON.parse(JSON.parse(x.signed_bytes).wire).data === d).at(-1), b64);
+      const setEntry = (pg, b64, fields) => pg.evaluate(([d, f]) => { const l = JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]'); const e = l.filter(x => x.rail === 'arweave' && JSON.parse(JSON.parse(x.signed_bytes).wire).data === d).at(-1); Object.assign(e, f); localStorage.setItem('bnr_outbox_v1', JSON.stringify(l)); }, [b64, fields]);
+      const pressBtn = (sel, label) => page.evaluate(([s, t]) => [...document.querySelectorAll(s + ' button.wl-act')].find(b => b.textContent === t).click(), [sel, label]);
+      const hoursAgo4 = new Date(Date.now() - 4 * 3600e3).toISOString();
+      const signs2 = await page.evaluate(() => window.__arSignCount || 0), posts2 = posted.length;
+      ok('the gateway list holds only gateways that serve the status API (gateway.ardrive.io no longer resolves)',
+        await page.evaluate(() => JSON.stringify(window.BNRAR.GATEWAYS) === JSON.stringify(['https://arweave.net', 'https://ar-io.dev'])), await page.evaluate(() => JSON.stringify(window.BNRAR.GATEWAYS)));
+      // past its window, the one gateway that answers says 404 and the other's name does not resolve: newly silent,
+      // so it is waited for, said calmly with its one action; nothing is settled and nothing is signed
+      await page.evaluate(() => localStorage.removeItem('bnr_ar_gw_silent_v1'));
+      await setEntry(page, fileB64, { phase: 'submitted', created_at: hoursAgo4, maybe_out: true });
+      statusMode = 'nxdomain-one'; statusHosts.length = 0;
+      await page.locator('#arw-file-review').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      ok('past its window, a gateway that just went silent is waited for, in one calm sentence and check again; nothing settled or signed',
+        /the network does not hold it, but one of the Arweave servers this wallet reads has not answered since .+, so the wallet waits for it until about .+ before it lets the earlier copy go\. check again/.test(await page.locator('#arw-file-status').innerText()) &&
+        await page.evaluate(() => /silent: https:\/\/ar-io\.dev since /.test((document.querySelector('#arw-file-status .wl-cyd') || {}).textContent || '')) &&
+        (await entryOf(page, fileB64)).phase === 'submitted' && !(await page.evaluate(() => document.getElementById('arw-file-dialog').open)) && await page.evaluate(() => window.__arSignCount || 0) === signs2 && posted.length === posts2,
+        await page.locator('#arw-file-status').innerText());
+      // the same gateway has given no answer for the whole silent span: it abstains, and the copy is settled as
+      // expired (maybe_in, never failed) on the 404 of the gateway that answers; a new copy goes to review
+      await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('bnr_ar_gw_silent_v1') || '{}'); s['https://ar-io.dev'].since = new Date(Date.now() - 2 * 3600e3).toISOString(); localStorage.setItem('bnr_ar_gw_silent_v1', JSON.stringify(s)); });
+      statusHosts.length = 0;
+      await page.locator('#arw-file-review').click();
+      await page.locator('#arw-file-dialog').waitFor({ state: 'visible', timeout: 20000 });
+      const expired = await entryOf(page, fileB64);
+      ok('a gateway silent for the whole span abstains: the copy is settled as expired, maybe in, never failed, on the 404 of the gateway that answers',
+        expired.phase === 'expired' && expired.evidence && expired.evidence.maybe_in === true && !expired.evidence.definite && JSON.stringify(expired.evidence.abstained) === JSON.stringify(['https://ar-io.dev']) &&
+        /arweave\.net 404/.test(expired.evidence.read) && statusHosts.includes('arweave.net'), JSON.stringify({ phase: expired.phase, ev: expired.evidence, statusHosts }));
+      ok('and the new copy is reviewed, saying the earlier one did not land; nothing is signed yet',
+        /your earlier copy did not land in time, so this is a new copy/.test(await page.locator('#arw-file-plan').innerText()) && await page.evaluate(() => window.__arSignCount || 0) === signs2 && posted.length === posts2);
+      await page.locator('#arw-file-cancel').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      // the outbox says it calmly, with the check for coins kept honest (it may have gone in)
+      ok('the outbox row says its time ran out and offers the coins to check, never "failed"',
+        await page.evaluate(id => { const r = [...document.querySelectorAll('#outbox-list .obx-row')].find(x => x.getAttribute('data-id') === id); return !!r && /its time ran out/.test(r.querySelector('.obx-stat').textContent) && !r.querySelector('.obx-retry'); }, expired.intent_id));
+      // inside its window: the press is held, and "check again" reads the network and says what it found
+      await setEntry(page, fileB64, { phase: 'submitted', created_at: new Date().toISOString(), evidence: null });
+      statusMode = '404';
+      await page.locator('#arw-file-review').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      ok('inside its window the copy holds the press, with one action: check again',
+        /this file is still on its way, so nothing new was signed\. check again/.test(await page.locator('#arw-file-status').innerText()) && !(await page.evaluate(() => document.getElementById('arw-file-dialog').open)),
+        await page.locator('#arw-file-status').innerText());
+      await pressBtn('#arw-file-status', 'check again');
+      await page.waitForFunction(() => !/checking it on the network/.test(document.getElementById('arw-file-status').textContent), null, { timeout: 15000 });
+      ok('check again, fresh inside its window and nowhere held: it can still land if the same copy is sent soon; no time is promised, nothing settled',
+        /the network does not hold it yet\. it can still land if its same signed copy is sent again soon, and that is safe/.test(await page.locator('#arw-file-status').innerText()) && !/until about/.test(await page.locator('#arw-file-status').innerText()) &&
+        await page.evaluate(() => !!document.querySelector('#arw-file-status a[href="#outbox-sec"]')) && (await entryOf(page, fileB64)).phase === 'submitted' && await page.evaluate(() => !localStorage.getItem('bnr_ar_gw_silent_v1') || !JSON.parse(localStorage.getItem('bnr_ar_gw_silent_v1'))['https://ar-io.dev']),
+        await page.locator('#arw-file-status').innerText());
+      // older than its anchor lasts (about 88 minutes), still inside the 3-hour hold: it is most likely too old to land
+      await setEntry(page, fileB64, { created_at: new Date(Date.now() - 2 * 3600e3).toISOString() });
+      await page.locator('#arw-file-review').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      await pressBtn('#arw-file-status', 'check again');
+      await page.waitForFunction(() => !/checking it on the network/.test(document.getElementById('arw-file-status').textContent), null, { timeout: 15000 });
+      ok('check again, past its anchor but inside the hold: most likely too old to land, publish again after about the end of the hold',
+        /the network does not hold it, and it is most likely too old to land now\. you can publish it again after about .+ if the network still does not hold it then\. check again/.test(await page.locator('#arw-file-status').innerText()) && (await entryOf(page, fileB64)).phase === 'submitted',
+        await page.locator('#arw-file-status').innerText());
+      statusMode = '202';
+      await page.locator('#arw-file-review').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      await pressBtn('#arw-file-status', 'check again');
+      await page.waitForFunction(() => !/checking it on the network/.test(document.getElementById('arw-file-status').textContent), null, { timeout: 15000 });
+      ok('check again, while the network holds it: it says so and offers to check again',
+        /the network holds it and has not put it in a block yet\. check again/.test(await page.locator('#arw-file-status').innerText()) && (await entryOf(page, fileB64)).phase === 'submitted',
+        await page.locator('#arw-file-status').innerText());
+      statusMode = 'confirmed';
+      await pressBtn('#arw-file-status', 'check again');
+      await page.waitForFunction(() => !/checking it on the network/.test(document.getElementById('arw-file-status').textContent), null, { timeout: 15000 });
+      const landed = await entryOf(page, fileB64);
+      ok('check again, once a block holds it: it landed, the entry is confirmed, and the link shows it',
+        /it landed\. the network confirmed it/.test(await page.locator('#arw-file-status').innerText()) && landed.phase === 'confirmed' && landed.evidence && landed.evidence.block_height === 1600000 &&
+        await page.evaluate(() => /^https:\/\/arweave\.net\//.test((document.querySelector('#arw-file-status a[target="_blank"]') || {}).href || '')) && await page.evaluate(() => window.__arSignCount || 0) === signs2 && posted.length === posts2,
+        await page.locator('#arw-file-status').innerText());
+      // the anchor takes the same window: past it, a copy every gateway lacks lets a new anchor be reviewed
+      const anchorB64 = await page.evaluate(async p => window.BNRAR.b64u(new Uint8Array(await (await fetch(p)).arrayBuffer())), '/surfaces/forge/orbit-manifests.md');
+      await setEntry(page, anchorB64, { phase: 'submitted', created_at: hoursAgo4, maybe_out: true });
+      statusMode = '404';
+      await page.waitForFunction(() => !document.getElementById('arw-go').disabled, null, { timeout: 15000 });
+      await page.evaluate(() => document.getElementById('arw-go').click());
+      await page.locator('#arw-file-dialog').waitFor({ state: 'visible', timeout: 20000 });
+      const anchorExp = await entryOf(page, anchorB64);
+      ok('the anchor past its window: settled as expired (maybe in), and a new anchor is reviewed, nothing signed',
+        anchorExp.phase === 'expired' && anchorExp.evidence.maybe_in === true && /estate anchor/.test(await page.locator('#arw-file-dialog-title').textContent()) &&
+        /your earlier copy did not land in time/.test(await page.locator('#arw-file-plan').innerText()) && await page.evaluate(() => window.__arSignCount || 0) === signs2 && posted.length === posts2,
+        JSON.stringify({ phase: anchorExp.phase, ev: anchorExp.evidence }));
+      await page.locator('#arw-file-cancel').click();
+      await page.waitForFunction(() => !document.querySelector('#arw-file-review').disabled);
+      statusMode = null;
+      await setArPhase(page, 'failed');
+    }
+    const beforeBlockedPosts=posted.length;
+    await page.evaluate(()=>{window.__outboxBackup=localStorage.getItem('bnr_outbox_v1');window.__storageSet=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){if(key==='bnr_outbox_v1')throw new DOMException('Storage full','QuotaExceededError');return window.__storageSet.call(this,key,value);};});
+    await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();
+    await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
+    ok('blocked outbox stops submission and preserves the prior receipt',posted.length===beforeBlockedPosts&&(await page.locator('#arw-file-status').innerText()).includes('out of room for the signed copy')&&await page.evaluate(()=>localStorage.getItem('bnr_outbox_v1')===window.__outboxBackup));
+    await page.evaluate(()=>{Storage.prototype.setItem=window.__storageSet;localStorage.setItem('bnr_outbox_v1','not valid JSON');});
+    await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();
+    await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
+    ok('unreadable outbox is never replaced or submitted',posted.length===beforeBlockedPosts&&(await page.locator('#arw-file-status').innerText()).includes('cannot be read on this device')&&await page.evaluate(()=>!!document.querySelector('#arw-file-status a[href="#outbox-sec"]'))&&await page.evaluate(()=>localStorage.getItem('bnr_outbox_v1')==='not valid JSON'));
+    await page.evaluate(()=>localStorage.setItem('bnr_outbox_v1',window.__outboxBackup));
+    await page.evaluate(()=>{const seed=JSON.parse(window.__outboxBackup)[0];localStorage.setItem('bnr_outbox_v1',JSON.stringify(Array.from({length:80},(_,i)=>({...seed,intent_id:'retention-fixture-'+i,phase:i<40?'signed':'confirmed'}))));});
+    await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
+    ok('history trimming retains all forty unresolved signed transactions',await page.evaluate(()=>{const list=JSON.parse(localStorage.getItem('bnr_outbox_v1'));return list.length===80&&Array.from({length:40},(_,i)=>'retention-fixture-'+i).every(id=>list.some(e=>e.intent_id===id&&e.phase==='signed'));}));
+    await page.evaluate(()=>localStorage.setItem('bnr_outbox_v1',window.__outboxBackup));
+    const beforeBadSignature=posted.length;
+    await page.evaluate(()=>{window.__originalSignature=arweaveWallet.signature;arweaveWallet.signature=async()=>new Uint8Array(512)});
+    await page.locator('#arw-file-review').click();await page.locator('#arw-file-dialog').waitFor({state:'visible'});await page.locator('#arw-file-confirm').click();await page.waitForFunction(()=>!document.querySelector('#arw-file-review').disabled);
+    ok('wrong signing key or invalid extension signature is refused before submission',posted.length===beforeBadSignature&&(await page.locator('#arw-file-status').innerText()).includes('signature that does not match this file')&&await page.evaluate(()=>!!document.querySelector('#arw-file-status button.wl-act')));
+    await page.evaluate(()=>{arweaveWallet.signature=window.__originalSignature});
+    const beforeOversize=posted.length;
+    await page.locator('#arw-file').setInputFiles({name:'too-big.txt',mimeType:'text/plain',buffer:Buffer.alloc(30001)});
+    await page.locator('#arw-file-review').click();
+    ok('oversized file is refused before wallet or network work',(await page.locator('#arw-file-status').innerText()).includes('30,000')&&posted.length===beforeOversize);
+
     await ctx.close();
   }
 
@@ -308,12 +565,12 @@ try {
     const ctx = await browser.newContext();
     mockGateways(ctx);
     const page = await ctx.newPage();
-    await page.goto('http://127.0.0.1:8892' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.goto(WALLET_ORIGIN + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(1000);
     const t = await page.locator('#arw-stat').innerText();
     ok('empty path names connect / Wander / public bind', /Wander|connect|public address|forge/i.test(t), t.slice(0, 120));
     ok('empty path does not demand vault JWK as required', !/seal your JWK|paste it; the type is detected/i.test(t), t.slice(0, 120));
-    ok('connect button is the primary control', await page.locator('#arw-connect').isVisible());
+    ok('with no Arweave extension in this browser, no extension button shows: your own keys come first', !(await page.locator('#arw-connect').isVisible()) && await page.evaluate(() => !!document.querySelector('#arw-stat a[href="#kc-sec"]')));
     ok('JWK scaffold is in a demoted details', await page.locator('#arw-jwk-scaffold summary').innerText().then(x => /scaffold|optional|advanced/i.test(x)));
     ok('kc-rec demoted to scaffold', await page.locator('#kc-rec-scaffold summary').innerText().then(x => /scaffold|recovery/i.test(x)));
     ok('vlt-secret demoted to scaffold', await page.locator('#vlt-secret-scaffold summary').innerText().then(x => /scaffold|recovery/i.test(x)));
@@ -324,7 +581,7 @@ try {
   function unb64len(s) { return Buffer.from(s, 'base64url').length; }
 } finally {
   await browser.close();
-  server.close();
+
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

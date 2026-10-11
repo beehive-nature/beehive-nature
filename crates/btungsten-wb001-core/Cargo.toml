@@ -1,0 +1,9 @@
+[package]
+name = "btungsten-wb001-core"
+version = "0.1.0"
+edition.workspace = true
+license = "Apache-2.0"
+description = "bTunGsTeN WB001: the SAW-verified canonical intent encoder: the WB001 model core, implementing scripts/btungsten/wb001-cryptol/BTungstenWB001.cry. no_std, no dependencies."
+publish = false
+
+[dependencies]

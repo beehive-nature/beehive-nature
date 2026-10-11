@@ -1,0 +1,192 @@
+// RB05 — the RB04 grammar (WB001Grammar.cry) is the WB001 decoder
+// (WB001Decode.cry, whose Rust implementation decode.saw proves) on EVERY
+// input: the statements below, proven by SAW in grammar.saw.
+//
+//   utf8Equiv      the grammar's Only (Many UTF8Char), RFC 3629's char
+//                  grammar under greedy repetition, accepts exactly what the
+//                  spec's UTF-8 DFA accepts, for a text field of 64 and of
+//                  128 bytes (any length, canonical padding).
+//   exactEquiv     Exact accepts exactly when the decoder's verdict is dOk,
+//                  with every decoded field equal (acceptance + values).
+//   envelopeOk / envelopeTrailing / envelopeRefuses
+//                  the Envelope entry (the envelope as a prefix): where it
+//                  accepts, the decoder accepts that prefix with the same
+//                  values; where the decoder refuses with dTrailing, Envelope
+//                  accepts a shorter prefix; under any other refusal it fails
+//                  (RB04's "consumed" dimension, for all inputs).
+//
+// utf8Equiv is a simulation: the DFA and the grammar's scan advance one
+// byte position at a time, and `rel` (below) is an invariant that holds at
+// every position: u8Init at 0, u8Step from p to p + 1, u8Fin turns it into
+// the equivalence at the last position. Every lemma is local (a symbolic
+// position, a four-byte window); grammar.saw composes them with `rel` and
+// `pairStep` opaque, so no proof ever unrolls both machines over 128 bytes
+// at once (the direct miter took 18 s at 32 bytes and 261 s at 64).
+
+module RB05 where
+
+import BTungstenWB001
+import WB001Decode
+import WB001Grammar
+
+//////////////////////////////////////////////////////////////////////////////
+// UTF-8: the simulation
+//////////////////////////////////////////////////////////////////////////////
+
+type PState = { s : [4], m : MState }
+
+initP : PState
+initP = { s = stG, m = { q = 0, stopped = False } }
+
+// both machines, one byte position
+pairStep : {cap} (fin cap, 32 >= width cap) => [cap][8] -> [32] -> PState -> [32] -> PState
+pairStep v len st p = { s = step st.s (vAt v p), m = manyStep v len st.m p }
+
+pairs : {cap} (fin cap, 32 >= width cap) => [cap][8] -> [32] -> [cap + 1]PState
+pairs v len = scanl (pairStep v len) initP (take`{cap} [0 ...])
+
+// the DFA from s over the first r (at most 4) of four bytes
+runN : [4] -> [8] -> [8] -> [8] -> [8] -> [32] -> [4]
+runN s a b c d r =
+  if r == 0 then s
+  else if r == 1 then step s a
+  else if r == 2 then step (step s a) b
+  else if r == 3 then step (step (step s a) b) c
+  else step (step (step (step s a) b) c) d
+
+// The DFA, from s at position p, ends in BAD within the next min(4, cap - p)
+// bytes, or the array ends first and leaves it short of ground: the DFA
+// can no longer accept. (A DFA state in which the grammar has stopped.)
+doomed : {cap} (fin cap, 32 >= width cap) => [cap][8] -> [32] -> [4] -> Bit
+doomed v p s = (e == sBAD) || ((m < 4) && (e != stG))
+  where
+    m = if `cap - p < 4 then `cap - p else 4
+    e = runN s (vAt v p) (vAt v (p + 1)) (vAt v (p + 2)) (vAt v (p + 3)) m
+
+// The invariant at position p (both machines have consumed positions < p):
+//   stopped        the grammar failed at a char start q < len, and the DFA is doomed;
+//   q < p          the scan ended at q == len and the DFA rests in ground on the padding;
+//   q == p         a char boundary: the DFA is in ground;
+//   q > p          inside a char the grammar already matched: the DFA reaches
+//                  ground exactly over the bytes p .. q-1.
+rel : {cap} (fin cap, 32 >= width cap) => [cap][8] -> [32] -> [32] -> PState -> Bit
+rel v len p st =
+  (len <= `cap) && (p <= `cap) && (st.m.q <= len) &&
+  ( if st.m.stopped then (st.m.q < len) && doomed v p st.s
+    else if st.m.q < p then (st.m.q == len) && (st.s == stG)
+    else if st.m.q == p then st.s == stG
+    else (st.m.q - p <= 3)
+         && (runN st.s (vAt v p) (vAt v (p + 1)) (vAt v (p + 2)) 0 (st.m.q - p) == stG) )
+
+padded : {cap} (fin cap) => [32] -> [cap][8] -> Bit
+padded len v = canonicalPad len v == v
+
+u8Init : {cap} (fin cap, 32 >= width cap) => [cap][8] -> [32] -> Bit
+u8Init v len = (len <= `cap) ==> rel v len 0 initP
+
+u8Step : {cap} (fin cap, 32 >= width cap) => [cap][8] -> [32] -> [32] -> PState -> Bit
+u8Step v len p st =
+  (padded len v && (p < `cap) && rel v len p st) ==> rel v len (p + 1) (pairStep v len st p)
+
+u8Fin : {cap} (fin cap, 32 >= width cap) => [cap][8] -> [32] -> PState -> Bit
+u8Fin v len st = rel v len `cap st ==> ((st.m.q == len) == (st.s == stG))
+
+u8Chain : {cap} (fin cap, 32 >= width cap) => [cap][8] -> [32] -> Bit
+u8Chain v len = (padded len v && (len <= `cap)) ==> rel v len `cap (pairs v len ! 0)
+
+// the two machines inside `pairs` are the spec's DFA and the grammar's scan
+u8ProjD : {cap} (fin cap, cap >= 1, 32 >= width cap) => [cap][8] -> [32] -> Bit
+u8ProjD v len = wellFormedUtf8 { len = 0 : [32], bytes = v } == ((pairs v len ! 0).s == stG)
+
+u8ProjG : {cap} (fin cap, 32 >= width cap) => [cap][8] -> [32] -> Bit
+u8ProjG v len = onlyManyUtf8 v len == ((pairs v len ! 0).m.q == len)
+
+utf8Equiv : {cap} (fin cap, cap >= 1, 32 >= width cap) => [cap][8] -> [32] -> Bit
+utf8Equiv v len =
+  (padded len v && (len <= `cap)) ==> (onlyManyUtf8 v len == wellFormedUtf8 { len = 0 : [32], bytes = v })
+
+// the stream primitive's value is canonically padded, whatever its length
+bytesFromPadded : {cap} (fin cap) => Buf -> [32] -> [32] -> Bit
+bytesFromPadded s q len = padded len (bytesFrom`{cap} s q len)
+
+// utf8Equiv on a text field's value read from the stream at q
+utf8From : {cap} (fin cap, cap >= 1, 32 >= width cap) => Buf -> [32] -> [32] -> Bit
+utf8From s q len =
+  (len <= `cap) ==>
+    (onlyManyUtf8 (bytesFrom`{cap} s q len) len
+       == wellFormedUtf8 { len = 0 : [32], bytes = bytesFrom`{cap} s q len })
+
+// Block starts: the arithmetic both decodeSpec (aDom .. aPld, aEnd) and
+// gEnvelope (8, p1 .. p10) perform, the value blocks advancing by their
+// length word and the word blocks by 8. grammar.saw instantiates the UTF-8
+// lemma at exactly these positions.
+starts : Buf -> [11][32]
+starts s = [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10]
+  where
+    lenAt p = be32From s (p + 1)
+    p0 = 8 : [32]
+    p1 = p0 + 5 + lenAt p0
+    p2 = p1 + 5 + lenAt p1
+    p3 = p2 + 5 + 8
+    p4 = p3 + 5 + lenAt p3
+    p5 = p4 + 5 + lenAt p4
+    p6 = p5 + 5 + lenAt p5
+    p7 = p6 + 5 + 8
+    p8 = p7 + 5 + 8
+    p9 = p8 + 5 + lenAt p8
+    p10 = p9 + 5 + lenAt p9
+
+//////////////////////////////////////////////////////////////////////////////
+// The envelope
+//////////////////////////////////////////////////////////////////////////////
+
+exactEquiv : Buf -> [64] -> Bit
+exactEquiv s n = (gOk == (decodeCode s n == dOk)) && (gOk ==> (gVal == decodeVal s n))
+  where (gOk, gVal) = gExact s n
+
+envelopeOk : Buf -> [64] -> Bit
+envelopeOk s n =
+  eOk ==> (((zext eEnd : [64]) <= n) && (decodeCode s (zext eEnd) == dOk) && (eVal == decodeVal s (zext eEnd)))
+  where (eOk, eEnd, eVal) = gEnvelope s n
+
+envelopeTrailing : Buf -> [64] -> Bit
+envelopeTrailing s n = (decodeCode s n == dTrailing) ==> (eOk && ((zext eEnd : [64]) < n))
+  where (eOk, eEnd, _) = gEnvelope s n
+
+envelopeRefuses : Buf -> [64] -> Bit
+envelopeRefuses s n = ((decodeCode s n != dOk) && (decodeCode s n != dTrailing)) ==> ~ eOk
+  where (eOk, _, _) = gEnvelope s n
+
+//////////////////////////////////////////////////////////////////////////////
+// NON-VACUITY, closed terms: the universal statements above would also hold
+// if both sides refused everything. On the pinned bridge envelopes
+// (BTungstenWB001.cry, re-derived from the Rust model every run) both
+// accept with the model's intent; one trailing byte and one encoded
+// surrogate are refused as the decoder names them.
+//////////////////////////////////////////////////////////////////////////////
+
+bothAccept : {m} (fin m, MaxEnv >= m) => [m][8] -> Intent -> Bit
+bothAccept e i =
+     (gExact buf (`m) == (True, i))
+  && (decodeSpec buf (`m) == (dOk, i))
+  where buf = e # (zero : [MaxEnv - m][8])
+
+acceptsBridgeTerms : Bit
+acceptsBridgeTerms =
+     bothAccept biBase iBase && bothAccept btwinL twinL && bothAccept btwinR twinR
+  && bothAccept bastral astral && bothAccept bfffd fffd && bothAccept bcombining combining
+  && bothAccept bnearA nearA && bothAccept bnearB nearB
+
+refusesTrailingByte : Bit
+refusesTrailingByte =
+     (decodeCode buf 188 == dTrailing) && ~ (gExact buf 188).0
+  && (gEnvelope buf 188).0 && ((gEnvelope buf 188).1 == 187)
+  where buf = biBase # [0x00] # (zero : [MaxEnv - 188][8])
+
+// "skaists.bpay/1" with "sts" (domain bytes 4..6, buffer 17..19) replaced by
+// ed a0 80, U+D800 encoded (CESU-8)
+refusesEncodedSurrogate : Bit
+refusesEncodedSurrogate = (decodeCode buf 187 == dUtf8) && ~ (gExact buf 187).0 && ~ (gEnvelope buf 187).0
+  where
+    buf = update (update (update base 17 0xed) 18 0xa0) 19 0x80
+    base = biBase # (zero : [MaxEnv - 187][8])

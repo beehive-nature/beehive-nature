@@ -1,0 +1,8 @@
+Config file path source is default config file.
+Config file not found: /home/runner/rbtools/cabal/config
+Writing default configuration to /home/runner/rbtools/cabal/config
+HEAD is now at dc0a777 Fix printing of generics
+HEAD is now at 0c815bf Define >> for Of in terms of *> (#118)
+Downloading the latest package list from hackage.haskell.org
+Package list of hackage.haskell.org has been updated.
+The index-state is set to 2026-10-01T22:42:03Z.

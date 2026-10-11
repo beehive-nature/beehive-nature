@@ -1,0 +1,71 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ11 — BIP-39 packing: crates/bpq-core/src/bip39.rs
+// against ../pq11-cryptol/Bip39.cry (EQUIVALENCE), then the spec's
+// obligations (PROVE-UNIVERSAL).
+//
+//   indices           == indicesSpec         (every entropy, checksum byte)
+//   indices_ok        == indicesOk           (every 24 indices)
+//   unpack            == unpackSpec          (every 24 indices)
+//   decode_ok         == decodeOk            (every 24 indices, hash byte)
+//   mnemonicRoundTrip      entropy and checksum -> 24 valid indices -> back
+//   mnemonicRoundTripBack  24 valid indices -> entropy and checksum -> back
+//   badChecksumRefused     any checksum byte other than the hash's is refused,
+//                          for a hash left free (so for every hash)
+//
+// usage (from this directory): saw bip39.saw   with MIR at ../../../target/saw-pq11/
+
+enable_experimental;
+import "../pq11-cryptol/Bip39.cry";
+
+m <- mir_load_module "../../../target/saw-pq11/bpq_core.linked-mir.json";
+
+let fn n = str_concat "bpq_core::bip39::" n;
+let proven name = print (str_concat "PQ11-SAW PROVEN " name);
+let bw = w4_unint_bitwuzla [];
+
+let array_ref name n ty = do {
+  v <- mir_fresh_var name (mir_array n ty);
+  r <- mir_alloc (mir_array n ty);
+  mir_points_to r (mir_term v);
+  return (r, v);
+};
+
+let indices_spec = do {
+  (r, e) <- array_ref "e" 32 mir_u8;
+  c <- mir_fresh_var "c" mir_u8;
+  mir_execute_func [r, mir_term c];
+  mir_return (mir_term {{ indicesSpec e c }});
+};
+mir_verify m (fn "indices") [] false indices_spec bw;
+proven "indices";
+
+let indices_ok_spec = do {
+  (r, idx) <- array_ref "idx" 24 mir_u16;
+  mir_execute_func [r];
+  mir_return (mir_term {{ indicesOk idx }});
+};
+ok_ov <- mir_verify m (fn "indices_ok") [] false indices_ok_spec bw;
+proven "indices_ok";
+
+let unpack_spec = do {
+  (r, idx) <- array_ref "idx" 24 mir_u16;
+  mir_execute_func [r];
+  mir_return (mir_tuple_value [mir_term {{ (unpackSpec idx).0 }}, mir_term {{ (unpackSpec idx).1 }}]);
+};
+unpack_ov <- mir_verify m (fn "unpack") [] false unpack_spec bw;
+proven "unpack";
+
+let decode_ok_spec = do {
+  (r, idx) <- array_ref "idx" 24 mir_u16;
+  h <- mir_fresh_var "hashed" mir_u8;
+  mir_execute_func [r, mir_term h];
+  mir_return (mir_term {{ decodeOk idx h }});
+};
+mir_verify m (fn "decode_ok") [ok_ov, unpack_ov] false decode_ok_spec bw;
+proven "decode_ok";
+
+prove_print bw {{ \e c -> mnemonicRoundTrip e c }};
+proven "mnemonicRoundTrip";
+prove_print bw {{ \idx -> mnemonicRoundTripBack idx }};
+proven "mnemonicRoundTripBack";
+prove_print bw {{ \e c h -> badChecksumRefused e c h }};
+proven "badChecksumRefused";

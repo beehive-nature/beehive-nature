@@ -276,3 +276,24 @@ proven.**
   about a balance. What a wrong-but-not-malicious adapter is allowed to cause is unsettled.
 - **Arweave funding:** the anchor needs a funded address and bundlers are ruled out. That is
   a rail question, not a contract question, and it is tracked in the wallet lane.
+
+---
+
+## 11. SETTLEMENT VERBS (proposed extension, not yet ruled)
+
+The settlement half of this contract runs in code at `scripts/lib/bpay-settle.mjs`
+(`bnr.settle-adapter/1`). It uses eight verbs: `network`, `balance`, `prepare`, `payloads`,
+`combine`, `submit`, `status` and `reconcile`. They are named after Coinbase Mesh's
+Construction/Data API and keep this contract's laws:
+
+- Adapters build; the vault signs. The outbox is persisted before submit.
+- `submit` is never terminal.
+- Value is evidenced only by an independent read, and only as VOCAB-1 records that RECON-1
+  concludes on.
+
+Two implementations exist: `tools/bpay-settle/adapters/solana-devnet.mjs` on the native carrier
+(the `settle-solana` binary) and `smart-account-usdc.mjs`. That satisfies §9.7's "a contract with
+one implementation has not been tested".
+
+Neither one enlarges §7's closed enums. Adding `solana` or `base` writes to the wallet stays a
+ruling (see `docs/register/PREAPPROVED-ADAPTERS-1.md`, where Base is read-only).

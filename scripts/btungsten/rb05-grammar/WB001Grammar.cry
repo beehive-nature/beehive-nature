@@ -1,0 +1,168 @@
+// RB05 — the RB04 grammar (scripts/btungsten/rb04-daedalus/WB001.ddl),
+// read into Cryptol definition by definition, so it can be proven equal to
+// the WB001 decoder (RB05.cry, grammar.saw).
+//
+// The semantics read here are the ones the Daedalus user guide states at
+// the pinned commit a4ad7592 (docs-src/source/user-guide/parsers.rst):
+// a `block` runs its parsers in sequence and fails when one fails; `Match`,
+// `UInt8`, `BEUInt32`, `BEUInt64` and `Many n UInt8` read bytes and fail
+// at the end of the stream; `Guard` fails on False; `First` is biased
+// choice (the first alternative that succeeds, each tried from the same
+// position); `Many P` repeats P and "will parse any input maximally" (it
+// stops at the first failure and never backtracks); `Only P` is P followed
+// by END. This is a reading, checked against the grammar by eye and by the
+// four TEETH substitutions RB04 already convicts; it is NOT a proof about
+// the Rust that `daedalus compile-rust` generates, which RB04 holds to the
+// decoder by sampling.
+//
+// The input is (s, n) as in the decoder spec: s holds the first MaxEnv
+// bytes, n counts them all. A field value is carried in the formal shape
+// (its length and its bytes zero padded to the field's capacity), the same
+// correspondence RB04's harness uses (Decoded::from_intent). The grammar
+// shares only the stream primitives with the decoder spec.
+
+module WB001Grammar where
+
+import BTungstenWB001
+import WB001Decode (Buf, byteAtPos, bytesFrom, be32From, be64From)
+
+// k more bytes exist at stream position p
+avail : [64] -> [32] -> [32] -> Bit
+avail n p k = (zext p : [64]) + zext k <= n
+
+//////////////////////////////////////////////////////////////////////////////
+// def Header (tag : uint 8) (lo : uint 32) (hi : uint 32) : uint 64 =
+//   block { @Match [tag]; let n = BEUInt32; Guard (lo <= n && n <= hi); ^ n as uint 64 }
+//////////////////////////////////////////////////////////////////////////////
+
+gHeader : Buf -> [64] -> [32] -> [8] -> [32] -> [32] -> (Bit, [32], [32])
+gHeader s n p tag lo hi = (okMatch && okLen && okGuard, p + 5, len)
+  where
+    okMatch = avail n p 1 && (byteAtPos s p == tag)
+    okLen = avail n (p + 1) 4
+    len = be32From s (p + 1)
+    okGuard = (lo <= len) && (len <= hi)
+
+// Many n UInt8: n bytes
+gBytes : {cap} (fin cap) => Buf -> [64] -> [32] -> [32] -> (Bit, [32], [cap][8])
+gBytes s n p len = (avail n p len, p + len, bytesFrom`{cap} s p len)
+
+//////////////////////////////////////////////////////////////////////////////
+// def UTF8Char = First { @$[0x00 .. 0x7F] } { @$[0xC2 .. 0xDF]; tail } ...
+// over the stream v[0 .. len-1]: the length of the char the first
+// alternative that succeeds consumes at position p, 0 when none does. An
+// alternative fails when it would read past the stream's end.
+//////////////////////////////////////////////////////////////////////////////
+
+inR : [8] -> [8] -> [8] -> Bit
+inR lo hi b = (lo <= b) && (b <= hi)
+
+vAt : {cap} (fin cap, 32 >= width cap) => [cap][8] -> [32] -> [8]
+vAt v i = if i < `cap then v @ i else 0
+
+utf8CharAt : {cap} (fin cap, 32 >= width cap) => [cap][8] -> [32] -> [32] -> [32]
+utf8CharAt v len p =
+       if (p + 1 <= len) && inR 0x00 0x7f b0 then 1
+  else if (p + 2 <= len) && inR 0xc2 0xdf b0 && tl b1 then 2
+  else if (p + 3 <= len) && (b0 == 0xe0) && inR 0xa0 0xbf b1 && tl b2 then 3
+  else if (p + 3 <= len) && (inR 0xe1 0xec b0 || inR 0xee 0xef b0) && tl b1 && tl b2 then 3
+  else if (p + 3 <= len) && (b0 == 0xed) && inR 0x80 0x9f b1 && tl b2 then 3
+  else if (p + 4 <= len) && (b0 == 0xf0) && inR 0x90 0xbf b1 && tl b2 && tl b3 then 4
+  else if (p + 4 <= len) && inR 0xf1 0xf3 b0 && tl b1 && tl b2 && tl b3 then 4
+  else if (p + 4 <= len) && (b0 == 0xf4) && inR 0x80 0x8f b1 && tl b2 && tl b3 then 4
+  else 0
+  where
+    b0 = vAt v p
+    b1 = vAt v (p + 1)
+    b2 = vAt v (p + 2)
+    b3 = vAt v (p + 3)
+    tl b = inR 0x80 0xbf b
+
+//////////////////////////////////////////////////////////////////////////////
+// Only (Many UTF8Char) over arrayStream v. Many runs UTF8Char at the
+// current position q until it fails, maximally, never backtracking; Only
+// then needs q == len. The scan is indexed by byte position: at position p
+// the step acts exactly when p is the current position q and the stream
+// still has a byte there. Every char moves q forward, so the attempts
+// happen at q0 = 0 < q1 < q2 ... in order, which is Many's sequence.
+//////////////////////////////////////////////////////////////////////////////
+
+type MState = { q : [32], stopped : Bit }
+
+manyStep : {cap} (fin cap, 32 >= width cap) => [cap][8] -> [32] -> MState -> [32] -> MState
+manyStep v len m p =
+  if m.stopped || (m.q != p) || (p >= len) then m
+  else if k == 0 then { q = m.q, stopped = True }
+  else { q = p + k, stopped = False }
+  where k = utf8CharAt v len p
+
+manyUtf8 : {cap} (fin cap, 32 >= width cap) => [cap][8] -> [32] -> MState
+manyUtf8 v len = foldl (manyStep v len) { q = 0, stopped = False } (take`{cap} [0 ...])
+
+onlyManyUtf8 : {cap} (fin cap, 32 >= width cap) => [cap][8] -> [32] -> Bit
+onlyManyUtf8 v len = (manyUtf8 v len).q == len
+
+//////////////////////////////////////////////////////////////////////////////
+// def Text tag lo hi = block { let n = Header tag lo hi; let v = Many n UInt8;
+//   WithStream (arrayStream v) (Only (Many UTF8Char)); ^ v }
+// def Fixed tag size = block { let n = Header tag size size; Many n UInt8 }
+// def Raw tag lo hi = block { let n = Header tag lo hi; Many n UInt8 }
+// def Word tag = block { Header tag 8 8; BEUInt64 }
+//////////////////////////////////////////////////////////////////////////////
+
+gText : {cap} (fin cap, 32 >= width cap) =>
+        Buf -> [64] -> [32] -> [8] -> [32] -> [32] -> (Bit, [32], { len : [32], bytes : [cap][8] })
+gText s n p tag lo hi = (okH && okB && okU, p2, { len = len, bytes = v })
+  where
+    (okH, p1, len) = gHeader s n p tag lo hi
+    (okB, p2, v) = gBytes`{cap} s n p1 len
+    okU = onlyManyUtf8 v len
+
+gFixed : {cap} (fin cap) => Buf -> [64] -> [32] -> [8] -> [32] -> (Bit, [32], { len : [32], bytes : [cap][8] })
+gFixed s n p tag size = (okH && okB, p2, { len = len, bytes = v })
+  where
+    (okH, p1, len) = gHeader s n p tag size size
+    (okB, p2, v) = gBytes`{cap} s n p1 len
+
+gRaw : {cap} (fin cap) => Buf -> [64] -> [32] -> [8] -> [32] -> [32] -> (Bit, [32], { len : [32], bytes : [cap][8] })
+gRaw s n p tag lo hi = (okH && okB, p2, { len = len, bytes = v })
+  where
+    (okH, p1, len) = gHeader s n p tag lo hi
+    (okB, p2, v) = gBytes`{cap} s n p1 len
+
+gWord : Buf -> [64] -> [32] -> [8] -> (Bit, [32], [64])
+gWord s n p tag = (okH && avail n p1 8, p1 + 8, be64From s p1)
+  where (okH, p1, _) = gHeader s n p tag 8 8
+
+//////////////////////////////////////////////////////////////////////////////
+// def Envelope = block { Match "bT-WB01"; Match [0x01]; domain = Text 0x01 1 64;
+//   nonce = Fixed 0x02 32; epoch = Word 0x03; action = Fixed 0x04 32;
+//   destination = Text 0x05 1 128; capability = Text 0x06 1 64;
+//   amount = Word 0x07; expiry = Word 0x08; payer = Text 0x09 1 128;
+//   payload = Raw 0x0a 0 4096 }
+// def Exact = Only Envelope
+//////////////////////////////////////////////////////////////////////////////
+
+gEnvelope : Buf -> [64] -> (Bit, [32], Intent)
+gEnvelope s n = (ok, p10, val)
+  where
+    okMagic = avail n 0 7 && (take`{7} s == "bT-WB01")
+    okVer = avail n 7 1 && (s @ 7 == 0x01)
+    (o1, p1, f1) = gText`{64} s n 8 0x01 1 64
+    (o2, p2, f2) = gFixed`{32} s n p1 0x02 32
+    (o3, p3, w3) = gWord s n p2 0x03
+    (o4, p4, f4) = gFixed`{32} s n p3 0x04 32
+    (o5, p5, f5) = gText`{128} s n p4 0x05 1 128
+    (o6, p6, f6) = gText`{64} s n p5 0x06 1 64
+    (o7, p7, w7) = gWord s n p6 0x07
+    (o8, p8, w8) = gWord s n p7 0x08
+    (o9, p9, f9) = gText`{128} s n p8 0x09 1 128
+    (o10, p10, f10) = gRaw`{4096} s n p9 0x0a 0 4096
+    ok = okMagic && okVer && o1 && o2 && o3 && o4 && o5 && o6 && o7 && o8 && o9 && o10
+    val =
+      { domain = f1, nonce = f2, epoch = w3, action = f4, destination = f5
+      , capability = f6, amount = w7, expiry = w8, payer = f9, payload = f10 }
+
+gExact : Buf -> [64] -> (Bit, Intent)
+gExact s n = (ok && ((zext p : [64]) == n), v)
+  where (ok, p, v) = gEnvelope s n

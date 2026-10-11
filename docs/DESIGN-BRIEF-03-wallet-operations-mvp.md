@@ -1,5 +1,13 @@
 # DESIGN BRIEF 03 — BNR WALLET / DASHBOARD / OPERATIONS MVP
 
+> **Capability correction, 2026-10-03:** the Tier-3 chain row below records
+> intended scope, not completed firmware support. In particular Hive/BTS,
+> Cosmos host/device integration, Arweave hardware signing and complete Zano
+> acceptance are not established by that row. Preserve the scope; follow the
+> [full reconciliation](dispatches/2026-10-03-wallet-full-scope.md) and its
+> source/receipt references for implementation status. Base and the complete
+> measured ERC-20i token family are wallet coin holdings; art has separate surfaces.
+
 > # ⚠ PARTIALLY SUPERSEDED — 2026-08-11
 > **The FRONTEND STACK in this document is SUPERSEDED.** Ruling 1 of
 > [`RULINGS_FRONTEND_SIGNER_XLM_2026-08-11.md`](dispatches/RULINGS_FRONTEND_SIGNER_XLM_2026-08-11.md): **htmx + hx-boost + Alpine.js +

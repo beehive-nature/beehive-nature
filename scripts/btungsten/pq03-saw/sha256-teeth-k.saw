@@ -1,0 +1,15 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ03 — TOOTH roundConstant: the crate's K32 table
+// against the derived K with K_5's low bit flipped MUST fail with a
+// counterexample (the table check is not vacuous).
+
+enable_experimental;
+import "../pq03-cryptol/Sha256.cry";
+
+m <- mir_load_module "../../../target/saw-pq03-sha256/pq03_sha256.linked-mir.json";
+
+print "PQ03-SAW-TEETH obligation roundConstant";
+mir_verify m "pq03_sha256::k32" [] false (do {
+  mir_execute_func [];
+  mir_return (mir_term {{ update K (5 : [6]) ((K @ (5 : [6])) ^ 1) }});
+}) (w4_unint_bitwuzla []);
+print "PQ03-SAW-TEETH UNEXPECTED-PROVEN roundConstant";

@@ -1,0 +1,1257 @@
+{
+ "schema": "skaists.hint-census/1",
+ "generated": "2026-10-07T16:22:33.074Z",
+ "scope": "outstanding (unattached) provider record hints across the 8 deceased blood generations (809 corpus persons, depths 2–9 from root L627-FH9) plus named extramural open-vein persons",
+ "root": "L627-FH9",
+ "provider": "FamilySearch record-matches wire (founder signed-in session, in-page fetch)",
+ "sessionProof": {
+  "wire": "/service/tree/tree-data/v8/person/L627-FH9/details",
+  "result": "HTTP 200 with real person data (birth 1976 formalText +1977-06-14, contributor travis remington)",
+  "when": "2026-10-07 (session start of this wake; founder sign-in retained from 2026-10-06)",
+  "law": "session oracle: wire proof, never cookie presence"
+ },
+ "evidenceClass": "possibility-tier — provider-computed matches; attaching is the only upgrade path and happens in the linker with identity verification; this layer never upgrades evidence.support",
+ "sweepMeta": {
+  "wire": "/service/tree/tree-data/v8/record-matches/{pid}/all",
+  "method": "in-page fetch loop (persistent page-side worker; 32s-eval-cap workaround), single worker, pacing 170ms",
+  "pidsSwept": 823,
+  "startedAt": "2026-10-07T00:00:00-06:00 (approx, loop start)",
+  "finishedAt": "2026-10-07T02:10:00-06:00 (approx)",
+  "durationApproxMin": 40,
+  "resumability": "ndjson append + cursor file in private tier C:/Users/travi/family-lineage/hint-sweep-2026-10-07/",
+  "honestNotes": "two abandoned in-page loops from 32s evaluate timeouts ran to completion before the persistent loop started (read-only fetches, same 170ms pacing); no writes during census",
+  "postPass": "after the attach session, the four Olsen-family pids (LZDH-WYF, MHRT-169, MLCS-MN5, L1N9-S2L) were re-polled and their rows rewritten in place: 22→18, 20→18, 4→4, 25→22 (the cluster drop with no attach work on it is a provider-side shared-record recount, reported as observed)"
+ },
+ "totals": {
+  "pidsSwept": 823,
+  "cohortPersons": 809,
+  "extramuralPersons": 14,
+  "hintedPersons": 14,
+  "openHintsTotal": 85,
+  "cohortOpenHints": 23,
+  "extramuralOpenHints": 62,
+  "byConfidence": {
+   "4": 15,
+   "5": 70
+  },
+  "redactedExtramuralPersons": 3
+ },
+ "reconciliation": {
+  "counted": 823,
+  "httpErrors": [
+   {
+    "pid": "LNQ5-BSG",
+    "status": 410,
+    "error": null,
+    "meaning": "provider refusal — pid record gone (living-flag/private-space class)"
+   }
+  ],
+  "okCount": 822,
+  "policy": "every pid accounted for; provider refusals named, never dropped"
+ },
+ "persons": {
+  "L6LW-1G2": {
+   "name": "Charles C Benadum",
+   "depth": 4,
+   "tier": "cohort",
+   "openHints": [
+    {
+     "ark": "1:1:F6VY-27T",
+     "personName": "Charles Benedict",
+     "collection": "Ohio, County Death Records, 1840-2001",
+     "confidence": 4,
+     "score": 0.8666853,
+     "hasImage": false,
+     "relations": [
+      "SPOUSE:Florence M. Benedict"
+     ],
+     "events": ""
+    }
+   ]
+  },
+  "LJDG-CYG": {
+   "name": "Joseph Benadum",
+   "depth": 5,
+   "tier": "cohort",
+   "openHints": [
+    {
+     "ark": "1:1:MCL8-D19",
+     "personName": "Joseph Benedum",
+     "collection": "United States, Census, 1860",
+     "confidence": 5,
+     "score": 0.9843672,
+     "hasImage": false,
+     "relations": [],
+     "events": "BIRTH 1833; OTHER 1860"
+    }
+   ]
+  },
+  "LN5V-3N2": {
+   "name": "John Eder",
+   "depth": 5,
+   "tier": "cohort",
+   "openHints": [
+    {
+     "ark": "1:1:MZ5M-5M6",
+     "personName": "John Eden",
+     "collection": "United States, Census, 1870",
+     "confidence": 5,
+     "score": 0.9634749,
+     "hasImage": false,
+     "relations": [],
+     "events": "OTHER 1870; BIRTH 1835"
+    }
+   ]
+  },
+  "KWJ4-XBD": {
+   "name": "Albert Perry Rockwood",
+   "depth": 5,
+   "tier": "cohort",
+   "openHints": [
+    {
+     "ark": "1:1:6KKG-W2PJ",
+     "personName": "Albert P. Rockwood",
+     "collection": "The Church of Jesus Christ of Latter-day Saints, Record of Members (Worldwide), 1836-1970",
+     "confidence": 5,
+     "score": 0.99971396,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Moses P. Rockwood",
+      "SPOUSE:Angeline"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:X33K-L9ZJ",
+     "personName": "Albert Perry Rockwood",
+     "collection": "Illinois, Hancock County, Nauvoo Community Project, 1839-1846 (BYU Center for Family History and Genealogy)",
+     "confidence": 5,
+     "score": 0.99933356,
+     "hasImage": false,
+     "relations": [
+      "FATHER:Luther Rockwood",
+      "MOTHER:Ruth Perry"
+     ],
+     "events": "DEATH 26 November 1879; BIRTH 9 June 1805; OTHER from 1839 to 1846"
+    },
+    {
+     "ark": "1:1:6K4D-3KG4",
+     "personName": "Albert P Rochwood",
+     "collection": "United States, Social Security Numerical Identification Files (NUMIDENT), 1936-2007",
+     "confidence": 5,
+     "score": 0.99873024,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Frank Rockwood",
+      "SPOUSE:Susana Cornvall"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:X33K-NW5G",
+     "personName": "Albert Perry Rockwood",
+     "collection": "Illinois, Hancock County, Nauvoo Community Project, 1839-1846 (BYU Center for Family History and Genealogy)",
+     "confidence": 5,
+     "score": 0.9982059,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Elizabeth Perry Rockwood",
+      "SPOUSE:Nancy Haven"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:65MC-2NM1",
+     "personName": "Albert Perry Rockwood",
+     "collection": "United States, Wikipedia, Prominent Persons Index, 1500-2022",
+     "confidence": 5,
+     "score": 0.9978351,
+     "hasImage": false,
+     "relations": [],
+     "events": "BIRTH 5 June 1805; DEATH 25 November 1879"
+    },
+    {
+     "ark": "1:1:6KKG-W2PZ",
+     "personName": "Albert P Rockwood",
+     "collection": "The Church of Jesus Christ of Latter-day Saints, Record of Members (Worldwide), 1836-1970",
+     "confidence": 5,
+     "score": 0.99453366,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Charles W. Rockwood",
+      "SPOUSE:Alvira Teeples"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:MCSX-7GZ",
+     "personName": "A P Rockwood",
+     "collection": "United States, Census, 1850",
+     "confidence": 4,
+     "score": 0.87026024,
+     "hasImage": false,
+     "relations": [],
+     "events": "BIRTH 1805; OTHER 1850"
+    }
+   ]
+  },
+  "MS86-N1C": {
+   "name": "William Saunders",
+   "depth": 7,
+   "tier": "cohort",
+   "openHints": [
+    {
+     "ark": "1:1:V5J1-Y9T",
+     "personName": "William Sanders",
+     "collection": "England, Births and Christenings, 1538-1975",
+     "confidence": 4,
+     "score": 0.8552757,
+     "hasImage": false,
+     "relations": [
+      "CHILD:William Sanders",
+      "SPOUSE:Elizabeth"
+     ],
+     "events": ""
+    }
+   ]
+  },
+  "GWXR-H2K": {
+   "name": "John Hole",
+   "depth": 8,
+   "tier": "cohort",
+   "openHints": [
+    {
+     "ark": "1:1:6D9D-2ZCT",
+     "personName": "John Hole",
+     "collection": "England, Somerset, Church Records, 1501-1999",
+     "confidence": 5,
+     "score": 0.9987458,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Sarah Hole",
+      "SPOUSE:Ann"
+     ],
+     "events": ""
+    }
+   ]
+  },
+  "GWXR-3TD": {
+   "name": "Ann Down",
+   "depth": 8,
+   "tier": "cohort",
+   "openHints": [
+    {
+     "ark": "1:1:6D9D-2ZCY",
+     "personName": "Ann",
+     "collection": "England, Somerset, Church Records, 1501-1999",
+     "confidence": 5,
+     "score": 0.9963779,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Sarah Hole",
+      "SPOUSE:John Hole"
+     ],
+     "events": ""
+    }
+   ]
+  },
+  "MVXD-XT8": {
+   "name": "Ebenezer Richardson",
+   "depth": 9,
+   "tier": "cohort",
+   "openHints": [
+    {
+     "ark": "1:1:FHXV-P42",
+     "personName": "Eben Richardson",
+     "collection": "Massachusetts, Town Clerk, Vital and Town Records, 1626-2001",
+     "confidence": 4,
+     "score": 0.8799374,
+     "hasImage": false,
+     "relations": [],
+     "events": "DEATH 9 September 1783"
+    }
+   ]
+  },
+  "LKR3-6XT": {
+   "name": "Giles Lawton",
+   "depth": 8,
+   "tier": "cohort",
+   "openHints": [
+    {
+     "ark": "1:1:F87K-78Z",
+     "personName": "Giles Lawton",
+     "collection": "Rhode Island, Births and Christenings, 1600-1914",
+     "confidence": 5,
+     "score": 0.9608952,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Sarah Lawton",
+      "SPOUSE:Ann"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:F8SX-HHB",
+     "personName": "Giles Lawton",
+     "collection": "Rhode Island, Town Births and Baptisms Index, 1639-1932",
+     "confidence": 5,
+     "score": 0.9608952,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Sarah Lawton",
+      "SPOUSE:Ann"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:F872-K2J",
+     "personName": "Giles Lawton",
+     "collection": "Rhode Island, Births and Christenings, 1600-1914",
+     "confidence": 5,
+     "score": 0.9562209,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Reuben Lawton",
+      "SPOUSE:Ann"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:F8SX-HHR",
+     "personName": "Giles Lawton",
+     "collection": "Rhode Island, Town Births and Baptisms Index, 1639-1932",
+     "confidence": 5,
+     "score": 0.9561667,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Ruben Lawton",
+      "SPOUSE:Ann"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:D6BQ-T66Z",
+     "personName": "Giles Lawton",
+     "collection": "Rhode Island, Town Deaths and Burials Index, 1639-1932",
+     "confidence": 4,
+     "score": 0.9118089,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Adam Lawton",
+      "SPOUSE:Mary Lawton"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:F872-KJ6",
+     "personName": "Giles Lawton",
+     "collection": "Rhode Island, Births and Christenings, 1600-1914",
+     "confidence": 4,
+     "score": 0.90615565,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Charles Lawton",
+      "SPOUSE:Ann"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:F8SX-HC9",
+     "personName": "Giles Lawton",
+     "collection": "Rhode Island, Town Births and Baptisms Index, 1639-1932",
+     "confidence": 4,
+     "score": 0.90615565,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Charles Lawton",
+      "SPOUSE:Ann"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:F8VT-2DW",
+     "personName": "Giles",
+     "collection": "Rhode Island, Town Marriages Index, 1639-1932",
+     "confidence": 4,
+     "score": 0.8433317,
+     "hasImage": false,
+     "relations": [
+      "CHILD:George Lawton"
+     ],
+     "events": ""
+    }
+   ]
+  },
+  "G9LD-217": {
+   "name": "Saunders",
+   "depth": 9,
+   "tier": "cohort",
+   "openHints": [
+    {
+     "ark": "1:1:6859-16MF",
+     "personName": "Joseph Saunders",
+     "collection": "England, Buckinghamshire, Church Records, 1217-1994",
+     "confidence": 5,
+     "score": 0.96458733,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Joseph Saunders",
+      "SPOUSE:Elizabeth"
+     ],
+     "events": ""
+    }
+   ]
+  },
+  "L1N9-S2L": {
+   "name": "Christen Olsen (census cluster)",
+   "depth": null,
+   "tier": "extramural",
+   "openHints": [
+    {
+     "ark": "1:1:QG8Q-5N1Z",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.997308,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Dorthe Cathrine Christensen",
+      "SPOUSE:Maren Nielsdatter"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG87-WZVN",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.99627244,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Mette Kirstine Christensen",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H2MR-KYMM",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.9951218,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Dorthe Cathrine",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H2S7-W13Z",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.9944349,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Mette Kirstine",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-JGC1",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9924804,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Johanne Marie Christensen",
+      "SPOUSE:Marie Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-V3CN",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9924539,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Ane Sophie Christensen",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-78S4",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9911936,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Dorthea Cathrine Christensen",
+      "SPOUSE:Maren Nielsdatter"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-GRNV",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.98996884,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Ane Marie Christensen",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H29V-YWN2",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.9887551,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Ane Sophie",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H29V-RJT2",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.98777837,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Johanne Marie",
+      "SPOUSE:Marie Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-N453",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9868559,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Oline Christensen",
+      "SPOUSE:Maren Nielsd"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H2SQ-FHW2",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.9863171,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Oline",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H2S9-19MM",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.98546326,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Ane Marie",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H29S-CLPZ",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.98275214,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Lars",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-15NY",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.97593576,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Karen Christensen",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-KWM6",
+     "personName": "Christian Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9740665,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Lars Christensen",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG84-Q1FJ",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9623378,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Niels Christensen",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H2QM-2XZM",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.9600941,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Niels",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H2SQ-JNPZ",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.9528046,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Karen",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-TY2R",
+     "personName": "Christian Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 4,
+     "score": 0.94601166,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Niels Christensen",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG87-M75V",
+     "personName": "Kristen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 4,
+     "score": 0.9445898,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Karen Kristiansen",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-V3DG",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 4,
+     "score": 0.8938882,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Lars Christensen",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    }
+   ]
+  },
+  "MLCS-MN5": {
+   "name": "Johanne Marie Christensen",
+   "depth": null,
+   "tier": "extramural",
+   "openHints": [
+    {
+     "ark": "1:1:QG8Q-JGC2",
+     "personName": "Johanne Marie Christensen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9709439,
+     "hasImage": false,
+     "relations": [
+      "MOTHER:Marie Nielsdr",
+      "FATHER:Christen Olsen"
+     ],
+     "events": "CHRISTENING 1835; BIRTH 15 August 1835"
+    },
+    {
+     "ark": "1:1:QLRV-LQD5",
+     "personName": "Johanne Marie Christensd",
+     "collection": "Denmark, Census, 1845",
+     "confidence": 5,
+     "score": 0.95788974,
+     "hasImage": false,
+     "relations": [
+      "MOTHER:Maren Nielsdatter",
+      "FATHER:Christen Olsen"
+     ],
+     "events": "BIRTH 1835; OTHER 1845"
+    },
+    {
+     "ark": "1:1:QG65-9WQB",
+     "personName": "Johanne Marie Christensdatter",
+     "collection": "Denmark, Census, 1840",
+     "confidence": 4,
+     "score": 0.9413706,
+     "hasImage": false,
+     "relations": [
+      "PARENT:Christen Olsen",
+      "MOTHER:Maren Nielsdatter"
+     ],
+     "events": "BIRTH 1835; OTHER 1840"
+    },
+    {
+     "ark": "1:1:QL68-VJXR",
+     "personName": "Johanne Marie Christensen",
+     "collection": "Denmark, Census, 1850",
+     "confidence": 4,
+     "score": 0.9182714,
+     "hasImage": false,
+     "relations": [
+      "FATHER:Christen Olsen",
+      "MOTHER:Maren Nielsdatter"
+     ],
+     "events": "OTHER 1850; BIRTH 1835"
+    }
+   ]
+  },
+  "MHRT-169": {
+   "name": "Christen Olsen",
+   "depth": null,
+   "tier": "extramural",
+   "openHints": [
+    {
+     "ark": "1:1:H29V-RJT2",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.9997447,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Johanne Marie",
+      "SPOUSE:Marie Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-V3CN",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.99965143,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Ane Sophie Christensen",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-JGC1",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.99961877,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Johanne Marie Christensen",
+      "SPOUSE:Marie Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H2MR-KYMM",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.9995665,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Dorthe Cathrine",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H29V-YWN2",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.99954563,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Ane Sophie",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-N453",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.99949276,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Oline Christensen",
+      "SPOUSE:Maren Nielsd"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG87-N389",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.99840987,
+     "hasImage": false,
+     "relations": [
+      "SPOUSE:Maren Nielsdatter"
+     ],
+     "events": "BIRTH 1807; MARRIAGE 17 October 1834"
+    },
+    {
+     "ark": "1:1:QG8Q-15NY",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9982449,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Karen Christensen",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-GRNV",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.99817586,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Ane Marie Christensen",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H2SQ-FHW2",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.9981647,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Oline",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H2S9-19MM",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.9975267,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Ane Marie",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H2SQ-JNPZ",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.99701166,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Karen",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-78S4",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9967378,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Dorthea Cathrine Christensen",
+      "SPOUSE:Maren Nielsdatter"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG87-M75V",
+     "personName": "Kristen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.99598867,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Karen Kristiansen",
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:FVLK-B9H",
+     "personName": "Christen Olesen",
+     "collection": "Denmark, Marriages, 1635-1916",
+     "confidence": 5,
+     "score": 0.9954333,
+     "hasImage": false,
+     "relations": [
+      "SPOUSE:Maren Nielsdr"
+     ],
+     "events": "BIRTH 1807; MARRIAGE 17 October 1834"
+    },
+    {
+     "ark": "1:1:QG8Q-JG4J",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9949026,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Oline Christensen",
+      "SPOUSE:Maria Nielsdatter"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QL85-3YKX",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Census, 1870",
+     "confidence": 5,
+     "score": 0.9551431,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Ana Marie Christensen",
+      "SPOUSE:Maren Peter Datter"
+     ],
+     "events": "OTHER 1870; BIRTH 1806"
+    },
+    {
+     "ark": "1:1:QG8Q-5N1Z",
+     "personName": "Christen Olsen",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 4,
+     "score": 0.89047337,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Dorthe Cathrine Christensen",
+      "SPOUSE:Maren Nielsdatter"
+     ],
+     "events": ""
+    }
+   ]
+  },
+  "[redacted-extramural-1]": {
+   "tier": "extramural",
+   "redacted": "living-or-unconfirmed extramural person",
+   "openHints": 0,
+   "matchDetailWithheld": true,
+   "basis": "privacy law — corpus public layer drops the living; full fidelity in the private sweep files"
+  },
+  "[redacted-extramural-2]": {
+   "tier": "extramural",
+   "redacted": "living-or-unconfirmed extramural person",
+   "openHints": 0,
+   "matchDetailWithheld": true,
+   "basis": "privacy law — corpus public layer drops the living; full fidelity in the private sweep files"
+  },
+  "[redacted-extramural-3]": {
+   "tier": "extramural",
+   "redacted": "living-or-unconfirmed extramural person",
+   "openHints": 0,
+   "matchDetailWithheld": true,
+   "basis": "privacy law — corpus public layer drops the living; full fidelity in the private sweep files"
+  },
+  "LZDH-WYF": {
+   "name": "Maren Nielsdatter",
+   "depth": null,
+   "tier": "extramural",
+   "openHints": [
+    {
+     "ark": "1:1:FVLK-B94",
+     "personName": "Maren Nielsdr",
+     "collection": "Denmark, Marriages, 1635-1916",
+     "confidence": 5,
+     "score": 0.9993186,
+     "hasImage": false,
+     "relations": [
+      "SPOUSE:Christen Olesen"
+     ],
+     "events": "BIRTH 1811; MARRIAGE 17 October 1834"
+    },
+    {
+     "ark": "1:1:QG87-N38Z",
+     "personName": "Maren Nielsdatter",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.99931073,
+     "hasImage": false,
+     "relations": [
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": "BIRTH 1811; MARRIAGE 17 October 1834"
+    },
+    {
+     "ark": "1:1:H2MR-KY3Z",
+     "personName": "Maren Nielsdr",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.9992113,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Dorthe Cathrine",
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-V3C5",
+     "personName": "Maren Nielsdr",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9991709,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Ane Sophie Christensen",
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H29V-YW2M",
+     "personName": "Maren Nielsdr",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.9989697,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Ane Sophie",
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-X866",
+     "personName": "Maren Nielsdr",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.99879897,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Ane Marie Christensen",
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H2S9-193Z",
+     "personName": "Maren Nielsdr",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.99834764,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Ane Marie",
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-N45H",
+     "personName": "Maren Nielsd",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9981604,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Oline Christensen",
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-15JW",
+     "personName": "Maren Nielsdr",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9981201,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Karen Christensen",
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H29V-RVMM",
+     "personName": "Marie Nielsdr",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.9977373,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Johanne Marie",
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG87-M751",
+     "personName": "Maren Nielsdr",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.99731404,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Karen Kristiansen",
+      "SPOUSE:Kristen Olsen"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H2SQ-FHZM",
+     "personName": "Maren Nielsdr",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.99729,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Oline",
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-1526",
+     "personName": "Marie Nielsdr",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9970631,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Johanne Marie Christensen",
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-78S6",
+     "personName": "Maren Nielsdatter",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9964803,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Dorthea Cathrine Christensen",
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H2SQ-JNT2",
+     "personName": "Maren Nielsdr",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.9964139,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Karen",
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG87-WZVK",
+     "personName": "Maren Nielsdr",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 5,
+     "score": 0.9880569,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Mette Kirstine Christensen",
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:H2S7-W1W2",
+     "personName": "Maren Nielsdr",
+     "collection": "Denmark, Baptisms, 1618-1923",
+     "confidence": 5,
+     "score": 0.9828477,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Mette Kirstine",
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": ""
+    },
+    {
+     "ark": "1:1:QG8Q-5N1K",
+     "personName": "Maren Nielsdatter",
+     "collection": "Denmark, Church Records, 1484-1941",
+     "confidence": 4,
+     "score": 0.8578114,
+     "hasImage": false,
+     "relations": [
+      "CHILD:Dorthe Cathrine Christensen",
+      "SPOUSE:Christen Olsen"
+     ],
+     "events": ""
+    }
+   ]
+  }
+ }
+}

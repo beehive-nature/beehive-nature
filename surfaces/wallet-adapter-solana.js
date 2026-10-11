@@ -59,7 +59,12 @@ async function solCall(method, params) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: method, params: params }) });
       if (res.ok) {
-        var d = await res.json();
+        // Quote integer tokens before JSON.parse can round a u64 lamport value.
+        // String tokens are consumed whole, so text inside strings is untouched.
+        var raw = await res.text();
+        var d = JSON.parse(raw.replace(/"(?:\\.|[^"\\])*"|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g, function(token){
+          return /^-?\d+$/.test(token) ? '"'+token+'"' : token;
+        }));
         if (d && d.result !== undefined) return d.result;
         if (d && d.error) { lastErr = new Error(d.error.message || 'solana refused'); continue }
       }
@@ -108,7 +113,7 @@ var METHODS = {
       v.code = E.BAD_PARAMS; throw v;
     }
     var r = await solCall('getBalance', [p.address, { commitment: 'confirmed' }]);
-    if (!r || typeof r.value !== 'number') {
+    if (!r || typeof r.value !== 'string' || !/^\d+$/.test(r.value) || BigInt(r.value)>18446744073709551615n) {
       var e = new Error('Solana answered without a balance value'); e.code = E.NOT_FOUND; throw e;
     }
     return { unit: 'SOL', quantity: fromLamports(r.value) + ' SOL', lamports: String(r.value) };

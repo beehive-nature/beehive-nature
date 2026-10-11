@@ -1,0 +1,61 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ05/PQ06 — the ML-KEM and ML-DSA base fields as
+// module-lattice 0.2.3 implements them (pq05-field/src/lib.rs), against
+// pq05-cryptol/Field.cry, for every input in the field.
+//
+//   *_small    the branchless conditional subtraction, for x < 2q
+//   *_barrett  Barrett reduction, for every product of two elements
+//              (x <= (q-1)^2); ML-KEM also for x <= 2(q-1)^2, the sum of
+//              two products its base-case multiply hands it
+//   *_add, *_sub, *_neg, *_mul   the Elem operators
+//
+// usage (from this directory): saw field.saw   with MIR at ../../../target/saw-pq05-field/
+
+enable_experimental;
+import "../pq05-cryptol/Field.cry";
+
+m <- mir_load_module "../../../target/saw-pq05-field/pq05_field.linked-mir.json";
+let fn n = str_concat "pq05_field::" n;
+let proven name = print (str_concat "PQ05-SAW PROVEN " name);
+let bw = w4_unint_bitwuzla [];
+
+let unary name ty pre post = do {
+  mir_verify m (fn name) [] false (do {
+    x <- mir_fresh_var "x" ty;
+    mir_precond (pre x);
+    mir_execute_func [mir_term x];
+    mir_return (mir_term (post x));
+  }) bw;
+  proven name;
+};
+
+let binary name ty pre post = do {
+  mir_verify m (fn name) [] false (do {
+    a <- mir_fresh_var "a" ty;
+    b <- mir_fresh_var "b" ty;
+    mir_precond (pre a b);
+    mir_execute_func [mir_term a, mir_term b];
+    mir_return (mir_term (post a b));
+  }) bw;
+  proven name;
+};
+
+// ML-KEM
+unary "kem_small" mir_u16 (\x -> {{ x < 2 * 3329 }}) (\x -> {{ x % 3329 }});
+unary "kem_barrett" mir_u32 (\x -> {{ x <= 3328 * 3328 }}) (\x -> {{ kemMod x }});
+mir_verify m (fn "kem_barrett") [] false (do {
+  x <- mir_fresh_var "x" mir_u32;
+  mir_precond {{ x <= 2 * 3328 * 3328 }};
+  mir_execute_func [mir_term x];
+  mir_return (mir_term {{ kemMod x }});
+}) bw;
+proven "kem_barrett (sums of two products)";
+binary "kem_add" mir_u16 (\a b -> {{ a < 3329 /\ b < 3329 }}) (\a b -> {{ kemAdd a b }});
+binary "kem_sub" mir_u16 (\a b -> {{ a < 3329 /\ b < 3329 }}) (\a b -> {{ kemSub a b }});
+unary "kem_neg" mir_u16 (\a -> {{ a < 3329 }}) (\a -> {{ kemNeg a }});
+binary "kem_mul" mir_u16 (\a b -> {{ a < 3329 /\ b < 3329 }}) (\a b -> {{ kemMul a b }});
+
+// ML-DSA
+unary "dsa_small" mir_u32 (\x -> {{ x < 2 * 8380417 }}) (\x -> {{ x % 8380417 }});
+binary "dsa_add" mir_u32 (\a b -> {{ a < 8380417 /\ b < 8380417 }}) (\a b -> {{ dsaAdd a b }});
+binary "dsa_sub" mir_u32 (\a b -> {{ a < 8380417 /\ b < 8380417 }}) (\a b -> {{ dsaSub a b }});
+unary "dsa_neg" mir_u32 (\a -> {{ a < 8380417 }}) (\a -> {{ dsaNeg a }});

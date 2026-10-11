@@ -1,0 +1,14 @@
+test rb03_budget/3d70d8f6::props[0]::p2_refuses_iff_network_fee_unaffordable[0]: [Crux] Attempting to prove verification conditions.
+[0KUNKNOWN
+
+failures:
+
+---- rb03_budget/3d70d8f6::props[0]::p2_refuses_iff_network_fee_unaffordable[0] counterexamples ----
+
+[Crux-MIR] ---- FINAL RESULTS ----
+[Crux] Goal status:
+[Crux]   Total: 10
+[Crux]   Proved: 9
+[Crux]   Disproved: 0
+[Crux]   Incomplete: 0
+[Crux]   Unknown: 1

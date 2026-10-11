@@ -1,17 +1,33 @@
-/* wallet-forge-pq.mjs — Gold move: forge pq: public cards (ML-DSA-65 / ML-KEM-768)
-   Beside classical contexts. Persist names only. Never fake PQ from nothing.
-   When keychain live + no bsigner WASM: honest "core derives when WASM armed".
-   When no keychain: chip says derives when keychain connects.
-   Served like soul-chrome; CI: tests.yml node job. */
+/* wallet-forge-pq.mjs — forge pq: public cards (ML-DSA-65 / X-Wing) beside
+   classical contexts. Persist names only. With the keychain live, bpq.js
+   derives real PQ keys from masterPRK: the cards must equal what Node derives
+   from the same root with the same files (two runtimes, one answer), and the
+   copied card must verify. Without the keychain: chip says derives when
+   keychain connects. Served like soul-chrome; CI: tests.yml node job. */
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { createRequire } from 'node:module';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { runInNewContext } from 'node:vm';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
 const SURF = join(ROOT, 'surfaces');
+// the same two files the page loads, evaluated in Node: the expected answer
+const require = createRequire(import.meta.url);
+require(join(SURF, 'onboarding', 'vendor', 'bpq-lib.js'));
+require(join(SURF, 'bpq.js'));
+const NODE_BPQ = globalThis.BPQ;
+// the BIP-39 English list the page loads, read in Node for the QR check words
+const NODE_WORDS = (() => { const sb = { window: {} }; runInNewContext(readFileSync(join(SURF, 'onboarding', 'vendor', 'bip39-wordlist.js'), 'utf8'), sb); return [...sb.window.BIP39_WORDLIST]; })();
+const ROOT_A = new Uint8Array(32).fill(0x2a);   // TEST-ONLY root, public
+const EXPECT = NODE_BPQ.keys(ROOT_A, 'pq:gatesoul');
+const SIGNER = NODE_BPQ.keys(ROOT_A, 'pq:signer');   // the one id that signs the law, whatever the soul
+let ONLY_ME = null;   // the only-me file block D seals in the page, reopened by block G
 const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.svg': 'image/svg+xml', '.wasm': 'application/wasm',
@@ -41,6 +57,8 @@ const ok = (name, cond, note = '') => {
 };
 
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
+// the words a bee or raver reader gets: an element's text without its cypherpunk-only spans
+const CALM = "window.__calm = e => { if (!e) return ''; const c = e.cloneNode(true); c.querySelectorAll('.wl-cyd').forEach(x => x.remove()); return c.textContent; }";
 
 try {
   /* A · cold forge — no soul: pq buttons present, no fake cards forced */
@@ -65,7 +83,7 @@ try {
     await page.close();
   }
 
-  /* B · soul + keychain live — pq contexts seeded; honest WASM stub (no fake pubkey) */
+  /* B · soul + keychain live — pq contexts seeded; real PQ keys derived by bpq.js */
   {
     const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
     await page.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
@@ -91,6 +109,7 @@ try {
         armed: window.BNRWALLET.forgePq.armed(),
         dsa: window.BNRWALLET.forgePq.derive('pq:ml-dsa-65:gatesoul'),
         kem: window.BNRWALLET.forgePq.derive('pq:ml-kem-768:gatesoul'),
+        dashed: chips.filter(c => c.pq).map(c => c.dashed),
         chipTexts: pqChips.map(c => c.t.replace(/\s+/g, ' ').trim()),
         pqDom: document.querySelectorAll('#forge-chips [data-pq-card]').length,
         failBox: [...document.querySelectorAll('#forge-sec .stat.err, #forge-chips .chip')].some(el => /fail|error|refused/i.test(el.textContent) && /var\(--amber\)/.test(el.getAttribute('style') || '')),
@@ -99,11 +118,15 @@ try {
     ok('pq count is 2 after soul seed', live.count === 2, String(live.count) + ' ' + JSON.stringify(live.contexts));
     ok('contexts include pq:ml-dsa-65:gatesoul', live.contexts.includes('pq:ml-dsa-65:gatesoul'), JSON.stringify(live.contexts));
     ok('contexts include pq:ml-kem-768:gatesoul', live.contexts.includes('pq:ml-kem-768:gatesoul'), JSON.stringify(live.contexts));
-    ok('bsigner WASM not armed on main (honest residual)', live.armed === false);
-    ok('ml-dsa-65 derive is needsWasm stub (no fake value)', !!(live.dsa && live.dsa.needsWasm && !live.dsa.value), JSON.stringify(live.dsa));
-    ok('ml-kem-768 derive is needsWasm stub (no fake value)', !!(live.kem && live.kem.needsWasm && !live.kem.value), JSON.stringify(live.kem));
+    ok('PQ armed on the page (bpq.js)', live.armed === true);
+    ok('ml-dsa-65 card is the bzpq1 id Node derives from the same root', !!(live.dsa && live.dsa.derived && live.dsa.value === EXPECT.id), JSON.stringify(live.dsa && live.dsa.value) + ' vs ' + EXPECT.id);
+    ok('ml-kem-768 card is the X-Wing fingerprint Node derives', !!(live.kem && live.kem.derived && live.kem.value === 'x-wing ' + NODE_BPQ.fingerprint(EXPECT.kem.publicKey)), JSON.stringify(live.kem && live.kem.value));
+    const card = live.dsa && live.dsa.copy ? JSON.parse(live.dsa.copy) : null;
+    ok('copied public card verifies in Node and names the same id', !!(card && NODE_BPQ.verifyCard(card) && card.id === EXPECT.id));
+    ok('copied card carries no secret material', !!(card && Object.keys(card).sort().join(',') === 'bpq,dsa,id,kem,sig,succ'), card ? Object.keys(card).join(',') : 'none');
     ok('DOM paints two data-pq-card chips', live.pqDom === 2, String(live.pqDom));
-    ok('chips say core derives when WASM armed', live.chipTexts.every(t => /core derives when WASM armed/i.test(t)), JSON.stringify(live.chipTexts));
+    ok('armed chips are solid, not stubs', live.dashed.length === 2 && live.dashed.every(d => d === false), JSON.stringify(live.dashed));
+    ok('chips name the PQ id and the seal-to-me key', live.chipTexts.some(t => /your PQ id/.test(t)) && live.chipTexts.some(t => /seal-to-me key/.test(t)), JSON.stringify(live.chipTexts));
     ok('no New-bee fail box on forge pq cards', !live.failBox);
     // quick-add buttons still work if contexts cleared
     await page.evaluate(() => {
@@ -131,6 +154,660 @@ try {
     await page.close();
   }
 
+  /* B2 · honesty on money and keys: "copied" only when the browser copied; your own
+     Arweave address before a bound one (the bound one is followed, and can be let go);
+     the binding vouches for the key the Vaulta account signs with, not the soul's */
+  {
+    const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    const BOUND = 'B'.repeat(43);
+    await page.addInitScript(b => { try {
+      localStorage.setItem('bnr_soul', 'gatesoul');
+      localStorage.setItem('bnr_vacct', JSON.stringify({ soul: 'gatesoul', acct: 'gatebeelovis', recv: 'gatebeelovis', state: 'name', proven: false }));
+      localStorage.setItem('bnr_ar_pub:ar:gatesoul', b);
+    } catch (e) {} }, BOUND);
+    await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, r => r.abort());   // no chain answers: the cached pointer stands
+    await page.goto(`${BASE}/surfaces/wallet.html#forge-sec`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BNRWALLET && window.BNRWALLET.forgePq && window.BPQ, null, { timeout: 20000 });
+    await page.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    // copy: a refused clipboard never says copied
+    const chipOf = ctx => `[...document.querySelectorAll('#forge-chips .chip')].find(el => (el.querySelector('.cc')||{}).textContent && el.querySelector('.cc').textContent.includes(${JSON.stringify(ctx)}) && !el.hasAttribute('data-ar-followed'))`;
+    await page.evaluate(() => Object.defineProperty(navigator.clipboard, 'writeText', { configurable: true, value: () => Promise.reject(new Error('denied')) }));
+    await page.evaluate(new Function('(' + chipOf('btc:gatesoul') + ').click()'));
+    await page.waitForFunction(new Function('return /did not copy/.test((' + chipOf('btc:gatesoul') + ').querySelector(".cx").textContent)'), null, { timeout: 5000 });
+    const refused = await page.evaluate(new Function('const el=' + chipOf('btc:gatesoul') + ';return {t:el.querySelector(".cx").textContent, sel:String(getSelection())===el.querySelector(".cv").textContent}'));
+    ok('a refused clipboard says it did not copy, never "copied", and selects the address to copy by hand', /did not copy/.test(refused.t) && !/(^|\s)copied/.test(refused.t.replace(/did not copy/, '')) && refused.sel, JSON.stringify(refused));
+    await page.evaluate(() => { window.__copied = null; Object.defineProperty(navigator.clipboard, 'writeText', { configurable: true, value: t => new Promise(r => setTimeout(() => { window.__copied = t; r(); }, 300)) }); });
+    await page.evaluate(new Function('(' + chipOf('btc:gatesoul') + ').click()'));
+    const early = await page.evaluate(new Function('return (' + chipOf('btc:gatesoul') + ').querySelector(".cx").textContent'));
+    await page.waitForFunction(() => window.__copied, null, { timeout: 5000 });
+    await page.waitForFunction(new Function('return /^copied/.test((' + chipOf('btc:gatesoul') + ').querySelector(".cx").textContent)'), null, { timeout: 5000 });
+    const copied = await page.evaluate(new Function('return {c:window.__copied, v:(' + chipOf('btc:gatesoul') + ').querySelector(".cv").textContent}'));
+    ok('"copied" shows only after the clipboard answered, and it holds the address shown', !/^copied/.test(early) && copied.c === copied.v && /^bc1q/.test(copied.v), JSON.stringify({ early, copied }));
+    // Arweave: the address your keys make comes first; the bound one is followed
+    const ar = await page.evaluate(new Function('const el=' + chipOf('ar:gatesoul') + ';const f=document.querySelector("#forge-chips [data-ar-followed]");return {own:el&&el.querySelector(".cv").textContent, derived:BNRWALLET.arInject.derivedAddress(), shown:BNRWALLET.arInject.boundAddress(), followed:f&&f.querySelector(".cv").textContent, words:f&&f.querySelector(".cx").innerText}'));
+    ok('ar: the chip shows the address your own keys make, not the bound one', !!ar.derived && ar.own === ar.derived && ar.own !== BOUND, JSON.stringify(ar));
+    ok('ar: the wallet\'s shown Arweave address is the one your keys make', ar.shown === ar.derived, JSON.stringify(ar));
+    ok('ar: the bound address stays, apart, as one you follow and only read', ar.followed === BOUND && /only reads it/.test(ar.words || ''), JSON.stringify(ar));
+    await page.click('#forge-ar');
+    const arSay = await page.evaluate(() => document.getElementById('forge-stat').innerText);
+    ok('+ ar: says made from your keys only because the card shows exactly that', /made from your keys/.test(arSay), arSay);
+    await page.evaluate(() => [...document.querySelectorAll('#forge-chips [data-ar-followed] button')].find(b => /stop following/.test(b.textContent)).click());
+    const let_go = await page.evaluate(() => ({ key: localStorage.getItem('bnr_ar_pub:ar:gatesoul'), chip: !!document.querySelector('#forge-chips [data-ar-followed]'), ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]').includes('ar:gatesoul') }));
+    ok('ar: "stop following it" lets the bound address go and keeps the context name', let_go.key === null && !let_go.chip && let_go.ctx, JSON.stringify(let_go));
+    // the binding: the Vaulta claim is the key of vaulta:<account>, and names the account
+    await page.evaluate(() => { const d = document.getElementById('pq-more'); if (d) d.open = true; document.getElementById('pq-bind').click(); });
+    await page.waitForSelector('#pq-bind-stat a', { state: 'attached', timeout: 20000 });
+    const bnd = await page.evaluate(async () => ({ b: JSON.parse(await (await fetch(document.querySelector('#pq-bind-stat a').href)).text()),
+      acctKey: BNRWALLET.forgePq.derive('vaulta:gatebeelovis').value, soulKey: BNRWALLET.forgePq.derive('vaulta:gatesoul').value }));
+    ok('binding: vaulta-k1 is the key the account gatebeelovis signs with, never the soul\'s by name',
+      !!bnd.acctKey && bnd.b.claims['vaulta-k1'] === bnd.acctKey && bnd.acctKey !== bnd.soulKey && NODE_BPQ.verifyBind(bnd.b), JSON.stringify(bnd.b.claims));
+    ok('binding: the account is named only once it carries the key: unread here, so it is left out and said', !('vaulta-account' in bnd.b.claims) && /vaulta-account \(gatebeelovis does not carry this key yet\)/.test(await page.textContent('#pq-bind-stat')), JSON.stringify(bnd.b.claims) + ' · ' + await page.textContent('#pq-bind-stat'));
+    await page.close();
+  }
+
+  /* B3 · the forge says what it did: an unknown kind is refused (no key nobody
+     accepts), the last line resets when the keychain locks, the binding counts only
+     addresses and never overwrites the clipboard, and a failed stamp never stacks */
+  {
+    const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await page.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
+    await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, r => r.abort());
+    await page.goto(`${BASE}/surfaces/wallet.html#forge-sec`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BNRWALLET && window.BPQ, null, { timeout: 20000 });
+    await page.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    const refuse = await page.evaluate(() => {
+      document.getElementById('forge-ctx').value = 'eth:me';
+      document.getElementById('forge-go').click();
+      return { say: document.getElementById('forge-stat').textContent, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]') };
+    });
+    ok('forge: an unknown kind is refused with the right name, and no key is made', /^evm is the name for eth here, so type evm:me instead\./.test(refuse.say) && !refuse.ctx.includes('eth:me'), JSON.stringify(refuse));
+    const made = await page.evaluate(() => {
+      document.getElementById('forge-ctx').value = 'evm:savings';
+      document.getElementById('forge-ctx').dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      return { say: document.getElementById('forge-stat').textContent, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]'), html: document.getElementById('forge-stat').innerHTML };
+    });
+    ok('forge: Enter makes the key, and the line says where it is, from what the card shows', made.ctx.includes('evm:savings') && /^the ethereum address named savings is in your list, so tap it to copy it\./.test(made.say) && !/<b>/.test(made.html), JSON.stringify(made));
+    const other = await page.evaluate(() => { const d = document.getElementById('forge-other'); return d ? [...d.querySelectorAll('.chip .cc')].map(x => x.textContent) : []; });
+    ok('forge: a key for another name folds away, kept', other.some(t => /evm:savings/.test(t)), JSON.stringify(other));
+    // bind: the count is addresses only, and the clipboard is untouched
+    await page.evaluate(() => { window.__clip = []; Object.defineProperty(navigator.clipboard, 'writeText', { configurable: true, value: t => { window.__clip.push(t); return Promise.resolve(); } }); });
+    await page.evaluate(() => document.getElementById('pq-bind').click());
+    await page.waitForSelector('#pq-bind-stat a', { state: 'attached', timeout: 20000 });
+    const bind = await page.evaluate(async () => ({ say: document.getElementById('pq-bind-stat').textContent, clip: window.__clip.length, b: JSON.parse(await (await fetch(document.querySelector('#pq-bind-stat a').href)).text()) }));
+    const addrN = ['evm', 'vaulta-k1', 'solana', 'bitcoin', 'nostr'].filter(k => bind.b.claims[k]).length;
+    ok('bind: the count is the addresses bound, not the co-sign key', new RegExp('^your ' + addrN + ' addresses are now tied to your post-quantum id').test(bind.say) && addrN < Object.keys(bind.b.claims).length, bind.say.slice(0, 120));
+    ok('bind: the clipboard is never overwritten behind your back', bind.clip === 0, String(bind.clip));
+    // a failed stamp, twice: one calm line, never stacked
+    await page.route(/\/digest$/, r => r.abort());
+    for (let i = 0; i < 2; i++) {
+      await page.evaluate(() => document.getElementById('pq-ots').click());
+      await page.waitForFunction(() => !document.getElementById('pq-ots').disabled && /did not go through/.test(document.getElementById('pq-ots-say').textContent), null, { timeout: 20000 });
+    }
+    const ots = await page.evaluate(() => document.getElementById('pq-bind-stat').textContent);
+    ok('bind: a failed timestamp says so once, however often it is pressed', (ots.match(/did not go through/g) || []).length === 1 && (ots.match(/no OpenTimestamps calendar answered/g) || []).length === 1, ots.slice(-260));
+    await page.unroute(/\/digest$/);
+    // the keychain locks: the last forge line no longer claims a key
+    await page.evaluate(() => document.getElementById('kc-out').click());
+    const locked = await page.evaluate(() => ({ say: document.getElementById('forge-stat').textContent, empty: (document.getElementById('forge-empty') || {}).textContent || '' }));
+    ok('forge: when the keychain locks, the line resets and the list says to connect', /^your addresses come from your keys, and none is ever stored\./.test(locked.say) && /connect your keychain and your addresses appear here/.test(locked.empty), JSON.stringify(locked));
+    await page.close();
+  }
+
+  /* D · only me: seal in the page, open in the page, open the same bytes in Node;
+     bind the classical accounts to the PQ id and verify the binding in Node */
+  {
+    const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await page.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
+    await page.goto(`${BASE}/surfaces/wallet.html#pq-sec`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BNRWALLET && window.BPQ, null, { timeout: 20000 });
+    const gateCold = await page.evaluate(() => ({ gate: !document.getElementById('pq-gate').hidden, tools: document.getElementById('pq-tools').hidden }));
+    ok('seal panel waits for the keychain (tools hidden, gate shown)', gateCold.gate && gateCold.tools, JSON.stringify(gateCold));
+    await page.evaluate(() => {
+      const mprk = new Uint8Array(32).fill(0x2a);
+      const code = window.BZDIDKEY.encodeRecoveryCode(mprk);
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    ok('seal tools appear with the keychain', await page.evaluate(() => !document.getElementById('pq-tools').hidden));
+    const secret = 'only me — ' + 'x'.repeat(70000);
+    await page.setInputFiles('#pq-file', { name: 'note.txt', mimeType: 'text/plain', buffer: Buffer.from(secret) });   // the pick is the press
+    await page.waitForSelector('#pq-seal-stat a', { state: 'attached', timeout: 20000 });
+    const sealed = Buffer.from(await page.evaluate(async () => Array.from(new Uint8Array(await (await fetch(document.querySelector('#pq-seal-stat a').href)).arrayBuffer()))));
+    ok('sealed file is a bpq1 object that does not contain the plaintext', NODE_BPQ.isSealed(new Uint8Array(sealed)) && sealed.indexOf('only me') < 0, String(sealed.length));
+    ONLY_ME = { sealed, secret };
+    // founder ruling 2026-10-04: the own slot is the phrase-only root vault, so Node needs no soul name
+    const inNode = await NODE_BPQ.open(new Uint8Array(sealed), { self: NODE_BPQ.rootVault(ROOT_A) });
+    ok('Node opens the page-sealed file with ONLY the root vault of the same root (no soul name)', Buffer.from(inNode.bytes).toString() === secret && inNode.meta.name === 'note.txt');
+    let personaOpened = false; try { await NODE_BPQ.open(new Uint8Array(sealed), { self: EXPECT, kem: EXPECT }); personaOpened = true; } catch (e) {}
+    ok('the soul-named persona keys are not what seals a new only-me file', !personaOpened);
+    const stranger = NODE_BPQ.keys(new Uint8Array(32).fill(0x2b), 'pq:gatesoul');
+    let strangerOpened = false; try { await NODE_BPQ.open(new Uint8Array(sealed), { self: NODE_BPQ.rootVault(new Uint8Array(32).fill(0x2b)) }); strangerOpened = true; } catch (e) {}
+    try { await NODE_BPQ.open(new Uint8Array(sealed), { self: stranger, kem: stranger }); strangerOpened = true; } catch (e) {}
+    ok('a different root cannot open it (neither its root vault nor its persona keys)', !strangerOpened);
+    await page.setInputFiles('#pq-open-file', { name: 'note.txt.bpq', mimeType: 'application/octet-stream', buffer: sealed });   // the pick is the press
+    await page.waitForSelector('#pq-open-stat a', { state: 'attached', timeout: 20000 });
+    const opened = await page.evaluate(async () => ({ text: await (await fetch(document.querySelector('#pq-open-stat a').href)).text(), name: document.querySelector('#pq-open-stat a').download, stat: document.getElementById('pq-open-stat').textContent }));
+    ok('the page opens its own sealed file back to the same bytes and name', opened.text === secret && opened.name === 'note.txt', opened.stat.slice(0, 120));
+    ok('an only-me file says so: its one slot opened with your own key', /unsigned, an only-me file: its one key slot opens with your own key/.test(opened.stat), opened.stat.slice(0, 160));
+    // sealed in Node by a stranger, to this soul as a READER, unsigned: never called only-me
+    const toMe = await NODE_BPQ.seal(new TextEncoder().encode('for a reader'), { self: stranger, to: [EXPECT.kem.publicKey], meta: { name: 'shared.txt', type: 'text/plain' } });
+    await page.evaluate(() => { document.getElementById('pq-open-stat').textContent = ''; });
+    await page.setInputFiles('#pq-open-file', { name: 'shared.txt.bpq', mimeType: 'application/octet-stream', buffer: Buffer.from(toMe) });   // the pick is the press
+    await page.waitForSelector('#pq-open-stat a', { state: 'attached', timeout: 20000 });
+    const readerStat = await page.evaluate(() => document.getElementById('pq-open-stat').textContent);
+    ok('a file opened through a reader slot says nothing proves who sealed it, never only-me',
+      /unsigned: nothing proves who sealed it \(opened through a reader slot\)/.test(readerStat) && !/only-me/.test(readerStat), readerStat.slice(0, 160));
+    await page.setInputFiles('#pq-sign-file', { name: 'ruling.md', mimeType: 'text/markdown', buffer: Buffer.from('# a ruling\n') });   // the pick is the press
+    await page.waitForSelector('#pq-sign-stat a', { state: 'attached', timeout: 20000 });
+    const sigJson = await page.evaluate(async () => (await (await fetch(document.querySelector('#pq-sign-stat a').href)).text()));
+    ok('page-made detached signature verifies in Node for that file only', NODE_BPQ.verifyFile(JSON.parse(sigJson), new TextEncoder().encode('# a ruling\n')).id === EXPECT.id && !NODE_BPQ.verifyFile(JSON.parse(sigJson), new TextEncoder().encode('# a ruling!\n')).ok);
+    await page.setInputFiles('#pq-ver-target', { name: 'ruling.md', mimeType: 'text/markdown', buffer: Buffer.from('# a ruling\n') });
+    await page.setInputFiles('#pq-ver-sig', { name: 'ruling.md.bpqsig.json', mimeType: 'application/json', buffer: Buffer.from(sigJson) });
+    await page.evaluate(() => document.getElementById('pq-verify').click());
+    await page.waitForFunction(() => /✓|✗/.test(document.getElementById('pq-verify-stat').textContent), null, { timeout: 10000 });
+    const verStat = await page.evaluate(() => document.getElementById('pq-verify-stat').textContent);
+    ok('the page checks its own signature and calls its time a claim', /^✓ ruling\.md checks out: it was signed by the id shown, and the signer says it was on \d{1,2} [a-z]+ \d{4}\./.test(verStat) && /✓ ruling\.md is signed by bzpq1\S+ \(ML-DSA-65\); it says it was signed at \d{4}-/.test(verStat), verStat);
+    await page.evaluate(() => document.getElementById('pq-bind').click());
+    await page.waitForSelector('#pq-bind-stat a', { state: 'attached', timeout: 20000 });
+    const binding = await page.evaluate(async () => JSON.parse(await (await fetch(document.querySelector('#pq-bind-stat a').href)).text()));
+    ok('binding verifies in Node under the bzpq1 id', NODE_BPQ.verifyBind(binding) && binding.id === EXPECT.id, JSON.stringify(Object.keys(binding.claims || {})));
+    // OpenTimestamps against mocked calendars: no network in CI, same bytes as a real reply's shape
+    // the real wire shape of a calendar reply: ops (append 16 bytes, sha256), then
+    // 0x00 + PENDING tag + varbytes(payload), the payload being varbytes(uri)
+    const pending = Buffer.concat([Buffer.from([0xf0, 0x10]), Buffer.alloc(16, 7), Buffer.from([0x08, 0x00, 0x83, 0xdf, 0xe3, 0x0d, 0x2e, 0xf9, 0x0c, 0x8e, 0x0f, 0x0e]), Buffer.from('https://mock/x')]);
+    let calendarHits = 0;
+    await page.route(/\/digest$/, route => { calendarHits++; route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/vnd.opentimestamps.v1' }, body: pending }); });
+    await page.evaluate(() => document.getElementById('pq-ots').click());
+    await page.waitForFunction(() => [...document.querySelectorAll('#pq-bind-stat a')].some(x => /\.ots$/.test(x.download)), null, { timeout: 20000 });
+    const ots = Buffer.from(await page.evaluate(async () => { const x = [...document.querySelectorAll('#pq-bind-stat a')].find(y => /\.ots$/.test(y.download)); return Array.from(new Uint8Array(await (await fetch(x.href)).arrayBuffer())); }));
+    const bindingBytes = Buffer.from(await page.evaluate(async () => { const x = [...document.querySelectorAll('#pq-bind-stat a')].find(y => /\.json$/.test(y.download)); return Array.from(new Uint8Array(await (await fetch(x.href)).arrayBuffer())); }));
+    const magic = Buffer.concat([Buffer.from('\0OpenTimestamps\0\0Proof\0'), Buffer.from([0xbf, 0x89, 0xe2, 0xe8, 0x84, 0xe8, 0x92, 0x94])]);
+    const digest = (await import('node:crypto')).createHash('sha256').update(bindingBytes).digest();
+    ok('the .ots stamps exactly the saved binding (magic, v1, sha256, digest, one branch per calendar)',
+      ots.subarray(0, magic.length).equals(magic) && ots[magic.length] === 1 && ots[magic.length + 1] === 0x08 && ots.subarray(magic.length + 2, magic.length + 34).equals(digest) && calendarHits === 3 && ots.length === magic.length + 34 + 2 + pending.length * 3,
+      'len ' + ots.length + ' hits ' + calendarHits);
+    ok('binding names the derived accounts and carries the bzDiD Ed25519 co-signature', !!(binding.claims && binding.claims.evm && binding.claims['bzdid-ed25519'] && binding.cosign && binding.cosign[0] && binding.cosign[0].alg === 'ed25519'), JSON.stringify(binding.claims));
+    const otsWords = await page.evaluate(() => document.getElementById('pq-bind-stat').textContent);
+    ok('the stamp is called pending, needs ots upgrade, and the page says it does not check it',
+      /3 calendars hold a pending stamp/.test(otsWords) && /ots upgrade/.test(otsWords) && /nothing on this page checks it/.test(otsWords) && !/it completes once/.test(otsWords), otsWords.slice(-400));
+    // one calendar answers 200 with an HTML page: it is refused, not counted, not spliced
+    await page.unroute(/\/digest$/);
+    const html = Buffer.from('<!doctype html><html><body>calendar maintenance</body></html>');
+    await page.route(/\/digest$/, route => route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': /a\.pool\.opentimestamps/.test(route.request().url()) ? 'text/html' : 'application/vnd.opentimestamps.v1' }, body: /a\.pool\.opentimestamps/.test(route.request().url()) ? html : pending }));
+    await page.evaluate(() => document.getElementById('pq-bind').click());
+    await page.waitForSelector('#pq-ots', { state: 'attached', timeout: 20000 });
+    await page.evaluate(() => document.getElementById('pq-ots').click());
+    await page.waitForFunction(() => [...document.querySelectorAll('#pq-bind-stat a')].some(x => /\.ots$/.test(x.download)), null, { timeout: 20000 });
+    const ots2 = Buffer.from(await page.evaluate(async () => { const x = [...document.querySelectorAll('#pq-bind-stat a')].find(y => /\.ots$/.test(y.download)); return Array.from(new Uint8Array(await (await fetch(x.href)).arrayBuffer())); }));
+    const words2 = await page.evaluate(() => document.getElementById('pq-bind-stat').textContent);
+    ok('an HTML calendar reply is not counted and not spliced into the .ots',
+      /2 calendars hold a pending stamp/.test(words2) && ots2.length === magic.length + 34 + 1 + pending.length * 2 && ots2.indexOf('<!doctype') < 0 && ots2.indexOf('maintenance') < 0,
+      'len ' + ots2.length + ' · ' + words2.slice(-300, -200));
+    // a reply that forks at its top level, and one with a zero-length append: both refused, as the ots client would
+    const forked = Buffer.concat([Buffer.from([0xff]), pending, pending]);
+    const emptyArg = Buffer.concat([Buffer.from([0xf0, 0x00]), pending.subarray(18)]);
+    await page.unroute(/\/digest$/);
+    await page.route(/\/digest$/, route => { const u = route.request().url(); route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*' }, body: /a\.pool\.opentimestamps/.test(u) ? forked : /b\.pool\.opentimestamps/.test(u) ? emptyArg : pending }); });
+    await page.evaluate(() => document.getElementById('pq-bind').click());
+    await page.waitForSelector('#pq-ots', { state: 'attached', timeout: 20000 });
+    await page.evaluate(() => document.getElementById('pq-ots').click());
+    await page.waitForFunction(() => [...document.querySelectorAll('#pq-bind-stat a')].some(x => /\.ots$/.test(x.download)), null, { timeout: 20000 });
+    const ots3 = Buffer.from(await page.evaluate(async () => { const x = [...document.querySelectorAll('#pq-bind-stat a')].find(y => /\.ots$/.test(y.download)); return Array.from(new Uint8Array(await (await fetch(x.href)).arrayBuffer())); }));
+    const words3 = await page.evaluate(() => document.getElementById('pq-bind-stat').textContent);
+    ok('a top-level fork and a zero-length append are refused; only the clean reply is kept',
+      /1 calendar holds a pending stamp/.test(words3) && ots3.length === magic.length + 34 + pending.length && ots3.subarray(magic.length + 34).equals(pending),
+      'len ' + ots3.length);
+    // every calendar answers junk: no stamp is made
+    await page.unroute(/\/digest$/);
+    await page.route(/\/digest$/, route => route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*' }, body: html }));
+    await page.evaluate(() => document.getElementById('pq-bind').click());
+    await page.waitForSelector('#pq-ots', { state: 'attached', timeout: 20000 });
+    await page.evaluate(() => document.getElementById('pq-ots').click());
+    await page.waitForFunction(() => /no stamp was made/.test(document.getElementById('pq-bind-stat').textContent), null, { timeout: 20000 });
+    ok('when no calendar gives a pending stamp, the page says no stamp was made and offers no .ots',
+      await page.evaluate(() => ![...document.querySelectorAll('#pq-bind-stat a')].some(x => /\.ots$/.test(x.download))));
+    await page.unroute(/\/digest$/);
+    // a successor id with a broken bech32m checksum is refused before anything is signed
+    const badSucc = NODE_BPQ.keys(new Uint8Array(32).fill(0x2c), 'pq:next').id.replace(/.$/, c => (c === 'q' ? 'p' : 'q'));
+    await page.evaluate(s => { document.getElementById('pq-succ').value = s; document.getElementById('pq-bind').click(); }, badSucc);
+    const succStat = await page.evaluate(() => ({ t: document.getElementById('pq-bind-stat').textContent, links: document.querySelectorAll('#pq-bind-stat a').length }));
+    ok('a bzpq1 successor with a bad checksum is refused and nothing is signed', /fails its checksum/.test(succStat.t) && succStat.links === 0, JSON.stringify(succStat));
+    await page.evaluate(() => { document.getElementById('pq-succ').value = ''; });
+    // Only me → My Data: the sealed bytes, and nothing else, land on My Data's shelf on this device
+    await page.evaluate(() => document.getElementById('pq-to-mydata').click());
+    await page.waitForSelector('#pq-mydata-link', { state: 'attached', timeout: 10000 });
+    const shelved = await page.evaluate(() => new Promise((resolve, reject) => {
+      const rq = indexedDB.open('bdata-local-shelf', 1);
+      rq.onerror = () => reject(rq.error);
+      rq.onsuccess = () => { const all = rq.result.transaction('artifacts', 'readonly').objectStore('artifacts').getAll(); all.onsuccess = async () => { const r = all.result; rq.result.close(); resolve(await Promise.all(r.map(async x => ({ sha256: x.sha256, name: x.name, keys: Object.keys(x).sort().join(','), bytes: Array.from(new Uint8Array(await x.blob.arrayBuffer())) })))); }; };
+    }));
+    const shelfSha = (await import('node:crypto')).createHash('sha256').update(sealed).digest('hex');
+    ok('My Data shelf holds exactly the sealed bytes under their sha256, no key and no plaintext',
+      shelved.length === 1 && shelved[0].sha256 === shelfSha && Buffer.from(shelved[0].bytes).equals(sealed) && shelved[0].name === 'note.txt.bpq' && shelved[0].keys === 'at,blob,bytes,name,sha256,shelf',
+      JSON.stringify(shelved.map(x => [x.name, x.keys, x.bytes.length])));
+    await page.route('http://127.0.0.1:8807/**', route => route.abort());
+    await page.goto(`${BASE}/surfaces/bdata.html`, { waitUntil: 'load' });
+    await page.waitForSelector('[data-bdata-sealed]', { state: 'attached', timeout: 15000 });
+    const md = await page.evaluate(() => ({ shelf: document.querySelector('[data-bdata-intake-ok]')?.getAttribute('data-bdata-intake-shelf'), sha: document.querySelector('[data-bdata-intake-ok]')?.textContent, honest: !!document.querySelector('[data-bdata-intake-honest]'), link: document.querySelector('[data-bdata-seal-link]')?.getAttribute('href') }));
+    ok('My Data shows the kept file as sealed, still on this device, and links back to the seal panel',
+      md.shelf === 'browser' && md.honest && (md.sha || '').includes(shelfSha.slice(0, 16)) && md.link === 'wallet.html#pq-file', JSON.stringify(md));
+    await page.close();
+  }
+
+  /* E · device registry against MOCKED relays (a fake WebSocket; no live relay
+     is ever opened): newest by the signed time wins over first-to-answer, a
+     rollback below this browser's high-water mark is refused, a classical list
+     after a PQ one is refused, "nothing here" needs relays that answered in
+     full, a flooding relay is cut off, a fast clock cannot raise the mark, and
+     nothing is built on a list that is not PQ-verified until the human chooses
+     this device's own view. */
+  {
+    const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await page.addInitScript(() => {
+      try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {}
+      window.__dmRelays = {}; window.__dmDelay = {}; window.__dmFail = {}; window.__dmFlood = {};
+      window.__wsOpened = []; window.__wsSent = []; window.__wsDelivered = {};
+      class FakeWS {
+        constructor(url) {
+          this.url = url; this.readyState = 0; window.__wsOpened.push(url);
+          if (window.__dmFail[url]) { setTimeout(() => { this.readyState = 3; this.onerror && this.onerror({}); this.onclose && this.onclose({}); }, 2); return; }
+          setTimeout(() => { this.readyState = 1; this.onopen && this.onopen(); }, 2);
+        }
+        deliver(msg) { if (this.readyState !== 1) return; window.__wsDelivered[this.url] = (window.__wsDelivered[this.url] || 0) + 1; this.onmessage && this.onmessage({ data: JSON.stringify(msg) }); }
+        send(s) {
+          const m = JSON.parse(s); window.__wsSent.push([this.url, m]);
+          // __dmCloseAfterSend: the relay takes the list and closes without a word (it may hold it)
+          if (m[0] === 'EVENT') { if ((window.__dmCloseAfterSend || {})[this.url]) { setTimeout(() => this.close(), 2); return; } if (!(window.__dmNoOk || {})[this.url]) setTimeout(() => this.deliver(['OK', m[1].id, true, '']), window.__dmOkDelay || 2); return; }
+          if (m[0] !== 'REQ') return;
+          const evs = window.__dmRelays[this.url] || [], flood = window.__dmFlood[this.url];
+          setTimeout(() => {
+            if (flood) { for (let i = 0; i < flood.n; i++) this.deliver(['EVENT', m[1], flood.ev]); }
+            evs.forEach(e => this.deliver(['EVENT', m[1], e]));
+            if (this.readyState === 1) this.onmessage && this.onmessage({ data: JSON.stringify(['EOSE', m[1]]) });
+          }, window.__dmDelay[this.url] || 2);
+        }
+        close() { if (this.readyState === 3) return; this.readyState = 3; setTimeout(() => this.onclose && this.onclose({}), 0); }
+      }
+      window.WebSocket = FakeWS;
+    });
+    await page.goto(`${BASE}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BnrSign && window.BPQ, null, { timeout: 20000 });
+    await page.evaluate(() => {
+      const mprk = new Uint8Array(32).fill(0x2a);
+      const code = window.BZDIDKEY.encodeRecoveryCode(mprk);
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+      // test-side event maker: the soul's registry nostr key and PQ key, from the same TEST root
+      const BN = window.BnrSign, hex = u => Array.from(u, b => b.toString(16).padStart(2, '0')).join('');
+      const sk = window.BZDIDKEY.deriveK1Key(mprk, 'nostr:bnr-devices').seed.slice();
+      window.__mkEv = (body, created) => {
+        const ev = { pubkey: hex(BN.schnorr.getPublicKey(sk)), created_at: created, kind: 30078, tags: [['d', 'bnr-devices-v1']], content: JSON.stringify(body) };
+        const ser = '[0,"' + ev.pubkey + '",' + ev.created_at + ',' + ev.kind + ',' + JSON.stringify(ev.tags) + ',' + JSON.stringify(ev.content) + ']';
+        ev.id = hex(BN.sha256(new TextEncoder().encode(ser)));
+        ev.sig = hex(BN.schnorr.sign(Uint8Array.from(ev.id.match(/../g).map(h => parseInt(h, 16))), sk));
+        return ev;
+      };
+      const BPQ = window.BPQ;
+      window.__v2 = (at, devices, root) => {
+        const k = BPQ.keys(new Uint8Array(32).fill(root || 0x2a), 'pq:bnr-devices');
+        return { v: 2, at, devices, pqsig: BPQ.signFile(k, new TextEncoder().encode(JSON.stringify({ at, devices })), at) };
+      };
+      window.__hwmKey = () => Object.keys(JSON.parse(localStorage.getItem('bnr_dm_hwm') || '{}'))[0];
+      window.__lastEvent = () => { const x = window.__wsSent.filter(y => y[1][0] === 'EVENT').pop(); return x ? JSON.parse(x[1][1].content) : null; };
+    });
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    const R = await page.evaluate(() => { const m = document.documentElement.innerHTML.match(/QR_RELAYS=\[([^\]]+)\]/); return m[1].split(',').map(s => s.replace(/'/g, '').trim()); });
+    const openDm = async () => {
+      await page.evaluate(() => { document.getElementById('dm-stat').textContent = ''; document.getElementById('dm-open').click(); });
+      await page.waitForFunction(() => { const t = document.getElementById('dm-stat').textContent; return t && !/^loading/.test(t); }, null, { timeout: 10000 });
+      await page.evaluate(CALM);
+      return page.evaluate(() => ({
+        stat: document.getElementById('dm-stat').textContent,
+        calm: window.__calm(document.getElementById('dm-stat')).trim(),
+        cy: [...document.querySelectorAll('#dm-stat .wl-cyd')].map(x => x.textContent.trim()).join(' '),
+        head: document.querySelector('[data-dm-reg]')?.textContent || '',
+        trust: document.querySelector('[data-dm-trust]')?.getAttribute('data-dm-trust') || null,
+        rows: [...document.querySelectorAll('.dm-rv')].map(b => b.getAttribute('data-c')),
+        own: !!document.getElementById('dm-own'),
+        hwm: localStorage.getItem('bnr_dm_hwm'),
+      }));
+    };
+    const setRelays = (all, extra = {}) => page.evaluate(({ R, all, extra }) => {
+      window.__wsDelivered = {}; window.__dmFail = extra.fail || {}; window.__dmFlood = extra.flood || {}; window.__dmDelay = extra.delay || {};
+      R.forEach((u, i) => { window.__dmRelays[u] = all[i] || []; });
+    }, { R, all, extra });
+    const revoke = id => page.evaluate(id => { document.querySelector('.dm-rv[data-c="' + id + '"]').click(); const y = document.querySelector('.dm-rv-yes'); if (y) y.click(); }, id);
+    const T1 = '2026-10-01T00:00:00.000Z', T2 = '2026-10-02T00:00:00.000Z', T3 = '2026-10-03T00:00:00.000Z';
+    const A = { credId: 'devA', name: 'A', fp: 'fa', at: T1 }, B = { credId: 'devB', name: 'B', fp: 'fb', at: T1 };
+    const mk = (body, created) => page.evaluate(({ body, created }) => window.__mkEv(body, created), { body, created });
+    const v2 = (at, devs, root) => page.evaluate(({ at, devs, root }) => window.__v2(at, devs, root), { at, devs, root });
+    // 0 · nothing anywhere, every relay said so: a new soul may start here
+    await setRelays([[], [], []]);
+    const s0 = await openDm();
+    ok('registry: every relay answered in full with nothing, so a new list may start (no dash in the words)',
+      !s0.own && s0.calm === 'this is your first device list, and it starts here.' && /^no registry on the relays yet, so this soul's device list starts here$/.test(s0.cy) && !/[—–]/.test(s0.calm), JSON.stringify(s0));
+    // 0b · only one relay answered in full, two failed: never "nothing here"
+    await setRelays([[], [], []], { fail: { [R[1]]: 1, [R[2]]: 1 } });
+    const s0b = await openDm();
+    ok('registry: with only 1 of 3 relays answering, an empty result is not a fresh start', s0b.own && /only 1 of 3 relays answered in full/.test(s0b.stat) && /only 1 of 3 relays answered in full/.test(s0b.head), JSON.stringify(s0b));
+    await page.evaluate(() => document.querySelector('#dm-add').click());
+    ok('registry: add after a partial answer is refused before any passkey prompt', /Nothing was changed/.test(await page.evaluate(() => document.getElementById('dm-stat').textContent)));
+    // 1 · relay 0 is slow and has the newest list (B revoked); relay 1 answers first with the older list
+    await setRelays([[await mk(await v2(T2, [A]), 1000)], [await mk(await v2(T1, [A, B]), 2000)], []], { delay: { [R[0]]: 200 } });
+    const s1 = await openDm();
+    ok('registry: the newest SIGNED list wins, not the first relay to answer', s1.trust === 'pq' && s1.rows.join() === 'devA' && !s1.own, JSON.stringify(s1));
+    ok('registry: the high-water mark is a timestamp only, kept under a public-key prefix', (() => { try { const h = JSON.parse(s1.hwm); const ks = Object.keys(h); return ks.length === 1 && /^[0-9a-f]{16}$/.test(ks[0]) && JSON.stringify(h[ks[0]]) === JSON.stringify({ at: T2 }); } catch (e) { return false; } })(), s1.hwm);
+    // 2 · every relay now serves only the older (validly signed) list: refused
+    const old = await mk(await v2(T1, [A, B]), 3000);
+    await setRelays([[old], [old], [old]]);
+    const s2 = await openDm();
+    ok('registry: an older list than this browser saw is refused (no revoked device comes back)', /not used/.test(s2.stat) && /older list/.test(s2.stat) && s2.rows.length === 0 && s2.trust === null && s2.own, JSON.stringify(s2));
+    // 3 · a classical v1 list after a PQ one: refused
+    const v1 = await mk({ v: 1, devices: [A, B] }, 4000);
+    await setRelays([[v1], [v1], [v1]]);
+    const s3 = await openDm();
+    ok('registry: a classical list after a post-quantum one is refused', /not used/.test(s3.stat) && /not signed post-quantum/.test(s3.stat) && s3.rows.length === 0, JSON.stringify(s3));
+    // 3b · nothing comes back, but this browser saw a list: the header and the status agree
+    await setRelays([[], [], []]);
+    const s3b = await openDm();
+    ok('registry: an empty answer after a seen list says so in the header and the status alike',
+      s3b.own && new RegExp('though this browser saw one signed at ' + T2.replace(/\./g, '\\.')).test(s3b.head) && new RegExp('though this browser saw one signed at ' + T2.replace(/\./g, '\\.')).test(s3b.stat) && !/new soul, or never published/.test(s3b.head), JSON.stringify(s3b));
+    // 3c · a relay floods 3000 copies of a valid list: cut off after 10, one check, no stall
+    const fresh = await mk(await v2(T3, [A]), 5000);
+    await setRelays([[], [], []], { flood: { [R[0]]: { n: 3000, ev: fresh } } });
+    const t0 = Date.now();
+    const s3c = await openDm();
+    const flooded = await page.evaluate(u => window.__wsDelivered[u], R[0]);
+    ok('registry: a flooding relay is cut off after 10 events and the list still loads quickly', s3c.trust === 'pq' && s3c.rows.join() === 'devA' && flooded <= 11 && Date.now() - t0 < 4000, 'delivered ' + flooded + ' in ' + (Date.now() - t0) + ' ms');
+    // 3d · a list signed with a clock a day fast: shown and usable, but the mark is not raised to it
+    const future = new Date(Date.now() + 864e5).toISOString();
+    const fast = await mk(await v2(future, [A]), 6000);
+    await setRelays([[fast], [fast], [fast]]);
+    const s3d = await openDm();
+    ok('registry: a list dated beyond this clock is shown but never raises the mark',
+      s3d.trust === 'pq' && /more than 10 minutes ahead of this device's clock/.test(s3d.stat) && JSON.parse(s3d.hwm)[await page.evaluate(() => window.__hwmKey())].at === T3, JSON.stringify(s3d));
+    // 3e · a mark slightly ahead (within the allowance): a publish signs past it, never at or below it
+    const near = Date.now() + 5 * 60 * 1000, nearIso = new Date(near).toISOString();
+    const nearEv = await mk(await v2(nearIso, [A]), 7000);
+    await setRelays([[nearEv], [nearEv], [nearEv]]);
+    await page.evaluate(T2 => localStorage.setItem('bnr_seal', JSON.stringify({ credId: 'devA', name: 'A', fp: 'fa', at: T2 })), T2);
+    const s3e = await openDm();
+    await page.evaluate(() => { window.__wsSent.length = 0; });
+    await revoke('devA');
+    await page.waitForFunction(() => window.__wsSent.some(x => x[1][0] === 'EVENT'), null, { timeout: 5000 });
+    await page.waitForFunction(() => !/saving your device list/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    const pubNear = await page.evaluate(() => window.__lastEvent());
+    ok('registry: a publish signs a time after the mark even when this clock is behind it',
+      s3e.trust === 'pq' && pubNear.v === 2 && Date.parse(pubNear.at) === near + 1, JSON.stringify({ s: s3e.stat, at: pubNear.at, near: nearIso }));
+    // 4 · fresh browser (no mark) and a list whose PQ signature is another key's: shown as bad, never built on
+    const badEv = await mk(await v2(T2, [A, B], 0x2b), 8000);
+    await page.evaluate(T2 => {
+      localStorage.removeItem('bnr_dm_hwm');
+      localStorage.setItem('bnr_seal', JSON.stringify({ credId: 'devA', name: 'A', fp: 'fa', at: T2 }));
+      window.__wsSent.length = 0;
+    }, T2);
+    await setRelays([[badEv], [badEv], [badEv]]);
+    const s4 = await openDm();
+    ok('registry: a list with a foreign PQ signature is shown as bad and offers this device\'s own view', s4.trust === 'bad' && s4.own && s4.rows.join() === 'devA,devB', JSON.stringify(s4));
+    await revoke('devB');
+    const s4b = await page.evaluate(() => ({ stat: document.getElementById('dm-stat').textContent, events: window.__wsSent.filter(x => x[1][0] === 'EVENT').length }));
+    ok('registry: revoke on an unverified list is refused and nothing is published', /Nothing was changed/.test(s4b.stat) && s4b.events === 0, JSON.stringify(s4b));
+    await page.evaluate(() => document.getElementById('dm-own').click());
+    const s4c = await page.evaluate(() => ({ stat: document.getElementById('dm-stat').textContent, rows: [...document.querySelectorAll('.dm-rv')].map(b => b.getAttribute('data-c')), own: !!document.getElementById('dm-own') }));
+    ok('registry: this device\'s own view holds only this browser\'s seal', s4c.rows.join() === 'devA' && !s4c.own && /only what this browser knows/.test(s4c.stat), JSON.stringify(s4c));
+    await revoke('devA');
+    await page.waitForFunction(() => window.__wsSent.some(x => x[1][0] === 'EVENT'), null, { timeout: 5000 });
+    // the mark rises once a relay ACCEPTED the list, not when it was sent
+    await page.waitForFunction(() => { const x = window.__lastEvent(), h = JSON.parse(localStorage.getItem('bnr_dm_hwm') || '{}'); return !!x && Object.values(h)[0]?.at === x.at; }, null, { timeout: 12000 });
+    const pub = await page.evaluate(() => {
+      const o = window.__lastEvent();
+      const r = window.BPQ.verifyFile(o.pqsig, new TextEncoder().encode(JSON.stringify({ at: o.at, devices: o.devices })));
+      return { v: o.v, n: o.devices.length, ok: r.ok, id: r.id, want: window.BPQ.keys(new Uint8Array(32).fill(0x2a), 'pq:bnr-devices').id, at: o.at, hwm: JSON.parse(localStorage.getItem('bnr_dm_hwm') || '{}'), trust: document.querySelector('[data-dm-trust]')?.getAttribute('data-dm-trust') };
+    });
+    ok('registry: a revoke from the own view publishes a v2 list this soul signed post-quantum and raises the mark',
+      pub.v === 2 && pub.n === 0 && pub.ok && pub.id === pub.want && Object.values(pub.hwm)[0]?.at === pub.at && pub.trust === 'pq', JSON.stringify(pub));
+    // 5 · post-quantum bundle missing, no mark, relays serve a v2 list: no classical list may replace it
+    const v2Ev = await mk(await v2(T2, [A, B]), 9000);
+    await page.evaluate(T2 => {
+      localStorage.removeItem('bnr_dm_hwm');
+      localStorage.setItem('bnr_seal', JSON.stringify({ credId: 'devA', name: 'A', fp: 'fa', at: T2 }));
+      window.__savedBPQ = window.BPQ; window.BPQ = undefined;
+      window.__wsSent.length = 0;
+    }, T2);
+    await setRelays([[v2Ev], [v2Ev], [v2Ev]]);
+    const s5 = await openDm();
+    await revoke('devB');
+    const s5b = await page.evaluate(() => ({ stat: document.getElementById('dm-stat').textContent, events: window.__wsSent.filter(x => x[1][0] === 'EVENT').length }));
+    await page.evaluate(() => { window.BPQ = window.__savedBPQ; });
+    ok('registry: without the PQ bundle, a classical list never replaces a post-quantum one',
+      s5.trust === 'unchecked' && /cannot sign post-quantum right now/.test(s5b.stat) && /Nothing was changed/.test(s5b.stat) && s5b.events === 0, JSON.stringify({ s5, s5b }));
+    // 6 · a change counts only what a relay ACCEPTED: with every relay down nothing changes and the
+    //     same signed list can go again; a self-revoke also drops the wrapper pointer (bnr_cred)
+    const v2ok = await mk(await v2(T3, [A, B]), 10000);
+    await page.evaluate(T2 => {
+      localStorage.removeItem('bnr_dm_hwm');
+      localStorage.setItem('bnr_seal', JSON.stringify({ credId: 'devA', name: 'A', fp: 'fa', at: T2 }));
+      localStorage.setItem('bnr_cred', 'devA');
+    }, T2);
+    await setRelays([[v2ok], [v2ok], [v2ok]]);
+    const s6 = await openDm();
+    ok('registry (control): a fresh post-quantum list loads with both devices', s6.trust === 'pq' && s6.rows.join() === 'devA,devB', JSON.stringify(s6));
+    await page.evaluate(() => { window.__wsSent.length = 0; document.querySelector('.dm-rv[data-c="devB"]').click(); });
+    await page.waitForTimeout(150);
+    const ask = await page.evaluate(() => ({ yes: !!document.querySelector('.dm-rv-yes'), words: window.__calm(document.querySelector('.dm-ask')), sent: window.__wsSent.filter(x => x[1][0] === 'EVENT').length }));
+    await page.evaluate(() => document.querySelector('.dm-rv-no').click());
+    const kept = await page.evaluate(() => [...document.querySelectorAll('.dm-rv')].map(b => b.getAttribute('data-c')).join());
+    ok('registry: one press on remove asks first in the row and sends nothing; keep it puts the row back',
+      ask.yes && /remove this device\? it will have to be added again from that device\./.test(ask.words) && ask.sent === 0 && kept === 'devA,devB', JSON.stringify({ ask, kept }));
+    // 6a · every relay takes the list and closes without a word: one may hold it, so nothing is
+    //      called unchanged, nothing is rolled back, the mark does not rise, and try again stays
+    await page.evaluate(R => { window.__dmCloseAfterSend = {}; R.forEach(u => { window.__dmCloseAfterSend[u] = 1; }); window.__wsSent.length = 0; }, R);
+    await revoke('devB');
+    await page.waitForFunction(() => /no relay confirmed/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    await page.evaluate(CALM);
+    const s6u = await page.evaluate(() => ({ stat: window.__calm(document.getElementById('dm-stat')), cy: document.querySelector('#dm-stat .wl-cyd')?.textContent || '', ask: !!document.querySelector('.dm-ask'), hwm: JSON.parse(localStorage.getItem('bnr_dm_hwm') || '{}'), again: !!document.querySelector('#dm-stat button.wl-act'), sent: window.__wsSent.filter(x => x[1][0] === 'EVENT').length }));
+    ok('registry: a list sent with no answer is never called unchanged or rolled back, and try again stays',
+      /no relay confirmed your device list yet, so that device may still be on it\./.test(s6u.stat) && !/nothing changed|did not reach/.test(s6u.stat) && /3 got it and did not answer/.test(s6u.cy) && s6u.ask && s6u.again && s6u.sent === 3 && Object.values(s6u.hwm)[0]?.at === T3, JSON.stringify(s6u));
+    await page.evaluate(() => { window.__dmCloseAfterSend = {}; document.querySelector('.dm-rv-no').click(); });
+    // 6b · every relay down before the list could leave: nothing changed, the row comes back
+    await page.evaluate(R => { R.forEach(u => { window.__dmFail[u] = 1; }); window.__wsSent.length = 0; }, R);
+    await revoke('devB');
+    await page.waitForFunction(() => /no relay took the change/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    await page.evaluate(CALM);
+    const s6b = await page.evaluate(() => ({ stat: window.__calm(document.getElementById('dm-stat')), rows: [...document.querySelectorAll('.dm-rv')].map(b => b.getAttribute('data-c')), hwm: JSON.parse(localStorage.getItem('bnr_dm_hwm') || '{}'), again: !!document.querySelector('#dm-stat button.wl-act') }));
+    ok('registry: with every relay down a revoke claims nothing, changes nothing, and offers try again',
+      /no relay took the change, so nothing changed yet/.test(s6b.stat) && s6b.rows.join() === 'devA,devB' && Object.values(s6b.hwm)[0]?.at === T3 && s6b.again, JSON.stringify(s6b));
+    await page.evaluate(() => { window.__dmFail = {}; window.__wsSent.length = 0; document.querySelector('#dm-stat button.wl-act').click(); });
+    await page.waitForFunction(() => /removed on 3 of 3 relays/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    const s6c = await page.evaluate(() => ({ rows: [...document.querySelectorAll('.dm-rv')].map(b => b.getAttribute('data-c')), ids: [...new Set(window.__wsSent.filter(x => x[1][0] === 'EVENT').map(x => x[1][1].id))], at: window.__lastEvent().at, hwm: JSON.parse(localStorage.getItem('bnr_dm_hwm') || '{}') }));
+    ok('registry: try again sends one signed list to every relay and removes the device only once they accepted it',
+      s6c.rows.join() === 'devA' && s6c.ids.length === 1 && Object.values(s6c.hwm)[0]?.at === s6c.at, JSON.stringify(s6c));
+    await page.evaluate(R => { window.__wsSent.length = 0; window.__dmCloseAfterSend = {}; R.forEach(u => { window.__dmCloseAfterSend[u] = 1; }); }, R);
+    await revoke('devA');
+    await page.waitForFunction(() => /no relay confirmed/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    await page.evaluate(CALM);
+    const s6e = await page.evaluate(() => ({ stat: window.__calm(document.getElementById('dm-stat')), seal: localStorage.getItem('bnr_seal'), cred: localStorage.getItem('bnr_cred'), again: !!document.querySelector('#dm-stat button.wl-act') }));
+    ok('registry: a self-remove nobody answered drops this device\'s seal at once and says the list is not confirmed yet',
+      /this device no longer keeps your soul, and no relay confirmed your device list yet\./.test(s6e.stat) && s6e.seal === null && s6e.cred === null && s6e.again, JSON.stringify(s6e));
+    await page.evaluate(() => { window.__dmCloseAfterSend = {}; document.querySelector('#dm-stat button.wl-act').click(); });
+    await page.waitForFunction(() => /no longer keeps your soul\. to use it here again/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    const s6f = await page.evaluate(() => [...new Set(window.__wsSent.filter(x => x[1][0] === 'EVENT').map(x => x[1][1].id))]);
+    ok('registry: try again after no answer resends the identical signed list', s6f.length === 1, JSON.stringify(s6f));
+    const s6d = await page.evaluate(() => ({ cred: localStorage.getItem('bnr_cred'), seal: localStorage.getItem('bnr_seal'), link: document.querySelector('#dm-stat a')?.getAttribute('href'), wraps: JSON.parse(localStorage.getItem('bnr_wraps') || '[]') }));
+    ok('registry: a self-revoke drops the seal AND the wrapper pointer, and names the recovery words',
+      s6d.cred === null && s6d.seal === null && s6d.link === '#kc-rec-scaffold' && s6d.wraps.includes('devA'), JSON.stringify(s6d));
+    // 7 · another soul opens over this one while its device list is open and a change is still
+    //     being saved: the old soul's rows and sheet go, the late answer leaves the new soul alone,
+    //     and the new soul's list never shows (or publishes) the old soul's devices
+    const T5 = new Date(Date.now() + 60000).toISOString();
+    await setRelays([[await mk(await v2(T5, [A, B]), 11000)], [], []]);
+    const s7 = await openDm();
+    ok('registry (control): the open soul\'s list shows both devices before the switch', s7.trust === 'pq' && s7.rows.join() === 'devA,devB', JSON.stringify(s7));
+    const aPub = await page.evaluate(() => window.__mkEv({}, 1).pubkey);
+    await page.evaluate(() => {
+      window.__dmOkDelay = 1500; window.__wsSent.length = 0;
+      document.querySelector('.dm-rv[data-c="devB"]').click(); document.querySelector('.dm-rv-yes').click();
+      const b64u = x => Uint8Array.from(atob(x.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+      navigator.credentials.create = async () => ({ id: 'bmV3', getClientExtensionResults: () => ({ prf: { enabled: true } }) });
+      navigator.credentials.get = async () => ({ id: 'bmV3', rawId: b64u('bmV3').buffer, type: 'public-key', response: { userHandle: null }, getClientExtensionResults: () => ({ prf: { results: { first: new Uint8Array(32).fill(11).buffer } } }) });
+      document.getElementById('kc-create').click();
+    });
+    await page.waitForFunction(() => window.__wsSent.some(x => x[1][0] === 'EVENT') && document.getElementById('kc-born').style.display !== 'none', null, { timeout: 10000 });
+    const s7a = await page.evaluate(() => ({ sheet: document.getElementById('dm-sec').style.display, rows: document.querySelectorAll('.dm-rv,.dm-ask').length, fp: document.getElementById('kc-soul-fp').textContent }));
+    ok('registry: a soul opened over another closes the old soul\'s device sheet and its rows at once',
+      s7a.sheet === 'none' && s7a.rows === 0 && s7a.fp === await page.evaluate(() => window.BZDIDKEY.deriveIdentity(window.BZDIDKEY.masterPrkFromPrfSecret(new Uint8Array(32).fill(11)), 'bnr.b').fingerprint.words), JSON.stringify(s7a));
+    await page.waitForFunction(() => /your keychain changed while this was saving/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    await page.evaluate(() => { window.__dmOkDelay = 0; });
+    const s7b = await page.evaluate(() => ({ rows: document.querySelectorAll('.dm-rv').length, authors: [...new Set(window.__wsSent.filter(x => x[1][0] === 'EVENT').map(x => x[1][1].pubkey))] }));
+    ok('registry: the old soul\'s late answer leaves the new soul\'s view alone, and only the old soul signed its list',
+      s7b.rows === 0 && s7b.authors.length === 1 && s7b.authors[0] === aPub, JSON.stringify(s7b));
+    const s7c = await openDm();
+    ok('registry: the new soul\'s device list never shows the old soul\'s devices', s7c.rows.length === 0 && s7c.calm === 'this is your first device list, and it starts here.', JSON.stringify(s7c));
+    await page.evaluate(T2 => { localStorage.setItem('bnr_seal', JSON.stringify({ credId: 'devA', name: 'A', fp: 'fa', at: T2 })); document.getElementById('dm-add').click(); }, T2);
+    await page.evaluate(CALM);
+    const s7d = await page.evaluate(() => ({ stat: window.__calm(document.getElementById('dm-stat')), btn: !!document.querySelector('#dm-stat button.wl-act') }));
+    ok('registry: a device that keeps another soul never says it already keeps this one',
+      /this device already keeps another soul, so it cannot keep this one too\./.test(s7d.stat) && s7d.btn, JSON.stringify(s7d));
+    // 7e · this device keeps the open soul: the seal names that soul's own fingerprint
+    await page.evaluate(() => {
+      localStorage.removeItem('bnr_seal'); window.__wsSent.length = 0;
+      const create0 = navigator.credentials.create;
+      navigator.credentials.create = async () => ({ id: 'ZGV2Qw', getClientExtensionResults: () => ({ prf: { enabled: true } }) });
+      document.getElementById('dm-add').click();
+    });
+    await page.waitForFunction(() => /this device now keeps your soul/.test(document.getElementById('dm-stat').textContent), null, { timeout: 12000 });
+    const s7e = await page.evaluate(() => ({ seal: JSON.parse(localStorage.getItem('bnr_seal') || 'null'), fp: document.getElementById('kc-soul-fp').textContent }));
+    ok('registry: a device that now keeps the open soul names that soul\'s fingerprint in its seal',
+      !!s7e.seal && s7e.seal.credId === 'ZGV2Qw' && s7e.seal.fp === s7e.fp && /^[a-z]+( [a-z]+){5}$/.test(s7e.fp), JSON.stringify(s7e));
+    ok('registry: only the mocked relay URLs were ever opened', (await page.evaluate(() => window.__wsOpened)).every(u => R.includes(u)));
+    await page.close();
+  }
+
+  /* F · leaving the page wipes the keys (pagehide, not only beforeunload), and a
+     page restored from the back/forward cache reloads instead of showing a live
+     keychain with nothing behind it */
+  {
+    const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await page.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
+    await page.goto(`${BASE}/surfaces/wallet.html#pq-sec`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BPQ, null, { timeout: 20000 });
+    await page.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await page.waitForFunction(() => !document.getElementById('pq-tools').hidden, null, { timeout: 15000 });
+    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true })));
+    await page.waitForFunction(() => document.getElementById('pq-tools').hidden, null, { timeout: 5000 });
+    ok('pagehide wipes the keys: the seal tools close and the gate asks to connect', await page.evaluate(() => !document.getElementById('pq-gate').hidden && /connect your keychain/.test(document.getElementById('pq-gate').textContent)));
+    const reload = page.waitForEvent('load', { timeout: 15000 });
+    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })));
+    await reload;
+    await page.waitForFunction(() => window.BZDIDKEY && document.getElementById('kc-stat'), null, { timeout: 20000 });
+    ok('a page restored from the back/forward cache reloads and starts disconnected', await page.evaluate(() => !/keychain live/.test(document.getElementById('kc-stat').textContent) && document.getElementById('pq-tools').hidden));
+    const src = await readFile(join(SURF, 'wallet.html'), 'utf8');
+    ok('the QR bridge promises only what holds: wiped when this page closes', /tab memory only, wiped when this page closes'/.test(src) && !/scrubbed on close like every lane here|close or leave this page/.test(src));
+    await page.close();
+  }
+
+  /* G · a forgotten soul (founder ruling 2026-10-04): this browser lost bnr_soul and
+     bnr_contexts; the keychain reconnects from the recovery code alone. An only-me
+     file opens from the phrase alone; a file shared to the soul through X-Wing asks
+     for the soul name, opens with the right one, never with a wrong one, and keeps
+     only a name that opened it. */
+  {
+    const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await page.addInitScript(() => { try { localStorage.removeItem('bnr_soul'); localStorage.removeItem('bnr_contexts'); } catch (e) {} });
+    await page.goto(`${BASE}/surfaces/wallet.html#pq-sec`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BPQ, null, { timeout: 20000 });
+    await page.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await page.waitForFunction(() => !document.getElementById('pq-tools').hidden, null, { timeout: 15000 });
+    const forgot = await page.evaluate(() => ({ soul: localStorage.getItem('bnr_soul'), ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]').filter(c => /^pq:/.test(c)) }));
+    ok('forgotten soul: no soul name and no pq context in this browser', forgot.soul === null && forgot.ctx.length === 0, JSON.stringify(forgot));
+    // 1 · the only-me file block D sealed opens here with no soul name at all
+    await page.setInputFiles('#pq-open-file', { name: 'note.txt.bpq', mimeType: 'application/octet-stream', buffer: ONLY_ME.sealed });   // the pick is the press
+    await page.waitForSelector('#pq-open-stat a', { state: 'attached', timeout: 20000 });
+    const g1 = await page.evaluate(async () => ({ text: await (await fetch(document.querySelector('#pq-open-stat a').href)).text(), stat: document.getElementById('pq-open-stat').textContent, field: !!document.getElementById('pq-open-soul') }));
+    ok('forgotten soul: an only-me file opens from the recovery code alone, and says so',
+      g1.text === ONLY_ME.secret && !g1.field && /an only-me file: its one key slot opens with your own key, from your recovery words alone/.test(g1.stat), g1.stat.slice(0, 200));
+    // 2 · shared to the soul (pq:gatesoul) through X-Wing by a stranger: nothing known opens it, so the page asks
+    const strangerRoot = new Uint8Array(32).fill(0x2b);
+    const toSoul = await NODE_BPQ.seal(new TextEncoder().encode('shared to gatesoul'), { self: NODE_BPQ.rootVault(strangerRoot), to: [EXPECT.kem.publicKey], meta: { name: 'to-soul.txt', type: 'text/plain' } });
+    await page.evaluate(() => { document.getElementById('pq-open-stat').textContent = ''; });
+    await page.setInputFiles('#pq-open-file', { name: 'to-soul.txt.bpq', mimeType: 'application/octet-stream', buffer: Buffer.from(toSoul) });   // the pick is the press
+    await page.waitForSelector('#pq-open-soul', { state: 'attached', timeout: 20000 });
+    const g2 = await page.evaluate(() => ({ stat: document.getElementById('pq-open-stat').textContent, links: document.querySelectorAll('#pq-open-stat a').length, label: document.querySelector('label[for="pq-open-soul"]')?.textContent || '' }));
+    ok('forgotten soul: a file shared to the soul asks for the soul name it was shared to, and opens nothing yet',
+      g2.links === 0 && /the soul name this file was sealed or shared under/.test(g2.label) && /sealed or shared under one of your souls/.test(g2.stat) && /type that soul name \(the name on its card\)/.test(g2.stat) && !/[–—]/.test(g2.stat + g2.label), g2.stat.slice(0, 200));
+    // 3 · a wrong name does not open it and is not kept
+    await page.fill('#pq-open-soul', 'notmysoul');
+    await page.click('#pq-open-soul-go');
+    await page.waitForFunction(() => /does not open it/.test(document.getElementById('pq-open-soul-stat').textContent), null, { timeout: 20000 });
+    const g3 = await page.evaluate(() => ({ msg: document.getElementById('pq-open-soul-stat').textContent, links: document.querySelectorAll('#pq-open-stat a').length, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]') }));
+    ok('forgotten soul: a wrong name does not open the file and is not kept',
+      g3.links === 0 && /notmysoul does not open it, so check the name and try again/.test(g3.msg) && /the name was not kept/.test(g3.msg) && !g3.ctx.some(c => /notmysoul/.test(c)), JSON.stringify(g3));
+    // 4 · the right name opens it, and only then is the name kept, as the forge keeps it
+    await page.fill('#pq-open-soul', 'gatesoul');
+    await page.click('#pq-open-soul-go');
+    await page.waitForSelector('#pq-open-stat a', { state: 'attached', timeout: 20000 });
+    const g4 = await page.evaluate(async () => ({ text: await (await fetch(document.querySelector('#pq-open-stat a').href)).text(), name: document.querySelector('#pq-open-stat a').download, stat: document.getElementById('pq-open-stat').textContent, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]') }));
+    ok('forgotten soul: the right soul name opens the shared file through its reader slot',
+      g4.text === 'shared to gatesoul' && g4.name === 'to-soul.txt' && /opened through a reader slot/.test(g4.stat) && /opened as gatesoul/.test(g4.stat), g4.stat.slice(0, 200));
+    ok('forgotten soul: the name that opened it is kept as a forge context, nothing else',
+      g4.ctx.includes('pq:ml-kem-768:gatesoul') && !g4.ctx.some(c => /notmysoul/.test(c)), JSON.stringify(g4.ctx));
+    // 5 · forget again (the reload clears the soul and the contexts), then an only-me file sealed the
+    //     pre-ruling way (one self slot under the pq:gatesoul vault) asks for the name and opens with it
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BPQ, null, { timeout: 20000 });
+    await page.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await page.waitForFunction(() => !document.getElementById('pq-tools').hidden, null, { timeout: 15000 });
+    const oldStyle = await NODE_BPQ.seal(new TextEncoder().encode('sealed before the ruling'), { self: EXPECT, meta: { name: 'old.txt', type: 'text/plain' } });
+    ok('pre-ruling only-me file: one self slot, no X-Wing slot', NODE_BPQ.inspect(oldStyle).slots.map(s => s.to).join() === 'self');
+    await page.evaluate(() => { document.getElementById('pq-open-stat').textContent = ''; });
+    await page.setInputFiles('#pq-open-file', { name: 'old.txt.bpq', mimeType: 'application/octet-stream', buffer: Buffer.from(oldStyle) });   // the pick is the press
+    await page.waitForSelector('#pq-open-soul', { state: 'attached', timeout: 20000 });
+    const g5 = await page.evaluate(() => ({ links: document.querySelectorAll('#pq-open-stat a').length, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]').filter(c => /^pq:/.test(c)) }));
+    ok('forgotten soul: a pre-ruling only-me file (no reader slot) still offers the soul name field', g5.links === 0 && g5.ctx.length === 0, JSON.stringify(g5));
+    await page.fill('#pq-open-soul', 'notmysoul');
+    await page.click('#pq-open-soul-go');
+    await page.waitForFunction(() => /does not open it/.test(document.getElementById('pq-open-soul-stat').textContent), null, { timeout: 20000 });
+    const g6 = await page.evaluate(() => ({ links: document.querySelectorAll('#pq-open-stat a').length, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]') }));
+    ok('forgotten soul: a wrong name neither opens the pre-ruling file nor is kept', g6.links === 0 && !g6.ctx.some(c => /notmysoul/.test(c)), JSON.stringify(g6));
+    await page.fill('#pq-open-soul', 'gatesoul');
+    await page.click('#pq-open-soul-go');
+    await page.waitForSelector('#pq-open-stat a', { state: 'attached', timeout: 20000 });
+    const g7 = await page.evaluate(async () => ({ text: await (await fetch(document.querySelector('#pq-open-stat a').href)).text(), stat: document.getElementById('pq-open-stat').textContent, ctx: JSON.parse(localStorage.getItem('bnr_contexts') || '[]') }));
+    ok('forgotten soul: the soul name opens the pre-ruling only-me file through its own slot, and is kept',
+      g7.text === 'sealed before the ruling' && /an only-me file: its one key slot opens with your own key/.test(g7.stat) && !/recovery words alone/.test(g7.stat) && /opened as gatesoul/.test(g7.stat) && g7.ctx.includes('pq:ml-kem-768:gatesoul') && !g7.ctx.some(c => /notmysoul/.test(c)), g7.stat.slice(0, 200));
+    await page.close();
+  }
+
   /* C · no keychain: pq contexts may seed with soul, chips wait honestly */
   {
     const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
@@ -150,6 +827,607 @@ try {
     ok('without MPRK derive returns null (honest connect path)', cold.dsaNull);
     ok('chip says derives when keychain connects', /derives when keychain connects/i.test(cold.waitText), cold.waitText);
     await page.close();
+  }
+
+  /* D · QR bridge check words: six BIP-39 words over the whole QR payload
+     (sid ‖ secp256k1 pub33 ‖ SHA-256 of the X-Wing key), the same function on
+     the desktop that shows the QR and on the phone that scans it. The old four
+     digits fell to a ~10^4 key grind by anyone who could swap the QR. */
+  {
+    const nodeWords = (pub, sid, commit) => {
+      // an independent reading (BigInt bit slicing, not the page's accumulator)
+      const h = createHash('sha256').update(Buffer.from('bnr-qr-check/v2', 'utf8')).update(pub).update(sid).update(commit).digest();
+      const top = BigInt('0x' + h.toString('hex')) >> 190n;   // first 66 bits
+      return [5, 4, 3, 2, 1, 0].map(i => NODE_WORDS[Number((top >> BigInt(11 * i)) & 2047n)]);
+    };
+    // pinned vector: a future change to the derivation turns this red
+    const VSID = Buffer.from([...Array(16).keys()]);
+    const VPUB = Buffer.concat([Buffer.from([2]), Buffer.alloc(32, 0x11)]);
+    const VCOM = Buffer.alloc(32, 0x33);
+    const VECTOR = 'bright sock clump negative symptom legend';
+    ok('qr words: the Node reference gives the pinned vector', nodeWords(VPUB, VSID, VCOM).join(' ') === VECTOR, nodeWords(VPUB, VSID, VCOM).join(' '));
+
+    // desktop: no keychain, so the QR button asks a phone; relays are faked
+    const fakeWs = () => {
+      class FakeWS { constructor(u) { this.url = u; this.readyState = 0; setTimeout(() => { this.readyState = 1; this.onopen && this.onopen(); }, 2); } send() {} close() { this.readyState = 3; } }
+      window.WebSocket = FakeWS;
+    };
+    const desk = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await desk.addInitScript(fakeWs);
+    await desk.goto(`${BASE}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await desk.waitForFunction(() => window.BNRQR && window.BnrSign && window.BPQ_LIB && window.BIP39_WORDLIST && window.BNRWALLET, null, { timeout: 20000 });
+    const fn = await desk.evaluate(({ sid, pub, com }) => {
+      const f = window.BNRWALLET.qrWords, U = a => Uint8Array.from(a);
+      const base = f(U(pub), U(sid), U(com));
+      const flip = (a, i) => { const b = a.slice(); b[i] ^= 1; return U(b); };
+      return {
+        base, again: f(U(pub), U(sid), U(com)),
+        pubFlip: f(flip(pub, 32), U(sid), U(com)), sidFlip: f(U(pub), flip(sid, 15), U(com)), comFlip: f(U(pub), U(sid), flip(com, 31)),
+        listLen: window.BIP39_WORDLIST.length, listHead: window.BIP39_WORDLIST.slice(0, 3), listTail: window.BIP39_WORDLIST.slice(-1),
+      };
+    }, { sid: [...VSID], pub: [...VPUB], com: [...VCOM] });
+    ok('qr words: the page gives the pinned vector', fn.base.join(' ') === VECTOR, fn.base.join(' '));
+    ok('qr words: deterministic (same QR, same six words)', fn.again.join(' ') === fn.base.join(' '));
+    ok('qr words: one changed bit in pub33, sid or the X-Wing commit changes the words',
+      [fn.pubFlip, fn.sidFlip, fn.comFlip].every(w => w.join(' ') !== VECTOR), JSON.stringify([fn.pubFlip, fn.sidFlip, fn.comFlip]));
+    ok('qr words: the page uses the vendored BIP-39 English list (2048 words, abandon … zoo)',
+      fn.listLen === 2048 && fn.listHead.join() === 'abandon,ability,able' && fn.listTail[0] === 'zoo' && fn.listLen === NODE_WORDS.length);
+    await desk.evaluate(() => { const m = window.BNRQR.make; window.BNRQR.make = t => { window.__qrText = t; return m(t); }; document.getElementById('kc-qr').click(); });
+    await desk.waitForFunction(() => document.getElementById('qr-words') && window.__qrText, null, { timeout: 10000 });
+    const D = await desk.evaluate(() => ({ words: document.getElementById('qr-words').textContent, url: window.__qrText, body: document.getElementById('qr-body').textContent }));
+    const payload = Buffer.from(D.url.slice(D.url.indexOf('#qr=') + 4), 'base64url');
+    const dw = D.words.split(' ');
+    ok('qr words: the desktop shows six words from the BIP-39 list', dw.length === 6 && dw.every(w => NODE_WORDS.includes(w)), D.words);
+    ok('qr words: the desktop words are the Node reading of its own 81-byte QR (sid ‖ pub33 ‖ commit)',
+      payload.length === 81 && D.words === nodeWords(payload.subarray(16, 49), payload.subarray(0, 16), payload.subarray(49)).join(' '), D.words);
+    ok('qr words: the desktop says the phone shows the same six words, a difference means a swapped QR',
+      /the phone will show these same six words before it sends anything\. If any word differs, the QR was swapped: walk away\./.test(D.body) && !/digit/.test(D.body), D.body.slice(0, 200));
+    await desk.close();
+
+    // phone: keychain live, opened on the desktop's own QR link
+    const phone = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await phone.addInitScript(fakeWs);
+    await phone.goto(`${BASE}/surfaces/wallet.html#qr=` + payload.toString('base64url'), { waitUntil: 'load' });
+    await phone.waitForFunction(() => window.BZDIDKEY && window.BnrSign && window.BIP39_WORDLIST, null, { timeout: 20000 });
+    await phone.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await phone.waitForFunction(() => document.getElementById('qr-words') && document.getElementById('qr-allow'), null, { timeout: 15000 });
+    const P = await phone.evaluate(() => ({ words: document.getElementById('qr-words').textContent, body: document.getElementById('qr-body').textContent, fits: (() => { const e = document.getElementById('qr-words'); return e.scrollWidth <= e.clientWidth + 1 && document.documentElement.scrollWidth <= innerWidth; })() }));
+    ok('qr words: on a 390 px phone the six words fit without a sideways scroll', P.fits);
+    ok('qr words: the phone shows the very same six words for the same QR, before anything is sent', P.words === D.words, P.words + ' vs ' + D.words);
+    ok('qr words: the phone says cancel if any word differs', /these six words must match the desktop's\. If any word differs, cancel\./.test(P.body) && !/digit/.test(P.body), P.body.slice(0, 200));
+    ok('qr: a request that came in a link never says where the desktop is; it asks the reader to check, and cypherpunk says the link proves nothing',
+      /allow this only if you just pressed sign in with your phone on your own desktop, and its address bar shows /.test(P.body) && !/a desktop on .* wants to sign in/.test(P.body) && /came in a #qr= link .* was never proven/.test(P.body), P.body.slice(0, 400));
+    await phone.evaluate(() => document.getElementById('qr-deny').click());
+    ok('qr: a cancelled request is spent: the #qr= link leaves the address, so a reload never offers it again', await phone.evaluate(() => location.hash === '' && document.getElementById('qr-sec').style.display === 'none'));
+    await phone.close();
+
+    // desktop: no relay can be reached, so the code says it cannot work, with try again
+    const dead = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await dead.addInitScript(() => { class DeadWS { constructor(u) { this.url = u; this.readyState = 0; setTimeout(() => { this.readyState = 3; this.onerror && this.onerror({}); this.onclose && this.onclose({}); }, 5); } send() {} close() {} } window.WebSocket = DeadWS; });
+    await dead.goto(`${BASE}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await dead.waitForFunction(() => window.BNRQR && window.BnrSign && window.BPQ_LIB && window.BIP39_WORDLIST, null, { timeout: 20000 });
+    await dead.evaluate(() => document.getElementById('kc-qr').click());
+    await dead.waitForFunction(() => /relays could not be reached/.test(document.getElementById('qr-law').textContent), null, { timeout: 10000 });
+    await dead.evaluate(CALM);
+    const DD = await dead.evaluate(() => ({ law: window.__calm(document.getElementById('qr-law')), btn: !!document.querySelector('#qr-law button.wl-act'), code: !!document.getElementById('qr-svg') }));
+    ok('qr: with no relay reachable the desktop says the code cannot work, takes it down and offers try again',
+      /the relays could not be reached, so this code cannot work right now\./.test(DD.law) && DD.btn && !DD.code, JSON.stringify(DD));
+    await dead.close();
+
+    // phone camera: the scanned code must come from this very site; one from any other origin sends nothing
+    const cam = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await cam.addInitScript(() => {
+      window.__sent = [];
+      class RecWS { constructor(u) { this.url = u; this.readyState = 0; setTimeout(() => { this.readyState = 1; this.onopen && this.onopen(); }, 2); } send(x) { window.__sent.push(x); } close() { this.readyState = 3; } }
+      window.WebSocket = RecWS;
+      if (navigator.mediaDevices) navigator.mediaDevices.getUserMedia = async () => {
+        if (window.__camHold) await new Promise(r => { window.__camRelease = r; });
+        const c = document.createElement('canvas'); c.width = 64; c.height = 48; const g = c.getContext('2d');
+        const paint = () => { g.fillStyle = '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0'); g.fillRect(0, 0, 64, 48); };
+        paint(); setInterval(paint, 50); const st = c.captureStream(20); window.__lastStream = st; return st;
+      };
+    });
+    await cam.goto(`${BASE}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await cam.waitForFunction(() => window.BZDIDKEY && window.BnrSign && window.BIP39_WORDLIST && window.BNRQR && window.BPQ_LIB, null, { timeout: 20000 });
+    await cam.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await cam.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    const foreign = 'https://evil.example/surfaces/wallet.html#qr=' + payload.toString('base64url');
+    await cam.evaluate(t => { window.__scan = t; window.BNRQR.scan = () => window.__scan; document.getElementById('kc-qr').click(); }, foreign);
+    await cam.waitForFunction(() => /another site/.test(document.getElementById('qr-body').textContent), null, { timeout: 15000 });
+    await cam.evaluate(CALM);
+    const F1 = await cam.evaluate(() => ({ text: window.__calm(document.getElementById('qr-body')), raw: document.getElementById('qr-body').textContent, allow: !!document.getElementById('qr-allow'), words: !!document.getElementById('qr-words'), sent: window.__sent.filter(x => /EVENT/.test(x)).length }));
+    ok('qr camera: a code from another site is refused before any check word or allow, and nothing is sent',
+      /this code comes from another site, so nothing was sent/.test(F1.text) && !/evil\.example/.test(F1.text) && /evil\.example/.test(F1.raw) && !F1.allow && !F1.words && F1.sent === 0, JSON.stringify(F1));
+    // control: the very same code, from this site, offers the six words and allow
+    const same = BASE + '/surfaces/wallet.html#qr=' + payload.toString('base64url');
+    await cam.evaluate(t => { window.__scan = t; document.getElementById('qr-x').click(); document.getElementById('kc-qr').click(); }, same);
+    await cam.waitForFunction(() => document.getElementById('qr-allow'), null, { timeout: 15000 });
+    await cam.evaluate(CALM);
+    const F2 = await cam.evaluate(() => ({ words: document.getElementById('qr-words').textContent, body: window.__calm(document.getElementById('qr-body')), cy: [...document.querySelectorAll('#qr-body .wl-cyd')].map(x => x.textContent).join(' ') }));
+    ok('qr camera (control): the same code from this site offers allow with the same six words, and asks the reader to check this site in the desktop\'s address bar',
+      F2.words === D.words && F2.body.includes('allow this only if you just pressed sign in with your phone on your own desktop, and its address bar shows ' + new URL(BASE).host + '.') && !/a desktop on/.test(F2.body), JSON.stringify(F2));
+    ok('qr camera: the address a code names is said to be its own claim, never proof of where it was shown',
+      F2.cy.includes('the code names ' + new URL(BASE).origin + ' as its own address') && /never proves where the code was shown/.test(F2.cy), F2.cy);
+    // the sheet closed while the camera prompt was still open: the camera the browser hands over goes off at once
+    await cam.evaluate(() => { document.getElementById('qr-x').click(); window.__camHold = true; window.__lastStream = null; document.getElementById('kc-qr').click(); });
+    await cam.waitForFunction(() => typeof window.__camRelease === 'function', null, { timeout: 5000 });
+    await cam.evaluate(() => { document.getElementById('qr-x').click(); window.__camHold = false; window.__camRelease(); });
+    await cam.waitForFunction(() => !!window.__lastStream, null, { timeout: 5000 });
+    await cam.waitForTimeout(300);
+    const off = await cam.evaluate(() => ({ ended: window.__lastStream.getTracks().every(t => t.readyState === 'ended'), shown: document.getElementById('qr-sec').style.display, stat: window.__calm(document.getElementById('kc-stat')) }));
+    ok('qr camera: a camera allowed after the sheet was closed is stopped, and the keychain line comes back',
+      off.ended && off.shown === 'none' && /your keychain is open on this page/.test(off.stat), JSON.stringify(off));
+    // another soul's recovery words never replace the open soul in place
+    const fp0 = await cam.evaluate(() => document.getElementById('kc-soul-fp').textContent);
+    await cam.evaluate(() => { document.getElementById('kc-rec').value = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2b)); document.getElementById('kc-recgo').click(); });
+    const other = await cam.evaluate(() => ({ stat: window.__calm(document.getElementById('kc-stat')), fp: document.getElementById('kc-soul-fp').textContent, btn: [...document.querySelectorAll('#kc-stat button')].map(b => b.textContent).join() }));
+    ok('recovery: words for another soul are refused while a soul is open, and the open one stays',
+      /you are connected as another soul\. close your keychain first to open a different one\./.test(other.stat) && other.fp === fp0 && other.btn === 'close keychain', JSON.stringify(other));
+    // closing the keychain closes the phone sheet and the device list with it
+    await cam.evaluate(() => { document.getElementById('kc-qr').click(); document.getElementById('dm-sec').style.display = 'block'; document.getElementById('kc-out').click(); });
+    const closed = await cam.evaluate(() => ({ qr: document.getElementById('qr-sec').style.display, dm: document.getElementById('dm-sec').style.display, stat: window.__calm(document.getElementById('kc-stat')), label: document.getElementById('kc-qr').textContent }));
+    ok('keychain: closing it closes the phone sheet and the device list, and says so calmly',
+      closed.qr === 'none' && closed.dm === 'none' && /your keychain is closed and its keys are gone from this page\./.test(closed.stat) && closed.label === '📷 sign in with your phone', JSON.stringify(closed));
+    await cam.close();
+
+    const src = await readFile(join(SURF, 'wallet.html'), 'utf8');
+    const block = src.slice(src.indexOf('QR BRIDGE v2'), src.indexOf('boot detect: opened via the desktop'));
+    ok('qr words: no four-digit pre-check is left, and the comment names its honest limit',
+      !/qrDigits|%10000\)/.test(src) && /cannot catch a page that is itself fake/.test(block));
+    ok('qr words: the new QR words carry no em or en dash', !/[–—]/.test((D.body.match(/the phone will show[^]*?walk away\./) || [''])[0] + (P.body.match(/these six words[^]*?cancel\./) || [''])[0]));
+  }
+
+  /* H · sign the law in one press: the deep link lists the law files, one press signs
+     every one with this soul's id and saves a single receipt, which Node checks file by file */
+  {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, acceptDownloads: true });
+    await page.goto(`${BASE}/surfaces/wallet.html#pq-law`, { waitUntil: 'load' });   // no soul named on purpose: signing never needs one
+    await page.waitForFunction(() => window.BZDIDKEY && window.BNRWALLET && window.BPQ, null, { timeout: 20000 });
+    const law = JSON.parse(await readFile(join(ROOT, 'docs', 'PQ-LAW.json'), 'utf8')).files;
+    await page.waitForFunction(n => document.querySelectorAll('#pq-law-list li a').length === n, law.length, { timeout: 20000 });
+    const listed = await page.evaluate(() => [...document.querySelectorAll('#pq-law-list li')].map(li => li.textContent));
+    ok('law: the deep link lists every law file with its status, before anything is pressed',
+      listed.length === law.length && listed.every(t => / · (not signed yet|signed by bzpq1\S+…|changed since it was signed)$/.test(t)), JSON.stringify(listed.slice(0, 2)));
+    ok('law: the button is visible without the keychain connected', await page.evaluate(() => { const b = document.getElementById('pq-law-go'); return !!b && b.offsetParent !== null; }));
+    await page.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 30000 }), page.evaluate(() => document.getElementById('pq-law-go').click())]);
+    const rc = JSON.parse(await readFile(await dl.path(), 'utf8'));
+    const each = await Promise.all(rc.signatures.map(async s => ({ path: s.path, r: NODE_BPQ.verifyFile(s.sig, new Uint8Array(await readFile(join(ROOT, s.path)))) })));
+    ok('law: one press saves one receipt signing every listed file, each verifying in Node against the file on disk',
+      /^law-signatures-[a-z0-9]{8}-\d{4}-\d\d-\d\d\.json$/.test(dl.suggestedFilename()) && rc.kind === 'law-signatures' &&
+      each.length === law.length && each.every((x, i) => x.path === law[i] && x.r.ok && x.r.id === SIGNER.id),
+      dl.suggestedFilename() + ' ' + JSON.stringify(each.filter(x => !x.r.ok)));
+    ok('law: the receipt carries the public card of that id and no soul name or secret',
+      NODE_BPQ.verifyCard(rc.card) && rc.card.id === SIGNER.id && !/gatesoul/.test(JSON.stringify(rc)) && Object.keys(rc).sort().join() === 'at,bpq,card,kind,signatures');
+    ok('law: the page says it is done, in one plain sentence, and names the receipt as the only copy',
+      /^you signed all \d+ law files, and the receipt is in your downloads, so keep it: the signatures live only in that file\./.test(await page.evaluate(() => document.getElementById('pq-law-stat').textContent)));
+    await page.close();
+  }
+
+  /* I · wallet.html#sign: the whole job on one sheet: one sentence, one button, no soul name */
+  {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, acceptDownloads: true });
+    await page.goto(`${BASE}/surfaces/wallet.html#sign`, { waitUntil: 'load' });
+    await page.waitForSelector('#sign-sheet #sign-go', { timeout: 20000 });
+    const sheet = await page.evaluate(() => {
+      const d = document.getElementById('sign-sheet'), r = d.getBoundingClientRect();
+      return { cover: r.width >= innerWidth - 1 && r.height >= innerHeight - 1, say: document.getElementById('sign-say').textContent,
+        buttons: d.querySelectorAll('button').length, words: d.innerText, wide: document.documentElement.scrollWidth <= innerWidth + 1 };
+    });
+    ok('sign sheet: covers the wallet, one sentence, one button, no soul or Vaulta words',
+      sheet.cover && sheet.say === 'Press Sign, then confirm with your passkey.' && sheet.buttons === 1 && !/soul|vaulta|keychain|post-quantum|bzpq/i.test(sheet.words) && sheet.wide,
+      JSON.stringify(sheet));
+    await page.evaluate(() => {
+      const code = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a));
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = code;
+      document.getElementById('kc-recgo').click();
+    });
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 30000 }), page.click('#sign-go')]);
+    const rc = JSON.parse(await readFile(await dl.path(), 'utf8'));
+    const n = JSON.parse(await readFile(join(ROOT, 'docs', 'PQ-LAW.json'), 'utf8')).files.length;
+    const done = await page.evaluate(() => ({ stat: document.getElementById('sign-stat').textContent, go: document.getElementById('sign-go').hidden }));
+    ok('sign sheet: one press signs every law file and says Done',
+      rc.card.id === SIGNER.id && rc.signatures.length === n && /^Done\./.test(done.stat) && done.go, JSON.stringify(done));
+    await page.close();
+  }
+  /* J · the keychain opens only its own soul (WebAuthn stubbed; the PRF bytes are
+     TEST-ONLY constants): a sealed device never derives a soul from its wrapper
+     passkey, a closed prompt opens nothing and offers the same soul again, a
+     wrapper that answers the picker is refused, and a bzDiD made here hands over
+     ITS OWN recovery words, never the onboarding ones */
+  {
+    const stub = () => {
+      window.__gets = []; window.__plan = [];
+      if (window.PublicKeyCredential) PublicKeyCredential.getClientCapabilities = async () => ({ 'extension:prf': true });
+      const b64u = x => Uint8Array.from(atob(x.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+      navigator.credentials.get = async o => {
+        const pk = o.publicKey, step = window.__plan.shift() || { fail: 'NotAllowedError' };
+        window.__gets.push(pk.allowCredentials ? 'targeted' : 'picker');
+        if (step.fail) throw new DOMException('The operation either timed out or was not allowed.', step.fail);
+        return { id: step.id, rawId: b64u(step.id).buffer, type: 'public-key', response: { userHandle: step.handle ? Uint8Array.from(step.handle).buffer : null },
+          getClientExtensionResults: () => ({ prf: { results: { first: new Uint8Array(32).fill(step.prf).buffer } } }) };
+      };
+      navigator.credentials.create = async () => { window.__creates = (window.__creates || 0) + 1; return { id: 'bmV3', getClientExtensionResults: () => ({ prf: { enabled: true } }) }; };
+    };
+    const BASE_N = BASE.replace('127.0.0.1', 'localhost');   // a name, not an IP: an IP origin can hold no passkey at all
+    const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await page.addInitScript(() => {
+      try {
+        if (!sessionStorage.getItem('j-seeded')) {
+          sessionStorage.setItem('j-seeded', '1');
+          localStorage.setItem('bnr_soul', 'gatesoul');
+          localStorage.setItem('bnr_seal', JSON.stringify({ v: 1, iv: 'AQIDBAUGBwgJCgsM', ct: 'AQID'.repeat(16), at: '2026-10-01T00:00:00.000Z', credId: 'c2VhbA' }));
+          localStorage.setItem('bnr_cred', 'c2VhbA');   // an older add pointed the founding pointer at its own wrapper
+        }
+      } catch (e) {}
+    });
+    await page.addInitScript(stub);
+    await page.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    const stat = () => page.evaluate(CALM).then(() => page.evaluate(() => { const e = document.getElementById('kc-stat'); return { text: window.__calm(e), raw: e.textContent, again: !!e.querySelector('button.wl-act'), rec: e.querySelector('a')?.getAttribute('href') || null, gets: window.__gets.slice() }; }));
+    ok('keychain: an older add\'s wrapper pointer is dropped on load (the seal reaches its credential by itself)', await page.evaluate(() => localStorage.getItem('bnr_cred') === null && JSON.parse(localStorage.getItem('bnr_wraps') || '[]').includes('c2VhbA')));
+    // 1 · the seal's prompt is closed: nothing opens, no second prompt, the same soul is offered again
+    await page.evaluate(() => { window.__plan = [{ fail: 'NotAllowedError' }, { id: 'c2VhbA', prf: 7 }]; document.getElementById('kc-pass').click(); });
+    await page.waitForFunction(() => window.__gets.length && !/^touch/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    const j1 = await stat();
+    ok('keychain: a closed seal prompt opens nothing, asks once, and offers try again or the recovery words (never "create one")',
+      j1.gets.join() === 'targeted' && !/keychain live/.test(j1.raw) && j1.again && j1.rec === '#kc-rec-scaffold' && /your passkey did not open the keychain/.test(j1.text) && !/create/i.test(j1.text) && !/[—–]/.test(j1.text), JSON.stringify(j1));
+    // 2 · the seal's passkey answers but the seal does not open: no fallback derive from that passkey
+    await page.evaluate(() => { window.__plan = [{ id: 'c2VhbA', prf: 7 }, { id: 'c2VhbA', prf: 9 }]; document.querySelector('#kc-stat button.wl-act').click(); });
+    await page.waitForFunction(() => window.__gets.length >= 2 && /did not open your soul/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    await page.waitForTimeout(300);
+    const j2 = await stat();
+    ok('keychain: a seal that will not open never falls back to deriving a soul from the device passkey',
+      j2.gets.join() === 'targeted,targeted' && !/keychain live/.test(j2.raw) && /this device's saved key did not open your soul/.test(j2.text) && j2.again, JSON.stringify(j2));
+    // 2b · this device keeps a soul sealed: a new bzDiD made here could never be opened by its passkey
+    await page.evaluate(() => { window.__creates = 0; document.getElementById('kc-create').click(); });
+    await page.waitForTimeout(200);
+    const j2b = await stat();
+    const j2bx = await page.evaluate(() => ({ creates: window.__creates, cred: localStorage.getItem('bnr_cred') }));
+    ok('keychain: a device that keeps a soul refuses to make a new bzDiD before any prompt, with the way on',
+      /this device already keeps a soul, so a new bzDiD cannot be made here\./.test(j2b.text) && j2b.again && j2bx.creates === 0 && j2bx.cred === null && j2b.gets.join() === 'targeted,targeted' && /connectSoul opens the seal and only the seal/.test(j2b.raw), JSON.stringify({ j2b, j2bx }));
+    // 3 · no seal, the remembered pointer is a known wrapper: the picker runs and a wrapper answer is refused
+    await page.evaluate(() => { localStorage.removeItem('bnr_seal'); localStorage.setItem('bnr_cred', 'd3JhcA'); localStorage.setItem('bnr_wraps', JSON.stringify(['d3JhcA'])); });
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await page.evaluate(() => { window.__plan = [{ id: 'd3JhcA', prf: 7 }]; document.getElementById('kc-pass').click(); });
+    await page.waitForFunction(() => window.__gets.length && !/^touch/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    const j3 = await stat();
+    ok('keychain: a remembered wrapper is never touched directly, and a wrapper that answers the picker is refused',
+      j3.gets.join() === 'picker' && !/keychain live/.test(j3.raw) && /is not your bzDiD itself/.test(j3.text), JSON.stringify(j3));
+    // 3b · a wrapper this browser never saw, recognised by its marked user handle (a synced copy)
+    await page.evaluate(() => { window.__plan = [{ id: 'b3RoZXI', prf: 7, handle: [0x62, 0x6e, 0x72, 0x77, 0x72, 0x61, 0x70, 0x31, 1, 2, 3, 4, 5, 6, 7, 8] }]; document.querySelector('#kc-stat button.wl-act').click(); });
+    await page.waitForFunction(() => window.__gets.length >= 2, null, { timeout: 10000 });
+    await page.waitForTimeout(300);
+    const j3b = await stat();
+    ok('keychain: a wrapper known only by its marked user handle is refused too', !/keychain live/.test(j3b.raw) && /is not your bzDiD itself/.test(j3b.text), JSON.stringify(j3b));
+    // 4 · control: the founding passkey answering the picker, on a browser that keeps no soul yet:
+    //     it opens only after the reader confirms its six words, and nothing is bound before
+    const FP7 = await page.evaluate(() => window.BZDIDKEY.deriveIdentity(window.BZDIDKEY.masterPrkFromPrfSecret(new Uint8Array(32).fill(7)), 'bnr.b').fingerprint.words);
+    await page.evaluate(() => { window.__plan = [{ id: 'Zm91bmQ', prf: 7 }]; document.querySelector('#kc-stat button.wl-act').click(); });
+    await page.waitForFunction(() => /is it yours/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    await page.evaluate(CALM);
+    const j4q = await page.evaluate(() => ({ text: window.__calm(document.getElementById('kc-stat')), btns: [...document.querySelectorAll('#kc-stat button')].map(b => b.textContent), bind: localStorage.getItem('bnr_bind'), mark: localStorage.getItem('bnr_cred_fp'), cards: document.getElementById('kc-cards').style.display }));
+    ok('keychain: on a browser that keeps no soul, the first answer asks first, naming the soul in its six words, and nothing opens or is bound',
+      j4q.text === 'this opens the soul ' + FP7 + '. is it yours? yes, open itno, try another passkey' && j4q.btns.join('|') === 'yes, open it|no, try another passkey' && j4q.bind === null && j4q.mark === null && j4q.cards === 'none' && !/[—–]/.test(j4q.text), JSON.stringify(j4q));
+    await page.evaluate(() => [...document.querySelectorAll('#kc-stat button')].find(b => /yes, open it/.test(b.textContent)).click());
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    ok('keychain (control): the founding passkey opens exactly its own soul once the reader says yes',
+      await page.evaluate(fp => document.getElementById('kc-soul-fp').textContent === fp, FP7));
+    ok('keychain: the soul a passkey opened is kept for the name (a public fingerprint, never a key)',
+      await page.evaluate(fp => { const b = JSON.parse(localStorage.getItem('bnr_bind') || '{}'); return b.name && b.name.gatesoul === fp && b.souls.includes(fp) && !/masterPrk|seed/i.test(JSON.stringify(b)); }, FP7));
+    // 6 · the vault's passkey and the account passkey carry their own mark: refused before any derive
+    const refuse = async (step, want, label) => {
+      await page.evaluate(step => { document.getElementById('kc-out').click(); window.__gets = []; window.__plan = [step]; document.getElementById('kc-pass').click(); }, step);
+      await page.waitForFunction(() => window.__gets.length && !/^touch/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+      await page.waitForTimeout(200);
+      const j = await stat();
+      ok(label, j.gets.join() === 'picker' && !/keychain live/.test(j.raw) && want.test(j.text) && j.again && j.rec === '#kc-rec-scaffold' && await page.evaluate(() => document.getElementById('kc-cards').style.display === 'none'), JSON.stringify(j));
+    };
+    const TAG = s => [...Buffer.from(s)].concat([1, 2, 3, 4, 5, 6, 7, 8]);
+    await refuse({ id: 'dmF1bHQ', prf: 13, handle: TAG('bnrvlt01') }, /that passkey opens your vault or your account and is not your bzDiD itself, so nothing opened\./, 'keychain: the vault\'s "add this device" passkey answering the picker is refused (its marked handle)');
+    await refuse({ id: 'YWNjdA', prf: 13, handle: TAG('bnracct1') }, /that passkey opens your vault or your account and is not your bzDiD itself/, 'keychain: the account passkey answering the picker is refused (its marked handle)');
+    await page.evaluate(() => localStorage.setItem('bnr_notsoul', JSON.stringify(['bm90c291bA'])));
+    await refuse({ id: 'bm90c291bA', prf: 13 }, /that passkey opens your vault or your account and is not your bzDiD itself/, 'keychain: a vault or account passkey this browser made is refused by its id alone');
+    // 7 · an unmarked passkey (an older vault passkey, say) that opens another soul than this name's: refused and wiped
+    await refuse({ id: 'b2xkdmx0', prf: 13 }, /that passkey opens a different soul than the one this browser keeps for you, so nothing opened\./, 'keychain: a passkey that opens another soul than the one kept for this name is refused, and nothing opens');
+    await page.evaluate(() => { window.__plan = [{ id: 'Zm91bmQ', prf: 7 }]; document.querySelector('#kc-stat button.wl-act').click(); });
+    await page.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    ok('keychain (control): after a refusal, try again with the name\'s own passkey opens exactly its soul', await page.evaluate(fp => document.getElementById('kc-soul-fp').textContent === fp, FP7));
+    await page.close();
+
+    // 8 · a founding pointer from before its mark that opens another soul than one this browser
+    //     saw a device list for (an older add left its wrapper there): refused, the pointer goes,
+    //     and the next press runs the picker, where the real soul opens
+    const lg = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await lg.addInitScript(() => { try { if (!sessionStorage.getItem('lg')) { sessionStorage.setItem('lg', '1'); localStorage.setItem('bnr_soul', 'gatesoul'); localStorage.setItem('bnr_cred', 'd3JhcA'); } } catch (e) {} });
+    await lg.addInitScript(stub);
+    await lg.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await lg.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await lg.evaluate(() => {
+      const K = window.BZDIDKEY, sd = K.deriveK1Key(K.masterPrkFromPrfSecret(new Uint8Array(32).fill(7)), 'nostr:bnr-devices').seed;
+      const pre = Array.from(window.BnrSign.schnorr.getPublicKey(sd), b => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
+      localStorage.setItem('bnr_dm_hwm', JSON.stringify({ [pre]: { at: '2026-10-04T00:00:00.000Z' } }));
+      window.__plan = [{ id: 'd3JhcA', prf: 9 }]; document.getElementById('kc-pass').click();
+    });
+    await lg.waitForFunction(() => window.__gets.length && !/^touch/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    await lg.waitForTimeout(200);
+    await lg.evaluate(CALM);
+    const j8 = await lg.evaluate(() => ({ text: window.__calm(document.getElementById('kc-stat')), raw: document.getElementById('kc-stat').textContent, gets: window.__gets.slice(), cred: localStorage.getItem('bnr_cred'), mark: localStorage.getItem('bnr_cred_fp') }));
+    ok('keychain: an unmarked founding pointer that opens a soul this browser does not know is refused and dropped',
+      j8.gets.join() === 'targeted' && !/keychain live/.test(j8.raw) && /opens a different soul than the one this browser keeps/.test(j8.text) && j8.cred === null && j8.mark === null, JSON.stringify(j8));
+    await lg.evaluate(() => { window.__plan = [{ id: 'Zm91bmQ', prf: 7 }]; document.querySelector('#kc-stat button.wl-act').click(); });
+    await lg.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    ok('keychain: after the stale pointer goes, the picker opens the soul this browser keeps a device list for',
+      await lg.evaluate(fp => window.__gets.join() === 'targeted,picker' && document.getElementById('kc-soul-fp').textContent === fp, FP7), await lg.evaluate(() => window.__gets.join()));
+    await lg.close();
+
+    // 8b · never a lockout: an unmarked pointer on a browser that knows no soul goes to the picker,
+    //      and the soul the reader confirms opens and marks it
+    const lk = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await lk.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); if (!localStorage.getItem('bnr_cred_fp')) localStorage.setItem('bnr_cred', 'bGVnYWN5'); } catch (e) {} });
+    await lk.addInitScript(stub);
+    await lk.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await lk.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await lk.evaluate(() => { window.__plan = [{ id: 'bGVnYWN5', prf: 5 }]; document.getElementById('kc-pass').click(); });
+    await lk.waitForFunction(() => /is it yours/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    await lk.evaluate(() => [...document.querySelectorAll('#kc-stat button')].find(b => /yes, open it/.test(b.textContent)).click());
+    await lk.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    const FP5 = await lk.evaluate(() => window.BZDIDKEY.deriveIdentity(window.BZDIDKEY.masterPrkFromPrfSecret(new Uint8Array(32).fill(5)), 'bnr.b').fingerprint.words);
+    const j8b = await lk.evaluate(() => ({ gets: window.__gets.join(), mark: JSON.parse(localStorage.getItem('bnr_cred_fp') || 'null'), fp: document.getElementById('kc-soul-fp').textContent }));
+    ok('keychain (never a lockout): an unmarked pointer on a browser that knows no soul runs the picker, and the soul the reader confirms opens and marks it',
+      j8b.gets === 'picker' && j8b.fp === FP5 && j8b.mark && j8b.mark.id === 'bGVnYWN5' && j8b.mark.fp === FP5, JSON.stringify(j8b));
+    await lk.reload({ waitUntil: 'load' });
+    await lk.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await lk.evaluate(() => { window.__plan = [{ id: 'bGVnYWN5', prf: 5 }]; document.getElementById('kc-pass').click(); });
+    await lk.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    ok('keychain: the marked pointer opens its soul again with one targeted touch', await lk.evaluate(fp => window.__gets.join() === 'targeted' && document.getElementById('kc-soul-fp').textContent === fp, FP5));
+    await lk.close();
+
+    // 8c · the founding pointer's passkey answers with a wrapper's mark: refused, kept as a wrapper,
+    //      and the pointer goes, so the next press runs the picker instead of the same dead end
+    const tg = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await tg.addInitScript(() => { try { if (!sessionStorage.getItem('tg')) { sessionStorage.setItem('tg', '1'); localStorage.setItem('bnr_soul', 'gatesoul'); localStorage.setItem('bnr_cred', 'dGFnZ2Vk'); } } catch (e) {} });
+    await tg.addInitScript(stub);
+    await tg.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await tg.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await tg.evaluate(h => { window.__plan = [{ id: 'dGFnZ2Vk', prf: 9, handle: h }]; document.getElementById('kc-pass').click(); }, TAG('bnrwrap1'));
+    await tg.waitForFunction(() => window.__gets.length && !/^touch/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    await tg.waitForTimeout(200);
+    await tg.evaluate(CALM);
+    const j8c = await tg.evaluate(() => ({ text: window.__calm(document.getElementById('kc-stat')), raw: document.getElementById('kc-stat').textContent, gets: window.__gets.join(), cred: localStorage.getItem('bnr_cred'), wraps: JSON.parse(localStorage.getItem('bnr_wraps') || '[]') }));
+    ok('keychain: a founding pointer whose passkey carries a wrapper mark is refused, kept as a wrapper, and dropped',
+      j8c.gets === 'picker' && !/keychain live/.test(j8c.raw) && /is not your bzDiD itself/.test(j8c.text) && j8c.cred === null && j8c.wraps.includes('dGFnZ2Vk'), JSON.stringify(j8c));
+    await tg.evaluate(() => { window.__plan = [{ id: 'Zm91bmQ', prf: 7 }]; document.querySelector('#kc-stat button.wl-act').click(); });
+    await tg.waitForFunction(() => /is it yours/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    await tg.evaluate(() => [...document.querySelectorAll('#kc-stat button')].find(b => /yes, open it/.test(b.textContent)).click());
+    await tg.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    ok('keychain: after the marked pointer goes, the next press runs the picker and opens the soul the reader confirms', await tg.evaluate(fp => window.__gets.join() === 'picker,picker' && document.getElementById('kc-soul-fp').textContent === fp, FP7));
+    await tg.close();
+
+    // 9 · review4 [0]: an old untagged wrapper in bnr_cred on a browser with no evidence at all (no
+    //     seal, no bnr_wraps, no device list mark, no binding): never touched directly, never opened
+    //     or bound before the reader's yes; no drops it, and the picker runs again
+    const w0 = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await w0.addInitScript(() => { try { if (!sessionStorage.getItem('w0')) { sessionStorage.setItem('w0', '1'); localStorage.setItem('bnr_soul', 'gatesoul'); localStorage.setItem('bnr_cred', 'd3JhcA'); } } catch (e) {} });
+    await w0.addInitScript(stub);
+    await w0.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await w0.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    const FP9 = await w0.evaluate(() => window.BZDIDKEY.deriveIdentity(window.BZDIDKEY.masterPrkFromPrfSecret(new Uint8Array(32).fill(9)), 'bnr.b').fingerprint.words);
+    await w0.evaluate(() => { window.__plan = [{ id: 'd3JhcA', prf: 9 }]; document.getElementById('kc-pass').click(); });
+    await w0.waitForFunction(() => /is it yours/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    await w0.evaluate(CALM);
+    const w0a = await w0.evaluate(() => ({ text: window.__calm(document.getElementById('kc-stat')), gets: window.__gets.join(), bind: localStorage.getItem('bnr_bind'), mark: localStorage.getItem('bnr_cred_fp'), cred: localStorage.getItem('bnr_cred'), cards: document.getElementById('kc-cards').style.display }));
+    ok('keychain: an old unmarked pointer on a browser with no evidence runs the picker, and its soul waits for the reader with nothing opened or bound',
+      w0a.gets === 'picker' && w0a.text.indexOf('this opens the soul ' + FP9 + '. is it yours?') === 0 && w0a.bind === null && w0a.mark === null && w0a.cred === 'd3JhcA' && w0a.cards === 'none', JSON.stringify(w0a));
+    await w0.evaluate(() => { window.__plan = [{ id: 'Zm91bmQ', prf: 7 }]; [...document.querySelectorAll('#kc-stat button')].find(b => /no, try another passkey/.test(b.textContent)).click(); });
+    await w0.waitForFunction(fp => window.__gets.length === 2 && document.getElementById('kc-stat').textContent.indexOf('this opens the soul ' + fp) === 0, FP7, { timeout: 10000 });
+    const w0b = await w0.evaluate(() => ({ bind: localStorage.getItem('bnr_bind'), cred: localStorage.getItem('bnr_cred'), mark: localStorage.getItem('bnr_cred_fp') }));
+    ok('keychain: "no, try another passkey" wipes that soul, drops the old pointer, binds nothing, and runs the picker again',
+      w0b.bind === null && w0b.cred === null && w0b.mark === null, JSON.stringify(w0b));
+    await w0.evaluate(() => [...document.querySelectorAll('#kc-stat button')].find(b => /yes, open it/.test(b.textContent)).click());
+    await w0.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    const w0c = await w0.evaluate(() => ({ fp: document.getElementById('kc-soul-fp').textContent, bind: JSON.parse(localStorage.getItem('bnr_bind') || 'null'), gets: window.__gets.join() }));
+    ok('keychain: the soul the reader says yes to opens and becomes this name\'s soul',
+      w0c.fp === FP7 && w0c.bind && w0c.bind.name.gatesoul === FP7 && w0c.bind.souls.join() === FP7 && w0c.gets === 'picker,picker', JSON.stringify(w0c));
+    await w0.close();
+
+    // 10 · review4 [1]: an unmarked passkey from before the marks (an older vault passkey) answers the
+    //      first tap's auto-connect on a browser that keeps no soul: the check waits, the glance
+    //      points to it, and a no that ends in a closed prompt opens and binds nothing
+    const w1 = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await w1.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
+    await w1.addInitScript(stub);
+    await w1.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await w1.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    const FP13 = await w1.evaluate(() => window.BZDIDKEY.deriveIdentity(window.BZDIDKEY.masterPrkFromPrfSecret(new Uint8Array(32).fill(13)), 'bnr.b').fingerprint.words);
+    await w1.evaluate(() => { window.__plan = [{ id: 'b2xkdmx0', prf: 13 }]; document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); });
+    await w1.waitForFunction(() => /is it yours/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    await w1.evaluate(CALM);
+    const w1a = await w1.evaluate(() => ({ text: window.__calm(document.getElementById('kc-stat')), glance: window.__calm(document.getElementById('sum-kc')), link: document.querySelector('#sum-kc a')?.getAttribute('href'), bind: localStorage.getItem('bnr_bind'), cards: document.getElementById('kc-cards').style.display }));
+    ok('keychain: an unmarked older passkey answering auto-connect waits for the reader, and the glance points to the check',
+      w1a.text.indexOf('this opens the soul ' + FP13 + '. is it yours?') === 0 && /one check before your keychain opens/.test(w1a.glance) && w1a.link === '#kc-sec' && w1a.bind === null && w1a.cards === 'none', JSON.stringify(w1a));
+    await w1.evaluate(() => { window.__plan = [{ fail: 'NotAllowedError' }]; [...document.querySelectorAll('#kc-stat button')].find(b => /no, try another passkey/.test(b.textContent)).click(); });
+    await w1.waitForFunction(() => /did not open/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    const w1b = await w1.evaluate(() => ({ bind: localStorage.getItem('bnr_bind'), cards: document.getElementById('kc-cards').style.display, live: /keychain live/.test(document.getElementById('kc-stat').textContent) }));
+    ok('keychain: after no and a closed prompt, nothing opened and nothing was bound', w1b.bind === null && w1b.cards === 'none' && !w1b.live, JSON.stringify(w1b));
+    await w1.close();
+
+    // 11 · a job that opens the keychain (the sign sheet) shows the check in its own line, and goes on after yes
+    const sg = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await sg.addInitScript(stub);
+    await sg.goto(`${BASE_N}/surfaces/wallet.html#sign`, { waitUntil: 'load' });
+    await sg.waitForFunction(() => window.BZDIDKEY && window.BnrSign && window.BPQ && document.getElementById('sign-go'), null, { timeout: 20000 });
+    await sg.evaluate(() => { window.__plan = [{ id: 'Zm91bmQ', prf: 7 }]; document.getElementById('sign-go').click(); });
+    await sg.waitForFunction(() => /is it yours/.test(document.getElementById('sign-stat').textContent), null, { timeout: 10000 });
+    await sg.evaluate(CALM);
+    const sgq = await sg.evaluate(() => ({ text: window.__calm(document.getElementById('sign-stat')), btns: document.querySelectorAll('#sign-stat button').length }));
+    ok('sign sheet: on a browser that keeps no soul, the check shows on the sheet itself with its two answers',
+      sgq.text.indexOf('this opens the soul ' + FP7 + '. is it yours?') === 0 && sgq.btns === 2, JSON.stringify(sgq));
+    // review6 [2][5] · the check ends without a yes (the page is hidden): the sheet says so truly, and
+    //               the keychain's line and the glance keep no dead yes or no
+    await sg.evaluate(() => window.dispatchEvent(new Event('pagehide')));
+    await sg.waitForFunction(() => /not answered/.test(document.getElementById('sign-stat').textContent), null, { timeout: 10000 });
+    await sg.evaluate(CALM);
+    const sgx = await sg.evaluate(() => ({ sheet: document.getElementById('sign-stat').textContent, kc: window.__calm(document.getElementById('kc-stat')), kcBtns: [...document.querySelectorAll('#kc-stat button')].map(b => b.textContent), glance: window.__calm(document.getElementById('sum-kc')), go: !document.getElementById('sign-go').disabled }));
+    ok('sign sheet: an unanswered check is said as that, never "no wallet passkey answered", and Sign can be pressed again',
+      sgx.sheet === 'The check was not answered, so nothing was signed. Press Sign again.' && sgx.go, JSON.stringify(sgx));
+    ok('keychain: a check that ended without a yes leaves no dead buttons in the keychain line or the glance',
+      !sgx.kcBtns.some(t => /yes, open it|no, try another/.test(t)) && sgx.kcBtns.includes('connect keychain') && /not connected/.test(sgx.glance) && !/one check/.test(sgx.glance), JSON.stringify(sgx));
+    // review6 [0] · yes opens the keychain and stops: the yes is never also the signature
+    let sgDl = 0; sg.on('download', () => { sgDl++; });
+    await sg.evaluate(() => { window.__plan = [{ id: 'Zm91bmQ', prf: 7 }]; document.getElementById('sign-go').click(); });
+    await sg.waitForFunction(() => /is it yours/.test(document.getElementById('sign-stat').textContent), null, { timeout: 10000 });
+    await sg.evaluate(() => [...document.querySelectorAll('#sign-stat button')].find(b => /yes, open it/.test(b.textContent)).click());
+    await sg.waitForFunction(() => /keychain is open/.test(document.getElementById('sign-stat').textContent), null, { timeout: 10000 });
+    await sg.waitForTimeout(500);
+    const sgo = await sg.evaluate(() => ({ t: document.getElementById('sign-stat').textContent, go: !document.getElementById('sign-go').disabled && !document.getElementById('sign-go').hidden, live: /keychain live/.test(document.getElementById('kc-stat').textContent) }));
+    ok('sign sheet: the yes opens the keychain and stops there, nothing is signed, and Sign waits for its own press',
+      sgo.t === 'Your keychain is open. Press Sign to sign the law.' && sgo.go && sgo.live && sgDl === 0, JSON.stringify(sgo) + ' downloads ' + sgDl);
+    const [sgdl] = await Promise.all([sg.waitForEvent('download', { timeout: 30000 }), sg.evaluate(() => document.getElementById('sign-go').click())]);
+    await sg.waitForFunction(() => /^Done\./.test(document.getElementById('sign-stat').textContent), null, { timeout: 30000 });
+    ok('sign sheet: its own press then signs, in one press', !!sgdl);
+    await sg.close();
+
+    // review6 [3][4] · while a check waits: make a new bzDiD points at the check, and the recovery words
+    //                 that open the keychain are not written over by the waiting press
+    const rw = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await rw.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
+    await rw.addInitScript(stub);
+    await rw.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await rw.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await rw.evaluate(() => { window.__plan = [{ id: 'b2xkdmx0', prf: 13 }]; document.getElementById('kc-pass').click(); });
+    await rw.waitForFunction(() => /is it yours/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    await rw.evaluate(() => { window.__creates = 0; document.getElementById('kc-create').click(); });
+    await rw.evaluate(CALM);
+    const rwc = await rw.evaluate(() => ({ t: window.__calm(document.getElementById('kc-stat')), btns: [...document.querySelectorAll('#kc-stat button')].map(b => b.textContent), creates: window.__creates }));
+    ok('keychain: make a new bzDiD while the check waits points at the check, never "a prompt is already open"',
+      rwc.t.indexOf('answer this first. this opens the soul ') === 0 && rwc.btns.join('|') === 'yes, open it|no, try another passkey' && rwc.creates === 0 && !/already open/.test(rwc.t), JSON.stringify(rwc));
+    await rw.evaluate(() => {
+      const sc = document.getElementById('kc-rec-scaffold'); if (sc) sc.open = true;
+      document.getElementById('kc-rec').value = window.BZDIDKEY.encodeRecoveryCode(new Uint8Array(32).fill(0x2a)); document.getElementById('kc-recgo').click();
+    });
+    await rw.waitForFunction(() => /keychain live/.test(document.getElementById('kc-stat').textContent), null, { timeout: 15000 });
+    await rw.waitForTimeout(400);
+    const rwr = await rw.evaluate(() => ({ kc: document.getElementById('kc-stat').textContent, glance: document.getElementById('sum-kc').textContent }));
+    ok('keychain: the recovery words that open the keychain during a check are not written over by the waiting press',
+      /keychain live/.test(rwr.kc) && !/not answered|did not open/.test(rwr.kc) && /^your keychain is connected in this tab/.test(rwr.glance), JSON.stringify(rwr));
+    await rw.close();
+
+    // review6 [1] · a phone sign-in with another soul than the one kept for the name opens it for this
+    //               visit, and makes it the name's soul only on the reader's yes
+    const ph = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await ph.addInitScript(() => {
+      window.__socks = []; window.__sent = [];
+      class QWS { constructor(u) { this.url = u; this.readyState = 0; window.__socks.push(this); setTimeout(() => { this.readyState = 1; this.onopen && this.onopen(); }, 2); } send(x) { window.__sent.push(x); } close() { this.readyState = 3; } }
+      window.WebSocket = QWS;
+    });
+    await ph.goto(`${BASE}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await ph.waitForFunction(() => window.BZDIDKEY && window.BnrSign && window.BPQ_LIB && window.BNRQR && window.BIP39_WORDLIST, null, { timeout: 20000 });
+    const FPA = await ph.evaluate(() => window.BZDIDKEY.deriveIdentity(new Uint8Array(32).fill(0x2a), 'bnr.b').fingerprint.words);
+    const FPB = await ph.evaluate(() => window.BZDIDKEY.deriveIdentity(new Uint8Array(32).fill(0x2b), 'bnr.b').fingerprint.words);
+    await ph.evaluate(fp => { localStorage.setItem('bnr_soul', 'gatesoul'); localStorage.setItem('bnr_bind', JSON.stringify({ name: { gatesoul: fp }, souls: [fp] })); }, FPA);
+    await ph.reload({ waitUntil: 'load' });
+    await ph.waitForFunction(() => window.BZDIDKEY && window.BnrSign && window.BPQ_LIB && window.BNRQR && window.BIP39_WORDLIST, null, { timeout: 20000 });
+    /* the phone's half, written here from the protocol: sealed to the desktop's two ephemerals */
+    const phoneGrant = () => ph.evaluate(async () => {
+      const BN = window.BnrSign, X = window.BPQ_LIB.xwing;
+      const b64d = x => Uint8Array.from(atob(x.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+      const b64e = u => btoa(String.fromCharCode.apply(null, u)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      const cat = (...a) => { const o = new Uint8Array(a.reduce((n, x) => n + x.length, 0)); let p = 0; a.forEach(x => { o.set(x, p); p += x.length; }); return o; };
+      const hex = u => Array.from(u, b => b.toString(16).padStart(2, '0')).join('');
+      const q = b64d(window.__qrText.slice(window.__qrText.indexOf('#qr=') + 4)), sid = q.slice(0, 16), pub = q.slice(16, 49), commit = q.slice(49);
+      const hello = window.__sent.map(x => JSON.parse(x)).filter(m => m[0] === 'EVENT').map(m => JSON.parse(m[1].content)).find(o => o.xpk);
+      const xpk = b64d(hello.xpk), esk = BN.secp.utils.randomPrivateKey(), epk = BN.secp.getPublicKey(esk), enc = X.encapsulate(xpk);
+      const ikm = cat(BN.sha256(BN.secp.getSharedSecret(esk, pub)), enc.sharedSecret);
+      const info = cat(new TextEncoder().encode('bnr-qr-bridge-v2'), commit, epk, BN.sha256(enc.cipherText));
+      const ik = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveKey']);
+      const key = await crypto.subtle.deriveKey({ name: 'HKDF', hash: 'SHA-256', salt: sid, info }, ik, { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: sid }, key, new Uint8Array(32).fill(0x2b)));
+      const content = JSON.stringify({ v: 2, epk: b64e(epk), xct: b64e(enc.cipherText), iv: b64e(iv), ct: b64e(ct) });
+      const s = window.__socks.find(w => w.readyState === 1 && w.onmessage);
+      s.onmessage({ data: JSON.stringify(['EVENT', 'bnrqr' + hex(sid), { content }]) });
+    });
+    const askPhone = async () => {
+      await ph.evaluate(() => { window.__sent.length = 0; const m = window.BNRQR.make; if (!window.__qrHooked) { window.__qrHooked = 1; window.BNRQR.make = t => { window.__qrText = t; return m(t); }; } document.getElementById('kc-qr').click(); });
+      await ph.waitForFunction(() => window.__qrText && window.__sent.some(x => /xpk/.test(x)), null, { timeout: 10000 });
+      await phoneGrant();
+      await ph.waitForFunction(() => /your phone opened the soul/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+      await ph.evaluate(CALM);
+      return ph.evaluate(() => ({ t: window.__calm(document.getElementById('kc-stat')), fp: document.getElementById('kc-soul-fp').textContent, bind: JSON.parse(localStorage.getItem('bnr_bind') || 'null') }));
+    };
+    const p1 = await askPhone();
+    ok('phone: another soul than the one kept for the name opens for this visit and asks before it becomes the name\'s soul',
+      p1.fp === FPB && p1.t === 'your phone opened the soul ' + FPB + ', and this browser keeps another for gatesoul.b. make it gatesoul.b\u2019s soul? yes, make it gatesoul.b\u2019s soulno, only for now' && p1.bind.name.gatesoul === FPA, JSON.stringify(p1));
+    await ph.evaluate(() => [...document.querySelectorAll('#kc-stat button')].find(b => /only for now/.test(b.textContent)).click());
+    ok('phone: no, only for now keeps the name\'s soul as it was', await ph.evaluate(fp => JSON.parse(localStorage.getItem('bnr_bind')).name.gatesoul === fp && /keychain live/.test(document.getElementById('kc-stat').textContent), FPA));
+    await ph.evaluate(() => document.getElementById('kc-out').click());
+    await askPhone();
+    await ph.evaluate(() => [...document.querySelectorAll('#kc-stat button')].find(b => /yes, make it/.test(b.textContent)).click());
+    ok('phone: yes makes the phone\'s soul the name\'s soul', await ph.evaluate(fp => JSON.parse(localStorage.getItem('bnr_bind')).name.gatesoul === fp && /soul now, and your keychain is open/.test(document.getElementById('kc-stat').textContent), FPB));
+    await ph.close();
+
+    // 4b · a press on connect (pointerdown, then click) opens ONE prompt: the auto-connect hands off
+    const one = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await one.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
+    await one.addInitScript(stub);
+    await one.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await one.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await one.evaluate(() => { window.__plan = [{ fail: 'NotAllowedError' }, { fail: 'NotAllowedError' }]; });
+    await one.locator('#kc-pass').dispatchEvent('pointerdown');
+    await one.evaluate(() => document.getElementById('kc-pass').click());
+    await one.waitForFunction(() => window.__gets.length && /did not open/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    await one.waitForTimeout(300);
+    ok('keychain: a press on connect opens exactly one passkey prompt', await one.evaluate(() => window.__gets.length === 1), String(await one.evaluate(() => window.__gets.join())));
+    await one.close();
+
+    // 5 · a bzDiD made here: its own 24 words, shown once on request, then gone from the page
+    const mk2 = await browser.newPage({ viewport: { width: 1100, height: 900 } });
+    await mk2.addInitScript(stub);
+    await mk2.goto(`${BASE_N}/surfaces/wallet.html`, { waitUntil: 'load' });
+    await mk2.waitForFunction(() => window.BZDIDKEY && window.BnrSign, null, { timeout: 20000 });
+    await mk2.evaluate(() => { window.__plan = [{ id: 'bmV3', prf: 11 }]; document.getElementById('kc-create').click(); });
+    await mk2.waitForFunction(() => [...document.querySelectorAll('#kc-born button')].some(b => /show my recovery words/.test(b.textContent)), null, { timeout: 10000 });
+    await mk2.evaluate(CALM);
+    const j5 = await mk2.evaluate(() => ({ text: window.__calm(document.getElementById('kc-born')), raw: document.getElementById('kc-born').textContent, cred: localStorage.getItem('bnr_cred'), mark: JSON.parse(localStorage.getItem('bnr_cred_fp') || 'null'), fp: document.getElementById('kc-soul-fp').textContent }));
+    ok('create: the new bzDiD asks for ITS OWN recovery words, never the onboarding phrase',
+      /write down its 24 recovery words now/.test(j5.text) && !/onboarding/.test(j5.text) && /bzDiD born/.test(j5.raw) && j5.cred === 'bmV3' && !/[—–]|NOW/.test(j5.text), JSON.stringify(j5));
+    ok('create: the founding pointer is marked with the soul it opens', !!j5.mark && j5.mark.id === 'bmV3' && j5.mark.fp === j5.fp);
+    // ordinary actions rewrite the keychain's status line: closing the phone sheet, a passkey
+    // prompt that was closed. The one-time offer lives in its own line and stays
+    await mk2.evaluate(() => { window.__plan = [{ fail: 'NotAllowedError' }]; document.getElementById('qr-x').click(); document.getElementById('kc-pass').click(); });
+    await mk2.waitForFunction(() => /did not open/.test(document.getElementById('kc-stat').textContent), null, { timeout: 10000 });
+    ok('create: the show my recovery words offer survives ordinary status changes',
+      await mk2.evaluate(() => [...document.querySelectorAll('#kc-born button')].some(b => /show my recovery words/.test(b.textContent)) && document.getElementById('kc-born').style.display !== 'none'));
+    await mk2.evaluate(() => [...document.querySelectorAll('#kc-born button')].find(b => /show my recovery words/.test(b.textContent)).click());
+    const j5b = await mk2.evaluate(() => {
+      const w = (document.getElementById('kc-words') || {}).textContent || '';
+      let fp = null; try { fp = window.BZDIDKEY.identityFromRecovery(w, 'bnr.b').fingerprint.words; } catch (e) {}
+      return { n: w.trim().split(/\s+/).length, same: fp === document.getElementById('kc-soul-fp').textContent };
+    });
+    ok('create: the words shown are 24 and open exactly the soul just made', j5b.n === 24 && j5b.same, JSON.stringify(j5b));
+    await mk2.evaluate(() => [...document.querySelectorAll('#kc-born button')].find(b => /written down/.test(b.textContent)).click());
+    ok('create: once written down, the words leave the page', await mk2.evaluate(() => !document.getElementById('kc-words') && document.getElementById('kc-born').style.display === 'none' && !document.getElementById('kc-born').textContent));
+    await mk2.close();
   }
 } finally {
   await browser.close();

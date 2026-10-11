@@ -1,0 +1,6 @@
+{
+ "wire": "/service/tree/tree-data/v8/person/L627-FH9/details",
+ "result": "HTTP 200 with real person data (birth 1976 formalText +1977-06-14, contributor travis remington)",
+ "when": "2026-10-07 (session start of this wake; founder sign-in retained from 2026-10-06)",
+ "law": "session oracle: wire proof, never cookie presence"
+}

@@ -1,0 +1,35 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ05 — TOOTH bentGamma: ml-kem's base-case multiply
+// against FIPS 203 Algorithm 12 with ONE γ changed (entry 3 plus one) MUST
+// fail with a counterexample: the proof reads the whole γ table.
+
+enable_experimental;
+import "../pq05-cryptol/Field.cry";
+import "../pq05-cryptol/KemNtt.cry";
+include "../../../target/saw-pq05-ntt/names.saw";
+
+m <- mir_load_module "../../../target/saw-pq05-ntt/pq05_ntt.linked-mir.json";
+let elem_adt = mir_find_mangled_adt m elem_adt_name;
+let elem v = mir_struct_value elem_adt [mir_term v];
+
+ov_barrett <- mir_unsafe_assume_spec m barrett_name (do {
+  x <- mir_fresh_var "x" mir_u32;
+  mir_precond {{ x <= 2 * 3328 * 3328 }};
+  mir_execute_func [mir_term x];
+  let r = {{ kemMod x }};
+  mir_return (mir_term r);
+  mir_postcond {{ r < 3329 }};
+});
+
+print "PQ05-SAW-TEETH obligation bentGamma";
+mir_verify m base_case_name [ov_barrett] false (do {
+  a0 <- mir_fresh_var "a0" mir_u16;
+  a1 <- mir_fresh_var "a1" mir_u16;
+  b0 <- mir_fresh_var "b0" mir_u16;
+  b1 <- mir_fresh_var "b1" mir_u16;
+  i <- mir_fresh_var "i" mir_usize;
+  mir_precond {{ a0 < 3329 /\ a1 < 3329 /\ b0 < 3329 /\ b1 < 3329 /\ i < 128 }};
+  mir_execute_func [elem a0, elem a1, elem b0, elem b1, mir_term i];
+  let c = {{ baseCase a0 a1 b0 b1 ((update gammas (3 : [7]) ((gammas @ (3 : [7])) + 1)) @ i) }};
+  mir_return (mir_tuple_value [elem {{ c.0 }}, elem {{ c.1 }}]);
+}) (w4_unint_bitwuzla ["kemMod"]);
+print "PQ05-SAW-TEETH UNEXPECTED-PROVEN bentGamma";

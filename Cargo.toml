@@ -16,6 +16,7 @@ members = [
     "crates/b-token",
     "crates/bswap",
     "crates/bsigner",
+    "crates/bzdid",
     "crates/headroom-textcrusher",
     "crates/bnr-shell",
     "crates/capability",
@@ -60,7 +61,20 @@ members = [
     "crates/banchor",
     "crates/btrezor",
     "crates/watchpay",
+    "crates/settle-solana",
     "crates/bnr-seal",
+    "crates/btungsten-wb001-core",
+    "crates/btungsten-wb001",
+    "crates/btungsten-wb002-core",
+    "crates/btungsten-wb002",
+    "crates/btungsten-wb003",
+    "crates/btungsten-wb004",
+    "crates/btungsten-teeth",
+    "crates/btungsten-pq",
+    "crates/btungsten-bench",
+    "crates/bpq-core",
+    "crates/bheraldry",
+    "crates/bpq-device-xcheck",
 ]
 
 [workspace.metadata]
@@ -79,3 +93,14 @@ sha2 = "0.10"
 hmac = "0.12"
 zeroize = "1"
 hex-literal = "0.4"
+
+# SLH-DSA-SHAKE-256f signs in seconds unoptimised; the handover tests and the
+# PQ01 runner sign with it. Optimise it and its hashing in dev and test builds.
+[profile.dev.package.fips205]
+opt-level = 3
+[profile.dev.package.slh-dsa]
+opt-level = 3
+[profile.dev.package.sha3]
+opt-level = 3
+[profile.dev.package.keccak]
+opt-level = 3

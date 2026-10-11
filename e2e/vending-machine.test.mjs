@@ -33,6 +33,9 @@ test('a dry run composes a hash-true certificate under a throwaway key, and keep
   assert.ok(out.bytes > 2000 && out.bytes < 8000, 'a few KiB, inside Turbo\'s free tier');
   const keyStep = steps.find((s) => s[0] === 'key')[1];
   assert.deepEqual(Object.keys(keyStep).sort(), ['kept', 'member_key'], 'the key step reports the public key and where it is kept, nothing else');
+  const memStep = steps.find((s) => s[0] === 'memory')[1];
+  assert.deepEqual(Object.keys(memStep).sort(), ['a1_genesis', 'pq_id'], 'the memory log is a1 v2: its genesis pins a post-quantum id');
+  assert.match(memStep.pq_id, /^bzpq1[02-9ac-hj-np-z]+$/);
   assert.doesNotMatch(JSON.stringify(steps), NO_KEY);
   const again = await M.mint({ name: 'machine selftest', dryRun: true });
   assert.notEqual(again.member_key, out.member_key, 'no vault: every dry run is a fresh throwaway key');

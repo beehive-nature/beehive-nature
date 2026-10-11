@@ -1,0 +1,27 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ02 — TOOTH for sponge022.saw: sha3_512_33 against the sponge at SHA3-256's rate (136, not 72).
+// It MUST fail with a counterexample: the proof reads the rate.
+//
+// usage (from this directory): saw sponge022-teeth-512.saw
+
+enable_experimental;
+import "../pq02-cryptol/KeccakF1600.cry";
+include "../../../target/saw-pq02-sponge022/names.saw";
+
+m <- mir_load_module "../../../target/saw-pq02-sponge022/pq02_sponge022.linked-mir.json";
+ov_p <- mir_unsafe_assume_spec m keccak_p_name (do {
+  st <- mir_fresh_var "st" (mir_array 25 mir_u64);
+  r <- mir_alloc_mut (mir_array 25 mir_u64);
+  mir_points_to r (mir_term st);
+  mir_execute_func [r];
+  mir_points_to r (mir_term {{ keccakF st }});
+});
+
+print "PQ02-SAW-TEETH obligation sha3_512_33 at rate 136";
+mir_verify m "pq02_sponge022::sha3_512_33" [ov_p] false (do {
+  x <- mir_fresh_var "m" (mir_array 33 mir_u8);
+  p <- mir_alloc (mir_array 33 mir_u8);
+  mir_points_to p (mir_term x);
+  mir_execute_func [p];
+  mir_return (mir_term {{ spongeR`{r = 136, d = 64} 0x06 x }});
+}) (w4_unint_bitwuzla ["keccakF"]);
+print "PQ02-SAW-TEETH UNEXPECTED-PROVEN sha3_512_33 at rate 136";

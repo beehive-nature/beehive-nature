@@ -122,30 +122,51 @@ for i, p in enumerate(PASS, 1):
 
 # ============================================================
 # USDC-ON-BASE RAIL — proofs 11–16 (Seat-1's extension, spec-enum rates)
+# + AV-2 proofs 17–23 (2026-10-06 convergence: quote TTL + single-use,
+#   the same law the Rust conformance core enforces — derived boundaries
+#   from the constant so a founder TTL ruling cannot silently break these)
 # ============================================================
 LEDGER2 = Path("/tmp/escrow-test/ledger-usdc.jsonl")
 if LEDGER2.exists():
     LEDGER2.unlink()
 es2 = Escrow(LEDGER2)
 P2 = []
+from voucher_escrow import ConversionQuote, QuoteReplay, StaleQuote, QUOTE_TTL_SECS  # noqa: E402
 
-# 11. USDC deposit requires tx AND rate_ref; refuses without either
-for kwargs in ({"base_tx": "", "rate_a_per_usdc": "2.5", "rate_ref": "pool@demo"},
-               {"base_tx": "0xabc", "rate_a_per_usdc": "2.5", "rate_ref": ""}):
+T0 = 1_800_000_000.0  # a fixed serve moment; deposits below pass explicit `now`
+CARD = "estate-rate-card@v1-demo"
+
+def quote(qid, quoted_at, rate="2.5", ref=CARD):
+    return ConversionQuote(id=qid, rate_a_per_usdc=rate, rate_ref=ref, quoted_at=quoted_at)
+
+# 11. USDC deposit requires tx AND a well-formed quote (id, rate_ref at
+#     construction — malformed quotes never reach the engine)
+try:
+    es2.deposit_usdc("member-x", "10.0", base_tx="", quote=quote("q-no-tx", T0), now=T0 + 10)
+    raise SystemExit("FAIL: USDC deposit without base_tx accepted")
+except VoucherError:
+    pass
+for bad in ("", "q-ok"):
     try:
-        es2.deposit_usdc("member-x", "10.0", **kwargs)
-        raise SystemExit("FAIL: incomplete USDC deposit accepted")
+        quote(bad, T0, ref="")
+        raise SystemExit("FAIL: quote without rate_ref accepted")
     except VoucherError:
         pass
-P2.append("usdc deposit refuses without base_tx / rate_ref")
+try:
+    quote("", T0)
+    raise SystemExit("FAIL: quote without id accepted")
+except VoucherError:
+    pass
+P2.append("usdc deposit refuses without base_tx; a quote refuses without id / rate_ref at construction")
 
 # 12. USDC in, A credited at an explicit cited rate — balance is A-only
 ev = es2.deposit_usdc("member-x", "10.0", base_tx="0xbase123",
-                      rate_a_per_usdc="2.5", rate_ref="estate-rate-card@v1-demo")
+                      quote=quote("q-fresh-1", T0), now=T0 + 10)
 assert ev["currency_in"] == "USDC" and ev["chain_in"] == "base"
 assert ev["usdc_amount"] == "10.000000" and ev["rate_a_per_usdc"] == "2.5"
+assert ev["quote_id"] == "q-fresh-1" and ev["quote_ts"] == T0
 assert es2.balance("member-x") == Decimal("25.0000")
-P2.append("10 USDC @ 2.5 A/USDC -> 25.0000 A credited; rate + rate_ref on the event")
+P2.append("10 USDC @ 2.5 A/USDC -> 25.0000 A credited; rate + rate_ref + quote_id/quote_ts on the event")
 
 # 13. Mixed funding: A deposit stacks on the same voucher, one A balance
 es2.deposit("member-x", "5.0", vaulta_tx="vlt789")
@@ -161,7 +182,7 @@ P2.append("charge on mixed-funded voucher: 0.2200 A incl. 0.0200 tithe")
 # 15. Dust refused: a USDC deposit whose credit rounds to zero A never lands
 try:
     es2.deposit_usdc("member-x", "0.00001", base_tx="0xdust",
-                     rate_a_per_usdc="2.5", rate_ref="estate-rate-card@v1-demo")
+                     quote=quote("q-dust", T0), now=T0 + 10)
     raise SystemExit("FAIL: dust deposit accepted")
 except VoucherError:
     P2.append("dust deposit (credits 0.0000 A) refused")
@@ -169,6 +190,74 @@ except VoucherError:
 # 16. Chain still verifies with the new event shape
 n = es2.verify_chain()
 P2.append(f"chain verifies with USDC events: {n} events")
+
+# 17. AV-2 2.2: a stale quote (age TTL+1) refuses typed; nothing written
+bal = es2.balance("member-x")
+try:
+    es2.deposit_usdc("member-y", "10.0", base_tx="0xstale1",
+                     quote=quote("q-stale", T0), now=T0 + QUOTE_TTL_SECS + 1)
+    raise SystemExit("FAIL: stale quote credited")
+except StaleQuote as e:
+    assert f"TTL {QUOTE_TTL_SECS}s" in str(e), "the refusal names the TTL"
+assert es2.balance("member-y") == Decimal("0") and es2.balance("member-x") == bal
+P2.append("AV-2 2.2: stale quote (TTL+1s) refuses typed StaleQuote, writes nothing")
+
+# 18. AV-2 2.3: the boundary is INCLUSIVE — age == TTL refuses too
+try:
+    es2.deposit_usdc("member-y", "10.0", base_tx="0xedge",
+                     quote=quote("q-edge", T0), now=T0 + QUOTE_TTL_SECS)
+    raise SystemExit("FAIL: boundary-age quote credited")
+except StaleQuote:
+    pass
+P2.append("AV-2 2.3: age == TTL refuses (inclusive boundary, fail closed)")
+
+# 19. AV-2 2.2b: a future-dated quote is malformed, not fresh — same refusal
+try:
+    es2.deposit_usdc("member-y", "10.0", base_tx="0xfuture",
+                     quote=quote("q-future", T0 + 3600), now=T0 + 10)
+    raise SystemExit("FAIL: future-dated quote credited")
+except StaleQuote:
+    pass
+P2.append("AV-2 2.2b: future-dated quote refuses StaleQuote (malformed, not fresh)")
+
+# 20. AV-2 2.4: a quote id credits ONE deposit ever — a second voucher citing
+#     the same id is a double-credit attempt and refuses typed
+ev_a = es2.deposit_usdc("member-y", "4.0", base_tx="0xok20",
+                        quote=quote("q-once", T0 + 20), now=T0 + 30)
+assert es2.balance("member-y") == Decimal("10.0000")
+try:
+    es2.deposit_usdc("member-z", "4.0", base_tx="0xreplay20",
+                     quote=quote("q-once", T0 + 20), now=T0 + 40)
+    raise SystemExit("FAIL: replayed quote id credited a second voucher")
+except QuoteReplay:
+    pass
+assert es2.balance("member-z") == Decimal("0")
+P2.append("AV-2 2.4: quote id is single-use across vouchers (double credit refused, typed)")
+
+# 21. AV-2 2.4b: the burn survives a reload — a fresh engine instance on the
+#     same ledger still refuses the id, and refuses it BEFORE staleness ever
+#     matters (single use is checked first, independent of age)
+es3 = Escrow(LEDGER2)
+try:
+    es3.deposit_usdc("member-w", "4.0", base_tx="0xafter-reload",
+                     quote=quote("q-once", T0 + QUOTE_TTL_SECS - 10), now=T0 + QUOTE_TTL_SECS - 5)
+    raise SystemExit("FAIL: replayed quote id credited after reload")
+except QuoteReplay:
+    pass
+P2.append("AV-2 2.4b: reload rebuilds the burned-id set from the ledger (the ledger IS the nonce set)")
+
+# 22. Z33 still rules replays of the SAME settlement: the (voucher, tx) key
+#     returns the ORIGINAL event — idempotent credit outranks refusal
+again = es2.deposit_usdc("member-y", "4.0", base_tx="0xok20",
+                         quote=quote("q-once", T0 + 20), now=T0 + 30)
+assert again["hash"] == ev_a["hash"]
+P2.append("Z33 preserved: the same settlement replays idempotently (original event returned)")
+
+# 23. A second fresh quote still credits after all the refusals above
+es2.deposit_usdc("member-z", "1.0", base_tx="0xfresh2",
+                 quote=quote("q-fresh-2", T0 + 50), now=T0 + 60)
+assert es2.balance("member-z") == Decimal("2.5000")
+P2.append("a FRESH quote still credits after every refusal (fail closed, not fail stuck)")
 
 print("\n=== USDC-ON-BASE RAIL — ALL PROOFS PASS ===")
 for i, p in enumerate(P2, 11):

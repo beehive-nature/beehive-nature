@@ -1,0 +1,56 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ06 — TOOTH droppedSign: ml-dsa's last inverse layer
+// (length 128) against FIPS 204 Algorithm 42 with the twiddle's negation
+// dropped (zetas[m] where the algorithm has -zetas[m]) MUST fail with a
+// counterexample: the proof reads the sign.
+
+enable_experimental;
+import "../pq05-cryptol/Field.cry";
+import "../pq06-cryptol/DsaNtt.cry";
+include "../../../target/saw-pq06-ntt/names.saw";
+
+m <- mir_load_module "../../../target/saw-pq06-ntt/pq06_ntt.linked-mir.json";
+let elem_adt = mir_find_mangled_adt m elem_adt_name;
+let elem_ty = mir_adt elem_adt;
+let elem v = mir_struct_value elem_adt [mir_term v];
+
+let op name post = mir_unsafe_assume_spec m name (do {
+  a <- mir_fresh_var "a" mir_u32;
+  b <- mir_fresh_var "b" mir_u32;
+  mir_precond {{ a < 8380417 /\ b < 8380417 }};
+  mir_execute_func [elem a, elem b];
+  let r = post a b;
+  mir_return (elem r);
+  mir_postcond {{ r < 8380417 }};
+});
+ov_add <- op add_name (\a b -> {{ dsaAdd a b }});
+ov_sub <- op sub_name (\a b -> {{ dsaSub a b }});
+ov_mul <- op mul_name (\a b -> {{ dsaMul a b }});
+ov_neg <- mir_unsafe_assume_spec m neg_name (do {
+  a <- mir_fresh_var "a" mir_u32;
+  mir_precond {{ a < 8380417 }};
+  mir_execute_func [elem a];
+  let r = {{ dsaNeg a }};
+  mir_return (elem r);
+  mir_postcond {{ r < 8380417 }};
+});
+
+let arr_of f = do {
+  xs <- for (eval_list {{ [0 .. 255] : [256][8] }}) (\i -> return (elem {{ f @ i }}));
+  return (mir_array_value elem_ty xs);
+};
+
+print "PQ06-SAW-TEETH obligation droppedSign";
+mir_verify m inv_layer_128_name [ov_add, ov_sub, ov_mul, ov_neg] false (do {
+  f <- mir_fresh_var "f" (mir_array 256 mir_u32);
+  mir_precond {{ all (\x -> x < 8380417) f }};
+  fv <- arr_of f;
+  wp <- mir_alloc_mut (mir_array 256 elem_ty);
+  mir_points_to wp fv;
+  mp <- mir_alloc_mut mir_usize;
+  mir_points_to mp (mir_term {{ 2 : [64] }});
+  mir_execute_func [wp, mp];
+  rv <- arr_of {{ invLayerWith`{128, 1} (\x -> x) 2 f }};
+  mir_points_to wp rv;
+  mir_points_to mp (mir_term {{ 1 : [64] }});
+}) (w4_unint_bitwuzla ["dsaAdd", "dsaSub", "dsaMul"]);
+print "PQ06-SAW-TEETH UNEXPECTED-PROVEN droppedSign";

@@ -99,11 +99,12 @@ export async function mint({ name, tongue = 'latvian', template = 'bqueenbee-gen
   const canon = canonicalName(name, tongue); report('name', { canonical: canon });
   const k = throwawayKey(); report('key', { member_key: k.pubHex, kept: 'nowhere, memory only' });
   const memberPriv = await a1.importMemberSeed(k.seed);
-  const genesis = await a1.genesisRevision({ agent: canon, body: { note: 'a1 genesis — memory begins empty; the store funds later under this binding' }, memberPrivateKey: memberPriv });
-  const genesisHash = a1.hashRevision(genesis); report('memory', { a1_genesis: genesisHash });
-  const storeBinding = { store: 'autonomi', binding: 'a1-log v1 — append-only hash-linked revisions, owner-signed ed25519 (this member key); resolver takes the highest valid revision; deletable by the member',
-    a1_genesis: { rev: genesis.rev, sha256: genesisHash, ts: genesis.ts },
-    funded_write_status: 'GATED on the ANT custody review (storage-substrate-split item 8); the binding is derivable from this certificate the day it is funded' };
+  /* a1 v2: the memory log pins the agent's post-quantum key (derived from the same throwaway seed) */
+  const pqKeys = a1.a1PqKeys(k.seed, canon);
+  const genesis = await a1.genesisRevisionV2({ agent: canon, body: { note: 'a1 genesis — memory begins empty; the store funds later under this binding' }, memberPrivateKey: memberPriv, pqKeys });
+  pqKeys.wipe();
+  const genesisHash = a1.hashRevision(genesis); report('memory', { a1_genesis: genesisHash, pq_id: genesis.pq.id });
+  const storeBinding = a1.storeBinding(genesis, genesisHash);
   const mintedIso = new Date().toISOString();
   const record = cert.composeCertificate({ agentName: canon, house: 'a', tongue, template, memberKeyHex: k.pubHex, memberAccount: MEMBER_ACCT, mintedIso, storeBinding });
   const bytes = Buffer.from(cert.canonicalJson(record), 'utf8'); const hash = cert.contentHash(record);
