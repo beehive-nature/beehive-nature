@@ -27,8 +27,8 @@ const HOUSE_REV2_DIGEST_HEX: &str =
     "8fe6a76f6acdae0686c5a959777a80141a2812c9352ec5f9ed9ca663f6222d69"; // PUBLIC-CONSTANT (frozen house rev2 digest — claim restructure)
 
 /// Revision 3 (the portal read, 2026-10-10) — pinned at its first sealing.
-const BG_REV3_DIGEST_HEX: &str = "4101baf1709175003f039fb49839d04ce7460251e74703d2503c9b7e0f917bc4"; // PUBLIC-CONSTANT (frozen rev3 digest — portal read)
-const BG_REV3_BYTES: usize = 84085;
+const BG_REV3_DIGEST_HEX: &str = "d0106aa4817b9e9d35e3f0c2aa50f6a67eaeea23c7d3b64511e8b84c103976d7"; // PUBLIC-CONSTANT (frozen rev3 digest — portal read, review-fix re-pin)
+const BG_REV3_BYTES: usize = 86087;
 
 #[test]
 fn bulgarian_revision_1_is_frozen() {

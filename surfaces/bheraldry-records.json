@@ -6,8 +6,8 @@
       "id": "bg/national-arms",
       "revision": 3,
       "supersedes": "fd991cf4e2f6d86d5b4b9d1bc07d3a3b3b5d134b6b920ce15e6d07c61f70a759",
-      "digest": "4101baf1709175003f039fb49839d04ce7460251e74703d2503c9b7e0f917bc4",
-      "canonical_bytes": 84085,
+      "digest": "d0106aa4817b9e9d35e3f0c2aa50f6a67eaeea23c7d3b64511e8b84c103976d7",
+      "canonical_bytes": 86087,
       "record": {
         "id": "bg/national-arms",
         "revision": 3,
@@ -611,7 +611,7 @@
             "truth": "Authority",
             "grade": "PrimaryLegal",
             "verbatim": "УКАЗ № 304 На основание чл. 98, т. 4 от Конституцията на Република България ПОСТАНОВЯВАМ: Да се обнародва в “Държавен вестник” Законът за герб на Република България, приет от ХХХVIII Народно събрание на 31 юли 1997 г. Издаден в София на 4 август 1997 г. и подпечатан с държавния печат.",
-            "access_note": "read in the portal PDF's own text (page 10); whitespace normalized as with Чл. 2 (1); the signature block is intentionally not carried (no-living-person law — the record names offices and instruments, not officeholders). This decree dissolves the adoption-date dispute: adoption 31 юли 1997 (the law's § 1), decree issued 4 август 1997, promulgation ДВ бр. 62 от 5 август 1997 — three events, all primary-named now."
+            "access_note": "read in the portal PDF's own text (page 10); whitespace normalized as with Чл. 2 (1) — including collapsing the edition's letter-spaced heading П О С Т А Н О В Я В А М: to ПОСТАНОВЯВАМ:; the signature block is intentionally not carried (no-living-person law — the record names offices and instruments, not officeholders). This decree dissolves the adoption-date dispute: adoption 31 юли 1997 (the law's § 1), decree issued 4 август 1997, promulgation ДВ бр. 62 от 5 август 1997 — three events, all primary-named now."
           },
           {
             "label": "Решение № 1 от 4 април 1995 г. по к.д. № 5/1995 — Конституционен съд (own site)",
@@ -927,7 +927,7 @@
                   "truth": "Authority",
                   "grade": "PrimaryLegal",
                   "verbatim": "УКАЗ № 304 На основание чл. 98, т. 4 от Конституцията на Република България ПОСТАНОВЯВАМ: Да се обнародва в “Държавен вестник” Законът за герб на Република България, приет от ХХХVIII Народно събрание на 31 юли 1997 г. Издаден в София на 4 август 1997 г. и подпечатан с държавния печат.",
-                  "access_note": "read in the portal PDF's own text (page 10); whitespace normalized as with Чл. 2 (1); the signature block is intentionally not carried (no-living-person law — the record names offices and instruments, not officeholders). This decree dissolves the adoption-date dispute: adoption 31 юли 1997 (the law's § 1), decree issued 4 август 1997, promulgation ДВ бр. 62 от 5 август 1997 — three events, all primary-named now."
+                  "access_note": "read in the portal PDF's own text (page 10); whitespace normalized as with Чл. 2 (1) — including collapsing the edition's letter-spaced heading П О С Т А Н О В Я В А М: to ПОСТАНОВЯВАМ:; the signature block is intentionally not carried (no-living-person law — the record names offices and instruments, not officeholders). This decree dissolves the adoption-date dispute: adoption 31 юли 1997 (the law's § 1), decree issued 4 август 1997, promulgation ДВ бр. 62 от 5 август 1997 — three events, all primary-named now."
                 }
               }
             ],
@@ -984,16 +984,16 @@
               {
                 "statement": "The ink print of ДВ бр. 62 (5 August 1997) — still unread: the portal serves a re-typeset machine-text edition, not a photograph of the print. The print alone can close the residual four.",
                 "source": {
-                  "label": "Държавен вестник — official archive portal (dv.parliament.bg/DVWeb)",
-                  "url": "https://dv.parliament.bg/DVWeb/broeveList.faces",
-                  "publisher": "Народно събрание на Република България",
+                  "label": "Държавен вестник брой 62, 5.VIII.1997 — official portal PDF edition",
+                  "url": "https://dv.parliament.bg/DVWeb/fileUploadShowing.jsp?&idFileAtt=191101&allowCache=true&openDirectly=false",
+                  "publisher": "Народно събрание на Република България — Държавен вестник portal",
                   "lang": "bg",
                   "accessed": "2026-10-10",
-                  "kind": "Authenticity",
+                  "kind": "Legal",
                   "truth": "SourceAuthenticity",
                   "grade": "PrimaryLegal",
-                  "verbatim": null,
-                  "access_note": "the primary archive portal was LOCATED and its server-rendered issue index fetched (74,791 bytes, HTTP 200); but issue deep links are JSF POST flows and five direct URL patterns returned 404. The бр. 62/1997 SCAN was therefore NOT machine-read by this seat on 2026-10-10. Scan-level quote verification remains OPEN — a named next-owner item, not a silent gap."
+                  "verbatim": "Чл. 2. (1) Гербът на Република България е изправен златен коронован лъв на тъмночервено поле във формата на щит. Над щита има голяма корона, първообраз на която са корони на български владетели от Втората българска държава, с пет кръста и отделно кръст над самата корона. Щитът е поддържан от два златни короновани изправени лъва, обърнати към щита от лява и дясна хералдическа страна. Те стоят върху две кръстосани дъбови клонки с плодове. Под щита върху прехвърлена през краищата на дъбовите клонки бяла лента с трикольорен кант е изписано със златни букви “Съединението прави силата”.",
+                  "access_note": "obtained through the portal's own issue-download gesture after walking its JSF flow (date filter 1–10.08.1997 → issue row 62, idObj 5036 → 302 to fileUploadShowing.jsp idFileAtt=191101, Content-Disposition filename=62_1997.pdf, 1,461,387 bytes, sha256 a08ec6f1…337074d — the bytes are NOT committed; the issue's приложения carry the state insignia images). The PDF is a re-typeset MACHINE-TEXT edition: zero image XObjects (verified by object inspection), glyphs mapped through a CP1251-flavoured encoding that had to be reversed to read the text. The verbatim above is whitespace-normalized (line-break hyphens joined, extraction item-boundary spaces restored); no characters were changed, and the quote glyphs are the portal PDF's own “…” pair. The 1997 INK PRINT itself remains unread — this edition is one step from it, which is why the residual word-level divergences stay a retained dispute rather than a ruling."
                 }
               }
             ],

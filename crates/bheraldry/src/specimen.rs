@@ -1111,11 +1111,12 @@ fn ukaz304_claim() -> SourceClaim {
         ),
         access_note: Some(
             "read in the portal PDF's own text (page 10); whitespace normalized as with Чл. 2 \
-             (1); the signature block is intentionally not carried (no-living-person law — the \
-             record names offices and instruments, not officeholders). This decree dissolves \
-             the adoption-date dispute: adoption 31 юли 1997 (the law's § 1), decree issued \
-             4 август 1997, promulgation ДВ бр. 62 от 5 август 1997 — three events, all \
-             primary-named now."
+             (1) — including collapsing the edition's letter-spaced heading П О С Т А Н О В \
+             Я В А М: to ПОСТАНОВЯВАМ:; the signature block is intentionally not carried \
+             (no-living-person law — the record names offices and instruments, not \
+             officeholders). This decree dissolves the adoption-date dispute: adoption 31 юли \
+             1997 (the law's § 1), decree issued 4 август 1997, promulgation ДВ бр. 62 от 5 \
+             август 1997 — three events, all primary-named now."
                 .into(),
         ),
     }
@@ -1402,7 +1403,16 @@ pub fn bulgaria_national_arms() -> SymbolRecord {
                             portal serves a re-typeset machine-text edition, not a photograph \
                             of the print. The print alone can close the residual four."
                     .into(),
-                source: r2.sources[14].clone(),
+                // the rev-3 portal claim itself carries this edition's machine-text
+                // finding; rev 2's portal claim predates the read and must not source
+                // a statement only this revision's read supports (independent review,
+                // finding 2 of the r3 review pass)
+                source: r
+                    .sources
+                    .iter()
+                    .find(|s| s.label.contains("official portal PDF edition"))
+                    .expect("the rev3 portal PDF claim is in sources")
+                    .clone(),
             },
         ],
         note: Some(

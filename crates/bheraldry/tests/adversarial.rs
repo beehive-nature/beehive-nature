@@ -463,8 +463,11 @@ fn r04_portal_claim_paired_with_lex_text_is_detected() {
 
 /// Regression r5 — roll back the adoption-date resolution: strip the УКАЗ №
 /// 304 position and the resolution note, quietly re-opening the dispute the
-/// primary evidence closed. The shipped rev3 digest refuses the rollback;
-/// the sealed bytes carry the decree quote, checkably.
+/// primary evidence closed. No `LawViolation` fires here BY DESIGN and this
+/// test says so on its face: dispute notes are not law-protected state, so
+/// the FROZEN DIGEST is the only guard — the rolled-back record still
+/// validates cleanly (asserted below, so the guard's solitude is itself
+/// checkable), and only the digest refuses it as the shipped rev3.
 #[test]
 fn r05_resolution_rollback_is_detected() {
     let sealed = bulgaria_national_arms().seal().unwrap();
@@ -479,6 +482,13 @@ fn r05_resolution_rollback_is_detected() {
     d.positions.retain(|p| !p.statement.contains("УКАЗ № 304"));
     assert_eq!(d.positions.len(), before - 1, "the position was removed");
     d.note = Some("RETAINED, not adjudicated.".into());
+    // the rolled-back record is structurally lawful — the digest is the ONLY
+    // thing standing between it and a reader (independent-review finding 1
+    // made checkable instead of hidden)
+    assert!(
+        r.validate().is_ok(),
+        "the rollback passes the laws — only the frozen digest catches it"
+    );
     assert!(
         !sealed.digest_matches(&r.canonical_bytes()),
         "a rolled-back resolution must not verify as the shipped rev3"

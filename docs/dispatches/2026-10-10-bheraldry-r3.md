@@ -88,8 +88,11 @@ the unchanged rev-2 frozen vector). Working text = the portal edition's own
 item-boundary spaces restored; no characters changed; the portal's „…“ quote
 glyphs kept). New sources: portal PDF, УКАЗ № 304, the court's own
 Решение № 1/1995, the quote-verified Решение № 480/2017, and the three
-lv/zh/ar Wikipedia claims. Frozen: **rev 3 = 84,085 canonical bytes, digest
-`4101baf1709175003f039fb49839d04ce7460251e74703d2503c9b7e0f917bc4`** <!-- PUBLIC-CONSTANT (frozen bg rev3 digest) -->
+lv/zh/ar Wikipedia claims. Frozen: **rev 3 = 86,087 canonical bytes, digest
+`d0106aa4817b9e9d35e3f0c2aa50f6a67eaeea23c7d3b64511e8b84c103976d7`** <!-- PUBLIC-CONSTANT (frozen bg rev3 digest, re-pinned after the review fixes) -->
+(re-pinned once after the independent review's citation fix — the first
+sealing was 84,085 bytes / `4101baf1…917bc4`, superseded intra-round
+before merge; the chain law made the re-pin a fresh freeze, not an edit).
 `bnr/house-achievement` stays rev 2 (no new evidence — unchanged bytes).
 
 ## 4. lv/zh/ar through bLANGUAGEdock (item 3)
@@ -146,8 +149,21 @@ standing boundary pinned on top.
 - `cargo fmt --all --check` clean; `estate-check` PASS (112 · 121 · hub in
   sync); `build-stack-inventory --check` 23 components; i18n selftest PASS;
   lang-coverage tests 13/13; atlas tests 15/15.
-- **Independent review**: obtained on the PR (fresh-eyes reviewer pass over
-  the diff against the lane's laws — see §8).
+- **Independent review: APPROVE WITH NOTES, no blockers** (fresh-eyes
+  reviewer, read-only, went beyond the lane's own evidence: re-fetched the
+  portal PDF — sha256 and the seven settled wordings confirmed byte-for-byte
+  — plus the court act page and the 480 material page live; reproduced the
+  whole gate set; searched for officeholder names — zero hits). Its findings
+  and what this seat did with them: (1) MINOR, r05 had no named
+  LawViolation → the test now ASSERTS the rolled-back record still validates
+  cleanly, making the digest's solitude checkable instead of hidden; (2)
+  NOTE, the ink-print dispute position cited rev 2's pre-read portal claim →
+  re-pointed to rev 3's own portal claim (rev 3 re-pinned: 86,087 bytes,
+  `d0106aa4…976d7`); (3) NOTE, the УКАЗ 304 note now names the collapsed
+  letter-spaced heading explicitly; (4) NOTE, floors/set re-serialization
+  noise — accepted (semantic diff is one entry each); (5) NOTE, the
+  "266 visible" figure not re-measured by the reviewer — the gate-relevant
+  numbers were.
 
 ## 7. Boundaries not crossed
 
