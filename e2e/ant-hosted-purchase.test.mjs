@@ -101,7 +101,10 @@ test('an invoice changed after authorization signs nothing',async()=>{
  ledger.plans[0].txs[0].data=_wire.encodeApprove(network.paymentVaultAddress,'1000000');f.storage.setItem(k,JSON.stringify(ledger));f.reload();
  await assert.rejects(f.payer.provider(inv.id).pay(network,quotes,{}),/changed after it was authorized/);assert.equal(f.sends,0);
  const unscoped=JSON.parse(f.storage.getItem(k));delete unscoped.plans[0].authorization.scope;f.storage.setItem(k,JSON.stringify(unscoped));f.reload();
- await assert.rejects(f.payer.provider(inv.id).pay(network,quotes,{}),/not authorized/);assert.equal(f.sends,0);
+ await assert.rejects(f.payer.provider(inv.id).pay(network,quotes,{}),/does not name/);assert.equal(f.sends,0);
+});
+test('the envelope decoder refuses deep nesting and malformed input with a named refusal',()=>{
+ for(const raw of ['c1'.repeat(20000)+'80','','c3','c180ff','b8','f800'])assert.throws(()=>_envelope.decode(raw),e=>e.refusal==='binding');
 });
 test('native signer persists envelope and hash before broadcast, then recovers a lost reply without another send',async()=>{
  const n=nativeFixture({lostReply:true}),inv=await authorized(n.f);

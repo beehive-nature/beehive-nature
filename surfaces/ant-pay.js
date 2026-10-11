@@ -15,9 +15,10 @@
    - approve is for the EXACT quoted total, never unlimited.
    - contract addresses come from the bridge's own binary (/health → evm), never from a document or this file.
    - transaction hashes are persisted BEFORE finalize. a paid-but-unfinalized upload resumes; it never pays twice.
-   - a signed envelope is decoded, compared field by field and its sender recovered by code that did not
-     sign it, before it is kept or broadcast (checkEnvelope). an authorization names the digest of what it
-     covers (scopeOf), and the signer recomputes it.
+   - a signed envelope is decoded and compared field by field by code that did not build it, and its sender
+     is recovered with noble secp256k1, not the Rust core that signed (checkEnvelope). keccak is the same
+     vendored noble build on both sides. an authorization names the digest of what it covers (scopeOf, a
+     serializer the signer shares), and the signer recomputes that digest with noble SHA-256.
    - wire facts are cited: selectors and tuple order are held to a real Arbitrum One transaction in
      e2e/ant-pay-vector.json (PaymentVaultV2.payForQuotes, verified source on Blockscout). */
 (function (root) {
@@ -39,7 +40,7 @@
     return SEL.payForQuotes + word(32) + word(payments.length) + payments.map(function (p) { return pad32(p.rewards_address) + word(p.amount_atto) + pad32(p.quote_hash); }).join('');
   }
 
-  /* ── RLP + the EIP-1559 envelope (only the Trezor path needs them: the device returns a signature, the page serialises and broadcasts) ── */
+  /* ── RLP + the EIP-1559 envelope (the Trezor path serialises the device's signature; checkEnvelope re-encodes what a signer returned) ── */
   function rlpBytes(hex) { hex = strip(hex); if (hex.length % 2) hex = '0' + hex; return hex; }
   function rlpInt(v) { var h = BigInt(v).toString(16); return BigInt(v) === 0n ? '' : (h.length % 2 ? '0' + h : h); }
   function rlpLen(len, base) { if (len < 56) return (base + len).toString(16).padStart(2, '0'); var l = len.toString(16); if (l.length % 2) l = '0' + l; return (base + 55 + l.length / 2).toString(16) + l; }
@@ -61,18 +62,19 @@
     var i = 0, bad = function () { throw refusal('binding', 'The signed envelope is not well-formed RLP'); };
     function take(n) { if (n < 0 || i + 2 * n > hex.length) bad(); var s = hex.substr(i, 2 * n); i += 2 * n; return s; }
     function size(n) { var s = take(n); if (!s || s.slice(0, 2) === '00') bad(); return parseInt(s, 16); }
-    function item() {
+    function item(depth) {
+      if (depth > 4) bad(); // envelope → fields → access list → entry → storage keys
       var b = parseInt(take(1), 16);
       if (b < 0x80) return hex.substr(i - 2, 2);
       if (b < 0xb8) return take(b - 0x80);
       if (b < 0xc0) return take(size(b - 0xb7));
       var len = b < 0xf8 ? b - 0xc0 : size(b - 0xf7), end = i + 2 * len, out = [];
       if (end > hex.length) bad();
-      while (i < end) out.push(item());
+      while (i < end) out.push(item(depth + 1));
       if (i !== end) bad();
       return out;
     }
-    var out = item(); if (i !== hex.length) bad(); return out;
+    var out = item(0); if (i !== hex.length) bad(); return out;
   }
   function checkEnvelope(signed, tx, payer, verify) {
     var refuse = function (what) { throw refusal('binding', 'The signed envelope differs from the authorized transaction: ' + what + '. Nothing was broadcast.'); };
@@ -359,7 +361,8 @@
     function storageExposure(){ return ledger.plans.reduce((sum,p)=>sum+(p.txs.some(t=>t.kind==='payment'&&t.state!=='planned')?BigInt(p.total):0n),0n); }
     function authorized(p, signal){
       stopped(signal);
-      if (!p.authorization || p.authorization.invoice !== p.id || p.authorization.payer !== p.payer || p.authorization.expiresAt !== p.expiresAt || !p.scope || p.authorization.scope !== p.scope || clock() >= p.expiresAt) fail('expired','The invoice is not authorized or has expired. No new transaction was requested.');
+      if (!p.authorization || p.authorization.invoice !== p.id || p.authorization.payer !== p.payer || p.authorization.expiresAt !== p.expiresAt || clock() >= p.expiresAt) fail('expired','The invoice is not authorized or has expired. No new transaction was requested.');
+      if (!p.scope || p.authorization.scope !== p.scope) fail('binding','The authorization does not name this invoice’s contents. Prepare a new invoice; no new transaction was requested.');
       if (BigInt(p.total)+storageExposure()-(p.txs.some(t=>t.kind==='payment'&&t.state!=='planned')?BigInt(p.total):0n)>100n*10n**18n) fail('over-ceiling','The file would exceed the 100 ANT storage ceiling');
       if (gasExposure()>BigInt(p.authorization.gasCeilingWei)) fail('gas-ceiling','Aggregate gas exposure exceeds the authorized ETH limit');
     }
