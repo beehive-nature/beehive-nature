@@ -1,11 +1,15 @@
 # Tungsten integration — October 10, 2026
 
-PR #338 now integrates main at `7f339bb0b`, retaining another 215 intervening
-commits after the October 7 integration at `7a23164b5`. The original experiment and related
-work on main are complementary components, with different acceptance scopes.
+PR #338 merged at `36cea386fd3e9be242ec1df2275611de2d31a3a6` on October 10.
+The tested branch integrated main at `7f339bb0b`; the normal merge also retained
+the later main parent `fe3e9b890`. The original experiment and related work on
+main are complementary components, with different acceptance scopes.
 
-All 20 checks on the previous head `c9fcf898a` passed. No submitted review
-findings or unresolved review threads were present at the October 10 refresh.
+All nine retained workflows on the integration head `b689fde58` passed:
+23 checks succeeded and four unchanged RB lanes were conditionally skipped.
+No submitted review findings or unresolved review threads were present.
+All nine post-merge workflows on `36cea386f` also succeeded: 23 checks passed,
+the same four RB lanes were conditionally skipped, and Pages deployed successfully.
 The [integration closeout dispatch](../../docs/dispatches/2026-10-10-tungsten-integration.md)
 records the fresh integration and merge evidence. The private-chain receipts
 below remain dated October 7; they have not been relabeled as a new chain run.

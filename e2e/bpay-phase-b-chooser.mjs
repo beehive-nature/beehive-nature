@@ -130,7 +130,7 @@ check('audience unchanged after cypherpunk toggle + fresh quote', /You chose/i.t
 check('no numeric confirmation count', !/\d+\s+confirmation/i.test(bodyText));
 
 const fullHtml = await page.content();
-check('no authorization route strings (A9c law)', !/Review & Pay|review-pay|bpay-invoice-review-pay/i.test(fullHtml));
+check('no obsolete reference-invoice authorization route', !/Review & Pay|review-pay|bpay-invoice-review-pay/i.test(fullHtml));
 // page errors ATTRIBUTABLE TO THE bPAY SURFACE gate this suite; foreign wallet
 // findings are REPORTED (detail line) and docketed for their owning lane —
 // the CI-headless BZDIDKEY race (wallet keychain, pre-existing, 15s-local-probe
@@ -147,5 +147,5 @@ await browser.close();
 const failed = results.filter(r => !r.ok);
 console.log(failed.length
   ? `\nbPay PHASE-B GATE: ${failed.length} FAILED of ${results.length}`
-  : `\nbPay PHASE-B GATE: GREEN — ${results.length}/${results.length} (chooser gesture → resolved policy → fresh quote; nothing spendable; A9c held) — MOCK service, real acceptance belongs to the founder`);
+  : `\nbPay PHASE-B GATE: GREEN — ${results.length}/${results.length} (chooser gesture → resolved policy → fresh quote; reference quote grants no spending authority) — MOCK service, real acceptance belongs to the founder`);
 process.exit(failed.length ? 1 : 0);

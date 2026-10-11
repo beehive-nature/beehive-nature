@@ -20,8 +20,22 @@ fresh browser context, requires both matching bytes and playback ending, stops
 after ten minutes at most, and writes an exclusive-create receipt including the
 served HTML digest, browser version, timings, stalls, source path, chunk timeline
 and data-channel counters. A failure is preserved and exits nonzero. Optional
-`--candidate /absolute/bview.html` substitutes only candidate HTML on the public
-origin. No user browser profile, wallet, service, or local server is needed.
+`--candidate /absolute/bview.html` substitutes candidate HTML plus the local
+direct-MSE module and its pinned MP4Box runtime on the public origin. Loaded
+remuxer/runtime response digests are recorded. No user browser profile, wallet,
+service, or local server is needed for the public command.
+
+For the actual 214 MB video associated with the 434-second startup observation:
+
+```sh
+node e2e/bview-live.mjs --route direct-only --corpus tools/video-trial/corpus-2026-10-10.json --warm --out new-receipt.json
+```
+
+`--warm` reloads after the complete hash-matching download and verifies a cache
+replay with zero SDK requests, relay requests and WebRTC dials. `--save-video`
+optionally saves a hash-verified original copy for the separate local-content
+runner, `node e2e/bview-file.mjs --media original.mp4 --out new-local-receipt.json`.
+Local-content results are player acceptance, not public-network throughput.
 
 This is a measurement kit, not a bTunGsTeN conformance result. Its companion
 bView repair bounds recovery when a needed chunk is missing; it does not claim
