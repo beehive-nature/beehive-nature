@@ -1,0 +1,67 @@
+{
+  "checkedAt": "2026-10-03T07:44:18.900Z",
+  "scope": "Public GitHub Pages bytes compared to checked-out files, independent of Pages build status",
+  "results": [
+    {
+      "path": "surfaces/blood.html",
+      "status": 200,
+      "bytes": 157734,
+      "sha256": "2c83ec2f1ad91a3e20b62b4067eecfd3906b6977ea751aa86a0dd5c200d141e1", "publicDigestNote": "PUBLIC-CONSTANT; public deployed file digest",
+      "matchesCheckout": true
+    },
+    {
+      "path": "surfaces/blood-atlas.mjs",
+      "status": 200,
+      "bytes": 53634,
+      "sha256": "e778b304af07895ca561977d210fba96806749a05befb6e31df796f4bdd482a0", "publicDigestNote": "PUBLIC-CONSTANT; public deployed file digest",
+      "matchesCheckout": true
+    },
+    {
+      "path": "surfaces/blood-atlas.css",
+      "status": 200,
+      "bytes": 6294,
+      "sha256": "f6c40c384d3d73e9fb16aeb713eb15dc319eb2878a5f932c73544d1fc91b6627", "publicDigestNote": "PUBLIC-CONSTANT; public deployed file digest",
+      "matchesCheckout": true
+    },
+    {
+      "path": "surfaces/tree-of-life.mjs",
+      "status": 200,
+      "bytes": 22116,
+      "sha256": "25e04759a0aacf4a4d339dc0ad12e29214cfd7af73e46969155d9f5b8b64faa1", "publicDigestNote": "PUBLIC-CONSTANT; public deployed file digest",
+      "matchesCheckout": true
+    },
+    {
+      "path": "surfaces/person-panel-corpus.mjs",
+      "status": 200,
+      "bytes": 30479,
+      "sha256": "fb7c091ad50eca90d1326acf15dbcb9c878ae934c7cf3a212d98ebf8a5d6099c", "publicDigestNote": "PUBLIC-CONSTANT; public deployed file digest",
+      "matchesCheckout": true
+    },
+    {
+      "path": "assets/profile-archive/lineage/sources/images-summary.json",
+      "status": 200,
+      "bytes": 126551,
+      "sha256": "2ae6dbf4bdb66a8fcd8d6c65b623a882c96fa64b86e5f61772e169c84d7ce896", "publicDigestNote": "PUBLIC-CONSTANT; public deployed file digest",
+      "matchesCheckout": true
+    }
+  ],
+  "pages": {
+    "run": 37106192855,
+    "commit": "0ce0ff781d9b1fcf604f45f9b2fe4ea8d3fa8393",
+    "status": "built",
+    "updatedAt": "2026-10-03T07:43:39Z"
+  },
+  "browser": {
+    "url": "https://skaists.dev/surfaces/blood.html",
+    "publishedDeceased": 11041,
+    "generations": 143,
+    "generation44Count": 36,
+    "nobleEntries": 905,
+    "charlemagneHops": 39,
+    "charlemagneSupport": "unsourced-entry",
+    "fanChartHeight": 445.0625,
+    "fanChartWidth": 1049.3333740234375,
+    "interaction": "Charlemagne walk opened via accessible button; initial DOM automation timed out, accessibility interaction succeeded after reload",
+    "leftOpen": true
+  }
+}

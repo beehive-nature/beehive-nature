@@ -41,7 +41,7 @@ fleet version evidence.
 | RNG doc/implementation mismatch | `src/pqc/fips_rng.rs:8` module doc: "Uses approved DRBG mechanisms (CTR_DRBG with AES-256)" — but `fips_rng.rs:255-257`: `struct DrbgState { … rng: ChaCha20Rng }` (`rand_chacha::ChaCha20Rng`, seeded at `:281,:312`) | REPRODUCED — a three-way contradiction: module doc says CTR_DRBG/AES-256, README says ChaCha20-is-approved, the code stores ChaCha20Rng |
 | `fips205` availability ≠ use everywhere | dep present; no census of network call sites attempted | REPRODUCED as scoped |
 | wrappers call `OsRng` directly | `src/pqc/ml_kem.rs:9,36,60`; `src/pqc/ml_dsa.rs:9,36,57`; `src/api/sig.rs:60,525,539` — and `FipsRng` is only re-exported (`src/pqc/mod.rs:147`), never called by the library's own crypto paths | REPRODUCED and SHARPENED: the default keygen/sign/encaps paths bypass `fips_rng.rs` entirely |
-| `UPSTREAM_VERIFICATION.md` is honest about limits | dated **2025-01-08**, 7× "assumed" re constant-time properties, upstream = `integritychain` crates | REPRODUCED and SHARPENED: the CAVP/CMVP items at `docs/fips/UPSTREAM_VERIFICATION.md:138-139` are **unchecked checkboxes** — "Consider CAVP testing", "Document verification evidence for CMVP" — the repo's own tracker says validation work has not been done |
+| `UPSTREAM_VERIFICATION.md` is honest about limits | dated **2025-01-08**, 7× "assumed" re constant-time properties, upstream = `integritychain` crates | REPRODUCED and SHARPENED: the CAVP/CMVP items at `docs/fips/UPSTREAM_VERIFICATION.md:138-139` are **unchecked checkboxes** — "Consider CAVP testing", "Document verification evidence for CMVP" — validation evidence was **not established in the reviewed tracker**; this is not a finding that certification work definitively never occurred |
 
 ### self_encryption @ `eb95108a6e` (manifest version 0.36.1, `Cargo.toml:16`)
 
@@ -151,3 +151,33 @@ the handoff is carried forward verbatim as the lane's canon:
 | call-site census (does anything route through `FipsRng`?) | next session this lane, if ordered |
 | bDroP/BNR disclosure line using the canon wording above | bDroP lane when its surface next changes |
 | Safe 7 PQ-signing zCode review (separate lane, requested in `2026-10-09-zcode-review-request-safe7-step2.md`) | zCode review seat — untouched by this lane |
+
+## Closeout (2026-10-10, founder-ordered archive)
+
+**Landed state.** The dispatch above landed on `main` at
+`80fff711e97b20f09c17af907cf031a966d4de07` (push `299c3f139..80fff711e`) and
+remains an ancestor of `main`. Available CI at that SHA, read back read-only
+with nothing re-run: **27 check-runs — 24 success, 3 skipped
+(`rb01-psi`, `rb02-aes`, `rb03-budget`), 0 failures.** This closeout commit
+adds only the correction below and this section.
+
+**Correction (named as a correction).** One clause in the verification table
+overstated: the unchecked CAVP/CMVP boxes show that **validation evidence was
+not established in the reviewed tracker** — not that certification work
+definitively never occurred. The clause now reads that way; everything it
+supported is unchanged and preserved: the finding remains **"validation claim
+unestablished"** and **security consequences UNVERIFIED**.
+
+**Explicitly open for future work** (none performed by this lane):
+
+- call-site tracing (which paths, if any, route through `FipsRng`);
+- deployed-version verification — the October 9 repository tips are source
+  pins only and must never be presented as current fleet versions;
+- certificate-database verification (CMVP search beyond the material
+  reviewed).
+
+**Scope fences held at close.** No upstream outreach (the wording correction
+to `saorsa-labs/saorsa-pqc` remains a founder gesture), no cryptographic
+implementation changes, no expansion into another audit. The Safe 7 review
+stays with its separate owner. Session archived on the strength of this
+dispatch.

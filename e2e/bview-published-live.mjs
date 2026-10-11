@@ -35,10 +35,12 @@ page.on('response',response=>{
 try{
  const cdp=await context.newCDPSession(page);await cdp.send('Network.enable');await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
  if(kbps!==null)await cdp.send('Network.emulateNetworkConditions',{offline:false,latency:80,downloadThroughput:kbps*1000/8,uploadThroughput:kbps*1000/8,connectionType:'cellular3g'});
+ const navigationStarted=Date.now();
  const response=await page.goto('https://skaists.dev/surfaces/bview.html?route=adaptive',{waitUntil:'domcontentloaded'});
  const htmlSha256=sha(await response.body()),htmlMatches=htmlSha256===sha(html);
  if(!htmlMatches)throw Error('Hosted player differs from this tested checkout');
  await page.waitForFunction(()=>typeof window.__bviewEngine==='function');
+ const pageReadyObservedMs=Date.now()-navigationStarted;
  await page.fill('#addr',source.address);
  const started=Date.now();await page.locator('#f button').click();
  while(Date.now()-started<120000){
@@ -62,6 +64,7 @@ try{
  const result={observedAt:new Date().toISOString(),browser:browser.version(),profile:values.profile,kbps,latencyMs:kbps!==null?80:null,
   boundary:'one public Chrome viewer, fresh context, HTTP browser cache disabled; phone profile is Pixel 7 emulation; edge caches may be warm; not a physical phone or audience-capacity test',
   htmlSha256,htmlMatches,source,publication,bundleId:bundle,accepted,integrity,complete,sourceMatches,smooth,budgets,layout,
+  pageReadyObservedMs,navigationToWatchActionMs:started-navigationStarted,
   startupMs:e.playStartMs,previewMs:e.ttffMs,firstMediaByteMs:e.ttfbMs,endedObservedMs:Date.now()-started,stalls:e.stalls,stallMs:e.stallMs,
   droppedFraction,mediaBytes:e.adaptive.mediaBytes,assetBodyBytes:assets.reduce((n,a)=>n+(a.bytes||0),0),payloadReduction:1-e.adaptive.mediaBytes/source.size,video:e.video,adaptive:e.adaptive,
   sdkRequests,relayRequests,webRtcDials,errors,failedRequests,assets,samples,'PUBLIC-CONSTANT':'public original and immutable rendition hashes'};
