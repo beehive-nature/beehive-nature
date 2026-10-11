@@ -21,10 +21,10 @@ test at e2e\bview-published.test.mjs:58:1
 ✖ original address defaults to adaptive copy, completes, and retains the saved original address (29390.1931ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
   + actual - expected
-  
+
   + undefined
   - '7c4f61ed1c7b950a3043b8a2d1aa9974a24ac6ca274c330e4da1b3a6a61bbb78' # PUBLIC-CONSTANT: public fixture identifier
-  
+
       at TestContext.<anonymous> (file:///C:/Users/travi/.codex/worktrees/0d0c/wt-codex-shu003/e2e/bview-published.test.mjs:67:10)
       at async Test.run (node:internal/test_runner/test:1332:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
