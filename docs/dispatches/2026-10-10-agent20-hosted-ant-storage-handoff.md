@@ -1,6 +1,18 @@
 # Agent 20 — Hosted ANT Storage Purchasing
 
-Status: HANDOFF / IMPLEMENTATION OPEN. Archiving the old wallet-unification chat is housekeeping, not acceptance of ANT purchasing.
+Status: #391 and native bzDiD follow-up #396 MERGED. Native deployment and live paid retrieval remain OPEN. Archiving the old wallet-unification chat is housekeeping, not acceptance of ANT purchasing.
+
+## Current continuation, 2026-10-11
+
+PR #391 merged as `42c466b56feaf94796da828302d01cdc714b0156`; all eight source workflows and all eight merge-commit workflows succeeded. Its v8 public release and non-spending hosted controls were verified. A quote alone did not establish a bound payable invoice or purchased retrieval.
+
+The founder selected the estate's own bzDiD wallet and clarified that the Rust kernel is the root. PR #396 merged as `283babc42dbb7caffb1872e4fd82565d2db7edc8` after all eight workflows succeeded on source `54d8e96c4c5511fb39835da36d3390757b07034d`. The storage panel requires the first-party Rust signer, with no extension or JavaScript signing fallback. Six real-Rust fixture purchases passed across three registers and two phone widths. These are mocked-network receipts, not mainnet payments.
+
+Custody correction: Rust computes the signature, but key material and policy still share the wallet page's JavaScript realm. There is no isolated keychain frame. Independent Rust authority over custody, aggregate authorization and cross-device replay is UNVERIFIED. Claude's competing provider will not land; its PR #400 adds envelope validation, a vault pin and scoped authorization, but does not establish isolated custody. Inspect its current status before any live payment; do not duplicate or modify that owner's worktree.
+
+The 49-byte public probe remains unpaid. Its earlier 0.0002 ETH fee ceiling was only a proposal. No standing genealogy or bView budget authorizes this file. The public page's keychain was disconnected on the latest read, and a fresh payable ANT invoice has not been prepared. Connect the existing bzDiD keychain through the hosted UI, obtain a fresh bound invoice, show ANT and aggregate ETH separately, and obtain the founder's explicit bounded authorization before spending. Never request or export a seed.
+
+Latest deployment observation: Pages run `38120141518` on descendant `48c8d2416f7ad4bd46ca1054646b6a66d313a183` was queued. A public-byte check at `2026-10-11T07:31:45Z` failed for the new wallet/adapters; the site still served the older release. Five runtime/core files are unchanged between tested source and this descendant; the stack inventory has an unrelated bDrop change. Hold receipt-only main pushes while this deployment waits, to avoid superseding it again. Recheck deployment and actual bytes rather than treating this paragraph as a current receipt.
 
 ## User order, preserved
 
