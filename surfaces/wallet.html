@@ -10070,8 +10070,92 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      core — every primitive below is proven against a published vector in
      e2e/wallet-signer.mjs before it is trusted with an address or an amount. */
   window.BNRHIVE={amount:hiveAmount,ser:hiveSer,digest:function(b){return hexS(hiveDigest(b))},sign:function(wif,b){ return hiveSign(wif,hiveDigest(b)) },pubOf:hivePubOf,bound:function(){return hiveBound()}};
+  /* ══ THE OWN-KEY WALLET as an EIP-1193 provider, for the hosted ANT storage purchase.
+     The order of ways for any chain is the wallet's own key first (founder, 2026-10-05):
+     the bzDiD keychain's evm:<soul> key signs, in this tab, with no extension and no
+     second seed. It is a SCOPED provider: it signs only what an ANT storage payment is —
+     an approve of the payment token to the storage vault, and payForQuotes on the vault —
+     on one rail, at zero native value, from its own address. Anything else is refused
+     before the key is touched. The ANT a payment moves is read from its own calldata and
+     passes capAssert first: the cap lives in the signer, as on every rail. It signs
+     exactly the transaction it is handed (type 2: the nonce, gas and fee caps the payer
+     set and journaled), so the payer's recovery recognises what was mined. Deterministic
+     signatures (RFC 6979) mean the same request re-signs to the same bytes and hash. ══ */
+  function ownProvider(railKey,scope){
+    var rail=railOf(railKey), CH=BigInt(rail.chainId), chainHex='0x'+CH.toString(16);
+    var token=String(scope&&scope.token||'').toLowerCase(), vault=String(scope&&scope.vault||'').toLowerCase();
+    if(!/^0x[0-9a-f]{40}$/.test(token)||!/^0x[0-9a-f]{40}$/.test(vault)||token===vault) throw new Error('the own-key wallet needs the payment token and the storage vault');
+    function rpcErr(code,msg){ var e=new Error(msg); e.code=code; return e }
+    function armed(){ return !!(MPRK&&SOUL&&BN&&BN.secp&&BN.keccak_256) }
+    function addr(){ if(!armed()) throw rpcErr(4100,'connect your keychain: your own key pays for storage'); var p=evmAddrOf(); p.seed.fill(0); return p.addr.toLowerCase() }
+    function qty(v,what){ if(typeof v!=='string'||!/^0x[0-9a-f]+$/i.test(v)) throw rpcErr(-32602,what+' must be a 0x quantity'); return BigInt(v) }
+    function words(data){
+      var h=String(data||'').toLowerCase().replace(/^0x/,'');
+      if(!/^[0-9a-f]*$/.test(h)||h.length<8||(h.length-8)%64) throw rpcErr(4200,'the calldata is not a selector and whole words');
+      var w=[]; for(var i=8;i<h.length;i+=64)w.push(h.slice(i,i+64)); return {sel:'0x'+h.slice(0,8),w:w};
+    }
+    var ZERO12='0'.repeat(24);
+    /* the ANT a transaction moves, from its own calldata: an approve moves none (it lets
+       the vault pull up to its amount); payForQuotes moves the sum of its quotes */
+    function antOf(to,data){
+      var d=words(data);
+      if(to===token&&d.sel==='0x095ea7b3'){
+        if(d.w.length!==2||d.w[0]!==ZERO12+vault.slice(2)) throw rpcErr(4200,'the only approval this key signs is to the storage vault');
+        return 0n;
+      }
+      if(to===vault&&d.sel==='0xb6c2141b'){
+        if(d.w.length<2||BigInt('0x'+d.w[0])!==32n) throw rpcErr(4200,'payForQuotes is not in the expected encoding');
+        var n=BigInt('0x'+d.w[1]);
+        if(n<1n||n>256n||BigInt(d.w.length)!==2n+3n*n) throw rpcErr(4200,'payForQuotes carries an unexpected number of quotes');
+        var sum=0n;
+        for(var i=0;i<Number(n);i++){
+          if(d.w[2+3*i].slice(0,24)!==ZERO12) throw rpcErr(4200,'payForQuotes names a malformed rewards address');
+          sum+=BigInt('0x'+d.w[3+3*i]);
+        }
+        return sum;
+      }
+      throw rpcErr(4200,'this key signs only the storage payment: an approve to the storage vault, or payForQuotes on it');
+    }
+    async function send(tx){
+      if(!tx||typeof tx!=='object') throw rpcErr(-32602,'a transaction is required');
+      var from=addr();
+      if(String(tx.from||'').toLowerCase()!==from) throw rpcErr(4100,'the transaction is from another account than your own key');
+      if(tx.chainId!==undefined&&qty(tx.chainId,'chainId')!==CH) throw rpcErr(4901,'the transaction names another chain than '+rail.label);
+      if(tx.value!==undefined&&qty(tx.value,'value')!==0n) throw rpcErr(4200,'a storage payment carries no native value');
+      var to=String(tx.to||'').toLowerCase();
+      if(!/^0x[0-9a-f]{40}$/.test(to)) throw rpcErr(-32602,'to must be an address');
+      var nonce=qty(tx.nonce,'nonce'), gas=qty(tx.gas,'gas'), maxFee=qty(tx.maxFeePerGas,'maxFeePerGas'), tip=qty(tx.maxPriorityFeePerGas,'maxPriorityFeePerGas');
+      if(gas<=0n||maxFee<=0n||tip>maxFee) throw rpcErr(-32602,'gas and fee caps must be set, and the tip within the fee cap');
+      var ant=antOf(to,tx.data), antAmt=fromBaseUnits(ant,18);
+      if(ant>0n) capAssert('ANT',Number(antAmt));          /* SIGNER-AUTHORITATIVE, before the key is touched */
+      var p=evmAddrOf(), raw;
+      try{
+        var body=[CH,nonce,tip,maxFee,gas,hexB(to.slice(2)),0n,hexB(String(tx.data).replace(/^0x/,'')),[]];
+        var unsigned=rlp(body), pre=new Uint8Array(unsigned.length+1); pre[0]=2; pre.set(unsigned,1);
+        var sig=BN.secp.sign(BN.keccak_256(pre),p.seed);
+        var signed=rlp(body.concat([BigInt(sig.recovery||0),hexB(sig.r.toString(16).padStart(64,'0')),hexB(sig.s.toString(16).padStart(64,'0'))]));
+        raw=new Uint8Array(signed.length+1); raw[0]=2; raw.set(signed,1);
+      } finally { p.seed.fill(0) }                           /* the seed is scrubbed on every exit */
+      var rawHex='0x'+hexS(raw), hash='0x'+hexS(BN.keccak_256(raw));
+      var b=await evmBroadcast({rail:railKey,raw:rawHex});
+      if(b.no&&b.sure) throw rpcErr(-32000,'the network refused this payment before it ran: '+b.no);
+      if(ant>0n) capRecord('ANT',Number(antAmt));          /* it went out, or may have: it counts */
+      /* sent, already known, nonce used or no verdict: the payer's journal reconciles by
+         hash and nonce, and absence never permits a second send */
+      return hash;
+    }
+    return { isBnrOwnKey:true, request: async function(a){
+      var m=a&&a.method, ps=a&&a.params||[];
+      if(m==='eth_chainId')return chainHex;
+      if(m==='eth_accounts')return armed()?[addr()]:[];
+      if(m==='eth_requestAccounts')return [addr()];
+      if(m==='eth_sendTransaction')return send(ps[0]);
+      throw rpcErr(4200,'the own-key wallet does not answer '+m);
+    }};
+  }
   window.BNRPAY={rlp:rlp,evmSendRaw:evmSendRaw,parseWif:parseWifAny,
     rails:EVM_RAILS,evmChecksumOk:evmChecksumOk,
+    ownProvider:ownProvider,ownKeyReady:function(){ return !!(MPRK&&SOUL&&BN&&BN.secp&&BN.keccak_256) },
     ripemd160:ripemd160,hash160:hash160,p2wpkhAddress:p2wpkhAddress,solanaAddress:solanaAddress,
     toBaseUnits:toBaseUnits,fromBaseUnits:fromBaseUnits,
     decodeBolt11:decodeBolt11,decodeBolt12:decodeBolt12,decodeLnRequest:decodeLnRequest,
