@@ -27,8 +27,8 @@ const sdk=`const bytes=new TextEncoder().encode(${JSON.stringify(bytes.toString(
 export async function getNetworkDefaults(){return {payment:{chainId:42161,paymentTokenAddress:'0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684',paymentVaultAddress:'0x'+'b'.repeat(40)},rpcUrl:'https://fixture.invalid/rpc'};}
 export class AutonomiClient{static async connect(){return new AutonomiClient();}closed=false;close(){}async upload(file,opts){await opts.onCheckpoint({fixture:true});const n=(await getNetworkDefaults()).payment;await opts.payment.pay(n,[{quoteHash:'0x'+'c'.repeat(64),rewardsAddress:'0x'+'d'.repeat(40),amount:'100'}],{signal:opts.signal});return {file:{address:'fixture-only'},storageCostAtto:'100'};}async download(){return {bytes};}}`;
 try{
- for(const reg of ['bee','raver','cypherpunk']){
-  const context=await browser.newContext({viewport:{width:390,height:900}});
+ for(const width of [320,390]) for(const reg of ['bee','raver','cypherpunk']){
+  const context=await browser.newContext({viewport:{width,height:900}});
   await context.route('**/vendor/ant-browser-sdk/0.1.1/index.js',r=>r.fulfill({body:sdk,contentType:'text/javascript'}));
   await context.addInitScript(reg=>{
    localStorage.setItem('bregister',reg);localStorage.setItem('bnr_soul','gatesoul');localStorage.setItem('bpay-policy-v1',JSON.stringify({audience:'public'}));window.__sends=0;window.__txs={};
@@ -117,9 +117,11 @@ try{
   await until(async()=>{const text=await page.locator('#ant-buy-status').innerText();if(text.startsWith('Storage stopped:'))throw Error(text);return text.startsWith('Stored and retrieved:');});
   assert.equal(await page.evaluate(()=>window.__sends),2);
   const receipt=JSON.parse(await page.locator('#ant-buy-receipt').textContent());assert.equal(receipt.retrievedBytes,bytes.length);assert.equal(receipt.transactions.length,2);
-  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  await page.evaluate(()=>document.fonts.ready);
+  const layout=await page.evaluate(()=>({viewport:innerWidth,scroll:document.documentElement.scrollWidth}));
+  assert.ok(layout.scroll<=layout.viewport+1,`${reg} at ${width}px overflows: ${JSON.stringify(layout)}`);
   await page.locator('#ant-buy-start').click();await until(()=>page.locator('#ant-buy-start').isEnabled());assert.equal(await page.evaluate(()=>window.__sends),2);
-  console.log('PASS '+reg+': explicit authorization, cancellation, two bounded sends, retrieved hash, retry without duplicate, 390px layout');
+  console.log('PASS '+reg+': explicit authorization, cancellation, two bounded sends, retrieved hash, retry without duplicate, '+width+'px layout');
   await context.close();
  }
 }catch(e){console.error(e);throw e;}finally{await browser.close();}

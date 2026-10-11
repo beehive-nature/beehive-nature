@@ -87,3 +87,11 @@ Validation of the native candidate:
 - Native altered value/chain/recipient/calldata/gas requests are refused. The zero-ETH-cap mutation initially caught the legacy daily-cap display tolerance accepting a sub-nanounit fixture fee; the native storage signer now applies a strict comparison, and that refusal passes.
 - These are fixture results, not a live purchase. No funds spent. The Python command alias resolved to the Windows Store shim during a text-edit attempt; no edit occurred through it, and the edit was performed with Node instead.
 - A concurrent Claude lane was identified at branch `claude/own-key-ant-storage`, in its own `bnr-settlement-adapter-03c61e` worktree. Its in-progress native provider overlaps this candidate. That worktree was inspected read-only and left untouched. There must be one landed storage signing path; neither implementation is represented as deployed by this entry.
+
+### Native CI layout correction
+
+PR #396 source `6277cb12ba307a8925a2e39bccb9dc874618e698` failed the wallet shard of run `38110543430` at the hosted purchase fixture's final 390px layout assertion: `document.documentElement.scrollWidth<=innerWidth+1` evaluated false. The six other test shards passed. The signing, broadcast and retrieval assertions precede that layout assertion; the run is still a failed receipt, not a completed release gate.
+
+The connected bzDiD fixture exposes the Arweave public address. Its `#arw-addr` span lacked word wrapping, inherited from `12cceb1c09`. A local 320px reproduction measured document width 362px, with the 43-character address extending to x=361.984375. The span now allows `overflow-wrap:anywhere`. No signing or payment behavior changed. The fixture now checks both 320px and 390px after fonts are ready; all six register/width combinations passed locally, including exact bounded signatures, cancellation, retrieval and duplicate-send refusal. The generated surface-directory check and `git diff --check` also passed. Fresh descendant CI is required.
+
+A separate default-deny fixture connected a throwaway bzDiD identity while deliberately withholding the Rust core. Preparation refused with `first-party signing core is not ready`; no JavaScript signer fallback or broadcast occurred. All identities in these fixtures are deterministic test data, never the founder's wallet. No live funds spent.
