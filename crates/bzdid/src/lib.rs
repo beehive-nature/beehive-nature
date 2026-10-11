@@ -16,22 +16,32 @@
 //! serves the proof** (the order's design principle, made mechanical).
 //!
 //! WHAT THIS INCREMENT IS NOT (named, so nobody reads more into it): no
-//! succession/rotation signatures yet (next increment), no `.b` name
-//! binding, no BEELOG, no Merkle proofs, no Vaulta epoch root. The root
-//! alone already carries its value: a free-tier identity that costs
-//! nothing, exists offline, and verifies in anyone's hands.
+//! `.b` name binding, no Vaulta epoch root yet. Signed succession/rotation
+//! (ORDER BZDID-002 Phase 1) IS here — `succession::resolve_did` walks
+//! the signed op chain with priority arbitration and fails closed on
+//! every ambiguity. The root alone already carries its value: a
+//! free-tier identity that costs nothing, exists offline, and verifies
+//! in anyone's hands; the chain keeps that identity SOVEREIGN across key
+//! changes — the did never moves, only the keys do.
 //!
 //! FAIL CLOSED everywhere: unknown algorithms refused, non-canonical
 //! encodings refused, structural doubts refused. A verifier that answers
 //! plausibly when it should error is how identities get forged
 //! (architecture §3.4 rule 10, applied at the root).
 
+pub mod anchor;
+pub mod beelog;
 pub mod dagcbor;
 pub mod did;
 pub mod genesis;
+pub mod succession;
 
 pub use did::BzDid;
 pub use genesis::{GenesisOp, KeyAlg, KeyCard};
+pub use succession::{
+    resolve_did, rotate_body_bytes, DidState, LostFork, ResolvedDid, RotateOp, SuccessionError,
+    ROTATE_DOMAIN, ROTATE_TYPE,
+};
 
 /// Everything that can go wrong, named — refusals are self-describing.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -47,6 +57,9 @@ pub enum BzDidError {
     BadRotationCount(usize),
     DuplicateRotationKey,
     BadValidUntil(u64),
+    /// A signature does not verify under the key card it was checked
+    /// against (bad bytes, wrong key, or a key since revoked).
+    SignatureRejected,
     /// The handed bytes are a well-formed op — for a DIFFERENT identity.
     DidMismatch {
         claimed: String,
@@ -75,6 +88,10 @@ impl std::fmt::Display for BzDidError {
                 write!(f, "the same rotation key appears twice — malformed, refused")
             }
             BzDidError::BadValidUntil(v) => write!(f, "validUntil must be a nonzero unix second, got {v}"),
+            BzDidError::SignatureRejected => write!(
+                f,
+                "the signature does not verify under the key card it names — refuse, never guess"
+            ),
             BzDidError::DidMismatch { claimed, computed } => write!(
                 f,
                 "these bytes are not that identity: claimed {claimed}, bytes hash to {computed} — refuse, never guess"
@@ -122,6 +139,94 @@ mod tests {
             also_known_as: vec![],
             valid_until: 4_102_444_800,
         }
+    }
+
+    /// A structurally valid rotation op with placeholder signature bytes —
+    /// for canon-shape tests only; resolution tests sign for real.
+    pub(crate) fn demo_rotate() -> succession::RotateOp {
+        succession::RotateOp {
+            seq: 1,
+            prev: [0x11; 32],
+            at: 1_800_000_000,
+            signed_by: 0,
+            rotation_keys: vec![KeyCard::new(KeyAlg::Ed25519, vec![0xE4; 32]).unwrap()],
+            signing_key: KeyCard::new(KeyAlg::Ed25519, vec![0x5E; 32]).unwrap(),
+            services: vec!["https://demo.example".into()],
+            also_known_as: vec![],
+            valid_until: 4_102_444_801,
+            sig: vec![0x5A; 64],
+        }
+    }
+
+    /// A resolved two-op chain with REAL ed25519 signatures — the beelog
+    /// identity-log test's fixture. Deterministic seeds, like every test
+    /// key in this crate.
+    pub(crate) fn demo_keys() -> (succession::ResolvedDid, Vec<u8>) {
+        let mk = |seed: u8| {
+            let mut s = [0u8; 32];
+            s[0] = seed;
+            ed25519_dalek::SigningKey::from_bytes(&s)
+        };
+        let r0 = mk(0xA1);
+        let r1 = mk(0xB2);
+        let genesis = GenesisOp {
+            rotation_keys: vec![
+                KeyCard::new(KeyAlg::Ed25519, r0.verifying_key().as_bytes().to_vec()).unwrap(),
+                KeyCard::new(KeyAlg::Ed25519, r1.verifying_key().as_bytes().to_vec()).unwrap(),
+            ],
+            signing_key: KeyCard::new(KeyAlg::Ed25519, vec![0x5D; 32]).unwrap(),
+            services: vec![],
+            also_known_as: vec![],
+            valid_until: 4_102_444_800,
+        };
+        let genesis_bytes = genesis.build().unwrap();
+        let did = BzDid::derive(&genesis_bytes);
+        let genesis_hash = {
+            use sha2::Digest as _;
+            let h: [u8; 32] = sha2::Sha256::digest(&genesis_bytes).into();
+            h
+        };
+        let card = |k: &ed25519_dalek::SigningKey| {
+            KeyCard::new(KeyAlg::Ed25519, k.verifying_key().as_bytes().to_vec()).unwrap()
+        };
+        let mut op1 = succession::RotateOp {
+            seq: 1,
+            prev: genesis_hash,
+            at: 1_700_000_000,
+            signed_by: 1,
+            rotation_keys: vec![card(&r0)],
+            signing_key: KeyCard::new(KeyAlg::Ed25519, vec![0x5E; 32]).unwrap(),
+            services: vec![],
+            also_known_as: vec![],
+            valid_until: 4_102_444_800,
+            sig: vec![0u8; 64],
+        };
+        use ed25519_dalek::Signer as _;
+        op1.sig = r1
+            .sign(&succession::rotate_body_bytes(&op1).unwrap())
+            .to_bytes()
+            .to_vec();
+        let b1 = op1.build().unwrap();
+        let h1 = op1.hash().unwrap();
+        let mut op2 = succession::RotateOp {
+            seq: 2,
+            prev: h1,
+            at: 1_700_000_100,
+            signed_by: 0,
+            rotation_keys: vec![card(&r1)],
+            signing_key: KeyCard::new(KeyAlg::Ed25519, vec![0x5F; 32]).unwrap(),
+            services: vec![],
+            also_known_as: vec![],
+            valid_until: 4_102_444_800,
+            sig: vec![0u8; 64],
+        };
+        op2.sig = r0
+            .sign(&succession::rotate_body_bytes(&op2).unwrap())
+            .to_bytes()
+            .to_vec();
+        let b2 = op2.build().unwrap();
+        let resolved = succession::resolve_did(&did, &genesis_bytes, &[b1, b2], None).unwrap();
+        (resolved, genesis_bytes)
     }
 
     #[test]
