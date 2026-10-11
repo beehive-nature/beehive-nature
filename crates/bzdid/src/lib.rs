@@ -29,6 +29,7 @@
 //! plausibly when it should error is how identities get forged
 //! (architecture §3.4 rule 10, applied at the root).
 
+pub mod anchor;
 pub mod beelog;
 pub mod dagcbor;
 pub mod did;

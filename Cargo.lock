@@ -652,6 +652,8 @@ dependencies = [
 name = "btungsten-wb004"
 version = "0.1.0"
 dependencies = [
+ "bzdid",
+ "ed25519-dalek",
  "sha2 0.10.9",
 ]
 
