@@ -45,6 +45,9 @@
   var ancestors = location.ancestorOrigins ? Array.from(location.ancestorOrigins) : null;
   if (framed && ancestors && !ancestors.every(function (o) { return PARENTS.indexOf(o) >= 0; })) return stop('This keychain only opens inside the heART WALLet at skaists.dev, or on its own.');
   if (!window.BZDIDKEY || !window.BnrSign || !window.BZGENESIS) return stop('Part of the keychain did not load, so it holds and signs nothing. Reload to try again.');
+  // Without ancestorOrigins this browser cannot name who framed us: show nothing to press until
+  // the wallet at skaists.dev has spoken (its message origin is checked).
+  var greeted = !framed || !!ancestors;
   var K = window.BZDIDKEY, B = window.BnrSign, G = window.BZGENESIS;
 
   /* ── bytes ── */
@@ -72,7 +75,8 @@
     } finally { r0.seed.fill(0); sg.seed.fill(0); }
   }
   function open(secret, how) {
-    lock(true);
+    if (root) root.fill(0);
+    root = null; me = null;
     root = how === 'prf' ? K.masterPrkFromPrfSecret(secret) : secret.slice();
     secret.fill(0);
     me = identity(); mem.set('kc.did', me.did); mem.set('kc.enrolled', '1');
@@ -85,6 +89,7 @@
     if (!quiet) { publish(); render(); }
   }
   window.addEventListener('pagehide', function () { lock(true); });
+  window.addEventListener('pageshow', function () { render(); publish(); });
 
   /* ── the narrow interface: public state out, sign requests in ── */
   function stateMsg() { return me ? { t: 'kc.state', v: 1, state: 'unlocked', did: me.did, evm: me.evm, genesis: me.genesis } : { t: 'kc.state', v: 1, state: 'locked', known: mem.get('kc.did') || null }; }
@@ -95,6 +100,7 @@
     var m = ev.data;
     if (!m || typeof m !== 'object' || m.v !== 1) return;
     parentOrigin = ev.origin;
+    if (!greeted) { greeted = true; render(); }
     if (m.t === 'kc.hello') publish();
     else if (m.t === 'kc.sign') ask(m);
   });
@@ -152,10 +158,13 @@
   function confirmCard() {
     var d;
     try { d = decide(pending.tx); } catch (e) { refuse(e.message); return; }
-    var go = btn('Sign this payment', null, 'go'), shownAt = performance.now(), visible = !('IntersectionObserver' in window);
+    // The press counts only after the whole card has been visible and unobscured for
+    // PRESS_DELAY_MS without a break. Only browsers with IntersectionObserver v2 (isVisible)
+    // can prove "unobscured"; elsewhere the keychain refuses rather than guesses.
+    var go = btn('Sign this payment', null, 'go'), visibleSince = null, visible = false, provable = false;
     go.disabled = true;
-    var ready = function () { go.disabled = !(visible && performance.now() - shownAt >= PRESS_DELAY_MS); };
-    setTimeout(ready, PRESS_DELAY_MS + 10);
+    var ready = function () { go.disabled = !(provable && visible && visibleSince !== null && performance.now() - visibleSince >= PRESS_DELAY_MS); };
+    var seen = function (v) { if (v && !visible) { visibleSince = performance.now(); setTimeout(ready, PRESS_DELAY_MS + 10); } if (!v) visibleSince = null; visible = v; ready(); };
     go.addEventListener('click', trusted(function () {
       ready(); if (go.disabled || !pending) return;
       var p = pending; pending = null;
@@ -170,13 +179,19 @@
         el('dt', { text: 'Sequence' }), el('dd', { text: d.nonce.toString() })]),
       go, btn('Refuse', trusted(function () { refuse('You refused this payment in your keychain.'); }))
     ]);
+    var note = el('p', { class: 'dim', text: 'This browser cannot prove that nothing covers this card, so the keychain will not sign here. Open the wallet in Chrome, Edge or Brave to sign.', hidden: '' });
+    card.append(note);
+    var unprovable = function () { provable = false; note.hidden = false; ready(); };
     if ('IntersectionObserver' in window) {
-      try { new IntersectionObserver(function (es) { var e = es[es.length - 1]; visible = ('isVisible' in e ? e.isVisible : e.isIntersecting) && e.intersectionRatio >= 0.999; ready(); }, { trackVisibility: true, delay: 100, threshold: [0, 1] }).observe(card); }
-      catch (e) { visible = true; }
-    }
+      try { watcher = new IntersectionObserver(function (es) { var e = es[es.length - 1]; if (!('isVisible' in e)) return unprovable(); provable = true; seen(e.isVisible && e.intersectionRatio >= 0.999); }, { trackVisibility: true, delay: 100, threshold: [0, 1] }); watcher.observe(card); }
+      catch (e) { unprovable(); }
+    } else unprovable();
     return card;
   }
+  var watcher = null; // the one visibility observer, for the card on screen
   function render() {
+    if (watcher) { watcher.disconnect(); watcher = null; }
+    if (!greeted) { show(el('p', { class: 'dim', text: 'Waiting for the heART WALLet…' })); return; }
     if (pending && me) { var c = confirmCard(); if (c) show(c); return; }
     if (me) {
       var code = el('p', { class: 'mono', hidden: '' });

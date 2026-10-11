@@ -18,7 +18,8 @@
     opts = opts || {};
     if (!container || !(await reachable())) return null;
     return new Promise(function (resolve) {
-      var f = document.createElement('iframe'), state = null, waits = {}, listeners = [], seq = 0, settled = false;
+      var f = document.createElement('iframe'), state = null, waits = {}, listeners = [], seq = 0, settled = false, loads = 0;
+      function failAll(why) { Object.keys(waits).forEach(function (id) { var w = waits[id]; delete waits[id]; var e = new Error(why); e.refusal = 'keychain'; w.no(e); }); }
       f.src = ORIGIN + '/';
       f.title = 'Your isolated bzDiD keychain';
       f.allow = 'publickey-credentials-get ' + ORIGIN + '; publickey-credentials-create ' + ORIGIN;
@@ -50,6 +51,7 @@
                 if (!state || state.state !== 'unlocked') return no(new Error('Unlock your isolated keychain to sign'));
                 var id = 'r' + (++seq) + '.' + Date.now();
                 waits[id] = { ok: ok, no: no };
+                setTimeout(function () { if (waits[id]) { delete waits[id]; var e = new Error('Your keychain did not answer in time; nothing was signed'); e.refusal = 'keychain'; no(e); } }, 310000);
                 f.scrollIntoView({ block: 'center' });
                 f.contentWindow.postMessage({ t: 'kc.sign', v: 1, id: id, tx: tx }, ORIGIN);
               });
@@ -58,7 +60,10 @@
         }
       };
       window.addEventListener('message', onmsg);
-      f.addEventListener('load', function () { f.contentWindow.postMessage({ t: 'kc.hello', v: 1 }, ORIGIN); });
+      f.addEventListener('load', function () {
+        if (loads++) failAll('Your keychain reloaded before answering; nothing was signed');
+        f.contentWindow.postMessage({ t: 'kc.hello', v: 1 }, ORIGIN);
+      });
       setTimeout(function () { if (!settled) { window.removeEventListener('message', onmsg); f.remove(); finish(null); } }, opts.timeout || 10000);
       container.append(f);
     });

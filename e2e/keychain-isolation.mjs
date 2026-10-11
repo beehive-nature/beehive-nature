@@ -80,6 +80,16 @@ try {
   assert.ok(signed.ok, JSON.stringify(signed));
   _envelope.check(signed.ok, approve, st.evm, verify); // decode, compare, canonical, keccak, recover — independently
 
+  // 3b. Hidden time does not count: the press needs the card visible, unobscured, without a break.
+  await page.evaluate(tx => { kc.frame.style.opacity = '0'; window.pendingSign = kc.signer().signTransaction(tx).then(s => ({ok: s}), e => ({no: e.message})); }, approve);
+  await go.waitFor({state: 'attached'});
+  await page.waitForTimeout(1200);
+  await page.evaluate(() => { kc.frame.style.opacity = '1'; });
+  await page.waitForTimeout(250);
+  assert.equal(await go.isDisabled(), true, 'time spent hidden does not count toward the press delay');
+  await page.waitForTimeout(900); await go.click();
+  _envelope.check((await page.evaluate(() => window.pendingSign)).ok, approve, st.evm, verify);
+
   // 4. A payForQuotes is shown as what it pays.
   const pay = {...base, nonce: '0x8', to: VAULT, data: _wire.encodePayForQuotes([{rewards_address: '0x' + '1'.repeat(40), amount_atto: '250000000000000000', quote_hash: '0x' + 'a'.repeat(64)}, {rewards_address: '0x' + '2'.repeat(40), amount_atto: '250000000000000000', quote_hash: '0x' + 'b'.repeat(64)}])};
   await page.evaluate(tx => { window.pendingSign = kc.signer().signTransaction(tx).then(s => ({ok: s}), e => ({no: e.message})); }, pay);
@@ -91,6 +101,8 @@ try {
 
   // 5. Refuse inside the keychain.
   await page.evaluate(tx => { window.pendingSign = kc.signer().signTransaction(tx).then(s => ({ok: s}), e => ({no: e.message})); }, approve);
+  // let the card settle (the frame resizes to fit it) before pressing, as a person would
+  await go.waitFor(); await page.waitForTimeout(900);
   await frame.getByRole('button', {name: 'Refuse'}).click();
   assert.match((await page.evaluate(() => window.pendingSign)).no, /refused this payment/);
 
