@@ -113,9 +113,23 @@ The complete Linux workflow is not yet green: main run `38096910617` remains que
 Only this lane's duplicate push jobs, unchanged proof jobs and superseded test runs were canceled;
 other seats' jobs were preserved. Superseded test run IDs: `38096223107`, `38096339364`, `38096820309`.
 The latest main tests, secret scan and Pages deployment were retained.
-The first 20-minute public-byte sampling window expired while the old HTML remained public.
-Pages run `38096910682` has completed its build, with deployment still queued at the next check.
-No deployment claim is made from a merge or successful build alone.
+The first two 20-minute public-byte sampling windows expired while the old HTML remained public.
+Pages [run 38096910682](https://github.com/beehive-nature/beehive-nature/actions/runs/38096910682)
+then completed successfully. The public 148,986-byte HTML matched the tested checkout at
+2026-10-11 00:50:49 UTC (October 10 locally); `deployment.json` retains both digests.
+
+Public acceptance completed at 00:51:45 UTC: **1.538 s actual playback startup**, 1.533 s preview,
+48.067 s full playback, **zero stalls**, **zero dropped frames / 1,440 frames**, one source assignment,
+one quality upgrade, no player errors or media-recovery attempts, and all **17 requested assets** matching their expected digests.
+The 12 media fragments totaled 4,625,380 bytes; maximum sampled forward buffer was 23.77 s against a 20 s target.
+The phone-width layout had no horizontal overflow (412 px viewport and scroll width), and its saved screenshot was inspected.
+Evidence: `adaptive-public.json`, `adaptive-public.png` and `ci-checkpoint.json` in the evidence directory.
+This is one public Chrome 153 viewer with Pixel 7 emulation, not a physical phone, a controlled comparison
+against the original video, or a distributed audience test.
+
+The [public adaptive sample](https://skaists.dev/surfaces/bview.html#https%3A%2F%2Fskaists.dev%2Ffixtures%2Fbview%2Fadaptive%2Fmaster.m3u8)
+contains a synthetic test pattern with sound. The broader Linux tests remain queued at the saved checkpoint;
+Pages success and focused local tests do not imply that entire workflow has passed.
 
 References: [hls.js API](https://github.com/video-dev/hls.js/blob/v1.6.15/docs/API.md),
 [FFmpeg HLS muxer](https://ffmpeg.org/ffmpeg-formats.html#hls-2),
