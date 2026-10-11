@@ -29,6 +29,7 @@
 //! plausibly when it should error is how identities get forged
 //! (architecture §3.4 rule 10, applied at the root).
 
+pub mod beelog;
 pub mod dagcbor;
 pub mod did;
 pub mod genesis;
@@ -154,6 +155,77 @@ mod tests {
             valid_until: 4_102_444_801,
             sig: vec![0x5A; 64],
         }
+    }
+
+    /// A resolved two-op chain with REAL ed25519 signatures — the beelog
+    /// identity-log test's fixture. Deterministic seeds, like every test
+    /// key in this crate.
+    pub(crate) fn demo_keys() -> (succession::ResolvedDid, Vec<u8>) {
+        let mk = |seed: u8| {
+            let mut s = [0u8; 32];
+            s[0] = seed;
+            ed25519_dalek::SigningKey::from_bytes(&s)
+        };
+        let r0 = mk(0xA1);
+        let r1 = mk(0xB2);
+        let genesis = GenesisOp {
+            rotation_keys: vec![
+                KeyCard::new(KeyAlg::Ed25519, r0.verifying_key().as_bytes().to_vec()).unwrap(),
+                KeyCard::new(KeyAlg::Ed25519, r1.verifying_key().as_bytes().to_vec()).unwrap(),
+            ],
+            signing_key: KeyCard::new(KeyAlg::Ed25519, vec![0x5D; 32]).unwrap(),
+            services: vec![],
+            also_known_as: vec![],
+            valid_until: 4_102_444_800,
+        };
+        let genesis_bytes = genesis.build().unwrap();
+        let did = BzDid::derive(&genesis_bytes);
+        let genesis_hash = {
+            use sha2::Digest as _;
+            let h: [u8; 32] = sha2::Sha256::digest(&genesis_bytes).into();
+            h
+        };
+        let card = |k: &ed25519_dalek::SigningKey| {
+            KeyCard::new(KeyAlg::Ed25519, k.verifying_key().as_bytes().to_vec()).unwrap()
+        };
+        let mut op1 = succession::RotateOp {
+            seq: 1,
+            prev: genesis_hash,
+            at: 1_700_000_000,
+            signed_by: 1,
+            rotation_keys: vec![card(&r0)],
+            signing_key: KeyCard::new(KeyAlg::Ed25519, vec![0x5E; 32]).unwrap(),
+            services: vec![],
+            also_known_as: vec![],
+            valid_until: 4_102_444_800,
+            sig: vec![0u8; 64],
+        };
+        use ed25519_dalek::Signer as _;
+        op1.sig = r1
+            .sign(&succession::rotate_body_bytes(&op1).unwrap())
+            .to_bytes()
+            .to_vec();
+        let b1 = op1.build().unwrap();
+        let h1 = op1.hash().unwrap();
+        let mut op2 = succession::RotateOp {
+            seq: 2,
+            prev: h1,
+            at: 1_700_000_100,
+            signed_by: 0,
+            rotation_keys: vec![card(&r1)],
+            signing_key: KeyCard::new(KeyAlg::Ed25519, vec![0x5F; 32]).unwrap(),
+            services: vec![],
+            also_known_as: vec![],
+            valid_until: 4_102_444_800,
+            sig: vec![0u8; 64],
+        };
+        op2.sig = r0
+            .sign(&succession::rotate_body_bytes(&op2).unwrap())
+            .to_bytes()
+            .to_vec();
+        let b2 = op2.build().unwrap();
+        let resolved = succession::resolve_did(&did, &genesis_bytes, &[b1, b2], None).unwrap();
+        (resolved, genesis_bytes)
     }
 
     #[test]
