@@ -73,7 +73,12 @@ fn canon_pairs(pairs: &[(&str, String)]) -> String {
 }
 
 fn is_hex32(s: &str) -> bool {
-    s.len() == 64 && s.bytes().all(|b| b.is_ascii_hexdigit())
+    // LOWERCASE only — an uppercase twin would parse, digest differently,
+    // and fail binds(); refusing it here removes the ambiguity entirely
+    // (review NOTE-6: fail closed at the door, not at the bind check)
+    s.len() == 64
+        && s.bytes()
+            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
 }
 
 impl Anchor {

@@ -178,23 +178,28 @@ fn a_random_growing_log_stays_consistent_at_every_checkpoint() {
 }
 
 #[test]
-fn mutations_of_proofs_and_leaves_fail_both_verifiers() {
+fn mutations_of_proofs_and_leaves_never_falsely_verify() {
     let mut rng = Rng(0xD00D_0002);
     let log = log_of(17, "leaf");
     let head = log.head();
-    for round in 0..300u64 {
+    let mut refusals = 0usize;
+    let mut _tolerated_noops = 0usize;
+    for _round in 0..300u64 {
+        let idx = rng.below(17); // pick the verified index FIRST so leaf
+        let mut proof = log.inclusion_proof(idx).unwrap(); // mutations bite
         let mut leaves: Vec<Vec<u8>> = (0..17u64)
             .map(|i| format!("leaf-{i}").into_bytes())
             .collect();
-        let mut proof = log.inclusion_proof(rng.below(17)).unwrap();
-        let which = rng.below(3);
-        match which {
+        let mutated_leaf = !rng.next().is_multiple_of(3); // usually the same leaf
+        match rng.below(3) {
             0 => {
                 let i = rng.below(proof.len() as u64) as usize;
-                proof[i][rng.below(32) as usize] ^= 1 << rng.below(8);
+                let j = rng.below(32);
+                let b = rng.below(8);
+                proof[i][j as usize] ^= 1 << b;
             }
             1 => {
-                let i = rng.below(17) as usize;
+                let i = if mutated_leaf { idx } else { rng.below(17) } as usize;
                 let j = rng.below(leaves[i].len() as u64) as usize;
                 let b = rng.below(8);
                 leaves[i][j] ^= 1 << b;
@@ -208,23 +213,24 @@ fn mutations_of_proofs_and_leaves_fail_both_verifiers() {
                 }
             }
         }
-        let idx = rng.below(17);
-        let v = verify_inclusion(&leaves[idx as usize], idx, &head, &proof);
-        // a mutation either fails outright, or (impossibly) verifies —
-        // but it must NEVER verify against BOTH the original and the
-        // mutated data simultaneously
-        assert!(v.is_err() || round == round); // err expected in practice
-        if v.is_ok() {
-            // tolerated only when the mutation was a no-op fold; demand
-            // the path still folds to the SAME root over the SAME bytes
-            let p_lib = log.inclusion_proof(idx).unwrap();
-            assert_eq!(
-                proof, p_lib,
-                "a mutated proof that still verifies must be the original"
-            );
-            assert_eq!(leaves[idx as usize], log.leaf(idx).unwrap().to_vec());
+        match verify_inclusion(&leaves[idx as usize], idx, &head, &proof) {
+            Err(_) => refusals += 1,
+            Ok(()) => {
+                // a mutation that still verifies must have been a no-op:
+                // the byte-identical original proof over the byte-identical
+                // original leaf — anything else is a false accept
+                _tolerated_noops += 1;
+                assert_eq!(
+                    proof,
+                    log.inclusion_proof(idx).unwrap(),
+                    "a mutated proof that still verifies must be the original"
+                );
+                assert_eq!(leaves[idx as usize], log.leaf(idx).unwrap().to_vec());
+            }
         }
     }
+    // both populations non-empty — the battery bit both ways
+    assert!(refusals > 0, "no mutation was refused: vacuous");
 }
 
 #[test]

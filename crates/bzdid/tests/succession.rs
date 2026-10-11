@@ -962,3 +962,66 @@ fn did_state_reports_validity_at_the_callers_clock() {
     assert!(st.valid_at(V1 - 1));
     assert!(!st.valid_at(V1));
 }
+
+// ------------------------------------------------------------------
+// The canonical-encoding law (review MINOR-1/2)
+// ------------------------------------------------------------------
+
+#[test]
+fn a_non_canonical_reencoding_of_a_valid_op_refuses_at_the_door() {
+    // the attack: a KEYLESS peer takes an honest op's parsed value and
+    // re-encodes it with shuffled map keys. The bytes decode to the same
+    // op (the decoder reads any order) — without this law, that twin
+    // would chain on the canonical-rebuild hash, fork BEELOG roots
+    // across resolvers, and mint an Equivocation from ONE signature.
+    let s = scenario();
+    let (op, canonical) = signed_rotate(
+        1,
+        s.genesis_hash,
+        T0,
+        1,
+        vec![s.r2.card()],
+        TestKey::ed(0x5E).card(),
+        V1,
+        &s.r1,
+    );
+    let _ = op;
+
+    // build the shuffled twin by hand: decode, then re-frame the same
+    // entries in REVERSED order at the byte level (the public encoder
+    // always canonicalizes, so the map frame is hand-rolled; each entry
+    // alone encodes deterministically)
+    use bzdid::dagcbor::{self, DagValue};
+    let v = dagcbor::decode(&canonical).unwrap();
+    let DagValue::Map(entries) = v else {
+        panic!("op is a map")
+    };
+    let mut twin = vec![0xA0 | entries.len() as u8]; // map(n) — head only
+    for (k, val) in entries.iter().rev() {
+        twin.extend(dagcbor::encode(&DagValue::text(k)));
+        twin.extend(dagcbor::encode(val));
+    }
+
+    assert_ne!(twin, canonical, "the twin really is different bytes");
+    // the SURFACE existed: the dag-cbor layer decodes any key order …
+    assert!(dagcbor::decode(&twin).is_ok());
+    // … and the DOOR holds: the op parser refuses the non-canonical
+    // form, so no resolver ever hashes a second encoding of one op
+    let err = RotateOp::parse(&twin).unwrap_err();
+    assert!(
+        matches!(err, SuccessionError::NotARotateOp(_)),
+        "got {err:?}"
+    );
+    // and in resolution — in isolation AND alongside its honest twin
+    // (no Equivocation gift for the keyless)
+    let err = resolve_did(&s.did, &s.genesis_bytes, &[twin.clone()], None).unwrap_err();
+    assert!(
+        matches!(err, SuccessionError::NotARotateOp(_)),
+        "got {err:?}"
+    );
+    let err = resolve_did(&s.did, &s.genesis_bytes, &[canonical.clone(), twin], None).unwrap_err();
+    assert!(
+        matches!(err, SuccessionError::NotARotateOp(_)),
+        "got {err:?}"
+    );
+}

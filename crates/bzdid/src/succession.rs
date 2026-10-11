@@ -53,6 +53,29 @@
 //! with a losing branch it once trusted is caller policy — this verifier
 //! reports, it never silently rebase-s.
 //!
+//! **Equivocation is asymmetric, by design** (review NOTE-1): on the
+//! canonical path, same-index twins BELOW a higher-priority winner are
+//! recorded as evidence and do not poison the resolution (r0 governs; a
+//! misbehaving r1 cannot hold the identity hostage). On a LOSING branch,
+//! same-index twins still refuse — an equivocating key is evidence of
+//! compromise anywhere it appears, and nothing on a discarded branch is
+//! worth tolerating it for.
+//!
+//! ## Honest limits, named so nobody reads more into this (review NOTEs)
+//!
+//! - `at` is a CLAIM inside the signed body: the time laws bind the
+//!   signer's word, not wall-clock truth. A compromised key can backdate
+//!   `at`; a later anchor/witness layer is where reality-time binds.
+//! - The rollback floor is a SEQ SCALAR: it catches a head moving
+//!   backwards, not a same-seq head swap — which is exactly the designed
+//!   recovery gesture (a higher-priority op displacing a resolved one at
+//!   the same seq, the loser returned as evidence). Callers that need
+//!   fork detection at a seq use the BEELOG head comparison, not the
+//!   floor.
+//! - Any parseable op with a garbage signature refuses the whole
+//!   resolution — fail closed by §3.4 rule 10; candidate feeds are the
+//!   caller's authenticated sources.
+//!
 //! ## What the verifier refuses (all fail closed, all named)
 //!
 //! - **Authorization** — `signedBy` outside the predecessor keyset.
@@ -61,8 +84,9 @@
 //!   removes it, its old index names a different key and its signature no
 //!   longer verifies).
 //! - **Expiry** — an op claiming `at >= validUntil` of the state it
-//!   extends was signed after that state expired; identities do not
-//!   resurrect. The boundary refuses (inclusive-edge law).
+//!   extends was signed after that state expired (by its own claim);
+//!   identities do not resurrect on paper. The boundary refuses
+//!   (inclusive-edge law).
 //! - **Time inversion** — `at` may not go backwards along a chain.
 //! - **Rollback** — the caller's floor (the highest seq it has EVER
 //!   verified) above the resolved head: withholding or fork-recovery,
@@ -462,6 +486,19 @@ impl RotateOp {
             sig,
         };
         op.validate()?;
+        // CANONICAL-ENCODING LAW: the handed bytes must BE the canonical
+        // encoding, not merely decode to one. The decoder accepts any map
+        // key order (it is a reader of handed bytes), so an op re-encoded
+        // with shuffled keys would parse to the same value while hashing
+        // differently — two resolvers handed two orders of one op would
+        // derive two chain hashes and a keyless peer could mint an
+        // Equivocation from one honest signature. Refused here, at the
+        // door: handed == canonical, always (review MINOR-1/2).
+        if op.build()? != bytes {
+            return Err(SuccessionError::NotARotateOp(
+                "non-canonical encoding — the bytes decode but are not the canonical form; refuse, never guess".into(),
+            ));
+        }
         Ok(op)
     }
 }
@@ -770,6 +807,13 @@ pub fn resolve_did(
             });
         }
     }
+
+    // lost_forks in a TOTAL order — (seq, signed_by, bytes) — so the
+    // evidence list is a pure function of the multiset, like the head
+    // and applied already are (review MINOR-3)
+    lost.sort_by(|a, b| {
+        (a.seq, a.signed_by, a.bytes.clone()).cmp(&(b.seq, b.signed_by, b.bytes.clone()))
+    });
 
     Ok(ResolvedDid {
         did: did.clone(),

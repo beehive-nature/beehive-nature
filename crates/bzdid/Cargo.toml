@@ -19,4 +19,3 @@ atmirror = { path = "../atmirror" }
 # tests/bsigner_organ.rs signs through the real frozen organ CLI and reads
 # its bheart.signature/1 envelope JSON (base64url signature extraction)
 serde_json = "1"
-tempfile = "3"
