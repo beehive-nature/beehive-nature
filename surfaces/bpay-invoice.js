@@ -119,6 +119,7 @@
       '<ol class="wallet-steps" aria-label="Storage progress"><li data-ant-step="prepare" aria-current="step"><b>1</b><span>Prepare</span></li><li data-ant-step="review"><b>2</b><span>Review &amp; pay</span></li><li data-ant-step="verify"><b>3</b><span>Verify receipt</span></li></ol>'+
       '<div class="ant-intro">Public means anyone with the address can read your file. Stored files cannot be deleted.</div>'+
       '<div id="ant-buy-session" class="ant-session" aria-live="polite"><span id="ant-session-message">Checking your wallet…</span> <a id="ant-connect" href="#kc-sec" data-kc-return="storage">Connect your bzDiD keychain</a></div>'+
+      '<div id="ant-buy-keychain"></div>'+
       '<div class="ant-fields"><div><label for="ant-buy-file">Public file (3 bytes to 32 MiB)</label><input id="ant-buy-file" type="file" aria-describedby="ant-file-help"><small id="ant-file-help">Choose the file you want to keep.</small></div>'+
       '<div><label for="ant-buy-gas">ETH network-fee ceiling</label><input id="ant-buy-gas" inputmode="decimal" placeholder="Your ETH ceiling" aria-describedby="ant-gas-help"><small id="ant-gas-help">Covers approvals and all attempts. ANT storage is priced separately. This limit does not authorize payment.</small></div></div>'+
       '<button id="ant-buy-start" class="ant-primary" type="button">Prepare storage invoice / resume</button> <button id="ant-buy-stop" type="button" hidden>Stop waiting</button>'+
@@ -133,9 +134,19 @@
     var input=document.getElementById('ant-buy-file'),fee=document.getElementById('ant-buy-gas');
     function progress(step){document.querySelectorAll('[data-ant-step]').forEach(function(el){if(el.dataset.antStep===step)el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');});}
     function walletState(){return window.BNRPAY&&BNRPAY.antStorageState?BNRPAY.antStorageState():{connected:false,hasName:false,coreReady:false};}
+    // The isolated keychain (keys.skaists.dev) pays when it is open: its key never enters this page.
+    // It appears only when that origin answers; otherwise the wallet keychain pays as before.
+    var isolated=null;
+    function isolatedOpen(){return !!(isolated&&isolated.state&&isolated.state.state==='unlocked');}
+    var slot=document.getElementById('ant-buy-keychain');
+    if(window.KeychainClient&&slot){
+      if(!card._keychain)card._keychain=KeychainClient.mount(slot);
+      card._keychain.then(function(c){isolated=c;if(!c)return;if(!slot.contains(c.frame))slot.append(c.frame);c.onstate(sessionState);sessionState();});
+    }
     function sessionState(){
       var state=walletState(),message=document.getElementById('ant-session-message'),link=document.getElementById('ant-connect');
       if(!message)return;
+      if(isolatedOpen()){message.textContent='Your isolated keychain is open and pays from its own account. Ready to prepare an invoice.';link.hidden=true;start.disabled=!!active;start.hidden=false;return;}
       message.textContent=!state.connected?'First, open your existing wallet. Your file and fee limit stay here.':!state.hasName?'Wallet open. Connect your existing .b name to choose the paying account.':!state.coreReady?'Wallet open. Waiting for the Rust signing core.':'Wallet connected. Ready to prepare an invoice.';
       link.hidden=state.connected&&state.hasName;
       link.href=state.connected?'#connect-sec':'#kc-sec';
@@ -163,8 +174,9 @@
       try{
         await navigator.locks.request('bnr-ant-purchase-v1',{mode:'exclusive',ifAvailable:true},async function(lock){
           if(!lock)throw new Error('Another tab is handling a storage purchase. Resume after it finishes.');
-          if(!window.BNRPAY||!BNRPAY.antStorageSigner)throw new Error('The bzDiD storage signer is not ready; reload this wallet');
-          var signer=BNRPAY.antStorageSigner();
+          var signer;
+          if(isolatedOpen())signer=isolated.signer();
+          else{if(!window.BNRPAY||!BNRPAY.antStorageSigner)throw new Error('The bzDiD storage signer is not ready; reload this wallet');signer=BNRPAY.antStorageSigner();}
           await signer.address(); // Public identity only; no key or signature leaves the keychain.
           status.textContent='Hashing the original file and opening Autonomi…';
           var bytes=new Uint8Array(await file.arrayBuffer());
@@ -199,7 +211,7 @@
                 button.onclick=function(){try{if(signal.aborted)return abort();payer.authorize(inv);end();}catch(e){end(e);}};
                 view.append(button);view.focus();if(signal.aborted)abort();
               });
-              status.textContent='Signing with your bzDiD keychain and waiting for chain confirmation. Keep this page open.';
+              status.textContent=signer.isolated?'Confirm each payment in your isolated keychain, then wait for chain confirmation. Keep this page open.':'Signing with your bzDiD keychain and waiting for chain confirmation. Keep this page open.';
               return payer.provider(inv.id).pay(network,quotes,context);
             },
             recover:function(network,quotes,attempt,context){return payer.provider(null).recover(network,quotes,attempt,context);}
