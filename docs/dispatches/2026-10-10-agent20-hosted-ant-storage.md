@@ -48,3 +48,11 @@ Mobile inspection moved raw receipt JSON into a disclosure and provides a direct
 - Live bundled payment profile and browser RPC check: Arbitrum One chain 42161, token `0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684`, vault `0x9a3ecac693b699fc0b2b6a50b5549e50c2320a26`; `https://arb1.arbitrum.io/rpc` returned HTTP 200 and `eth_chainId: 0xa4b1`. This read-only check confirms browser RPC reachability, not storage-node availability or a purchase.
 
 - Pre-release recovery review found and repaired an elapsed-history refusal: unknown broadcasts now search successive bounded history pages, preserving their cursor and never resubmitting. The delayed-return regression passes.
+
+## Extended live quote and CI correction
+
+The same keyless hosted quote probe was allowed 300 seconds after the first 90-second timeout. It returned **0.3859936435546875 ANT for 49 bytes**, at approximately `2026-10-11T00:02:39Z` (October 10 in Denver). This supersedes the timeout as the latest quote observation, but still authorizes nothing and proves no upload or retrieval. Receipt: `docs/receipts/agent20-ant-extended-live-2026-10-10.json`.
+
+PR #391's first full current-source test run (`38097285561`, source `7e124126fff66531a76ef5f1c61735a539f96468`) exposed a wallet-register gate failure: the new help text said "open the storage invoice below", violating the rule against positional directions. A local reproduction named line 1629 with that exact text. The correction names the actual "Pay ANT to store a public file" control. The source has also incorporated newer main `b9c75cd7b7a568fa29760acd89152c67d17aa585`; fresh CI is required for the resulting head. This record does not label the failed run green.
+
+The local register gate completed **127/128**, with that wording assertion its sole failure. CI also exposed a missing generated dependency-directory update: `node scripts/build-stack-surfaces.mjs --check` returned `Surface directory needs regeneration`. Regenerating `surfaces/stack.html` changed only the wallet row, adding the new `ant-pay.js` reference and current bPay query version. Both Engine Room generator checks pass after regeneration. The full register correction and final head remain subject to fresh CI.
