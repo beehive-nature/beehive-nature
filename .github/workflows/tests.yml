@@ -1017,6 +1017,10 @@ jobs:
         if: always()
         timeout-minutes: 10
         run: node e2e/ant-hosted-browser.mjs
+      - name: Wallet guided flow — identity confirmation and retained invoice inputs in all three styles
+        if: always()
+        timeout-minutes: 10
+        run: node e2e/wallet-guided-flow.mjs
       - name: Wallet read budget — fifty accounts, shared concurrency and cancelled queued reads
         if: always()
         timeout-minutes: 10

@@ -6,6 +6,7 @@ try{
  await page.goto(out.url,{waitUntil:'domcontentloaded',timeout:60000});
  await page.locator('[data-wallet-store]').click();await page.locator('.wallet-storage-options a[href="#bpay-sec"]').click();
  if(!await page.locator('#ant-quote-file').count())await page.locator('[data-audience="public"]').click();
+ if(!await page.locator('#ant-quote-only').evaluate(el=>el.open))await page.locator('#ant-quote-only > summary').click();
  out.purchasePanel=await page.locator('#ant-purchase').count()>0;
  await page.locator('#ant-quote-file').setInputFiles({name:'agent20-public-probe.txt',mimeType:'text/plain',buffer:Buffer.from('Agent 20 non-spending live quote probe 2026-10-10')});
  await page.locator('#ant-quote-go').click();
