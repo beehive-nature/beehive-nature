@@ -1,5 +1,10 @@
 # bTunGsTeN workbenches
 
+For the relationship between these workbenches, the private-chain proof lab,
+and the offline Solana adapter, see the
+[current integration map](../../tools/solana-tungsten/CURRENT.md).
+Their wire formats and acceptance scopes remain explicit.
+
 The executable arm of SPEC-BTUNGSTEN-1: every claimed property of the
 standard reduces to a reproducible adversarial test with explicit
 assumptions, pass/fail criteria, evidence, and a machine-verifiable
