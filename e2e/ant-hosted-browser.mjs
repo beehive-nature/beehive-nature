@@ -24,7 +24,7 @@ async function until(fn){for(let i=0;i<150;i++){if(await fn())return;await new P
 await installWalletFixture(browser,process.cwd());
 const bytes=Buffer.from('Agent 20 browser purchase fixture; never live funds.');
 const sdk=`const bytes=new TextEncoder().encode(${JSON.stringify(bytes.toString())});
-export async function getNetworkDefaults(){return {payment:{chainId:42161,paymentTokenAddress:'0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684',paymentVaultAddress:'0x'+'b'.repeat(40)},rpcUrl:'https://fixture.invalid/rpc'};}
+export async function getNetworkDefaults(){return {payment:{chainId:42161,paymentTokenAddress:'0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684',paymentVaultAddress:'0x9a3ecac693b699fc0b2b6a50b5549e50c2320a26'},rpcUrl:'https://fixture.invalid/rpc'};}
 export class AutonomiClient{static async connect(){return new AutonomiClient();}closed=false;close(){}async upload(file,opts){await opts.onCheckpoint({fixture:true});const n=(await getNetworkDefaults()).payment;await opts.payment.pay(n,[{quoteHash:'0x'+'c'.repeat(64),rewardsAddress:'0x'+'d'.repeat(40),amount:'100'}],{signal:opts.signal});return {file:{address:'fixture-only'},storageCostAtto:'100'};}async download(){return {bytes};}}`;
 try{
  for(const width of [320,390]) for(const reg of ['bee','raver','cypherpunk']){
@@ -98,7 +98,7 @@ try{
   if(reg==='bee'){
     const refusals=await page.evaluate(()=>{
       const ledger=JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k=>k.startsWith('bnr.ant.purchase.v1:'))));
-      const p=ledger.plans[0];p.authorization={invoice:p.id,payer:p.payer,artifactSha256:ledger.artifact.sha256,expiresAt:p.expiresAt,gasCeilingWei:p.gasCeilingWei};
+      const p=ledger.plans[0];p.authorization={invoice:p.id,scope:p.scope,payer:p.payer,artifactSha256:ledger.artifact.sha256,expiresAt:p.expiresAt,gasCeilingWei:p.gasCeilingWei};
       const t=p.txs[0];t.state='sending';t.nonce='0x0';
       const tx={from:p.payer,to:t.to,data:t.data,gas:t.gas,nonce:t.nonce,maxFeePerGas:t.maxFeePerGas,maxPriorityFeePerGas:'0x0',value:'0x0',chainId:'0xa4b1'};
       const bound={artifact:ledger.artifact,network:ledger.network,invoice:p,kind:t.kind},signer=BNRPAY.antStorageSigner();
@@ -106,11 +106,15 @@ try{
       for(const change of [{value:'0x1'},{chainId:'0x1'},{to:'0x'+'f'.repeat(40)},{data:'0xdead'},{gas:'0xffffff'}]){
         try{signer.signTransaction({...tx,...change},bound);errors.push('SIGNED');}catch{errors.push('refused');}
       }
+      // Another vault, or a quote recipient changed after authorization, is refused by the signer itself.
+      for(const other of [{...bound,network:{...bound.network,paymentVaultAddress:'0x'+'b'.repeat(40)}},{...bound,invoice:{...p,payments:p.payments.map(q=>({...q,rewards_address:'0x'+'9'.repeat(40)}))}}]){
+        try{signer.signTransaction(tx,other);errors.push('SIGNED');}catch{errors.push('refused');}
+      }
       localStorage.setItem('bnr-spend-cap',JSON.stringify({ETH:0}));
       try{signer.signTransaction(tx,bound);errors.push('SIGNED');}catch{errors.push('refused');}
       localStorage.removeItem('bnr-spend-cap');return errors;
     });
-    assert.deepEqual(refusals,Array(6).fill('refused'));
+    assert.deepEqual(refusals,Array(8).fill('refused'));
   }
   await page.locator('#ant-buy-stop').click();await until(()=>page.locator('#ant-buy-start').isEnabled());assert.equal(await page.evaluate(()=>window.__sends),0);
   await page.locator('#ant-buy-start').click();await page.getByRole('button',{name:'Authorize this invoice and ask my wallet'}).click();

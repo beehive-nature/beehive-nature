@@ -1630,7 +1630,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <div id="bpay-card" class="law" style="margin-top:10px;min-height:24px;overflow-wrap:anywhere">loading the Autonomi price panel.</div>
 </section>
 <script src="adapter-seam.js" defer></script>
-<script src="ant-pay.js?v=9" defer></script>
+<script src="ant-pay.js?v=10" defer></script>
 <script src="bpay-invoice.js?v=9" defer></script>
 <script>if(window.ResizeObserver)new ResizeObserver(function(entries){document.documentElement.style.setProperty('--wallet-offset',Math.ceil(entries[0].target.getBoundingClientRect().height+12)+'px')}).observe(document.getElementById('wallet-identity'));document.querySelector('[data-wallet-store]').addEventListener('click',function(e){e.preventDefault();e.stopPropagation();document.querySelector('#wl-dock [data-wl-go="keep"]').click();document.querySelectorAll('main>section[data-wl-open]').forEach(function(s){s.removeAttribute('data-wl-open')});document.getElementById('wallet-storage').scrollIntoView({block:'start'});});</script>
 
@@ -4980,7 +4980,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       assets:{
         ETH:{symbol:'ETH',decimals:18,contract:null},
         ANT:{symbol:'ANT',decimals:18,contract:'0xa78d8321B20c4Ef90eCd72f2588AA985A4BDb684'} // PUBLIC-CONSTANT: ANT (Autonomi) on Arbitrum One
-      }
+      },
+      antStorageVault:'0x9A3EcAc693b699Fc0B2B6A50B5549e50c2320A26' // PUBLIC-CONSTANT: Autonomi PaymentVaultV2, the vault of the real payForQuotes tx pinned in e2e/ant-pay-vector.json
     }
   };
   function railOf(k){ var r=EVM_RAILS[k]; if(!r)throw new Error('no such EVM rail: '+k); return r }
@@ -10106,7 +10107,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       function refuse(){throw new Error('The storage transaction differs from the authorized bzDiD invoice');}
       var same=function(x,y){return String(x).toLowerCase()===String(y).toLowerCase();};
       if(!a||a.invoice!==p.id||a.payer!==p.payer||a.artifactSha256!==f.sha256||a.expiresAt!==p.expiresAt||Date.now()>=p.expiresAt||a.gasCeilingWei!==p.gasCeilingWei)refuse();
-      if(n.chainId!==42161||BigInt(tx.chainId)!==42161n||!same(n.paymentTokenAddress,EVM_RAILS.arbitrum.assets.ANT.contract)||!same(tx.from,p.payer)||BigInt(tx.value)!==0n||BigInt(tx.maxPriorityFeePerGas)!==0n)refuse();
+      if(n.chainId!==42161||BigInt(tx.chainId)!==42161n||!same(n.paymentTokenAddress,EVM_RAILS.arbitrum.assets.ANT.contract)||!same(n.paymentVaultAddress,EVM_RAILS.arbitrum.antStorageVault)||!same(tx.from,p.payer)||BigInt(tx.value)!==0n||BigInt(tx.maxPriorityFeePerGas)!==0n)refuse();
+      // The authorization names what it covers. Recompute that digest here, with noble's
+      // SHA-256 rather than the coordinator's WebCrypto, from the invoice being signed.
+      if(!a.scope||a.scope!==p.scope||hexS(BN.sha256(new TextEncoder().encode(JSON.stringify(AntPay._wire.scopeOf(f,n,p)))))!==a.scope)refuse();
       var total=p.payments.reduce(function(s,q){return s+BigInt(q.amount_atto);},0n);
       if(total!==BigInt(p.total)||total<0n||total>100n*10n**18n)refuse();
       var t=p.txs.find(function(t){return t.kind===bound.kind;});
