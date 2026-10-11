@@ -11,6 +11,7 @@ const sha = data => createHash('sha256').update(data).digest('hex');
 const html = await readFile(new URL('../surfaces/bview.html', import.meta.url));
 const pkg = JSON.parse(await readFile(new URL('../fixtures/bview/adaptive/package.json', import.meta.url)));
 const expected = new Map(pkg.files.map(f => [f.path, f.sha256]));
+expected.set('master.m3u8', sha(await readFile(new URL('../fixtures/bview/adaptive/master.m3u8', import.meta.url))));
 const browser = await chromium.launch({ channel: 'chrome' });
 const context = await browser.newContext({ ...devices['Pixel 7'] });
 const page = await context.newPage(), checks = [], assets = [], errors = [];

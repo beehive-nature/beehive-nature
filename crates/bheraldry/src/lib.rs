@@ -685,6 +685,16 @@ impl SymbolRecord {
     pub fn validate(&self) -> Result<(), LawViolation> {
         check_lang_tag(&self.blazon.lang)?;
 
+        // V9 — the working text IS the source quote it claims to read from.
+        // A blazon whose source carries a verbatim quote must carry exactly
+        // those bytes as its text: swapping one while keeping the other is a
+        // metadata/working-text split, detected here rather than trusted.
+        if let Some(verbatim) = &self.blazon.source.verbatim {
+            if self.blazon.text != *verbatim {
+                return Err(LawViolation::BlazonTextDivergesFromSourceVerbatim);
+            }
+        }
+
         // V3 — translations bind the original they translate.
         let original = self.motto.original.digest();
         for t in &self.motto.translations {
@@ -1047,6 +1057,7 @@ pub enum LawViolation {
     WrongSealDomain {
         found: String,
     },
+    BlazonTextDivergesFromSourceVerbatim,
     EmptyChain,
     ChainIdMismatch,
     ChainRevisionNotIncreasing,
@@ -1079,6 +1090,7 @@ impl std::fmt::Display for LawViolation {
             LawViolation::NotDecodable(e) => write!(f, "record does not decode: {e}"),
             LawViolation::BadSignerDid(e) => write!(f, "signer is not a valid did:b: identity: {e}"),
             LawViolation::WrongSealDomain { found } => write!(f, "seal domain is {found:?}, expected {SEAL_DOMAIN:?}"),
+            LawViolation::BlazonTextDivergesFromSourceVerbatim => write!(f, "the blazon text diverges from its own source's verbatim quote — keep them identical or cite the source without a quote"),
             LawViolation::EmptyChain => write!(f, "a revision chain may not be empty"),
             LawViolation::ChainIdMismatch => write!(f, "a chain carries one record id"),
             LawViolation::ChainRevisionNotIncreasing => write!(f, "chain revisions must strictly increase"),

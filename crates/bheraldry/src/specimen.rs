@@ -264,7 +264,7 @@ fn blazon_md_claim() -> SourceClaim {
 
 // ── specimen 1: the Bulgarian national arms ───────────────────────────────────
 
-pub fn bulgaria_national_arms() -> SymbolRecord {
+pub fn bulgaria_national_arms_v1() -> SymbolRecord {
     let law = law_claim();
     let law_adoption = law_adoption_claim();
     let gov_en = gov_en_claim();
@@ -534,7 +534,7 @@ pub fn bulgaria_national_arms() -> SymbolRecord {
 
 // ── specimen 2: the house achievement ─────────────────────────────────────────
 
-pub fn house_achievement() -> SymbolRecord {
+pub fn house_achievement_v1() -> SymbolRecord {
     let blazon_md = blazon_md_claim();
     let internal = internal_claim();
 
@@ -648,4 +648,415 @@ pub fn successor(prev: &SealedRecord, correction_note: &str) -> SymbolRecord {
     next.notes
         .push(format!("revision {}: {}", next.revision, correction_note));
     next
+}
+
+// ── revision 2: the gazette pass (2026-10-10) ─────────────────────────────────
+//
+// What changed and why, in one breath: a second extraction of the same lex.bg
+// page disagreed with the first in ~7 wordings, an independent commercial
+// rendering (ciela.net) corroborated the SECOND wording, the Bulgarian
+// Wikipedia carries no amendment history at all, and the official gazette
+// portal was located but its scan could not be machine-read by this seat.
+// So revision 2: switches the working text to the corroborated rendering,
+// RETAINS both renderings as a dispute (only a scan can adjudicate), and
+// WITHDRAWS the 2017-amendment line as a transport artifact (withdrawn named
+// withdrawn — no independent rendering carries it).
+
+pub const ACCESS_DATE_R2: &str = "2026-10-10";
+
+/// The law again, as extracted on 2026-10-10 — the rendering corroborated by
+/// ciela.net's snippet of the same instrument. Differences from the 2026-10-09
+/// extraction are recorded in the transport-variance dispute, NOT resolved
+/// here; only the gazette scan can do that.
+fn law_claim_r2() -> SourceClaim {
+    SourceClaim {
+        label: "Закон за герба на Република България — lex.bg, second extraction".into(),
+        url: "https://lex.bg/laws/ldoc/2134146564".into(),
+        publisher: "lex.bg (Национално издателство / National Publishing House)".into(),
+        lang: "bg".into(),
+        accessed: ACCESS_DATE_R2.into(),
+        kind: ClaimKind::Legal,
+        truth: TruthKind::Authority,
+        grade: ProvenanceGrade::PrimaryLegal,
+        verbatim: Some(
+            "Чл. 2. (1) Гербът на Република България е изправен златен коронован лъв на \
+             тъмночервено поле във формата на щит. Над щита има голяма корона, първообраз на \
+             която са короните на българските владетели от Втората българска държава, с пет \
+             кръста и отделно разположен кръст над самата корона. Щитът е поддържан от два \
+             златни короновани изправени лъва, обърнати към щита от лява и дясна \
+             хералдическа страна. Те стоят върху две кръстосани дъбови клонки с плодове. Под \
+             щита върху прехвърлена през краищата на дъбовите клонки бяла лента с трикольорен \
+             кант е изписано със златни букви „Съединението прави силата“."
+                .into(),
+        ),
+        access_note: Some(
+            "webReader extraction, 2026-10-10. This rendering is corroborated on its \
+             diverging phrases by an independent commercial rendering of the same instrument \
+             (ciela.net issue page, search-snippet mediated) and its opening sentence by the \
+             Bulgarian Wikipedia. Transport variance against the 2026-10-09 extraction is \
+             RETAINED as a dispute; the header on THIS read shows no amendment line."
+                .into(),
+        ),
+    }
+}
+
+fn law_adoption_claim_r2() -> SourceClaim {
+    SourceClaim {
+        label: "Закон за герба — adoption and promulgation line (lex.bg, second extraction)".into(),
+        url: "https://lex.bg/laws/ldoc/2134146564".into(),
+        publisher: "lex.bg".into(),
+        lang: "bg".into(),
+        accessed: ACCESS_DATE_R2.into(),
+        kind: ClaimKind::Legal,
+        truth: TruthKind::SourceAuthenticity,
+        grade: ProvenanceGrade::PrimaryLegal,
+        verbatim: Some(
+            "ЗАКОН ЗА ГЕРБ НА РЕПУБЛИКА БЪЛГАРИЯ Обн. ДВ. бр.62 от 5 Август 1997г. … § 1. \
+             Законът е приет от XXXVIII Народно събрание на 31 юли 1997 г. и е подпечатан с \
+             държавния печат."
+                .into(),
+        ),
+        access_note: Some(
+            "2026-10-10 extraction: the header carries NO amendment line. The „изм. - ДВ. бр. \
+             100 от 29 Декември 2017г.“ fragment of the 2026-10-09 extraction is WITHDRAWN as \
+             a transport artifact (see the lane's internal claim); it survives only in \
+             revision 1's immutable bytes."
+                .into(),
+        ),
+    }
+}
+
+fn ciela_claim() -> SourceClaim {
+    SourceClaim {
+        label: "Държавен вестник, брой 62 от 5.VIII.1997 — ciela.net rendering".into(),
+        url: "https://www.ciela.net/issue".into(),
+        publisher: "Ciela (commercial legal database)".into(),
+        lang: "bg".into(),
+        accessed: ACCESS_DATE_R2.into(),
+        kind: ClaimKind::Legal,
+        truth: TruthKind::SourceAuthenticity,
+        grade: ProvenanceGrade::Tertiary,
+        verbatim: Some(
+            "Чл. 2. (1) Гербът на Република България е изправен златен коронован лъв на \
+             тъмночервено поле във формата на щит. Над щита има голяма корона, първообраз на …"
+                .into(),
+        ),
+        access_note: Some(
+            "search-snippet mediated (direct fetch refused); quoted only through the snippet's \
+             own ellipsis. Corroborates the 2026-10-10 lex.bg rendering on the phrase where \
+             the two lex.bg extractions diverge („Над щита има голяма корона, първообраз на …“)."
+                .into(),
+        ),
+    }
+}
+
+fn bgwiki_claim_r2() -> SourceClaim {
+    SourceClaim {
+        label: "Герб на България — Bulgarian Wikipedia".into(),
+        url: "https://bg.wikipedia.org/wiki/Герб_на_България".into(),
+        publisher: "Wikipedia contributors (user-edited)".into(),
+        lang: "bg".into(),
+        accessed: ACCESS_DATE_R2.into(),
+        kind: ClaimKind::Historical,
+        truth: TruthKind::HistoricalInterpretation,
+        grade: ProvenanceGrade::Tertiary,
+        verbatim: Some(
+            "Гербът на Република България е изправен златен коронован лъв на тъмночервено поле \
+             във формата на щит … Чл. 164: Гербът на Република България е изправен златен \
+             коронован лъв на тъмночервено поле във формата на щит."
+                .into(),
+        ),
+        access_note: Some(
+            "assistant-mediated extraction, 2026-10-10. The article carries NO amendment \
+             history for the law — no Закон за изменение и допълнение, no ДВ бр.100/2017 \
+             reference — and links the law text to Wikisource. Decision № 1 of 4 April 1995 \
+             (case № 5/1995) of the Constitutional Court is recorded as interpreting Чл. 164: \
+             the article's list of elements is not exhaustive and a crown is permissible."
+                .into(),
+        ),
+    }
+}
+
+fn constcourt_claim() -> SourceClaim {
+    SourceClaim {
+        label: "Решение № 1 от 4 април 1995 г. по дело № 5/1995 — Конституционен съд".into(),
+        url: "https://bg.wikipedia.org/wiki/Герб_на_България".into(),
+        publisher: "Конституционен съд на Република България (as reported by the Bulgarian Wikipedia article)".into(),
+        lang: "bg".into(),
+        accessed: ACCESS_DATE_R2.into(),
+        kind: ClaimKind::Legal,
+        truth: TruthKind::HistoricalInterpretation,
+        grade: ProvenanceGrade::Tertiary,
+        verbatim: Some(
+            "Решение № 1 от 4 април 1995 г., дело № 5/1995: списъкът в чл. 164 не е изчерпателен \
+             и короната е допустима (the list of elements in Art. 164 is not exhaustive and a \
+             crown is permissible)."
+                .into(),
+        ),
+        access_note: Some(
+            "the ruling PREDATES the 1997 law and concerns the constitutional article, not the \
+             statute; carried as historical interpretation of the crown's constitutional \
+             permissibility. Ruling text not fetched directly (constcourt.bg unattempted) — \
+             tertiary channel, recheck before scholarly citation."
+                .into(),
+        ),
+    }
+}
+
+fn com_decision_480_claim() -> SourceClaim {
+    SourceClaim {
+        label: "Решение № 480 от 28 август 2017 г. — Министерски съвет".into(),
+        url: "https://dv.parliament.bg".into(),
+        publisher: "Министерски съвет, published in Държавен вестник (1 септември 2017 г.)".into(),
+        lang: "bg".into(),
+        accessed: ACCESS_DATE_R2.into(),
+        kind: ClaimKind::Authority,
+        truth: TruthKind::Authority,
+        grade: ProvenanceGrade::PrimaryOfficial,
+        verbatim: Some(
+            "РЕШЕНИЕ № 480 ОТ 28 АВГУСТ 2017 Г. за даване на съгласие изображението на герба на \
+             Република България да бъде включено в марката на …"
+                .into(),
+        ),
+        access_note: Some(
+            "search-snippet mediated (the gazette portal's own indexed snippet); direct fetch \
+             of the act not completed by this seat. This is a Council of Ministers CONSENT \
+             under Чл. 3 (2) — an act of the usage mechanism, NOT an amendment of the law. \
+             The organization named in the elided tail was not extracted."
+                .into(),
+        ),
+    }
+}
+
+fn com_decree_476_claim() -> SourceClaim {
+    SourceClaim {
+        label: "Постановление № 476 от 17 декември 1997 г. — Министерски съвет".into(),
+        url: "https://pris.government.bg".into(),
+        publisher: "Министерски съвет (as surfaced via strategy.bg and pris.government.bg)".into(),
+        lang: "bg".into(),
+        accessed: ACCESS_DATE_R2.into(),
+        kind: ClaimKind::Authority,
+        truth: TruthKind::Authority,
+        grade: ProvenanceGrade::PrimaryOfficial,
+        verbatim: None,
+        access_note: Some(
+            "search-snippet mediated only: approved the graphic and plastic depictions for use \
+             of the arms (одобряване на графичните и пластичните образци). This is the \
+             mechanism that gave the law's приложения 1–2 their approved forms. Direct text \
+             not fetched — UNVERIFIED at quote level."
+                .into(),
+        ),
+    }
+}
+
+fn dv_portal_claim() -> SourceClaim {
+    SourceClaim {
+        label: "Държавен вестник — official archive portal (dv.parliament.bg/DVWeb)".into(),
+        url: "https://dv.parliament.bg/DVWeb/broeveList.faces".into(),
+        publisher: "Народно събрание на Република България".into(),
+        lang: "bg".into(),
+        accessed: ACCESS_DATE_R2.into(),
+        kind: ClaimKind::Authenticity,
+        truth: TruthKind::SourceAuthenticity,
+        grade: ProvenanceGrade::PrimaryLegal,
+        verbatim: None,
+        access_note: Some(
+            "the primary archive portal was LOCATED and its server-rendered issue index \
+             fetched (74,791 bytes, HTTP 200); but issue deep links are JSF POST flows and \
+             five direct URL patterns returned 404. The бр. 62/1997 SCAN was therefore NOT \
+             machine-read by this seat on 2026-10-10. Scan-level quote verification remains \
+             OPEN — a named next-owner item, not a silent gap."
+                .into(),
+        ),
+    }
+}
+
+fn internal_claim_r2() -> SourceClaim {
+    SourceClaim {
+        label: "bHERALDRY lane round 2 (order + dispatch)".into(),
+        url: "docs/dispatches/2026-10-10-bheraldry-r2.md".into(),
+        publisher: "zCode seat (GLM-5.3), beehive-nature".into(),
+        lang: "en".into(),
+        accessed: ACCESS_DATE_R2.into(),
+        kind: ClaimKind::Authenticity,
+        truth: TruthKind::SourceAuthenticity,
+        grade: ProvenanceGrade::InternalTree,
+        verbatim: None,
+        access_note: Some(
+            "carries the WITHDRAWAL: the „изм. - ДВ. бр. 100 от 29 Декември 2017г.“ line of \
+             the 2026-10-09 extraction is withdrawn as a transport artifact — no independent \
+             rendering carries an amendment, and the 2017 act that exists (Решение № 480) is \
+             a CoM consent, not a statute change."
+                .into(),
+        ),
+    }
+}
+
+/// The Bulgarian national arms, revision 2 — the gazette pass. Revision 1 is
+/// immutable ([`bulgaria_national_arms_v1`], digest frozen in the vector
+/// test); this revision supersedes it by that exact digest.
+pub fn bulgaria_national_arms() -> SymbolRecord {
+    let v1 = bulgaria_national_arms_v1();
+    let v1_digest = SymbolRecord::digest_of_bytes(&v1.canonical_bytes());
+    let law_r2 = law_claim_r2();
+    let ciela = ciela_claim();
+    let bgwiki_r2 = bgwiki_claim_r2();
+    let constcourt = constcourt_claim();
+    let decision480 = com_decision_480_claim();
+    let decree476 = com_decree_476_claim();
+    let dv_portal = dv_portal_claim();
+    let internal_r2 = internal_claim_r2();
+    let law_adoption_r2 = law_adoption_claim_r2();
+
+    let mut r = v1.clone();
+    r.revision = 2;
+    r.supersedes = Some(v1_digest);
+    r.title = "Coat of arms of the Republic of Bulgaria (1997) — gazette pass".into();
+
+    // the adoption claim moves to the second extraction, whose header carries
+    // no amendment line; the r1 LAW claim stays (the transport-variance
+    // dispute cites it), but the withdrawn header fragment leaves the sources
+    r.sources[1] = law_adoption_r2;
+
+    // the working text moves to the corroborated rendering; the law claim it
+    // reads from moves with it (the blazon-verbatim consistency law).
+    r.blazon.text = law_r2.verbatim.clone().expect("r2 verbatim present");
+    r.blazon.source = law_r2.clone();
+
+    r.period.note = Some(
+        "in force since promulgation (ДВ бр.62, 5 August 1997); adopted by the XXXVIII Народно \
+         събрание on 31 July 1997 per the law's own § 1. The 2017 amendment line of the first \
+         extraction is WITHDRAWN as a transport artifact (see notes)."
+            .into(),
+    );
+
+    r.sources.extend([
+        law_r2.clone(),
+        ciela,
+        bgwiki_r2.clone(),
+        constcourt.clone(),
+        decision480.clone(),
+        decree476.clone(),
+        dv_portal.clone(),
+        internal_r2.clone(),
+    ]);
+
+    // the usage mechanism, exercised in the record's own lifetime: a 2017
+    // CoM consent under Чл. 3 (2), and the 1997 decree that approved the
+    // depictions the law annexes.
+    r.usage.push(UsageCondition {
+        statement: "Решение № 480 от 28.08.2017 (ДВ, 1 септември 2017): the Council of Ministers \
+                     gave consent for the arms' image to be included in an organization's mark — \
+                     the Чл. 3 (2) mechanism in force. Search-snippet mediated; recheck the act \
+                     before quotation."
+            .into(),
+        kind: ClaimKind::Legal,
+        source: decision480,
+    });
+
+    r.associations[0].source = law_r2.clone();
+
+    // the crown dispute gains its constitutional dimension
+    r.disputes[1].positions.push(DisputePosition {
+        statement: "Решение № 1/1995 (дело № 5/1995): чл. 164's list of elements is not \
+                    exhaustive and a crown is permissible — settled the crown's constitutionality \
+                    before the 1997 law was drafted."
+            .into(),
+        source: constcourt,
+    });
+
+    // the new dispute: the two transport renderings of Чл. 2 (1), retained
+    r.disputes.push(Dispute {
+        topic: "Exact wording of Чл. 2 (1) across transport renderings".into(),
+        positions: vec![
+            DisputePosition {
+                statement: "2026-10-09 lex.bg extraction (rev 1's working text): „е разположена \
+                            голяма корона … с желуди … трикольорна кантова ивичка … написано“."
+                    .into(),
+                source: r.sources[0].clone(),
+            },
+            DisputePosition {
+                statement: "2026-10-10 lex.bg extraction (rev 2's working text), corroborated by \
+                            ciela.net's rendering of the same instrument: „има голяма корона … с \
+                            плодове … трикольорен кант … изписано“."
+                    .into(),
+                source: law_r2.clone(),
+            },
+            DisputePosition {
+                statement: "The primary gazette scan (ДВ бр.62/1997) — NOT yet machine-read by \
+                            this seat; the portal is located but its deep links are JSF flows. No \
+                            scan-based position exists yet."
+                    .into(),
+                source: dv_portal,
+            },
+        ],
+        note: Some(
+            "RETAINED, not adjudicated. Revision 2 carries the corroborated rendering as WORKING \
+             TEXT only — that is a choice of which transport to read from, not a ruling on what \
+             the ДВ print says. Only the scan can close this."
+                .into(),
+        ),
+    });
+
+    r.notes.extend([
+        "REVISION 2 (2026-10-10): working text switched to the 2026-10-10 lex.bg rendering after \
+         a second extraction of the same page disagreed with the first in ~7 wordings and an \
+         independent rendering (ciela.net) corroborated the second; both renderings are RETAINED \
+         in the transport-variance dispute. Revision 1's bytes are immutable and its frozen \
+         digest still pins them."
+            .into(),
+        "WITHDRAWN: the „изм. - ДВ. бр. 100 от 29 Декември 2017г.“ line of the 2026-10-09 \
+         extraction. No independent rendering carries an amendment — the 2026-10-10 lex.bg \
+         header has no such line, the Bulgarian Wikipedia records no amendment history, and the \
+         2017 act that exists (Решение № 480 от 28.08.2017) is a Council of Ministers consent \
+         under Чл. 3 (2), not a statute change. Withdrawn as a transport artifact, named here \
+         per the corrective discipline."
+            .into(),
+        "The depictions the law annexes (приложения 1–2 per Чл. 2 (2)) were given approved forms \
+         by Постановление № 476 от 17.12.1997 (search-snippet mediated, UNVERIFIED at quote \
+         level) — still deliberately not captured in this record."
+            .into(),
+        "Constitutional layer: чл. 164 (1991) fixes the shield; Решение № 1/1995 held the \
+         article's element list non-exhaustive, permitting the crown. Carried as historical \
+         interpretation via a tertiary channel."
+            .into(),
+    ]);
+
+    r
+}
+
+/// The house achievement, revision 2 — a claim restructure demanded by the
+/// blazon-verbatim consistency law (added with this revision): the motto
+/// quote that rev 1's blazon source carried belongs to the motto's
+/// provenance, not to the blazon's. No content claim changed.
+pub fn house_achievement() -> SymbolRecord {
+    let v1 = house_achievement_v1();
+    let v1_digest = SymbolRecord::digest_of_bytes(&v1.canonical_bytes());
+    let blazon_md_quoteless = {
+        let mut c = v1.blazon.source.clone();
+        c.label =
+            "BLAZON — the quarters (summary by this lane; the file's own text is the canon)".into();
+        c.verbatim = None;
+        c.access_note = Some(
+            "rev 1 cited the motto line as this claim's verbatim; the blazon-verbatim \
+             consistency law (revision 2) requires a blazon source's quote to be the blazon \
+             text, so the motto quote now lives only with the motto's own provenance."
+                .into(),
+        );
+        c
+    };
+
+    let mut r = v1.clone();
+    r.revision = 2;
+    r.supersedes = Some(v1_digest);
+    r.blazon.source = blazon_md_quoteless;
+    r.notes.push(
+        "REVISION 2 (2026-10-10): claim restructure only — the blazon source no longer carries \
+         the motto line as its verbatim (that quote belongs to the motto's provenance). The \
+         family association stays FamilyTradition/Unverified; the four UNVERIFIED quarters stay \
+         a retained dispute. Revision 1's bytes are immutable (digest computed and recorded in \
+         the round-1 dispatch)."
+            .into(),
+    );
+    r
 }
