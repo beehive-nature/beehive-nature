@@ -18,6 +18,11 @@ documentation. It is distinct from the later square-job lab.
 - `sprint03/src/main.rs::load_pk` validates pinned public proving parameters
   once and reuses them through `OnceLock`. The `prove` branch still checks each
   witness, matrix identity and proof; parameter caching is not cached approval.
+  Its `serve` mode is a local stdin loop, not a required hosted proof endpoint.
+  The funded suite's serialized public proving key is **109,224,816 bytes**
+  (Sprint 02: 33,457,968 bytes). Those measured file sizes are not peak RAM;
+  mobile/browser proving remains unqualified. Watching a public video must not
+  automatically trigger that download or a proof per media segment.
 - `sprint03/src/circuit.rs::FundedCircuit` and `fixtures/suite.json` define
   352,976 constraints, 18 public inputs, Groth16 on BLS12-381, a 384-byte proof
   and a single-party test setup. They bind funded-note membership, owner,
