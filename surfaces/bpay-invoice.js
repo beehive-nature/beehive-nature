@@ -9,8 +9,8 @@
 // authority — opening cypherpunk view must not alter one byte of policy.
 //
 // PHASE LAWS HELD HERE:
-//  - nothing can spend; there is NO authorization route on this panel (the
-//    recon1-oracle A9c tripwire owns that string until Phase C's re-ruling)
+//  - the quote-only action never spends; hosted purchasing requires a separate
+//    exact invoice authorization and the key holder's browser-wallet signature
 //  - owed is RECOMPUTED in-page from the carried quotes, never trusted
 //  - the confirmation count is NEVER inferred from the quote count — it will
 //    come from the payment adapter's transaction plan (Phase E)
@@ -102,10 +102,89 @@
     }
     // the honest waiting state — until Phase C earns the authorization route
     h += '<div style="margin-top:12px;padding:8px 10px;border:1px solid #1d4655;border-radius:8px;font-size:12px">';
-    h += '<span style="color:var(--amber)">⏳</span> <b data-bpay-state="awaiting">' + T('wl.bpay.quoteonly','quote only · payment unavailable here for now') + '</b>';
-    h += '<div style="font-size:10px;opacity:.7;margin-top:2px">this shows the price only. to keep a file today, <a href="#arw-sec">publish it on Arweave</a>.</div>';
+    h += '<b data-bpay-state="awaiting">A quote does not authorize payment.</b>';
+    h += '<div style="font-size:10px;opacity:.7;margin-top:2px">Use the storage invoice below to pay with a browser wallet, or <a href="#arw-sec">publish it on Arweave</a>.</div>';
     h += '</div>';
     return h;
+  }
+
+  // Hosted storage purchasing lives beside the existing quote-only chooser.
+  // It uses the same bundled Autonomi client and AntPay wire implementation.
+  function purchasePanel(){
+    return '<details id="ant-purchase"><summary>Pay ANT to store a public file</summary><p>Anyone with its address can read this file. Storage cannot be deleted. Your browser wallet pays ANT on Arbitrum One; ETH network fees have a separate limit. The storage ceiling is 100 ANT for this file.</p><p>Keep this browser’s saved data and resume here after an interruption. Another browser or device does not share this payment record.</p><label for="ant-buy-file">Public file (3 bytes to 32 MiB)</label><input id="ant-buy-file" type="file" style="display:block;max-width:100%;margin:8px 0"><label for="ant-buy-gas">Maximum total network fee (ETH, including approvals and all attempts)</label><input id="ant-buy-gas" inputmode="decimal" placeholder="Enter your ETH limit" style="display:block;max-width:100%;margin:8px 0"><button id="ant-buy-start" type="button">Prepare storage invoice / resume</button> <button id="ant-buy-stop" type="button" hidden>Stop waiting</button><div id="ant-buy-status" role="status" aria-live="polite"></div><div id="ant-buy-invoice"></div><div id="ant-buy-download"></div><details id="ant-buy-proof" hidden><summary>Receipt and verified hash</summary><pre id="ant-buy-receipt" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details></details>';
+  }
+  function bindPurchase(){
+    var start=document.getElementById('ant-buy-start'),stop=document.getElementById('ant-buy-stop'),status=document.getElementById('ant-buy-status'),view=document.getElementById('ant-buy-invoice'),receipt=document.getElementById('ant-buy-receipt');
+    if(!start)return;
+    var active=null,downloadUrl=null;
+    stop.onclick=function(){if(active)active.abort();view.replaceChildren();status.textContent='Stopped waiting. Any submitted payment may still settle; resume the same file to reconcile.';};
+    start.onclick=async function(){
+      if(active)return;
+      var file=document.getElementById('ant-buy-file').files[0],gas=document.getElementById('ant-buy-gas').value.trim();
+      if(!file||file.size<3||file.size>33554432){status.textContent='Choose a public file from 3 bytes to 32 MiB.';return;}
+      if(!/^(0|[1-9]\d*)(\.\d{1,18})?$/.test(gas)){status.textContent='Enter a separate ETH fee limit with at most 18 decimal places.';return;}
+      var parts=gas.split('.'),gasWei=(BigInt(parts[0])*10n**18n+BigInt((parts[1]||'').padEnd(18,'0'))).toString();
+      if(gasWei==='0'){status.textContent='The ETH network-fee limit must be greater than zero.';return;}
+      if(!navigator.locks||!window.AntPay){status.textContent='This browser cannot safely coordinate storage payments. No payment was requested.';return;}
+      active=new AbortController();var signal=active.signal;start.disabled=true;stop.hidden=false;receipt.textContent='';document.getElementById('ant-buy-proof').hidden=true;document.getElementById('ant-buy-download').replaceChildren();if(downloadUrl){URL.revokeObjectURL(downloadUrl);downloadUrl=null;}
+      try{
+        await navigator.locks.request('bnr-ant-purchase-v1',{mode:'exclusive',ifAvailable:true},async function(lock){
+          if(!lock)throw new Error('Another tab is handling a storage purchase. Resume after it finishes.');
+          status.textContent='Hashing the original file and opening Autonomi…';
+          var bytes=new Uint8Array(await file.arrayBuffer());
+          var sha=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
+          var session=await antSession(signal),defaults=await session.sdk.getNetworkDefaults({signal:signal});
+          var requestId=0;
+          var rpc=async function(method,params){var r=await fetch(defaults.rpcUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:++requestId,method:method,params:params})});if(!r.ok)throw new Error('Payment RPC unavailable');var j=await r.json();if(j.error)throw new Error('Payment RPC refused '+method);return j.result;};
+          var payer=AntPay.createHosted({artifact:{name:file.name,sha256:sha,bytes:file.size},network:defaults.payment,storage:localStorage,rpc:rpc,ethereum:window.ethereum});
+          await payer.retryUnpaid(signal);
+          var prior=payer.snapshot();
+          if(prior.gasCeilingWei&&prior.gasCeilingWei!==gasWei)throw new Error('Use this file’s original ETH limit: '+ant(prior.gasCeilingWei)+' ETH.');
+          var tasks=[];
+          var payment={
+            pay:async function(network,quotes,context){
+              var inv=await payer.invoice(network,quotes,gasWei,signal);
+              if(inv.txs.every(t=>t.state==='confirmed'))return payer.provider(inv.id).recover(network,quotes,{},context);
+              if(inv.txs.some(t=>t.state==='sending'||t.state==='submitted'||t.state==='failed'))return payer.provider(inv.id).recover(network,quotes,{},context);
+              status.textContent='Review this invoice. Nothing new is signed until you confirm.';
+              view.replaceChildren();
+              var text=document.createElement('p');text.textContent=ant(inv.total)+' ANT for this part of '+file.name+' · account '+inv.payer+' · '+inv.txs.filter(t=>t.state==='planned').length+' wallet confirmations · aggregate ETH limit '+gas+' · expires '+new Date(inv.expiresAt).toLocaleTimeString()+'. Additional parts require another invoice confirmation. Current maximum gas exposure: '+ant(inv.txs.reduce((s,t)=>s+BigInt(t.actualWei||t.reservedWei),0n).toString())+' ETH.';view.append(text);
+              var details=document.createElement('details'),summary=document.createElement('summary'),raw=document.createElement('pre');summary.textContent='Invoice and contract bindings';raw.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere';raw.textContent=JSON.stringify({invoice:inv.id,sha256:sha,network:defaults.payment,quotes:inv.payments,transactions:inv.txs},null,2);details.append(summary,raw);view.append(details);
+              await new Promise(function(resolve,reject){
+                var done=false,button=document.createElement('button');button.type='button';button.textContent='Authorize this invoice and ask my wallet';
+                function end(error){if(done)return;done=true;clearTimeout(timer);signal.removeEventListener('abort',abort);button.remove();error?reject(error):resolve();}
+                function abort(){end(new Error('Invoice cancelled. No new signature requested.'));}
+                var timer=setTimeout(()=>end(new Error('Invoice expired. No new signature requested.')),Math.max(0,inv.expiresAt-Date.now()));
+                signal.addEventListener('abort',abort,{once:true});
+                button.onclick=function(){try{if(signal.aborted)return abort();payer.authorize(inv);end();}catch(e){end(e);}};
+                view.append(button);if(signal.aborted)abort();
+              });
+              status.textContent='Waiting for your wallet and chain confirmation. Keep this page open.';
+              return payer.provider(inv.id).pay(network,quotes,context);
+            },
+            recover:function(network,quotes,attempt,context){return payer.provider(null).recover(network,quotes,attempt,context);}
+          };
+          var originalPay=payment.pay;
+          payment.pay=function(){var task=originalPay.apply(payment,arguments);tasks.push(task);return task;};
+          var result=prior.result;
+          if(!result){
+            try{
+            status.textContent='Preparing public storage; your wallet has not been asked to sign.';
+            result=await session.client.upload(file,{visibility:'public',paymentMode:'single',payment:payment,signal:signal,checkpoint:prior.checkpoint||undefined,retainOnFailure:false,onCheckpoint:value=>payer.checkpoint(value)});
+            payer.uploaded(result);
+            }finally{await Promise.allSettled(tasks);}
+          }
+          status.textContent='Retrieving the stored file and checking its original SHA-256…';
+          var downloaded=await session.client.download(result.file,{signal:signal});
+          var reconciled=await payer.reconcile(downloaded.bytes);
+          receipt.textContent=JSON.stringify(reconciled,null,2);document.getElementById('ant-buy-proof').hidden=false;
+          downloadUrl=URL.createObjectURL(new Blob([downloaded.bytes],{type:file.type||'application/octet-stream'}));
+          var download=document.createElement('a');download.href=downloadUrl;download.download=file.name;download.textContent='Download verified file';document.getElementById('ant-buy-download').append(download);
+          view.replaceChildren();status.textContent='Stored and retrieved: all '+reconciled.retrievedBytes+' bytes match the original SHA-256. Receipt reconciled.';
+        });
+      }catch(error){status.textContent='Storage stopped: '+(error&&error.message||error)+'. Keep this browser’s saved data and resume the same file; do not start a second payment elsewhere.';}
+      finally{active=null;start.disabled=false;stop.hidden=true;}
+    };
   }
 
   function invoiceBlock(inv, current){
@@ -152,8 +231,10 @@
     stopQuote();
     var h = renderChooser();
     if (refInvoice) h += '<details id="bpay-reference" data-min-insp="cypherpunk" style="display:none"><summary>Reference invoice</summary>'+invoiceBlock(refInvoice, false)+'</details>';
+    if(st.audience === 'public') h += purchasePanel();
     h += '<div id="bpay-fresh"></div>';
     card.innerHTML = h;
+    bindPurchase();
     applyInspection();
     // audience selection — the ONE available choice; unavailable rows are
     // plain prose with their reasons (never promised, never pressable)

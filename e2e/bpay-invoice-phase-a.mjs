@@ -80,7 +80,7 @@ if (invoice) {
 
   // waiting state, honestly
   const stateText = (await page.$('#bpay-sec [data-bpay-state]')) ? await page.$eval('#bpay-sec [data-bpay-state]', e => e.innerText) : '';
-  check('quote-only reference has no payment authorization', /Quote only.*payment unavailable/i.test(stateText), stateText.slice(0, 60));
+  check('quote-only reference has no payment authorization', /A quote does not authorize payment/i.test(stateText), stateText.slice(0, 60));
 
   // founder corrections 2026-09-17 — Phase E: obligations ≠ confirmations
   const tux = invoice.domain?.trezor_ux || {};
@@ -97,7 +97,7 @@ if (invoice) {
 }
 
 // A9c law — no authorization route anywhere on the page until Phase C's re-ruling
-check('no authorization route strings (A9c law)', !/Review & Pay|review-pay|bpay-invoice-review-pay/i.test(fullHtml));
+check('no obsolete reference-invoice authorization route', !/Review & Pay|review-pay|bpay-invoice-review-pay/i.test(fullHtml));
 
 check('no page errors', pageErrors.length === 0, pageErrors.slice(0, 2).join(' | ').slice(0, 160));
 check('no bPay console errors', bpayConsole.length === 0, bpayConsole.slice(0, 2).join(' | ').slice(0, 160));
@@ -109,5 +109,5 @@ await browser.close();
 const failed = results.filter(r => !r.ok);
 console.log(failed.length
   ? `\nbPay PHASE-A GATE: ${failed.length} FAILED of ${results.length}`
-  : `\nbPay PHASE-A GATE: GREEN — ${results.length}/${results.length} (real invoice rendered; nothing spendable; A9c held)`);
+  : `\nbPay PHASE-A GATE: GREEN — ${results.length}/${results.length} (real invoice rendered; reference quote grants no spending authority)`);
 process.exit(failed.length ? 1 : 0);
