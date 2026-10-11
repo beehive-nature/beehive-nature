@@ -1,8 +1,12 @@
 # Agent 20 — Hosted ANT Storage Purchasing
 
-Status: #391 and native bzDiD follow-up #396 MERGED. Native deployment and live paid retrieval remain OPEN. Archiving the old wallet-unification chat is housekeeping, not acceptance of ANT purchasing.
+Status: #391 and native bzDiD follow-up #396 MERGED AND DEPLOYED. Native public bytes and non-spending controls VERIFIED. Fresh bound invoice and live paid retrieval remain OPEN, awaiting the founder's existing-passkey sign-in and then explicit bounded payment authorization.
 
 ## Current continuation, 2026-10-11
+
+Latest accepted deployment: Pages `38127860473` attempt 1 completed successfully on `ae4a554cd13b14185112d958d4de3cd6c476b12e`; deploy finished at `2026-10-11T09:36:57Z`. The six public asset checks passed at `09:39:17Z`. Five runtime/core files match tested #396 source byte-for-byte; stack.html matches deployment in full and its wallet row matches the tested source. The actual Codex wallet was reloaded only after confirming it was idle and disconnected; native invoice controls and the visible Rust self-test passed badge were observed.
+
+The exact 49-byte probe was selected with a proposed, unapproved `0.0002 ETH` aggregate fee ceiling. Preparation refused because the existing bzDiD keychain is disconnected. The existing-passkey sign-in was opened, and user presence requested once. Do not create a new identity or request any recovery secret. The file input reset after refusal: reselect `tools/agent20-public-probe.txt` after sign-in before retrying. ANT total remains null; no signature, payment, uploaded file or retrieval receipt exists. Durable release receipt: `docs/receipts/agent20-ant-native-hosted-release-2026-10-10.json`. Older queued-deployment notes below are historical.
 
 PR #391 merged as `42c466b56feaf94796da828302d01cdc714b0156`; all eight source workflows and all eight merge-commit workflows succeeded. Its v8 public release and non-spending hosted controls were verified. A quote alone did not establish a bound payable invoice or purchased retrieval.
 
