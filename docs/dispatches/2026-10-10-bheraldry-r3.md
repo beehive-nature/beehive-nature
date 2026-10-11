@@ -149,6 +149,21 @@ standing boundary pinned on top.
 - `cargo fmt --all --check` clean; `estate-check` PASS (112 · 121 · hub in
   sync); `build-stack-inventory --check` 23 components; i18n selftest PASS;
   lang-coverage tests 13/13; atlas tests 15/15.
+
+### 6a. The red CI named, and its cure
+
+The first CI wave on the review-fix head failed the static job's
+`e2e/estate-source.mjs` — **the corpus English must match what the page
+actually says**, and three of the five new en cells drifted: two
+typographic apostrophes (corpus „symbol's"/"crate's" vs the page's
+straight `'`) and the banner's `&nbsp;` entities (the extractor decodes
+five entity kinds, not `&nbsp;`, so the corpus cell must carry them
+literally). Cured by aligning the three en cells to the page text through
+the gate's own extractor — verified locally with
+`node e2e/estate-source.mjs` → **11 passed, 0 failed** before pushing.
+The lesson folds into the lane's corpus law: the en cell is not a
+paraphrase of the page, it is the page's bytes under the extractor's
+normalization — draft translations freely, transcribe English exactly.
 - **Independent review: APPROVE WITH NOTES, no blockers** (fresh-eyes
   reviewer, read-only, went beyond the lane's own evidence: re-fetched the
   portal PDF — sha256 and the seven settled wordings confirmed byte-for-byte

@@ -79597,7 +79597,7 @@
    "sa": "स्थिता-सीमा"
   },
   "bher.lede.what": {
-   "en": "A symbol is evidence, not artwork. These records carry a symbol’s meaning, grammar, sources, uses and translations as separate, typed claims — the four truths: source authenticity, historical interpretation, language equivalence, authority.",
+   "en": "A symbol is evidence, not artwork. These records carry a symbol's meaning, grammar, sources, uses and translations as separate, typed claims — the four truths: source authenticity, historical interpretation, language equivalence, authority.",
    "ru": "Символ — это улика, а не картинка. Эти записи несут значение символа, его грамматику, источники, употребления и переводы как отдельные типизированные утверждения — четыре истины: подлинность источника, историческая интерпретация, языковая эквивалентность, полномочие.",
    "lv": "Simbols ir pierādījums, ne mākslas darbs. Šie ieraksti nes simbola nozīmi, gramatiku, avotus, lietojumus un tulkojumus kā atsevišķus, tipizētus apgalvojumus — četras patiesības: avota autentiskumu, vēsturisko interpretāciju, valodas ekvivalenci, pilnvaru.",
    "th": "สัญลักษณ์คือหลักฐาน ไม่ใช่งานศิลป์ บันทึกเหล่านี้แยกความหมาย ลำดับพุทธศัพท์ แหล่งที่มา การใช้ และคำแปลของสัญลักษณ์ออกเป็นข้ออ้างที่จัดชนิดชัดเจน — สี่ความจริง: สาระแท้ของแหล่งที่มา ความเข้าใจเชิงประวัติศาสตร์ ความเท่ากันทางภาษา และอำนาจตามกฎหมาย",
@@ -79659,7 +79659,7 @@
    "sa": "केवलं पठनम्। दत्तांशः bheraldry-records.json अस्ति, crates/bheraldry तः उत्पन्नः, डाइजेस्ट्‑द्वारा सङ्केतस्य प्रति अधिपितः।"
   },
   "bher.banner.p": {
-   "en": "A research and conformance specimen. Not government endorsement. Not reproduction rights: reproducing elements of the Bulgarian arms requires an act of the Council of Ministers (Чл. 3 (2)). Unofficial translations are visibly marked machine drafts (⚙, unattested). No living person is named — living subjects are pseudonyms by law.",
+   "en": "A research and conformance specimen. Not government endorsement. Not reproduction rights: reproducing elements of the Bulgarian arms requires an act of the Council of Ministers (Чл.&nbsp;3&nbsp;(2)). Unofficial translations are visibly marked machine drafts (⚙, unattested). No living person is named — living subjects are pseudonyms by law.",
    "ru": "Исследовательский образец для проверки соответствия. Не государственная поддержка. Не права на воспроизведение: воспроизведение элементов болгарского герба требует акта Совета министров (Чл. 3 (2)). Неофициальные переводы видимо помечены как машинные черновики (⚙, не заверены). Имена живых людей не называются — живые субъекты по закону псевдонимы.",
    "lv": "Pētniecības un atbilstības paraugs. Ne valdības atbalstījums. Ne atražošanas tiesības: Bulgārijas ģerboņa elementu atražošanai vajadzīgs Ministru kabineta akts (Чл. 3 (2)). Neoficiālie tulkojumi redzami atzīmēti kā mašīnraksta melnraksti (⚙, nepārbaudīti). Neviens dzīvs cilvēks netiek nosaukts — dzīvi subjekti pēc likuma ir pseidonīmi.",
    "th": "ตัวอย่างเพื่อการวิจัยและการตรวจสอบการปฏิบัติตาม ไม่ใช่การรับรองจากรัฐบาล ไม่ใช่สิทธิ์ในการทำซ้ำ: การทำซ้ำองค์ประกอบของตราแผ่นดินบัลแกเรียต้องมีมติคณะรัฐมนตรี (Чл. 3 (2)) คำแปลที่ไม่เป็นทางการถูกทำเครื่องหมายอย่างเห็นได้ว่าเป็นฉบับร่างจากเครื่อง (⚙ ไม่ผ่านการรับรอง) ไม่มีการระบุชื่อบุคคลที่ยังมีชีวิต — ผู้ที่ยังมีชีวิตใช้นามแฝงตามกฎหมาย",
@@ -79690,7 +79690,7 @@
    "sa": "अनुसन्धान‑अनुरूपता‑निदर्शनम्। न सर्वकारसमर्थनम्। न पुनरुत्पादन‑अधिकारः: बल्गेरियालिङ्गचिह्नस्य तत्त्वानां पुनरुत्पादनाय मन्त्रिपरिषद्कृत्यम् अपेक्ष्यते (Чл. 3 (2))। अनाधिकृतानुवादाः दृश्यतः यन्त्रलेखनानि (⚙, असम्प्रमाणितानि) इति चिह्नितानि। न कस्यापि जीवतः नाम उच्यते — विधिना जीवन्तः विषयाः छद्मनामानि सन्ति।"
   },
   "bher.footer.p": {
-   "en": "External links (lex.bg, government.bg, Wikipedia, dv.parliament.bg) open in a new tab; same-estate pages stay in this one. Record digests are sha256(bheraldry/record/1 ‖ canonical bytes) — verify before trusting. Integrity of these renderings lives in the crate’s tests, not in this page’s paint.",
+   "en": "External links (lex.bg, government.bg, Wikipedia, dv.parliament.bg) open in a new tab; same-estate pages stay in this one. Record digests are sha256(bheraldry/record/1 ‖ canonical bytes) — verify before trusting. Integrity of these renderings lives in the crate's tests, not in this page's paint.",
    "ru": "Внешние ссылки (lex.bg, government.bg, Wikipedia, dv.parliament.bg) открываются в новой вкладке; страницы поместья остаются в этой. Дайджесты записей — sha256(bheraldry/record/1 ‖ канонические байты) — проверяйте, прежде чем доверять. Целостность этих отрисовок живёт в тестах контейнера, а не в краске этой страницы.",
    "lv": "Ārējās saites (lex.bg, government.bg, Wikipedia, dv.parliament.bg) atveras jaunā cilnē; tā paša īpašuma lapas paliek šajā. Ierakstu īssavilkumi ir sha256(bheraldry/record/1 ‖ kanoniskie baiti) — pārbaudiet pirms uzticēšanās. Šo attēlojumu integritāte mīt crate testos, nevis šīs lapas krāsā.",
    "th": "ลิงก์ภายนอก (lex.bg, government.bg, Wikipedia, dv.parliament.bg) เปิดในแท็บใหม่ หน้าของเอสเตทเดียวกันอยู่ในแท็บนี้ ไดเจสต์ของระเบียนคือ sha256(bheraldry/record/1 ‖ canonical bytes) — ตรวจสอบก่อนเชื่อถือ ความถูกต้องของการแสดงผลเหล่านี้อยู่ในการทดสอบของ crate ไม่ใช่ในหน้านี้",
