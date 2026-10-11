@@ -1,0 +1,40 @@
+# adaptive receipt {"browser":"153.0.8010.53","boundary":"one browser; intercepted local fixture; no external capacity test","first":{"door":"https://relay.skaists.dev/ant/v1/data/public/","cache":"ant-bview-v1","rule":{"safety":1.15,"margin":2,"ahead":1,"probeMs":450,"stubBytes":131072},"has":true,"bad":false,"fail":false,"slow":false,"path":"hls","bytes":2218902,"size":0,"rateMbs":null,"rateBps":0,"ttfbMs":270.90000009536743,"ttffMs":877.7999999523163,"sha":null,"doneMs":null,"dec":null,"moov":0,"plan":null,"planless":false,"preview":false,"sounded":false,"stalled":false,"done":false,"paintedAt":0,"waitS":0,"playhead":1.019813,"direct":null,"video":{"duration":48,"width":427,"height":240,"buffered":[[0,23.957333]],"ahead":22.93752,"quality":{"total":29,"dropped":0},"paused":false,"ended":false,"srcChanges":1},"stalls":0,"stallMs":0,"streaming":null,"playStartMs":880.2000000476837,"holds":0,"holdMs":0,"adaptive":{"mode":"mse","segments":6,"mediaBytes":2218902,"errors":0,"recoveries":0,"switches":0,"level":0,"bitrate":507483,"bandwidth":52579299.81562045,"peakAhead":23.957333,"forwardTargetSeconds":20,"backTargetSeconds":10,"bufferTargetBytes":25165824,"published":false,"bundleId":null},"route":"https","source":{"kind":"https","text":"adaptive video · HTTPS playlist host · no Autonomi or estate relay requests"}},"middle":{"door":"https://relay.skaists.dev/ant/v1/data/public/","cache":"ant-bview-v1","rule":{"safety":1.15,"margin":2,"ahead":1,"probeMs":450,"stubBytes":131072},"has":true,"bad":false,"fail":false,"slow":false,"path":"hls","bytes":4625380,"size":0,"rateMbs":null,"rateBps":0,"ttfbMs":270.90000009536743,"ttffMs":877.7999999523163,"sha":null,"doneMs":null,"dec":null,"moov":0,"plan":null,"planless":false,"preview":false,"sounded":false,"stalled":false,"done":false,"paintedAt":0,"waitS":0,"playhead":29.039919,"direct":null,"video":{"duration":48.066666,"width":640,"height":360,"buffered":[[16.066666,48.066666]],"ahead":19.026746999999997,"quality":{"total":870,"dropped":0},"paused":false,"ended":false,"srcChanges":1},"stalls":0,"stallMs":0,"streaming":null,"playStartMs":880.2000000476837,"holds":0,"holdMs":0,"adaptive":{"mode":"mse","segments":12,"mediaBytes":4625380,"errors":0,"recoveries":0,"switches":1,"level":1,"bitrate":905263,"bandwidth":57120037.02504516,"peakAhead":23.957333,"forwardTargetSeconds":20,"backTargetSeconds":10,"bufferTargetBytes":25165824,"published":false,"bundleId":null},"route":"https","source":{"kind":"https","text":"adaptive video · HTTPS playlist host · no Autonomi or estate relay requests"}},"final":{"door":"https://relay.skaists.dev/ant/v1/data/public/","cache":"ant-bview-v1","rule":{"safety":1.15,"margin":2,"ahead":1,"probeMs":450,"stubBytes":131072},"has":true,"bad":false,"fail":false,"slow":false,"path":"hls","bytes":5433136,"size":0,"rateMbs":null,"rateBps":0,"ttfbMs":270.90000009536743,"ttffMs":877.7999999523163,"sha":null,"doneMs":null,"dec":null,"moov":0,"plan":null,"planless":false,"preview":false,"sounded":false,"stalled":false,"done":false,"paintedAt":0,"waitS":0,"playhead":48.066666,"direct":null,"video":{"duration":48.066666,"width":640,"height":360,"buffered":[[7.957333,48.066666]],"ahead":0,"quality":{"total":2012,"dropped":0},"paused":true,"ended":true,"srcChanges":1},"stalls":0,"stallMs":0,"streaming":null,"playStartMs":880.2000000476837,"holds":0,"holdMs":0,"adaptive":{"mode":"mse","segments":14,"mediaBytes":5433136,"errors":0,"recoveries":0,"switches":1,"level":1,"bitrate":905263,"bandwidth":58059440.89809335,"peakAhead":38.024417,"forwardTargetSeconds":20,"backTargetSeconds":10,"bufferTargetBytes":25165824,"published":false,"bundleId":null},"route":"https","source":{"kind":"https","text":"adaptive video · HTTPS playlist host · no Autonomi or estate relay requests"}},"requests":19}
+✔ adaptive route decodes, upgrades, evicts old buffers, seeks and completes without file copies (38630.9826ms)
+# request failure net::ERR_ABORTED
+# request failure net::ERR_ABORTED
+✔ paused and cancelled streams stop demand; replacement ignores old callbacks (10998.2517ms)
+✔ quality falls when measured segment delivery slows (33769.732ms)
+# browser Failed to load resource: the server responded with a status of 503 (Service Unavailable)
+# browser Failed to load resource: the server responded with a status of 503 (Service Unavailable)
+# browser Failed to load resource: the server responded with a status of 503 (Service Unavailable)
+✔ unavailable playlist has bounded retries and an actionable failure (5287.4804ms)
+# direct chunk lanes: three boundary reads per file, Blob playback, no service worker, one connection across two addresses, readers closed, no relay
+✔ direct: chunks read on their boundaries, real MSE frames, one connection, no relay (5308.5244ms)
+✔ direct setup rejection automatically uses the existing relay (844.2623ms)
+✔ a direct connection that never opens reaches the relay after the quiet limit (12888.1205ms)
+✔ an open file whose chunks never arrive reaches the relay and cancels the stuck reads (45804.3074ms)
+✔ large-file relay startup records a first-frame receipt when early preview is skipped (4308.0244ms)
+✔ direct only: a failed direct start stops, records why, and never asks the relay (2535.2327ms)
+✔ direct only: a clean run is labelled direct with no relay bytes (1092.2068ms)
+✔ relay only: every byte is labelled relay and no direct connection opens (878.4396ms)
+✔ later chunks cannot postpone recovery from a missing playable head (2845.6483ms)
+✔ head progress renews the next demand deadline and completes ordered delivery (3166.9972ms)
+✔ ordered starvation on the fallback route asks the relay exactly once (2456.5406ms)
+✔ retry-once: a settled failed head recovers without relay or duplicate bytes (1387.157ms)
+✔ retry-short: a settled failed head recovers without relay or duplicate bytes (1284.1395ms)
+✔ retry exhaustion is bounded on direct-only (2293.9213ms)
+✔ retry exhaustion is bounded on direct (2341.8061ms)
+✔ cancelling during backoff launches no retry and late reads cannot change its receipt (3033.354ms)
+# 52 chunks: 54 attempts, two settled failures, same-byte SHA-256, <=3 reads, no duplicate in-flight range
+✔ 52-chunk transfer recovers chunk 16 twice, preserves order and verifies every byte (8063.069ms)
+✔ a widespread failure cannot exceed the twelve-retry transfer budget (2293.2312ms)
+✔ billion viewer units, cold-start load, cache misses and utilization remain explicit (3.3365ms)
+✔ packaged fixture has complete aligned variants, accurate peak rates and intact media (171.7238ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 105402.7028

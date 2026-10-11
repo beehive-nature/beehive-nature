@@ -1,0 +1,12 @@
+✔ published package is bound to the verified original and every immutable byte (727.1331ms)
+✔ original address defaults to adaptive copy, completes, and retains the saved original address (28625.9909ms)
+✔ explicit direct-only and saved transport choice never fetch a published copy (1224.3359ms)
+✔ adaptive share link selects this viewing mode without overwriting a saved original route (1164.9724ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 32930.7643
