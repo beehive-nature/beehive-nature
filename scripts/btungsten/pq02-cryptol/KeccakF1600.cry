@@ -1,0 +1,253 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ02 — Keccak-f[1600] as FIPS 202 §3 defines it, the
+// permutation under SHA3-256/512, SHAKE128/256, ML-KEM, ML-DSA, SLH-DSA-SHAKE,
+// X-Wing and every bpq1 id.
+//
+// Written from the standard, not from any implementation:
+//   - the state is 25 lanes of 64 bits, lane (x, y) at index 5y + x
+//     (the §3.1.2 string-to-state order), bit z of a lane = numeric bit z
+//   - the ρ offsets are COMPUTED by §3.2.2 Algorithm 2's (x, y) walk
+//   - the ι round constants are COMPUTED by §3.2.5 Algorithm 5's LFSR rc(t)
+//     and Algorithm 6's bit positions 2^j - 1
+// Nothing is transcribed. The closed-term checks at the bottom hold the
+// derivations against published values (Keccak team zero-state permutation,
+// FIPS 202 SHA3-256 examples); those values are checks, never definitions.
+module KeccakF1600 where
+
+type Lane = [64]
+type State = [25]Lane
+
+lane : State -> Integer -> Integer -> Lane
+lane A x y = A @ (5 * y + x)
+
+// §3.2.1 θ
+theta : State -> State
+theta A = [ lane A x y ^ D @ x | y <- [0 .. 4 : Integer], x <- [0 .. 4 : Integer] ]
+  where
+    C = [ foldl (^) zero [ lane A x y | y <- [0 .. 4 : Integer] ] | x <- [0 .. 4 : Integer] ] : [5]Lane
+    D = [ C @ ((x + 4) % 5) ^ (C @ ((x + 1) % 5) <<< 1) | x <- [0 .. 4 : Integer] ] : [5]Lane
+
+// §3.2.2 Algorithm 2: (x, y) starts at (1, 0); step t rotates by
+// (t + 1)(t + 2) / 2 mod 64, then (x, y) := (y, (2x + 3y) mod 5)
+rhoWalk : [24](Integer, Integer)
+rhoWalk = take`{24} ps
+  where
+    ps = [(1, 0)] # [ (y, (2 * x + 3 * y) % 5) | (x, y) <- ps ]
+
+rhoOffset : Integer -> Integer
+rhoOffset i =
+  foldl (\acc (t, (x, y)) -> if 5 * y + x == i then ((t + 1) * (t + 2) / 2) % 64 else acc)
+        0 (zip [0 .. 23 : Integer] rhoWalk)
+
+rho : State -> State
+rho A = [ (A @ i) <<< rhoOffset i | i <- [0 .. 24 : Integer] ]
+
+// §3.2.3 π: A'[x, y] = A[(x + 3y) mod 5, x]
+pi : State -> State
+pi A = [ lane A ((x + 3 * y) % 5) x | y <- [0 .. 4 : Integer], x <- [0 .. 4 : Integer] ]
+
+// §3.2.4 χ
+chi : State -> State
+chi A = [ lane A x y ^ (~ (lane A ((x + 1) % 5) y) && lane A ((x + 2) % 5) y)
+        | y <- [0 .. 4 : Integer], x <- [0 .. 4 : Integer] ]
+
+// §3.2.5 Algorithm 5: rc(t), an LFSR over R[0..7] with R[0] first
+lfsrStep : [8] -> [8]
+lfsrStep r = take`{8} [ if (i == 0) || (i == 4) || (i == 5) || (i == 6) then (r9 @ i) ^ (r9 @ 8) else r9 @ i
+                      | i <- [0 .. 8 : Integer] ]
+  where
+    r9 = [False] # r : [9]
+
+rc : Integer -> Bit
+rc t = if t % 255 == 0 then True else (iterate lfsrStep 0b10000000 @ (t % 255)) @ 0
+
+// §3.2.5 Algorithm 6: RC[2^j - 1] = rc(j + 7 i_r), every other bit 0
+RC : Integer -> Lane
+RC ir = foldl (||) zero [ if rc (j + 7 * ir) then (1 : Lane) << ((2 ^^ j) - 1) else zero | j <- [0 .. 6 : Integer] ]
+
+iota : Integer -> State -> State
+iota ir A = update A (0 : [5]) (A @ (0 : [5]) ^ RC ir)
+
+// §3.3 Rnd with its round constant as the argument. Two round pairs share a
+// constant (RC 5 = RC 22, RC 6 = RC 20), so a round is a function of the
+// constant, not of the index.
+keccakRoundRC : Lane -> State -> State
+keccakRoundRC c A = update B (0 : [5]) (B @ (0 : [5]) ^ c)
+  where B = chi (pi (rho (theta A)))
+
+// §3.3 Rnd and Keccak-p[1600, 24] = Keccak-f[1600]
+keccakRound : Integer -> State -> State
+keccakRound ir A = keccakRoundRC (RC ir) A
+
+keccakF : State -> State
+keccakF A = foldl (\s ir -> keccakRound ir s) A [0 .. 23 : Integer]
+
+// ---- SHA3-256 on one block (messages shorter than the 136-byte rate) ----
+// §5.1 pad10*1 after the SHA-3 domain bits 01: byte 0x06 ... final byte | 0x80;
+// lanes are little-endian 8-byte groups (B.1).
+toLanes : [200][8] -> State
+toLanes bs = [ join (reverse (bs @@ [8 * i + k | k <- [0 .. 7 : Integer]])) | i <- [0 .. 24 : Integer] ]
+
+fromLanes : State -> [200][8]
+fromLanes A = join [ reverse (split`{8} l) | l <- A ]
+
+sha3_256_short : {n} (fin n, n < 136) => [n][8] -> [32][8]
+sha3_256_short m = take`{32} (fromLanes (keccakF (toLanes block)))
+  where
+    padded = m # [0x06] # zero : [136][8]
+    rateBlock = update padded (135 : [8]) (padded @ (135 : [8]) || 0x80)
+    block = rateBlock # zero : [200][8]
+
+// ---- the sponge at rate 136 (SHA3-256 and SHAKE256), any length ----
+// §4 SPONGE[f, pad, r]: each 136-byte block XORed into the state's first
+// 17 lanes, then f; pad10*1 (§5.1) after the domain bits, which share the
+// first pad byte: SHA-3's 01 makes it 0x06, SHAKE's 1111 makes it 0x1F
+// (§6.1, §6.2); the last byte of the padded message gains 0x80.
+
+// m, its domain byte, zeros, then the final bit; a 135-byte remainder puts
+// the domain byte and the final bit in one byte
+padRate : {n} (fin n) => [8] -> [n][8] -> [n / 136 + 1][136][8]
+padRate d m = split (padded || (zero # [0x80]))
+  where
+    padded = take`{(n / 136 + 1) * 136} (m # [d] # (zero : [136][8]))
+
+absorb : {k} (fin k) => [k][136][8] -> State
+absorb blocks = foldl (\s b -> keccakF (s ^ toLanes (b # zero))) zero blocks
+
+sha3_256 : {n} (fin n) => [n][8] -> [32][8]
+sha3_256 m = take`{32} (fromLanes (absorb (padRate 0x06 m)))
+
+// SHAKE256 with at most one rate block out (d <= 136); bsigner reads 96
+shake256 : {n, d} (fin n, d <= 136) => [n][8] -> [d][8]
+shake256 m = take`{d} (fromLanes (absorb (padRate 0x1F m)))
+
+// ---- the sponge at any rate, any output length (§4 Algorithm 8) ----
+// r is the rate in bytes: 136 for SHA3-256 and SHAKE256, 72 for SHA3-512,
+// 168 for SHAKE128. The output is trunc_r(S) ‖ trunc_r(f(S)) ‖ ..., cut to d.
+
+padR : {r, n} (fin r, r >= 1, fin n) => [8] -> [n][8] -> [n / r + 1][r][8]
+padR d m = split (padded || (zero # [0x80]))
+  where
+    padded = take`{(n / r + 1) * r} (m # [d] # (zero : [r][8]))
+
+absorbR : {r, k} (fin r, fin k, 200 >= r) => [k][r][8] -> State
+absorbR blocks = foldl (\s b -> keccakF (s ^ toLanes (b # zero))) zero blocks
+
+squeezeR : {r, d} (fin r, r >= 1, 200 >= r, fin d) => State -> [d][8]
+squeezeR s = take`{d} (join [ take`{r} (fromLanes t) | t <- states ])
+  where
+    states = scanl (\t _ -> keccakF t) s (zero : [d / r][0])
+
+spongeR : {r, n, d} (fin r, r >= 1, 200 >= r, fin n, fin d) => [8] -> [n][8] -> [d][8]
+spongeR dom m = squeezeR`{r} (absorbR`{r} (padR`{r} dom m))
+
+sha3_512 : {n} (fin n) => [n][8] -> [64][8]
+sha3_512 = spongeR`{r = 72} 0x06
+
+shake128 : {n, d} (fin n, fin d) => [n][8] -> [d][8]
+shake128 = spongeR`{r = 168} 0x1F
+
+// SHAKE256 with any output length (shake256 above reads one block at most)
+shake256Long : {n, d} (fin n, fin d) => [n][8] -> [d][8]
+shake256Long = spongeR`{r = 136} 0x1F
+
+// ---- closed-term checks (published values; checks, not definitions) ----
+
+// The Keccak team's KeccakF-1600 intermediate values: the permutation of
+// the all-zero state, first and last lanes.
+zeroStateFirstLane : Bit
+property zeroStateFirstLane = (keccakF zero) @ (0 : [5]) == 0xF1258F7940E1DDE7
+
+zeroStateLastLane : Bit
+property zeroStateLastLane = (keccakF zero) @ (24 : [5]) == 0xEAF1FF7B5CECA249
+
+// FIPS 202 example values (NIST CSRC SHA3-256 "" and "abc"), as four
+// 64-bit big-endian words of the digest.
+digestWords : [32][8] -> [4][64]
+digestWords d = [ join (d @@ [8 * i + k | k <- [0 .. 7 : Integer]]) | i <- [0 .. 3 : Integer] ]
+
+sha3EmptyDigest : Bit
+property sha3EmptyDigest = digestWords (sha3_256_short []) ==
+  [0xa7ffc6f8bf1ed766, 0x51c14756a061d662, 0xf580ff4de43b49fa, 0x82d80a4b80f8434a]
+
+sha3AbcDigest : Bit
+property sha3AbcDigest = digestWords (sha3_256_short "abc") ==
+  [0x3a985da74fe225b2, 0x045c172d6bd390bd, 0x855f086e3e9d525b, 0x46bfe24511431532]
+
+// The sponge on more than one block and at both padding edges. 200 bytes of
+// 0xA3 is FIPS 202's published SHA3-256 example; the rest were computed by
+// Python's hashlib (its own Keccak, an independent implementation).
+sha3MultiBlockDigest : Bit
+property sha3MultiBlockDigest = digestWords (sha3_256 (repeat 0xA3 : [200][8])) ==
+  [0x79f38adec5c20307, 0xa98ef76e8324afbf, 0xd46cfd81b22e3973, 0xc65fa1bd9de31787]
+
+// 135 bytes: the domain byte and the final bit share the last byte (0x86)
+sha3PadSharedByte : Bit
+property sha3PadSharedByte = digestWords (sha3_256 (zero : [135][8])) ==
+  [0x7d080d7ba978a75c, 0x8a7d1f9be566c859, 0x084509c9c2b49284, 0x35c225d5777d98e3]
+
+// 136 bytes: a whole block of padding follows
+sha3PadFullBlock : Bit
+property sha3PadFullBlock = digestWords (sha3_256 (zero : [136][8])) ==
+  [0xe772c9cf9eb9c991, 0xcdfcf125001b454f, 0xdbc0a95f188d1b4c, 0x844aa032ad6e075e]
+
+// SHAKE256 of the bytes 0 .. 31, 96 bytes out (the shape of xwing_expand)
+shake256Seed96 : Bit
+property shake256Seed96 = split`{12} (join (shake256`{d = 96} [0 .. 31 : [8]])) ==
+  [0x69f07c8840ce8002, 0x4db30939882c3d5b, 0xbc9c98b3e31e4513, 0xebd2ca9b4503cdd3,
+   0xc9c90742452c7173, 0xd4a75ac49163e14e, 0xe0cc24ef7035b272, 0xd19a7af1099b333f,
+   0x617465d69b5f5b78, 0xae914e4a1b1cecc9, 0x21f6d5791830ae3f, 0x914bee9b0292b288]
+
+// The any-rate sponge at the shapes ML-KEM and ML-DSA hash at, on the
+// message pattern byte i = s * i + 7 (computed by Python's hashlib). Each
+// output is checked by its first and last 32 bytes as 64-bit words.
+pattern : {n} (fin n) => [8] -> [n][8]
+pattern s = [ drop`{8} i * s + 7 | i <- take`{n} [(0 : [16]) ...] ]
+
+ends : {d} (fin d, d >= 32) => [d][8] -> [8][64]
+ends z = split (join (take`{32} z # drop`{d - 32} z))
+
+sha3_512Of33 : Bit
+property sha3_512Of33 = split (join (sha3_512 (pattern`{33} 3))) ==
+  [0xeb50562b0c7ee978, 0x9946100ffe4d949f, 0xa8ea874d3d4bb106, 0x84675fd6709183d0,
+   0x4a49b113006c774e, 0xe85d9de3b0cb6fdf, 0xe069e6a9b6c26840, 0x698d8563b47f1bd2]
+
+// SHA3-256 of 1184 bytes (an ML-KEM-768 encapsulation key's length), both
+// sponge definitions
+sha3_256Of1184 : Bit
+property sha3_256Of1184 =
+  (digestWords (sha3_256 m) == [0xe2a77bbd44433906, 0x934a26aa83194e38, 0x35bac9d4f4a0d121, 0xc2acc0e789ec0376])
+  /\ (spongeR`{r = 136} 0x06 m == sha3_256 m)
+  where
+    m = pattern`{1184} 5
+
+// SHAKE128 of 34 bytes, 504 out: three squeezed blocks
+shake128Of34To504 : Bit
+property shake128Of34To504 = ends (shake128`{d = 504} (pattern`{34} 11)) ==
+  [0x0526b054267ba668, 0x528405a391fec370, 0x065a2e3004fd7873, 0x55f7157f29ecd6ca,
+   0x1dd3d78160d85f7a, 0xb84862d1543669f6, 0x9fbf7df0feaf033d, 0xcd4af0ea85157b44]
+
+// SHAKE256 of 1120 bytes (z ‖ c for ML-KEM-768's J), 32 out
+shake256Of1120 : Bit
+property shake256Of1120 = split (join (shake256Long`{d = 32} (pattern`{1120} 13))) ==
+  [0x6b4d32b1b90ebe15, 0xbf29c5423eef89d4, 0x2e76eedfde41c715, 0x9bdbf739c95341b6]
+
+// SHAKE256 of 33 bytes, 128 out (the PRF's shape at eta = 2)
+shake256Of33To128 : Bit
+property shake256Of33To128 = ends (shake256Long`{d = 128} (pattern`{33} 17)) ==
+  [0xe0c56ea069723a28, 0xf21135581418239e, 0xd37d41112a8f76df, 0x31659844ee07b119,
+   0x62671b53b34b2e56, 0xe7c5256241e1a840, 0x08ea8c0ee4e97c66, 0x92cb8b1f112b7eb2]
+
+// The derived offsets are a permutation of the 24 non-zero lanes' needs:
+// lane 0 never rotates, and every other lane gets exactly one walk step.
+rhoWalkCoversEveryLaneOnce : Bit
+property rhoWalkCoversEveryLaneOnce =
+  rhoOffset 0 == 0 /\ and [ hits i == 1 | i <- [1 .. 24 : Integer] ]
+  where
+    hits i = foldl (+) 0 [ if 5 * y + x == i then 1 else 0 | (x, y) <- rhoWalk ] : Integer
+
+// TEETH spec: the same round with ONE ρ offset off by one (lane 1). The SAW
+// teeth obligation asks the harness round to equal THIS and must fail.
+keccakRoundRhoOffByOne : Integer -> State -> State
+keccakRoundRhoOffByOne ir A = iota ir (chi (pi (rhoBad (theta A))))
+  where
+    rhoBad S = [ (S @ i) <<< (if i == 1 then rhoOffset i + 1 else rhoOffset i) | i <- [0 .. 24 : Integer] ]

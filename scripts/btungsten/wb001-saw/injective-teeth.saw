@@ -1,0 +1,14 @@
+// TEETH for injective.saw: the same first-difference obligation with the
+// canonical-padding premise removed. Two intents that differ only in bytes
+// past a field's length put the same bytes on the wire, so this MUST fail
+// with a solver counterexample. If it ever proves, the ladder's premises
+// stopped carrying weight and the PROVEN lines would be vacuous.
+
+enable_experimental;
+cryptol_add_path "../wb001-cryptol";
+import "WB001Injective.cry";
+import "../wb001-cryptol/BTungstenWB001.cry";
+
+print "WB001-SAW-TEETH obligation: fd01 without canonical padding";
+prove_print (w4_unint_bitwuzla []) {{ \a b -> (lensBounded a && lensBounded b && (a.domain != b.domain)) ==> concl a b }};
+print "WB001-SAW-TEETH UNEXPECTED-PROVEN";

@@ -9,7 +9,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { pinRegister } from './wallet-register-pin.mjs';
+import { pinRegister, REG } from './wallet-register-pin.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
@@ -66,7 +66,10 @@ try {
     ok('only implemented public readers can be selected', options.filter(o => !o.disabled).length === available.length && options.filter(o => !o.disabled).every(o => available.includes(o.value)));
     ok('every research/gap row is visible and unavailable in the picker', data.filter(c => !c.watch).every(c => options.some(o => o.disabled && o.value === '' && o.text.startsWith(c.name+' · '))));
     ok('Vaulta and Hive remain first-class selectable accounts', ['vaulta','hive'].every(value => options.some(o => o.value === value && !o.disabled)));
-    const summary = await page.locator('#matrix-summary').innerText();
+    // the count chips are cypherpunk's; every register reads one sentence (textContent carries both)
+    const summary = await page.locator('#matrix-summary').textContent();
+    const said = await page.locator('#matrix-say').innerText();
+    ok('every register reads the coverage as one sentence computed from the data', said === 'this wallet can read ' + data.filter(c => c.state === 'READ').length + ' of these ' + data.length + ' today; the rest cannot be read here yet.', said);
     const tally = await page.evaluate(d => {
       const t = {}; d.forEach(c => t[c.state] = (t[c.state] || 0) + 1); return t;
     }, data);
@@ -90,7 +93,7 @@ try {
     await page.waitForFunction(() => window.__CHAIN_MATRIX, null, { timeout: 15000 });
     const body = await page.evaluate(() => document.getElementById('matrix-body').innerText);
     ok('removed rail disappears from the matrix and picker', !/Arweave/.test(body) && await page.locator('#wa-chain option[value="arweave"]').count() === 0);
-    const sum2 = await page.locator('#matrix-summary').innerText();
+    const sum2 = await page.locator('#matrix-summary').textContent();
     ok('removal recomputes the summary count', sum2.includes((originalCount-1)+' scope entries · computed'), sum2.slice(0, 60));
     await ctx.close();
   }
@@ -108,12 +111,15 @@ try {
       !!(prof.canonical_home && prof.composer && prof.composer.contract && Array.isArray(prof.discovery_seeds) &&
          prof.anchor && prof.anchor.path && prof.anchor.sha256 && Array.isArray(prof.anchor.tags)), JSON.stringify(prof).slice(0, 90));
     const booted = await page.evaluate(() => ({ c: document.getElementById('tx-contract').value, a: document.getElementById('tx-action').value, d: document.getElementById('tx-data').value }));
-    ok('composer boots FROM the profile (no hard-wired defaults in the markup)',
+    if (REG === 'cypherpunk') ok('composer boots FROM the profile (no hard-wired defaults in the markup)',
       booted.c === prof.composer.contract && booted.a === prof.composer.action &&
       JSON.parse(booted.d).registrant === prof.composer.args.registrant, JSON.stringify(booted));
+    else ok('bee and raver boot the composer empty: no visitor is shown the estate account as the thing to sign (the profile stays data, cypherpunk boots from it)',
+      booted.c === '' && booted.a === '' && booted.d === '' && prof.composer.contract === 'kingbeelovis', JSON.stringify(booted));
     await page.close();
 
-    const ctx = await browser.newContext();
+    const ctx = await (browser.newContextOwnRegister || browser.newContext).call(browser);
+    await ctx.addInitScript(() => { try { localStorage.setItem('bregister', 'cypherpunk'); } catch (e) {} });   // the profile's composer defaults boot in cypherpunk
     await ctx.route(/surfaces\/wallet\.html/, async route => {
       const src = await readFile(join(ROOT, 'surfaces', 'wallet.html'), 'utf8');
       const anchor = "contract: 'kingbeelovis',";

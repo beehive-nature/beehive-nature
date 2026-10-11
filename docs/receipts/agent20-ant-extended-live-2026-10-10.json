@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-11T00:00:19.127Z",
+  "url": "https://skaists.dev/surfaces/wallet.html",
+  "kind": "live-keyless-quote-only",
+  "timeoutSeconds": 300,
+  "paymentAuthorized": false,
+  "fundsSpent": false,
+  "purchasePanel": false,
+  "quoteStatus": "0.3859936435546875 ANT · 49 bytes · quoted 6:02:39 PM · from Autonomi storage nodes. ETH network fees are separate. Quote only; nothing was stored on Autonomi or paid.",
+  "horizontalOverflow": false
+}

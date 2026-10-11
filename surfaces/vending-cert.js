@@ -1,9 +1,11 @@
 /* vending-cert.js — the birth certificate, composed in the page.
    A byte-for-byte port of contracts/vending/tool/cert.mjs (composeCertificate,
-   canonicalJson, contentHash, certTags) plus the a1-log genesis revision of
-   tool/a1.mjs, so the machine can mint in a browser with no server between
-   the member and the permaweb. e2e/vending-cert.test.mjs holds this file and
-   cert.mjs to the SAME hash for the same inputs — drift fails the gate. */
+   canonicalJson, contentHash, certTags) plus the a1-log genesis revision
+   (v1 and v2) and store binding of tool/a1.mjs, so the machine can mint in a
+   browser with no server between the member and the permaweb.
+   e2e/vending-cert.test.mjs holds this file and cert.mjs to the SAME hash
+   for the same inputs, and this file's genesis to a1.mjs's verifier — drift
+   fails the gate. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.VendingCert = factory();
@@ -11,7 +13,7 @@
   'use strict';
   var subtle = (typeof crypto !== 'undefined' && crypto.subtle) || (typeof require === 'function' && require('node:crypto').webcrypto.subtle);
   var te = new TextEncoder();
-  var CERT_VERSION = 1, A1_VERSION = 1;
+  var CERT_VERSION = 1, A1_VERSION = 1, A1_V2 = 2;
 
   var sortDeep = function (v) {
     return Array.isArray(v) ? v.map(sortDeep)
@@ -53,7 +55,7 @@
           arweave: { role: 'this birth certificate AND this recipe — the permanent layer',
             door: 'Arweave Turbo free tier (<=105 KiB; ed25519-signed so the OWNER equals the member key when that door is open, else Member-Key tag carries the key road)' },
           autonomi: { role: 'private working memory under the member\'s own key',
-            format: 'a1-log v1: append-only hash-linked revisions, owner-signed; highest valid revision wins; deletable by the member',
+            format: 'a1-log v2: append-only hash-linked revisions, each signed by the member\'s ed25519 key and by an ML-DSA-65 key pinned at genesis; highest valid revision wins; v1 logs still verify under v1 rules; deletable by the member',
             funded_write: 'gated on the ANT custody review (storage-substrate-split item 8); never priced at zero (R3)' },
           vaulta: { role: 'rate table + tithe + one bounded pointer row per agent',
             contract: 'vending (contracts/vending/src/vending.cpp, cdt-cpp 4.x)',
@@ -99,11 +101,49 @@
     var sig = hex(new Uint8Array(await subtle.sign({ name: 'Ed25519' }, p.memberPrivateKey, te.encode(canonicalJson(base)))));
     base.sig_ed25519 = sig; return base;
   }
+
+  /* a1.mjs v2: a1PqKeys + genesisRevisionV2. The same genesis signed twice
+     over the same canonical bytes: ed25519 by the member key, ML-DSA-65 by
+     the post-quantum key it pins (BPQ.keys(member seed, 'a1:' + agent) —
+     surfaces/bpq.js, SPEC-BPQ-1). Needs bpq-lib.js + bpq.js loaded first; a
+     page without them is refused here, never handed a v1 genesis instead. */
+  function bpq() {
+    var B = typeof BPQ !== 'undefined' ? BPQ : null;
+    if (!B) throw new Error('a1 v2 needs the post-quantum library (bpq-lib.js + bpq.js), and it did not load');
+    return B;
+  }
+  function a1PqKeys(seed32, agent) {
+    if (typeof agent !== 'string' || !agent) throw new Error('a1 v2: agent must be a non-empty string');
+    return bpq().keys(seed32, 'a1:' + agent);
+  }
+  async function genesisRevisionV2(p) {
+    var B = bpq(), k = p.pqKeys;
+    if (!k || !k.dsa || !k.succession) throw new Error('a1 v2 needs the agent\'s PQ keys (a1PqKeys(member seed, agent))');
+    if (k.context !== 'a1:' + p.agent) throw new Error('a1 v2: the PQ keys were derived for context ' + JSON.stringify(k.context) + ', not ' + JSON.stringify('a1:' + p.agent));
+    var base = { v: A1_V2, agent: p.agent, rev: 0, prev: '', body: p.body, ts: p.ts || new Date().toISOString(),
+      pq: { alg: 'ml-dsa-65', id: k.id, dsa: B.b64u(k.dsa.publicKey), succ: B.b64u(k.succession.commit) } };
+    var canon = canonicalJson(base);
+    var ed = hex(new Uint8Array(await subtle.sign({ name: 'Ed25519' }, p.memberPrivateKey, te.encode(canon))));
+    // a1.mjs pqMessage: the ML-DSA-65 signature also covers the ed25519 one
+    var head = te.encode('a1/v2/pq' + canon), msg = new Uint8Array(head.length + 64);
+    msg.set(head, 0);
+    for (var i = 0; i < 64; i++) msg[head.length + i] = parseInt(ed.substr(i * 2, 2), 16);
+    var ml = B.b64u(k.dsa.sign(msg));
+    base.sig_ed25519 = ed; base.sig_ml_dsa_65 = ml; return base;
+  }
+
+  /* a1.mjs storeBinding: v1 text unchanged byte for byte; v2 names the pinned pq id */
+  var FUNDED_WRITE_STATUS = 'GATED on the ANT custody review (storage-substrate-split item 8); the binding is derivable from this certificate the day it is funded';
   function storeBinding(genesis, genesisHash) {
-    return { store: 'autonomi',
+    if (genesis.v === A1_VERSION) return { store: 'autonomi',
       binding: 'a1-log v1 — append-only hash-linked revisions, owner-signed ed25519 (this member key); resolver takes the highest valid revision; deletable by the member',
       a1_genesis: { rev: genesis.rev, sha256: genesisHash, ts: genesis.ts },
-      funded_write_status: 'GATED on the ANT custody review (storage-substrate-split item 8); the binding is derivable from this certificate the day it is funded' };
+      funded_write_status: FUNDED_WRITE_STATUS };
+    if (genesis.v === A1_V2) return { store: 'autonomi',
+      binding: 'a1-log v2 — append-only hash-linked revisions, each signed twice: ed25519 (this member key) over the canonical bytes, and ML-DSA-65 (the post-quantum key pinned at genesis, a1_genesis.pq_id) over those bytes and the ed25519 signature; a revision counts only if every revision back to this genesis carries both; resolver takes the highest valid revision; deletable by the member',
+      a1_genesis: { rev: genesis.rev, sha256: genesisHash, ts: genesis.ts, pq_id: genesis.pq.id },
+      funded_write_status: FUNDED_WRITE_STATUS };
+    throw new Error('unknown a1 version ' + JSON.stringify(genesis.v));
   }
 
   /* verify: the resurrection gate (cert.mjs verifyCertificate) */
@@ -114,5 +154,5 @@
     return h === record.hash.value ? { ok: true, hash: h } : { ok: false, reason: 'hash mismatch', hash: h, claimed: record.hash.value };
   }
 
-  return { CERT_VERSION: CERT_VERSION, canonicalJson: canonicalJson, contentHash: contentHash, composeCertificate: composeCertificate, certTags: certTags, hashRevision: hashRevision, genesisRevision: genesisRevision, storeBinding: storeBinding, verifyCertificate: verifyCertificate };
+  return { CERT_VERSION: CERT_VERSION, canonicalJson: canonicalJson, contentHash: contentHash, composeCertificate: composeCertificate, certTags: certTags, hashRevision: hashRevision, genesisRevision: genesisRevision, a1PqKeys: a1PqKeys, genesisRevisionV2: genesisRevisionV2, storeBinding: storeBinding, verifyCertificate: verifyCertificate };
 });

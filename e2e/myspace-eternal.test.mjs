@@ -1,9 +1,13 @@
-// myspace-eternal.test.mjs — MY SPACE as three products in one surface (founder blueprint 2026-09-26,
-// docs/design/eternal). Proves at 390 px: exactly one front per register, each in its own dress and
-// structure; all three carry the SAME facts, read from window.__myspace (the purposes the attached
-// rails answer, each rail's declared terms, the device index); and no gesture stores anything on its
-// own — choosing presses the page's own #mode-* button, and "add a file" opens the page's own picker,
-// whose real write then shows up in all three fronts. Run: node --test e2e/myspace-eternal.test.mjs
+// myspace-eternal.test.mjs — MY SPACE in the founder's chosen UI (order 2026-10-04: "NOW seems like a
+// good time to bring my chosen UI back in", nine screens at 390 px). One DOM, three registers: new bee
+// (cream paper, forest-green primary), raver (violet night, magenta primary), cypherpunk (mono, cyan
+// primary, cut corners). Proves at 390x844, in every register and in all three views a visitor meets
+// (empty, one file, the delete sheet): each register wears its own ground, words and primary; there is
+// never more than one filled primary on screen; nothing scrolls sideways; every press target is at
+// least 44 px; text holds 4.5:1 on its ground; no text is re-cased; the cards are exactly the purposes
+// the attached rails answer, in the page's own order; and the words do not claim what the code does
+// not do. Behaviour (rails, storage, delete, sweep, ANT) is judged by e2e/myspace-seam.mjs.
+// Run: node --test e2e/myspace-eternal.test.mjs
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
@@ -23,143 +27,165 @@ let browser;
 before(async () => { await new Promise(r => srv.listen(PORT, '127.0.0.1', r)); browser = await chromium.launch(); });
 after(async () => { if (browser) await browser.close(); srv.close(); });
 
-async function open(reg, ctx) {
-  ctx = ctx || await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+const REGS = ['bee', 'raver', 'cypherpunk'];
+// each register's own dress, read off the screens: ground, the big line, the one primary's fill
+const WANT = {
+  bee: { bg: 'rgb(251, 247, 240)', title: 'Your files live on this phone.', primary: 'rgb(38, 77, 54)', face: /system-ui|Segoe UI|ui-sans-serif/ },
+  raver: { bg: 'rgb(18, 14, 30)', title: 'Drop it. Keep it. Or let it fly.', primary: 'rgb(214, 85, 187)', face: /system-ui|Segoe UI|ui-sans-serif/ },
+  cypherpunk: { bg: 'rgb(6, 17, 12)', title: 'local rows · sha256 · AES-GCM', primary: 'rgb(69, 194, 220)', face: /monospace/ },
+};
+
+async function open(reg) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await ctx.addInitScript(r => { try { localStorage.setItem('bregister', r); } catch {} }, reg);
   const outside = [];
   await ctx.route('**/*', r => { if (r.request().url().startsWith(ORIGIN)) return r.continue(); outside.push(r.request().url()); return r.abort('blockedbyclient'); });
   const p = await ctx.newPage(); const errs = [];
   p.on('pageerror', e => errs.push(String(e)));
   await p.goto(`${ORIGIN}/surfaces/myspace.html`, { waitUntil: 'load' });
-  await p.waitForFunction(() => window.__eternal && window.__eternal.data.ready && window.__eternal.data.purposes.some(x => x.offered), null, { timeout: 20000 });
-  await p.waitForTimeout(300);
+  await p.waitForFunction(r => document.body.dataset.reg === r && window.__myspace && document.querySelectorAll('#modes .mode').length >= 2, reg, { timeout: 20000 });
+  await p.waitForTimeout(400);
   return { ctx, p, errs, outside };
 }
-const shown = p => p.evaluate(() => ['.et-b', '.et-r', '.et-c'].filter(s => getComputedStyle(document.querySelector('#eternal>' + s)).display !== 'none'));
 
-test('one front per register, each in its own dress and structure', async () => {
-  const want = {
-    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, action: 'rgb(168, 35, 140)' },
-    raver: { front: '.et-r', bg: 'rgb(6, 17, 12)', title: /Unbounded/, action: 'rgb(214, 85, 187)' },
-    cypherpunk: { front: '.et-c', bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, action: 'rgb(69, 194, 220)' },
-  };
-  for (const [reg, w] of Object.entries(want)) {
+// one probe for every view: what a visitor can see, measured the way the estate's meters measure it
+function probe() {
+  const rgb = s => { const m = /rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/.exec(s); return m ? [+m[1], +m[2], +m[3], m[4] == null ? 1 : +m[4]] : null; };
+  const L = c => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }; return .2126 * f(c[0]) + .7152 * f(c[1]) + .0722 * f(c[2]); };
+  const ground = el => { for (let e = el; e; e = e.parentElement) { const b = rgb(getComputedStyle(e).backgroundColor); if (b && b[3] > .5) return b; } return rgb(getComputedStyle(document.body).backgroundColor); };
+  const seen = e => e.checkVisibility() && e.getBoundingClientRect().width > 0;
+  const roots = [document.getElementById('eternal'), ...document.querySelectorAll('.sheet')].filter(seen);
+  const els = roots.flatMap(r => [r, ...r.querySelectorAll('*')]).filter(seen);
+  const out = { primaries: 0, small: [], faint: [], caps: [], junk: [], text: '' };
+  for (const e of els) {
+    const cs = getComputedStyle(e), r = e.getBoundingClientRect();
+    if (e.matches('.primary')) out.primaries++;
+    if (/^(BUTTON|A)$/.test(e.tagName) && (r.height < 43.5 || r.width < 43.5)) out.small.push(e.textContent.trim().slice(0, 24) + ' ' + Math.round(r.width) + 'x' + Math.round(r.height));
+    const own = [...e.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).join(' ').trim();
+    if (!own) continue;
+    if (cs.textTransform !== 'none') out.caps.push(own.slice(0, 24));
+    if (/^[—–-]$/.test(own) || /\b(NaN|undefined|null)\b|\[object/.test(own)) out.junk.push(own.slice(0, 24));
+    const fg = rgb(cs.color), bg = ground(e);
+    if (fg && fg[3] > .5) { const a = L(fg), b = L(bg), ratio = (Math.max(a, b) + .05) / (Math.min(a, b) + .05); if (ratio < 4.49) out.faint.push(own.slice(0, 24) + ' ' + ratio.toFixed(2)); }
+  }
+  out.text = roots.map(r => r.innerText).join('\n');
+  out.wide = document.documentElement.scrollWidth;
+  return out;
+}
+
+const law = (reg, view, m) => {
+  assert.ok(m.primaries <= 1, `${reg} ${view}: at most one filled primary on screen (saw ${m.primaries})`);
+  assert.ok(m.wide <= 390, `${reg} ${view}: no sideways page at 390 px (scrollWidth ${m.wide})`);
+  assert.deepEqual(m.small, [], `${reg} ${view}: every press target is at least 44 px`);
+  assert.deepEqual(m.faint, [], `${reg} ${view}: text holds 4.5:1 on its ground`);
+  assert.deepEqual(m.caps, [], `${reg} ${view}: no text is re-cased by text-transform`);
+  assert.deepEqual(m.junk, [], `${reg} ${view}: no dash, NaN or undefined shown as a value`);
+};
+
+// words the screens used that the code does not do (the false-signal law): none may appear in any register
+const UNTRUE = [/before it leaves/i, /asks? the store to drop/i, /drop the open (hash|one)/i, /localStorage/, /bzdid/i, /GET \/blossom/, /\/blossom\//];
+
+test('three registers, one page: each wears its own ground, big line and one primary; the cards are the rails\' purposes', async () => {
+  for (const reg of REGS) {
     const { ctx, p, errs } = await open(reg);
-    assert.deepEqual(await shown(p), [w.front], reg + ': exactly its own front');
-    const d = await p.evaluate(f => {
-      const fr = document.querySelector('#eternal>' + f);
-      const title = fr.querySelector('.et-b-h,.et-r-h,.et-c-path'), act = fr.querySelector('.et-b-primary,.et-r-pill,.et-c-primary');
-      return { bg: getComputedStyle(document.body).backgroundColor, title: getComputedStyle(title).fontFamily, action: getComputedStyle(act).backgroundColor, wide: document.documentElement.scrollWidth, vw: innerWidth,
-        rows: !!fr.querySelector('.et-b-rows [role="radio"]'), graphic: !!fr.querySelector('svg .orbit'), table: !!fr.querySelector('table.et-c-tab') };
-    }, w.front);
-    assert.equal(d.bg, w.bg, reg + ' ground'); assert.match(d.title, w.title, reg + ' title face'); assert.equal(d.action, w.action, reg + ' action colour');
-    assert.equal(d.rows, reg === 'bee'); assert.equal(d.graphic, reg === 'raver'); assert.equal(d.table, reg === 'cypherpunk');
-    assert.ok(d.wide <= 390 && d.vw <= 390, reg + ': no sideways page at 390 px');
+    const d = await p.evaluate(() => {
+      const prim = [...document.querySelectorAll('#eternal .primary')].filter(e => e.checkVisibility());
+      return {
+        bg: getComputedStyle(document.body).backgroundColor,
+        title: document.querySelector('#eternal h1').textContent,
+        face: getComputedStyle(document.querySelector('#eternal h1')).fontFamily,
+        primary: prim.map(e => getComputedStyle(e).backgroundColor),
+        cards: [...document.querySelectorAll('#modes .mode')].map(b => b.dataset.purpose),
+        pressed: [...document.querySelectorAll('#modes .mode[aria-pressed="true"]')].map(b => b.dataset.purpose),
+        offered: window.__myspace.purposes(),
+        empty: document.querySelector('.drop').checkVisibility(),
+        count: document.getElementById('count').textContent.replace(/\s+/g, ' ').trim(),
+      };
+    });
+    assert.equal(d.bg, WANT[reg].bg, reg + ' ground');
+    assert.equal(d.title, WANT[reg].title, reg + ' big line');
+    assert.match(d.face, WANT[reg].face, reg + ' heading face');
+    assert.deepEqual(d.primary, [WANT[reg].primary], reg + ': exactly one filled primary, in the register\'s colour');
+    assert.deepEqual(d.cards, d.offered, reg + ': one card per purpose an attached rail answers, in the page\'s order');
+    assert.ok(d.cards.length >= 2, reg + ': at least two purposes offered offline');
+    assert.equal(d.pressed.length, 1, reg + ': one card selected');
+    assert.ok(d.empty, reg + ': the empty well is on screen');
+    assert.equal(d.count, 'On this phone: 0 files', reg + ': the count reads the index');
+    law(reg, 'empty', await p.evaluate(probe));
     assert.equal(errs.length, 0, errs.join(' | '));
     await ctx.close();
   }
 });
 
-test('the same facts in all three: offered purposes, the rail each resolves to, its declared terms', async () => {
-  const facts = {};
-  for (const reg of ['bee', 'raver', 'cypherpunk']) {
-    const { ctx, p } = await open(reg);
-    facts[reg] = await p.evaluate(() => {
-      const M = window.__myspace, D = window.__eternal.data;
-      return {
-        truth: M.purposes().map(id => [id, M.railFor(id), JSON.stringify(M.terms(M.railFor(id)))]),
-        model: D.purposes.filter(x => x.offered).map(x => [x.id, x.rail, JSON.stringify(x.terms)]),
-        bee: [...document.querySelectorAll('#etBeeRows .et-b-row')].map(r => [r.dataset.etPurpose, r.textContent]),
-        rings: [...document.querySelectorAll('#etOrbits .orbit')].map(g => [g.dataset.etPurpose, g.getAttribute('aria-label')]),
-        table: [...document.querySelectorAll('#etPurposes tr.pick')].map(r => [r.dataset.etPurpose, r.children[1].textContent, r.children[2].textContent]),
-        pressed: document.querySelector('#modes .mode[aria-pressed="true"]').dataset.purpose, pick: D.pick,
-      };
+test('one file and the delete sheet, in every register: the laws hold, nothing leaves for a private file', async () => {
+  for (const reg of REGS) {
+    const { ctx, p, errs, outside } = await open(reg);
+    await p.click('#mode-keep');
+    await p.setInputFiles('#picker', { name: 'note.txt', mimeType: 'text/plain', buffer: Buffer.from('kept on this phone') });
+    await p.waitForFunction(() => document.body.dataset.state === 'file' && document.body.dataset.busy === '0', null, { timeout: 15000 });
+    const row = await p.evaluate(() => window.__myspace.rows().then(r => r.map(x => [x.name, x.purpose, x.addr && x.addr.scheme])));
+    assert.deepEqual(row, [['note.txt', 'keep', 'local']], reg + ': the page wrote the row with the chosen purpose');
+    const card = await p.evaluate(() => {
+      const f = document.querySelector('#list .file');
+      return { name: f.querySelector('.name').textContent, chip: f.querySelector('.chip').textContent, ids: [...f.querySelectorAll('button')].map(b => b.id.split('-')[0]).filter(Boolean), modes: document.getElementById('modes').checkVisibility(), drop: document.querySelector('.drop').checkVisibility() };
     });
+    assert.equal(card.name, 'note.txt');
+    assert.equal(card.chip, 'PRIVATE', reg + ': the chip names the purpose');
+    assert.deepEqual(card.ids, ['open', 'move', 'del'], reg + ': open, move and delete on a private row (no link to copy)');
+    assert.ok(card.modes && !card.drop, reg + ': the choice cards stay for the next file; the empty well goes');
+    law(reg, 'one file', await p.evaluate(probe));
+    await p.click('#list button[id^="del-"]');
+    await p.waitForFunction(() => document.body.dataset.state === 'delete');
+    const sheet = await p.evaluate(probe);
+    law(reg, 'delete sheet', sheet);
+    assert.equal(sheet.primaries, 1, reg + ': the delete sheet has exactly one filled answer');
+    await p.click('#delConfirm');
+    await p.waitForFunction(() => document.body.dataset.state === 'empty', null, { timeout: 10000 });
+    assert.equal((await p.evaluate(() => window.__myspace.rows())).length, 0, reg + ': delete removed the row');
+    assert.deepEqual(outside, [], reg + ': a private file and its delete send nothing anywhere');
+    assert.equal(errs.length, 0, errs.join(' | '));
     await ctx.close();
   }
-  const a = facts.bee;
-  assert.deepEqual(a.model, a.truth, 'the data layer is __myspace'); assert.ok(a.truth.length >= 2);
-  for (const reg of ['raver', 'cypherpunk']) assert.deepEqual(facts[reg].model, a.model, reg + ' same model');
-  for (const reg of ['bee', 'raver', 'cypherpunk']) assert.equal(facts[reg].pick, facts[reg].pressed, reg + ' shows the purpose the page has selected');
-  const ids = a.model.map(m => m[0]);
-  assert.deepEqual(a.bee.map(r => r[0]), ids); assert.deepEqual(facts.raver.rings.map(r => r[0]), ids); assert.deepEqual(facts.cypherpunk.table.map(r => r[0]), ids);
-  const say = { bee: { 'this-device': 'only this phone opens it', 'link-holders': 'anyone with the link opens it', everyone: 'anyone can read it' }, raver: { 'this-device': 'this phone only', 'link-holders': 'the link opens it', everyone: 'anyone reads it' } };
-  a.model.forEach(([id, rail, tj], i) => {
-    const t = JSON.parse(tj);
-    assert.ok(a.bee[i][1].includes(say.bee[t.readers]), id + ' bee readers');
-    assert.ok(facts.raver.rings[i][1].includes(say.raver[t.readers]), id + ' raver readers');
-    assert.equal(facts.cypherpunk.table[i][1], rail, id + ' cypher rail');
-    assert.ok(facts.cypherpunk.table[i][2].includes('readers ' + t.readers) && facts.cypherpunk.table[i][2].includes('payer ' + t.payer), id + ' cypher terms');
-    if (!t.deletable) { assert.match(a.bee[i][1], /nobody can delete it/); assert.match(facts.raver.rings[i][1], /no delete/); assert.match(facts.cypherpunk.table[i][2], /deletable no/); }
-  });
 });
 
-test('choosing presses the page\'s own purpose; the one action opens the page\'s own picker and the real write reaches every front', async () => {
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
-  const { p, errs, outside } = await open('bee', ctx);
-  await p.click('.et-b-row[data-et-purpose="share"]');
-  assert.equal(await p.getAttribute('#mode-share', 'aria-pressed'), 'true', 'the page\'s own button is pressed');
-  await p.click('.et-b-row[data-et-purpose="keep"]');
-  assert.equal(await p.getAttribute('#mode-keep', 'aria-pressed'), 'true');
-  assert.equal(await p.evaluate(() => window.__eternal.data.count), 0);
-  const [chooser] = await Promise.all([p.waitForEvent('filechooser'), p.click('#etBeeAdd')]);
-  await chooser.setFiles({ name: 'a-note.txt', mimeType: 'text/plain', buffer: Buffer.from('kept on this phone') });
-  await p.waitForFunction(() => window.__eternal.data.count === 1, null, { timeout: 10000 });
-  assert.match(await p.textContent('#etBeeFiles'), /1 file on this phone/);
-  const rows = await p.evaluate(() => window.__myspace.rows().then(r => r.map(x => [x.name, x.purpose])));
-  assert.deepEqual(rows, [['a-note.txt', 'keep']], 'the page wrote it, with the chosen purpose');
-  assert.deepEqual(outside, [], 'a keep-here file sends nothing anywhere');
-  // the same row, read by the other two fronts
-  for (const reg of ['raver', 'cypherpunk']) {
-    await p.evaluate(r => { localStorage.setItem('bregister', r); }, reg);
-    await p.reload({ waitUntil: 'load' });
-    await p.waitForFunction(() => window.__eternal && window.__eternal.data.ready && window.__eternal.data.count === 1, null, { timeout: 15000 });
-    if (reg === 'raver') assert.equal(await p.locator('#etOrbits circle.file').count(), 1, 'the file glows on its orbit');
-    else assert.match(await p.textContent('#etReceipt'), /rows\s*1 · a-note\.txt 18 B keep/);
+test('the move sheet keeps one filled answer: the tapped destination fills, the others stay outlines', async () => {
+  const { ctx, p, errs } = await open('bee');
+  await p.click('#mode-keep');
+  await p.setInputFiles('#picker', { name: 'move-me.txt', mimeType: 'text/plain', buffer: Buffer.from('m') });
+  await p.waitForFunction(() => document.body.dataset.state === 'file' && document.body.dataset.busy === '0', null, { timeout: 15000 });
+  await p.click('#list button[id^="move-"]');
+  await p.waitForFunction(() => document.body.dataset.state === 'flip');
+  const dests = await p.evaluate(() => [...document.querySelectorAll('[data-move-to]')].map(b => b.dataset.moveTo));
+  assert.ok(dests.length >= 1);
+  assert.equal((await p.evaluate(probe)).primaries, 0, 'nothing is filled before a destination is chosen');
+  for (const d of dests) {
+    await p.click(`[data-move-to="${d}"]`);
+    const m = await p.evaluate(probe);
+    law('bee', 'move sheet -> ' + d, m);
+    assert.equal(m.primaries, 1, 'one filled answer after choosing ' + d);
+    assert.equal(await p.getAttribute(`[data-move-to="${d}"]`, 'class'), 'primary', d + ' is the filled one');
   }
+  await p.click('#flipKeep');
+  await p.waitForFunction(() => document.body.dataset.state === 'file');
   assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
 });
 
-test('raver: tapping an orbit chooses; the heart opens the picker. cypherpunk: a row chooses; attach opens the picker', async () => {
-  let { ctx, p, errs } = await open('raver');
-  await p.click('#etOrbits .orbit[data-et-purpose="now"] .hit', { position: { x: 5, y: 60 }, force: true }).catch(() => p.evaluate(() => document.querySelector('#etOrbits .orbit[data-et-purpose="now"]').dispatchEvent(new MouseEvent('click', { bubbles: true }))));
-  await p.waitForFunction(() => window.__eternal.data.pick === 'now');
-  assert.equal(await p.getAttribute('#mode-now', 'aria-pressed'), 'true');
-  assert.match(await p.textContent('#etRaverCard'), /just now · temp/);
-  const [c1] = await Promise.all([p.waitForEvent('filechooser', { timeout: 5000 }), p.evaluate(() => document.querySelector('#etOrbits .heart').dispatchEvent(new MouseEvent('click', { bubbles: true })))]);
-  assert.ok(c1, 'the heart opens the page picker');
-  assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
-  ({ ctx, p, errs } = await open('cypherpunk'));
-  const d = await p.evaluate(() => ({ steps: document.querySelectorAll('#etPipe li').length, receipt: document.querySelectorAll('#etReceipt tr').length, key: document.getElementById('etCyKey').textContent, real: window.__myspace.devicePubkey() }));
-  assert.equal(d.steps, 6); assert.equal(d.receipt, 6); assert.equal(d.key, d.real, 'the path names the real device key');
-  await p.click('#etPurposes tr.pick[data-et-purpose="share"]');
-  assert.equal(await p.getAttribute('#mode-share', 'aria-pressed'), 'true');
-  await p.waitForFunction(() => window.__eternal.data.pick === 'share');
-  assert.match(await p.textContent('#etPipe li.now b'), /purpose · share/);
-  assert.match(await p.textContent('#etPipe'), /sign · schnorr/);
-  const [c2] = await Promise.all([p.waitForEvent('filechooser', { timeout: 5000 }), p.click('#etCyAdd')]);
-  assert.ok(c2);
-  const fork = await p.$eval('.et-c a[href*="github.com"]', a => [a.target, a.rel]);
-  assert.deepEqual(fork, ['_blank', 'noopener noreferrer']);
-  assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
-});
-
-test('the laws hold on the front: no dash for a value, no forced capitals, 44 px actions', async () => {
-  for (const reg of ['bee', 'raver', 'cypherpunk']) {
+test('the words stay true to the code in every register and view', async () => {
+  for (const reg of REGS) {
     const { ctx, p } = await open(reg);
-    const bad = await p.evaluate(() => {
-      const fr = [...document.querySelectorAll('#eternal>div')].find(e => getComputedStyle(e).display !== 'none'), out = [];
-      for (const el of fr.querySelectorAll('*')) {
-        const cs = getComputedStyle(el); if (cs.display === 'none') continue;
-        if (cs.textTransform !== 'none') out.push('caps ' + el.className);
-        const own = [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).join('');
-        if (/^[—–-]$/.test(own) || /NaN|undefined|null/.test(own)) out.push('bad value ' + el.className + ' ' + own);
-        const r = el.getBoundingClientRect();
-        if (/^(BUTTON|A)$/.test(el.tagName) && r.height && (r.height < 44 || r.width < 44)) out.push('small ' + el.tagName + ' ' + el.textContent.trim().slice(0, 20));
-      }
-      return out;
-    });
-    assert.deepEqual(bad, [], reg);
+    let text = (await p.evaluate(probe)).text;
+    await p.click('#mode-keep');
+    await p.setInputFiles('#picker', { name: 'w.txt', mimeType: 'text/plain', buffer: Buffer.from('w') });
+    await p.waitForFunction(() => document.body.dataset.state === 'file' && document.body.dataset.busy === '0', null, { timeout: 15000 });
+    text += '\n' + (await p.evaluate(probe)).text;
+    await p.click('#list button[id^="del-"]');
+    await p.waitForFunction(() => document.body.dataset.state === 'delete');
+    text += '\n' + (await p.evaluate(probe)).text;
+    const bad = UNTRUE.filter(re => re.test(text)).map(String);
+    assert.deepEqual(bad, [], reg + ': a sentence claims what the code does not do');
+    const cards = await p.evaluate(() => Object.fromEntries([...document.querySelectorAll('#modes .mode')].map(b => [b.dataset.purpose, b.textContent])));
+    if (cards.forever) assert.match(cards.forever, /cannot take the payment yet|pay arm not wired/, reg + ': the forever card says this page cannot pay yet');
+    if (cards.share) assert.match(cards.share, /nobody can delete it|deletable: no/i, reg + ': the public card says it cannot be taken back');
     await ctx.close();
   }
 });

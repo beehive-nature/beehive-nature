@@ -1,0 +1,32 @@
+# RB03: Crux-MIR symbolic checks of the actual ant-extsig budget arithmetic.
+# Not a member of the beehive-nature workspace: it builds under the Crux-MIR
+# bundle's own toolchain (mir-json at crucible 25d0f369's submodule pin, Rust
+# nightly-2026-03-21), so it carries its own lockfile. src/lib.rs compiles
+# ops/ant-extsig/src/budget.rs itself, by path (no copy); the dependency pins
+# below are the versions ops/ant-extsig/Cargo.lock resolves for the crates
+# budget.rs uses (rbench rb03 checks every shared lock entry).
+# Do not run `cargo fmt` in this directory: it reformats
+# ops/ant-extsig/src/budget.rs through the #[path] module, a production file
+# with its own formatting.
+[package]
+name = "rb03-budget"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+hex = "=0.4.3"
+serde_json = "=1.0.151"
+sha2 = "=0.10.9"
+
+[features]
+# The deliberately faulty variants (test-only; see src/faulty.rs).
+teeth = []
+
+[workspace]
+
+# `crux` is the cfg Crux-MIR's build sets; declaring it keeps rustc's
+# check-cfg from reporting every `#[cfg(crux)]` as unknown.
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(crux)'] }

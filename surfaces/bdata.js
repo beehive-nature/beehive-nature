@@ -37,12 +37,21 @@
   var LS = 'bdata-v1', SHARED = 'bpay-policy-v1';
   var DEFAULT_BRIDGE = 'http://127.0.0.1:8807';
   var WAVE_CHUNK = 4190208;
-  var WAVE_MAX_CHUNKS = 63;
+  var WAVE_MAX_CHUNKS = 59;        // + 3 DataMap chunks + 1 public map record = 63; 64 records is merkle, which the bridge cannot finalize
   var WAVE_MAX_BYTES = WAVE_CHUNK * WAVE_MAX_CHUNKS;
   var FRESH_MS = 15 * 60 * 1000;   // past this a cached price is "earlier", never "current"
   var DEADLINE_MS = 150000;        // measured asks: 42-69 s; a hung one ends here
   var RETRY_MS = 3000;
   var MODES = ['ask', 'auto', 'never'];
+  // A post-quantum sealed object (SPEC-BPQ-1 §4) starts with these eight bytes. My Data only
+  // recognises the head; sealing and opening stay in the wallet, where the keys are.
+  var BPQ_MAGIC = [0x89, 0x42, 0x50, 0x51, 0x31, 0x0d, 0x0a, 0x1a];
+  function isSealedHead(u){
+    if (!u || u.length < BPQ_MAGIC.length) return false;
+    for (var i = 0; i < BPQ_MAGIC.length; i++) if (u[i] !== BPQ_MAGIC[i]) return false;
+    return true;
+  }
+  function sealedLine(){ return '<p class="law" data-bdata-sealed="1">🔒 ' + tx('bd.add.sealed', 'sealed in your wallet: only the readers it was sealed for can open it, and anyone else sees only sealed bytes') + '</p>'; }
   var UNAVAIL = [
     { id:'only-me', ico:'🔒', label:['wl.bpay.aud.onlyme','Only me'], why:['bd.aud.onlyme.why','Private storage for your eyes only is not ready.'], tech:['bd.aud.onlyme.tech','private-DataMap custody path not yet qualified'] },
     { id:'selected-people', ico:'🔒', label:['wl.bpay.aud.selected','Selected people'], why:['bd.aud.selected.why','Sharing with people you pick is not ready.'], tech:['bd.aud.selected.tech','recipient capability/key granting not yet qualified'] }
@@ -383,6 +392,7 @@
       h += '<div class="opt na" role="radio" aria-checked="false" aria-disabled="true" data-bdata-aud="' + u.id + '" data-bdata-unavailable="' + u.id + '"><span class="ico" aria-hidden="true">' + u.ico + '</span><span class="name">' + tx(u.label[0], u.label[1]) + '</span><span class="soon">' + tx('bd.aud.notyet', 'Not available yet') + '</span><span class="desc">' + tx(u.why[0], u.why[1]) + '<span data-reg="cypherpunk"> · ' + tx(u.tech[0], u.tech[1]) + '</span></span></div>';
     });
     h += '</div>';
+    h += '<p class="law" data-bdata-seal-hint="1">🔒 <a href="wallet.html#pq-file" data-bdata-seal-link="1"><b>' + tx('bd.aud.sealhint', 'For your eyes only, or for people you pick: seal the file in your wallet, then add the sealed file here.') + '</b></a></p>';
     if (notice === 'nostore') h += '<div class="alert note"><b>' + tx('bd.aud.nostore', 'This browser would not save your choice, so nothing was asked.') + '</b></div>';
     if (sel) h += '<div class="chose"><span>' + tx('wl.bpay.youchose', 'You chose') + ' <b>🌐 ' + tx('wl.bpay.aud.public', 'Public') + '</b> <span class="sub">· ' + when(sel.selectedAt) + '</span></span><button type="button" class="btn quiet" data-bdata-undo="1" data-act="undo" data-fk="undo">' + tx('bd.aud.undo', 'Undo this choice') + '</button></div>';
     h += '<details class="more" data-reg-disclose data-dk="aud-rules"><summary>' + tx('bd.rules.sum', 'The rules behind this') + '</summary>';
@@ -645,7 +655,7 @@
     return String(intake.result.sha256).toLowerCase() !== String(a.sha256).toLowerCase() || Number(intake.result.bytes) !== Number(a.bytes);
   }
   function finishIntake(rec, voice){
-    intake.result = { name: String(rec.name || intake.name), bytes: Number(rec.bytes || intake.bytes), sha256: String(rec.sha256), shelf: rec.shelf || 'bridge', blob: rec.blob || null, at: rec.at || null };
+    intake.result = { name: String(rec.name || intake.name), bytes: Number(rec.bytes || intake.bytes), sha256: String(rec.sha256), shelf: rec.shelf || 'bridge', blob: rec.blob || null, at: rec.at || null, sealed: !!intake.sealed };
     intake.err = null; intake.soft = null; intake.placing = false;
     note({ kind:'intake', sha256: intake.result.sha256, name: intake.result.name, bytes: intake.result.bytes, shelf: intake.result.shelf });
     render();
@@ -665,6 +675,7 @@
       var okVoice = intakeVoice(intake.result.shelf);
       h += '<div class="badge" data-bdata-intake-ok="1" data-bdata-intake-shelf="' + esc(intake.result.shelf || 'bridge') + '">' + (intake.result.shelf === 'meta' ? '' : '✓ ') + esc(okVoice) + ' · <bdi class="mono">' + esc(intake.result.sha256.slice(0, 16)) + '…</bdi></div>';
       h += '<div class="meta sub"><span><bdi>' + esc(intake.result.name) + '</bdi> · <bdi>' + Number(intake.result.bytes).toLocaleString('en-US') + '</bdi> ' + tx('bd.bytes', 'bytes') + '</span></div>';
+      if (intake.result.sealed) h += sealedLine();
       if (intake.result.shelf === 'browser') {
         h += '<p class="law" data-bdata-intake-honest="1">' + tx('bd.add.honest', 'still in this browser, not on Autonomi') + '</p>';
         if (browserFileBlocksPay()) {
@@ -691,6 +702,7 @@
       h += '<div class="rv"><span class="sub">' + tx('bd.add.size', 'size') + '</span><span><bdi>' + Number(intake.bytes).toLocaleString('en-US') + '</bdi> ' + tx('bd.bytes', 'bytes') + '</span></div>';
       h += '<div class="rv"><span class="sub">sha256</span><span class="mono" data-bdata-intake-sha="' + esc(intake.sha256) + '"><bdi>' + esc(intake.sha256) + '</bdi></span></div>';
       h += '</div>';
+      if (intake.sealed) h += sealedLine();
       h += '<div class="actions"><button type="button" class="btn primary" data-bdata-intake-go="1" data-act="intake-go" data-fk="intake-go">➜ ' + tx('bd.add.go', 'Add to manifest') + '</button></div>';
     }
     if (intake.tooLarge) {
@@ -716,7 +728,7 @@
     function step(){
       if (offset >= file.size) {
         return crypto.subtle.digest('SHA-256', concat(acc)).then(function(d){
-          intake.hashing = false; intake.sha256 = hexOf(d); render({ focus:'intake-go' });
+          intake.hashing = false; intake.sha256 = hexOf(d); intake.sealed = isSealedHead(acc[0]); render({ focus:'intake-go' });
           say(intake.name + ' · sha256 ' + intake.sha256.slice(0, 12) + '…');
         }).catch(function(e){ intake.hashing = false; intake.err = String((e&&e.message)||e).slice(0,160); render(); });
       }
@@ -1237,9 +1249,9 @@
       if (sel) fill = tok('sovereign-strong');
       h += '<path class="pt" data-i="' + i + '" d="' + petal(66, r1, a0, a1) + '" fill="' + fill + '" opacity="' + (sel || lit ? 1 : (D.stored ? .78 : .9)) + '"' + (D.stored ? '' : ' stroke="' + tok('sovereign') + '" stroke-width="1"') + '/>';
     }
-    h += '<circle r="58" fill="' + tok('bg-card') + '"/><circle r="50" fill="none" stroke="' + tok('sovereign') + '" stroke-dasharray="3 4"/>';
-    h += '<text y="-4" text-anchor="middle" fill="' + tok('ink') + '" style="font:700 15px/1.2 var(--sk-font-raver-display)">' + D.mb + ' MB</text>';
-    h += '<text y="18" text-anchor="middle" fill="' + tok('ink-soft') + '" style="font:400 14px/1.4 var(--sk-font-raver-body)">' + esc(T('et.bdata.r.one', '1 video')) + '</text>';
+    h += '<circle r="58" fill="' + tok('sovereign-wash') + '"/><circle r="50" fill="none" stroke="' + tok('sovereign') + '" stroke-dasharray="3 4"/>';
+    h += '<text y="-4" text-anchor="middle" fill="' + tok('ink') + '" style="font:700 15px/1.2 var(--sk-font-ui)">' + D.mb + ' MB</text>';
+    h += '<text y="18" text-anchor="middle" fill="' + tok('ink-soft') + '" style="font:400 14px/1.4 var(--sk-font-ui)">' + esc(T('et.bdata.r.one', '1 video')) + '</text>';
     if (D.stored) h += '<circle r="196" fill="none" stroke="' + RN[0] + '" stroke-width="2" stroke-dasharray="2 6"/>';
     svg.innerHTML = h;
     var litN = Object.keys(ES.lit).length;
@@ -1501,6 +1513,9 @@
       var got = kept[0];
       intake.result = { name: String(got.name || 'file'), bytes: got.blob.size, sha256: String(got.sha256), shelf: 'browser', blob: got.blob, at: got.at || null };
       render();
+      got.blob.slice(0, BPQ_MAGIC.length).arrayBuffer().then(function(ab){
+        if (intake.result && intake.result.sha256 === String(got.sha256) && isSealedHead(new Uint8Array(ab))) { intake.result.sealed = true; render(); }
+      }).catch(function(){});
     }).catch(function(){ restoreMeta(); });
   }
   function intakeClear(){

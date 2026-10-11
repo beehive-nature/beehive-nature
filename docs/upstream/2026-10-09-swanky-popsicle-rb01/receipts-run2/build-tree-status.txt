@@ -1,0 +1,6 @@
+?? edge/popsicle/examples/probe_spin.rs
+?? edge/popsicle/examples/repro_evaluator_inputs.rs
+?? edge/popsicle/examples/repro_input_encoding.rs
+?? edge/popsicle/examples/repro_repeated_points.rs
+?? edge/popsicle/examples/repro_set_sizes.rs
+?? edge/popsicle/examples/repro_shared_seed.rs

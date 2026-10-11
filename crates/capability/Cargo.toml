@@ -3,7 +3,7 @@ name = "capability"
 version = "0.1.0"
 edition.workspace = true
 license.workspace = true
-description = "bNature identity.root + Capability primitive (Phase 2 scaffold): DID principals and UCAN-shaped delegable capability tokens. v1 ships the capability-match + time-bound authorization CORE (pure, tested). Signature issuance/verification (Ed25519 over the canonical form) gates behind the Verifier trait — the pending crypto step."
+description = "bNature identity.root + Capability primitive (Phase 2 scaffold): DID principals and UCAN-shaped delegable capability tokens. v1 ships the capability-match + time-bound authorization CORE (pure, tested). Signature verification over the canonical form sits behind the Verifier trait: Ed25519, ML-DSA-65 (post-quantum, algorithm-tagged), and an algorithm-dispatching verifier that refuses unknown ids and stripped signatures. The delegation-chain proof is still unbuilt."
 
 [dependencies]
 type-bindings = { path = "../type-bindings" }
@@ -14,3 +14,9 @@ serde_json = "1"
 # unrelated to the signing key, leaking the private key over repeated signatures.
 # Rider 2: `zeroize` so signing keys scrub on drop; the workspace already pins it.
 ed25519-dalek = { version = "2", features = ["zeroize"] }
+# ML-DSA-65 (FIPS 204) for the post-quantum delegation signature. The same crate
+# and version line crates/bsigner already uses and cites (bsigner/src/pq.rs), so
+# the workspace resolves one ml-dsa. No `getrandom`: this crate only derives
+# keys from caller-supplied seeds and signs deterministically. `zeroize` so an
+# ML-DSA signing key scrubs its seed on drop (ml-dsa 0.1.1 src/signing.rs:222-231).
+ml-dsa = { version = "0.1", default-features = false, features = ["alloc", "zeroize"] }

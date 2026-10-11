@@ -92,3 +92,30 @@ public parameters, not secrets.
   entropy noble's sync signer ignores) — mutual-validity law, same as
   eosjs↔k256: never string-compare signatures across libraries.
 - pins unchanged + `@noble/hashes` hmac subpath (1.8.0).
+
+## hive-tx.min.js (2026-10-09) — the bDroP drop desk's Hive signing
+- vendored VERBATIM from unpkg `hive-tx@6.1.0` `dist/hive-tx.min.js` — no local
+  build, no patching. It is a prebuilt UMD IIFE exposing `window.hiveTx`
+  (`{ Transaction, PrivateKey, PublicKey, Signature, Memo, call, config, utils }`).
+- license notice shipped beside it (`hive-tx.min.js.LICENSE.txt`, webpack-extracted):
+  hive-tx (MIT), noble-ciphers (MIT), noble-curves (MIT), bytebuffer.js
+  (Apache-2.0, @xmcl/bytebuffer fork customized for hive-tx).
+- sha256 `593e23481c17ee5a3ab54932375f114fdaa2bd530a817486caf31fffc6a21255` (PUBLIC-CONSTANT — vendored-file digest, verify after any re-vendor)
+- why vendored, not npm: surfaces are static and self-contained; the drop desk
+  signs with the founder's Hive POSTING key in-tab, so the signing code must
+  load from this origin, never a CDN at key time.
+- browser note (2026-10-09, proven by the offline fixture proof): the dist's
+  module init starts a healthcheck interval and calls `.unref()` on the timer
+  handle — a node-ism; on a browser's numeric interval id that throws and the
+  factory dies before `window.hiveTx` attaches. The desk installs guarded
+  no-op `Number.prototype.unref/ref` shims BEFORE the vendor tag (absent-only,
+  commented in bdrop.html). The vendor file itself stays verbatim.
+- signature wire form, settled by a live assert-rejection probe (2026-10-09,
+  uncommitted tmp script, throwaway key): hive-tx 6.1.0 sends signatures as
+  130-hex compact strings, not SIG_K1_ base58. A probe comment under the real
+  author signed by the throwaway key drew `missing required posting authority …
+  Missing Posting Authority loviswater` from api.hive.blog — the node PARSED the
+  hex signature and validated the transaction under both hf26 and legacy
+  serialization before rejecting on authority. Format accepted: proven by live
+  rejection, not by memory. With the real posting key the same pipeline
+  broadcasts; nothing else changes.

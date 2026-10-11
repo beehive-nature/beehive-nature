@@ -59,15 +59,23 @@ const readFlags = () => { try { const arg = argReader('usage: node myspace-stran
 const FLAGS = readFlags();
 
 /* where each register keeps its front, its purpose controls, its add control, and (if the
-   controls carry no words of their own) the card that answers a tap */
-const FRONT = { bee: '.et-b', raver: '.et-r', cypherpunk: '.et-c' };
-const ADD = { bee: '#etBeeAdd', raver: '#etRaverAdd', cypherpunk: '#etCyAdd' };
+   controls carry no words of their own) the card that answers a tap. Since the founder's chosen
+   UI (2026-10-04) the three registers are ONE DOM: the same cards and the same add button, worn
+   three ways, and every card carries its own words, so no register needs a card to learn from. */
+const FRONT = { bee: '#eternal', raver: '#eternal', cypherpunk: '#eternal' };
+const ADD = { bee: '#eternal .primary[data-attach]', raver: '#eternal .primary[data-attach]', cypherpunk: '#eternal .primary[data-attach]' };
 const CONTROLS = {
-  bee: '.et-b-row[data-et-purpose]',
-  raver: '#etOrbits .orbit[data-et-purpose]',
-  cypherpunk: '#etPurposes tr.pick[data-et-purpose]',
+  bee: '#modes .mode[data-purpose]',
+  raver: '#modes .mode[data-purpose]',
+  cypherpunk: '#modes .mode[data-purpose]',
 };
-const CARD = { bee: null, raver: '#etRaverCard', cypherpunk: null };
+const CARD = { bee: null, raver: null, cypherpunk: null };
+// the page's own state, read the way the fronts used to mirror it (one shape for every read below)
+const MODEL = `(() => { const M = window.__myspace; if (!M || !M.purposes) return null; const open = M.purposes(); const ads = M.adapters() || {};
+  const pressed = document.querySelector('#modes .mode[aria-pressed="true"]');
+  return { ready: open.length > 0 && document.querySelectorAll('#modes .mode').length > 0, pick: pressed ? pressed.getAttribute('data-purpose') : null,
+    purposes: ['now', 'keep', 'share', 'forever'].map(id => { const rail = open.includes(id) ? M.railFor(id) : null; return { id, offered: open.includes(id), rail, terms: rail ? M.terms(rail) : null }; }),
+    rails: Object.keys(ads).map(s => ({ scheme: s, networks: (ads[s] && ads[s].caps && ads[s].caps.networks) || [] })) }; })()`;
 
 const REGS = FLAGS.regs.split(',').map(s => s.trim()).filter(Boolean);
 const unknown = REGS.filter(r => !Object.hasOwn(FRONT, r)); // hasOwn: "constructor" is not a register
@@ -111,7 +119,7 @@ function pickByWords(intent, options) {
 }
 // the fixed implementation vocabulary, counted as whole words (singular or plural): "trail" is not "rail", "gasp"
 // is not "gas". Rail and network names are NOT here: they come from the page's own declarations at run time
-// (R.railWords, read from __eternal.data.rails), so a page that declares no rails counts none. Some of these are
+// (R.railWords, read from the page's own adapters, __myspace.adapters()), so a page that declares no rails counts none. Some of these are
 // also plain English (token, scheme, gas): they are counted wherever they appear, and the receipts print every word
 // with its count so a reader can see whether a hit is a rail name or ordinary prose.
 const LEAK = ['adapter', 'rail', 'worker', 'indexeddb', 'aes', 'schnorr', 'nostr', 'relay', 'datamap', 'chunk', 'digest', 'sha-?\\d*', 'signer', 'wallet', 'gas', 'token', 'scheme', 'predicate', 'ciphertext', 'keyref', 'pubkey'];
@@ -179,19 +187,7 @@ async function pressedMode(page) {
 
 // press a purpose control the way a thumb would, and wait until the page says it is the pick
 async function pressControl(page, reg, purpose) {
-  if (reg === 'raver') {
-    // a thumb on the ring itself: the orbit's top point, computed from the SVG's box after it is
-    // scrolled into view. (a playwright click at a fixed offset inside the .hit box lands on the
-    // NEXT ring out — measured 2026-09-27: (5,60) on keep selected share — so no forced clicks.)
-    await page.locator('#etOrbits').scrollIntoViewIfNeeded(CLICK);
-    // the browser maps the ring's own top point (0, -r) to client space, whatever the SVG's layout
-    const pt = await page.evaluate(p => { const svg = document.querySelector('#etOrbits'); const c = svg.querySelector(`.orbit[data-et-purpose="${p}"] .hit`); const q = svg.createSVGPoint(); q.x = 0; q.y = -(+c.getAttribute('r')); const m = q.matrixTransform(c.getScreenCTM()); return { x: m.x, y: m.y }; }, purpose);
-    if (!(pt.x >= 0 && pt.x < VIEW.width && pt.y >= 0 && pt.y < VIEW.height)) throw new Error(`the ${purpose} ring's tap point (${pt.x | 0},${pt.y | 0}) is outside the ${VIEW.width}×${VIEW.height} viewport`);
-    // a tap lands on whatever is on top at that point: if it is not this ring, name the occluder instead of tapping it
-    const under = await page.evaluate(([x, y, p]) => { const e = document.elementFromPoint(x, y); const ring = e && e.closest(`.orbit[data-et-purpose="${p}"]`); return ring ? null : (e ? (e.id ? '#' + e.id : e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.split(/\s+/).join('.') : '')) : 'nothing'); }, [pt.x, pt.y, purpose]);
-    if (under) throw new Error(`the ${purpose} ring's tap point is covered by ${under}`);
-    await page.touchscreen.tap(pt.x, pt.y);
-  } else await page.click(`${CONTROLS[reg]}[data-et-purpose="${purpose}"]`, CLICK);
+  await page.click(`${CONTROLS[reg]}[data-purpose="${purpose}"]`, CLICK);
   // the archive's pressed mode button is the page's own state (the fronts' aria-pressed is rendered from the
   // debounced mirror, which can hold a stale equal value, so it is not enough on its own)
   await page.waitForFunction(p => !!document.querySelector(`#modes .mode[aria-pressed="true"][data-purpose="${p}"]`), purpose, { timeout: 5000 });
@@ -224,7 +220,7 @@ async function stranger(reg) {
     phase = 'load'; t0 = Date.now();
     await page.goto(`${base}/surfaces/myspace.html`, { waitUntil: 'load', timeout: 30000 }).catch(e => { throw new Error('the page did not load: ' + errText(e)); }); // nothing below can be measured on a blank page
     try {
-      await page.waitForFunction(() => window.__eternal && window.__eternal.data.ready && window.__eternal.data.purposes.some(x => x.offered), null, { timeout: 20000 });
+      await page.waitForFunction(m => { const d = eval(m); return !!d && d.ready; }, MODEL, { timeout: 20000 });
     } catch { R.unsound.push('the fronts never became ready with an offered purpose (no rail attached offline?)'); }
     // the register is applied by register.js, which the tour bar loads asynchronously: until body[data-reg]
     // is this register, the requested front is still display:none and every read would be of the wrong one
@@ -238,7 +234,7 @@ async function stranger(reg) {
     const tSettle = Date.now(); let sig = null, since = tSettle;
     for (;;) {
       // the signature is the page's own state (register, the archive's mode buttons and which is pressed) plus the mirror's offered set
-      const now = await page.evaluate(() => { const d = window.__eternal?.data; if (!d) return null; const modes = [...document.querySelectorAll('#modes .mode')].map(m => m.getAttribute('data-purpose') + (m.getAttribute('aria-pressed') === 'true' ? '*' : '')).join(','); return document.body.dataset.reg + '|' + modes + '|' + d.pick + '|' + d.purposes.map(x => x.id + ':' + x.offered).join(','); }); // the mirror's pick is in the signature too: the raver card renders from it
+      const now = await page.evaluate(m => { const d = eval(m); if (!d) return null; const modes = [...document.querySelectorAll('#modes .mode')].map(m => m.getAttribute('data-purpose') + (m.getAttribute('aria-pressed') === 'true' ? '*' : '')).join(','); return document.body.dataset.reg + '|' + modes + '|' + d.pick + '|' + d.purposes.map(x => x.id + ':' + x.offered).join(','); }, MODEL); // the page's own pick and offered set
       if (now !== sig) { sig = now; since = Date.now(); }
       else if (now !== null && Date.now() - since >= 250) break;
       if (Date.now() - tSettle > 5000) { R.unsound.push('the offered purposes kept changing for 5 s; the front was read as it stood'); break; }
@@ -255,13 +251,13 @@ async function stranger(reg) {
     const archive = await visibleTextAll(page, 'main > :not(#eternal)');
     // the rail schemes and networks the page itself declares join the leak vocabulary (printed, so a reader sees them)
     // (a network name is one phrase, "skaists.buzz" or "arbitrum-one", never split into words like "one" or "buzz")
-    R.railWords = await page.evaluate(() => { const d = window.__eternal?.data; if (!d) return []; const w = new Set(); for (const r of d.rails || []) { if (r.scheme) w.add(String(r.scheme).toLowerCase()); for (const n of r.networks || []) if (String(n).trim()) w.add(String(n).toLowerCase().trim()); } return [...w]; });
+    R.railWords = await page.evaluate(m => { const d = eval(m); if (!d) return []; const w = new Set(); for (const r of d.rails || []) { if (r.scheme) w.add(String(r.scheme).toLowerCase()); for (const n of r.networks || []) if (String(n).trim()) w.add(String(n).toLowerCase().trim()); } return [...w]; }, MODEL);
     const leak = t => countLeak(t, R.railWords);
     R.leakage.frontBeforeTaps = leak(front); R.leakage.archive = leak(archive); // .front is set once the cards are known
     // the purpose controls' own words under the one visibility rule (an SVG ring has no text of its own; a <title>
     // inside it is not shown, and its aria-label is not read: words no sighted visitor sees are not scored)
     const options = await page.evaluate(new Function('sel', SEEN_TEXT + ` return [...document.querySelectorAll(sel)].map(el => ({
-      purpose: el.getAttribute('data-et-purpose'),
+      purpose: el.getAttribute('data-purpose'),
       visible: wordsIn(el, null),
       disabled: el.getAttribute('aria-disabled') === 'true' || el.hasAttribute('disabled'),
     }));`), CONTROLS[reg]);
@@ -273,7 +269,7 @@ async function stranger(reg) {
     // words are read for free, before any tap moves the card on.
     // the card on the page renders from the fronts' mirror, so the ring it belongs to is the mirror's pick (which
     // the settle wait has just seen hold still together with the archive's pressed mode)
-    const initialPick = CARD[reg] ? await page.evaluate(() => window.__eternal?.data?.pick ?? null) : R.pickAtRead;
+    const initialPick = CARD[reg] ? await page.evaluate(m => eval(m)?.pick ?? null, MODEL) : R.pickAtRead;
     const initialCard = CARD[reg] ? await visibleText(page, CARD[reg]) : '';
     if (CARD[reg] && initialPick !== R.pickAtRead) R.notes.push(`the card on arrival belonged to "${initialPick}" while the archive showed "${R.pickAtRead}" pressed`);
     for (const o of options) {
@@ -299,7 +295,7 @@ async function stranger(reg) {
     const cardsRead = options.filter(o => o.readOnCard || o.learnedByTap).map(o => o.text).join(' ');
     R.leakage.cardsRead = leak(cardsRead); // the front figure is the sum of frontBeforeTaps and cardsRead, computed where it is printed
     R.readMs = Date.now() - tRead; // instrument time spent reading and learning, printed beside the first-file figure
-    const declared = await page.evaluate(() => (window.__eternal?.data?.purposes || []).map(p => ({ id: p.id, offered: p.offered, rail: p.rail, terms: p.terms })));
+    const declared = await page.evaluate(m => (eval(m)?.purposes || []).map(p => ({ id: p.id, offered: p.offered, rail: p.rail, terms: p.terms })), MODEL);
     // own-wallet wording is looked for everywhere the visitor can read it, without counting a sentence twice; the
     // controls' hit is labelled by how the visitor reached THAT control's words (a tap, the card already showing, the
     // control itself), not by whether any control needed a tap

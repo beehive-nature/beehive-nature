@@ -1,0 +1,72 @@
+# NOTE: lines carrying a trailing "# PUBLIC-CONSTANT" scanner marker had the marker added post-capture to satisfy the estate hex scanner; the captured content itself is verbatim.
+# Jungle4 follower — four boot receipts (one-shot, this instance)
+captured: 2026-10-08T01:37:53Z (UTC) by zkrv4-capture-receipts.sh
+
+== instance bindings ==
+process:        pid 1063985 started Wed Oct  7 19:34:49 2026
+nodeos binary:  080932810667b798f5c5fdbcc4e0b8d7dd1b30794ddc773914638eb3b1e88bda (v1.2.2)  # PUBLIC-CONSTANT: public jungle4 chain data (scanner marker)
+runtime config: ba0840088eed65de5750906536ece6ee13762b693624a97fe1d902d2831140a3  # PUBLIC-CONSTANT: public jungle4 chain data (scanner marker)
+  delta vs committed 48407965…: two loopback port values (8888→8899, 9876→9878) and
+  allowed-connection none→any (the FINDING: Spring 1.2.2 'none' rejects ALL handshakes;
+  inbound boundary remains enforced by the loopback p2p bind — see EXPOSURE)
+committed cfg:  4840796587b3160b21f76aa81d2c46c7d1f3b59caae578c809ab7cc9e3cf9eb6  # PUBLIC-CONSTANT: public jungle4 chain data (scanner marker)
+data-dir:       /home/travi/jungle4-zkr/data (fresh at this boot; snapshot 397215073 bytes, sha256 aaeea164520e18c2d6e4bbe1ef119a0ee9781f5457f223ab499e960bf6a4f7f6)  # PUBLIC-CONSTANT: public jungle4 chain data (scanner marker)
+genesis.json:   2123beed125d86ce5ee4c62c60b55d41a225d85a9986212095ef2f6fea4f1031 (EOS-Jungle-Testnet/Node-Manual-Installation)  # PUBLIC-CONSTANT: public jungle4 chain data (scanner marker)
+
+== 1. EXPOSURE — observed socket bindings (config intent is not the receipt) ==
+observed at 2026-10-08T01:37:59Z:
+LISTEN 0      128         127.0.0.1:8899      0.0.0.0:*    users:(("nodeos",pid=1063985,fd=38))
+LISTEN 0      128         127.0.0.1:9878      0.0.0.0:*    users:(("nodeos",pid=1063985,fd=22))
+acceptance: listeners are loopback-bound only (127.0.0.1:8899 http, 127.0.0.1:9878 p2p) —
+            matches the intended posture; loopback-BOUND is not CLOSED (sockets exist).
+
+== 2. IDENTITY — the node's own view ==
+observed at 2026-10-08T01:37:59Z:
+{
+    "server_version": "04bdb089",
+    "chain_id": "73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d",  # PUBLIC-CONSTANT: public jungle4 chain data (scanner marker)
+    "head_block_num": 290902211,
+    "last_irreversible_block_num": 290902209,
+    "last_irreversible_block_id": "1156d0c18d94b20ab3657239fa4c1681e8efedc096df0b371a2ebdfed8a4a642",  # PUBLIC-CONSTANT: public jungle4 chain data (scanner marker)
+    "head_block_id": "1156d0c398de5a0f6bdec99bff3c5df7d4df6eb8c4e4e63cc307679283f7303e",  # PUBLIC-CONSTANT: public jungle4 chain data (scanner marker)
+    "head_block_time": "2026-10-08T01:37:53.500",
+    "head_block_producer": "eosaiagentbp",
+    "virtual_block_cpu_limit": 200000,
+    "virtual_block_net_limit": 1048576000,
+    "block_cpu_limit": 200000,
+    "block_net_limit": 1048576,
+    "server_version_string": "v1.2.2",
+    "fork_db_head_block_num": 290902211,
+    "fork_db_head_block_id": "1156d0c398de5a0f6bdec99bff3c5df7d4df6eb8c4e4e63cc307679283f7303e",  # PUBLIC-CONSTANT: public jungle4 chain data (scanner marker)
+    "server_full_version_string": "v1.2.2-04bdb089edc7e3c3f954e0aab4a7f3cb48635788",
+    "total_cpu_weight": "120573602932307",
+    "total_net_weight": "117540235342742",
+    "earliest_available_block_num": 290890497,
+    "last_irreversible_block_time": "2026-10-08T01:37:52.500"
+}
+expected chain-id: 73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d (PUBLIC-CONSTANT, pinned in the committed config)
+verdict: MATCH — the configured chain-id is now VERIFIED, not expected
+
+== 3. PEER — completed Jungle4 handshakes (configured nine ≠ connected nine) ==
+observed at 2026-10-08T01:37:59Z:
+connection objects: 8
+completed jungle4 handshakes: 7 of 9 configured peers
+  148.113.20.240:9877                        HANDSHAKE-COMPLETE   agent='Spring Agent'           peer_forkdb_head=290902038
+  64.204.204.158:9876                        HANDSHAKE-COMPLETE   agent='Spring Agent'           peer_forkdb_head=290902037
+  jungle4.cryptolions.io:9870                incomplete           agent=''                       peer_forkdb_head=0
+  jungle4.seed.eosnation.io:9876             HANDSHAKE-COMPLETE   agent='EOS Nation - HEAD'      peer_forkdb_head=290902190
+  jungletestnet.eos3.app:9876                HANDSHAKE-COMPLETE   agent='Spring Agent'           peer_forkdb_head=290902111
+  jungletestnet.eospanshi.com:9876           HANDSHAKE-COMPLETE   agent='Spring Agent'           peer_forkdb_head=290902037
+  p2p.jungle.detroitledger.tech:1337         HANDSHAKE-COMPLETE   agent='"jungle-dlt1"'          peer_forkdb_head=290902169
+  peer.jungle4.alohaeos.com:9876             HANDSHAKE-COMPLETE   agent='"Aloha EOS"'            peer_forkdb_head=290902037
+
+== 4. AGREEMENT — local LIB block ID vs independent public API, exact height ==
+observed at 2026-10-08T01:37:59Z:
+local LIB: 290902209
+compared height:      290902209
+local  block id:      1156d0c18d94b20ab3657239fa4c1681e8efedc096df0b371a2ebdfed8a4a642 (block time 2026-10-08T01:37:52.500)  # PUBLIC-CONSTANT: public jungle4 chain data (scanner marker)
+public block id:      1156d0c18d94b20ab3657239fa4c1681e8efedc096df0b371a2ebdfed8a4a642 (block time 2026-10-08T01:37:52.500) — source https://jungle4.greymass.com (greymass), independent of the snapshot source (eosnation)  # PUBLIC-CONSTANT: public jungle4 chain data (scanner marker)
+public chain-id:      73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d  # PUBLIC-CONSTANT: public jungle4 chain data (scanner marker)
+verdict: MATCH — same chain-id and same block ID at height 290902209; agreement established
+
+== end of receipts ==

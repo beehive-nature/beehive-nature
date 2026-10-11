@@ -209,6 +209,20 @@
     INCONCLUSIVE: { fill: 'var(--cyan)', fillOp: .16, rim: 'var(--cyan)', label: 'nectar', rimOp: .5 }
   };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  /* words for new bee and raver, the raw form for cypherpunk (register.js shows one; both are escaped here) */
+  function reg3(words, raw) {
+    return '<span data-reg="bee">' + esc(words) + '</span><span data-reg="raver">' + esc(words) + '</span><span data-reg="cypherpunk">' + esc(raw) + '</span>';
+  }
+  var SAY = { PASSED: 'checked and sealed', PENDING_ANCHOR: 'checked, waiting to be sealed', FAILED: 'does not add up', INCONCLUSIVE: 'cannot be checked yet' };
+  function checkWords(c) {
+    var m = /^line_(\d+)_arithmetic$/.exec(c.name);
+    if (m) return 'line ' + (+m[1] + 1) + (c.ok ? ' adds up' : ' does not add up');
+    return ({ closed_enums: c.ok ? 'every line is a kind this record knows' : 'a line is of a kind this record does not know',
+      tithe_line: c.ok ? 'the estate\'s 10% share is right' : 'the estate\'s 10% share is wrong',
+      total_matches_sum: c.ok ? 'the total matches its lines' : 'the total does not match its lines',
+      content_hash: c.ok ? 'the bill is unchanged since it was written' : 'the bill was changed after it was written',
+      forward_only: c.ok ? 'it comes after the bill before it' : 'it does not follow the bill before it' })[c.name] || (c.ok ? 'passed' : 'failed');
+  }
   function hexPoints(cx, cy, R) {
     var p = [];
     for (var i = 0; i < 6; i++) { var a = Math.PI / 180 * (60 * i - 90); p.push((cx + R * Math.cos(a)).toFixed(2) + ',' + (cy + R * Math.sin(a)).toFixed(2)); }
@@ -243,7 +257,8 @@
   function checksHtml(rec) {
     return rec.audit.checks.map(function (c) {
       return '<div style="font-size:10px;color:' + (c.ok ? 'var(--dim)' : 'var(--flag)') + ';padding:2px 0">' +
-        (c.ok ? '✓' : '✗') + ' <b style="color:var(--ink)">' + esc(c.name) + '</b>' + (c.note ? ': ' + esc(c.note) : '') + '</div>';
+        (c.ok ? '✓' : '✗') + ' <span data-reg="bee">' + esc(checkWords(c)) + '</span><span data-reg="raver">' + esc(checkWords(c)) + '</span>' +
+        '<span data-reg="cypherpunk"><b style="color:var(--ink)">' + esc(c.name) + '</b>' + (c.note ? ': ' + esc(c.note) : '') + '</span></div>';
     }).join('');
   }
 
@@ -251,38 +266,49 @@
     opts = opts || {};
     var ledger, result;
     el.innerHTML = '<div style="color:var(--dim);font-size:11px">reading the public ledger…</div>';
-    try { ledger = await fetchLedger(opts.ledgerPath); }
-    catch (e) { el.innerHTML = '<div style="color:var(--amber);font-size:11px">' + esc(e.message) + ' — the panel rests rather than guess</div>'; return; }
-    result = await auditLedger(ledger);
+    /* a record that cannot be read is said calmly, with a way to read it again; the panel never guesses */
+    var rest = function (why) {
+      el.innerHTML = '<div style="color:var(--amber);font-size:11px">the bills could not be read just now. ' +
+        '<button type="button" class="wl-act sa-retry">try again</button><span data-reg="cypherpunk"> ' + esc(why) + '; the panel rests rather than guess</span></div>';
+      var rb = el.querySelector('.sa-retry'); if (rb) rb.addEventListener('click', function () { mountPanel(el, opts); });
+    };
+    try { ledger = await fetchLedger(opts.ledgerPath); result = await auditLedger(ledger); }
+    catch (e) { rest((e && e.message) || String(e)); return; }
 
+    /* the total counts only bills that add up and can be checked: a bill with an unpriceable line
+       would be a partial sum, so it is left out and said so */
     var tot = 0n, byState = { PASSED: 0, PENDING_ANCHOR: 0, FAILED: 0, INCONCLUSIVE: 0 };
-    result.receipts.forEach(function (a) { byState[a.state]++; if (a.state !== 'FAILED') tot += a.owed; });
+    result.receipts.forEach(function (a) { byState[a.state]++; if (a.state === 'PASSED' || a.state === 'PENDING_ANCHOR') tot += a.owed; });
+    var leftOut = (byState.INCONCLUSIVE ? byState.INCONCLUSIVE + ' that cannot be checked yet' : '') +
+      (byState.INCONCLUSIVE && byState.FAILED ? ' and ' : '') + (byState.FAILED ? byState.FAILED + ' that do not add up' : '');
 
     /* the comb strip — every receipt one cell; clicking opens its audit */
     var cells = ledger.receipts.map(function (r, j) {
       var a = result.receipts[j];
-      return '<button type="button" data-rc="' + j + '" aria-label="receipt ' + (j + 1) + ': ' + a.state + '"' +
+      return '<button type="button" data-rc="' + j + '" aria-label="receipt ' + (j + 1) + ': ' + SAY[a.state] + '"' +
         ' style="background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px">' +
         cellChip(a.state, 26, r.operation && r.operation.kind) + '</button>';
     }).join('');
 
     var rows = ledger.receipts.map(function (r, j) {
       var a = result.receipts[j];
-      return '<details style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:6px">' +
+      return '<details data-ri="' + j + '" style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:6px">' +
         '<summary style="cursor:pointer;display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:11px">' +
-        cellChip(a.state, 18) + '<b style="color:var(--ink)">' + esc((r.operation && r.operation.kind) || 'spend') + '</b>' +
+        cellChip(a.state, 18) + '<b data-reg="cypherpunk" style="color:var(--ink)">' + esc((r.operation && r.operation.kind) || 'spend') + '</b>' +
         '<span style="color:var(--dim)">' + esc((r.seller && r.seller.name) || '') + '</span>' +
-        '<span style="color:var(--faint);font-size:10px">' + esc(r.occurred_at) + '</span>' +
+        '<span style="color:var(--faint);font-size:10px">' + reg3(String(r.occurred_at || '').slice(0, 16).replace('T', ' '), r.occurred_at) + '</span>' +
         '<span style="margin-left:auto;color:var(--sa-figure,var(--gold))">' + a.owedA + '</span>' +
-        '<span style="font-size:9px;letter-spacing:.12em;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:2px 8px">' + a.state + '</span>' +
+        '<span style="font-size:9px;letter-spacing:.12em;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:2px 8px">' + reg3(SAY[a.state], a.state) + '</span>' +
         '</summary>' +
         '<div style="margin-top:7px">' + lineRowsHtml({ audit: a }) + checksHtml({ audit: a }) +
-        '<div style="font-size:10px;color:var(--ink);margin-top:5px">recomputed bill: <b style="color:var(--sa-figure,var(--gold))">' + a.owedA + '</b> · state <b>' + a.state + '</b> · anchored: ' + (a.covered ? 'yes' : a.state === 'PENDING_ANCHOR' ? 'not yet (honey)' : 'n/a') + '</div>' +
+        '<div style="font-size:10px;color:var(--ink);margin-top:5px"><span data-reg="bee">this bill comes to ' + esc(a.owedA) + ' and ' + SAY[a.state] + '.</span><span data-reg="raver">' + esc(a.owedA) + ', ' + SAY[a.state] + '</span>' +
+        '<span data-reg="cypherpunk">recomputed bill: <b style="color:var(--sa-figure,var(--gold))">' + a.owedA + '</b> · state <b>' + a.state + '</b> · anchored: ' + (a.covered ? 'yes' : a.state === 'PENDING_ANCHOR' ? 'not yet (honey)' : 'n/a') + '</span></div>' +
         '</div></details>';
     }).join('');
 
     /* liveness + seller score — timestamps and this record only */
     var asOf = ledger.as_of || new Date().toISOString();
+    var asOfSay = ledger.as_of ? '<div style="font-size:10px;color:var(--dim);margin-top:8px">this list was written on ' + esc(String(ledger.as_of).slice(0, 10)) + ', so these services may have changed since.</div>' : '';
     var svcs = (ledger.services || []).map(function (s) {
       var st = deriveStatus(s.heartbeats, asOf);
       var col = st === 'online' ? 'var(--leaf)' : st === 'busy' ? 'var(--amber)' : 'var(--faint)';
@@ -291,8 +317,10 @@
     }).join(' ');
     var score = Object.keys(result.sellers).map(function (s) {
       var v = result.sellers[s], audited = v.passed + v.failed;
-      return '<span style="font-size:10px;color:var(--dim)">' + esc(s) + ': <b style="color:' + (v.failed ? 'var(--flag)' : 'var(--leaf)') + '">' + v.passed + '/' + (audited || 0) + ' clean</b>' +
-        ' <span style="color:var(--faint)">(' + v.passed + ' passed · ' + v.failed + ' failed · ' + v.pending + ' pending · ' + v.inconclusive + ' inconclusive, from this record only)</span></span>';
+      var words = v.failed ? (v.failed === 1 ? 'one bill does not add up' : v.failed + ' bills do not add up') : 'every bill checked so far adds up';
+      return '<span style="font-size:10px;color:var(--dim)">' + esc(s) + ': <span data-reg="bee">' + words + '</span><span data-reg="raver">' + words + '</span>' +
+        '<span data-reg="cypherpunk"><b style="color:' + (v.failed ? 'var(--flag)' : 'var(--leaf)') + '">' + v.passed + '/' + (audited || 0) + ' clean</b>' +
+        ' <span style="color:var(--faint)">(' + v.passed + ' passed · ' + v.failed + ' failed · ' + v.pending + ' pending · ' + v.inconclusive + ' inconclusive, from this record only)</span></span></span>';
     }).join(' · ');
 
     /* THE COMPREHENSION LAW (founder order 2026-09-16) reaches the engine's
@@ -311,22 +339,25 @@
     el.innerHTML =
       '<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">' +
       '<span style="font-size:26px;font-weight:600;color:var(--sa-figure,var(--gold));font-variant-numeric:tabular-nums">' + fromS(tot) + ' A</span>' +
-      '<span data-wl-tech style="font-size:10px;letter-spacing:.14em;color:var(--faint)">recomputed total: Σ quantity × rate, never the stored number</span></div>' +
+      (leftOut ? '<span style="font-size:10px;color:var(--dim)">the bills that add up; ' + leftOut + ' are left out.</span>' : '') +
+      '<span data-wl-tech style="font-size:10px;letter-spacing:.14em;color:var(--faint)">recomputed total of the PASSED and PENDING_ANCHOR bills: Σ quantity × rate, never the stored number</span></div>' +
       '<div style="font-size:11.5px;color:var(--ink);margin-top:6px">' + T('sa.lead', 'Every bill re-checked here in your browser. Open a receipt to see its proof.') + '</div>' +
+      (opts.sample ? '<div id="sa-sample" style="font-size:11.5px;color:var(--ink);margin-top:6px">' + esc(opts.sample.say) +
+        (opts.sample.to ? '<a href="#' + esc(opts.sample.to) + '">' + esc(opts.sample.t) + '</a>.' : '') + '</div>' : '') +
       '<details class="tnote" data-reg-disclose style="margin-top:8px"><summary data-i18n="sa.d.comb">' + T('sa.d.comb', 'The receipts: one cell per bill, tap for its proof') + '</summary>' +
       '<div style="display:flex;gap:4px;flex-wrap:wrap;margin:10px 0 2px">' + cells + '</div>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:9.5px;color:var(--dim);letter-spacing:.06em">' +
-      '<span>' + cellChip('PASSED', 13) + ' PASSED = capped</span><span>' + cellChip('PENDING_ANCHOR', 13) + ' PENDING_ANCHOR = honey</span>' +
-      '<span>' + cellChip('FAILED', 13) + ' FAILED = flag #c07f1c</span><span>' + cellChip('INCONCLUSIVE', 13) + ' INCONCLUSIVE = nectar</span></div>' +
+      '<span>' + cellChip('PASSED', 13) + ' ' + reg3(SAY.PASSED, 'PASSED = capped') + '</span><span>' + cellChip('PENDING_ANCHOR', 13) + ' ' + reg3(SAY.PENDING_ANCHOR, 'PENDING_ANCHOR = honey') + '</span>' +
+      '<span>' + cellChip('FAILED', 13) + ' ' + reg3(SAY.FAILED, 'FAILED = flag #c07f1c') + '</span><span>' + cellChip('INCONCLUSIVE', 13) + ' ' + reg3(SAY.INCONCLUSIVE, 'INCONCLUSIVE = nectar') + '</span></div>' +
       '<div style="margin-top:10px">' + rows + '</div>' +
       (opts.showPaste !== false ?
-        '<div style="margin-top:10px"><textarea id="sa-paste" aria-label="Spend receipt JSON" rows="3" placeholder="paste any spend receipt (SPEC-SPEND-RECEIPT-1 JSON) — a stranger can audit any session, keylessly"' +
+        '<div style="margin-top:10px"><textarea id="sa-paste" aria-label="Spend receipt JSON" rows="3" placeholder="paste a whole receipt here and press check it"' +
         ' style="width:100%;box-sizing:border-box;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px;font:11px \'IBM Plex Mono\',monospace"></textarea>' +
-        '<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><button type="button" id="sa-paste-go" style="background:var(--well);color:var(--sa-figure,var(--gold));border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11px \'IBM Plex Mono\',monospace;min-height:44px">audit it</button>' +
+        '<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><button type="button" id="sa-paste-go" style="background:var(--well);color:var(--sa-figure,var(--gold));border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11px \'IBM Plex Mono\',monospace;min-height:44px">check it</button>' +
         '<span id="sa-paste-out" style="font-size:10px;color:var(--dim)"></span></div></div>' : '') +
       '</details>' +
       '<details class="tnote" data-reg-disclose style="margin-top:6px"><summary data-i18n="sa.d.watch">' + T('sa.d.watch', 'Services and seller scores: from this record only') + '</summary>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' + svcs + '</div>' +
+      asOfSay + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' + svcs + '</div>' +
       '<div style="margin-top:8px">' + score + '</div>' +
       '</details>' +
       '<div data-wl-tech style="margin-top:10px;border:1px solid var(--line);border-left:3px solid var(--sa-care-line,var(--gold));border-radius:6px;padding:9px 11px;font-size:10px;color:var(--ink);background:var(--well)">' +
@@ -344,17 +375,27 @@
     var go = el.querySelector('#sa-paste-go');
     if (go) go.addEventListener('click', async function () {
       var t = el.querySelector('#sa-paste').value.trim();
-      if (!t) { pasteOut.textContent = 'paste a receipt first'; return; }
+      if (!t) { pasteOut.textContent = 'paste a receipt first, then press check it.'; return; }
       try {
         var r = JSON.parse(t);
+        if (!r || typeof r !== 'object' || !Array.isArray(r.line_items) || !r.line_items.every(function (l) { return l && l.charged && l.charged.value != null; }))
+          throw new Error('the receipt has no line_items with charged values');
         var a = await auditReceipt(r, ledger);
-        pasteOut.innerHTML = cellChip(a.state, 14) + ' <b style="color:var(--ink)">' + a.state + '</b> · recomputed ' + esc(a.owedA) +
-          ' · ' + a.checks.filter(function (c) { return c.ok; }).length + '/' + a.checks.length + ' checks pass';
-      } catch (e) { pasteOut.textContent = 'not a readable receipt: ' + e.message; }
+        var bad = a.checks.filter(function (c) { return !c.ok; })[0];
+        var words = a.state === 'PASSED' ? 'this bill adds up to ' + a.owedA + ' and is sealed.'
+          : a.state === 'PENDING_ANCHOR' ? 'this bill adds up to ' + a.owedA + '; it is waiting to be sealed.'
+          : a.state === 'FAILED' ? 'this bill does not add up: ' + (bad ? checkWords(bad) : 'a check failed') + '.'
+          : 'this bill cannot be checked yet: a price it uses is not in the public record.';
+        pasteOut.innerHTML = cellChip(a.state, 14) + ' <span data-reg="bee">' + esc(words) + '</span><span data-reg="raver">' + esc(words) + '</span>' +
+          '<span data-reg="cypherpunk"><b style="color:var(--ink)">' + a.state + '</b> · recomputed ' + esc(a.owedA) +
+          ' · ' + a.checks.filter(function (c) { return c.ok; }).length + '/' + a.checks.length + ' checks pass</span>';
+      } catch (e) {
+        pasteOut.innerHTML = 'that is not a receipt this page can read; paste the whole receipt and press check it.<span data-reg="cypherpunk"> ' + esc(e && e.message) + '</span>';
+      }
     });
     el.querySelectorAll('button[data-rc]').forEach(function (b) {
       b.addEventListener('click', function () {
-        var d = el.querySelectorAll('details')[+b.getAttribute('data-rc')];
+        var d = el.querySelector('details[data-ri="' + (+b.getAttribute('data-rc')) + '"]');
         if (d) { d.open = true; d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
       });
     });
