@@ -107,23 +107,23 @@ const step = async (name, fn) => { try { return await fn(); } catch (e) { ok(nam
 
 const KCFILES = { '/': 'keychain/index.html', '/prelude.js': 'keychain/prelude.js', '/keychain.js': 'keychain/keychain.js', '/genesis.js': 'keychain/genesis.js',
   '/vendor/bzdid-key.js': 'surfaces/onboarding/bzdid-key.js', '/vendor/bnr-sign.js': 'surfaces/onboarding/vendor/bnr-sign.js', '/vendor/hive-tx.min.js': 'surfaces/onboarding/vendor/hive-tx.min.js' };
-/* the desk mounts the isolated keychain only when keys.skaists.dev answers; in this suite that
-   origin is always served from the real tree (hermetic — never the live site), so the desk's
-   native door is available-but-unchosen everywhere except the scenario that drives it */
-const serveKeys = r => {
+/* the desk mounts the isolated keychain only when keys.skaists.dev answers. Scenarios that do
+   not drive the native door get an INERT origin: the mount's reachability probe answers, but no
+   keychain ever loads and no state ever posts — the native door stays closed, no heavy files
+   parse, nothing races the desk's own clock on slow runners. The live files are served only by
+   the scenario that drives the real interface. Hermetic either way: never the live site. */
+const serveKeysInert = r => {
   const p = new URL(r.request().url()).pathname;
-  const f = KCFILES[p];
-  if (!f) return r.fulfill({ status: 404, body: '' });
-  return readFile(join(ROOT, f)).then(
-    data => r.fulfill({ status: 200, body: data, contentType: MIME[extname(f)] || 'text/javascript' }),
-    () => r.fulfill({ status: 404, body: '' }));
+  if (p === '/genesis.js') return r.fulfill({ status: 200, body: '// inert probe target', contentType: 'text/javascript' });
+  if (p === '/') return r.fulfill({ status: 200, body: '<!doctype html><meta charset="utf-8"><body>', contentType: 'text/html' });
+  return r.fulfill({ status: 404, body: '' });
 };
 const profile = name => mkdtempSync(join(tmpdir(), 'bdrop-' + name + '-'));
 const ctxs = []; /* every browser context, so a failure path never leaks one into CI's pool */
 async function open(profileDir) {
   const ctx = await chromium.launchPersistentContext(profileDir, { headless: true });
   ctxs.push(ctx);
-  await ctx.route('https://keys.skaists.dev/**', serveKeys); /* hermetic: the keychain origin served from the tree, never the live site */
+  await ctx.route('https://keys.skaists.dev/**', serveKeysInert); /* hermetic: an inert keychain origin — the probe answers, no keychain loads (see serveKeysInert) */
   const page = await ctx.newPage();
   const errs = [];
   page.on('pageerror', e => errs.push(String(e)));
@@ -330,7 +330,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     mock.broadcasts.length = 0; mock.lastBody = null;
     const dir6 = profile('keychain'); dirs.push(dir6);
     const ctx6 = await chromium.launchPersistentContext(dir6, { headless: true });
-    await ctx6.route('https://keys.skaists.dev/**', serveKeys); /* hermetic: the keychain origin served from the tree */
+    await ctx6.route('https://keys.skaists.dev/**', serveKeysInert); /* hermetic: an inert keychain origin — the probe answers, no keychain loads */
     ctxs.push(ctx6);
     await ctx6.addInitScript(() => {
       window.hive_keychain = {
@@ -417,7 +417,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     /* browser closure DURING handoff — the persisted handoff state survives and reconciles on restart */
     await setMock({ mode: 'normal', contents: { 'bdrop-keychain-closed-midhandoff': '' } });
     const ctx6b = await chromium.launchPersistentContext(dir6, { headless: true });
-    await ctx6b.route('https://keys.skaists.dev/**', serveKeys); /* hermetic: the keychain origin served from the tree */
+    await ctx6b.route('https://keys.skaists.dev/**', serveKeysInert); /* hermetic: an inert keychain origin — the probe answers, no keychain loads */
     ctxs.push(ctx6b);
     await ctx6b.addInitScript(() => {
       window.hive_keychain = {
@@ -440,7 +440,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await ctx6b.close(); /* the browser closes mid-handoff */
     await setMock({ mode: 'normal', content: { permlink: 'bdrop-keychain-closed-midhandoff', body: BODY } });
     const ctx6c = await chromium.launchPersistentContext(dir6, { headless: true });
-    await ctx6c.route('https://keys.skaists.dev/**', serveKeys); /* hermetic: the keychain origin served from the tree */
+    await ctx6c.route('https://keys.skaists.dev/**', serveKeysInert); /* hermetic: an inert keychain origin — the probe answers, no keychain loads */
     ctxs.push(ctx6c);
     const page6c = await ctx6c.newPage();
     page6c.on('pageerror', e => errs6.push('restart: ' + String(e)));
