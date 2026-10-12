@@ -210,8 +210,9 @@ export function createEvmReader({ chainId, hosts, fetchFn = globalThis.fetch, ti
     },
     // The value every host returned identically, or null when any host failed
     // or disagreed: a probe that rests on one witness proves nothing.
-    async callAgreed(to, data, from) {
-      const rows = await each("eth_call", [from ? { from, to, data } : { to, data }, "latest"]);
+    // block: "latest" or a 0x block number (state as of that block)
+    async callAgreed(to, data, from, block = "latest") {
+      const rows = await each("eth_call", [from ? { from, to, data } : { to, data }, block]);
       const vals = new Set(rows.map((r) => (r.ok ? lc(r.v) : "!")));
       return vals.size === 1 && !vals.has("!") ? [...vals][0] : null;
     },

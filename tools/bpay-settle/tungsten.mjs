@@ -39,8 +39,8 @@ async function spenderIsOwner(reader, account, spender) {
   if (v === "0x") return { readable: true, deployed: false, owner: null };
   return { readable: true, deployed: true, owner: asWord(v) === 1n };
 }
-async function ownerIndex(reader, account) {
-  const v = await reader.callAgreed(account, SEL.nextOwnerIndex);
+async function ownerIndex(reader, account, block = "latest") {
+  const v = await reader.callAgreed(account, SEL.nextOwnerIndex, undefined, block);
   return v === null || v === "0x" ? null : asWord(v).toString();
 }
 // Does the CONTRACT refuse a spend above the cap? Run after approval, because
@@ -148,8 +148,6 @@ export async function runTungsten(cfg) {
       if (!own.deployed) findings.push({ id: "account-counterfactual", severity: "harness", text: "the owner account is not deployed; whether the spender is an owner cannot be read" });
       else ob("kill.1-no-owner-authority", own.owner === false, { spender_is_owner: own.owner });
       if (own.owner) stop("agent-is-owner", "the agent owns the account: nothing settles under that authority", "blocker");
-    } else {
-      ownerBefore = await ownerIndex(reader, cfg.payerAccount);
     }
 
     // 4 EXECUTE — the kernel's run, the vendor only behind the adapter
@@ -184,8 +182,13 @@ export async function runTungsten(cfg) {
     if (route === "pay") {
       if (capture.account && String(capture.account).toLowerCase() !== String(cfg.payerAccount).toLowerCase())
         findings.push({ id: "paid-from-another-account", severity: "blocker", text: "the chain shows the payment from an account other than the payer's" });
-      const after = await ownerIndex(reader, cfg.payerAccount);
-      // unreadable before or after is not a pass: a counterfactual account deployed by this very payment could carry any owner
+      // the owner index at the block before the payment and at the payment's own
+      // block, both read from the chain: no "before" press, no adapter's word.
+      // Unreadable either side is not a pass: a counterfactual account deployed by
+      // this very payment could carry any owner.
+      const blk = Number(run.observation.block);
+      ownerBefore = blk > 0 ? await ownerIndex(reader, cfg.payerAccount, "0x" + (blk - 1).toString(16)) : null;
+      const after = blk > 0 ? await ownerIndex(reader, cfg.payerAccount, "0x" + blk.toString(16)) : null;
       if (ownerBefore === null || after === null) findings.push({ id: "owner-index-unreadable", severity: "harness", text: "the payer account's owner index could not be read both before and after" });
       else ob("kill.1-no-owner-authority", ownerBefore === after, { owner_index_before: ownerBefore, owner_index_after: after });
       // the cap is the exact approved amount: the chain must show exactly it

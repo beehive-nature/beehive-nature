@@ -21,6 +21,17 @@ export function createFakeBase({ chainId = 84532, payer = addr("payer-smart-acco
   const approved = new Map(); // permission key → spent
   const txs = new Map();
   let head = 100, finalized = 100, n = 0, reads = 0;
+  // owner index per block, so state "as of block N" reads like a real node
+  const ownerHistory = new Map(); // block → Map(account → next)
+  const snapOwners = () => ownerHistory.set(head, new Map([...owners].map(([a, o]) => [a, o.next])));
+  snapOwners();
+  const ownerNextAt = (account, tag) => {
+    if (tag === "latest" || tag === undefined) return owners.get(account).next;
+    const b = Number(tag);
+    let best = null;
+    for (const [blk, m] of ownerHistory) if (blk <= b && (best === null || blk > best[0])) best = [blk, m];
+    return best ? best[1].get(account) : owners.get(account).next;
+  };
 
   const move = (from, to, atto) => {
     const b = bal.get(lc(from)) || 0n;
@@ -31,6 +42,7 @@ export function createFakeBase({ chainId = 84532, payer = addr("payer-smart-acco
   function mine({ from, to, input, logs, status = "0x1", gasUsed = 50000n, price = 1000n }) {
     const hash = "0x" + h(`tx:${chainId}:${++n}:${input}`);
     head++;
+    snapOwners();
     if (!sabotage.neverFinal) finalized = head;
     const blockHash = "0x" + h("block:" + head);
     txs.set(hash, { receipt: { transactionHash: hash, blockNumber: "0x" + head.toString(16), blockHash, status, from: lc(from), to: lc(to), gasUsed: "0x" + gasUsed.toString(16), effectiveGasPrice: "0x" + price.toString(16),
@@ -65,7 +77,7 @@ export function createFakeBase({ chainId = 84532, payer = addr("payer-smart-acco
         const s = lc(data).slice(0, 10);
         if (lc(to) === usdc && s === SEL.balanceOf) return "0x" + word(bal.get("0x" + lc(data).slice(-40)) || 0n);
         if (owners.has(lc(to)) && s === SEL.isOwnerAddress) return "0x" + word(owners.get(lc(to)).list.has("0x" + lc(data).slice(-40)) ? 1 : 0);
-        if (owners.has(lc(to)) && s === SEL.nextOwnerIndex) return "0x" + word(owners.get(lc(to)).next);
+        if (owners.has(lc(to)) && s === SEL.nextOwnerIndex) return "0x" + word(ownerNextAt(lc(to), params[1]));
         // SpendPermissionManager as the real contract orders it: sender, then
         // isValid (approved, not revoked) → UnauthorizedSpendPermission, then
         // the cap → ExceededSpendPermission (revert data carries the selector)
