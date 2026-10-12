@@ -33,29 +33,45 @@
         if (m.t === 'kc.state') { state = { state: m.state, did: m.did || null, evm: m.evm || null, genesis: m.genesis || null }; listeners.forEach(function (fn) { try { fn(state); } catch (e) {} }); finish(api); }
         else if ((m.t === 'kc.signed' || m.t === 'kc.refused') && waits[m.id]) {
           var w = waits[m.id]; delete waits[m.id];
-          if (m.t === 'kc.signed') w.ok({ raw: m.raw, hash: m.hash });
+          if (m.t === 'kc.signed') w.ok({ raw: m.raw, hash: m.hash, kind: m.kind || 'evm', pub: m.pub || null });
           else { var e = new Error(m.reason || 'Your keychain refused this request'); e.refusal = 'keychain'; w.no(e); }
+        }
+        else if (m.t === 'kc.hive.pubbed' && waits[m.id]) {
+          var hp = waits[m.id]; delete waits[m.id]; hp.ok({ account: m.account, pub: m.pub });
         }
       }
       var api = {
         frame: f,
         get state() { return state; },
         onstate: function (fn) { listeners.push(fn); },
+        ask: function (msg) {
+          return new Promise(function (ok, no) {
+            var id = 'r' + (++seq) + '.' + Date.now();
+            waits[id] = { ok: ok, no: no };
+            setTimeout(function () { if (waits[id]) { delete waits[id]; var e = new Error('Your keychain did not answer in time; nothing was signed'); e.refusal = 'keychain'; no(e); } }, 310000);
+            f.contentWindow.postMessage(msg(id), ORIGIN);
+          });
+        },
         /* the AntPay.createHosted signer shape: public address, and a signed envelope on request */
         signer: function () {
           return {
             isolated: true,
             address: async function () { if (!state || state.state !== 'unlocked') throw new Error('Unlock your isolated keychain to prepare this invoice'); return state.evm; },
             signTransaction: function (tx) {
-              return new Promise(function (ok, no) {
-                if (!state || state.state !== 'unlocked') return no(new Error('Unlock your isolated keychain to sign'));
-                var id = 'r' + (++seq) + '.' + Date.now();
-                waits[id] = { ok: ok, no: no };
-                setTimeout(function () { if (waits[id]) { delete waits[id]; var e = new Error('Your keychain did not answer in time; nothing was signed'); e.refusal = 'keychain'; no(e); } }, 310000);
-                f.scrollIntoView({ block: 'center' });
-                f.contentWindow.postMessage({ t: 'kc.sign', v: 1, id: id, tx: tx }, ORIGIN);
-              });
-            }
+              if (!state || state.state !== 'unlocked') return Promise.reject(new Error('Unlock your isolated keychain to sign'));
+              f.scrollIntoView({ block: 'center' });
+              return api.ask(function (id) { return { t: 'kc.sign', v: 1, id: id, tx: tx }; });
+            },
+            /* bDroP's Hive door: the structured transaction travels to the keychain, which
+               serializes and signs ITS OWN copy — the page never holds a Hive key */
+            signHive: function (account, tx) {
+              if (!state || state.state !== 'unlocked') return Promise.reject(new Error('Unlock your isolated keychain to sign this drop'));
+              f.scrollIntoView({ block: 'center' });
+              return api.ask(function (id) { return { t: 'kc.sign', v: 1, id: id, hive: { account: account, tx: tx } }; });
+            },
+            /* the public posting key this keychain would sign that account with — public
+               data only, so the desk can check it against the chain before asking anything */
+            hivePub: function (account) { return api.ask(function (id) { return { t: 'kc.hive.pub', v: 1, id: id, account: account }; }); }
           };
         }
       };

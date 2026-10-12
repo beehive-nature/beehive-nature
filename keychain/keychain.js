@@ -10,12 +10,16 @@
    in here as a recovery code), kept in this page's memory and scrubbed on lock. From the root:
    a BDID-GENESIS-V1 identity (r0 rotation key + signing key, both ed25519) and keys per context
    under the same HKDF law as surfaces/onboarding/bzdid-key.js. The EVM key's context is
-   'evm:' + the DID, so a name (the .b layer) never shapes a key.
+   'evm:' + the DID, so a name (the .b layer) never shapes a key. The Hive posting key's
+   context is 'hive-posting:' + the account: a Hive authority belongs to a chain account, so
+   here the account — like the EVM chain id — is what the signature is FOR, never a .b name.
 
    WHAT IT SIGNS (this phase): Autonomi storage payments on Arbitrum One — an approve of the ANT
-   token to the pinned storage vault, or payForQuotes on that vault. Every request is decoded
-   HERE and shown on a confirm card; only a trusted press inside this page signs, after the card
-   has been visibly on screen. Anything else is refused before the key is touched.
+   token to the pinned storage vault, or payForQuotes on that vault — and Hive drops: one root
+   post (a bDroP comment) under its posting authority, nothing that can move funds. Every
+   request is decoded HERE and shown on a confirm card; only a trusted press inside this page
+   signs, after the card has been visibly on screen. Anything else is refused before the key is
+   touched.
 
    WHAT IT DOES NOT CLAIM: it does not protect against a wallet page that replaces this frame
    with a look-alike before you unlock (check the address bar of a popped-out keychain), and it
@@ -23,12 +27,13 @@
    never imported. */
 (function () {
   'use strict';
-  var ORIGIN = 'https://keys.skaists.dev', PARENTS = ['https://skaists.dev'];
+  var ORIGIN = 'https://keys.skaists.dev', PARENTS = ['https://skaists.dev']; /* KC-ORIGINS — scripts/build-keychain.mjs --origin/--parent rewrites THIS line only in the built copy for a replacement origin; the source line is the production truth */
   var CHAIN = 42161, CHAIN_NAME = 'Arbitrum One';
   var TOKEN = '0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684'; // PUBLIC-CONSTANT: ANT (Autonomi) on Arbitrum One
   var VAULT = '0x9a3ecac693b699fc0b2b6a50b5549e50c2320a26'; // PUBLIC-CONSTANT: Autonomi PaymentVaultV2 (e2e/ant-pay-vector.json)
   var MAX_GAS = 3000000n, PRESS_DELAY_MS = 700, VALID_UNTIL = 4102444800; // 2100-01-01T00:00:00Z
   var main = document.getElementById('kc');
+  var HIVE_CHAIN = 'beeab0de00000000000000000000000000000000000000000000000000000000'; // PUBLIC-CONSTANT: Hive mainnet chain id (public network parameter)
 
   /* ── tiny DOM helpers: text only, never HTML from a message ── */
   function el(tag, attrs, kids) {
@@ -43,8 +48,8 @@
   if (location.origin !== ORIGIN) return stop('This keychain only runs at keys.skaists.dev. A copy anywhere else holds and signs nothing.');
   var framed = window.parent !== window;
   var ancestors = location.ancestorOrigins ? Array.from(location.ancestorOrigins) : null;
-  if (framed && ancestors && !ancestors.every(function (o) { return PARENTS.indexOf(o) >= 0; })) return stop('This keychain only opens inside the heART WALLet at skaists.dev, or on its own.');
-  if (!window.BZDIDKEY || !window.BnrSign || !window.BZGENESIS) return stop('Part of the keychain did not load, so it holds and signs nothing. Reload to try again.');
+  if (framed && ancestors && !ancestors.every(function (o) { return PARENTS.indexOf(o) >= 0; })) return stop('This keychain only opens on its own, or inside the wallet at ' + (PARENTS.join(' or ') || 'its home origin') + '.');
+  if (!window.BZDIDKEY || !window.BnrSign || !window.BZGENESIS || !window.hiveTx) return stop('Part of the keychain did not load, so it holds and signs nothing. Reload to try again.');
   // Without ancestorOrigins this browser cannot name who framed us: show nothing to press until
   // the wallet at skaists.dev has spoken (its message origin is checked).
   var greeted = !framed || !!ancestors;
@@ -64,7 +69,7 @@
 
   /* ── the root and what falls out of it ── */
   var root = null, me = null, parentOrigin = framed && ancestors && ancestors.length ? ancestors[0] : null, pending = null;
-  var mem = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+  var mem = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del: function (k) { try { localStorage.removeItem(k); } catch (e) {} } };
   function evmAddress(seed) { return '0x' + hex(B.keccak_256(B.secp.getPublicKey(seed, false).slice(1)).slice(12)); }
   function identity() {
     var r0 = K.deriveRecordKey(root, 'bzdid/rotation/r0'), sg = K.deriveRecordKey(root, 'bzdid/signing');
@@ -74,12 +79,14 @@
       try { return { did: did, genesis: hex(op), evm: evmAddress(k.seed) }; } finally { k.seed.fill(0); }
     } finally { r0.seed.fill(0); sg.seed.fill(0); }
   }
-  function open(secret, how) {
+  function open(secret, how, expectDid) {
     if (root) root.fill(0);
     root = null; me = null;
     root = how === 'prf' ? K.masterPrkFromPrfSecret(secret) : secret.slice();
-    secret.fill(0);
-    me = identity(); mem.set('kc.did', me.did); mem.set('kc.enrolled', '1');
+    if (secret) secret.fill(0);
+    me = identity();
+    if (expectDid && me.did !== expectDid) { var got = me.did; lock(true); return stop('This passkey opened a different keychain than the one stored here (' + got + '). Nothing was unlocked; nothing was signed.'); }
+    mem.set('kc.did', me.did); mem.set('kc.enrolled', '1');
     publish(); render();
   }
   function lock(quiet) {
@@ -90,6 +97,61 @@
   }
   window.addEventListener('pagehide', function () { lock(true); });
   window.addEventListener('pageshow', function () { render(); publish(); });
+
+  /* ── re-enrollment: keep THIS identity, bind a passkey born at another (or this) origin ──
+     A passkey's PRF output derives the root directly only where that passkey was born; a
+     replacement origin's new passkey knows nothing of it. So after opening the same keychain
+     from its recovery code, the new passkey does not re-derive the root — it WRAPS it: the
+     root is sealed under an AES-GCM key domain-separated from the PRF secret, and only the
+     sealed blob is stored. Unlock then unwraps and checks it reconstitutes the stored DID,
+     so an identity can never silently change under a stored wrap. The gesture also signs the
+     succession record with the identity's own r0 rotation key: whoever holds the public
+     genesis can verify, without trusting this page, that the DID authorized the new origin. */
+  var WRAP_KEY = 'kc.wrapped.v1', te = new TextEncoder();
+  function cat(a, b) { var o = new Uint8Array(a.length + b.length); o.set(a); o.set(b, a.length); return o; }
+  async function sealRoot(prfSecret) {
+    var ws = B.sha256(cat(prfSecret, te.encode('bdid/wrap/v1'))); // domain-separated from both the born-here derivation and anything else the PRF feeds
+    var wk = K.masterPrkFromPrfSecret(ws); ws.fill(0);
+    var key = await crypto.subtle.importKey('raw', wk, 'AES-GCM', false, ['encrypt', 'decrypt']);
+    wk.fill(0);
+    var iv = crypto.getRandomValues(new Uint8Array(12));
+    var ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, root));
+    return { v: 1, at: new Date().toISOString(), did: me.did, iv: hex(iv), ct: hex(ct) };
+  }
+  async function openSeal(w, prfSecret) {
+    var ws = B.sha256(cat(prfSecret, te.encode('bdid/wrap/v1')));
+    var wk = K.masterPrkFromPrfSecret(ws); ws.fill(0);
+    var key = await crypto.subtle.importKey('raw', wk, 'AES-GCM', false, ['encrypt', 'decrypt']);
+    wk.fill(0);
+    return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bytes(w.iv) }, key, bytes(w.ct)));
+  }
+  function successionBody() {
+    // fixed literal key order: this exact JSON.stringify output is what r0 signs
+    return { v: 1, what: 'bzDiD keychain origin succession', did: me.did, to_origin: ORIGIN, passkey_rp: location.hostname, at: new Date().toISOString() };
+  }
+  function successionRecord() {
+    var r0 = K.deriveRecordKey(root, 'bzdid/rotation/r0');
+    try {
+      var body = successionBody();
+      return { body: body, genesis: me.genesis, r0: hex(r0.publicKey), sig: hex(r0.sign(te.encode(JSON.stringify(body)))) };
+    } finally { r0.seed.fill(0); }
+  }
+  async function reenroll() {
+    if (!me) return;
+    try {
+      await K.enrollPasskey('bzDiD keychain', 'bzDiD keychain'); // one ceremony makes the passkey
+      var prf = await K.getPrfSecret(); // one ceremony proves it can open what is about to be sealed
+      var w;
+      try {
+        w = await sealRoot(prf);
+        var probe = await openSeal(w, prf);
+        var keep = root; root = probe; var id2 = identity(); root = keep; probe.fill(0);
+        if (id2.did !== me.did) throw new Error('The seal re-opened as a different identity; it was not kept.');
+      } finally { prf.fill(0); }
+      mem.set(WRAP_KEY, JSON.stringify(w));
+      showRecord(successionRecord());
+    } catch (e) { mem.del(WRAP_KEY); failSay(e); }
+  }
 
   /* ── the narrow interface: public state out, sign requests in ── */
   function stateMsg() { return me ? { t: 'kc.state', v: 1, state: 'unlocked', did: me.did, evm: me.evm, genesis: me.genesis } : { t: 'kc.state', v: 1, state: 'locked', known: mem.get('kc.did') || null }; }
@@ -103,6 +165,7 @@
     if (!greeted) { greeted = true; render(); }
     if (m.t === 'kc.hello') publish();
     else if (m.t === 'kc.sign') ask(m);
+    else if (m.t === 'kc.hive.pub') pubHive(m);
   });
 
   /* what a request IS, decoded here from its own bytes; throws a reason to refuse */
@@ -133,9 +196,20 @@
   function ask(m) {
     if (typeof m.id !== 'string' || m.id.length > 64) return;
     if (pending) return post({ t: 'kc.refused', v: 1, id: m.id, reason: 'Another request is waiting for your answer' });
-    pending = { id: m.id, tx: m.tx, at: Date.now() };
+    if (m.hive && m.tx) return post({ t: 'kc.refused', v: 1, id: m.id, reason: 'A request carries one kind: a storage payment or a Hive drop' });
+    if (!m.hive && !m.tx) return post({ t: 'kc.refused', v: 1, id: m.id, reason: 'No request was sent' });
+    pending = { id: m.id, tx: m.tx, hive: m.hive || null, at: Date.now() };
     setTimeout(function () { if (pending && pending.id === m.id) refuse('The request waited too long and was refused.'); }, 300000);
     render();
+  }
+  function pubHive(m) {
+    if (typeof m.id !== 'string' || m.id.length > 64) return;
+    var account = String((m && m.account) || '');
+    if (!/^[a-z0-9.-]{3,16}$/.test(account)) return post({ t: 'kc.refused', v: 1, id: m.id, reason: 'That is not a Hive account name' });
+    if (!me) return post({ t: 'kc.refused', v: 1, id: m.id, reason: 'Unlock your isolated keychain to name its Hive posting key' });
+    var k = K.deriveK1Key(root, 'hive-posting:' + account);
+    try { post({ t: 'kc.hive.pubbed', v: 1, id: m.id, account: account, pub: String(new window.hiveTx.PublicKey(B.secp.getPublicKey(k.seed, true))) }); }
+    finally { k.seed.fill(0); }
   }
   function refuse(reason) { var p = pending; pending = null; if (p) post({ t: 'kc.refused', v: 1, id: p.id, reason: reason }); render(); }
   function sign(d) {
@@ -148,36 +222,115 @@
     } finally { k.seed.fill(0); }
   }
 
+  /* ── Hive drops: one disclosed root post, posting authority only ──
+     The caller builds the transaction against its own RPC (the keychain's CSP
+     forbids every network call), but the keychain serializes and signs ITS OWN
+     copy of the structured transaction with the same vendored hive-tx the
+     wallet uses — so what the card shows is what is signed, and an opaque
+     digest from any page can never be signed at all. */
+  function hiveDigestOf(tx) {
+    var t = new window.hiveTx.Transaction([]);
+    t.created = true; t.transaction = JSON.parse(JSON.stringify(tx));
+    var d = t.digest(); // sha256(Hive mainnet chain id || serialized tx), the same bytes a node recovers
+    return { bytes: Uint8Array.from(Array.isArray(d.digest) ? d.digest : String(d.digest).split(',').map(Number)), txId: d.txId };
+  }
+  function decideHive(hv) {
+    if (!hv || typeof hv !== 'object') throw new Error('No Hive drop was sent');
+    var account = String(hv.account || '');
+    if (!/^[a-z0-9.-]{3,16}$/.test(account)) throw new Error('That is not a Hive account name');
+    var tx = hv.tx;
+    if (!tx || typeof tx !== 'object') throw new Error('No transaction was sent');
+    if (!Array.isArray(tx.operations) || tx.operations.length !== 1) throw new Error('This keychain signs one drop per request');
+    var op = tx.operations[0];
+    if (!Array.isArray(op) || op.length !== 2 || op[0] !== 'comment') throw new Error('This keychain signs Hive comment drops only');
+    var c = op[1];
+    if (!c || typeof c !== 'object') throw new Error('The drop is empty');
+    if (c.parent_author !== '') throw new Error('A drop is a new root post; this one carries a reply');
+    if (String(c.author || '').toLowerCase() !== account) throw new Error('The drop names another author than its account');
+    if (!/^[a-z0-9-]{1,32}$/.test(String(c.parent_permlink || ''))) throw new Error('The community tag is malformed');
+    var pl = String(c.permlink || '');
+    if (!/^[a-z0-9-]{1,256}$/.test(pl)) throw new Error('The permlink is malformed');
+    var title = String(c.title || '');
+    if (te.encode(title).length > 256) throw new Error('The title is too long');
+    var body = String(c.body || ''), bl = te.encode(body).length;
+    if (!bl) throw new Error('The drop has no body');
+    if (bl > 65536) throw new Error('The drop is past the 64 KB post cap');
+    var meta;
+    try { meta = JSON.parse(String(c.json_metadata || '')); } catch (e) { throw new Error('The drop metadata is not JSON'); }
+    var disc = meta && typeof meta.disclosure_version === 'string' ? meta.disclosure_version : '';
+    if (!/^bdrop-[0-9a-z-]{1,32}-disclosure-v[0-9]+$/.test(disc)) throw new Error('This keychain signs disclosed bDroP editions only');
+    if (!Array.isArray(tx.extensions) || tx.extensions.length) throw new Error('The transaction carries extensions this keychain does not sign');
+    if (!Number.isSafeInteger(tx.ref_block_num) || tx.ref_block_num < 0 || tx.ref_block_num > 65535) throw new Error('The reference block number is out of bounds');
+    if (!Number.isSafeInteger(tx.ref_block_prefix) || tx.ref_block_prefix < 0 || tx.ref_block_prefix > 4294967295) throw new Error('The reference block prefix is out of bounds');
+    var exp = String(tx.expiration || ''), et = Date.parse(exp.length === 19 ? exp + 'Z' : exp);
+    if (!Number.isFinite(et)) throw new Error('The expiration is not a moment');
+    if (et > Date.now() + 3600000) throw new Error('The expiration is more than an hour ahead');
+    if (et < Date.now() - 60000) throw new Error('The transaction has already expired');
+    var g = hiveDigestOf(tx); // what does not serialize never reaches a card
+    if (g.bytes.length !== 32) throw new Error('The transaction did not serialize');
+    return { what: 'Publish the drop @' + account + '/' + pl + ' on Hive (posting authority — no funds can move)', account: account, permlink: pl, tx: tx, bodySha: hex(B.sha256(te.encode(body))), bodyLen: bl, disclosure: disc, expires: exp };
+  }
+  function signHive(d) {
+    var k = K.deriveK1Key(root, 'hive-posting:' + d.account); // the account is the chain authority this signature is FOR; a .b name never shapes a key
+    try {
+      var g = hiveDigestOf(d.tx);
+      var sig = B.secp.sign(g.bytes, k.seed); // deterministic nonce, low-S: the same recoverable form Hive nodes expect
+      var raw = (sig.recovery + 31).toString(16) + sig.toCompactHex(); // 130 hex: recovery byte +31, then compact r||s
+      var pub = String(new window.hiveTx.PublicKey(B.secp.getPublicKey(k.seed, true)));
+      return { raw: raw, hash: g.txId, pub: pub };
+    } finally { k.seed.fill(0); }
+  }
+
   /* ── what you see ── */
   function btn(text, fn, cls) { return el('button', { type: 'button', class: cls || '', text: text, on: { click: fn } }); }
   function trusted(fn) { return function (ev) { if (ev && ev.isTrusted) fn(ev); }; }
   function failSay(e) { show(el('h1', { text: 'bzDiD keychain' }), el('p', { text: (e && e.message) || String(e) }), btn('Back', function () { render(); })); }
-  async function make() { try { var r = await K.enrollPasskey('bzDiD keychain', 'bzDiD keychain'); if (!r.prfEnabled) mem.set('kc.prf-unconfirmed', '1'); open(await K.getPrfSecret(), 'prf'); } catch (e) { failSay(e); } }
-  async function unlock() { try { open(await K.getPrfSecret(), 'prf'); } catch (e) { failSay(e); } }
+  async function make() { try { var r = await K.enrollPasskey('bzDiD keychain', 'bzDiD keychain'); if (!r.prfEnabled) mem.set('kc.prf-unconfirmed', '1'); mem.del(WRAP_KEY); open(await K.getPrfSecret(), 'prf'); } catch (e) { failSay(e); } }
+  async function unlock() {
+    try {
+      var wrapped = mem.get(WRAP_KEY);
+      if (wrapped) { /* this profile's passkey opens a seal, not a birth derivation */
+        var w = JSON.parse(wrapped), prf = await K.getPrfSecret(), r;
+        try { r = await openSeal(w, prf); } finally { prf.fill(0); }
+        open(r, 'wrapped', w.did);
+      } else open(await K.getPrfSecret(), 'prf');
+    } catch (e) { failSay(new Error('This passkey did not open a keychain stored here.')); }
+  }
   function fromCode(input) { try { open(K.decodeRecoveryAuto(input.value.trim()), 'code'); input.value = ''; } catch (e) { input.value = ''; failSay(new Error('That recovery code did not open a keychain.')); } }
   function confirmCard() {
-    var d;
-    try { d = decide(pending.tx); } catch (e) { refuse(e.message); return; }
+    var hive = !!pending.hive, d;
+    try { d = hive ? decideHive(pending.hive) : decide(pending.tx); } catch (e) { refuse(e.message); return; }
     // The press counts only after the whole card has been visible and unobscured for
     // PRESS_DELAY_MS without a break. Only browsers with IntersectionObserver v2 (isVisible)
     // can prove "unobscured"; elsewhere the keychain refuses rather than guesses.
-    var go = btn('Sign this payment', null, 'go'), visibleSince = null, visible = false, provable = false;
+    var go = btn(hive ? 'Sign this drop' : 'Sign this payment', null, 'go'), visibleSince = null, visible = false, provable = false;
     go.disabled = true;
     var ready = function () { go.disabled = !(provable && visible && visibleSince !== null && performance.now() - visibleSince >= PRESS_DELAY_MS); };
     var seen = function (v) { if (v && !visible) { visibleSince = performance.now(); setTimeout(ready, PRESS_DELAY_MS + 10); } if (!v) visibleSince = null; visible = v; ready(); };
     go.addEventListener('click', trusted(function () {
       ready(); if (go.disabled || !pending) return;
       var p = pending; pending = null;
-      try { var s = sign(d); post({ t: 'kc.signed', v: 1, id: p.id, raw: s.raw, hash: s.hash }); } catch (e) { post({ t: 'kc.refused', v: 1, id: p.id, reason: 'Signing failed: ' + e.message }); }
+      try {
+        var s = hive ? signHive(d) : sign(d);
+        post({ t: 'kc.signed', v: 1, id: p.id, raw: s.raw, hash: s.hash, kind: hive ? 'hive' : 'evm', pub: s.pub || null });
+      } catch (e) { post({ t: 'kc.refused', v: 1, id: p.id, reason: 'Signing failed: ' + e.message }); }
       render();
     }));
-    var card = el('section', { 'aria-label': 'Payment to confirm' }, [
+    var rows = hive
+      ? [el('dt', { text: 'Network' }), el('dd', { text: 'Hive mainnet' }),
+         el('dt', { text: 'From' }), el('dd', { class: 'mono', text: '@' + d.account + ' (posting authority)' }),
+         el('dt', { text: 'Drop' }), el('dd', { class: 'mono', text: '@' + d.account + '/' + d.permlink }),
+         el('dt', { text: 'Body' }), el('dd', { class: 'mono', text: d.bodyLen.toLocaleString() + ' bytes · sha-256 ' + d.bodySha }),
+         el('dt', { text: 'Disclosure' }), el('dd', { class: 'mono', text: d.disclosure }),
+         el('dt', { text: 'Expires' }), el('dd', { text: d.expires + ' UTC' })]
+      : [el('dt', { text: 'Network' }), el('dd', { text: CHAIN_NAME }), el('dt', { text: 'From' }), el('dd', { class: 'mono', text: me.evm }),
+        el('dt', { text: 'Contract' }), el('dd', { class: 'mono', text: d.to }), el('dt', { text: 'Network fee, at most' }), el('dd', { text: d.maxEth + ' ETH' }),
+        el('dt', { text: 'Sequence' }), el('dd', { text: d.nonce.toString() })];
+    var card = el('section', { 'aria-label': hive ? 'Drop to confirm' : 'Payment to confirm' }, [
       el('h1', { text: 'Confirm in your keychain' }),
       el('p', { text: d.what + '.' }),
-      el('dl', {}, [el('dt', { text: 'Network' }), el('dd', { text: CHAIN_NAME }), el('dt', { text: 'From' }), el('dd', { class: 'mono', text: me.evm }),
-        el('dt', { text: 'Contract' }), el('dd', { class: 'mono', text: d.to }), el('dt', { text: 'Network fee, at most' }), el('dd', { text: d.maxEth + ' ETH' }),
-        el('dt', { text: 'Sequence' }), el('dd', { text: d.nonce.toString() })]),
-      go, btn('Refuse', trusted(function () { refuse('You refused this payment in your keychain.'); }))
+      el('dl', {}, rows),
+      go, btn('Refuse', trusted(function () { refuse(hive ? 'You refused this drop in your keychain.' : 'You refused this payment in your keychain.'); }))
     ]);
     var note = el('p', { class: 'dim', text: 'This browser cannot prove that nothing covers this card, so the keychain will not sign here. Open the wallet in Chrome, Edge or Brave to sign.', hidden: '' });
     card.append(note);
@@ -189,6 +342,14 @@
     return card;
   }
   var watcher = null; // the one visibility observer, for the card on screen
+  function showRecord(rec) {
+    var txt = JSON.stringify(rec);
+    show(el('h1', { text: 'Re-enrolled for this origin' }),
+      el('p', { text: 'A passkey for ' + location.hostname + ' now opens this same keychain here — identity ' + rec.body.did + ', unchanged. The seal it opens holds only this identity, and the record below is signed by that identity\u2019s own rotation key: anyone holding the public genesis can verify the succession without trusting this page.' }),
+      el('p', { class: 'mono', text: txt }),
+      btn('Copy the record', trusted(function () { try { navigator.clipboard && navigator.clipboard.writeText(txt); } catch (e) {} })),
+      btn('Back', function () { render(); publish(); }));
+  }
   function render() {
     if (watcher) { watcher.disconnect(); watcher = null; }
     if (!greeted) { show(el('p', { class: 'dim', text: 'Waiting for the heART WALLet…' })); return; }
@@ -198,7 +359,11 @@
       show(el('h1', { text: 'Your isolated keychain is open' }),
         el('dl', {}, [el('dt', { text: 'Identity' }), el('dd', { class: 'mono', text: me.did }), el('dt', { text: 'Arbitrum account' }), el('dd', { class: 'mono', text: me.evm })]),
         el('p', { class: 'dim', text: 'The wallet page can ask this keychain to sign. It cannot sign by itself, and it never sees this key.' + (pending ? '' : ' Requests appear here for you to confirm.') }),
-        btn('Show my recovery code', trusted(function () { code.hidden = !code.hidden; code.textContent = code.hidden ? '' : K.encodeRecoveryCode(root); })), btn('Lock', trusted(function () { lock(); })), code);
+        btn('Show my recovery code', trusted(function () { code.hidden = !code.hidden; code.textContent = code.hidden ? '' : K.encodeRecoveryCode(root); })), btn('Lock', trusted(function () { lock(); })),
+        el('details', {}, [el('summary', { text: 'New origin, or lost passkey? Re-enroll here' }),
+          el('p', { class: 'dim', text: 'If this keychain was recovered here from its recovery code, one press enrolls a passkey for ' + location.hostname + ' that opens this same identity at this origin (sealed under that passkey, DID-checked at every unlock), and signs the succession record with the rotation key. Nothing else changes; the recovery code keeps working.' }),
+          btn('Re-enroll a passkey for this origin', trusted(reenroll), 'go')]),
+        code);
       return;
     }
     var known = mem.get('kc.enrolled') === '1', input = el('input', { 'aria-label': 'Recovery code', autocomplete: 'off', spellcheck: 'false', placeholder: 'bdidrec1…' });

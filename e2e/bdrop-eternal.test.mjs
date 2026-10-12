@@ -24,12 +24,18 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = 9171, ORIGIN = `http://127.0.0.1:${PORT}`;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.woff2': 'font/woff2', '.svg': 'image/svg+xml' };
 
-/* ── the mock chain: modes, content overrides, a broadcast ledger ── */
-const mock = { mode: 'normal', content: null, broadcasts: [], lastBody: null };
+/* ── the mock chain: modes, content overrides, per-account posting authorities, a broadcast ledger ── */
+const mock = { mode: 'normal', content: null, accounts: {}, broadcasts: [], lastBody: null };
 const rpcResult = (method, params) => {
   if (mock.mode === 'down') throw Object.assign(new Error('mock chain unreachable'), { http: 503 });
   if (method === 'condenser_api.get_dynamic_global_properties')
     return { head_block_number: 49000000, head_block_id: '02e0dcb4c89a1a5c1e4e8a5c1e4e8a5c1e4e8a5c', time: new Date().toISOString().slice(0, 19) };
+  if (method === 'condenser_api.get_accounts') {
+    const names = params[0] || [];
+    return names.map(n => (mock.accounts && mock.accounts[n])
+      ? { name: n, posting: { key_auths: mock.accounts[n].map(k => [k, 1]) } }
+      : null);
+  }
   if (method === 'condenser_api.broadcast_transaction') {
     const trx = params[0];
     mock.broadcasts.push(trx);
@@ -70,6 +76,8 @@ const server = createServer(async (q, s) => {
     let b = ''; for await (const c of q) b += c;
     const o = JSON.parse(b);
     mock.mode = o.mode ?? mock.mode; mock.content = o.content ?? null; mock.contents = o.contents ?? null; mock.junk = !!o.junk;
+    if ('accounts' in o) mock.accounts = o.accounts; /* per-account posting authorities (the native door's authority gate) */
+    if ('lastBody' in o) mock.lastBody = o.lastBody;
     s.writeHead(200); s.end('ok'); return;
   }
   const rel = decodeURIComponent(q.url.split('?')[0].replace(/^\//, '')) || 'index.html';
@@ -97,11 +105,25 @@ let failures = 0;
 const ok = (name, cond, detail = '') => { console.log((cond ? '  ✓ ' : '  ✗ ') + name + (detail ? ' — ' + detail : '')); if (!cond) failures++; };
 const step = async (name, fn) => { try { return await fn(); } catch (e) { ok(name, false, (e && e.message ? e.message : String(e))); return undefined; } };
 
+const KCFILES = { '/': 'keychain/index.html', '/prelude.js': 'keychain/prelude.js', '/keychain.js': 'keychain/keychain.js', '/genesis.js': 'keychain/genesis.js',
+  '/vendor/bzdid-key.js': 'surfaces/onboarding/bzdid-key.js', '/vendor/bnr-sign.js': 'surfaces/onboarding/vendor/bnr-sign.js', '/vendor/hive-tx.min.js': 'surfaces/onboarding/vendor/hive-tx.min.js' };
+/* the desk mounts the isolated keychain only when keys.skaists.dev answers; in this suite that
+   origin is always served from the real tree (hermetic — never the live site), so the desk's
+   native door is available-but-unchosen everywhere except the scenario that drives it */
+const serveKeys = r => {
+  const p = new URL(r.request().url()).pathname;
+  const f = KCFILES[p];
+  if (!f) return r.fulfill({ status: 404, body: '' });
+  return readFile(join(ROOT, f)).then(
+    data => r.fulfill({ status: 200, body: data, contentType: MIME[extname(f)] || 'text/javascript' }),
+    () => r.fulfill({ status: 404, body: '' }));
+};
 const profile = name => mkdtempSync(join(tmpdir(), 'bdrop-' + name + '-'));
 const ctxs = []; /* every browser context, so a failure path never leaks one into CI's pool */
 async function open(profileDir) {
   const ctx = await chromium.launchPersistentContext(profileDir, { headless: true });
   ctxs.push(ctx);
+  await ctx.route('https://keys.skaists.dev/**', serveKeys); /* hermetic: the keychain origin served from the tree, never the live site */
   const page = await ctx.newPage();
   const errs = [];
   page.on('pageerror', e => errs.push(String(e)));
@@ -308,6 +330,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     mock.broadcasts.length = 0; mock.lastBody = null;
     const dir6 = profile('keychain'); dirs.push(dir6);
     const ctx6 = await chromium.launchPersistentContext(dir6, { headless: true });
+    await ctx6.route('https://keys.skaists.dev/**', serveKeys); /* hermetic: the keychain origin served from the tree */
     ctxs.push(ctx6);
     await ctx6.addInitScript(() => {
       window.hive_keychain = {
@@ -383,7 +406,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await setMock({ mode: 'normal', contents: { 'bdrop-keychain-lost': '' } });
     await page6.fill('#permlink', 'bdrop-keychain-lost');
     await page6.click('#publish');
-    await step('lost callback reported as outcome UNKNOWN', () => page6.waitForFunction(() => /outcome UNKNOWN|outcome is UNKNOWN/.test(document.getElementById('status').textContent || ''), null, { timeout: 20000 }));
+    await step('lost callback reported as outcome UNKNOWN', () => page6.waitForFunction(() => /the handoff answer never arrived/.test(document.getElementById('status').textContent || ''), null, { timeout: 20000 }));
     ok('lost-callback: the extension broadcast exactly once before going silent', mock.broadcasts.length === 2, 'broadcasts=' + mock.broadcasts.length);
     await setMock({ mode: 'normal', contents: { 'bdrop-keychain-lost': BODY } }); /* the chain catches up with the extension's broadcast */
     await page6.click('#reconcile');
@@ -394,6 +417,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     /* browser closure DURING handoff — the persisted handoff state survives and reconciles on restart */
     await setMock({ mode: 'normal', contents: { 'bdrop-keychain-closed-midhandoff': '' } });
     const ctx6b = await chromium.launchPersistentContext(dir6, { headless: true });
+    await ctx6b.route('https://keys.skaists.dev/**', serveKeys); /* hermetic: the keychain origin served from the tree */
     ctxs.push(ctx6b);
     await ctx6b.addInitScript(() => {
       window.hive_keychain = {
@@ -416,6 +440,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await ctx6b.close(); /* the browser closes mid-handoff */
     await setMock({ mode: 'normal', content: { permlink: 'bdrop-keychain-closed-midhandoff', body: BODY } });
     const ctx6c = await chromium.launchPersistentContext(dir6, { headless: true });
+    await ctx6c.route('https://keys.skaists.dev/**', serveKeys); /* hermetic: the keychain origin served from the tree */
     ctxs.push(ctx6c);
     const page6c = await ctx6c.newPage();
     page6c.on('pageerror', e => errs6.push('restart: ' + String(e)));
@@ -473,11 +498,108 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     ok('7d no record manufactured from a malformed answer', !(await outboxOf(fr.page)).some(r => r.scope.permlink === 'drop-r-junk'));
     ok('fresh-client + negative scenarios produced no page errors', fr.errs.length === 0, fr.errs[0] || '');
     await fr.ctx.close();
+
+    /* ── scenario 8: the native door — the estate's isolated keychain, no extension, no paste ──
+       The desk runs at https://skaists.dev (route-fulfilled from the real tree, because the
+       keychain only opens for that parent), the keychain at https://keys.skaists.dev, and the
+       mock chain at https://hive-mock.test/rpc proxied to this file's one mock server. The
+       passkey is a CDP virtual authenticator with PRF. No hive_keychain extension is injected,
+       and the native radio is only ENABLED by the mount — the reader's own press chooses it. */
+    await setMock({ mode: 'normal', content: null, junk: false, accounts: {}, lastBody: null });
+    mock.broadcasts.length = 0;
+    const dir8 = profile('native'); dirs.push(dir8);
+    const ctx8 = await chromium.launchPersistentContext(dir8, { headless: true });
+    ctxs.push(ctx8);
+    const serve = async (r, rel) => {
+      try {
+        const file = join(ROOT, rel);
+        if (!file.startsWith(ROOT)) throw new Error('escape');
+        const data = await readFile(file);
+        await r.fulfill({ status: 200, body: data, contentType: MIME[extname(file)] || 'application/octet-stream' });
+      } catch { await r.fulfill({ status: 404, body: 'no' }); }
+    };
+    await ctx8.route('https://keys.skaists.dev/**', r => {
+      const p = new URL(r.request().url()).pathname;
+      return KCFILES[p] ? serve(r, KCFILES[p]) : r.fulfill({ status: 404, body: '' });
+    });
+    await ctx8.route('https://skaists.dev/**', r => serve(r, decodeURIComponent(new URL(r.request().url()).pathname.replace(/^\//, '')) || 'surfaces/bdrop.html'));
+    await ctx8.route('https://hive-mock.test/rpc', async r => {
+      const resp = await fetch(`http://127.0.0.1:${PORT}/rpc`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: r.request().postData() });
+      await r.fulfill({ status: resp.status, body: await resp.text(), contentType: 'application/json' });
+    });
+    const errs8 = [];
+    const page8 = await ctx8.newPage();
+    page8.on('pageerror', e => errs8.push(String(e)));
+    const cdp8 = await ctx8.newCDPSession(page8);
+    await cdp8.send('WebAuthn.enable');
+    await cdp8.send('WebAuthn.addVirtualAuthenticator', { options: { protocol: 'ctap2', ctap2Version: 'ctap2_1', transport: 'internal', hasResidentKey: true, hasUserVerification: true, isUserVerified: true, automaticPresenceSimulation: true, hasPrf: true } });
+    await page8.goto('https://skaists.dev/surfaces/bdrop.html#fast');
+    await page8.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await page8.waitForFunction(() => typeof window.hiveTx === 'object', null, { timeout: 8000 });
+    ok('no extension in this browser at all', await page8.evaluate(() => typeof window.hive_keychain === 'undefined'));
+    const bdropHtml = await readFile(join(ROOT, 'surfaces/bdrop.html'), 'utf8');
+    ok('the native door ships disabled in the page source — only the mount enables it', /id="signer-native" disabled/.test(bdropHtml));
+    await page8.waitForSelector('#kc-slot iframe', { timeout: 20000 });
+    const kframe = page8.frames().find(f => f.url().startsWith('https://keys.skaists.dev/'));
+    ok('the keychain runs at its own origin inside the desk', !!kframe);
+    await kframe.getByRole('button', { name: 'Make my keychain' }).click();
+    await page8.waitForFunction(() => window.bdropKeychain && bdropKeychain.state.state === 'unlocked', null, { timeout: 20000 });
+    await step('the native door is enabled once the keychain answers', () => page8.waitForFunction(() => !document.getElementById('signer-native').disabled, null, { timeout: 10000 }));
+    ok('still not auto-selected — the reader chooses', !(await page8.isChecked('#signer-native')));
+    await page8.check('#signer-native');
+    const pub8 = await page8.evaluate(() => bdropKeychain.signer().hivePub('loviswater').then(p => p.pub));
+    await setMock({ accounts: { loviswater: [pub8] }, lastBody: null }); /* the chain — not the page — authorizes the key */
+    await page8.fill('#author', 'loviswater');
+    await page8.fill('#permlink', 'bdrop-native-keychain-door');
+    await page8.fill('#body', BODY);
+    await page8.fill('#expected', BODY_SHA);
+    await page8.fill('#rpc', 'https://hive-mock.test/rpc');
+    await page8.click('#publish');
+    try {
+      await kframe.getByRole('button', { name: 'Sign this drop' }).waitFor({ timeout: 15000 });
+    } catch (e) {
+      const st = await page8.locator('#status').innerText();
+      const kt = await kframe.locator('#kc').innerText().catch(() => 'unreadable');
+      console.log('S8-DESK-STATUS: ' + st.split('\n').join(' | '));
+      console.log('S8-KEYCHAIN: ' + kt.split('\n').join(' | '));
+      throw e;
+    }
+    ok('the keychain card names the drop and its authority', /no funds can move/.test(await kframe.locator('#kc').innerText()));
+    await page8.waitForTimeout(900); /* the delayed press, as a person would */
+    await kframe.getByRole('button', { name: 'Sign this drop' }).click();
+    await step('native keychain path: the drop lands', () => page8.waitForFunction(() => /LANDED/.test(document.getElementById('receipt').textContent || ''), null, { timeout: 30000 }));
+    const ob8 = await outboxOf(page8);
+    const rec8 = ob8.find(r => r.scope.permlink === 'bdrop-native-keychain-door');
+    ok('native lifecycle: prepared → authorized → handoff → signed → submitted → confirmed with the keychain named',
+      JSON.stringify(rec8.events.map(e => e.event)) === JSON.stringify(['prepared', 'authorized', 'handoff', 'signed', 'submitted', 'confirmed'])
+        && rec8.events[1].signer === 'native-keychain' && rec8.events[3].signer === 'native-keychain',
+      rec8.events.map(e => e.event).join(' → '));
+    ok('the SIGNED transaction is held by the desk (restart can re-broadcast without any key)',
+      !!(rec8.signed_tx && rec8.signed_tx.signatures && /^[0-9a-f]{130}$/.test(rec8.signed_tx.signatures[0])));
+    ok('the broadcast carried that very signature through the desk\u2019s own endpoint',
+      mock.broadcasts.length === 1 && mock.broadcasts[0].signatures[0] === rec8.signed_tx.signatures[0]);
+    ok('native path: the WIF field was never touched', (await page8.inputValue('#wif')) === '');
+    ok('native path: no WIF-shaped string in any storage', !/5[JK][1-9A-HJ-NP-Za-km-z]{49}/.test(await storageDump(page8)));
+    ok('native path: receipt is byte-compare MATCH', /byte-compare MATCH/.test(await page8.textContent('#receipt')));
+    ok('native path: no page errors', errs8.length === 0, errs8[0] || '');
+
+    /* the authority gate: an unauthorized key is refused BY NAME — nothing signed, no fallback */
+    await setMock({ mode: 'normal', junk: false, content: null, accounts: { loviswater: ['STM1111111111111111111111111111111114T1Anm'] }, lastBody: null });
+    await page8.fill('#permlink', 'bdrop-unauthorized-probe');
+    await page8.fill('#body', BODY);
+    await page8.click('#publish');
+    await step('unauthorized posting key is refused by name', () => page8.waitForFunction(() => /NOT an authorized posting key/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    ok('unauthorized key: nothing more was broadcast', mock.broadcasts.length === 1, 'broadcasts=' + mock.broadcasts.length);
+    ok('unauthorized key: no confirm card ever stood in the keychain', (await kframe.getByRole('button', { name: 'Sign this drop' }).count()) === 0);
+    const rec8b = (await outboxOf(page8)).find(r => r.scope.permlink === 'bdrop-unauthorized-probe');
+    ok('unauthorized attempt left no signed record and names its refusal',
+      !!(rec8b && !rec8b.signed_tx && /not an authorized posting key/i.test(rec8b.last_error || '')), (rec8b && rec8b.last_error || 'no record').slice(0, 80));
+    await ctx8.close();
   } finally {
     for (const c of ctxs) { try { await c.close(); } catch {} }
     for (const d of dirs) { try { rmSync(d, { recursive: true, force: true }); } catch {} }
     server.close();
   }
   assert.equal(failures, 0, failures + ' lifecycle assertion(s) failed — see the ✗ lines above');
-  console.log(failures === 0 ? 'BDROP LIFECYCLE GREEN — editions, happy path, duplicates, restart, ambiguity, unavailability, divergence, retrieval, key hygiene, the quarantined journal, the contract-faithful keychain signer, mid-handoff closure and evidence-honest fresh-client recovery all held. nothing touched hive.' : 'BDROP LIFECYCLE RED.');
+  console.log(failures === 0 ? 'BDROP LIFECYCLE GREEN — editions, happy path, duplicates, restart, ambiguity, unavailability, divergence, retrieval, key hygiene, the quarantined journal, the contract-faithful keychain signer, mid-handoff closure, evidence-honest fresh-client recovery and the native keychain door (authority-checked, signature-verified, no extension, no paste) all held. nothing touched hive.' : 'BDROP LIFECYCLE RED.');
 });
