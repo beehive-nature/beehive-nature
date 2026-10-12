@@ -24,6 +24,10 @@
 (function (root) {
   'use strict';
   var CHAIN_ID = 42161, CHAIN_HEX = '0xa4b1', MAX_PER_TX = 256; /* evmlib MAX_TRANSFERS_PER_TRANSACTION */
+  /* the TEST network: a local Anvil devnet (ant-devnet --enable-evm), chain 31337, where
+     nothing of value lives. Only createHosted({testnet:true}) pays there, with the token and
+     vault the devnet's own nodes authenticate; every mainnet pin above stays as it is. */
+  var TEST_CHAIN_ID = 31337;
   var SEL = { approve: '0x095ea7b3', balanceOf: '0x70a08231', allowance: '0xdd62ed3e', payForQuotes: '0xb6c2141b' };
 
   function refusal(code, message, detail) { var e = new Error(message); e.refusal = code; if (detail) e.detail = detail; return e; }
@@ -76,14 +80,15 @@
     }
     var out = item(0); if (i !== hex.length) bad(); return out;
   }
-  function checkEnvelope(signed, tx, payer, verify) {
+  function checkEnvelope(signed, tx, payer, verify, chainId) {
+    var CHAIN_ID_ = chainId === undefined ? CHAIN_ID : chainId;
     var refuse = function (what) { throw refusal('binding', 'The signed envelope differs from the authorized transaction: ' + what + '. Nothing was broadcast.'); };
     var raw = String(signed && signed.raw || '').toLowerCase();
     if (!/^0x02([0-9a-f]{2})+$/.test(raw) || !isH32(signed.hash)) refuse('no type-2 envelope and hash');
     var f = rlpDecode(raw.slice(4));
     if (!Array.isArray(f) || f.length !== 12 || f.slice(0, 8).concat(f.slice(9)).some(Array.isArray)) refuse('field count');
     var n = function (h, what) { if (h.slice(0, 2) === '00') refuse(what + ' encoding'); return h ? BigInt('0x' + h) : 0n; };
-    var want = [['chain', CHAIN_ID], ['nonce', tx.nonce], ['priority fee', tx.maxPriorityFeePerGas], ['fee cap', tx.maxFeePerGas], ['gas', tx.gas]];
+    var want = [['chain', CHAIN_ID_], ['nonce', tx.nonce], ['priority fee', tx.maxPriorityFeePerGas], ['fee cap', tx.maxFeePerGas], ['gas', tx.gas]];
     want.forEach(function (w, k) { if (n(f[k], w[0]) !== BigInt(w[1])) refuse(w[0]); });
     if (f[5] !== strip(tx.to)) refuse('recipient');
     if (n(f[6], 'value') !== 0n) refuse('value');
@@ -91,7 +96,7 @@
     if (!Array.isArray(f[8]) || f[8].length) refuse('access list');
     var v = n(f[9], 'parity'), r = n(f[10], 'r'), s = n(f[11], 's');
     if (v > 1n || r <= 0n || r >= SECP_N || s <= 0n || s > SECP_N / 2n) refuse('signature range');
-    var body = [rlpInt(CHAIN_ID), rlpInt(tx.nonce), rlpInt(tx.maxPriorityFeePerGas), rlpInt(tx.maxFeePerGas), rlpInt(tx.gas), strip(tx.to), '', strip(tx.data), []];
+    var body = [rlpInt(CHAIN_ID_), rlpInt(tx.nonce), rlpInt(tx.maxPriorityFeePerGas), rlpInt(tx.maxFeePerGas), rlpInt(tx.gas), strip(tx.to), '', strip(tx.data), []];
     if ('0x02' + rlp(body.concat([rlpInt(v), rlpInt(r), rlpInt(s)])) !== raw) refuse('canonical encoding');
     var bytes = function (h) { var o = new Uint8Array(h.length / 2); for (var k = 0; k < o.length; k++) o[k] = parseInt(h.substr(2 * k, 2), 16); return o; };
     var hexOf = function (b) { return Array.from(b, function (x) { return x.toString(16).padStart(2, '0'); }).join(''); };
@@ -316,8 +321,13 @@
     var storage = cfg.storage, rpc = cfg.rpc, eth = cfg.ethereum, signer = cfg.signer;
     var verify = cfg.verify || nobleVerifier(root.BnrSign);
     var clock = cfg.now || Date.now, pause = cfg.sleep || (ms => new Promise(r => setTimeout(r, ms)));
-    var key = 'bnr.ant.purchase.v1:' + cfg.artifact.sha256;
     var fail = (code, message) => { throw refusal(code, message); };
+    // One pin for the whole purchase: Arbitrum One, or (only when asked) the local test chain.
+    // A test purchase keeps its own journal and quote claims, so it never meets a real one.
+    if (cfg.testnet !== undefined && cfg.testnet !== true && cfg.testnet !== false) fail('binding', 'testnet is true or false');
+    var TEST = cfg.testnet === true, CHAIN = TEST ? TEST_CHAIN_ID : CHAIN_ID, CHAIN_NAME = TEST ? 'the local test network' : 'Arbitrum One';
+    var key = (TEST ? 'bnr.ant.purchase.test.v1:' : 'bnr.ant.purchase.v1:') + cfg.artifact.sha256;
+    var CLAIMS = TEST ? 'bnr.ant.quote-claims.test.v1' : 'bnr.ant.quote-claims.v1';
     if (signer && !verify) fail('binding', 'The independent envelope verifier did not load; reload this wallet');
     var dec = v => { if (typeof v !== 'string' || !/^(0|[1-9]\d*)$/.test(v)) fail('binding', 'Invalid decimal amount'); return BigInt(v); };
     var hx = v => '0x' + BigInt(v).toString(16);
@@ -326,22 +336,22 @@
     var digest = async v => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(v)))), b => b.toString(16).padStart(2,'0')).join('');
     var artifact = copy(cfg.artifact), network = copy(cfg.network);
     if (!/^[a-f0-9]{64}$/.test(artifact.sha256) || !Number.isSafeInteger(artifact.bytes) || artifact.bytes < 3) fail('binding','Invalid file identity');
-    if (network.chainId !== CHAIN_ID || !isAddr(network.paymentTokenAddress) || !isAddr(network.paymentVaultAddress)) fail('binding','Expected the bundled Arbitrum One payment network');
+    if (network.chainId !== CHAIN || !isAddr(network.paymentTokenAddress) || !isAddr(network.paymentVaultAddress)) fail('binding','Expected the payment network of '+CHAIN_NAME);
     var raw = storage.getItem(key);
     var ledger = raw ? JSON.parse(raw) : {v:1, artifact, network, plans:[], checkpoint:null, result:null, receipt:null};
     if (JSON.stringify(ledger.artifact) !== JSON.stringify(artifact) || JSON.stringify(ledger.network) !== JSON.stringify(network)) fail('binding','Saved purchase belongs to a different file or payment network');
     function save(){ storage.setItem(key, JSON.stringify(ledger)); }
     save(); // Storage failure must precede even a wallet request.
     function stopped(signal){ if (signal && signal.aborted) fail('cancelled','Request stopped. Submitted transactions may still settle; resume this file to reconcile.'); }
-    async function chain(){ if (BigInt(await rpc('eth_chainId',[])) !== BigInt(CHAIN_ID)) fail('wrong-chain','The payment RPC is not Arbitrum One'); }
+    async function chain(){ if (BigInt(await rpc('eth_chainId',[])) !== BigInt(CHAIN)) fail('wrong-chain','The payment RPC is not '+CHAIN_NAME); }
     async function account(prompt){
       if(signer){
         var address=await signer.address();
         if(!isAddr(address))fail('no-wallet','Connect your bzDiD keychain to prepare this invoice');
         return address.toLowerCase();
       }
-      if (!eth || typeof eth.request !== 'function') fail('no-wallet','Connect an Arbitrum One browser wallet to pay for storage');
-      if (BigInt(await eth.request({method:'eth_chainId'})) !== BigInt(CHAIN_ID)) fail('wrong-chain','Select Arbitrum One in your browser wallet');
+      if (!eth || typeof eth.request !== 'function') fail('no-wallet','Connect a browser wallet on '+CHAIN_NAME+' to pay for storage');
+      if (BigInt(await eth.request({method:'eth_chainId'})) !== BigInt(CHAIN)) fail('wrong-chain','Select '+CHAIN_NAME+' in your browser wallet');
       var accounts = await eth.request({method:prompt?'eth_requestAccounts':'eth_accounts'});
       if (!accounts || !isAddr(accounts[0])) fail('no-wallet','The browser wallet shared no account');
       return accounts[0].toLowerCase();
@@ -373,7 +383,7 @@
       stopped(signal); checkedNetwork(n); await chain();
       var payments=quotesOf(quotes), total=payments.reduce((s,q)=>s+BigInt(q.amount_atto),0n).toString();
       var binding=await digest({artifact,network,payments});
-      var claims=JSON.parse(storage.getItem('bnr.ant.quote-claims.v1')||'{}');
+      var claims=JSON.parse(storage.getItem(CLAIMS)||'{}');
       if(payments.some(q=>claims[q.quote_hash]&&claims[q.quote_hash]!==artifact.sha256))fail('replay','A quote belongs to another saved file purchase. Reconcile that purchase first.');
       var prior=ledger.plans.find(p=>p.binding===binding&&!p.superseded);
       if(prior && prior.txs.some(t=>t.state!=='planned')) return copy(prior);
@@ -440,7 +450,7 @@
         var receipt=await rpc('eth_getTransactionReceipt',[t.hash]);
         if(receipt){
           var tx=await rpc('eth_getTransactionByHash',[t.hash]);
-          if(!isH32(receipt.blockHash)||!same(receipt.transactionHash,t.hash)||!tx||!same(tx.hash,t.hash)||!same(tx.from,p.payer)||!same(tx.to,t.to)||!same(tx.input,t.data)||BigInt(tx.value)!==0n||BigInt(tx.nonce)!==BigInt(t.nonce)||BigInt(tx.chainId)!==BigInt(CHAIN_ID)||BigInt(tx.gas)>BigInt(t.gas)||BigInt(tx.maxFeePerGas)>BigInt(t.maxFeePerGas)) fail('binding','Mined transaction differs from the authorized invoice');
+          if(!isH32(receipt.blockHash)||!same(receipt.transactionHash,t.hash)||!tx||!same(tx.hash,t.hash)||!same(tx.from,p.payer)||!same(tx.to,t.to)||!same(tx.input,t.data)||BigInt(tx.value)!==0n||BigInt(tx.nonce)!==BigInt(t.nonce)||BigInt(tx.chainId)!==BigInt(CHAIN)||BigInt(tx.gas)>BigInt(t.gas)||BigInt(tx.maxFeePerGas)>BigInt(t.maxFeePerGas)) fail('binding','Mined transaction differs from the authorized invoice');
           var canonical=await rpc('eth_getBlockByNumber',[receipt.blockNumber,false]);
           if(!isH32(canonical?.hash)||!same(canonical.hash,receipt.blockHash)||BigInt(await rpc('eth_blockNumber',[]))<BigInt(receipt.blockNumber)+1n){await pause(1500);continue;}
           var actual=BigInt(receipt.gasUsed)*BigInt(receipt.effectiveGasPrice);
@@ -461,7 +471,7 @@
           var used=await nonceOwner(p,t);
           if(used&&!same(used,t.hash)){t.state='dropped';t.usedBy=used;p.superseded=true;save();return;}
         }else if(!offered&&p.authorization&&clock()<p.expiresAt){
-          checkEnvelope({raw:t.raw,hash:t.hash},{to:t.to,data:t.data,nonce:t.nonce,gas:t.gas,maxFeePerGas:t.maxFeePerGas,maxPriorityFeePerGas:t.maxPriorityFeePerGas},p.payer,verify);
+          checkEnvelope({raw:t.raw,hash:t.hash},{to:t.to,data:t.data,nonce:t.nonce,gas:t.gas,maxFeePerGas:t.maxFeePerGas,maxPriorityFeePerGas:t.maxPriorityFeePerGas},p.payer,verify,CHAIN);
           try{await rpc('eth_sendRawTransaction',[t.raw]);}catch(e){/* already known or nonce used: the chain answers next */}
           return observe(p,t,signal,true);
         }else{
@@ -488,19 +498,19 @@
         authorized(p,signal);
         if(await account(false)!==p.payer)fail('binding','The wallet account changed before signing');
         authorized(p,signal);
-        var claims=JSON.parse(storage.getItem('bnr.ant.quote-claims.v1')||'{}');
+        var claims=JSON.parse(storage.getItem(CLAIMS)||'{}');
         if(p.payments.some(q=>claims[q.quote_hash]&&claims[q.quote_hash]!==artifact.sha256))fail('replay','Another file already reserved this quote');
         p.payments.forEach(q=>{claims[q.quote_hash]=artifact.sha256;});
-        storage.setItem('bnr.ant.quote-claims.v1',JSON.stringify(claims));
+        storage.setItem(CLAIMS,JSON.stringify(claims));
         t.state='sending';save();
-        var request={from:p.payer,to:t.to,data:t.data,value:'0x0',chainId:CHAIN_HEX,nonce:t.nonce,gas:t.gas,maxFeePerGas:t.maxFeePerGas,maxPriorityFeePerGas:t.maxPriorityFeePerGas},h;
+        var request={from:p.payer,to:t.to,data:t.data,value:'0x0',chainId:'0x'+CHAIN.toString(16),nonce:t.nonce,gas:t.gas,maxFeePerGas:t.maxFeePerGas,maxPriorityFeePerGas:t.maxPriorityFeePerGas},h;
         if(signer){
           // The bzDiD adapter signs only: it cannot broadcast. Keep the exact
           // signed envelope and its locally computed hash before any RPC send.
           var signed;
           try{
             signed=await signer.signTransaction(request,{artifact:copy(artifact),network:copy(network),invoice:copy(p),kind:t.kind});
-            checkEnvelope(signed,request,p.payer,verify);
+            checkEnvelope(signed,request,p.payer,verify,CHAIN);
             authorized(p,signal);
           }catch(error){
             // Nothing has left this page: the envelope is dropped and its nonce stays free.

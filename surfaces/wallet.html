@@ -1708,9 +1708,9 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <div id="bpay-card" class="law" style="margin-top:10px;min-height:24px;overflow-wrap:anywhere">loading the Autonomi price panel.</div>
 </section>
 <script src="adapter-seam.js" defer></script>
-<script src="ant-pay.js?v=10" defer></script>
+<script src="ant-pay.js?v=11" defer></script>
 <script src="keychain-client.js?v=1" defer></script>
-<script src="bpay-invoice.js?v=12" defer></script>
+<script src="bpay-invoice.js?v=13" defer></script>
 <script>if(window.ResizeObserver)new ResizeObserver(function(entries){document.documentElement.style.setProperty('--wallet-offset',Math.ceil(entries[0].target.getBoundingClientRect().height+12)+'px')}).observe(document.getElementById('wallet-identity'));document.querySelector('[data-wallet-store]').addEventListener('click',function(e){e.preventDefault();e.stopPropagation();document.querySelector('#wl-dock [data-wl-go="keep"]').click();document.querySelectorAll('main>section[data-wl-open]').forEach(function(s){s.removeAttribute('data-wl-open')});document.getElementById('wallet-storage').scrollIntoView({block:'start'});});</script>
 
 <!-- ══ THE VOUCHER — prepaid compute, the money engine with a face ══ -->
@@ -10220,7 +10220,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   /* The storage adapter exposes public identity and signed envelopes only.
      The existing bzDiD keychain owns derivation; the Rust core signs the
      EIP-1559 digest. ant-pay persists bytes before broadcasting them. */
-  function antStorageSigner(){
+  /* THE TEST NETWORK (wallet.html?net=devnet): a local ant-devnet with its own Anvil chain,
+     31337, where nothing of value lives. The page flag alone cannot point the signer anywhere:
+     a test pin also names a token and vault (the purchase flow takes them from the devnet's
+     nodes, after the kit authenticated their handshake), and it signs only chain 31337, so
+     nothing it signs is valid on Arbitrum One. Test spending is booked as tANT/tETH. */
+  var ANT_TESTNET_PAGE=/(^|[?&])net=devnet(&|$)/.test(location.search);
+  function antStorageSigner(opts){
+    var T=null;
+    if(opts&&opts.testnet){
+      if(!ANT_TESTNET_PAGE)throw new Error('The test network is only reachable at wallet.html?net=devnet');
+      var tt=String(opts.testnet.token||'').toLowerCase(),tv=String(opts.testnet.vault||'').toLowerCase();
+      if(!/^0x[0-9a-f]{40}$/.test(tt)||!/^0x[0-9a-f]{40}$/.test(tv)||tt===tv)throw new Error('The test network needs its authenticated token and vault');
+      T={token:tt,vault:tv};
+    }
+    var CHAIN=T?31337n:42161n,TOKEN=T?T.token:EVM_RAILS.arbitrum.assets.ANT.contract,VAULT=T?T.vault:EVM_RAILS.arbitrum.antStorageVault;
+    var U_ANT=T?'tANT':'ANT',U_ETH=T?'tETH':'ETH',ID=T?'ant-test:':'ant:';
     function ready(){
       if(!MPRK||!SOUL)throw new Error('Connect your bzDiD keychain in this wallet, then prepare the storage invoice');
       if(!CORE||!BN||!window.AntPay)throw new Error('The first-party signing core is not ready; reload this wallet');
@@ -10233,7 +10248,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       function refuse(){throw new Error('The storage transaction differs from the authorized bzDiD invoice');}
       var same=function(x,y){return String(x).toLowerCase()===String(y).toLowerCase();};
       if(!a||a.invoice!==p.id||a.payer!==p.payer||a.artifactSha256!==f.sha256||a.expiresAt!==p.expiresAt||Date.now()>=p.expiresAt||a.gasCeilingWei!==p.gasCeilingWei)refuse();
-      if(n.chainId!==42161||BigInt(tx.chainId)!==42161n||!same(n.paymentTokenAddress,EVM_RAILS.arbitrum.assets.ANT.contract)||!same(n.paymentVaultAddress,EVM_RAILS.arbitrum.antStorageVault)||!same(tx.from,p.payer)||BigInt(tx.value)!==0n||BigInt(tx.maxPriorityFeePerGas)!==0n)refuse();
+      if(typeof n.chainId!=='number'||BigInt(n.chainId)!==CHAIN||BigInt(tx.chainId)!==CHAIN||!same(n.paymentTokenAddress,TOKEN)||!same(n.paymentVaultAddress,VAULT)||!same(tx.from,p.payer)||BigInt(tx.value)!==0n||BigInt(tx.maxPriorityFeePerGas)!==0n)refuse();
       // The authorization names what it covers. Recompute that digest here, with noble's
       // SHA-256 rather than the coordinator's WebCrypto, from the invoice being signed.
       if(!a.scope||a.scope!==p.scope||hexS(BN.sha256(new TextEncoder().encode(JSON.stringify(AntPay._wire.scopeOf(f,n,p)))))!==a.scope)refuse();
@@ -10249,13 +10264,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       // One reservation per payer nonce: only one transaction can ever use a nonce, so a
       // payment re-signed or re-invoiced at the same nonce counts only what exceeds the
       // reservation already held for it today, never the whole amount again.
-      var ledger=capLedger(),today=capToday(),id='ant:'+String(p.payer).toLowerCase()+':'+BigInt(tx.nonce);
+      var ledger=capLedger(),today=capToday(),id=ID+String(p.payer).toLowerCase()+':'+BigInt(tx.nonce);
       var antAmount=t.kind==='payment'?Number(fromBaseUnits(total,18)):0;
       var ethAmount=Number(fromBaseUnits(fee,18));
       var held=function(u){return ledger.reduce(function(s,e){return (e.id===id&&e.u===u&&e.d===today)?s+e.a:s;},0);};
-      var extra={ANT:Math.max(0,antAmount-held('ANT')),ETH:Math.max(0,ethAmount-held('ETH'))};
+      var extra={ANT:Math.max(0,antAmount-held(U_ANT)),ETH:Math.max(0,ethAmount-held(U_ETH))};
       {
-        for(var charge of [['ANT',extra.ANT],['ETH',extra.ETH]]){
+        for(var charge of [[U_ANT,extra.ANT],[U_ETH,extra.ETH]]){
           if(!charge[1])continue;
           capAssert(charge[0],charge[1]);
           // Storage fees can be smaller than the legacy transfer display's
@@ -10267,7 +10282,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var key=evmAddrOf();
       try{
         if(!same(key.addr,p.payer))refuse();
-        var unsigned=[42161n,BigInt(tx.nonce),0n,BigInt(tx.maxFeePerGas),BigInt(tx.gas),hexB(tx.to.slice(2)),0n,hexB(tx.data.slice(2)),[]];
+        var unsigned=[CHAIN,BigInt(tx.nonce),0n,BigInt(tx.maxFeePerGas),BigInt(tx.gas),hexB(tx.to.slice(2)),0n,hexB(tx.data.slice(2)),[]];
         var digest=BN.keccak_256(concatB(new Uint8Array([2]),rlp(unsigned)));
         var sig=CORE.sign(key.seed,digest),parity=BigInt(sig[0]-31);
         if(parity<0n||parity>1n)refuse();
@@ -10275,8 +10290,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var hash='0x'+hexS(BN.keccak_256(raw));
         // A failed RPC never refunds a reservation: it may have accepted the envelope.
         if(extra.ANT||extra.ETH){
-          if(extra.ANT)ledger.push({d:today,u:'ANT',a:extra.ANT,id:id});
-          if(extra.ETH)ledger.push({d:today,u:'ETH',a:extra.ETH,id:id});
+          if(extra.ANT)ledger.push({d:today,u:U_ANT,a:extra.ANT,id:id});
+          if(extra.ETH)ledger.push({d:today,u:U_ETH,a:extra.ETH,id:id});
           localStorage.setItem(CAP_LEDGER,JSON.stringify(ledger));
           if(localStorage.getItem(CAP_LEDGER)!==JSON.stringify(ledger))throw new Error('Cannot persist storage fee reservations');
           capView();

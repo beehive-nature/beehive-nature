@@ -112,20 +112,92 @@
     return h;
   }
 
+  /* ══ THE TEST NETWORK (wallet.html?net=devnet) ══
+     The same purchase, end to end, on a local Autonomi devnet (tools/ant-testnet/start.sh):
+     ten storage nodes reached over WebRTC Direct and a local Anvil chain (31337) carrying
+     the test ANT token and payment vault. Nothing on it has value. The page reads the
+     devnet's own manifest from this computer (loopback only), connects the kit to those
+     nodes, and pays with the same bzDiD keychain signer pinned to the test chain and the
+     token and vault the nodes authenticated. Mainnet is never reachable from this mode. */
+  var ANT_TEST=/(^|[?&])net=devnet(&|$)/.test(location.search);
+  var DEVNET='http://127.0.0.1:25000';
+  var devnetCache=null;
+  function loopback(u){
+    var x=new URL(u);
+    if(x.protocol!=='http:'||!/^\d{1,5}$/.test(x.port)||Number(x.port)<1||Number(x.port)>65535)throw new Error('The test network named a test chain that is not an http port on this computer');
+    return 'http://127.0.0.1:'+x.port;
+  }
+  // F2: storage nodes only at private IPv4 addresses (this computer, its WSL guest or the LAN)
+  function privateSeed(a){
+    var m=/^\/ip4\/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\/udp\/\d{1,5}\/webrtc-direct\//.exec(a);
+    if(!m)return false;
+    var o=m.slice(1).map(Number);if(o.some(function(v){return v>255;}))return false;
+    return o[0]===127||o[0]===10||(o[0]===172&&o[1]>=16&&o[1]<=31)||(o[0]===192&&o[1]===168);
+  }
+  async function devnetProfile(signal){
+    if(devnetCache)return devnetCache;
+    async function get(path){
+      var r;try{r=await fetch(DEVNET+path,{signal:signal,cache:'no-store'});}catch(e){throw new Error('Could not reach the test network on this computer. Start it, and when your browser asks, allow skaists.dev to reach apps on this device.');}
+      if(!r.ok)throw new Error('The local test network answered HTTP '+r.status);
+      return r.json();
+    }
+    var browser=await get('/api/browser-manifest.json'),devnet=await get('/api/devnet-manifest.json');
+    var profile=antTestProfile(browser,devnet);
+    // Anvil mines only when a transaction arrives; the payer confirms a payment only once a
+    // later block exists. On the test chain alone (31337, checked), mine one block a second.
+    if(Number(await antTestRpc(profile,'eth_chainId',[]))!==31337)throw new Error('The test chain is not 31337; refusing it');
+    await antTestRpc(profile,'evm_setIntervalMining',[1]);
+    devnetCache=profile;return profile;
+  }
+  // Read the two manifests into a kit profile. Refuses anything that is not the test chain.
+  function antTestProfile(browser,devnet){
+    var nodes=browser&&(browser.bootstrap||browser.nodes||browser.endpoints)||[];
+    var seeds=nodes.map(function(n){return typeof n==='string'?n:(n.multiaddr||n.address);}).filter(function(a){return typeof a==='string'&&privateSeed(a);});
+    var pay=browser&&(browser.payment_network||browser.payment)||{};
+    var evm=devnet&&(devnet.evm||devnet.evm_info)||{};
+    var payment={chainId:Number(pay.chain_id),paymentTokenAddress:String(pay.payment_token_address||'').toLowerCase(),paymentVaultAddress:String(pay.payment_vault_address||'').toLowerCase()};
+    if(payment.chainId!==31337)throw new Error('This test network is not the local test chain (31337); refusing it');
+    if(!/^0x[0-9a-f]{40}$/.test(payment.paymentTokenAddress)||!/^0x[0-9a-f]{40}$/.test(payment.paymentVaultAddress))throw new Error('The test network named no payment token or vault');
+    if(!seeds.length)throw new Error('The test network listed no storage nodes at a private address');
+    if(typeof evm.rpc_url!=='string')throw new Error('The test network named no test chain');
+    return {id:'bnr-devnet',seeds:seeds,payment:payment,rpcUrl:loopback(evm.rpc_url)};
+  }
+  async function antTestRpc(profile,method,params){
+    var r=await fetch(profile.rpcUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:method,params:params})});
+    var j=await r.json();if(j.error)throw new Error('Test chain refused '+method+': '+String(j.error.message||'').slice(0,120));return j.result;
+  }
+  // Test funds: the local chain's own unlocked dev account sends test ANT, and Anvil sets the
+  // test ETH balance. No private key is read, held or typed anywhere.
+  async function antTestFund(profile,address){
+    if(Number(await antTestRpc(profile,'eth_chainId',[]))!==31337)throw new Error('Not the local test chain');
+    var accounts=await antTestRpc(profile,'eth_accounts',[]);
+    if(!accounts||!accounts[0])throw new Error('The test chain has no dev account to fund from');
+    await antTestRpc(profile,'anvil_setBalance',[address,'0xde0b6b3a7640000']);  // 1 test ETH
+    var pad=function(v){return BigInt(v).toString(16).padStart(64,'0');};
+    var data='0xa9059cbb'+address.toLowerCase().replace(/^0x/,'').padStart(64,'0')+pad(10n*10n**18n);  // 10 test ANT
+    var hash=await antTestRpc(profile,'eth_sendTransaction',[{from:accounts[0],to:profile.payment.paymentTokenAddress,data:data}]);
+    var mined=false;
+    for(var i=0;i<40&&!mined;i++){var rc=await antTestRpc(profile,'eth_getTransactionReceipt',[hash]);if(rc){if(rc.status!=='0x1')throw new Error('The test ANT transfer reverted');mined=true;}else await new Promise(function(r){setTimeout(r,250);});}
+    if(!mined)throw new Error('The test ANT transfer was not mined yet; press again in a moment');
+    var bal=await antTestRpc(profile,'eth_call',[{to:profile.payment.paymentTokenAddress,data:'0x70a08231'+address.toLowerCase().replace(/^0x/,'').padStart(64,'0')},'latest']);
+    return {ant:BigInt(bal).toString()};
+  }
+
   // Hosted storage purchasing lives beside the existing quote-only chooser.
   // It uses the same bundled Autonomi client and AntPay wire implementation.
   function purchasePanel(){
     return '<details id="ant-purchase" class="ant-stage" open><summary>Pay ANT to store a public file</summary>'+
       '<ol class="wallet-steps" aria-label="Storage progress"><li data-ant-step="prepare" aria-current="step"><b>1</b><span>Prepare</span></li><li data-ant-step="review"><b>2</b><span>Review &amp; pay</span></li><li data-ant-step="verify"><b>3</b><span>Verify receipt</span></li></ol>'+
+      (ANT_TEST?'<div class="ant-test-banner" role="note"><b>TEST NETWORK</b> · a local Autonomi devnet and test chain on this computer. Test ANT and test ETH have no value, and nothing here touches Arbitrum One.</div>':'')+
       '<div class="ant-intro">Public means anyone with the address can read your file. Stored files cannot be deleted.</div>'+
       '<div id="ant-buy-session" class="ant-session" aria-live="polite"><span id="ant-session-message">Checking your wallet…</span> <a id="ant-connect" href="#kc-sec" data-kc-return="storage">Connect your bzDiD keychain</a></div>'+
       '<div id="ant-buy-keychain"></div>'+
       '<div class="ant-fields"><div><label for="ant-buy-file">Public file (3 bytes to 32 MiB)</label><input id="ant-buy-file" type="file" aria-describedby="ant-file-help"><small id="ant-file-help">Choose the file you want to keep.</small></div>'+
       '<div><label for="ant-buy-gas">ETH network-fee ceiling</label><input id="ant-buy-gas" inputmode="decimal" placeholder="Your ETH ceiling" aria-describedby="ant-gas-help"><small id="ant-gas-help">Covers approvals and all attempts. ANT storage is priced separately. This limit does not authorize payment.</small></div></div>'+
-      '<button id="ant-fund" type="button">Fund this wallet · ETH / ANT</button><div id="ant-funding" hidden></div>'+
+      '<button id="ant-fund" type="button">'+(ANT_TEST?'Get test ANT and test ETH':'Fund this wallet · ETH / ANT')+'</button><div id="ant-funding" hidden></div>'+
       '<button id="ant-buy-start" class="ant-primary" type="button">Prepare storage invoice / resume</button> <button id="ant-buy-stop" type="button" hidden>Stop waiting</button>'+
       '<div id="ant-buy-status" role="status" aria-live="polite">Prepare an invoice to see the exact ANT total. Nothing is signed at this step.</div><div id="ant-buy-invoice" tabindex="-1"></div><div id="ant-buy-download"></div>'+
-      '<details class="wallet-secondary"><summary>Limits &amp; resuming an interrupted purchase</summary><div class="ant-help">The storage ceiling is 100 ANT per file. Your wallet pays on Arbitrum One. The ETH ceiling covers approvals and all attempts. Keep this browser’s saved data and resume with the same file after an interruption; another browser or device does not share this payment record.</div></details>'+
+      '<details class="wallet-secondary"><summary>Limits &amp; resuming an interrupted purchase</summary><div class="ant-help">The storage ceiling is 100 ANT per file. Your wallet pays on '+(ANT_TEST?'the local test chain':'Arbitrum One')+'. The ETH ceiling covers approvals and all attempts. Keep this browser’s saved data and resume with the same file after an interruption; another browser or device does not share this payment record.</div></details>'+
       '<details id="ant-buy-proof" hidden><summary>Receipt and verified hash</summary><pre id="ant-buy-receipt" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details></details>';
   }
   function bindPurchase(){
@@ -135,6 +207,16 @@
     var input=document.getElementById('ant-buy-file'),fee=document.getElementById('ant-buy-gas');
     document.getElementById('ant-fund').onclick=async function(){
       var box=document.getElementById('ant-funding');box.hidden=false;box.replaceChildren();
+      if(ANT_TEST){
+        try{
+          box.textContent='Sending test ANT and test ETH to your keychain’s test address…';
+          var prof=await devnetProfile();
+          var who=await BNRPAY.antStorageSigner({testnet:{token:prof.payment.paymentTokenAddress,vault:prof.payment.paymentVaultAddress}}).address();
+          var got=await antTestFund(prof,who);
+          box.textContent='Funded on the test network: '+ant(got.ant)+' test ANT and 1 test ETH at '+who+'.';
+        }catch(e){box.textContent='Test funding stopped: '+(e&&e.message||e);}
+        return;
+      }
       try{
         var address=await BNRPAY.antStorageSigner().address();
         var title=document.createElement('h3');title.textContent='Receive ETH and ANT · Arbitrum One';box.append(title);
@@ -187,17 +269,21 @@
       try{
         await navigator.locks.request('bnr-ant-purchase-v1',{mode:'exclusive',ifAvailable:true},async function(lock){
           if(!lock)throw new Error('Another tab is handling a storage purchase. Resume after it finishes.');
-          var signer;
-          if(isolatedOpen())signer=isolated.signer();
-          else{if(!window.BNRPAY||!BNRPAY.antStorageSigner)throw new Error('The bzDiD storage signer is not ready; reload this wallet');signer=BNRPAY.antStorageSigner();}
+          var signer,testProfile=ANT_TEST?await devnetProfile(signal):null;
+          // connect first: the kit refuses nodes whose authenticated handshake names another
+          // chain, token or vault than this profile, so the pin below is the nodes' own
+          if(ANT_TEST)await antSession(signal);
+          // The isolated keychain pays Arbitrum One only; the test network uses this wallet's keychain.
+          if(isolatedOpen()&&!ANT_TEST)signer=isolated.signer();
+          else{if(!window.BNRPAY||!BNRPAY.antStorageSigner)throw new Error('The bzDiD storage signer is not ready; reload this wallet');signer=BNRPAY.antStorageSigner(ANT_TEST?{testnet:{token:testProfile.payment.paymentTokenAddress,vault:testProfile.payment.paymentVaultAddress}}:undefined);}
           await signer.address(); // Public identity only; no key or signature leaves the keychain.
           status.textContent='Hashing the original file and opening Autonomi…';
           var bytes=new Uint8Array(await file.arrayBuffer());
           var sha=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
-          var session=await antSession(signal),defaults=await session.sdk.getNetworkDefaults({signal:signal});
+          var session=await antSession(signal),defaults=ANT_TEST?{payment:testProfile.payment,rpcUrl:testProfile.rpcUrl}:await session.sdk.getNetworkDefaults({signal:signal});
           var requestId=0;
           var rpc=async function(method,params){var r=await fetch(defaults.rpcUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:++requestId,method:method,params:params})});if(!r.ok)throw new Error('Payment RPC unavailable');var j=await r.json();if(j.error)throw new Error('Payment RPC refused '+method);return j.result;};
-          var payer=AntPay.createHosted({artifact:{name:file.name,sha256:sha,bytes:file.size},network:defaults.payment,storage:localStorage,rpc:rpc,signer:signer});
+          var payer=AntPay.createHosted({artifact:{name:file.name,sha256:sha,bytes:file.size},network:defaults.payment,storage:localStorage,rpc:rpc,signer:signer,testnet:ANT_TEST});
           await payer.retryUnpaid(signal);
           var prior=payer.snapshot();
           if(prior.gasCeilingWei&&prior.gasCeilingWei!==gasWei)throw new Error('Use this file’s original ETH limit: '+ant(prior.gasCeilingWei)+' ETH.');
@@ -226,7 +312,7 @@
               var title=document.createElement('h3');title.textContent='Review before you pay';view.append(title);
               var totals=document.createElement('dl');
               [['ANT total · this invoice',ant(inv.total)+' ANT','ant-invoice-total'],['ETH ceiling · whole file',ant(inv.gasCeilingWei)+' ETH','ant-invoice-eth']].forEach(function(row){var group=document.createElement('div'),label=document.createElement('dt'),value=document.createElement('dd');label.textContent=row[0];value.textContent=row[1];value.id=row[2];group.append(label,value);totals.append(group);});view.append(totals);
-              var text=document.createElement('div');text.className='ant-meta';text.textContent=file.name+' · '+file.size.toLocaleString('en-US')+' bytes · Arbitrum One. Paying account: '+inv.payer+'. '+inv.txs.filter(t=>t.state==='planned').length+' planned transactions. Expires '+new Date(inv.expiresAt).toLocaleTimeString()+'. This invoice covers this part of the file; any additional part needs separate approval. Current maximum gas exposure: '+ant(inv.txs.reduce((s,t)=>s+BigInt(t.actualWei||t.reservedWei),0n).toString())+' ETH.';view.append(text);
+              var text=document.createElement('div');text.className='ant-meta';text.textContent=file.name+' · '+file.size.toLocaleString('en-US')+' bytes · '+(ANT_TEST?'local test network':'Arbitrum One')+'. Paying account: '+inv.payer+'. '+inv.txs.filter(t=>t.state==='planned').length+' planned transactions. Expires '+new Date(inv.expiresAt).toLocaleTimeString()+'. This invoice covers this part of the file; any additional part needs separate approval. Current maximum gas exposure: '+ant(inv.txs.reduce((s,t)=>s+BigInt(t.actualWei||t.reservedWei),0n).toString())+' ETH.';view.append(text);
               var details=document.createElement('details'),summary=document.createElement('summary'),raw=document.createElement('pre');summary.textContent='Invoice and contract bindings';raw.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere';raw.textContent=JSON.stringify({invoice:inv.id,sha256:sha,network:defaults.payment,quotes:inv.payments,transactions:inv.txs},null,2);details.append(summary,raw);view.append(details);
               await new Promise(function(resolve,reject){
                 var done=false,button=document.createElement('button');button.type='button';button.textContent='Authorize this invoice and ask my wallet';
@@ -344,7 +430,10 @@
     try{ sdk=await (antKit||(antKit=import(ANT_KIT+'index.js'))); }
     catch(error){ var kit=new Error('Autonomi browser kit did not load',{cause:error}); kit.kit=true; throw kit; }
     if(antClient){ var open=await antClient.catch(function(){return null;}); if(open&&!open.closed)return {sdk:sdk,client:open}; antClient=null; }
-    var connecting=sdk.AutonomiClient.connect({signal:signal}); antClient=connecting;
+    var connecting=ANT_TEST
+      ? devnetProfile(signal).then(function(p){return sdk.AutonomiClient.connect({network:{id:p.id,seeds:p.seeds,payment:p.payment},expectedPaymentNetwork:p.payment,signal:signal});})
+      : sdk.AutonomiClient.connect({signal:signal});
+    antClient=connecting;
     try{ return {sdk:sdk,client:await connecting}; }
     catch(error){ if(antClient===connecting)antClient=null; if(error&&typeof error==='object')error.connect=true; throw error; }
   }
