@@ -24,7 +24,10 @@ const out = { at: new Date().toISOString(), network: "local ant-devnet + Anvil 3
 const until = async (f, ms = 300000, step = 500) => { const end = Date.now() + ms; for (;;) { const v = await f(); if (v) return v; if (Date.now() > end) throw new Error("timed out"); await new Promise((r) => setTimeout(r, step)); } };
 
 const browser = await chromium.launch();
-await installWalletFixture(browser, process.cwd());
+// --live: the deployed skaists.dev bytes; otherwise this checkout under the production origin
+const LIVE = process.argv.includes("--live");
+if (!LIVE) await installWalletFixture(browser, process.cwd());
+out.source = LIVE ? "deployed skaists.dev" : "this checkout (production-origin fixture)";
 const ctx = await browser.newContext({ viewport: { width: 390, height: 900 } });
 // the devnet is the only other place this page may reach: its manifest and its test chain, on loopback
 await ctx.route(/^http:\/\/127\.0\.0\.1:\d+\//, (route) => route.continue());
@@ -60,7 +63,10 @@ try {
   await page.locator("#ant-buy-gas").fill(ETH_CEILING);
   await page.locator("#ant-buy-start").click();
   const authorize = page.getByRole("button", { name: "Authorize this invoice and ask my wallet" });
-  await until(async () => (await authorize.count()) > 0 || /stopped/i.test(await page.locator("#ant-buy-status").innerText()), 600000);
+  await until(async () => (await authorize.count()) > 0 || /stopped|Stored and retrieved/i.test(await page.locator("#ant-buy-status").innerText()), 600000);
+  // a file this network already holds needs no payment: correct, but not a proof of the paid path
+  if (!(await authorize.count()) && /Stored and retrieved/.test(await page.locator("#ant-buy-status").innerText()))
+    throw new Error("this test network already holds the probe, so no payment was needed; start a fresh network (start.sh) for a paid run");
   out.status_before_authorize = await page.locator("#ant-buy-status").innerText();
   assert.equal(await authorize.count(), 1, out.status_before_authorize);
   // what the invoice says BEFORE anything is signed
@@ -107,7 +113,7 @@ try {
   out.console_errors = consoleErrors;
 } finally {
   await browser.close();
-  await writeFile(process.argv[2] || "tools/ant-testnet/last-loop.json", JSON.stringify(out, null, 2));
+  await writeFile(process.argv.slice(2).find((a) => !a.startsWith("--")) || "tools/ant-testnet/last-loop.json", JSON.stringify(out, null, 2));
   console.log(JSON.stringify({ ok: out.ok, invoice: out.invoice, status: out.status_final || out.status_at_failure, error: out.error && out.error.slice(0, 300) }, null, 2));
   process.exit(out.ok ? 0 : 1);
 }
