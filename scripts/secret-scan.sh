@@ -91,6 +91,16 @@
 #     only; the hex pattern stays armed everywhere else, including every
 #     other file under vendor/), on the wb002-specimen verbatim basis,
 #     2026-10-09 (bDroP lane dispatch).
+#   - scripts/btungsten/wb004-live/*.json: the WB004 live-lane run journal
+#     (state.json), final receipt (receipt-wb004-live.json) and probe state —
+#     generator-owned JSON written by scripts/btungsten/wb004-live/run-lifecycle.mjs,
+#     whose 48+-hex runs are PUBLIC Jungle4 chain data (on-chain transaction
+#     ids, block ids, sha256 digests of packed public transactions) verified
+#     by cold-recover.mjs against the chain itself; pretty-printed JSON
+#     cannot carry a same-line marker. Path-scoped (this glob's JSON only;
+#     the .mjs companions and the hex pattern stay armed everywhere else),
+#     on the wb001-bridge.json generated-JSON basis, 2026-10-12 (WB004
+#     jungle-live dispatch).
 #   - lines carrying a same-line TESTNET-ONLY marker — the sanctioned way to
 #     commit a throwaway testnet vector for the compat tests, e.g.:
 #       let s: [u8; 32] = hex!("...");  // TESTNET-ONLY throwaway compat vector
@@ -235,7 +245,7 @@ diff)
     # decompose to A+D, the destination's full content is inspected, and the
     # clean line's count is over exactly what was scanned.
     names=$(git diff --cached --name-only --diff-filter=ACMR --no-renames | grep -Ei "$NAME_RE")
-    added=$(git diff --cached --diff-filter=ACMR --no-renames -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' ':(exclude)scripts/btungsten/wb002-specimen/simpleassets-e6a042f/' ':(exclude)scripts/btungsten/wb001-bridge.json' ':(exclude)surfaces/bheraldry-records.json' ':(exclude)surfaces/onboarding/vendor/hive-tx.min.js' |
+    added=$(git diff --cached --diff-filter=ACMR --no-renames -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' ':(exclude)scripts/btungsten/wb002-specimen/simpleassets-e6a042f/' ':(exclude)scripts/btungsten/wb001-bridge.json' ':(exclude)surfaces/bheraldry-records.json' ':(exclude)scripts/btungsten/wb004-live/*.json' ':(exclude)surfaces/onboarding/vendor/hive-tx.min.js' |
         grep '^+' | grep -v '^+++')
     hex=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE" | grep -nE "$HEX_RE")
     pem=$(printf '%s\n' "$added" | grep -nE "$PEM_RE")
@@ -253,9 +263,9 @@ diff)
     ;;
 tree)
     names=$(git ls-files | grep -Ei "$NAME_RE")
-    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' ':(exclude)scripts/btungsten/wb002-specimen/simpleassets-e6a042f/' ':(exclude)scripts/btungsten/wb001-bridge.json' ':(exclude)surfaces/bheraldry-records.json' ':(exclude)surfaces/onboarding/vendor/hive-tx.min.js' | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE")
+    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' ':(exclude)scripts/btungsten/wb002-specimen/simpleassets-e6a042f/' ':(exclude)scripts/btungsten/wb001-bridge.json' ':(exclude)surfaces/bheraldry-records.json' ':(exclude)scripts/btungsten/wb004-live/*.json' ':(exclude)surfaces/onboarding/vendor/hive-tx.min.js' | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE")
     pem=$(git grep -InE "$PEM_RE")
-    wif=$(git grep -InE "$WIF_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' ':(exclude)scripts/btungsten/wb002-specimen/simpleassets-e6a042f/' ':(exclude)scripts/btungsten/wb001-bridge.json' ':(exclude)surfaces/bheraldry-records.json' ':(exclude)surfaces/onboarding/vendor/hive-tx.min.js' | grep -vF -e "$MARK" -e "$MARK2" | while IFS= read -r thit; do
+    wif=$(git grep -InE "$WIF_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' ':(exclude)scripts/btungsten/wb002-specimen/simpleassets-e6a042f/' ':(exclude)scripts/btungsten/wb001-bridge.json' ':(exclude)surfaces/bheraldry-records.json' ':(exclude)scripts/btungsten/wb004-live/*.json' ':(exclude)surfaces/onboarding/vendor/hive-tx.min.js' | grep -vF -e "$MARK" -e "$MARK2" | while IFS= read -r thit; do
         tf=${thit%%:*}; trest=${thit#*:}; tln=${trest%%:*}; tcontent=${trest#*:}
         for tok in $(printf '%s\n' "$tcontent" | grep -oE "$WIF_RE"); do
           cls=$(keyshape classify "$tok")
