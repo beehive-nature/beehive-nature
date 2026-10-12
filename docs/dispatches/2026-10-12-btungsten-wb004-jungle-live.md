@@ -244,3 +244,18 @@ whose plaintext is a UTF-16LE bare WIF (shape-asserted, never printed).
   ever runs a chain-time helper; otherwise it stays a model+spec boundary.
 
 HUMAN INTERACTION: NONE.
+
+## Post-run note (same session)
+
+- While reproducing the inherited static red locally, a `git stash pop` in
+  this lane's worktree accidentally popped the CODEX seat's bpay-rail WIP
+  stash (shared stash stack across worktrees). Detected immediately,
+  discarded from this worktree with a hard reset to this lane's own pushed
+  commit; the codex stash itself is INTACT (pop-on-conflict preserves it)
+  and nothing of theirs was modified or dropped. The same accident and
+  recovery has precedent (stash@{1}'s own message). Noted here per the
+  corrective-receipt law: named, contained, no silent anything.
+- The inherited static red ("Surface directory needs regeneration") was
+  located at main's own tip (83775b5ec modified bdrop surfaces without
+  regenerating; a7d0989f2 was the same cure for the prior round) and cured
+  as a one-line descendant rider in this PR (surfaces/stack.html).
