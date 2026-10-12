@@ -1,0 +1,250 @@
+#!/usr/bin/env node
+// ── sources-sync: post-freeze attach transcription sync ────────────────────
+//   The 2026-09-18 harvest is FROZEN and merged (founder freeze 2026-09-28:
+//   no re-scrape). Every record the lane attached AFTER the freeze lives on
+//   FamilySearch but not in the frozen public sources layer. This tool rides
+//   the proven cookie-session wires (fs-adapter PAGE_SOURCE_WALKER: v8
+//   details + tf entityref + batched links/sources?readExternalData=true) over
+//   ONLY the touched persons, and folds the result into a NEW public artifact
+//   — skaists.sources-sync/1 — without mutating the frozen manifest.
+//
+//   What counts as a "new" source:
+//     cohort persons (the frozen 809): any attached source id present in the
+//       fresh entityref walk but absent from the frozen index → the exact
+//       sync debt, per person (ledger-matched or honestly "unattributed").
+//     extramural persons: no frozen baseline exists, so ONLY ledger-known
+//       post-freeze attaches are transcribed; the remaining standing sources
+//       are reported as a count, never mixed in with our attaches.
+//
+//   Privacy law (same shape as hint-census): cohort persons are
+//   deceased-by-scope; extramural persons are nameable ONLY via the explicit
+//   dispatch-proven deceased allowlist below; anything else (or any walked
+//   pid flagged living) is a redacted count stub with the fsid withheld.
+//   Full fidelity (notes, contributor cis ids, raw responses) stays in the
+//   private tier dump — publicSourceRecord() is the public projection.
+//
+// Usage:
+//   node sources-sync.mjs payload <sources-index.json> <out-payload.json>
+//     → emits the PAGE_SOURCE_WALKER payload for this pass (walked set as
+//       cohort entries; extramural at dep 9 so parent-repair is suppressed
+//       by the walker's own depth gate; `known` = all 809 frozen fsids).
+//   node sources-sync.mjs build <dump.json> <ledger.json> <sources-index.json> <out.json> <redact-list.txt>
+//     → folds a completed walk dump + the dispatch-derived ledger into the
+//       public artifact. The redact list is the PRIVATE tier living-name file
+//       (newline-separated, never committed); the build REFUSES to run
+//       without it (fail-closed: an absent list must not mean "no names").
+//
+// Staged 2026-10-12 (order-23 wake, session signed out); execution rides the
+// next authed wake per the standing SESSION-ORACLE law.
+
+import { readFileSync, writeFileSync } from "node:fs";
+import { publicSourceRecord } from "./fs-adapter.mjs";
+
+// dispatch-proven deceased extramural persons on this pass's walked set
+// (name + basis required — same law as hint-census DECEASED_EXTRAMURAL)
+export const DECEASED_EXTRAMURAL_SYNC = {
+  "MHRT-169": { name: "Christen Olsen", lifespan: "1806–1875", basis: "authed-wake dispatch 2026-10-06 (linker-canonical cluster husband)" },
+  "LZDH-WYF": { name: "Maren Nielsdatter", lifespan: "1811–1877", basis: "authed-wake dispatch 2026-10-06; death sourced 2026-10-07 (QG83-1487, d. 4 Oct 1877 Bakkendrup)" },
+  "MLCS-MN5": { name: "Johanne Marie Christensen", lifespan: "1835–", basis: "authed-wake dispatch 2026-10-06 (confirmation attach)" },
+  "MLCS-M2L": { name: "Ane Marie Christensen", lifespan: "1837–", basis: "authed-wake dispatch 2026-10-10 (child-event vein, 19th-century Danish church records)" },
+  "MLCS-M2Q": { name: "Oline Christensen", lifespan: "1850–", basis: "hint-census dispatch 2026-10-07 + authed-wake dispatch 2026-10-10 (christening vein)" },
+  "MLCS-MVB": { name: "Karen Christensen", lifespan: "1845–", basis: "hint-census dispatch 2026-10-07 + authed-wake dispatch 2026-10-10 (christening vein)" },
+  "MLCS-MKV": { name: "Dorthe Catherine Christensen", lifespan: "1847–", basis: "hint-census dispatch 2026-10-07 + authed-wake dispatch 2026-10-10 (christening vein)" },
+};
+
+// The walked set: persons touched by the post-freeze attaches this pass
+// transcribes (10-06d + 10-07 + 10-10 dispatch sets). Ane Sophie LZDH-WB1
+// (10-03/10-07 attaches) is a named follow-on pid, not in this run.
+export const WALKED_PIDS = [
+  "LJDG-CYG", "LN5V-3N2", "GWXR-H2K", "GWXR-3TD",
+  "LZDH-WYF", "MHRT-169", "MLCS-MN5", "MLCS-M2L", "MLCS-M2Q", "MLCS-MVB", "MLCS-MKV",
+];
+
+export function buildPayload(index) {
+  const persons = Array.isArray(index.persons) ? index.persons : Object.values(index.persons);
+  const byFsid = new Map(persons.map((p) => [p.fsid, p]));
+  const cohort = [];
+  for (const pid of WALKED_PIDS) {
+    const frozen = byFsid.get(pid);
+    // extramural persons walk at dep 9: the walker's qRepair depth gate
+    // (dep > 9 suppressed) then refuses their parent-repair, keeping the
+    // pass exactly on the walked set.
+    cohort.push({ pid, dep: frozen ? frozen.depth : 9 });
+  }
+  return {
+    cohort,
+    danglers: [],
+    known: persons.map((p) => p.fsid),
+    note: "sources-sync pass: evidence-only walk of the post-freeze touched set; repair suppressed (all frozen fsids known, extramural at dep 9)",
+  };
+}
+
+const ARK_IN = (hay) => (typeof hay === "string" ? hay : "");
+
+// does a links/sources record correspond to a ledger ark? Matches the ark on
+// the record id, the about URI, or any URL (the citation ark forms differ:
+// 4-3 tree-source ids and 4-4 record arks both occur).
+function recordMatchesArk(rec, ark) {
+  if (rec.id === ark) return true;
+  for (const h of [ARK_IN(rec.about), ...rec.urls.map((u) => ARK_IN(typeof u === "string" ? u : u.url))]) {
+    if (h.includes(ark)) return true;
+  }
+  return false;
+}
+
+export function validateRedactInput(text) {
+  if (typeof text !== "string") return { ok: false, reason: "redact list file unreadable — build refuses (fail-closed)" };
+  const names = text.split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
+  if (!names.length) return { ok: false, reason: "redact list empty — an absent list must not mean 'no living names' (fail-closed)" };
+  return { ok: true, names };
+}
+
+export function buildSync({ dump, index, ledger, generated, redactNames, walkedPids = WALKED_PIDS }) {
+  if (!Array.isArray(redactNames) || !redactNames.length) {
+    throw new Error("redactNames required — the build is fail-closed without the private-tier living-name list");
+  }
+  const persons = Array.isArray(index.persons) ? index.persons : Object.values(index.persons);
+  const byFsid = new Map(persons.map((p) => [p.fsid, p]));
+  const ledgerByArk = new Map();
+  for (const r of ledger.records || []) {
+    ledgerByArk.set(r.ark, r);
+  }
+
+  const out = {
+    schema: "skaists.sources-sync/1",
+    generated,
+    scope: "post-freeze attach transcription sync — full citations + transcriptions for records attached after the 2026-09-18 harvest freeze, on the touched persons",
+    provenance: {
+      freeze: { generated: index.generated ?? null, uniqueRecords: index.uniqueRecords ?? null, schema: index.schema ?? null },
+      method: "fs-adapter PAGE_SOURCE_WALKER (v8 details + tf entityref + links/sources readExternalData), cookie session",
+      ledger: "dispatch-derived post-freeze attach ledger (tools/genealogy/sources-sync-ledger.json)",
+    },
+    persons: {},
+    reconciliation: null,
+  };
+
+  let newSourcesTotal = 0, unattributed = 0, cohortDebtTotal = 0, redactedStubs = 0;
+  const cohortSyncDebt = {};
+
+  for (const pid of walkedPids) {
+    const person = dump.persons?.[pid];
+    const refs = dump.refs?.[pid];
+    if (!person || !refs) {
+      out.persons[pid] = { tier: "missing", reason: "not in walk dump" };
+      continue;
+    }
+    const frozen = byFsid.get(pid);
+    const tier = frozen ? "cohort" : "extramural";
+    const livingFlag = person.living === true;
+    const allow = DECEASED_EXTRAMURAL_SYNC[pid];
+
+    // redacted stubs never carry the fsid — not even as the map key
+    const redactStub = (reason) => {
+      redactedStubs++;
+      out.persons[`[redacted-extramural-${redactedStubs}]`] = { tier, status: "redacted", sourcesAttached: refs.sources.length, reason };
+    };
+    if (tier === "extramural" && !allow) {
+      redactStub("extramural, not on the dispatch-proven deceased allowlist — fsid withheld");
+      continue;
+    }
+    if (livingFlag && tier === "extramural") {
+      redactStub("living flag on the walked record — fsid withheld");
+      continue;
+    }
+    if (livingFlag && tier === "cohort") {
+      redactStub("living flag contradicts the deceased-by-scope cohort — withheld pending reconciliation");
+      continue;
+    }
+
+    const currentIds = new Set(refs.sources.map((s) => s.id));
+    const frozenIds = tier === "cohort"
+      ? new Set((frozen.sources || []).map((s) => s.id))
+      : new Set();
+
+    // records to transcribe: ledger-known arks matched against the walk dump
+    const ledgerRows = (ledger.records || []).filter((r) => (r.attachedTo || []).includes(pid));
+    const newSources = [];
+    for (const row of ledgerRows) {
+      const rec = Object.values(dump.src || {}).find((s) => recordMatchesArk(s, row.ark));
+      const inRef = [...currentIds].some((id) => id === row.ark);
+      if (!rec && !inRef) {
+        newSources.push({ ark: row.ark, status: "ledger-expected-not-found", dispatch: row.dispatch });
+        continue;
+      }
+      const pub = rec ? publicSourceRecord(rec, { redactNames }) : null;
+      newSources.push({
+        ...(pub || { id: row.ark, title: null, citation: null }),
+        ark: row.ark,
+        dispatch: row.dispatch,
+        status: "attached",
+      });
+      newSourcesTotal++;
+    }
+    // cohort-only: unattributed deltas (fresh ids outside the frozen baseline
+    // and outside the ledger) are named honestly, never silently dropped
+    if (tier === "cohort") {
+      const ledgerArks = new Set(ledgerRows.map((r) => r.ark));
+      for (const id of currentIds) {
+        if (frozenIds.has(id)) continue;
+        const matched = [...ledgerArks].some((ark) => recordMatchesArk({ id, urls: [], about: null }, ark)) ||
+          (dump.src?.[id] && [...ledgerArks].some((ark) => recordMatchesArk(dump.src[id], ark)));
+        if (matched) continue;
+        const rec = dump.src?.[id];
+        const pub = rec ? publicSourceRecord(rec, { redactNames }) : { id, title: null, citation: null };
+        newSources.push({ ...pub, status: "attached", dispatch: "post-freeze delta (unattributed to a dispatch)" });
+        unattributed++;
+        newSourcesTotal++;
+      }
+      const debt = newSources.filter((s) => s.status === "attached").length;
+      if (debt) { cohortSyncDebt[pid] = debt; cohortDebtTotal += debt; }
+    }
+
+    out.persons[pid] = {
+      tier,
+      ...(tier === "cohort"
+        ? { iid: frozen.iid, depth: frozen.depth, name: frozen.name, lifespan: frozen.lifespan,
+            providerSourceCount: { freeze: frozen.providerSourceCount ?? null, now: refs.sources.length } }
+        : { name: allow.name, lifespan: allow.lifespan, allowlistBasis: allow.basis,
+            sourcesAttachedNow: refs.sources.length,
+            standingNotTranscribed: refs.sources.length - newSources.filter((s) => s.status === "attached").length }),
+      newSources,
+    };
+  }
+
+  out.reconciliation = {
+    pidsWalked: walkedPids.length,
+    newSourcesTranscribed: newSourcesTotal,
+    unattributedDelta: unattributed,
+    cohortSyncDebt,
+    cohortDebtTotal,
+    redactedStubs,
+    countingNote: "manifest-derived only; extramural standing sources are counted, never transcribed without ledger provenance",
+  };
+  return out;
+}
+
+// ── CLI ─────────────────────────────────────────────────────────────────────
+const [cmd, ...args] = process.argv.slice(2);
+if (cmd === "payload") {
+  const [indexFile, outFile] = args;
+  const index = JSON.parse(readFileSync(indexFile, "utf8"));
+  writeFileSync(outFile, JSON.stringify(buildPayload(index)));
+  console.log(`payload written: ${outFile} (walked ${WALKED_PIDS.length} pids)`);
+} else if (cmd === "build") {
+  const [dumpFile, ledgerFile, indexFile, outFile, redactFile] = args;
+  const dump = JSON.parse(readFileSync(dumpFile, "utf8"));
+  const ledger = JSON.parse(readFileSync(ledgerFile, "utf8"));
+  const index = JSON.parse(readFileSync(indexFile, "utf8"));
+  const v = validateRedactInput(readFileSync(redactFile, "utf8"));
+  if (!v.ok) { console.error(v.reason); process.exit(1); }
+  const artifact = buildSync({
+    dump, index, ledger, redactNames: v.names,
+    generated: new Date().toISOString().slice(0, 16) + "Z",
+  });
+  writeFileSync(outFile, JSON.stringify(artifact));
+  console.log(JSON.stringify(artifact.reconciliation, null, 1));
+  console.log(`artifact written: ${outFile}`);
+} else if (cmd) {
+  console.error("usage: sources-sync.mjs payload <index.json> <out> | build <dump> <ledger> <index> <out> <redact-list>");
+  process.exit(1);
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "skaists.sources-sync-ledger/1",
+  "note": "dispatch-derived ledger of the lane's post-freeze (after 2026-09-18 harvest freeze) FamilySearch attaches on this pass's walked set. attachedTo lists the person rows the dispatches name as attached; rows may name pids outside the walked set (kept for provenance; the sync reports only walked pids). Every entry traces to a committed dispatch.",
+  "records": [
+    { "ark": "QG87-RV9L", "title": "Denmark, Church Records — marriage, 17 Oct 1834 Finderup (Christen Olsen × Maren Nielsdatter)", "dispatch": "2026-10-06-fs-authed-wake-harvest", "attachedTo": ["LZDH-WYF", "MHRT-169"] },
+    { "ark": "QG8Q-ZCKM", "title": "Denmark, Church Records — Johanne Marie Christensen confirmation, 7 Apr 1850 Bakkendrup", "dispatch": "2026-10-06-fs-authed-wake-harvest", "attachedTo": ["MLCS-MN5", "LZDH-WYF", "MHRT-169"] },
+    { "ark": "QG83-1487", "title": "Denmark, Church Records — Maren Nielsdatter death, 4 Oct 1877 Bakkendrup", "dispatch": "2026-10-07-fs-8gen-hint-census-wake", "attachedTo": ["LZDH-WYF"] },
+    { "ark": "QG8Q-P964", "title": "Denmark, Church Records — Ane Sophie christening", "dispatch": "2026-10-07-fs-8gen-hint-census-wake", "attachedTo": ["LZDH-WB1", "LZDH-WYF", "MHRT-169"] },
+    { "ark": "QG8Q-ZCJ9", "title": "Denmark, Church Records — Ane Marie event", "dispatch": "2026-10-07-fs-8gen-hint-census-wake", "attachedTo": ["MLCS-M2L", "LZDH-WYF", "MHRT-169"] },
+    { "ark": "QG87-SM82", "title": "Denmark, Church Records — Mette Kirstine event (parent rows)", "dispatch": "2026-10-07-fs-8gen-hint-census-wake", "attachedTo": ["LZDH-WYF", "MHRT-169"] },
+    { "ark": "MCL8-D19", "title": "United States Census, 1860 — Joseph Benedum household", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["LJDG-CYG"] },
+    { "ark": "MZ5M-5M6", "title": "United States Census, 1870 — John Eden household", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["LN5V-3N2"] },
+    { "ark": "6D9D-2ZCT", "title": "England, Somerset, Church Records — John Hole / Ann Down", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["GWXR-H2K", "GWXR-3TD"] },
+    { "ark": "QG8Q-JGC2", "title": "Denmark, Church Records — Johanne Marie's record", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["MLCS-MN5", "LZDH-WYF"] },
+    { "ark": "QG8Q-V3C5", "title": "Denmark, Church Records — Maren's birth/christening, 22 Jul 1811 Sønderup", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["LZDH-WYF", "MHRT-169"] },
+    { "ark": "QG8Q-X866", "title": "Denmark, Church Records — Ane Marie's event", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["LZDH-WYF", "MHRT-169", "MLCS-M2L"] },
+    { "ark": "QG8Q-N45H", "title": "Denmark, Church Records — Oline's christening", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["LZDH-WYF", "MHRT-169", "MLCS-M2Q"] },
+    { "ark": "QG8Q-15JW", "title": "Denmark, Church Records — Karen's christening", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["LZDH-WYF", "MHRT-169", "MLCS-MVB"] },
+    { "ark": "QG87-WZVK", "title": "Denmark, Church Records", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["LZDH-WYF", "MHRT-169"] },
+    { "ark": "QG8Q-1526", "title": "Denmark, Church Records — Christen Olsen", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["MHRT-169"] },
+    { "ark": "QG8Q-78S6", "title": "Denmark, Church Records — Dorthe Cathrine's christening", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["LZDH-WYF", "MHRT-169", "MLCS-MKV"] }
+  ]
+}
