@@ -160,9 +160,9 @@ a{color:var(--ink)}
       <b>what this operation does:</b> publishes the post above, irreversibly, on the Hive
       mainnet blockchain under the author named above, at the permlink named above.<br>
       <b>what data it uses and reveals, to whom:</b> the title, body and tags — to the public
-      chain and every reader and front-end that ever mirrors it. the posting key — to no one:
+      chain and every reader and front-end that ever mirrors it. the posting key — <span id="keytruth">to no one:
       it signs in this tab and is wiped after the gesture; only the signed transaction is
-      sent, to the RPC endpoint named below.<br>
+      sent, to the RPC endpoint named below.</span><br>
       <b>what the evidence establishes:</b> the hash verdict above, and nothing more. acceptance
       of this disclosure never converts an UNVERIFIED finding into a proven one.<br>
       <b>what remains uncertain:</b> every scientific claim inside the body stays at its own
@@ -183,6 +183,12 @@ a{color:var(--ink)}
 
   <h2>sign &amp; broadcast</h2>
   <div class="card">
+    <p class="law" style="margin-top:0">how this drop is signed — two doors, one gesture, no new keychain:</p>
+    <div class="row">
+      <label><input type="radio" name="signer" value="keychain" id="signer-keychain"> hive keychain extension (your existing one — the key never touches this page)</label>
+      <label><input type="radio" name="signer" value="paste" checked> paste the posting key in this tab</label>
+    </div>
+    <p class="law" id="signer-note">…</p>
     <div class="grid2">
       <div>
         <label for="wif">hive posting key (WIF, 5… — the posts tier, not owner, not active)</label>
@@ -224,7 +230,9 @@ a{color:var(--ink)}
     transaction can be re-broadcast byte-identically without the key.</p>
     <div class="row">
       <button id="reconcile">reconcile now</button>
+      <button id="recover">recover a drop from the chain alone (a fresh client needs nothing else)</button>
       <button id="rebroadcast" hidden>re-broadcast the signed bytes (no key needed)</button>
+      <button id="damaged-archive" hidden>archive the damaged record and start a clean journal</button>
     </div>
   </div>
 
@@ -272,7 +280,7 @@ if(typeof Number.prototype.unref!=='function'){Number.prototype.unref=function()
 </script>
 <script src="onboarding/vendor/hive-tx.min.js?v=1"></script>
 <script src="ant-pay.js?v=1"></script>
-<script src="bdrop.js?v=2"></script>
+<script src="bdrop.js?v=3"></script>
 <script src="tour.js?v=42"></script>
 </body>
 </html>

@@ -4,8 +4,11 @@
    touches Hive. Proven here: editions discovery + byte verification, the
    happy path, duplicate attempts, browser-restart reconciliation, ambiguous
    submission (lost broadcast answer), unavailable RPC, mismatched content
-   (divergence refusal), independent retrieval, and that no key material ever
-   reaches storage. Run: node --test e2e/bdrop-eternal.test.mjs */
+   (divergence refusal), independent retrieval, no key material in storage,
+   a damaged journal (preserved, reported, refusing, reconciled from the
+   chain — never silently emptied), the keychain signer (a full publication
+   with no key paste), and fresh-client recovery with the original profile
+   destroyed. Run: node --test e2e/bdrop-eternal.test.mjs */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
@@ -225,10 +228,129 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     ok('divergence broadcast nothing', mock.broadcasts.length === 1);
     ok('divergence produced no page errors', div.errs.length === 0, div.errs[0] || '');
     await div.ctx.close();
+
+    /* ── scenario 5: a damaged journal — preserved, reported, refusing, then reconciled ── */
+    await setMock({ mode: 'normal', content: null });
+    mock.broadcasts.length = 0; mock.lastBody = null;
+    const dir5 = profile('corrupt'); dirs.push(dir5);
+    const cor0 = await open(dir5);
+    const RAW = '{"v":1,"id":"@author/damaged","stage":"signed","signed_tx":{"expiration":"2026-01-01T00:00:0';
+    await cor0.page.evaluate(r => localStorage.setItem('bnr.bdrop.outbox.v1', r), RAW);
+    await cor0.page.reload();
+    await cor0.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    ok('damaged journal bytes preserved verbatim — never replaced by an empty array',
+      (await cor0.page.evaluate(() => localStorage.getItem('bnr.bdrop.outbox.v1'))) === RAW);
+    ok('damaged copy stored under the .damaged key',
+      (await cor0.page.evaluate(() => localStorage.getItem('bnr.bdrop.outbox.v1.damaged'))) === RAW);
+    await step('the damaged journal is reported in the outbox', () => cor0.page.waitForFunction(() => /DAMAGED/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 8000 }));
+    await cor0.page.fill('#body', BODY);
+    await cor0.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await cor0.page.click('#publish');
+    await step('submission refused while the journal is damaged', () => cor0.page.waitForFunction(() => /refuses new submissions/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    ok('damaged journal: nothing broadcast', mock.broadcasts.length === 0);
+    /* the chain — never an empty array — establishes what happened */
+    await setMock({ mode: 'normal', content: { permlink: 'bdrop-recovery-probe', body: BODY } });
+    await cor0.page.fill('#author', 'loviswater');
+    await cor0.page.fill('#permlink', 'bdrop-recovery-probe');
+    await cor0.page.click('#recover');
+    await step('reconciliation establishes the outcome from the chain', () => cor0.page.waitForFunction(() => /the chain established the outcome/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    const obCor = await outboxOf(cor0.page);
+    ok('damaged journal reconciled into a clean receipted journal',
+      obCor.length === 1 && obCor[0].stage === 'confirmed' && obCor[0].events.some(e => e.event === 'recovered_from_chain'),
+      obCor.map(r => r.stage + ':' + r.events.map(e => e.event).join('/')).join(','));
+    ok('damaged bytes still preserved after reconciliation',
+      (await cor0.page.evaluate(() => localStorage.getItem('bnr.bdrop.outbox.v1.damaged'))) === RAW);
+    ok('damaged-journal reconciliation broadcast nothing', mock.broadcasts.length === 0);
+    /* the deliberate archive path — explicit, receipted, never silent */
+    await cor0.page.evaluate(r => localStorage.setItem('bnr.bdrop.outbox.v1', r), RAW);
+    await cor0.page.reload();
+    await cor0.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    cor0.page.once('dialog', d => d.accept());
+    await cor0.page.click('#damaged-archive');
+    await step('deliberate archive starts a clean journal', () => cor0.page.waitForFunction(() => /archived deliberately/.test(document.getElementById('status').textContent || ''), null, { timeout: 8000 }));
+    ok('archive: journal is a clean empty list', (await cor0.page.evaluate(() => localStorage.getItem('bnr.bdrop.outbox.v1'))) === '[]');
+    const arch = await cor0.page.evaluate(() => localStorage.getItem('bnr.bdrop.outbox.v1.damaged'));
+    ok('archive: damaged bytes preserved inside the archive wrapper', !!(arch && (() => { try { return JSON.parse(arch).raw === RAW; } catch { return false; } })()));
+    await cor0.page.fill('#author', 'loviswater');
+    await cor0.page.fill('#permlink', 'after-archive-unblocked');
+    await cor0.page.fill('#body', BODY);
+    await cor0.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await cor0.page.click('#publish');
+    await step('after the deliberate archive the normal guards apply again', () => cor0.page.waitForFunction(() => /no posting key given/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    await cor0.ctx.close();
+
+    /* ── scenario 6: the keychain signer — a full publication with no key paste ── */
+    await setMock({ mode: 'normal', content: null });
+    mock.broadcasts.length = 0; mock.lastBody = null;
+    const dir6 = profile('keychain'); dirs.push(dir6);
+    const ctx6 = await chromium.launchPersistentContext(dir6, { headless: true });
+    await ctx6.addInitScript(() => {
+      window.hive_keychain = {
+        requestPost: async function (account, permlink, title, body, json_metadata, cb) {
+          try {
+            const H = window.hiveTx;
+            H.config.node = document.getElementById('rpc').value;
+            const op = ['comment', { parent_author: '', parent_permlink: 'hive', author: account, permlink, title, body, json_metadata }];
+            const tx = new H.Transaction([op]);
+            await tx.create([op]);
+            tx.sign(H.PrivateKey.from(String(await H.PrivateKey.randomKey())));
+            await tx.broadcast();
+            cb({ success: true, result: { id: tx.txId } });
+          } catch (e) { cb({ success: false, message: String((e && e.message) || e) }); }
+        }
+      };
+    });
+    const errs6 = [];
+    const page6 = await ctx6.newPage();
+    page6.on('pageerror', e => errs6.push(String(e)));
+    page6.on('console', m => { if (m.type() === 'error') errs6.push('console: ' + m.text()); });
+    await page6.goto(ORIGIN + '/surfaces/bdrop.html#fast');
+    await page6.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await page6.waitForFunction(() => typeof window.hiveTx === 'object', null, { timeout: 8000 });
+    ok('keychain signer auto-selected when the extension is present', await page6.isChecked('#signer-keychain'));
+    ok('disclosure speaks the keychain truth when it is selected', /never here/.test(await page6.textContent('#keytruth')));
+    await page6.fill('#author', 'loviswater');
+    await page6.fill('#permlink', 'bdrop-keychain-signer-path');
+    await page6.fill('#body', BODY);
+    await page6.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await page6.click('#publish');
+    await step('keychain path: the drop lands', () => page6.waitForFunction(() => /LANDED/.test(document.getElementById('receipt').textContent || ''), null, { timeout: 30000 }));
+    const ob6 = await outboxOf(page6);
+    ok('keychain lifecycle: prepared → authorized → submitted → confirmed (no in-page signature)',
+      JSON.stringify(ob6[0].events.map(e => e.event)) === JSON.stringify(['prepared', 'authorized', 'submitted', 'confirmed'])
+        && ob6[0].signed_tx === null,
+      ob6[0].events.map(e => e.event).join(' → '));
+    ok('keychain path: byte-compare MATCH receipt', /byte-compare MATCH/.test(await page6.textContent('#receipt')));
+    ok('keychain path: the WIF field was never touched', (await page6.inputValue('#wif')) === '');
+    ok('keychain path: no WIF-shaped string in any storage', !/5[JK][1-9A-HJ-NP-Za-km-z]{49}/.test(await storageDump(page6)));
+    ok('keychain path: exactly one broadcast', mock.broadcasts.length === 1, 'broadcasts=' + mock.broadcasts.length);
+    ok('keychain path: no page errors', errs6.length === 0, errs6[0] || '');
+    await ctx6.close();
+
+    /* ── scenario 7: fresh client, original profile UNAVAILABLE — the chain alone ── */
+    rmSync(dir1, { recursive: true, force: true }); /* the original browser profile is destroyed, not just closed */
+    const dir7 = profile('fresh'); dirs.push(dir7);
+    const fr = await open(dir7);
+    await step('fresh client: the outbox starts empty', () => fr.page.waitForFunction(() => /outbox is empty/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 8000 }));
+    await setMock({ mode: 'normal', content: { permlink: 'bdrop-fresh-recovery', body: BODY } });
+    await fr.page.fill('#author', 'loviswater');
+    await fr.page.fill('#permlink', 'bdrop-fresh-recovery');
+    await fr.page.fill('#body', BODY);
+    await fr.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    const before = mock.broadcasts.length;
+    await fr.page.click('#recover');
+    await step('recovered from the chain alone', () => fr.page.waitForFunction(() => /recovered from the chain alone/.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    const obFr = await outboxOf(fr.page);
+    ok('fresh client rebuilt the confirmed record with a receipt',
+      !!(obFr[0] && obFr[0].stage === 'confirmed' && obFr[0].receipt && obFr[0].events.some(e => e.event === 'recovered_from_chain')),
+      obFr.map(r => r.stage).join(','));
+    ok('fresh-client recovery broadcast nothing', mock.broadcasts.length === before);
+    ok('fresh-client receipt: LANDED with byte-compare MATCH', /LANDED/.test(await fr.page.textContent('#receipt')) && /MATCH/.test(await fr.page.textContent('#receipt')));
+    await fr.ctx.close();
   } finally {
     for (const d of dirs) { try { rmSync(d, { recursive: true, force: true }); } catch {} }
     server.close();
   }
   assert.equal(failures, 0, failures + ' lifecycle assertion(s) failed — see the ✗ lines above');
-  console.log(failures === 0 ? 'BDROP LIFECYCLE GREEN — editions, happy path, duplicates, restart, ambiguity, unavailability, divergence, retrieval and key hygiene all held. nothing touched hive.' : 'BDROP LIFECYCLE RED.');
+  console.log(failures === 0 ? 'BDROP LIFECYCLE GREEN — editions, happy path, duplicates, restart, ambiguity, unavailability, divergence, retrieval, key hygiene, the damaged journal, the keychain signer and fresh-client recovery all held. nothing touched hive.' : 'BDROP LIFECYCLE RED.');
 });
