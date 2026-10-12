@@ -1,19 +1,24 @@
-/* bdrop.js v3 — the drop desk's durable lifecycle.
-   prepared → authorized → signed → submitted → confirmed → reconciled.
+/* bdrop.js v4 — the drop desk's durable lifecycle.
+   prepared → authorized → [signed | handoff] → submitted → confirmed → reconciled.
    The browser is a client, never the sole keeper: recoverable state (scope,
    body bytes, the signed transaction, the event log) persists in localStorage
    BEFORE submission and never contains a secret; a restart or a lost RPC
    response reconciles against the chain first — a landed drop is confirmed,
    never re-published; a diverged permlink is reported, never edited; an
    unexpired signed transaction re-broadcasts byte-identically without the key.
-   A journal that cannot be parsed is never silently replaced: the damaged
-   bytes are preserved verbatim, the problem is reported, and new submissions
-   are refused until the chain reconciles what happened — uncertain history is
-   never overwritten with an empty array.
-   Signing has two doors, no new keychain: the founder's existing Hive
-   Keychain extension (the key never touches this page) or a one-scope paste
-   held as zeroable bytes in tab memory — never persisted, never logged, never
-   sent; only the signed transaction travels. */
+   A journal that cannot be read is QUARANTINED: bytes preserved verbatim,
+   every parseable operation reconciled on its own against the chain, unresolved
+   operations and unparseable residue keep new submissions refused — an explicit,
+   dialog-confirmed archive is the only exit, never a silent empty rewrite.
+   Signing has three doors, chosen explicitly, nothing auto-selected: the
+   native BNR wallet signer (the keychain contract — handoff issue #405, not
+   built yet), the Hive Keychain extension (external COMPATIBILITY; its
+   upstream requestPost contract is pinned below — callback NINTH), and a
+   one-scope in-tab paste held as zeroable bytes — never persisted, never
+   logged, never sent; only the signed transaction travels. Recovery evidence
+   keeps expected, chain-recovered and signature-bound hashes SEPARATE: a
+   content read proves presence, never a signature — no commitment means
+   UNVERIFIED, never MATCH. */
 (function(){
 'use strict';
 var $=function(id){return document.getElementById(id)};
@@ -108,11 +113,30 @@ function renderKeySession(){
 
 /* ─── the outbox: recoverable state, persisted before submission ───
    A journal that cannot be parsed is evidence of an uncertain past, not
-   garbage: the raw bytes are preserved verbatim under the .damaged key, the
-   working key is left untouched until reconciliation (or an explicit,
-   receipted archive) establishes what happened, and nothing new is submitted
-   while the question stands. */
-var CORRUPT=null;
+   garbage: the raw bytes are preserved verbatim under the .damaged key and the
+   working key is never touched. Every balanced object inside the damaged raw
+   that parses as a record is a READABLE operation and is reconciled against
+   the chain on its own; unresolved operations and the unparseable residue
+   keep the whole desk refusing new submissions (QUARANTINE). Recovering one
+   operation never clears uncertainty about the others. */
+var CORRUPT=null; /* {raw,why,seen,ops[],statuses[],residue_bytes} */
+function parseDamaged(raw){
+  var ops=[],depth=0,start=-1,inStr=false,esc=false,covered=0;
+  for(var i=0;i<raw.length;i++){
+    var ch=raw[i];
+    if(esc){esc=false;continue;}
+    if(inStr){if(ch==='\\')esc=true;else if(ch==='"')inStr=false;continue;}
+    if(ch==='"'){inStr=true;continue;}
+    if(ch==='{'){if(depth===0)start=i;depth++;}
+    else if(ch==='}'&&depth>0){depth--;if(depth===0&&start>=0){
+      var span=raw.slice(start,i+1),o=null;
+      try{o=JSON.parse(span);}catch(e){}
+      if(o&&typeof o==='object'&&o.id&&o.stage&&o.scope){ops.push(o);covered+=span.length;}
+      start=-1;
+    }}
+  }
+  return {ops:ops,residue_bytes:Math.max(0,raw.length-covered)};
+}
 function loadOutbox(){
   var raw=localStorage.getItem(OUTBOX_KEY);
   if(raw===null)return [];
@@ -121,10 +145,16 @@ function loadOutbox(){
     if(!Array.isArray(a))throw new Error('the saved journal is not a list');
     CORRUPT=null;return a;
   }catch(e){
-    CORRUPT={raw:raw,why:e&&e.message?e.message:String(e),seen:new Date().toISOString()};
+    var p=parseDamaged(raw);
+    CORRUPT={raw:raw,why:e&&e.message?e.message:String(e),seen:new Date().toISOString(),
+      ops:p.ops,residue_bytes:p.residue_bytes,
+      statuses:p.ops.map(function(o){return{id:o.id,outcome:'unresolved',note:'not yet reconciled'};})};
     if(localStorage.getItem(OUTBOX_DAMAGED_KEY)===null)localStorage.setItem(OUTBOX_DAMAGED_KEY,raw);
     return [];
   }
+}
+function quarantine(){ /* true while ANY uncertainty from the damaged journal stands */
+  return !!(CORRUPT&&(CORRUPT.residue_bytes>0||CORRUPT.statuses.some(function(s){return s.outcome==='unresolved';})));
 }
 function saveOutbox(a){
   if(CORRUPT)return false; /* never overwrite uncertain history */
@@ -147,8 +177,19 @@ function renderOutbox(a){
   if(CORRUPT){
     box.innerHTML='';
     var w=document.createElement('div');w.className='bad';
-    w.textContent='the recoverable journal is DAMAGED ('+CORRUPT.why+') — seen '+String(CORRUPT.seen).slice(11,19)+'. the damaged bytes are preserved verbatim under '+OUTBOX_DAMAGED_KEY+' and the original key is untouched. the desk REFUSES new submissions until the chain reconciles what happened: name the drop in the desk above (an edition load fills it) and press "recover a drop from the chain alone", or archive the damaged record deliberately below — it is never replaced silently.';
+    w.textContent='the recoverable journal is DAMAGED ('+CORRUPT.why+') — seen '+String(CORRUPT.seen).slice(11,19)+'. the damaged bytes are preserved verbatim under '+OUTBOX_DAMAGED_KEY+' and the working key is untouched. '+CORRUPT.ops.length+' readable operation(s) inside it will each be reconciled against the chain on their own; '+(quarantine()?'unresolved operations or unparseable residue ('+CORRUPT.residue_bytes+' bytes) keep the desk REFUSING new submissions.':'every operation resolved and no residue remains.')+' press "recover a drop from the chain alone" to reconcile them now; the deliberate archive below is a founder decision, never a silent rewrite.';
     box.appendChild(w);
+    CORRUPT.statuses.forEach(function(s){
+      var l=document.createElement('div');
+      l.className=s.outcome==='unresolved'?'bad':(s.outcome.indexOf('resolved-')===0?'ok':'dim');
+      l.textContent=s.id+' · '+s.outcome+(s.block?' (block '+s.block+')':'')+(s.note?' — '+s.note:'');
+      box.appendChild(l);
+    });
+    if(CORRUPT.residue_bytes>0){
+      var rz=document.createElement('div');rz.className='bad';
+      rz.textContent=CORRUPT.residue_bytes+' unparseable residue byte(s) — preserved verbatim; their operations are unknowable from here';
+      box.appendChild(rz);
+    }
     var rb=$('rebroadcast');if(rb)rb.hidden=true;
     return;
   }
@@ -262,6 +303,10 @@ async function reconcileAll(quiet){
     var r=a[i];
     if(r.stage==='signed'||r.stage==='submitted'||(r.stage==='confirmed'&&!r.receipt)){
       await reconcileOne(a,r,quiet);
+    }else if(r.stage==='handoff'){
+      /* a handoff whose answer never arrived: the outcome is unknown — the chain decides */
+      var h=await reconcileOne(a,r,true);
+      if(!quiet)log(r.id+' — a handoff whose answer never arrived: '+(h.stage==='confirmed'?'the chain shows it LANDED — confirmed, never re-asked.':h.stage==='diverged'?'the permlink exists with different bytes — diverged.':'the chain does not show it yet. it may still land; reconcile again later. a re-attempt is a new explicit press, never a blind retry.'),(h.stage==='confirmed'?'ok':(h.stage==='diverged'?'bad':'dim')));
     }else if(r.stage==='diverged'){
       if(!quiet)log(r.id+' — diverged. the desk will not edit an existing edition; fork a new permlink for corrections.','dim');
     }
@@ -296,18 +341,15 @@ function signerMode(){var el=document.querySelector('input[name="signer"]:checke
 function renderSigner(){
   var kc=$('signer-keychain');if(!kc)return;
   var note=$('signer-note'),kt=$('keytruth'),wl=document.querySelector('label[for="wif"]');
-  if(!KC){
-    kc.disabled=true;kc.checked=false;
-    if(note)note.textContent='no hive keychain extension detected in this browser — the paste signer below is the working door today. (the estate\u2019s isolated keychain at keys.skaists.dev signs EVM/bzDiD only; a hive phase belongs to its owner and is routed there.)';
-  }else{
-    kc.checked=true;
-    if(note)note.textContent='your keychain extension signs after one press inside it and broadcasts through the endpoint IT is configured with; this desk confirms inclusion from the endpoint named below. the posting key never enters this page.';
-  }
-  var keychain=signerMode()==='keychain';
-  if(kt)kt.textContent=keychain
+  kc.disabled=!KC; /* external signers are NEVER auto-selected — nothing sets this radio but the reader's own choice */
+  if(note)note.textContent=KC
+    ?'the keychain extension is a COMPATIBILITY door you choose yourself. it signs after one press inside it and broadcasts through the endpoint IT is configured with; this desk confirms inclusion from the endpoint named below. the native BNR wallet signer — the assigned path — is handed to the keychain owner (github issue #405) and is not built yet.'
+    :'no hive keychain extension detected — that door is closed. the native BNR wallet signer is handed to the keychain owner (github issue #405) and is not built yet; the manual paste below works today.';
+  var mode=signerMode();
+  if(kt)kt.textContent=mode==='keychain'
     ?'to no one and never here: your keychain extension signs after your press inside it and broadcasts through its own configured endpoint; the desk confirms inclusion from the endpoint named below.'
     :'to no one: it signs in this tab and is wiped after the gesture; only the signed transaction is sent, to the RPC endpoint named below.';
-  if(wl)wl.style.opacity=keychain?'0.6':'1';
+  if(wl)wl.style.opacity=mode==='keychain'?'0.6':'1';
 }
 Array.prototype.forEach.call(document.querySelectorAll('input[name="signer"]'),function(r){r.addEventListener('change',renderSigner);});
 $('publish').addEventListener('click',async function(){
@@ -315,7 +357,9 @@ $('publish').addEventListener('click',async function(){
   var body=$('body').value;
   var wif=$('wif').value.trim();
   if(!body){log('no body — nothing to publish, nothing attempted.','bad');return;}
-  if(CORRUPT){log('the recoverable journal is damaged — the desk refuses new submissions until the chain reconciles what happened (see the outbox below).','bad');return;}
+  if(quarantine()){log('the journal is quarantined (damaged, with unresolved operations or unparseable bytes) — the desk refuses new submissions until every readable operation is reconciled against the chain (see the outbox below).','bad');return;}
+  var mode0=signerMode();
+  if(mode0==='native'){log('the native BNR wallet signer is not built yet — the signing contract is handed to the keychain owner (github issue #405). choose another door for now.','bad');return;}
   if(!lastHash)await rehash();
   var bodyHash=lastHash;
   var scope=await currentScope(bodyHash);
@@ -347,24 +391,47 @@ $('publish').addEventListener('click',async function(){
   $('opjson').textContent=JSON.stringify(op,null,1);
   var mode=signerMode();
   if(mode==='keychain'){
-    if(!KC){log('no hive keychain extension detected in this browser — choose the paste signer instead.','bad');return;}
+    if(!KC){log('the hive keychain extension is not present — choose another door.','bad');return;}
     $('txjson').textContent='the keychain signer holds the signed bytes — this page never sees them; the chain read below is the proof.';
     log('gesture accepted — body hashed before your eyes: sha-256 '+scope.body_sha256+' · '+scope.body_bytes.toLocaleString()+' bytes.');
     var recK=upsert(a,scope,function(r){r.body=body;r.stage='authorized';r.events.push(ev('authorized',scope.body_sha256,{signer:'hive-keychain'}));});
-    log('asking your keychain extension to sign and broadcast — the posting key never enters this page; press once inside the extension…','dim');
+    /* the attempted operation persists BEFORE anything that can broadcast sees it */
+    upsert(a,scope,function(r){r.stage='handoff';r.events.push(ev('handoff','hive-keychain'));});
+    log('handing the operation to your keychain — persisted first at the handoff stage; if the answer never comes back the outcome is UNKNOWN, and the desk reconciles from the chain instead of guessing.','dim');
+    var fast=(location.hash||'').indexOf('fast')>=0;
     var kcd=await new Promise(function(res){
-      try{KC.requestPost(scope.author,scope.permlink,scope.title,body,op[1].json_metadata,function(r){res(r&&r.success?r:{refused:(r&&(r.message||r.error))||'the keychain did not confirm'});});}
-      catch(e){res({refused:e&&e.message?e.message:String(e)});}
+      var done=false;
+      var t=setTimeout(function(){if(!done){done=true;res({unknown:true,why:'the keychain answer never arrived'});}},fast?2500:240000);
+      try{
+        /* upstream contract PINNED from hive-keychain-extension master documentation/README.md:
+           requestPost(account, title, body, parent_perm, parent_account=null for root,
+           json_metadata as Object, permlink, comment_options, callback — the NINTH
+           parameter, then optional rpc override). Never invent a different shape. */
+        KC.requestPost(scope.author,scope.title,body,scope.parent_permlink,null,
+          JSON.parse(op[1].json_metadata),scope.permlink,null,
+          function(r){
+            if(done)return;done=true;clearTimeout(t);
+            res(r&&typeof r==='object'&&r.success?r:{refused:(r&&(r.message||r.error))||'the keychain did not confirm'});
+          },null);
+      }catch(e){
+        if(!done){done=true;clearTimeout(t);res({unknown:true,why:'the keychain call itself failed: '+(e&&e.message?e.message:String(e))});}
+      }
     });
-    if(!kcd||kcd.refused){
-      upsert(a,scope,function(r){r.last_error='keychain: '+((kcd&&kcd.refused)||'no answer');});
-      log('the keychain refused or failed ('+((kcd&&kcd.refused)||'no answer')+') — nothing was broadcast. the record stays authorized; reconciliation reads the chain before anything is asked again.','bad');
+    if(kcd&&kcd.unknown){
+      upsert(a,scope,function(r){r.stage='submitted';r.last_error='handoff: '+kcd.why+' — outcome UNKNOWN';r.events.push(ev('submitted','outcome-unknown',{signer:'hive-keychain'}));});
+      log('the handoff answer never arrived ('+kcd.why+') — the outcome is UNKNOWN, not "not broadcast". the desk reconciles from the chain before anything is asked again; it never blind-retries.','bad');
+      await confirmFromChain(a,null,scope,null);
       return;
     }
-    var kctxid=(kcd.result&&kcd.result.id)||kcd.id||null;
+    if(!kcd||kcd.refused){
+      upsert(a,scope,function(r){r.stage='authorized';r.last_error='keychain refused: '+((kcd&&kcd.refused)||'no reason given');r.events.push(ev('refused','hive-keychain'));});
+      log('the keychain REFUSED the request ('+((kcd&&kcd.refused)||'no reason given')+') — an explicit refusal before any broadcast it would make. the record returns to authorized; the chain is read before any re-attempt.','bad');
+      return;
+    }
+    var kctxid=(kcd.result&&(kcd.result.id||kcd.result))||null;
+    if(typeof kctxid==='object')kctxid=kctxid.id||null;
     var recS=upsert(a,scope,function(r){r.stage='submitted';r.last_error=null;r.events.push(ev('submitted',kctxid||'keychain',{signer:'hive-keychain'}));});
-    if(kctxid)log('the keychain broadcast accepted. transaction id '+kctxid,'ok');
-    else log('the keychain broadcast accepted (no id returned — the chain lookup below is the receipt).','ok');
+    log('the keychain broadcast accepted. transaction id '+(kctxid||'(none returned — the chain lookup below is the receipt)'),'ok');
     await confirmFromChain(a,recS,scope,kctxid);
     return;
   }
@@ -457,8 +524,13 @@ function renderReceipt(r){
   box.innerHTML='';
   var rc=r.receipt;if(!rc){box.textContent='no receipt on this record yet.';return;}
   var head=document.createElement('div');
-  head.className=(rc.body_byte_compare==='MATCH')?'ok':'bad';
-  head.textContent=(r.stage==='diverged'?'DIVERGED':'LANDED')+' · block '+rc.block_num+' · created '+rc.created+' · body sha-256 '+rc.body_sha256_published+' · byte-compare '+rc.body_byte_compare;
+  if(rc.what==='bDroP chain-recovery record'){
+    head.className=rc.body_byte_compare==='MATCH'?'ok':(rc.body_byte_compare==='DIVERGED'?'bad':'dim');
+    head.textContent='RECOVERED (chain read — proves presence, never a signature) · block '+rc.block_num+' · expected '+(rc.body_sha256_expected||'NONE in this desk')+' · chain '+rc.body_sha256_chain+' · '+rc.body_byte_compare+' · signing evidence NONE · inclusion UNVERIFIED';
+  }else{
+    head.className=(rc.body_byte_compare==='MATCH')?'ok':'bad';
+    head.textContent=(r.stage==='diverged'?'DIVERGED':'LANDED')+' · block '+rc.block_num+' · created '+rc.created+' · body sha-256 '+rc.body_sha256_published+' · byte-compare '+rc.body_byte_compare;
+  }
   box.appendChild(head);
   var meta=document.createElement('div');meta.className='dim';
   meta.textContent='transaction id: '+rc.txid+' · events: '+r.events.map(function(e){return e.event;}).join(' → ');
@@ -488,45 +560,96 @@ $('rebroadcast').addEventListener('click',async function(){
 $('reconcile').addEventListener('click',async function(){$('status').innerHTML='';await reconcileAll(false);});
 
 /* ─── recovery from the chain alone: a fresh client, the original profile gone ───
-   No journal, no key, no manual JSON: the desk names a drop (an edition load
-   fills the fields), the chain answers, and the record is rebuilt confirmed
-   with a receipted event. this is also the reconciliation path for a damaged
-   journal: the chain — never an empty array — establishes what happened. */
+   No journal, no key, no manual JSON. A content read proves PRESENCE, never a
+   signature: the expected commitment (the desk's bytes, when present), the
+   chain-recovered hash and any signature-bound hash stay SEPARATE fields. A
+   missing commitment means UNVERIFIED, never MATCH; a differing commitment
+   means DIVERGED. Nothing here invents signing time, signature provenance,
+   transaction inclusion or finality — and the recovered BYTES ride the record.
+   When the journal is damaged, this same button reconciles every READABLE
+   operation in it on its own; unresolved operations stay quarantined. */
+async function reconcileDamaged(){
+  if(!CORRUPT)return;
+  var rpc=$('rpc').value.trim().replace(/\/+$/,'');
+  if(!rpc){log('name the rpc endpoint to read the chain from.','bad');return;}
+  log('reconciling every readable operation in the damaged journal against the chain — '+CORRUPT.ops.length+' readable, '+CORRUPT.residue_bytes+' unparseable residue byte(s) preserved verbatim.','dim');
+  for(var i=0;i<CORRUPT.ops.length;i++){
+    var o=CORRUPT.ops[i],st=CORRUPT.statuses[i],s=o.scope||{};
+    st.note='';
+    var c;
+    try{c=await rpcCall(rpc,'condenser_api.get_content',{author:s.author,permlink:s.permlink});}
+    catch(e){st.outcome='unresolved';st.note='chain read failed: '+e.message;continue;}
+    if(c&&typeof c==='object'&&typeof c.body==='string'&&c.body.length){
+      var h=await sha256Hex(new TextEncoder().encode(c.body));
+      if(h===s.body_sha256){st.outcome='resolved-confirmed';st.block=c.block_num;}
+      else{st.outcome='resolved-diverged';st.block=c.block_num;st.note='the chain body differs from this operation\u2019s committed bytes';}
+    }else if(o.signed_tx&&expired(o.signed_tx)){
+      st.outcome='resolved-expired';st.note='not landed and the signed transaction has expired — it cannot land anymore';
+    }else{
+      st.outcome='unresolved';
+      st.note=o.signed_tx?'not landed and the signed transaction is still live — it may be in flight':'not landed and no signed transaction is held — its broadcast state is unknowable from this desk';
+    }
+  }
+  renderOutbox();
+  if(quarantine()){
+    log('the damaged journal still holds unresolved operations or unparseable bytes — submissions stay refused. each resolved outcome above is recorded; the raw bytes stay preserved; recovering one operation never clears the others\u2019 uncertainty.','bad');
+  }else{
+    /* every readable operation resolved and no residue remains — the outcomes are established */
+    var clean=CORRUPT.ops.map(function(o,i){
+      var st=CORRUPT.statuses[i];
+      o.stage=st.outcome==='resolved-confirmed'?'confirmed':'diverged';
+      o.events=(o.events||[]).concat([ev('resolved_from_damaged_journal','chain:'+(st.block||'none'),{outcome:st.outcome})]);
+      return o;
+    });
+    CORRUPT=null;
+    saveOutbox(clean);renderOutbox(clean);
+    log('every readable operation in the damaged journal resolved against the chain and no residue remains — the quarantine lifts; the resolved records are the journal now.','ok');
+  }
+}
 $('recover').addEventListener('click',async function(){
   $('status').innerHTML='';
+  if(CORRUPT)return reconcileDamaged();
   var author=$('author').value.trim().toLowerCase(),permlink=slug($('permlink').value);
   if(!author||!permlink){log('name the drop to recover — author and permlink (an edition load fills both).','bad');return;}
   var rpc=$('rpc').value.trim().replace(/\/+$/,'');
   if(!rpc){log('name the rpc endpoint to read the chain from.','bad');return;}
-  log('reading the chain alone for @'+author+'/'+permlink+' — no key, no journal, nothing is broadcast.','dim');
+  log('reading the chain alone for @'+author+'/'+permlink+' — a content read: it proves presence, never a signature. nothing is broadcast.','dim');
   var c;
   try{c=await rpcCall(rpc,'condenser_api.get_content',{author:author,permlink:permlink});}
   catch(e){log('the chain read failed ('+e.message+') — nothing was recovered; nothing beyond the read was attempted.','bad');return;}
-  if(!(c&&c.body&&c.body.length)){log('the chain shows no such drop at @'+author+'/'+permlink+' from this endpoint. a chain read is not proof it never existed — another endpoint may know more; nothing was recovered.','bad');return;}
+  if(!(c&&typeof c==='object'&&typeof c.body==='string'&&c.body.length)){
+    log('the endpoint\u2019s answer did not read as content — nothing was recovered and nothing was manufactured. an untrusted endpoint cannot make this desk invent a record.','bad');return;
+  }
   var chainHash=await sha256Hex(new TextEncoder().encode(c.body));
   var deskBytes=currentBytes();
-  var compare=deskBytes&&deskBytes.length?((await sha256Hex(deskBytes))===chainHash?'MATCH':'DIFFERS'):'not compared — no body in the desk';
-  var scope={author:author,permlink:permlink,title:(c.title||$('title').value.trim()||''),
-    parent_permlink:($('tags').value.split(/[\s,]+/).filter(Boolean)[0]||'hive'),
-    tags:$('tags').value.split(/[\s,]+/).filter(Boolean).join(','),
-    body_sha256:chainHash,body_bytes:new TextEncoder().encode(c.body).length,
-    disclosure_version:DISCLOSURE_VERSION,rpc:rpc};
-  if(CORRUPT){
-    var seed={v:1,id:'@'+author+'/'+permlink,created_at:new Date().toISOString(),stage:'confirmed',
-      scope:scope,body:null,signed_tx:null,receipt:null,attempts:0,last_error:null,
-      events:[ev('recovered_from_chain','chain:'+c.block_num,{client:'recovery',journal:'damaged-quarantined',body_byte_compare:compare})]};
-    seed.receipt=assembleReceipt(seed,c,chainHash,null);
-    localStorage.setItem(OUTBOX_DAMAGED_KEY,localStorage.getItem(OUTBOX_DAMAGED_KEY)||CORRUPT.raw);
-    CORRUPT=null; /* the chain established this scope's fate; the clean journal starts receipted */
-    saveOutbox([seed]);
-    renderOutbox([seed]);renderReceipt(seed);
-    log('the chain established the outcome: @'+author+'/'+permlink+' landed in block '+c.block_num+', byte-compare '+compare+'. the damaged journal is preserved verbatim under '+OUTBOX_DAMAGED_KEY+' and a clean receipted journal begins — submissions are unblocked.','ok');
-    return;
-  }
+  var expected=deskBytes&&deskBytes.length?await sha256Hex(deskBytes):null;
+  var verdict=expected===null?'UNVERIFIED':(expected===chainHash?'MATCH':'DIVERGED');
+  var rec={v:1,id:'@'+author+'/'+permlink,created_at:new Date().toISOString(),
+    stage:verdict==='DIVERGED'?'diverged':'confirmed',
+    scope:{author:author,permlink:permlink,title:(typeof c.title==='string'?c.title:''),
+      parent_permlink:($('tags').value.split(/[\s,]+/).filter(Boolean)[0]||'hive'),
+      tags:$('tags').value.split(/[\s,]+/).filter(Boolean).join(','),
+      body_sha256:expected,body_bytes:new TextEncoder().encode(c.body).length,
+      disclosure_version:DISCLOSURE_VERSION,rpc:rpc},
+    body:c.body,signed_tx:null,attempts:0,last_error:null,events:[],receipt:null};
+  rec.events.push(ev('recovered_from_chain','chain:'+(typeof c.block_num==='number'?c.block_num:'unnumbered'),{verdict:verdict,body_bytes:c.body.length}));
+  rec.receipt={v:3,what:'bDroP chain-recovery record',chain:'hive-mainnet',
+    author:author,permlink:permlink,
+    body_sha256_expected:expected,body_sha256_chain:chainHash,signature_bound_hash:null,
+    signing_evidence:'NONE — a content read cannot speak for any signature',
+    txid:null,inclusion:'UNVERIFIED — content lookup only; no transaction inclusion or finality claimed',
+    block_num:(typeof c.block_num==='number'?c.block_num:null),
+    created:(typeof c.created==='string'?c.created:null),
+    rpc_endpoint:rpc,disclosure_version:DISCLOSURE_VERSION,
+    recovered_at:new Date().toISOString(),body_byte_compare:verdict,events:rec.events};
   var a=loadOutbox();
-  var rec=upsert(a,scope,function(r){r.stage='confirmed';r.receipt=assembleReceipt(r,c,chainHash,null);r.events.push(ev('recovered_from_chain','chain:'+c.block_num,{client:'fresh',body_byte_compare:compare}));});
-  renderReceipt(rec);
-  log('recovered from the chain alone: @'+author+'/'+permlink+' landed in block '+c.block_num+' · byte-compare '+compare+'. no key, no journal import, nothing broadcast — the chain was the keeper all along.','ok');
+  a=a.filter(function(x){return x.id!==rec.id;});
+  a.push(rec);
+  saveOutbox(a);renderOutbox(a);renderReceipt(rec);
+  var line={MATCH:'recovered: the chain body equals the desk\u2019s committed bytes (MATCH). the signature evidence is still NONE — presence proven, signing never.',
+    DIVERGED:'recovered: the chain body DIFFERS from the desk\u2019s committed bytes (DIVERGED) — both digests ride the record; the desk edits nothing.',
+    UNVERIFIED:'recovered with NO commitment in the desk (UNVERIFIED): the chain body is recorded as-found; nothing claims what was signed — a missing commitment never converts to MATCH.'}[verdict];
+  log(line+' the recovered bytes ride the record. no key, no journal import, nothing broadcast.','ok');
 });
 $('damaged-archive').addEventListener('click',function(){
   if(!CORRUPT)return;
@@ -646,7 +769,7 @@ rehash();
 reconcileAll(true).then(function(a){
   var pend=a.filter(function(r){return r.stage==='signed'||r.stage==='submitted';});
   if(pend.length)log('recovered state: '+pend.length+' drop(s) in flight — reconciled against the chain on load; nothing was re-signed or re-published blind.','dim');
-  if(CORRUPT)log('the recoverable journal is damaged — bytes preserved, problem reported, submissions refused until the chain reconciles what happened (see the outbox).','bad');
+  if(CORRUPT)log('the recoverable journal is damaged — bytes preserved verbatim; every readable operation reconciles on its own (press "recover a drop from the chain alone"); submissions stay refused while any operation or residue is unresolved.','bad');
   renderOutbox(a);
 });
 })();

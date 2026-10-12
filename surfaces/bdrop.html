@@ -183,10 +183,11 @@ a{color:var(--ink)}
 
   <h2>sign &amp; broadcast</h2>
   <div class="card">
-    <p class="law" style="margin-top:0">how this drop is signed — two doors, one gesture, no new keychain:</p>
+    <p class="law" style="margin-top:0">how this drop is signed — three doors, chosen explicitly; nothing here is auto-selected for you:</p>
     <div class="row">
-      <label><input type="radio" name="signer" value="keychain" id="signer-keychain"> hive keychain extension (your existing one — the key never touches this page)</label>
-      <label><input type="radio" name="signer" value="paste" checked> paste the posting key in this tab</label>
+      <label><input type="radio" name="signer" value="native" id="signer-native" disabled> native BNR wallet signer — the keychain contract (handoff issue #405; not built yet)</label>
+      <label><input type="radio" name="signer" value="keychain" id="signer-keychain"> hive keychain extension (external, compatibility — you choose it; the key never touches this page)</label>
+      <label><input type="radio" name="signer" value="paste" checked> paste the posting key in this tab (manual)</label>
     </div>
     <p class="law" id="signer-note">…</p>
     <div class="grid2">
@@ -227,7 +228,11 @@ a{color:var(--ink)}
     submitted, and never a secret. a restart or a lost response reconciles against the chain
     first: a drop that already landed is confirmed, never re-published; a permlink that exists
     with different bytes is reported as diverged and never edited; an unexpired signed
-    transaction can be re-broadcast byte-identically without the key.</p>
+    transaction can be re-broadcast byte-identically without the key. a journal that cannot be
+    read is <b>quarantined</b>: its bytes are preserved verbatim, every parseable operation is
+    reconciled against the chain on its own, unresolved operations stay quarantined, and no new
+    submission happens while any of them is unresolved — archiving the damaged bytes is a
+    deliberate founder decision, never a silent empty rewrite.</p>
     <div class="row">
       <button id="reconcile">reconcile now</button>
       <button id="recover">recover a drop from the chain alone (a fresh client needs nothing else)</button>
@@ -280,7 +285,7 @@ if(typeof Number.prototype.unref!=='function'){Number.prototype.unref=function()
 </script>
 <script src="onboarding/vendor/hive-tx.min.js?v=1"></script>
 <script src="ant-pay.js?v=1"></script>
-<script src="bdrop.js?v=3"></script>
+<script src="bdrop.js?v=4"></script>
 <script src="tour.js?v=42"></script>
 </body>
 </html>
