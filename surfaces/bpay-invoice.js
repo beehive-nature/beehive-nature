@@ -137,12 +137,16 @@
   async function devnetProfile(signal){
     if(devnetCache)return devnetCache;
     async function get(path){
-      var r;try{r=await fetch(DEVNET+path,{signal:signal,cache:'no-store'});}catch(e){throw new Error('Could not reach the test network on this computer. Start it, and when your browser asks, allow skaists.dev to reach apps on this device.');}
+      // F3: a redirect is a refusal — the manifest comes from this computer's loopback or not at all
+      var r;try{r=await fetch(DEVNET+path,{signal:signal,cache:'no-store',redirect:'error'});}catch(e){throw new Error('Could not reach the test network on this computer (or it answered with a redirect, which is refused). Start it, and when your browser asks, allow skaists.dev to reach apps on this device.');}
       if(!r.ok)throw new Error('The local test network answered HTTP '+r.status);
       return r.json();
     }
     var browser=await get('/api/browser-manifest.json'),devnet=await get('/api/devnet-manifest.json');
     var profile=antTestProfile(browser,devnet);
+    // the banner reads like a receipt: how many private-address nodes and which loopback port, measured, not promised
+    var banner=document.querySelector('.ant-test-banner');
+    if(banner){var strong=document.createElement('b');strong.textContent='TEST NETWORK';banner.replaceChildren(strong,document.createTextNode(' · a local Autonomi devnet and test chain on this computer: '+profile.seeds.length+' storage nodes at private addresses, test chain at '+profile.rpcUrl+'. Test ANT and test ETH have no value, and nothing here touches Arbitrum One.'));}
     // Anvil mines only when a transaction arrives; the payer confirms a payment only once a
     // later block exists. On the test chain alone (31337, checked), mine one block a second.
     if(Number(await antTestRpc(profile,'eth_chainId',[]))!==31337)throw new Error('The test chain is not 31337; refusing it');
@@ -163,7 +167,8 @@
     return {id:'bnr-devnet',seeds:seeds,payment:payment,rpcUrl:loopback(evm.rpc_url)};
   }
   async function antTestRpc(profile,method,params){
-    var r=await fetch(profile.rpcUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:method,params:params})});
+    // F3: the test chain answers at its loopback port or not at all; a redirect is a refusal
+    var r;try{r=await fetch(profile.rpcUrl,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',redirect:'error',body:JSON.stringify({jsonrpc:'2.0',id:1,method:method,params:params})});}catch(e){throw new Error('The test chain did not answer on this computer, or answered with a redirect, which is refused');}
     var j=await r.json();if(j.error)throw new Error('Test chain refused '+method+': '+String(j.error.message||'').slice(0,120));return j.result;
   }
   // Test funds: the local chain's own unlocked dev account sends test ANT, and Anvil sets the
@@ -197,7 +202,9 @@
       '<button id="ant-fund" type="button">'+(ANT_TEST?'Get test ANT and test ETH':'Fund this wallet · ETH / ANT')+'</button><div id="ant-funding" hidden></div>'+
       '<button id="ant-buy-start" class="ant-primary" type="button">Prepare storage invoice / resume</button> <button id="ant-buy-stop" type="button" hidden>Stop waiting</button>'+
       '<div id="ant-buy-status" role="status" aria-live="polite">Prepare an invoice to see the exact ANT total. Nothing is signed at this step.</div><div id="ant-buy-invoice" tabindex="-1"></div><div id="ant-buy-download"></div>'+
-      '<details class="wallet-secondary"><summary>Limits &amp; resuming an interrupted purchase</summary><div class="ant-help">The storage ceiling is 100 ANT per file. Your wallet pays on '+(ANT_TEST?'the local test chain':'Arbitrum One')+'. The ETH ceiling covers approvals and all attempts. Keep this browser’s saved data and resume with the same file after an interruption; another browser or device does not share this payment record.</div></details>'+
+      '<details class="wallet-secondary"><summary>Limits &amp; resuming an interrupted purchase</summary><div class="ant-help">The storage ceiling is 100 ANT per file. Your wallet pays on '+(ANT_TEST?'the local test chain':'Arbitrum One')+'. The ETH ceiling covers approvals and all attempts. Keep this browser’s saved data and resume with the same file after an interruption. Another browser or device does not share this payment record unless you save it here and open it there: the record carries what was signed and sent, never a key.</div>'+
+      '<div class="ant-help"><a id="ant-buy-record" href="#" hidden>Save this file’s payment record</a></div>'+
+      '<div class="ant-help"><label for="ant-buy-record-in">Open a saved payment record (from another browser)</label> <input id="ant-buy-record-in" type="file" accept="application/json"></div><div id="ant-buy-record-status" role="status" aria-live="polite"></div></details>'+
       '<details id="ant-buy-proof" hidden><summary>Receipt and verified hash</summary><pre id="ant-buy-receipt" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details></details>';
   }
   function bindPurchase(){
@@ -211,21 +218,21 @@
         try{
           box.textContent='Sending test ANT and test ETH to your keychain’s test address…';
           var prof=await devnetProfile();
-          var who=await BNRPAY.antStorageSigner({testnet:{token:prof.payment.paymentTokenAddress,vault:prof.payment.paymentVaultAddress}}).address();
+          var who=await paySigner(prof).address(); // the same chooser the invoice uses: funding, display and payer agree
           var got=await antTestFund(prof,who);
-          box.textContent='Funded on the test network: '+ant(got.ant)+' test ANT and 1 test ETH at '+who+'.';
+          box.textContent='Funded on the test network: '+ant(got.ant)+' test ANT and 1 test ETH at '+who+' ('+payerWords()+').';
         }catch(e){box.textContent='Test funding stopped: '+(e&&e.message||e);}
         return;
       }
       try{
-        var address=await BNRPAY.antStorageSigner().address();
-        var title=document.createElement('h3');title.textContent='Receive ETH and ANT · Arbitrum One';box.append(title);
+        var address=await paySigner(null).address(); // the account that will pay, never another
+        var title=document.createElement('h3');title.textContent='Receive ETH and ANT · Arbitrum One ('+payerWords()+')';box.append(title);
         var note=document.createElement('div');note.textContent='Send on Arbitrum One (chain 42161). ETH pays network fees; ANT pays storage. Scan this address, or click the QR to copy it.';box.append(note);
         var qr=document.createElement('button');qr.type='button';qr.setAttribute('aria-label','Copy Arbitrum funding address');qr.innerHTML=BNRPAY.receiveQr(address);box.append(qr);
         var text=document.createElement('div');text.style.overflowWrap='anywhere';text.textContent=address;box.append(text);
         var copied=document.createElement('div');copied.setAttribute('role','status');box.append(copied);
         qr.onclick=async function(){try{await navigator.clipboard.writeText(address);copied.textContent='Address copied. Use Arbitrum One for ETH or ANT.';}catch(e){copied.textContent='Copy the address shown above.';}};
-      }catch(e){box.textContent='Open your existing bzDiD wallet and connect your .b name to show its funding address.';}
+      }catch(e){box.textContent=(e&&e.message)||'Open your existing bzDiD wallet and connect your .b name to show its funding address.';}
     };
     function progress(step){document.querySelectorAll('[data-ant-step]').forEach(function(el){if(el.dataset.antStep===step)el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');});}
     function walletState(){return window.BNRPAY&&BNRPAY.antStorageState?BNRPAY.antStorageState():{connected:false,hasName:false,coreReady:false};}
@@ -233,16 +240,43 @@
     // It appears only when that origin answers; otherwise the wallet keychain pays as before.
     var isolated=null;
     function isolatedOpen(){return !!(isolated&&isolated.state&&isolated.state.state==='unlocked');}
+    // An open isolated keychain must be pinned to the network this page pays on: the production
+    // build (Arbitrum One) here, a TEST BUILD (chain 31337, the devnet's own token and vault) on
+    // wallet.html?net=devnet. A mismatch is a refusal by name — never a silent fallback to the
+    // wallet page's own keychain. Only when no isolated keychain is open does this page's keychain
+    // pay, and the session line says so. A keychain that announces no pin is the production one.
+    function pinProblem(testProfile){
+      var p=(isolated&&isolated.state&&isolated.state.pin)||{chain:42161,test:false},same=function(a,b){return String(a).toLowerCase()===String(b).toLowerCase();};
+      if(ANT_TEST){
+        if(p.test!==true||p.chain!==31337)return 'Your isolated keychain is pinned to '+(p.chain===42161?'Arbitrum One':'chain '+p.chain)+' and cannot pay on the test network. Lock it to pay with this page’s own test keychain, or open a TEST BUILD keychain.';
+        if(testProfile&&!(same(p.token,testProfile.payment.paymentTokenAddress)&&same(p.vault,testProfile.payment.paymentVaultAddress)))return 'Your TEST BUILD keychain is pinned to another test network’s token and vault than the one running now. Rebuild it for this network.';
+        return null;
+      }
+      if(p.test===true||p.chain!==42161)return 'The open keychain is a TEST BUILD (chain '+p.chain+') and cannot pay on Arbitrum One. Lock it and open your production keychain at keys.skaists.dev.';
+      return null;
+    }
+    function paySigner(testProfile){
+      if(isolatedOpen()){var problem=pinProblem(testProfile);if(problem)throw new Error(problem);return isolated.signer();}
+      if(!window.BNRPAY||!BNRPAY.antStorageSigner)throw new Error('The bzDiD storage signer is not ready; reload this wallet');
+      return BNRPAY.antStorageSigner(ANT_TEST?{testnet:{token:testProfile.payment.paymentTokenAddress,vault:testProfile.payment.paymentVaultAddress}}:undefined);
+    }
+    function payerWords(){return isolatedOpen()?'your isolated '+(isolated.state.pin&&isolated.state.pin.test?'TEST BUILD ':'')+'keychain':'this page’s own '+(ANT_TEST?'test ':'')+'keychain';}
     var slot=document.getElementById('ant-buy-keychain');
     if(window.KeychainClient&&slot){
-      if(!card._keychain)card._keychain=KeychainClient.mount(slot);
+      // on the test network only the TEST BUILD keychain at its own origin is mounted; the production keychain is never asked to pay there
+      if(!card._keychain)card._keychain=KeychainClient.mount(slot,ANT_TEST?{build:'devnet'}:undefined);
       card._keychain.then(function(c){isolated=c;if(!c)return;if(!slot.contains(c.frame))slot.append(c.frame);c.onstate(sessionState);sessionState();});
     }
     function sessionState(){
       var state=walletState(),message=document.getElementById('ant-session-message'),link=document.getElementById('ant-connect');
       if(!message)return;
-      if(isolatedOpen()){message.textContent='Your isolated keychain is open and pays from its own account. Ready to prepare an invoice.';link.hidden=true;start.disabled=!!active;start.hidden=false;return;}
-      message.textContent=!state.connected?'First, open your existing wallet. Your file and fee limit stay here.':!state.hasName?'Wallet open. Connect your existing .b name to choose the paying account.':!state.coreReady?'Wallet open. Waiting for the Rust signing core.':'Wallet connected. Ready to prepare an invoice.';
+      if(isolatedOpen()){
+        var problem=pinProblem(null);
+        if(problem){message.textContent=problem;link.hidden=true;start.disabled=true;start.hidden=false;return;}
+        message.textContent='Your isolated '+(isolated.state.pin&&isolated.state.pin.test?'TEST BUILD ':'')+'keychain is open and pays from its own account. Ready to prepare an invoice. Paying account: '+isolated.state.evm+'.';
+        link.hidden=true;start.disabled=!!active;start.hidden=false;return;
+      }
+      message.textContent=!state.connected?'First, open your existing wallet. Your file and fee limit stay here.':!state.hasName?'Wallet open. Connect your existing .b name to choose the paying account.':!state.coreReady?'Wallet open. Waiting for the Rust signing core.':'Wallet connected. Ready to prepare an invoice. '+(ANT_TEST?'This page’s own test keychain pays on the test network; no isolated keychain is open.':'This page’s own keychain pays; no isolated keychain is open.');
       link.hidden=state.connected&&state.hasName;
       link.href=state.connected?'#connect-sec':'#kc-sec';
       link.textContent=state.connected?'Connect your .b name':'Connect your bzDiD keychain';
@@ -273,16 +307,16 @@
           // connect first: the kit refuses nodes whose authenticated handshake names another
           // chain, token or vault than this profile, so the pin below is the nodes' own
           if(ANT_TEST)await antSession(signal);
-          // The isolated keychain pays Arbitrum One only; the test network uses this wallet's keychain.
-          if(isolatedOpen()&&!ANT_TEST)signer=isolated.signer();
-          else{if(!window.BNRPAY||!BNRPAY.antStorageSigner)throw new Error('The bzDiD storage signer is not ready; reload this wallet');signer=BNRPAY.antStorageSigner(ANT_TEST?{testnet:{token:testProfile.payment.paymentTokenAddress,vault:testProfile.payment.paymentVaultAddress}}:undefined);}
+          signer=paySigner(testProfile); // named by its pin; a mismatch refused above, never a fallback
           await signer.address(); // Public identity only; no key or signature leaves the keychain.
           status.textContent='Hashing the original file and opening Autonomi…';
           var bytes=new Uint8Array(await file.arrayBuffer());
           var sha=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
+          recordSha=sha;
           var session=await antSession(signal),defaults=ANT_TEST?{payment:testProfile.payment,rpcUrl:testProfile.rpcUrl}:await session.sdk.getNetworkDefaults({signal:signal});
           var requestId=0;
-          var rpc=async function(method,params){var r=await fetch(defaults.rpcUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:++requestId,method:method,params:params})});if(!r.ok)throw new Error('Payment RPC unavailable');var j=await r.json();if(j.error)throw new Error('Payment RPC refused '+method);return j.result;};
+          // F3: the payment RPC is the named endpoint or nothing — a redirect is refused, never followed
+          var rpc=async function(method,params){var r;try{r=await fetch(defaults.rpcUrl,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',redirect:'error',body:JSON.stringify({jsonrpc:'2.0',id:++requestId,method:method,params:params})});}catch(e){throw new Error('Payment RPC unreachable, or it answered with a redirect, which is refused; nothing was sent');}if(!r.ok)throw new Error('Payment RPC unavailable');var j=await r.json();if(j.error)throw new Error('Payment RPC refused '+method);return j.result;};
           var payer=AntPay.createHosted({artifact:{name:file.name,sha256:sha,bytes:file.size},network:defaults.payment,storage:localStorage,rpc:rpc,signer:signer,testnet:ANT_TEST});
           await payer.retryUnpaid(signal);
           var prior=payer.snapshot();
@@ -346,9 +380,49 @@
           var download=document.createElement('a');download.href=downloadUrl;download.download=file.name;download.textContent='Download verified file';document.getElementById('ant-buy-download').append(download);
           view.replaceChildren();status.textContent='Stored and retrieved: all '+reconciled.retrievedBytes+' bytes match the original SHA-256. Receipt reconciled.';
         });
-      }catch(error){status.textContent='Storage stopped: '+(error&&error.message||error)+'. Keep this browser’s saved data and resume the same file; do not start a second payment elsewhere.';}
-      finally{active=null;input.disabled=false;fee.disabled=false;stop.hidden=true;sessionState();}
+      }catch(error){status.textContent='Storage stopped: '+(error&&error.message||error)+'. Keep this browser’s saved data and resume the same file; do not start a second payment elsewhere.'+(recordSha&&localStorage.getItem(JOURNAL+recordSha)?' To continue on another browser, save this file’s payment record under “Limits & resuming”.':'');}
+      finally{active=null;input.disabled=false;fee.disabled=false;stop.hidden=true;sessionState();refreshRecord();}
     };
+    // ── the payment record for the chosen file ──
+    // What this page already journals before every consequential step (invoice identity and
+    // scope, the signed envelope and its hash, gas and quote reservations, the upload checkpoint
+    // and the retrieval reference) can be carried to another browser as a file. Opened there, the
+    // same file resumes from the kept record: confirmed payments are reused, an unknown broadcast
+    // is reconciled from the chain, and nothing new is signed without a fresh authorization. The
+    // record never carries a key. It is state transport for the existing payer, not another executor.
+    var RECORD='bpay.ant.journal/1',recordSha=null,JOURNAL=ANT_TEST?'bnr.ant.purchase.test.v1:':'bnr.ant.purchase.v1:',CLAIMS_KEY=ANT_TEST?'bnr.ant.quote-claims.test.v1':'bnr.ant.quote-claims.v1';
+    async function shaOf(file){return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await file.arrayBuffer())),function(b){return b.toString(16).padStart(2,'0');}).join('');}
+    function refreshRecord(){
+      var a=document.getElementById('ant-buy-record');if(!a)return;
+      if(a.href&&a.href.indexOf('blob:')===0)URL.revokeObjectURL(a.href);
+      var raw=recordSha&&localStorage.getItem(JOURNAL+recordSha);
+      if(!raw){a.hidden=true;a.removeAttribute('href');a.removeAttribute('download');return;}
+      var ledger=JSON.parse(raw),claims=JSON.parse(localStorage.getItem(CLAIMS_KEY)||'{}'),mine={};
+      Object.keys(claims).forEach(function(q){if(claims[q]===recordSha)mine[q]=claims[q];});
+      var record={schema:RECORD,testnet:ANT_TEST,exportedAt:new Date().toISOString(),artifact:ledger.artifact,network:ledger.network,ledger:ledger,claims:mine};
+      a.href=URL.createObjectURL(new Blob([JSON.stringify(record,null,2)],{type:'application/json'}));
+      a.download='ant-payment-record-'+recordSha.slice(0,16)+(ANT_TEST?'-testnet':'')+'.json';a.hidden=false;
+    }
+    input.addEventListener('change',function(){var f=input.files[0];recordSha=null;refreshRecord();if(f)shaOf(f).then(function(h){if(input.files[0]===f){recordSha=h;refreshRecord();}});});
+    document.getElementById('ant-buy-record-in').addEventListener('change',async function(){
+      var say=document.getElementById('ant-buy-record-status'),rf=this.files[0];this.value='';if(!rf)return;
+      try{
+        var file=input.files[0];if(!file)throw new Error('Choose the same public file first, then open its payment record');
+        var record=JSON.parse(await rf.text());
+        if(!record||record.schema!==RECORD||!record.ledger||!record.artifact||!record.ledger.network)throw new Error('That is not a payment record this wallet wrote');
+        if(record.testnet!==ANT_TEST)throw new Error(record.testnet?'That record is from the test network; open it on wallet.html?net=devnet':'That record is for Arbitrum One, not the test network');
+        if(record.ledger.network.chainId!==(ANT_TEST?31337:42161))throw new Error('That record names another payment network');
+        var sha=await shaOf(file);
+        if(record.artifact.sha256!==sha||record.artifact.bytes!==file.size||JSON.stringify(record.ledger.artifact)!==JSON.stringify(record.artifact))throw new Error('That record belongs to a different file than the one chosen');
+        var have=localStorage.getItem(JOURNAL+sha);
+        if(have&&JSON.parse(have).plans.some(function(p){return p.txs.some(function(t){return t.state!=='planned';});}))throw new Error('This browser already holds a payment record for this file. Resume that one; nothing was replaced');
+        localStorage.setItem(JOURNAL+sha,JSON.stringify(record.ledger));
+        var claims=JSON.parse(localStorage.getItem(CLAIMS_KEY)||'{}');Object.keys(record.claims||{}).forEach(function(q){if(record.claims[q]===sha)claims[q]=sha;});localStorage.setItem(CLAIMS_KEY,JSON.stringify(claims));
+        recordSha=sha;refreshRecord();
+        say.textContent='Payment record opened for '+file.name+'. Resume with the same file and ETH limit: kept payments are reused, and nothing new is signed without your authorization.';
+      }catch(e){say.textContent='Record not opened: '+(e&&e.message||e)+'.';}
+    });
+    refreshRecord();
   }
 
   function invoiceBlock(inv, current){
