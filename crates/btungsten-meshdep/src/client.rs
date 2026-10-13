@@ -275,13 +275,16 @@ impl CollectorSet {
 
     /// Drain pending frames into Delivered/DuplicateDelivery ledger
     /// events, matched by envelope digest against the ledger's ops.
+    /// `/events` frames nest the message under `.data` — both shapes are
+    /// accepted (`{"data":{"payload":…}}` and `{"payload":…}`).
     pub fn drain_into(&self, ledger: &mut crate::ledger::Ledger) {
         for (node, rx, _) in &self.entries {
             while let Ok(frame) = rx.try_recv() {
                 let Ok(v) = serde_json::from_str::<serde_json::Value>(&frame.data) else {
                     continue;
                 };
-                let Some(payload) = v.get("payload").and_then(|p| p.as_str()) else {
+                let inner = v.get("data").unwrap_or(&v);
+                let Some(payload) = inner.get("payload").and_then(|p| p.as_str()) else {
                     continue;
                 };
                 let Ok(bytes) = b64::decode(payload) else {

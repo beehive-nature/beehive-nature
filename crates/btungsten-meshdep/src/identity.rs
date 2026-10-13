@@ -34,6 +34,20 @@ pub enum OpClass {
 }
 
 impl OpClass {
+    /// Lowercase slug (DM logical_id charset is [a-z0-9._:-], lowercase only).
+    pub fn slug(self) -> &'static str {
+        match self {
+            Self::IdlePresence => "idle-presence",
+            Self::TargetedDm => "targeted-dm",
+            Self::Discovery => "discovery",
+            Self::StateSync => "state-sync",
+            Self::Revocation => "revocation",
+            Self::GroupOp => "group-op",
+            Self::Reconnect => "reconnect",
+            Self::ClassProbe => "class-probe",
+        }
+    }
+
     /// The action-field spelling (<= 32 bytes; padded with zeros to exactly 32).
     pub fn action_bytes(self) -> [u8; 32] {
         let mut a = [0u8; 32];

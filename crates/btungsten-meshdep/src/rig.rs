@@ -178,6 +178,14 @@ impl Rig {
                 &mesh_br,
             ])?;
             run(&["ip", "link", "set", &mesh_br, "up"])?;
+            // br_netfilter routes bridged IP packets through iptables
+            // FORWARD; a docker host's default-DROP policy there silently
+            // kills all rig traffic (convicted live: ICMP 100% loss until
+            // this rule). Scoped to THIS bridge only — inserted at head,
+            // removed at teardown.
+            run(&[
+                "iptables", "-I", "FORWARD", "-i", &mesh_br, "-o", &mesh_br, "-j", "ACCEPT",
+            ])?;
             let _ = run(&["ip", "link", "del", &mgmt_br]);
             run(&["ip", "link", "add", &mgmt_br, "type", "bridge"])?;
             run(&[
@@ -189,6 +197,9 @@ impl Rig {
                 &mgmt_br,
             ])?;
             run(&["ip", "link", "set", &mgmt_br, "up"])?;
+            run(&[
+                "iptables", "-I", "FORWARD", "-i", &mgmt_br, "-o", &mgmt_br, "-j", "ACCEPT",
+            ])?;
 
             let mut host = 1u8;
             for ns in &spec.nodes {
@@ -337,18 +348,13 @@ impl Rig {
         for n in &self.nodes {
             let _ = Command::new("ip").args(["netns", "del", &n.netns]).status();
         }
-        let _ = run(&[
-            "ip",
-            "link",
-            "del",
-            &format!("bmb{}", self.spec.subnet_third),
-        ]);
-        let _ = run(&[
-            "ip",
-            "link",
-            "del",
-            &format!("bpb{}", self.spec.subnet_third),
-        ]);
+        for br in ["bmb", "bpb"] {
+            let name = format!("{br}{}", self.spec.subnet_third);
+            let _ = run(&[
+                "iptables", "-D", "FORWARD", "-i", &name, "-o", &name, "-j", "ACCEPT",
+            ]);
+            let _ = run(&["ip", "link", "del", &name]);
+        }
         // Reap children to avoid zombies.
         for mut n in self.nodes {
             if let Some(mut c) = n.child.take() {

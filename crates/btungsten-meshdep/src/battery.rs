@@ -253,7 +253,7 @@ fn trial_body(
         for l in leaf_labels.iter().take(2) {
             let mut ok = false;
             for _ in 0..30 {
-                if w.store_join(l, store_topic, &owner_hex).is_ok() {
+                if w.store_join(l, &store_id, &owner_hex).is_ok() {
                     ok = true;
                     break;
                 }
@@ -343,7 +343,7 @@ fn trial_body(
             // mutated inside the loop.
             let mut pending_group: Vec<(String, String)> = Vec::new();
             let mut pending_sync: Vec<(String, String, String)> = Vec::new();
-            for (idx, op) in ledger.ops.iter().enumerate() {
+            for op in &ledger.ops {
                 for l in &op.intended {
                     if ledger.has_delivery(&op.op_id, l) {
                         continue;
@@ -351,7 +351,10 @@ fn trial_body(
                     match op.class {
                         OpClass::GroupOp => pending_group.push((op.op_id.clone(), l.clone())),
                         OpClass::StateSync => {
-                            pending_sync.push((op.op_id.clone(), l.clone(), format!("k{idx}")))
+                            // The store key rides the op's destination
+                            // ("store:<key>") — never an index.
+                            let key = op.destination_key();
+                            pending_sync.push((op.op_id.clone(), l.clone(), key))
                         }
                         _ => {}
                     }

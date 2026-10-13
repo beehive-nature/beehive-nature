@@ -62,13 +62,21 @@ impl<'a> WorkloadCtx<'a> {
         let env = envelope_bytes(&i);
         assert!(!env.is_empty(), "workload intent must be valid");
         let op_id = op_digest(&env);
-        let logical_id = format!("btmd-{:?}-{}-{}", class, self.rig.spec.run_id, self.seq);
+        // The DM logical_id charset is lowercase-only [a-z0-9._:-]; the
+        // class Debug spelling has uppercase — use a lowercase slug.
+        let logical_id = format!(
+            "btmd:{}:{}:{}",
+            class.slug(),
+            self.rig.spec.run_id,
+            self.seq
+        );
         (
             OperationRecord {
                 op_id: op_id.clone(),
                 logical_id,
                 class,
                 sender: String::new(),
+                destination: destination.to_string(),
                 intended: Vec::new(),
                 payload_bytes: payload.len(),
                 envelope_b64: b64::encode(&env),
@@ -266,7 +274,9 @@ impl<'a> WorkloadCtx<'a> {
         Ok(new_id)
     }
 
-    /// Create a KV store at `node` (state-sync class). Returns the store id.
+    /// Create a KV store at `node` (state-sync class). Returns the HEX
+    /// `store_id` — the URL-safe id for join/put/get paths (`id` is the
+    /// topic string, which carries slashes and cannot ride a path).
     pub fn store_create(&mut self, node: &str, name: &str, topic: &str) -> Result<String, String> {
         let c = self.client(node)?;
         let body = serde_json::json!({"name": name, "topic": topic, "policy": "signed"});
@@ -275,35 +285,28 @@ impl<'a> WorkloadCtx<'a> {
             return Err(format!("store create {node} -> {s}: {b}"));
         }
         let v: serde_json::Value = serde_json::from_str(&b).map_err(|e| e.to_string())?;
-        v.get("id")
-            .or_else(|| v.get("store_id"))
+        v.get("store_id")
+            .or_else(|| v.get("id"))
             .and_then(|i| i.as_str())
             .map(|s| s.to_string())
             .ok_or_else(|| format!("store create: no id in {b}"))
     }
 
+    /// URL-encode a store id for a path segment: store ids are topic
+    /// strings carrying `/` — they must ride percent-encoded or the
+    /// router never sees the join route (convicted live).
+    fn store_seg(store_id: &str) -> String {
+        store_id.replace('/', "%2F")
+    }
+
     /// Join an existing store at `node` (owner-anchored).
-    pub fn store_join(&self, node: &str, topic: &str, owner_hex: &str) -> Result<(), String> {
+    pub fn store_join(&self, node: &str, store_id: &str, owner_hex: &str) -> Result<(), String> {
         let c = self.client(node)?;
-        let stores = c.get_json("/stores")?;
-        // find the store id by topic
-        let mut found = None;
-        if let Some(list) = stores.as_array() {
-            for st in list {
-                if st.get("topic").and_then(|t| t.as_str()) == Some(topic) {
-                    if let Some(id) = st
-                        .get("id")
-                        .or_else(|| st.get("store_id"))
-                        .and_then(|i| i.as_str())
-                    {
-                        found = Some(id.to_string());
-                    }
-                }
-            }
-        }
-        let id = found.ok_or_else(|| format!("store {topic} not visible at {node}"))?;
         let body = serde_json::json!({"expected_owner": owner_hex});
-        let (s, b) = c.post_json(&format!("/stores/{id}/join"), &body.to_string())?;
+        let (s, b) = c.post_json(
+            &format!("/stores/{}/join", Self::store_seg(store_id)),
+            &body.to_string(),
+        )?;
         if s != 200 && s != 201 {
             return Err(format!("store join {node} -> {s}: {b}"));
         }
@@ -329,7 +332,10 @@ impl<'a> WorkloadCtx<'a> {
         ledger.record_op(op);
         let c = self.client(node)?;
         let body = serde_json::json!({"value": b64::encode(&env), "content_type": "application/octet-stream"});
-        let (s, b) = c.put_json(&format!("/stores/{store_id}/{key}"), &body.to_string())?;
+        let (s, b) = c.put_json(
+            &format!("/stores/{}/{}", Self::store_seg(store_id), key),
+            &body.to_string(),
+        )?;
         ledger.record(Event::Published {
             op_id: op_id.clone(),
             at_ms: crate::client::now_ms(),
@@ -357,7 +363,7 @@ impl<'a> WorkloadCtx<'a> {
         op_id: &str,
     ) -> Result<bool, String> {
         let c = self.client(node)?;
-        let (s, b) = c.get(&format!("/stores/{store_id}/{key}"))?;
+        let (s, b) = c.get(&format!("/stores/{}/{}", Self::store_seg(store_id), key))?;
         if s != 200 {
             return Ok(false);
         }
@@ -367,10 +373,15 @@ impl<'a> WorkloadCtx<'a> {
         Ok(op_digest(&bytes) == op_id)
     }
 
-    /// Create a named group at `node`.
+    /// Create a named group at `node`. `public_open` preset = SignedPublic
+    /// (Phase-E public messaging carries on it; the default
+    /// `private_secure` creates an MLS-encrypted group instead).
     pub fn group_create(&mut self, node: &str, name: &str) -> Result<String, String> {
         let c = self.client(node)?;
-        let (s, b) = c.post_json("/groups", &format!("{{\"name\":\"{name}\"}}"))?;
+        let (s, b) = c.post_json(
+            "/groups",
+            &format!("{{\"name\":\"{name}\",\"preset\":\"public_open\"}}"),
+        )?;
         if s != 200 && s != 201 {
             return Err(format!("group create -> {s}: {b}"));
         }

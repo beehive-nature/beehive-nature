@@ -75,7 +75,12 @@ mod tests {
     fn sanitizer_convicts_64_hex_runs_and_keeps_short_ones() {
         // Assembled at runtime from short pieces: the source carries no
         // 48+ hex literal (the estate hex law applies to sources too).
-        let peer_id = format!("{}{}{}", "1ca00a42", "0123456789abcdef".repeat(3), "8df66367");
+        let peer_id = format!(
+            "{}{}{}",
+            "1ca00a42",
+            "0123456789abcdef".repeat(3),
+            "8df66367"
+        );
         assert_eq!(peer_id.len(), 64);
         let s = sanitize(&format!("node {} ready", peer_id));
         assert!(

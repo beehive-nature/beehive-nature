@@ -21,6 +21,10 @@ pub struct OperationRecord {
     pub logical_id: String,
     pub class: OpClass,
     pub sender: String,
+    /// The operation's destination as recorded at build time (recipient
+    /// label, topic, or `store:<key>`).
+    #[serde(default)]
+    pub destination: String,
     pub intended: Vec<String>,
     pub payload_bytes: usize,
     /// The canonical envelope bytes (base64) — the exact bytes an
@@ -28,6 +32,16 @@ pub struct OperationRecord {
     pub envelope_b64: String,
     pub published_at_ms: u64,
     pub deadline_ms: u64,
+}
+
+impl OperationRecord {
+    /// For state-sync ops the destination carries the store key.
+    pub fn destination_key(&self) -> String {
+        self.destination
+            .strip_prefix("store:")
+            .unwrap_or(&self.destination)
+            .to_string()
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -357,6 +371,7 @@ mod tests {
             logical_id: format!("logical-{id}"),
             class,
             sender: "leaf-1".into(),
+            destination: "leaf-2".into(),
             intended: intended.iter().map(|s| s.to_string()).collect(),
             payload_bytes: 10,
             envelope_b64: String::new(),
