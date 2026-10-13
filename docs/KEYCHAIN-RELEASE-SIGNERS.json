@@ -1,0 +1,1 @@
+{"about":"Post-quantum ids allowed to sign keychain release records (tools/keychain-release). Empty until the founder rules who the release signer is. Never the law key in docs/PQ-SIGNERS.json; never a key derived from the skaists.dev wallet passkey.","signers":[]}
