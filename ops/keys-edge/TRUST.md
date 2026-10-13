@@ -55,11 +55,13 @@ The law key authenticates the *ruling*; it never signs releases. The ruling must
 1. **Public-key binding.** The release signer id (`mldsa65:<base64url SHA3-256 of the ML-DSA-65
    verifying key>` for a `bsigner` key, or a `bzpq1…` id for a §3b key) and the full verifying key
    (or the `bsigner keygen` public output), so any verifier can check the id against the key.
-2. **Custody.** Who holds it, on what device; generated there with
-   `bsigner keygen --alg ml-dsa-65 --rec-env VAR` (sealed at rest under that custodian's recovery
-   words). Never derived from the `skaists.dev` wallet passkey (any `*.skaists.dev` origin can
-   re-derive that root), never the law key, never on a serving edge, never generated or held by an
-   agent.
+2. **Custody.** Who holds it, and in which environment; provisioned there (for a `bsigner` key,
+   `bsigner keygen --alg ml-dsa-65 --rec-env VAR`, sealed at rest under that custodian's recovery
+   words). Provisioning inside the custodian's environment is not the same as private material
+   entering an agent's conversation: the seed, the recovery words and the sealed keyset never
+   appear in a conversation, a repository, CI, or a serving edge. The key is dedicated to releases.
+   Never derived from the `skaists.dev` wallet passkey (any `*.skaists.dev` origin can re-derive
+   that root), never the law key. Generating a key does not appoint it.
 3. **Genesis checkpoint.** The SHA3-256 of the seq-1 record it authorizes. Edges are provisioned
    with this checkpoint and the signer id out of band (from the signed ruling), never from a peer.
 4. **Succession.** A rotation is a release record whose `signers` names the successor, signed by the
@@ -72,6 +74,18 @@ The law key authenticates the *ruling*; it never signs releases. The ruling must
 
 Until that ruling exists, every release in this tree is signed by a disposable test key and is lab
 evidence only. A fixture key is never promoted, and no production key is authorized by committing it.
+
+### Signature profiles
+
+Two profiles are accepted, each parsed strictly, with no fallback from one to the other:
+SPEC-BPQ-1 §3b detached (`bzpq1…` ids) and `bheart.signature/1` from `bsigner sign`
+(`mldsa65:<base64url SHA3-256 of the verifying key>` ids). Authority is the full public key and the
+exact record bytes: the short `key_id` in a `bheart` envelope is checked only for consistency with
+the key, never used as a pin. `signed_at_ms` is not covered by the `bheart` signature; it is ignored
+for authorization, freshness, ordering and revocation, which come only from the authenticated
+release history. The edge's second verifier calls `bsigner verify` with a public-only keyset; that
+works with the pinned `bsigner` build and is version-specific compatibility, not a guarantee of
+bsigner's frozen interface.
 
 ## 3. Anchors are witnesses
 
