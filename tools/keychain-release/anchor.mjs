@@ -18,11 +18,15 @@
 // (one operator), SIGNED-UNANCHORED (the release's signature verifies and no anchor names it),
 // DIVERGENT (operators, or one operator's two read paths, disagree; or an operator past the block
 // in irreversible history omits it), INCONCLUSIVE (nothing irreversible to count yet).
-// An operator is its scheme, host and port: --nodes listing one twice counts it once.
+// An operator is its scheme, host and port: --nodes listing one twice counts it once, and a
+// fully qualified name's trailing dot (https://api.hive.blog.) is the same host.
 // The chain starts only at the pinned genesis (block, trx AND json sha3), ANCHORED-TERMINAL, and
-// links only through anchors that are not DIVERGENT. A release anchor carries its record's seq
-// (the genesis is seq 0, so record seq 1 anchors as seq 1), and it names the release only when its
-// rec digests, its sig.bpq and its sig.sha3 (of the signature's one byte form) all match.
+// links only through anchors that are not DIVERGENT. A fork is looked for in every reading of every
+// anchor, DIVERGENT ones and each operator's own bytes for an op in dispute included: one operator
+// that omits or alters one side of an equivocation cannot hide it and so choose the head.
+// A release anchor carries its record's seq (the genesis is seq 0, so record seq 1 anchors as
+// seq 1), and it names the release only when its rec digests, its sig.bpq and its sig.sha3 (of the
+// signature's one byte form) all match.
 // Read paths as the July receipt measured them (DISPATCH-RECEIPTS-2026-07-24.md:293-346):
 // condenser_api.* takes positional params and account_history_api.* named ones; the custom_json id
 // is filtered client-side; never bridge.* (HiveMind is a second layer, not consensus).
@@ -81,16 +85,19 @@ export function buildAnchor({ recordBytes, sigBytes, prevJson, seq, loc = [] }) 
 }
 
 // ── operators ────────────────────────────────────────────────────────────
-// An operator is scheme://host[:port], lower case, no default port, no trailing slash: the same
-// operator spelled twice is one vote, never a quorum. A path, query, fragment or credentials is
+// An operator is scheme://host[:port], lower case, no default port, no trailing slash and no
+// trailing dot on the host (a fully qualified name is the same host): the same operator spelled
+// twice is one vote, never a quorum. A path, query, fragment, credentials or an empty label is
 // refused rather than guessed at; plain http only to loopback.
 const LOOPBACK = new Set(['localhost', '127.0.0.1', '[::1]']);
 export function normalizeNode(s) {
   let u;
   try { u = new URL(String(s).trim()); } catch { throw new Error(`node ${s} is not a URL`); }
-  if (u.protocol !== 'https:' && !(u.protocol === 'http:' && LOOPBACK.has(u.hostname))) throw new Error(`node ${s}: https only (plain http to loopback alone)`);
+  const host = u.hostname.endsWith('.') ? u.hostname.slice(0, -1) : u.hostname;
+  if (!host.startsWith('[') && host.split('.').some(label => !label)) throw new Error(`node ${s}: the host has an empty label`);
+  if (u.protocol !== 'https:' && !(u.protocol === 'http:' && LOOPBACK.has(host))) throw new Error(`node ${s}: https only (plain http to loopback alone)`);
   if (u.username || u.password || u.search || u.hash || (u.pathname !== '/' && u.pathname !== '')) throw new Error(`node ${s}: an operator is scheme://host[:port], with no path, query, fragment or credentials`);
-  return `${u.protocol}//${u.host}`.toLowerCase();
+  return `${u.protocol}//${host}${u.port ? `:${u.port}` : ''}`.toLowerCase();
 }
 export function normalizeNodes(list) {
   const out = [];
@@ -145,7 +152,7 @@ async function inBlock(url, a) {
     o.op[1] && o.op[1].id === ANCHOR_ID && o.op[1].json === a.json);
 }
 export async function readNodes(nodes, account) {
-  return Promise.all(nodes.map(async url => {
+  return Promise.all(normalizeNodes(nodes).map(async url => {
     try {
       const lib = await lastIrreversible(url);   // first: every op at or below it is already history
       return { url, ok: true, lib, ops: await anchorsOf(url, account) };
@@ -157,10 +164,12 @@ export async function readNodes(nodes, account) {
 const RANK = ['ANCHORED-TERMINAL', 'ANCHORED-AS-REPORTED', 'INCONCLUSIVE', 'DIVERGENT'];
 // json is the bytes every reporting operator agrees on (null when they disagree). It stays on a
 // DIVERGENT anchor whose bytes agree (an omission, a block that does not carry it) so the release
-// verdict can name it; assess() never links a DIVERGENT anchor into the chain.
+// verdict can name it; assess() never links a DIVERGENT anchor into the chain. versions is every
+// distinct json string an operator returned for the op, so a fork is seen in bytes in dispute too.
 async function classify(views, key, confirm) {
   const live = views.filter(v => v.ok), reporters = live.filter(v => v.ops.has(key));
-  const first = reporters[0].ops.get(key), out = { key, block: first.block, trx: first.trx, op_in_trx: first.op_in_trx, json: null, operators: reporters.length, confirmed: 0 };
+  const first = reporters[0].ops.get(key), versions = [...new Set(reporters.map(v => v.ops.get(key).json))];
+  const out = { key, block: first.block, trx: first.trx, op_in_trx: first.op_in_trx, json: null, versions, operators: reporters.length, confirmed: 0 };
   if (new Set(reporters.map(v => `${v.ops.get(key).block}\n${v.ops.get(key).json}`)).size > 1) return { ...out, class: 'DIVERGENT', why: 'operators return different bytes for this op' };
   out.json = first.json;
   const omit = live.filter(v => !v.ops.has(key) && v.lib >= first.block).map(v => v.url);
@@ -204,12 +213,30 @@ export async function assess(views0, confirm, { subject = SUBJECT, recordBytes, 
     if (!j || j.subject !== subject) { other++; continue; }
     try { releases.push({ ...a, anchor: parseAnchor(Buffer.from(a.json, 'utf8')) }); } catch (e) { malformed.push({ block: a.block, trx: a.trx, why: e.message }); }
   }
-  const chain = [], used = new Set(), linkable = releases.filter(a => a.class !== 'DIVERGENT');
+  // Every reading that parses as this subject's release anchor: each agreed anchor, DIVERGENT ones
+  // included, and each operator's own bytes for an op in dispute. Forks are looked for here, so an
+  // operator that omits or alters one side of an equivocation cannot hide it and pick the head;
+  // only an anchor that is not DIVERGENT ever links.
+  const readings = [];
+  for (const a of anchors) {
+    if (a === genesis) continue;
+    for (const json of a.versions) {
+      if (jsonSha3(json) === GENESIS.sha3) continue;
+      let anchor = null;
+      try { const j = JSON.parse(json); if (j && j.subject === subject) anchor = parseAnchor(Buffer.from(json, 'utf8')); } catch { anchor = null; }
+      if (anchor) readings.push({ a, json, anchor });
+    }
+  }
+  const rivalsOf = xs => [...new Map(xs.map(x => [`${x.a.key}\n${x.json}`, x])).values()]
+    .map(x => ({ seq: x.anchor.seq, ...brief(x.a), rec_sha3: x.anchor.rec.sha3, signer: x.anchor.sig.bpq }));
+  const chain = [], used = new Set();
   let cur = genesisWhy === null ? genesis.json : null, seq = 0, fork = null;
   while (cur !== null) {
-    const want = jsonSha3(cur), next = linkable.filter(a => a.anchor.prev === want && a.anchor.seq === seq + 1);
-    if (!next.length) break;
-    if (new Set(next.map(a => a.json)).size > 1) { fork = { seq: seq + 1, anchors: next.map(brief) }; break; }
+    const want = jsonSha3(cur), rivals = readings.filter(x => x.anchor.prev === want && x.anchor.seq === seq + 1);
+    if (!rivals.length) break;
+    if (new Set(rivals.map(x => x.json)).size > 1) { fork = { seq: seq + 1, anchors: rivalsOf(rivals) }; break; }
+    const next = releases.filter(a => a.class !== 'DIVERGENT' && a.json === rivals[0].json);
+    if (!next.length) break;   // its one reading is on DIVERGENT anchors only: the chain stops before it
     next.sort((x, y) => x.block - y.block);   // the same json posted again is a repeat; the earliest is the anchor
     next.forEach(a => used.add(a.key));
     chain.push(next[0]); cur = next[0].json; seq++;
@@ -249,7 +276,7 @@ export async function assess(views0, confirm, { subject = SUBJECT, recordBytes, 
 }
 
 export async function readGenesis(nodes) {
-  const views = await Promise.all(nodes.map(async url => {
+  const views = await Promise.all(normalizeNodes(nodes).map(async url => {
     try {
       const lib = await lastIrreversible(url);
       const hits = (await rpc(url, 'condenser_api.get_ops_in_block', [GENESIS.block, false]))

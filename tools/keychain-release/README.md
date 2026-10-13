@@ -27,9 +27,10 @@ Release records for the isolated keychain at keys.skaists.dev (`bnr.keychain-rel
   - **The anchor seq is the record seq.** The genesis anchor is seq 0, so the record with seq 1 anchors as seq 1, seq 2 as seq 2, and so on. `build` refuses any other `--seq`, and `verify` never counts an anchor whose seq differs from its record's.
 - `genesis [--nodes ...] [--out FILE]` reads the genesis anchor (block 108404167) from every node and prints its SHA3-256. `--out` writes the bytes only when two operators agree and the bytes are the pin.
 - `verify [--account A] [--subject S] [--nodes ...] [--record R --sig S | --envelope E]` is a quorum reader. It reports a class per anchor and for the release: ANCHORED-TERMINAL, ANCHORED-AS-REPORTED, SIGNED-UNANCHORED, DIVERGENT or INCONCLUSIVE. Anchors are classical witnesses, so the class is reported and never gates serving.
-  - An operator is its scheme, host and port. `--nodes` is normalized and deduplicated, so one operator listed twice is one vote.
+  - An operator is its scheme, host and port. `--nodes` is normalized and deduplicated, so one operator listed twice is one vote. That includes a fully qualified name's trailing dot: `https://api.hive.blog.` is `https://api.hive.blog`. A host with an empty label is refused.
   - The chain starts only at the pinned genesis: block 108404167, trx `7d404d75…`, json SHA3-256 `O4n0MUUDIN24chEO6f07XnGXUgFlqi16PauvsAp0zUs`, and ANCHORED-TERMINAL. The same 620 bytes posted again later (block 108460005) are reported under `genesis_repeats` and never start a chain.
   - A DIVERGENT anchor never links into the chain and never becomes its head. Every DIVERGENT anchor is listed under `divergent`.
+  - Forks are looked for in every reading of every anchor. That includes DIVERGENT anchors, and each operator's own bytes for an op whose bytes are in dispute. One operator that omits or alters one side of an equivocation therefore cannot hide the fork and choose the head. It can stop the chain (a fork, no head), never pick its head.
   - An anchor names the release only when its `rec` digests, its `sig.bpq`, its `sig.sha3` and its seq all match. An anchor of the same record with another signer or another signature file is listed under `same_record_other_anchors` and is not this release's anchor.
 
 ## R-SIGNER

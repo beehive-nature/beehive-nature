@@ -131,6 +131,33 @@ test('quorum classes over simulated operators; a DIVERGENT anchor never links in
   assert.deepEqual([r.chain.length, r.orphans.length, r.release.on_chain], [0, 1, false]);
 });
 
+test('a fork is seen through DIVERGENT anchors: one operator that omits or alters one side cannot hide it and pick the head', async () => {
+  // RB: a second signed seq 1 anchor on the same prev (the pinned genesis), for another record
+  const otherRecord = assemble({ files: [{ path: 'index.html', bytes: Buffer.from('<!doctype html><title>other</title>\n') }], seq: 1, prev: null, signers: [GOLDEN.id], commit: 'c'.repeat(40) }).bytes;
+  const RB = { block: 110000001, trx: 'b'.repeat(40), op_in_trx: 0, json: buildAnchor({ recordBytes: otherRecord, sigBytes: signAt(GOLDEN, otherRecord), prevJson: GENESIS_JSON, seq: 1 }).json };
+  const seen = r => [r.fork && r.fork.seq, r.fork && r.fork.anchors.map(x => x.trx).sort(), r.head, r.chain.length];
+  const forked = [1, [R.trx, RB.trx], null, 0];
+  // both operators carry both: the fork, and no head
+  let r = await assess([node('a', LIB, G, R, RB), node('b', LIB, G, R, RB)], yes, opts);
+  assert.deepEqual(seen(r), forked);
+  // b, past both blocks, omits RB: RB is DIVERGENT and never links, but it is still a rival
+  r = await assess([node('a', LIB, G, R, RB), node('b', LIB, G, R)], yes, opts);
+  assert.deepEqual(seen(r), forked);
+  assert.deepEqual(r.fork.anchors.map(x => [x.trx, x.class, x.rec_sha3]), [[R.trx, 'ANCHORED-TERMINAL', REC.sha3], [RB.trx, 'DIVERGENT', b64u(sha3(otherRecord))]]);
+  assert.deepEqual(r.divergent.map(d => d.trx), [RB.trx]);
+  assert.equal(r.release.on_chain, false);
+  // b omits R instead: RB does not become the head either
+  assert.deepEqual(seen(await assess([node('a', LIB, G, R, RB), node('b', LIB, G, RB)], yes, opts)), forked);
+  // b alters RB's bytes into no anchor at all: a's reading of RB is still a rival
+  r = await assess([node('a', LIB, G, R, RB), node('b', LIB, G, R, { ...RB, json: RB.json.replace('"v":1', '"v":2') })], yes, opts);
+  assert.deepEqual(seen(r), forked);
+  assert.match(r.fork.anchors.find(x => x.trx === RB.trx).why, /different bytes/);
+  // b alters R itself into a rival anchor: one operator can stop the chain, never choose its head
+  const altered = anchorJson({ ...JSON.parse(R.json), loc: ['ar:' + 'B'.repeat(43)] });
+  r = await assess([node('a', LIB, G, R), node('b', LIB, G, { ...R, json: altered })], yes, opts);
+  assert.deepEqual([r.fork.seq, r.fork.anchors.length, r.head, r.chain.length], [1, 2, null, 0]);
+});
+
 test('an anchor names the release only when rec, sig.bpq, sig.sha3 and seq all match', async () => {
   const at = (trx, json) => ({ block: 110000000, trx: trx.repeat(40), op_in_trx: 0, json });
   const both = (...xs) => [node('a', LIB, G, ...xs), node('b', LIB, G, ...xs)];
@@ -163,13 +190,20 @@ test('operators: scheme, host and port, normalized; one operator listed twice is
   assert.deepEqual(normalizeNodes(['https://api.hive.blog', 'https://API.Hive.blog/', 'https://api.hive.blog:443', ' https://api.openhive.network/ ']), ['https://api.hive.blog', 'https://api.openhive.network']);
   assert.equal(normalizeNode('https://techcoderx.com:8443'), 'https://techcoderx.com:8443');
   assert.equal(normalizeNode('http://127.0.0.1:8091'), 'http://127.0.0.1:8091');
-  for (const bad of ['http://api.hive.blog', 'https://api.hive.blog/rpc', 'https://api.hive.blog/?x=1', 'https://api.hive.blog/#f', 'https://u:p@api.hive.blog', 'api.hive.blog']) {
+  // a fully qualified name's trailing dot is the same host
+  assert.deepEqual(normalizeNodes(['https://api.hive.blog', 'https://api.hive.blog.', 'https://api.hive.blog:443/', 'https://API.HIVE.BLOG.:443']), ['https://api.hive.blog']);
+  assert.equal(normalizeNode('https://techcoderx.com.:8443'), 'https://techcoderx.com:8443');
+  assert.equal(normalizeNode('http://localhost.:8091'), 'http://localhost:8091');
+  for (const bad of ['http://api.hive.blog', 'https://api.hive.blog/rpc', 'https://api.hive.blog/?x=1', 'https://api.hive.blog/#f', 'https://u:p@api.hive.blog', 'api.hive.blog',
+    'https://api.hive.blog..', 'https://.api.hive.blog', 'https://api..hive.blog', 'http://api.hive.blog.']) {
     assert.throws(() => normalizeNode(bad), /^Error: node /, bad);
   }
-  const r = await assess([node('https://api.hive.blog', LIB, G, R), node('https://API.hive.blog/', LIB, G, R)], yes, opts);
-  assert.deepEqual([r.operators.length, r.duplicate_operators], [1, ['https://API.hive.blog/']]);
-  assert.deepEqual([r.genesis.class, r.genesis.starts_chain, r.chain.length], ['ANCHORED-AS-REPORTED', false, 0]);
-  assert.deepEqual([r.release.class, r.release.on_chain], ['ANCHORED-AS-REPORTED', false]);
+  for (const twice of ['https://API.hive.blog/', 'https://api.hive.blog.']) {
+    const r = await assess([node('https://api.hive.blog', LIB, G, R), node(twice, LIB, G, R)], yes, opts);
+    assert.deepEqual([r.operators.length, r.duplicate_operators], [1, [twice]]);
+    assert.deepEqual([r.genesis.class, r.genesis.starts_chain, r.chain.length], ['ANCHORED-AS-REPORTED', false, 0]);
+    assert.deepEqual([r.release.class, r.release.on_chain], ['ANCHORED-AS-REPORTED', false]);
+  }
   // the command line normalizes --nodes before any request
   const cli = run('verify', '--nodes', 'https://api.hive.blog/rpc');
   assert.equal(cli.status, 1);
