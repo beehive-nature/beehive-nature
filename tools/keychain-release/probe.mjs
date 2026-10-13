@@ -19,10 +19,15 @@
 // cannot produce a green run while the name has AAAA records.
 //
 // The expectation:
-//   keychain/releases/*/record.json with record.json.relsig.json beside it: every committed record,
-//   read strictly (contract §1), seq 1..N with no gap or repeat, each prev naming the record before,
-//   each SPEC-BPQ-1 §3b signature valid (surfaces/bpq.js) by a signer pinned in
-//   docs/KEYCHAIN-RELEASE-SIGNERS.json at seq 1 and by an id the previous record names after it.
+//   keychain/releases/<seq>/ (contract §7 A2): every committed record, in the layout place writes and
+//   read by the same reader (release.mjs readPlaced: only <seq>/ directories named by their record's
+//   seq, seq 1..N with no gap, each holding exactly record.json, record.json.relsig.json and
+//   envelope.json; an unfinished place, .place-*, refuses). Each record strict (contract §1,
+//   release.mjs's reader: one strict reader for the tools and the probe; the edge, ops/keys-door,
+//   reads with its own), each prev naming the record before, each SPEC-BPQ-1 §3b signature in its one
+//   byte form (canonical JSON, no trailing newline) and valid (surfaces/bpq.js) by a signer pinned in
+//   docs/KEYCHAIN-RELEASE-SIGNERS.json at seq 1 and by an id the previous record names after it, and
+//   each envelope.json carrying exactly that record and signature.
 //   The highest is the expectation; any defect is NOT MEASURED, never a fallback to the build.
 //   With none committed: `node scripts/build-keychain.mjs --out` on this checkout (CNAME and
 //   .nojekyll left out, as a record leaves them out), only when every build input is byte for byte
@@ -58,12 +63,12 @@
 import {readFileSync, readdirSync, existsSync, mkdtempSync, rmSync, statSync, writeFileSync} from 'node:fs';
 import {createHash, X509Certificate, randomBytes} from 'node:crypto';
 import {execFile, execFileSync, spawnSync} from 'node:child_process';
-import {createRequire} from 'node:module';
 import {request} from 'node:https';
 import {rootCertificates} from 'node:tls';
 import {tmpdir} from 'node:os';
 import {join, relative} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
+import {BPQ as RELEASE_BPQ, canon as releaseCanon, checkIdentity, checkPlacedEnvelope, checkSig, isId as releaseIsId, parseRecord, readPlaced, readSig} from './release.mjs';
 
 export const SCHEMA = 'bnr.keychain-edge-receipt/1';
 export const ORIGIN = 'https://keys.skaists.dev';
@@ -91,12 +96,8 @@ const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 // What scripts/build-keychain.mjs reads (:13-14): itself, keychain/ and the vendored onboarding sources.
 const INPUTS = ['scripts/build-keychain.mjs', 'keychain', 'surfaces/onboarding'];
 
-// The post-quantum verifier, loaded as scripts/verify-bpq-signatures.mjs loads it.
-const require = createRequire(import.meta.url);
-require(join(ROOT, 'surfaces', 'onboarding', 'vendor', 'bpq-lib.js'));
-require(join(ROOT, 'surfaces', 'bpq.js'));
-export const BPQ = globalThis.BPQ;
-if (!BPQ) throw new Error('surfaces/bpq.js did not load: no post-quantum verifier, no probe');
+// The post-quantum verifier (surfaces/bpq.js), loaded by release.mjs as scripts/verify-bpq-signatures.mjs loads it.
+export const BPQ = RELEASE_BPQ;
 
 const b64u = buf => Buffer.from(buf).toString('base64url');
 const hash = (alg, bytes) => b64u(createHash(alg).update(bytes).digest());
@@ -104,23 +105,11 @@ const bytewise = (a, b) => Buffer.compare(Buffer.from(a), Buffer.from(b));
 const check = (name, verdict, evidence) => ({name, verdict, evidence});
 export const digests = bytes => ({sha256: hash('sha256', bytes), sha3: hash('sha3-256', bytes), size: bytes.length});
 
-// ---- release records, read here independently of the tools that write them ----
+// ---- release records, read with release.mjs's strict reader ----
 
-const isDigest = s => typeof s === 'string' && /^[A-Za-z0-9_-]{43}$/.test(s) && b64u(Buffer.from(s, 'base64url')) === s;
-const isPath = p => typeof p === 'string' && /^[A-Za-z0-9._-]+(\/[A-Za-z0-9._-]+)*$/.test(p) && !p.split('/').some(s => s === '.' || s === '..');
-export const isId = s => {
-  try { const d = globalThis.BPQ_LIB.bech32m.decodeToBytes(s, 120); return s === s.toLowerCase() && d.prefix === 'bzpq' && d.bytes.length === 32; } catch { return false; }
-};
-
+export const isId = releaseIsId;
 // Contract §1 canonical JSON: printable ASCII, keys sorted bytewise, integers only, no whitespace.
-export function canon(v) {
-  if (v === null || typeof v === 'boolean') return String(v);
-  if (typeof v === 'number') { if (!Number.isSafeInteger(v)) throw new Error(`not an integer: ${v}`); return String(v); }
-  if (typeof v === 'string') { if (!/^[\x20-\x7e]*$/.test(v)) throw new Error('a string that is not printable ASCII'); return JSON.stringify(v); }
-  if (Array.isArray(v)) return `[${v.map(canon).join(',')}]`;
-  if (typeof v === 'object') return `{${Object.keys(v).sort(bytewise).map(k => `${canon(k)}:${canon(v[k])}`).join(',')}}`;
-  throw new Error(`not JSON: ${typeof v}`);
-}
+export const canon = releaseCanon;
 
 const exactly = (o, keys, where) => {
   if (!o || typeof o !== 'object' || Array.isArray(o)) throw new Error(`${where} is not an object`);
@@ -129,40 +118,14 @@ const exactly = (o, keys, where) => {
   return o;
 };
 
-// A record whose bytes are exactly the canonical form of their own parse (that one comparison refuses
-// whitespace, escapes, floats, duplicate and unsorted keys), with every field the contract names and
-// no other.
-export function readRecord(bytes) {
-  for (const c of bytes) if (c < 0x20 || c > 0x7e) throw new Error('record bytes are not printable ASCII');
-  let r;
-  try { r = JSON.parse(bytes.toString('latin1')); } catch { throw new Error('record is not JSON'); }
-  if (canon(r) !== bytes.toString('latin1')) throw new Error('record bytes are not the canonical form of their own parse');
-  exactly(r, ['files', 'kind', 'origin', 'pack', 'prev', 'rp_id', 'schema', 'seq', 'signers', 'source'], 'record');
-  if (r.schema !== 'bnr.keychain-release/1' || r.kind !== 'release') throw new Error('record schema/kind');
-  if (r.origin !== ORIGIN || r.rp_id !== HOST) throw new Error(`record names ${r.origin} / ${r.rp_id}`);
-  if (!Number.isSafeInteger(r.seq) || r.seq < 1) throw new Error('record seq is not an integer >= 1');
-  if (r.seq === 1 ? r.prev !== null : !isDigest(r.prev)) throw new Error(`record prev at seq ${r.seq}`);
-  if (!Array.isArray(r.files) || !r.files.length) throw new Error('record files is empty');
-  let total = 0;
-  r.files.forEach((f, n) => {
-    exactly(f, ['path', 'sha256', 'sha3', 'size'], `record files[${n}]`);
-    if (!isPath(f.path) || (n && bytewise(r.files[n - 1].path, f.path) >= 0)) throw new Error(`record files[${n}] path is not a sorted relative path`);
-    if (!isDigest(f.sha256) || !isDigest(f.sha3) || !Number.isSafeInteger(f.size) || f.size < 0) throw new Error(`record files[${n}] digests`);
-    total += f.size;
-  });
-  exactly(r.pack, ['sha256', 'sha3', 'size'], 'record pack');
-  if (!isDigest(r.pack.sha256) || !isDigest(r.pack.sha3) || r.pack.size !== total) throw new Error('record pack');
-  if (!Array.isArray(r.signers) || !r.signers.length || r.signers.some((s, n) => !isId(s) || (n && bytewise(r.signers[n - 1], s) >= 0))) throw new Error('record signers');
-  exactly(r.source, ['build', 'commit', 'repo'], 'record source');
-  if (r.source.build !== 'node scripts/build-keychain.mjs --out DIR' || !/^[0-9a-f]{40}$/.test(r.source.commit) || r.source.repo !== 'beehive-nature/beehive-nature') throw new Error('record source');
-  return r;
-}
+// A record whose bytes are exactly the canonical form of their own parse (no whitespace, escapes,
+// floats, duplicate or unsorted keys), with every field the contract names and no other, for this
+// origin and RP ID.
+export const readRecord = bytes => checkIdentity(parseRecord(bytes), {origin: ORIGIN, rp_id: HOST});
 
 // A SPEC-BPQ-1 §3b detached signature over exactly these bytes → its signer id; anything else throws.
 export function signerOf(sig, bytes) {
-  exactly(sig, ['at', 'bpq', 'dsa', 'file', 'id', 'kind', 'sig', 'succ'], 'signature');
-  exactly(sig.file, ['sha3', 'size'], 'signature file');
-  if (sig.kind !== 'detached' || sig.bpq !== 1) throw new Error('not a SPEC-BPQ-1 §3b detached signature');
+  checkSig(sig);
   const v = BPQ.verifyFile(sig, new Uint8Array(bytes));
   if (!v.ok) throw new Error(`signature: ${v.why}`);
   return v.id;
@@ -180,23 +143,21 @@ const authorized = (seq, id, auth, before) => !auth.law.includes(id) && (seq ===
 
 // ---- the expectation, from the repository only ----
 
-export function expectedFromRecords(dir, auth) {
-  if (!existsSync(dir)) return null;
-  const found = [];
-  for (const d of readdirSync(dir).sort(bytewise)) {
-    const p = join(dir, d, 'record.json'), where = `keychain/releases/${d}/record.json`;
-    if (!existsSync(p)) continue;
-    const bytes = readFileSync(p);
-    try {
-      const r = readRecord(bytes);
-      if (!existsSync(p + '.relsig.json')) throw new Error('no record.json.relsig.json beside it');
-      found.push({r, where, id: signerOf(JSON.parse(readFileSync(p + '.relsig.json', 'utf8')), bytes), sha3: hash('sha3-256', bytes)});
-    } catch (e) { throw new Error(`${where}: ${e.message}`); }
-  }
-  if (!found.length) return null;
-  found.sort((a, b) => a.r.seq - b.r.seq);
+// releases: keychain/releases. The layout is read by release.mjs's readPlaced, the reader place
+// writes for: only <seq>/ directories named by their record's seq, seq 1..N with no gap, each holding
+// exactly record.json, record.json.relsig.json and envelope.json; an unfinished place (.place-*) or
+// anything else there refuses the whole expectation rather than being read as part of the chain.
+export function expectedFromRecords(releases, auth) {
+  const placed = readPlaced(releases);
+  if (!placed.length) return null;
+  const found = placed.map(p => {
+    const where = `${p.where}/record.json`;
+    let r, id;
+    try { r = readRecord(p.recordBytes); id = signerOf(readSig(p.sigBytes), p.recordBytes); } catch (e) { throw new Error(`${where}: ${e.message}`); }
+    checkPlacedEnvelope(p);   // its messages name keychain/releases/<seq>/envelope.json
+    return {r, where, id, sha3: hash('sha3-256', p.recordBytes)};
+  });
   found.forEach((f, n) => {
-    if (f.r.seq !== n + 1) throw new Error(`committed records are not seq 1..${found.length} with no gap or repeat: ${f.where} is seq ${f.r.seq}`);
     if (n && f.r.prev !== found[n - 1].sha3) throw new Error(`${f.where}: prev does not name the committed seq ${n}`);
     if (!authorized(f.r.seq, f.id, auth, found[n - 1]?.r)) throw new Error(`${f.where}: signed by ${f.id}, not an id the repository authorizes for seq ${f.r.seq}`);
   });
