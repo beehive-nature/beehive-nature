@@ -6,7 +6,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -87,6 +87,13 @@ test('strict reader refuses: duplicate key, unknown and missing fields, whitespa
   refuse(s.replace('"path":"index.html"', '"path":"../index.html"'), /not a relative/);
 });
 
+// What `node scripts/build-keychain.mjs --out` emits, CNAME and .nojekyll left out: five files before
+// PR #407, and after it (contract §7 A4, main) seven. A tree whose build script copies prelude.js is
+// held to A4's seven; any other tree to the five it had before.
+const BEFORE_407 = ['genesis.js', 'index.html', 'keychain.js', 'vendor/bnr-sign.js', 'vendor/bzdid-key.js'];
+const A4 = ['genesis.js', 'index.html', 'keychain.js', 'prelude.js', 'vendor/bnr-sign.js', 'vendor/bzdid-key.js', 'vendor/hive-tx.min.js'];
+const BUILD_AT_HEAD = inputsAt(HEAD).get('scripts/build-keychain.mjs').toString('utf8');
+
 test('prepare → check: the real tree, built from HEAD, rebuilds byte-identical; tampering fails', () => {
   const dir = tmp();
   try {
@@ -94,7 +101,13 @@ test('prepare → check: the real tree, built from HEAD, rebuilds byte-identical
     assert.equal(p.status, 0, p.stderr);
     const bytes = readFileSync(join(dir, 'r1', 'record.json')), rec = parseRecord(bytes);
     assert.equal(rec.source.commit, HEAD);
-    assert.deepEqual(rec.files.map(f => f.path), ['genesis.js', 'index.html', 'keychain.js', 'vendor/bnr-sign.js', 'vendor/bzdid-key.js']);
+    // the record names exactly what the build script emits, run here on its own, without release.mjs
+    const direct = join(dir, 'direct');
+    execFileSync(process.execPath, ['scripts/build-keychain.mjs', '--out', direct], { cwd: ROOT, stdio: 'ignore' });
+    const emitted = readdirSync(direct, { recursive: true }).map(p => String(p).split('\\').join('/'))
+      .filter(p => statSync(join(direct, p)).isFile() && p !== 'CNAME' && p !== '.nojekyll').sort();
+    assert.deepEqual(rec.files.map(f => f.path), emitted);
+    assert.deepEqual(emitted, /'prelude\.js'/.test(BUILD_AT_HEAD) ? A4 : BEFORE_407);
     assert.deepEqual([rec.seq, rec.prev, rec.signers], [1, null, [ALICE.id]]);
     assert.ok(readFileSync(join(dir, 'r1', 'site', 'keychain.js')).equals(readFileSync(join(ROOT, 'keychain', 'keychain.js'))));
 
@@ -188,12 +201,12 @@ test('sign-test → verify: the one byte form, the genesis signer and pin; a wro
     assert.match(JSON.parse(wrong.stdout).why, /not a genesis signer/);
     const pin = run('verify', '--record', rec, '--sig', sig, '--signers', ALICE.id, '--genesis-sha3', b64u(sha3(Buffer.from('another'))));
     assert.match(JSON.parse(pin.stdout).why, /not the genesis pin/);
-    // rule 3: no pin, no chain verdict; --no-genesis-pin is a signature-only check, exit 0 but never ok:true
+    // rule 3: no pin, no chain verdict; --no-genesis-pin is a signature-only check: exit 3, never 0, never ok:true
     const nopin = run('verify', '--record', rec, '--sig', sig, '--signers', ALICE.id);
     assert.equal(nopin.status, 1);
     assert.match(JSON.parse(nopin.stdout).why, /seq 1 needs the genesis pin/);
     const only = run('verify', '--record', rec, '--sig', sig, '--signers', ALICE.id, '--no-genesis-pin');
-    assert.equal(only.status, 0, only.stdout + only.stderr);
+    assert.equal(only.status, 3, only.stdout + only.stderr);   // non-zero: `verify ... && next` stops here
     const o = JSON.parse(only.stdout);
     assert.deepEqual([o.ok, o.signature_ok, o.checked, o.genesis_pin], [false, true, 'signature only (--no-genesis-pin)', 'not checked']);
     assert.equal(run('verify', '--record', rec, '--sig', sig, '--signers', BOB.id, '--no-genesis-pin').status, 1, 'a signature-only check still needs a genesis signer');
@@ -326,5 +339,55 @@ test('place: verified from the genesis pin, written to keychain/releases/<seq>/,
     assert.deepEqual([JSON.parse(placed.stdout).seq, JSON.parse(placed.stdout).unchanged], [1, false]);
     assert.ok(readFileSync(join(cli, 'keychain', 'releases', '1', 'record.json')).equals(r1.bytes));
     assert.match(run('place', '--dir', cli, '--record', rec, '--sig', sig, '--signers', ALICE.id).stderr, /--genesis-sha3 is required/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('place: everything already placed is read in A2\'s layout and nothing else, each envelope.json included', () => {
+  const dir = tmp();
+  try {
+    const s1 = sign(ALICE, r1.bytes);
+    const r2 = assemble({ files: FILES, seq: 2, prev: PIN, signers: [BOB.id], commit: COMMIT }), s2 = sign(ALICE, r2.bytes);
+    const r3 = assemble({ files: FILES, seq: 3, prev: b64u(sha3(r2.bytes)), signers: [ALICE.id], commit: COMMIT }), s3 = sign(BOB, r3.bytes);
+    const base = { dir, signers: [ALICE.id], genesisSha3: PIN, law: NO_LAW }, two = { ...base, recordBytes: r2.bytes, sigBytes: s2 };
+    const releases = join(dir, 'keychain', 'releases'), at1 = join(releases, '1');
+    const lay = (name, files) => { mkdirSync(join(releases, name), { recursive: true }); for (const [f, b] of Object.entries(files)) writeFileSync(join(releases, name, f), b); };
+    place({ ...base, recordBytes: r1.bytes, sigBytes: s1 });
+    const env1 = readFileSync(join(at1, 'envelope.json'));
+
+    // seq 1's envelope.json carrying another signature, another record, or no envelope: every later placement refuses
+    writeFileSync(join(at1, 'envelope.json'), envelope(r1.bytes, sign(ALICE, r1.bytes, '2026-10-13T00:00:00Z')));
+    assert.throws(() => place(two), /keychain\/releases\/1\/envelope\.json carries another signature than keychain\/releases\/1\/record\.json\.relsig\.json/);
+    const other = assemble({ files: FILES, seq: 1, prev: null, signers: [BOB.id], commit: COMMIT }).bytes;
+    writeFileSync(join(at1, 'envelope.json'), envelope(other, sign(ALICE, other)));
+    assert.throws(() => place(two), /keychain\/releases\/1\/envelope\.json carries another record than keychain\/releases\/1\/record\.json/);
+    writeFileSync(join(at1, 'envelope.json'), 'not an envelope');
+    assert.throws(() => place(two), /keychain\/releases\/1\/envelope\.json: the envelope is not canonical JSON/);
+    writeFileSync(join(at1, 'envelope.json'), env1);
+
+    // a crash between place's writes and its rename leaves a complete .place-2-*: refused, never read as placed
+    lay('.place-2-AbCdEf', { 'envelope.json': envelope(r2.bytes, s2), 'record.json': r2.bytes, 'record.json.relsig.json': s2 });
+    assert.throws(() => place(two), /keychain\/releases\/\.place-2-AbCdEf is an unfinished place/);
+    rmSync(join(releases, '.place-2-AbCdEf'), { recursive: true });
+    // a directory is named by its record's seq in plain decimal; it holds the three files and nothing else
+    cpSync(at1, join(releases, '01'), { recursive: true });
+    assert.throws(() => place(two), /keychain\/releases\/01: keychain\/releases holds only <seq>\/ directories/);
+    rmSync(join(releases, '01'), { recursive: true });
+    cpSync(at1, join(releases, '3'), { recursive: true });
+    assert.throws(() => place(two), /keychain\/releases\/3\/record\.json is seq 1/);
+    rmSync(join(releases, '3'), { recursive: true });
+    writeFileSync(join(at1, 'notes.txt'), 'x\n');
+    assert.throws(() => place(two), /keychain\/releases\/1 holds \[envelope\.json,notes\.txt,record\.json,record\.json\.relsig\.json\]/);
+    rmSync(join(at1, 'notes.txt'));
+    // seq 1..N with no gap: a seq 3 laid down without seq 2 is refused before anything is written
+    lay('3', { 'envelope.json': envelope(r3.bytes, s3), 'record.json': r3.bytes, 'record.json.relsig.json': s3 });
+    assert.throws(() => place(two), /keychain\/releases\/2 is not placed and keychain\/releases\/3 is: placed releases are seq 1\.\.N with no gap/);
+    rmSync(join(releases, '3'), { recursive: true });
+
+    // the layout restored, seq 2 and then seq 3 place, and re-placing seq 1 verifies the whole chain
+    assert.equal(place(two).seq, 2);
+    assert.equal(place({ ...base, recordBytes: r3.bytes, sigBytes: s3 }).seq, 3);
+    assert.deepEqual(readdirSync(releases).sort(), ['1', '2', '3']);
+    writeFileSync(join(releases, '3', 'envelope.json'), envelope(r3.bytes, sign(BOB, r3.bytes, '2026-10-13T00:00:00Z')));
+    assert.throws(() => place({ ...base, recordBytes: r1.bytes, sigBytes: s1 }), /keychain\/releases\/3\/envelope\.json carries another signature/);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });

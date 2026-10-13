@@ -15,6 +15,7 @@ import {
   servedCertificates, bytesCheck, headersCheck, statusCheck, packCheck, rollup, digests, canon, readRecord, expectedFromRecords,
   inputsChanged, dnsCheck, normAnswer, addresses, pagesFromDns, ctCheck, wellKnownCheck, overall, summary,
 } from '../probe.mjs';
+import {place} from '../release.mjs';
 
 const PROBE = fileURLToPath(new URL('../probe.mjs', import.meta.url));
 
@@ -302,61 +303,104 @@ test('well-known: absent is NOT MEASURED only while both resolvers name GitHub P
   assert.equal(wellKnownCheck(WK, absent('Caddy'), {pages: null}).verdict, 'NOT MEASURED');
 });
 
-// committed records in a scratch keychain/releases
-const commit = (dir, name, bytes, sig) => {
-  mkdirSync(join(dir, name), {recursive: true});
-  writeFileSync(join(dir, name, 'record.json'), bytes);
-  if (sig) writeFileSync(join(dir, name, 'record.json.relsig.json'), canon(sig));   // the one byte form
+// committed records in a scratch keychain/releases, in the layout place writes (contract §7 A2):
+// keychain/releases/<seq>/ with record.json, record.json.relsig.json (its one byte form) and envelope.json
+const envelopeOf = (bytes, sig) => canon({bnr: 'keychain-release-envelope/1', hints: {}, record: bytes.toString('base64url'), sig});
+const commit = (dir, seq, bytes, sig, env = envelopeOf(bytes, sig)) => {
+  const at = join(dir, String(seq));
+  mkdirSync(at, {recursive: true});
+  writeFileSync(join(at, 'record.json'), bytes);
+  writeFileSync(join(at, 'record.json.relsig.json'), canon(sig));
+  writeFileSync(join(at, 'envelope.json'), env);
 };
 const scratch = fn => { const dir = mkdtempSync(join(tmpdir(), 'kc-probe-test-')); try { fn(dir); } finally { rmSync(dir, {recursive: true, force: true}); } };
+const later = (k, bytes) => BPQ.signFile(k, new Uint8Array(bytes), '2026-10-13T00:00:00Z');
 
 test('expectation: committed records are a verified chain from the pinned signer, or no expectation at all', () => scratch(dir => {
   assert.equal(expectedFromRecords(join(dir, 'absent'), PINNED), null);
   assert.equal(expectedFromRecords(dir, PINNED), null);
-  commit(dir, '0001', R1, sign(K1, R1));
-  commit(dir, '0002', R2, sign(K2, R2));
+  commit(dir, 1, R1, sign(K1, R1));
+  commit(dir, 2, R2, sign(K2, R2));
   const e = expectedFromRecords(dir, PINNED);
   assert.equal(e.seq, 2); assert.deepEqual(e.files, [want]); assert.deepEqual(e.pack, digests(KEYCHAIN));
-  assert.match(e.source, /record seq 2 \(keychain\/releases\/0002\/record\.json\)/);
+  assert.match(e.source, /record seq 2 \(keychain\/releases\/2\/record\.json\)/);
   assert.deepEqual(e.chain.map(c => [c.seq, c.sha3]), [[1, digests(R1).sha3], [2, digests(R2).sha3]]);
-  assert.throws(() => expectedFromRecords(dir, {pins: [], law: []}), /0001\/record\.json: signed by .* not an id the repository authorizes for seq 1/);
+  assert.throws(() => expectedFromRecords(dir, {pins: [], law: []}), /releases\/1\/record\.json: signed by .* not an id the repository authorizes for seq 1/);
   assert.throws(() => expectedFromRecords(dir, {pins: [K1.id], law: [K1.id]}), /seq 1/);
-  commit(dir, '0002', R2, sign(K1, R2));
-  assert.throws(() => expectedFromRecords(dir, PINNED), /0002\/record\.json: signed by .* not an id the repository authorizes for seq 2/);
+  commit(dir, 2, R2, sign(K1, R2));
+  assert.throws(() => expectedFromRecords(dir, PINNED), /releases\/2\/record\.json: signed by .* not an id the repository authorizes for seq 2/);
   // the right signer in any byte form but the one (canonical JSON, no trailing newline): refused
-  writeFileSync(join(dir, '0002', 'record.json.relsig.json'), JSON.stringify(sign(K2, R2), null, 1) + '\n');
-  assert.throws(() => expectedFromRecords(dir, PINNED), /0002\/record\.json: the signature file is not its one byte form/);
-  rmSync(join(dir, '0002', 'record.json.relsig.json'));
-  assert.throws(() => expectedFromRecords(dir, PINNED), /no record\.json\.relsig\.json beside it/);
+  commit(dir, 2, R2, sign(K2, R2));
+  writeFileSync(join(dir, '2', 'record.json.relsig.json'), JSON.stringify(sign(K2, R2), null, 1) + '\n');
+  assert.throws(() => expectedFromRecords(dir, PINNED), /releases\/2\/record\.json: the signature file is not its one byte form/);
+  // envelope.json is the same evidence as the record and signature beside it, or the expectation is refused
+  commit(dir, 2, R2, sign(K2, R2), envelopeOf(R2, later(K2, R2)));
+  assert.throws(() => expectedFromRecords(dir, PINNED), /keychain\/releases\/2\/envelope\.json carries another signature than keychain\/releases\/2\/record\.json\.relsig\.json/);
+  commit(dir, 2, R2, sign(K2, R2), envelopeOf(R1, sign(K1, R1)));
+  assert.throws(() => expectedFromRecords(dir, PINNED), /keychain\/releases\/2\/envelope\.json carries another record/);
+  commit(dir, 2, R2, sign(K2, R2), '{"bnr":"keychain-release-envelope/1"}');
+  assert.throws(() => expectedFromRecords(dir, PINNED), /keychain\/releases\/2\/envelope\.json: envelope: missing field/);
+  commit(dir, 2, R2, sign(K2, R2));
+  assert.equal(expectedFromRecords(dir, PINNED).seq, 2);
+  rmSync(join(dir, '2', 'record.json.relsig.json'));
+  assert.throws(() => expectedFromRecords(dir, PINNED), /keychain\/releases\/2 holds \[envelope\.json,record\.json\], not \[envelope\.json,record\.json,record\.json\.relsig\.json\]/);
 }));
 
-test('expectation: a gap, a repeat anywhere, a broken prev or a non-canonical record refuses the whole expectation', () => scratch(dir => {
-  commit(dir, '0001', R1, sign(K1, R1));
+test('expectation: a gap, a misnamed or unfinished directory, a broken prev or a non-canonical record refuses the whole expectation', () => scratch(dir => {
+  commit(dir, 1, R1, sign(K1, R1));
   const R3 = bytesOf(recordOf({seq: 3, prev: digests(R2).sha3}));
-  commit(dir, '0003', R3, sign(K2, R3));
-  assert.throws(() => expectedFromRecords(dir, PINNED), /not seq 1\.\.2 with no gap or repeat/);
-  rmSync(join(dir, '0003'), {recursive: true});
-  commit(dir, '0002', R2, sign(K2, R2));
+  commit(dir, 3, R3, sign(K2, R3));
+  assert.throws(() => expectedFromRecords(dir, PINNED), /keychain\/releases\/2 is not placed and keychain\/releases\/3 is: placed releases are seq 1\.\.N with no gap/);
+  rmSync(join(dir, '3'), {recursive: true});
+  commit(dir, 2, R2, sign(K2, R2));
+  assert.equal(expectedFromRecords(dir, PINNED).seq, 2);
+  // a record under a directory that is not its seq: a repeat of seq 1 placed as 3
   const R1b = bytesOf(recordOf({signers: [K1.id, K2.id].sort()}));
-  commit(dir, '0001b', R1b, sign(K1, R1b));
-  assert.throws(() => expectedFromRecords(dir, PINNED), /no gap or repeat/, 'a repeated seq below the top');
-  rmSync(join(dir, '0001b'), {recursive: true});
+  commit(dir, 3, R1b, sign(K1, R1b));
+  assert.throws(() => expectedFromRecords(dir, PINNED), /keychain\/releases\/3\/record\.json is seq 1/);
+  rmSync(join(dir, '3'), {recursive: true});
+  // the directory name is the seq in plain decimal, and nothing else lives in keychain/releases
+  for (const name of ['0003', '3x', 'three']) {
+    commit(dir, name, R3, sign(K2, R3));
+    assert.throws(() => expectedFromRecords(dir, PINNED), new RegExp(`keychain/releases/${name}: keychain/releases holds only <seq>/ directories`), name);
+    rmSync(join(dir, name), {recursive: true});
+  }
+  writeFileSync(join(dir, 'README'), 'x\n');
+  assert.throws(() => expectedFromRecords(dir, PINNED), /keychain\/releases\/README: keychain\/releases holds only <seq>\/ directories/);
+  rmSync(join(dir, 'README'));
+  // place's temporary directory, left complete by a crash between its writes and its rename: a
+  // validly signed seq 3 is in it, and it is refused, never taken as the top of the committed chain
+  commit(dir, '.place-3-AbCdEf', R3, sign(K2, R3));
+  assert.throws(() => expectedFromRecords(dir, PINNED), /keychain\/releases\/\.place-3-AbCdEf is an unfinished place/);
+  rmSync(join(dir, '.place-3-AbCdEf'), {recursive: true});
+  // a seq directory holds the three files and nothing else
+  writeFileSync(join(dir, '2', 'notes.txt'), 'x\n');
+  assert.throws(() => expectedFromRecords(dir, PINNED), /keychain\/releases\/2 holds \[envelope\.json,notes\.txt,record\.json,record\.json\.relsig\.json\]/);
+  rmSync(join(dir, '2', 'notes.txt'));
   const R2x = bytesOf(recordOf({seq: 2, prev: digests(R1b).sha3}));
-  commit(dir, '0002', R2x, sign(K2, R2x));
+  commit(dir, 2, R2x, sign(K2, R2x));
   assert.throws(() => expectedFromRecords(dir, PINNED), /prev does not name the committed seq 1/);
-  commit(dir, '0001', SPACED, sign(K1, SPACED));
-  assert.throws(() => expectedFromRecords(dir, PINNED), /0001\/record\.json: not canonical JSON at byte \d+: insignificant whitespace/);
+  commit(dir, 1, SPACED, sign(K1, SPACED));
+  assert.throws(() => expectedFromRecords(dir, PINNED), /keychain\/releases\/1\/record\.json: not canonical JSON at byte \d+: insignificant whitespace/);
   // a second spelling of the same 32 bytes (non-zero padding bits in the last character)
   const A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_', alias = want.sha256.slice(0, 42) + A[A.indexOf(want.sha256[42]) ^ 1];
   assert.deepEqual(Buffer.from(alias, 'base64url'), Buffer.from(want.sha256, 'base64url'));
   const aliased = bytesOf(recordOf({files: [{...want, sha256: alias}]}));
-  commit(dir, '0001', aliased, sign(K1, aliased));
+  commit(dir, 1, aliased, sign(K1, aliased));
   assert.throws(() => expectedFromRecords(dir, PINNED), /record\.files\[0\]\.sha256 is not a base64url SHA digest/);
 }));
 
+test('expectation: what release.mjs place writes is what the probe reads, one layout for both tools', () => scratch(dir => {
+  const bytes = sig => Buffer.from(canon(sig), 'latin1'), base = {dir, signers: [K1.id], genesisSha3: digests(R1).sha3};
+  place({...base, recordBytes: R1, sigBytes: bytes(sign(K1, R1))});
+  place({...base, recordBytes: R2, sigBytes: bytes(sign(K2, R2))});
+  const e = expectedFromRecords(join(dir, 'keychain', 'releases'), PINNED);
+  assert.deepEqual([e.seq, e.recordSha3, e.source], [2, digests(R2).sha3, 'record seq 2 (keychain/releases/2/record.json)']);
+}));
+
 test('well-known: against committed records the edge serves exactly the top one', () => scratch(dir => {
-  commit(dir, '0001', R1, sign(K1, R1));
-  commit(dir, '0002', R2, sign(K2, R2));
+  commit(dir, 1, R1, sign(K1, R1));
+  commit(dir, 2, R2, sign(K2, R2));
   const expected = expectedFromRecords(dir, PINNED), ctx = {expected, auth: PINNED};
   const p = wellKnownCheck(WK, ok(R2, sign(K2, R2)), ctx);
   assert.equal(p.verdict, 'PASS'); assert.match(p.evidence.brief, /authorized by committed seq 1/);

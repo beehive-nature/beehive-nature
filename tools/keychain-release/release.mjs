@@ -13,10 +13,12 @@
 //   envelope --record R --sig S [--hint-ant A] [--hint-ar T]... [--hint-hive BLOCK:TRX] [--hint-peer URL]... [--out FILE]
 //   verify --record R --sig S [--signers id,...] [--prev R0] [--genesis-sha3 B | --no-genesis-pin]
 //       the signature and the seq/prev/signer rules an edge applies (one implementation here: noble);
-//       seq 1 needs the genesis pin, and --no-genesis-pin is a signature-only check, never ok:true
+//       seq 1 needs the genesis pin, and --no-genesis-pin is a signature-only check, never ok:true.
+//       Exit 0 only for ok:true; 1 for a refusal; 3 for a good signature-only check (no chain verdict)
 //   place --dir DIR --record R --sig S [--envelope E] --signers id,... --genesis-sha3 B
-//       verify R against the chain already placed under DIR (rules 1-3, from the genesis pin), then
-//       write DIR/keychain/releases/<seq>/{record.json, record.json.relsig.json, envelope.json};
+//       verify the chain already placed under DIR (rules 1-3 from the genesis pin, every envelope.json,
+//       A2's layout and nothing else), then R as the next record, and write
+//       DIR/keychain/releases/<seq>/{record.json, record.json.relsig.json, envelope.json};
 //       an existing seq directory with other bytes is refused, never rewritten
 //
 // A signature file (record.json.relsig.json) has ONE byte form: the canonical JSON of the record
@@ -516,26 +518,63 @@ export function openEnvelope(bytes) {
 }
 
 // ── committed releases (contract §7 A2) ──────────────────────────────────
-// DIR/keychain/releases/<seq>/ holds record.json, record.json.relsig.json and envelope.json.
-// build-keychain.mjs copies an explicit file list, so nothing here reaches the site.
-const PLACED = ['envelope.json', 'record.json', 'record.json.relsig.json'];
+// DIR/keychain/releases/<seq>/ holds record.json, record.json.relsig.json and envelope.json, and
+// nothing else; <seq> is the record's own seq in plain decimal, and the seqs are 1..N with no gap.
+// keychain/releases holds nothing but those directories. build-keychain.mjs copies an explicit file
+// list, so nothing here reaches the site.
+export const PLACED = ['envelope.json', 'record.json', 'record.json.relsig.json'];
+// The one reader of that layout, for place and for probe.mjs, so the two agree on it. It checks the
+// layout and the strict record (its seq is its directory's name); the caller verifies signatures and
+// the chain, then checkPlacedEnvelope. A .place-<seq>-* directory is a place that wrote its files and
+// never renamed them into place (it crashed between the two): nothing in it is placed, and it is
+// refused, never read as the top of the chain.
+export function readPlaced(releases) {
+  if (!existsSync(releases)) return [];
+  const out = [];
+  for (const e of readdirSync(releases, { withFileTypes: true })) {
+    const where = `keychain/releases/${e.name}`;
+    if (e.name.startsWith('.place-')) throw new Error(`${where} is an unfinished place (its files were written and never renamed into place): nothing in it is placed; remove it`);
+    if (!e.isDirectory() || !/^[1-9][0-9]*$/.test(e.name)) throw new Error(`${where}: keychain/releases holds only <seq>/ directories, named by the record's seq in plain decimal (contract §7 A2)`);
+    const at = join(releases, e.name), held = walk(at);
+    if (held.join('\n') !== PLACED.join('\n')) throw new Error(`${where} holds [${held}], not [${PLACED}]`);
+    const p = { seq: Number(e.name), where, recordBytes: readFileSync(join(at, 'record.json')), sigBytes: readFileSync(join(at, 'record.json.relsig.json')), envelopeBytes: readFileSync(join(at, 'envelope.json')) };
+    let r;
+    try { r = parseRecord(p.recordBytes); } catch (err) { throw new Error(`${where}/record.json: ${err.message}`); }
+    if (r.seq !== p.seq) throw new Error(`${where}/record.json is seq ${r.seq}: a placed record lives at keychain/releases/<its seq>/`);
+    out.push(p);
+  }
+  out.sort((a, b) => a.seq - b.seq);
+  out.forEach((p, i) => { if (p.seq !== i + 1) throw new Error(`keychain/releases/${i + 1} is not placed and ${p.where} is: placed releases are seq 1..N with no gap`); });
+  return out;
+}
+// A placed envelope.json is the same evidence as the record.json and record.json.relsig.json beside
+// it, byte for byte: an envelope that carries another record or signature is refused.
+export function checkPlacedEnvelope({ where, recordBytes, sigBytes, envelopeBytes }) {
+  let e;
+  try { e = openEnvelope(envelopeBytes); } catch (err) { throw new Error(`${where}/envelope.json: ${err.message}`); }
+  if (!e.recordBytes.equals(recordBytes)) throw new Error(`${where}/envelope.json carries another record than ${where}/record.json`);
+  if (!e.sigBytes.equals(sigBytes)) throw new Error(`${where}/envelope.json carries another signature than ${where}/record.json.relsig.json`);
+}
+
 export function place({ dir, recordBytes, sigBytes, envelopeBytes, signers, genesisSha3, law = lawIds() }) {
   if (!signers || !signers.length) throw new Error('--signers is required: the genesis signers rule 3 starts the chain from');
   if (!isDigest(genesisSha3)) throw new Error('--genesis-sha3 is required: the pinned SHA3-256 (base64url) of the seq 1 record');
   const r = checkIdentity(parseRecord(recordBytes));
   const releases = join(dir, 'keychain', 'releases');
-  // Rule 3, from the genesis pin: every placed record before this one verifies, in order.
+  // Rule 3, from the genesis pin: everything already placed verifies, in order, each envelope.json
+  // included, in A2's layout and nothing else; then this record, as the next one or as the one placed
+  // at its seq.
+  const placed = readPlaced(releases);
   let prevBytes;
-  for (let n = 1; n <= r.seq; n++) {
-    const here = n === r.seq;
-    const at = join(releases, String(n));
-    if (!here && !existsSync(join(at, 'record.json'))) throw new Error(`keychain/releases/${n} is not placed: seq ${r.seq} is accepted only after every record before it`);
-    const rb = here ? recordBytes : readFileSync(join(at, 'record.json'));
-    const sb = here ? sigBytes : readFileSync(join(at, 'record.json.relsig.json'));
-    const v = verifyRelease({ recordBytes: rb, sigBytes: sb, signers: n === 1 ? signers : undefined, genesisSha3: n === 1 ? genesisSha3 : undefined, prevBytes, law });
-    if (!v.ok) throw new Error(`${here ? 'the record' : `keychain/releases/${n}`} does not verify: ${v.why}`);
-    prevBytes = rb;
+  for (const p of placed) {
+    const v = verifyRelease({ recordBytes: p.recordBytes, sigBytes: p.sigBytes, signers: p.seq === 1 ? signers : undefined, genesisSha3: p.seq === 1 ? genesisSha3 : undefined, prevBytes, law });
+    if (!v.ok) throw new Error(`${p.where} does not verify: ${v.why}`);
+    checkPlacedEnvelope(p);
+    prevBytes = p.recordBytes;
   }
+  if (r.seq > placed.length + 1) throw new Error(`keychain/releases/${placed.length + 1} is not placed: seq ${r.seq} is accepted only after every record before it`);
+  const v = verifyRelease({ recordBytes, sigBytes, signers: r.seq === 1 ? signers : undefined, genesisSha3: r.seq === 1 ? genesisSha3 : undefined, prevBytes: r.seq === 1 ? undefined : placed[r.seq - 2].recordBytes, law });
+  if (!v.ok) throw new Error(`the record does not verify: ${v.why}`);
   let env;
   if (envelopeBytes) {
     const e = openEnvelope(envelopeBytes);
@@ -545,11 +584,9 @@ export function place({ dir, recordBytes, sigBytes, envelopeBytes, signers, gene
   } else env = envelope(recordBytes, sigBytes);
   const want = { 'envelope.json': env, 'record.json': Buffer.from(recordBytes), 'record.json.relsig.json': Buffer.from(sigBytes) };
   const target = join(releases, String(r.seq)), out = { placed: target, seq: r.seq, sha3: b64u(sha3(recordBytes)) };
-  if (existsSync(target)) {
-    const held = walk(target);
-    if (held.join('\n') !== PLACED.join('\n') || PLACED.some(f => !readFileSync(join(target, f)).equals(want[f]))) {
-      throw new Error(`keychain/releases/${r.seq} exists with different bytes; a placed release is never rewritten`);
-    }
+  if (r.seq <= placed.length) {
+    const p = placed[r.seq - 1], held = { 'envelope.json': p.envelopeBytes, 'record.json': p.recordBytes, 'record.json.relsig.json': p.sigBytes };
+    if (PLACED.some(f => !held[f].equals(want[f]))) throw new Error(`keychain/releases/${r.seq} exists with different bytes; a placed release is never rewritten`);
     return { ...out, unchanged: true };
   }
   mkdirSync(releases, { recursive: true });
@@ -611,9 +648,10 @@ const COMMANDS = {
       signers: o.signers ? list(o.signers) : undefined, prevBytes: o.prev ? readFileSync(o.prev) : undefined,
       genesisSha3: o['genesis-sha3'], noGenesisPin: !!o['no-genesis-pin']
     });
-    // exit 0: the chain verdict (ok), or, under --no-genesis-pin only, the signature verdict;
-    // the JSON keeps ok:false there, because a signature-only check says nothing about the chain
-    if (!r.ok && !(o['no-genesis-pin'] && r.signature_ok)) process.exitCode = 1;
+    // exit 0 only for ok:true, a verdict on the chain; 1 for a refusal; 3 when --no-genesis-pin found
+    // the signature and the genesis signer good, which is no verdict on the chain: a gate that reads
+    // the exit status (`verify ... && next`) never takes a signature-only check for a pass
+    process.exitCode = r.ok ? 0 : o['no-genesis-pin'] && r.signature_ok ? 3 : 1;
     console.log(JSON.stringify(r));
     return undefined;
   }],

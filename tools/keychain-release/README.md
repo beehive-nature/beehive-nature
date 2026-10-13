@@ -17,9 +17,11 @@ Release records for the isolated keychain at keys.skaists.dev (`bnr.keychain-rel
   - a valid signature (one implementation, noble; the edge runs two);
   - at seq 1, a signer from `--signers` and the record's SHA3-256 equal to `--genesis-sha3`. Without the pin there is no verdict on the chain.
   - at seq N > 1, only as `R0.seq + 1`, with `prev` naming `R0` and a signer that `R0` names. There, `--signers` only narrows.
-  - `--no-genesis-pin` (seq 1 only) checks the signature and the genesis signer and nothing else. It exits 0 when those hold, but the JSON says `"ok":false` and `"signature_ok":true`, never `"ok":true`.
-- `place --dir DIR --record R --sig S [--envelope E] --signers id,... --genesis-sha3 B` verifies every record already placed under `DIR/keychain/releases/`, from the genesis pin, and then R as the next one. It writes `DIR/keychain/releases/<seq>/` with `record.json`, `record.json.relsig.json` and `envelope.json` (E if given, which must carry R and S exactly; else an envelope with no hints).
+  - `--no-genesis-pin` (seq 1 only) checks the signature and the genesis signer and nothing else. When those hold it exits 3, not 0, and the JSON says `"ok":false` and `"signature_ok":true`, never `"ok":true`. Exit 0 is only ever `"ok":true`, so `verify ... && next` never takes a signature-only check for a pass. A refusal exits 1.
+- `place --dir DIR --record R --sig S [--envelope E] --signers id,... --genesis-sha3 B` verifies every release already placed under `DIR/keychain/releases/`, from the genesis pin, each `envelope.json` included, and then R as the next one. It writes `DIR/keychain/releases/<seq>/` with `record.json`, `record.json.relsig.json` and `envelope.json` (E if given, which must carry R and S exactly; else an envelope with no hints).
   - A seq directory that already exists with other bytes is refused, never rewritten. The same bytes again change nothing.
+  - The layout (contract §7 A2) is read by one reader, `readPlaced`, which `probe.mjs` uses too. `keychain/releases/` holds only `<seq>/` directories, named by the record's seq in plain decimal (`1`, never `0001`), seq 1 to N with no gap. Each holds those three files and nothing else, and its `envelope.json` carries exactly the record and signature beside it. Anything else refuses the whole chain, in place and in the probe.
+  - place writes into a `.place-<seq>-*` directory and renames it into place. One left behind by a crash between the two is refused by name and never read as placed. Remove it by hand.
 
 ## anchor.mjs
 
