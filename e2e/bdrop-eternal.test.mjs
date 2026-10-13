@@ -28,13 +28,30 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/jav
 const mock = { mode: 'normal', content: null, accounts: {}, broadcasts: [], lastBody: null };
 const rpcResult = (method, params) => {
   if (mock.mode === 'down') throw Object.assign(new Error('mock chain unreachable'), { http: 503 });
-  if (method === 'condenser_api.get_dynamic_global_properties')
+  if (method === 'condenser_api.get_dynamic_global_properties') {
+    mock.libcalls = (mock.libcalls || 0) + 1;
+    if (mock.badlib && mock.libcalls > 1) return { head_block_number: 49000000, last_irreversible_block_num: 'weird', time: new Date().toISOString().slice(0, 19) };
     return { head_block_number: 49000000, head_block_id: '02e0dcb4c89a1a5c1e4e8a5c1e4e8a5c1e4e8a5c', last_irreversible_block_num: 48999990, time: new Date().toISOString().slice(0, 19) };
+  }
   if (method === 'condenser_api.get_transaction') {
     if (Array.isArray(params)) params = params[0] || {}; /* positional, as mainnet expects */
     if (mock.gettx === 'fail') throw Object.assign(new Error('rpc error: transaction lookup unavailable (mock)'), { http: 200 });
     if (mock.gettx === 'missing') throw Object.assign(new Error('rpc error: Assert Exception:unknown transaction'), { http: 200 });
-    return { id: params.id, block_num: 48999985, trx: { operations: [] } };
+    const q0 = Array.isArray(params) ? params[0] : params; /* positional: the id IS the element */
+    mock.lastTxId = (q0 && typeof q0 === 'object') ? String(q0.id || '') : String(q0 || '');
+    const S = mock.txshape || 'ok'; /* faulty-response controls (scenario 13) */
+    if (S === 'minimal') return { block_num: 1 }; /* the source counterexample: a numeric block alone */
+    if (S === 'wrongid') return { transaction_id: '0x' + 'f'.repeat(40), block_num: 48999985, operations: [['comment', { author: 'someone', permlink: 'unrelated', body: 'x' }]] };
+    if (S === 'noops') return { transaction_id: mock.lastTxId, block_num: 48999985, operations: [] };
+    if (S === 'wrongop') return { transaction_id: mock.lastTxId, block_num: 48999985, operations: [['vote', {}]] };
+    const OP = mock.lastOp ? JSON.parse(JSON.stringify(mock.lastOp)) : { author: 'none', permlink: 'none', body: '' }; /* echo the actual broadcast op */
+    if (S === 'wrongbody') { OP.body = 'not the drop' + 's bytes at all'; return { transaction_id: mock.lastTxId, block_num: 48999985, operations: [['comment', OP]] }; }
+    return { transaction_id: mock.lastTxId, block_num: 48999985, operations: [['comment', OP]] };
+  }
+  if (method === 'condenser_api.get_block') {
+    if (Array.isArray(params)) params = params[0];
+    if (mock.getblock === 'empty') return { timestamp: '2026-10-13T00:00:00', transactions: [] };
+    return { timestamp: '2026-10-13T00:00:00', transactions: [{ transaction_id: mock.lastTxId || '0x' + 'e'.repeat(40) }] }; /* the named block contains the named tx by default */
   }
   if (method === 'condenser_api.get_accounts') {
     const names = params[0] || [];
@@ -45,6 +62,7 @@ const rpcResult = (method, params) => {
   if (method === 'condenser_api.broadcast_transaction') {
     const trx = params[0];
     mock.broadcasts.push(trx);
+    mock.lastOp = (trx.operations && trx.operations[0] && trx.operations[0][1]) ? JSON.parse(JSON.stringify(trx.operations[0][1])) : null; /* the inclusion answer echoes the actual broadcast op */
     mock.lastBody = trx.operations[0][1].body;
     if (mock.mode === 'swallow') throw Object.assign(new Error('broadcast answer lost (mock)'), { http: 502 });
     return 'fedcba9876543210fedcba9876543210fedcba98';
@@ -95,6 +113,9 @@ const server = createServer(async (q, s) => {
     if ('hive' in o) mock.hive = !!o.hive; /* model mainnet's assert-shaped not-found */
     if ('gettx' in o) mock.gettx = o.gettx; /* inclusion-lookup modes: ok | fail | missing */
     if ('blockless' in o) mock.blockless = !!o.blockless; /* model mainnet's block_num-less get_content */
+    if ('txshape' in o) mock.txshape = o.txshape; /* inclusion-answer faulty shapes: minimal|wrongid|noops|wrongop|wrongbody|ok */
+    if ('getblock' in o) mock.getblock = o.getblock; /* block-membership control: ok|empty */
+    if ('badlib' in o) { mock.badlib = !!o.badlib; mock.libcalls = 0; } /* malformed irreversible height, first call spared (the page's own tx build) */
     s.writeHead(200); s.end('ok'); return;
   }
   const rel = decodeURIComponent(q.url.split('?')[0].replace(/^\//, '')) || 'index.html';
@@ -480,7 +501,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     /* widened 2026-10-13: the same invariant on a CI-calmer window — the eternal job runs ~100
        suites under CPU contention, and 20s starved this reconcile twice on main's own runs
        (38322545384) with no code change anywhere near the path */
-    await step('restart after mid-handoff closure reconciles from the chain', () => page6c.waitForFunction(() => /bdrop-keychain-closed-midhandoff[^\n]*confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 45000 }));
+    await step('restart after mid-handoff closure reconciles from the chain', () => page6c.waitForFunction(() => /bdrop-keychain-closed-midhandoff[^\n]*confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 75000 }) /* 45s starved under the grown suite's contention — same invariant, more headroom */);
     ok('mid-handoff closure: no extra broadcast across the whole keychain scenario', mock.broadcasts.length === 2, 'broadcasts=' + mock.broadcasts.length);
     await ctx6c.close();
 
@@ -843,6 +864,61 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     ok('12 nothing was spent or priced in the gate tests', !(await p12.textContent('#pstatus')).includes('invoice'));
     ok('12 no page errors', errs12.length === 0, errs12[0] || '');
     await ctx12.close();
+
+    /* ── scenario 13: the inclusion-VERIFIER adversarial battery (Agent 30, 2026-10-13)
+       a numeric block_num alone is NOT inclusion; the answer must BE the named
+       transaction, carry THIS drop's comment op with the committed body, and the named
+       block must CONTAIN the transaction before any finality rule applies ── */
+    const dir13 = profile('inclverify'); dirs.push(dir13);
+    const i13 = await open(dir13);
+    const CASES = [
+      { name: 'minimal numeric-block answer is REJECTED (the source counterexample)', opts: { txshape: 'minimal' }, note: /no operations|did not read as a transaction/, reject: true },
+      { name: 'a DIFFERENT transaction id is rejected', opts: { txshape: 'wrongid' }, note: /DIFFERENT transaction id/, reject: true },
+      { name: 'empty operations rejected', opts: { txshape: 'noops' }, note: /no operations/, reject: true },
+      { name: 'a transaction without this drop\u2019s comment op rejected', opts: { txshape: 'wrongop' }, note: /does not carry this drop/, reject: true },
+      { name: 'a body that differs from the committed edition rejected', opts: { txshape: 'wrongbody' }, note: /differs from the committed edition/, reject: true },
+      { name: 'a transaction absent from its named block rejected', opts: { txshape: 'ok', getblock: 'empty' }, note: /does not contain it/, reject: true },
+      { name: 'a malformed irreversible height stays uncertainty (inclusion may stand; finality may not)', opts: { txshape: 'ok', badlib: true }, note: /malformed|absent irreversible/, finalityBad: true },
+      { name: 'an unavailable history lookup stays uncertainty', opts: { gettx: 'fail' }, note: /unavailable/, reject: true },
+      { name: 'the truthful full answer is accepted (id + op + body + block membership + LIB)', opts: { txshape: 'ok' }, note: /answered/, reject: false },
+    ];
+    let n13 = 0;
+    for (const c of CASES) {
+      n13++;
+      await setMock(Object.assign({ mode: 'normal', content: null, contents: null, junk: false, accounts: {}, lastBody: null, hive: false, gettx: 'ok', getblock: 'ok', badlib: false, txshape: 'ok' }, c.opts));
+      const pl = 'inc13-' + n13;
+      await i13.page.click('#wipe'); /* a key session is bound to ONE scope — each case presents its own */
+      mock.s13n = String(n13); mock.s13body = BODY; mock.s13pl = pl; mock.s13author = 'alice'; /* the mock answers THIS drop's exact op */
+      await i13.page.fill('#author', 'alice');
+      await i13.page.fill('#permlink', pl);
+      await i13.page.fill('#body', BODY);
+      await i13.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+      await i13.page.fill('#wif', await i13.page.evaluate(() => String(window.hiveTx.PrivateKey.randomKey())));
+      await i13.page.click('#publish');
+      try {
+        await step('13 case ' + n13 + ' settles', () => i13.page.waitForFunction((p2) => {
+          const rs = JSON.parse(localStorage.getItem('bnr.bdrop.outbox.v1') || '[]');
+          return rs.some(r => r.scope && r.scope.permlink === p2 && r.receipt && r.receipt.evidence && r.receipt.evidence.inclusion_note);
+        }, pl, { timeout: 30000 }));
+      } catch (e13) {
+        console.log('S13-CASE-' + n13 + ' STATUS: ' + ((await i13.page.textContent('#status')) || '').slice(0, 500));
+        console.log('S13-CASE-' + n13 + ' OUTBOX: ' + ((await i13.page.textContent('#outbox')) || '').slice(0, 300));
+        throw e13;
+      }
+      const rec13 = (await outboxOf(i13.page)).find(r => r.scope.permlink === pl);
+      const ev13 = (rec13 && rec13.receipt && rec13.receipt.evidence) || {};
+      const included = !!ev13.tx_included;
+      const note = String(ev13.inclusion_note || '');
+      if (c.finalityBad) {
+        ok('13 ' + c.name, included === true && ev13.tx_included.block_checked === true && typeof ev13.finality === 'string' && c.note.test(ev13.finality), 'included=' + included + ' finality=' + JSON.stringify(ev13.finality));
+      } else if (c.reject) {
+        ok('13 ' + c.name, !included && c.note.test(note), 'included=' + included + ' note=' + note.slice(0, 90));
+      } else {
+        ok('13 ' + c.name, included && ev13.tx_included.block_checked === true && ev13.finality && ev13.finality.irreversible === true, JSON.stringify(ev13).slice(0, 120));
+      }
+    }
+    ok('13 no page errors', i13.errs.length === 0, i13.errs[0] || '');
+    await i13.ctx.close();
   } finally {
     for (const c of ctxs) { try { await c.close(); } catch {} }
     for (const d of dirs) { try { rmSync(d, { recursive: true, force: true }); } catch {} }

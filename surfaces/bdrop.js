@@ -308,18 +308,50 @@ function chainLabel(c){
    condenser_api.get_transaction answers inclusion by the desk's own txid;
    last_irreversible_block_num answers finality. */
 async function evidenceFor(scope,txid){
+  /* a numeric block_num alone is NOT inclusion. the answer must BE the named
+     transaction, carry THIS drop's comment operation with the committed body bytes,
+     and the named block must actually CONTAIN the transaction — only then may the
+     finality rule compare against a well-formed irreversible height. */
   var e={tx_included:null,finality:null,inclusion_note:'not-attempted'};
   if(!txid){e.inclusion_note='no transaction id held';return e;}
   var t;
   try{t=await rpcCall(scope.rpc,'condenser_api.get_transaction',[txid]);}
   catch(err){e.inclusion_note='lookup unavailable: '+(isNotFound(err)?'the endpoint does not know this transaction':err.message);return e;}
-  if(!(t&&typeof t==='object')||typeof t.block_num!=='number'){e.inclusion_note='the endpoint’s answer did not read as a transaction';return e;}
-  e.tx_included={block_num:t.block_num,txid:txid};e.inclusion_note='answered';
+  if(!(t&&typeof t==='object')||Array.isArray(t)){e.inclusion_note='the endpoint’s answer did not read as a transaction';return e;}
+  if(typeof t.block_num!=='number'||!Number.isFinite(t.block_num)){e.inclusion_note='no usable block number in the answer';return e;}
+  if(t.transaction_id!==undefined&&String(t.transaction_id).toLowerCase()!==String(txid).toLowerCase()){
+    e.inclusion_note='the endpoint answered a DIFFERENT transaction id';return e;
+  }
+  var ops=Array.isArray(t.operations)?t.operations:null;
+  if(!ops||!ops.length){e.inclusion_note='the transaction carries no operations';return e;}
+  var hit=null;
+  for(var i=0;i<ops.length;i++){
+    var o=ops[i];
+    if(o&&o[0]==='comment'&&o[1]&&String(o[1].author)===String(scope.author)&&String(o[1].permlink)===String(scope.permlink)){hit=o[1];break;}
+  }
+  if(!hit){e.inclusion_note='the transaction does not carry this drop’s comment operation';return e;}
+  if(scope.body_sha256&&typeof hit.body==='string'){
+    var bh=await sha256Hex(new TextEncoder().encode(hit.body));
+    if(bh!==scope.body_sha256){e.inclusion_note='the transaction’s body differs from the committed edition bytes';return e;}
+  }else if(scope.body_sha256){e.inclusion_note='the transaction’s answer carried no comparable body';return e;}
+  /* membership: the named block itself must contain the named transaction */
+  var blk;
+  try{blk=await rpcCall(scope.rpc,'condenser_api.get_block',[t.block_num]);}
+  catch(err){
+    e.inclusion_note='transaction names block '+t.block_num+' but that block is unreadable: '+err.message;
+    e.tx_included={block_num:t.block_num,txid:txid,block_checked:false};
+    return e;
+  }
+  var inBlock=!!(blk&&Array.isArray(blk.transactions)&&blk.transactions.some(function(x){
+    return x&&String(x.transaction_id||'').toLowerCase()===String(txid).toLowerCase();
+  }));
+  if(!inBlock){e.inclusion_note='the transaction names block '+t.block_num+' but that block does not contain it';return e;}
+  e.tx_included={block_num:t.block_num,txid:txid,block_checked:true};e.inclusion_note='answered';
   var g;
   try{g=await rpcCall(scope.rpc,'condenser_api.get_dynamic_global_properties',[]);}
   catch(err){e.finality='lookup unavailable: '+err.message;return e;}
-  var lib=(g&&typeof g.last_irreversible_block_num==='number')?g.last_irreversible_block_num:null;
-  if(lib===null)e.finality='no irreversible head in the answer';
+  var lib=(g&&typeof g.last_irreversible_block_num==='number'&&Number.isFinite(g.last_irreversible_block_num))?g.last_irreversible_block_num:null;
+  if(lib===null)e.finality='malformed or absent irreversible height in the answer';
   else e.finality={lib_block:lib,irreversible:t.block_num<=lib};
   return e;
 }
