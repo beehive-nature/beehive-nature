@@ -1,11 +1,18 @@
 # The keychain edge kit (ops/keys-edge) end to end in throwaway docker on the runner
-# (keychain release + edge contract, 2026-10-12, §4 and §6): the keys-door image from its
-# Dockerfile on registry-pinned bases, a seq 1 -> seq 2 release chain signed by a throwaway key made
-# in the run, keys-door from compose.yml seeded through its inbox, caddy 2.11.4 running
-# Caddyfile.keys with only its issuer switched to Caddy's internal CA, OpenSSL 3.5 / curl probes of
-# the hybrid-only TLS policy and of every served byte, then rollback and tamper refusals.
+# (keychain release + edge contract, 2026-10-12, §4, §6 and §7): the keys-door image from its
+# Dockerfile on registry-pinned bases, a seq 1..4 release chain with a fork at seq 3, signed by a
+# throwaway key made in the run, keys-door from compose.yml seeded through its inbox, caddy 2.11.4
+# running Caddyfile.keys with only its issuer switched to Caddy's internal CA, OpenSSL 3.5 / curl
+# probes of the hybrid-only TLS policy and of every served byte, a fresh edge resuming from a peer
+# alone (A1), then tamper, rollback with the serve state lost or corrupt and the floor kept
+# (against a control edge with no floor), and the fork reported, remembered and resolved.
 # ops/keys-edge/lab/lab.sh holds every step and prints its evidence; any mismatch fails the job.
 # No secret, no real key, no public endpoint touched beyond image, package and crate pulls.
+#
+# The paths are every input the lab builds or reads: the image (bsigner and its path crates from
+# the root workspace, on the pinned toolchain), the release bytes (build-keychain.mjs and what it
+# reads, the PQ library release.mjs signs with, the law-key pins it refuses), and the Hostinger
+# Caddyfile mirror step d validates with Caddyfile.keys appended.
 name: keychain-edge-lab
 
 on:
@@ -15,12 +22,32 @@ on:
       - 'ops/keys-door/**'
       - 'tools/keychain-release/**'
       - '.github/workflows/keychain-edge-lab.yml'
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - 'scripts/build-keychain.mjs'
+      - 'keychain/**'
+      - 'surfaces/onboarding/**'
+      - 'surfaces/bpq.js'
+      - 'docs/PQ-SIGNERS.json'
+      - 'ops/watch/hostinger/Caddyfile.hostinger'
   pull_request:
     paths:
       - 'ops/keys-edge/**'
       - 'ops/keys-door/**'
       - 'tools/keychain-release/**'
       - '.github/workflows/keychain-edge-lab.yml'
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - 'scripts/build-keychain.mjs'
+      - 'keychain/**'
+      - 'surfaces/onboarding/**'
+      - 'surfaces/bpq.js'
+      - 'docs/PQ-SIGNERS.json'
+      - 'ops/watch/hostinger/Caddyfile.hostinger'
   workflow_dispatch:
 
 permissions:
