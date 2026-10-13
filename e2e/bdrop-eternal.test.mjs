@@ -272,7 +272,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
       mkRec('drop-a', BODY_SHA, FUTURE),        /* will resolve: confirmed (chain body matches) */
       mkRec('drop-b', BODY_SHA, FUTURE),        /* will resolve: diverged (chain body differs) */
       mkRec('drop-c', NEVER_SHA, FUTURE),       /* stays unresolved: not landed, signed tx still live */
-      mkRec('drop-d', NEVER_SHA, PAST),         /* will resolve: expired (cannot land anymore) */
+      mkRec('drop-d', NEVER_SHA, PAST),         /* stays unresolved: expiry is NOT proof of non-execution */
     ];
     const RAW5 = JSON.stringify(J5).slice(0, -1) + ',{"v":1,"id":"@zombie/trunca'; /* whole-parse fails; the four real objects still parse */
     await setMock({ mode: 'normal', contents: { 'drop-a': BODY, 'drop-b': 'other bytes live at this permlink' } });
@@ -298,7 +298,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     ok('partial recovery: drop-a confirmed', /drop-a[^\n]*resolved-confirmed/.test(outTxt), outTxt.split('\n').find(l => l.includes('drop-a')) || '');
     ok('partial recovery: drop-b diverged', /drop-b[^\n]*resolved-diverged/.test(outTxt));
     ok('partial recovery: drop-c stays unresolved (live signed tx, not landed)', /drop-c[^\n]*unresolved/.test(outTxt));
-    ok('partial recovery: drop-d resolved-expired (cannot land anymore)', /drop-d[^\n]*resolved-expired/.test(outTxt));
+    ok('partial recovery: drop-d stays unresolved — an expired signed tx is NOT proof it never executed', /drop-d[^\n]*unresolved/.test(outTxt));
     ok('partial recovery: unparseable residue reported', /residue/i.test(outTxt));
     ok('partial recovery did NOT touch the damaged journal bytes',
       (await cor0.page.evaluate(() => localStorage.getItem('bnr.bdrop.outbox.v1'))) === RAW5);
@@ -466,7 +466,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await fr.page.fill('#body', BODY);
     await fr.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
     await fr.page.click('#recover');
-    await step('7a recovered with a matching commitment', () => fr.page.waitForFunction(() => /equals the desk/.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    await step('7a recovered with a matching commitment', () => fr.page.waitForFunction(() => /equals the committed bytes/.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
     const obA = await outboxOf(fr.page);
     const rcA = obA.find(r => r.scope.permlink === 'drop-r-match');
     ok('7a MATCH verdict with expected and chain hashes RECORDED SEPARATELY',
@@ -479,7 +479,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await fr.page.fill('#permlink', 'drop-r-diverge');
     await fr.page.fill('#body', BODY);
     await fr.page.click('#recover');
-    await step('7b divergent recovery reported', () => fr.page.waitForFunction(() => /DIFFERS from the desk/.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    await step('7b divergent recovery reported', () => fr.page.waitForFunction(() => /DIFFERS from the committed bytes/.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
     const rcB = (await outboxOf(fr.page)).find(r => r.scope.permlink === 'drop-r-diverge');
     ok('7b DIVERGED verdict — never a self-compared MATCH', !!(rcB && rcB.receipt && rcB.receipt.body_byte_compare === 'DIVERGED' && rcB.receipt.body_sha256_expected === BODY_SHA && rcB.receipt.body_sha256_chain !== BODY_SHA && rcB.stage === 'diverged'));
     /* 7c: no commitment in the desk → UNVERIFIED, not MATCH */
@@ -598,11 +598,96 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     ok('unauthorized attempt left no signed record and names its refusal',
       !!(rec8b && !rec8b.signed_tx && /not an authorized posting key/i.test(rec8b.last_error || '')), (rec8b && rec8b.last_error || 'no record').slice(0, 80));
     await ctx8.close();
+
+    /* ── scenario 9: the two quarantine gaps (Agent 30, 2026-10-13) ──
+       (a) a transaction that EXECUTED before expiry, first seen through a stale
+       empty read, must never be labeled resolved-expired — expiry establishes
+       neither non-execution nor endpoint completeness;
+       (b) archiving a damaged journal that holds an unresolved HANDOFF must carry
+       that uncertainty across restart and refuse a replacement submission of the
+       SAME operation — until the chain establishes its fate, and then the desk
+       CONFIRMS the landing instead of republishing. Independence: a different
+       scope proceeds under its own pre-flight. ── */
+    await setMock({ mode: 'normal', content: null, junk: false, accounts: {}, lastBody: null });
+    mock.broadcasts.length = 0;
+    const PAST9 = new Date(Date.now() - 7200e3).toISOString().slice(0, 19);
+    const mkOp = (pl, sha, stage, exp) => ({ v: 1, id: '@alice/' + pl, created_at: '2026-10-13T00:00:00', stage: stage,
+      scope: { author: 'alice', permlink: pl, body_sha256: sha, body_bytes: 0, disclosure_version: 'x', rpc: `http://127.0.0.1:${PORT}/rpc` },
+      body: null, signed_tx: exp ? { expiration: exp } : null, events: [], receipt: null, attempts: 0, last_error: null });
+    const dir9 = profile('quargap'); dirs.push(dir9);
+    const q9 = await open(dir9);
+    /* (a) the stale view: drop-stale executed before expiry, but this read is empty */
+    await setMock({ mode: 'normal', contents: { 'drop-stale': '' }, accounts: {}, lastBody: null });
+    const RAW9a = JSON.stringify([mkOp('drop-stale', BODY_SHA, 'signed', PAST9)]).slice(0, -1) + ',"corrupt';
+    await q9.page.evaluate(r => { localStorage.setItem('bnr.bdrop.outbox.v1', r); localStorage.removeItem('bnr.bdrop.outbox.v1.damaged'); }, RAW9a);
+    await q9.page.reload();
+    await q9.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await q9.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await q9.page.click('#recover'); /* corrupt-mode reconciliation against the STALE view */
+    await step('9a reconciliation against the stale view reports the operation', () => q9.page.waitForFunction(() => /drop-stale/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 15000 }));
+    let txt9a = await q9.page.textContent('#outbox');
+    ok('9a an expired signed tx through an empty read stays UNRESOLVED — never resolved-expired',
+      /drop-stale[^\n]*unresolved/.test(txt9a) && !/drop-stale[^\n]*resolved-expired/.test(txt9a),
+      (txt9a.split('\n').find(l => l.includes('drop-stale')) || '').slice(0, 150));
+    ok('9a the note names expiry as non-proof (stale or incomplete reads are possible)', /NOT proof|stale/i.test(txt9a));
+    /* the endpoint catches up: drop-stale HAD executed — proving the label would have been wrong */
+    await setMock({ mode: 'normal', contents: { 'drop-stale': BODY }, accounts: {}, lastBody: null });
+    await q9.page.click('#recover');
+    await step('9a the caught-up view resolves it as LANDED', () => q9.page.waitForFunction(() => /drop-stale[^\n]*resolved-confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 15000 }));
+    ok('9a the op that "expired" actually landed — the mislabel window is closed by construction', /drop-stale[^\n]*resolved-confirmed/.test(await q9.page.textContent('#outbox')));
+    /* (b) a damaged journal holding an unresolved HANDOFF */
+    const RAW9b = JSON.stringify([mkOp('drop-handoff', BODY_SHA, 'handoff', null)]).slice(0, -1) + ',"trunc';
+    await q9.page.evaluate(r => { localStorage.setItem('bnr.bdrop.outbox.v1', r); localStorage.removeItem('bnr.bdrop.outbox.v1.damaged'); localStorage.removeItem('bnr.bdrop.quarantine.v1'); }, RAW9b);
+    await q9.page.reload();
+    await q9.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await setMock({ mode: 'normal', contents: { 'drop-handoff': '' }, accounts: {}, lastBody: null });
+    await q9.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await q9.page.click('#recover');
+    await step('9b the unresolved handoff is named', () => q9.page.waitForFunction(() => /drop-handoff[^\n]*unresolved/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 15000 }));
+    q9.page.once('dialog', d => d.accept());
+    await q9.page.click('#damaged-archive');
+    await step('9b the deliberate archive completes', () => q9.page.waitForFunction(() => /archived deliberately/.test(document.getElementById('status').textContent || ''), null, { timeout: 8000 }));
+    const ledger9 = await q9.page.evaluate(() => JSON.parse(localStorage.getItem('bnr.bdrop.quarantine.v1') || '[]'));
+    ok('9b the archive CARRIES the unresolved handoff into a durable quarantine ledger',
+      ledger9.some(e => e.scope && e.scope.permlink === 'drop-handoff' && e.outcome === 'unresolved'),
+      JSON.stringify(ledger9.map(e => (e.scope ? e.scope.permlink : '?') + ':' + e.outcome)));
+    /* RESTART: uncertainty and duplicate-prevention must survive */
+    await q9.page.reload();
+    await q9.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await step('9b the quarantine ledger survives the restart and renders', () => q9.page.waitForFunction(() => /quarantine ledger/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 8000 }));
+    await setMock({ mode: 'normal', contents: { 'drop-handoff': '' }, accounts: {}, lastBody: null });
+    await q9.page.fill('#author', 'alice');
+    await q9.page.fill('#permlink', 'drop-handoff');
+    await q9.page.fill('#body', BODY);
+    await q9.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await q9.page.click('#publish');
+    await step('9b the SAME operation is refused after restart — the archive authorized no replacement',
+      () => q9.page.waitForFunction(() => /quarantine ledger/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    ok('9b resubmission attempt broadcast nothing', mock.broadcasts.length === 0, 'broadcasts=' + mock.broadcasts.length);
+    await q9.page.fill('#permlink', 'drop-independent');
+    await q9.page.click('#publish');
+    await step('9b an independent scope proceeds under its own guards (not held hostage by the ledger)',
+      () => q9.page.waitForFunction(() => /no posting key given/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    /* the chain establishes drop-handoff's fate: it HAD landed */
+    await setMock({ mode: 'normal', contents: { 'drop-handoff': BODY }, accounts: {}, lastBody: null });
+    await q9.page.fill('#permlink', 'drop-handoff');
+    await q9.page.fill('#body', ''); /* an empty desk — the LEDGER's own commitment must do the comparing */
+    await q9.page.click('#recover');
+    await step('9b recovery resolves the ledger entry from its own commitment', () => q9.page.waitForFunction(() => /drop-handoff[^\n]*resolved-confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 15000 }));
+    const ledger9b = await q9.page.evaluate(() => JSON.parse(localStorage.getItem('bnr.bdrop.quarantine.v1') || '[]'));
+    ok('9b the ledger entry itself is resolved-confirmed (durable state updated, not just prose)', ledger9b.some(e => e.scope && e.scope.permlink === 'drop-handoff' && e.outcome === 'resolved-confirmed'));
+    await q9.page.fill('#body', BODY);
+    await q9.page.click('#publish');
+    await step('9b after resolution the desk CONFIRMS the landing instead of republishing',
+      () => q9.page.waitForFunction(() => /already published — identical bytes confirmed/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    ok('9b the whole quarantine-gap sequence broadcast nothing', mock.broadcasts.length === 0, 'broadcasts=' + mock.broadcasts.length);
+    ok('9 scenario produced no page errors', q9.errs.length === 0, q9.errs[0] || '');
+    await q9.ctx.close();
   } finally {
     for (const c of ctxs) { try { await c.close(); } catch {} }
     for (const d of dirs) { try { rmSync(d, { recursive: true, force: true }); } catch {} }
     server.close();
   }
   assert.equal(failures, 0, failures + ' lifecycle assertion(s) failed — see the ✗ lines above');
-  console.log(failures === 0 ? 'BDROP LIFECYCLE GREEN — editions, happy path, duplicates, restart, ambiguity, unavailability, divergence, retrieval, key hygiene, the quarantined journal, the contract-faithful keychain signer, mid-handoff closure, evidence-honest fresh-client recovery and the native keychain door (authority-checked, signature-verified, no extension, no paste) all held. nothing touched hive.' : 'BDROP LIFECYCLE RED.');
+  console.log(failures === 0 ? 'BDROP LIFECYCLE GREEN — editions, happy path, duplicates, restart, ambiguity, unavailability, divergence, retrieval, key hygiene, the quarantined journal, the contract-faithful keychain signer, mid-handoff closure, evidence-honest fresh-client recovery, the native keychain door (authority-checked, signature-verified, no extension, no paste) and the two quarantine gaps (expiry never proves non-execution; an archive never authorizes a replacement) all held. nothing touched hive.' : 'BDROP LIFECYCLE RED.');
 });
