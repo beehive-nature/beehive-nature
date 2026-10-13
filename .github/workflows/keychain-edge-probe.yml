@@ -1,10 +1,13 @@
 # The keychain edge at keys.skaists.dev, probed from a GitHub-hosted runner: a vantage point
 # independent of the founder's laptop and of the edge itself (an edge is never its own witness).
 # tools/keychain-release/probe.mjs writes a bnr.keychain-edge-receipt/1, saved as an artifact; the
-# job summary table is derived from that receipt, and the run fails when any check in it is FAIL.
+# job summary table is derived from that receipt, and the run is green only when every check in it
+# is PASS: a FAIL exits 1, anything NOT MEASURED or missing exits 2 (an edge that did not answer is
+# not an edge that passed). Each A and AAAA address is probed on its own, so a runner without an
+# IPv6 route cannot give a green run while the name has AAAA records.
 # TLS probes run in docker alpine:3.22 (OpenSSL 3.5): the runner's own OpenSSL cannot offer
-# X25519MLKEM768. Read-only: public GETs and TLS handshakes; no secret, no key, no payment.
-# On demand only, as ant-reach: no schedule.
+# X25519MLKEM768. Read-only: GETs, one OPTIONS per address, TLS handshakes; no secret, no key, no
+# payment. On demand only, as ant-reach: no schedule.
 name: keychain-edge-probe
 on:
   workflow_dispatch:
@@ -28,6 +31,6 @@ jobs:
         with:
           name: keychain-edge-receipt
           path: keychain-edge-receipt.json
-      - name: summary, derived from the receipt
+      - name: summary and verdict, derived from the receipt (exit 0 only when every check is PASS)
         if: always() && hashFiles('keychain-edge-receipt.json') != ''
         run: node tools/keychain-release/probe.mjs summary keychain-edge-receipt.json >> "$GITHUB_STEP_SUMMARY"
