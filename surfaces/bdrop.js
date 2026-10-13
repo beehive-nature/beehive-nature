@@ -141,6 +141,21 @@ function parseDamaged(raw){
   }
   return {ops:ops,residue_bytes:Math.max(0,raw.length-covered)};
 }
+/* the quarantine ledger: unresolved operations carried OUT of damaged journals.
+   Archiving reorganizes evidence; it reconciles nothing. An unresolved operation's
+   uncertainty and its duplicate-prevention state survive restarts here — its scope
+   stays refused until the chain establishes its fate, and an independent scope
+   proceeds under its own guards. Expiry never resolves an entry. */
+var QUAR_KEY='bnr.bdrop.quarantine.v1';
+function loadQuar(){try{var q=JSON.parse(localStorage.getItem(QUAR_KEY)||'[]');return Array.isArray(q)?q:[];}catch(e){return[];}}
+function saveQuar(q){localStorage.setItem(QUAR_KEY,JSON.stringify(q));}
+function quarFor(author,permlink){return loadQuar().find(function(e){return e.scope&&e.scope.author===author&&e.scope.permlink===permlink;})||null;}
+function quarUpsert(q,o,outcome,note,block){
+  var le=q.find(function(e){return e.id===o.id;});
+  if(!le){le={v:1,id:o.id,scope:o.scope,outcome:'unresolved',note:'',block:null,signed_tx_expiration:(o.signed_tx&&o.signed_tx.expiration)||null,created_at:new Date().toISOString(),updated_at:null};q.push(le);}
+  le.outcome=outcome;le.note=note||'';le.block=block||null;le.updated_at=new Date().toISOString();
+  return le;
+}
 function loadOutbox(){
   var raw=localStorage.getItem(OUTBOX_KEY);
   if(raw===null)return [];
@@ -150,9 +165,13 @@ function loadOutbox(){
     CORRUPT=null;return a;
   }catch(e){
     var p=parseDamaged(raw);
+    var q=loadQuar(); /* outcomes already established survive the restart */
     CORRUPT={raw:raw,why:e&&e.message?e.message:String(e),seen:new Date().toISOString(),
       ops:p.ops,residue_bytes:p.residue_bytes,
-      statuses:p.ops.map(function(o){return{id:o.id,outcome:'unresolved',note:'not yet reconciled'};})};
+      statuses:p.ops.map(function(o){
+        var k=q.find(function(e){return e.id===o.id;});
+        return k?{id:o.id,outcome:k.outcome,block:k.block||null,note:k.note||''}:{id:o.id,outcome:'unresolved',note:'not yet reconciled'};
+      })};
     if(localStorage.getItem(OUTBOX_DAMAGED_KEY)===null)localStorage.setItem(OUTBOX_DAMAGED_KEY,raw);
     return [];
   }
@@ -198,7 +217,7 @@ function renderOutbox(a){
     return;
   }
   a=a||loadOutbox();
-  if(!a.length){box.innerHTML='<span class="dim">the outbox is empty — no recoverable state yet.</span>';$('rebroadcast').hidden=true;return;}
+  if(!a.length){box.innerHTML='<span class="dim">the outbox is empty — no recoverable state yet.</span>';$('rebroadcast').hidden=true;renderQuar(box);return;}
   box.innerHTML='';
   a.forEach(function(r){
     var line=document.createElement('div');
@@ -209,6 +228,20 @@ function renderOutbox(a){
   });
   var pend=a.find(function(r){return (r.stage==='signed'||r.stage==='submitted')&&r.signed_tx&&!expired(r.signed_tx);});
   $('rebroadcast').hidden=!pend;
+  renderQuar(box);
+}
+function renderQuar(box){
+  var ql=loadQuar();if(!ql.length)return;
+  var un=ql.filter(function(e){return e.outcome==='unresolved';});
+  var qd=document.createElement('div');qd.className=un.length?'bad':'ok';
+  qd.textContent='quarantine ledger: '+un.length+' unresolved operation(s) carried out of damaged journals'+(un.length?' — their scopes stay refused until the chain establishes their fate (name the scope and press "recover a drop from the chain alone")':'.');
+  box.appendChild(qd);
+  ql.slice(-8).forEach(function(e){
+    var l=document.createElement('div');
+    l.className=e.outcome==='unresolved'?'bad':'ok';
+    l.textContent=e.id+' · '+e.outcome+(e.note?' — '+e.note:'');
+    box.appendChild(l);
+  });
 }
 function expired(signedTx){
   try{return Date.parse((signedTx&&signedTx.expiration||'')+'Z')<Date.now();}catch(e){return true;}
@@ -222,6 +255,14 @@ async function rpcCall(endpoint,method,params){
   var j=await r.json();
   if(j.error)throw new Error('rpc error: '+(j.error.message||JSON.stringify(j.error)));
   return j.result;
+}
+/* Hive's condenser_api.get_content ASSERTS for a post that does not exist —
+   "Assert Exception:Post author/permlink does not exist" — that assert IS the
+   endpoint's own not-found answer, never an outage (the founder's live finding
+   at the desk, 2026-10-13 05:16:36). Reading it as a failure would block every
+   first publication and every reconciliation on mainnet. */
+function isNotFound(e){
+  return /does not exist/i.test(String((e&&e.message)||e));
 }
 
 /* ─── hash verdict ─── */
@@ -276,7 +317,10 @@ async function reconcileOne(a,r,quiet){
   var s=r.scope;
   var c;
   try{c=await rpcCall(s.rpc,'condenser_api.get_content',{author:s.author,permlink:s.permlink});}
-  catch(e){r.last_error='reconcile lookup failed: '+e.message;if(!quiet)log(r.id+' — reconcile lookup failed: '+e.message,'bad');saveOutbox(a);return r;}
+  catch(e){
+    if(!isNotFound(e)){r.last_error='reconcile lookup failed: '+e.message;if(!quiet)log(r.id+' — reconcile lookup failed: '+e.message,'bad');saveOutbox(a);return r;}
+    /* the assert IS the not-found answer: fall through as not landed */
+  }
   if(c&&c.body&&c.body.length){
     var pubHash=await sha256Hex(new TextEncoder().encode(c.body));
     if(pubHash===s.body_sha256){
@@ -406,6 +450,13 @@ $('publish').addEventListener('click',async function(){
   var bodyHash=lastHash;
   var scope=await currentScope(bodyHash);
   if(!scope.permlink)scope.permlink='bdrop-'+Date.now();
+  /* the quarantine ledger: an unresolved operation's scope is never resubmitted —
+     a different scope is independent and proceeds under its own guards */
+  var quarOp=quarFor(scope.author,scope.permlink);
+  if(quarOp&&quarOp.outcome==='unresolved'){
+    log('this exact drop (author + permlink) has an UNRESOLVED operation in the quarantine ledger (an archived damaged journal) — its fate is unknown and it may have landed; resubmitting could duplicate an edition. establish its fate first: name this scope and press "recover a drop from the chain alone"; if the chain holds it, the ledger resolves and this desk confirms the landing instead of republishing.','bad');
+    return;
+  }
   var a=loadOutbox();
   var existing=findRec(a,scope);
   if(existing&&existing.stage==='diverged'){
@@ -413,10 +464,14 @@ $('publish').addEventListener('click',async function(){
   }
   /* prepared: recoverable state persists before any network step or key */
   upsert(a,scope,function(r){r.body=body;if(!r.events.length)r.events.push(ev('prepared',scope.body_sha256));});
-  /* pre-flight: the chain is read before any signature — duplicates reconcile, divergences refuse */
+  /* pre-flight: the chain is read before any signature — duplicates reconcile, divergences refuse.
+     the endpoint's assert-shaped "does not exist" IS its not-found answer: not landed. */
   var pre;
   try{pre=await rpcCall(scope.rpc,'condenser_api.get_content',{author:scope.author,permlink:scope.permlink});}
-  catch(e){log('pre-flight lookup failed ('+e.message+'). the desk will not sign blind — retry when the endpoint answers.','bad');return;}
+  catch(e){
+    if(!isNotFound(e)){log('pre-flight lookup failed ('+e.message+'). the desk will not sign blind — retry when the endpoint answers.','bad');return;}
+    pre=null;
+  }
   if(pre&&pre.body&&pre.body.length){
     var preHash=await sha256Hex(new TextEncoder().encode(pre.body));
     if(preHash===scope.body_sha256){
@@ -666,7 +721,33 @@ $('rebroadcast').addEventListener('click',async function(){
     log('re-broadcast failed: '+r.last_error,'bad');
   }
 });
-$('reconcile').addEventListener('click',async function(){$('status').innerHTML='';await reconcileAll(false);});
+$('reconcile').addEventListener('click',async function(){$('status').innerHTML='';await reconcileAll(false);await reconcileQuar(false);});
+/* the quarantine ledger reconciles against the chain too: a landing resolves an
+   entry (recovered, never resubmitted); a not-landing stays unresolved — expiry
+   is not proof, reads can be stale */
+async function reconcileQuar(quiet){
+  var q=loadQuar();if(!q.length)return q;
+  var rpc=$('rpc').value.trim().replace(/\/+$/,'');
+  if(!rpc)return q;
+  var changed=false;
+  for(var i=0;i<q.length;i++){
+    var e=q[i];
+    if(e.outcome!=='unresolved'||!e.scope)continue;
+    var c;
+    try{c=await rpcCall(rpc,'condenser_api.get_content',{author:e.scope.author,permlink:e.scope.permlink});}
+    catch(err){continue;}
+    if(c&&typeof c==='object'&&typeof c.body==='string'&&c.body.length){
+      var h=await sha256Hex(new TextEncoder().encode(c.body));
+      if(h===e.scope.body_sha256){e.outcome='resolved-confirmed';e.note='the chain holds this operation\u2019s committed bytes (block '+c.block_num+') — recovered, never resubmitted';}
+      else{e.outcome='resolved-diverged';e.note='the permlink holds different bytes (block '+c.block_num+') — occupied; the desk edits nothing';}
+      e.updated_at=new Date().toISOString();changed=true;
+      if(!quiet)log(e.id+' — the quarantine ledger resolves: '+e.outcome+'.','ok');
+    } /* not landed stays unresolved — expiry is not proof, reads can be stale */
+  }
+  if(changed)saveQuar(q);
+  renderOutbox();
+  return q;
+}
 
 /* ─── recovery from the chain alone: a fresh client, the original profile gone ───
    No journal, no key, no manual JSON. A content read proves PRESENCE, never a
@@ -682,23 +763,32 @@ async function reconcileDamaged(){
   var rpc=$('rpc').value.trim().replace(/\/+$/,'');
   if(!rpc){log('name the rpc endpoint to read the chain from.','bad');return;}
   log('reconciling every readable operation in the damaged journal against the chain — '+CORRUPT.ops.length+' readable, '+CORRUPT.residue_bytes+' unparseable residue byte(s) preserved verbatim.','dim');
+  var q=loadQuar();
   for(var i=0;i<CORRUPT.ops.length;i++){
     var o=CORRUPT.ops[i],st=CORRUPT.statuses[i],s=o.scope||{};
     st.note='';
     var c;
     try{c=await rpcCall(rpc,'condenser_api.get_content',{author:s.author,permlink:s.permlink});}
-    catch(e){st.outcome='unresolved';st.note='chain read failed: '+e.message;continue;}
+    catch(e){
+      if(!isNotFound(e)){st.outcome='unresolved';st.note='chain read failed: '+e.message;continue;}
+      /* the assert IS the not-found answer: fall through as not landed */
+    }
     if(c&&typeof c==='object'&&typeof c.body==='string'&&c.body.length){
       var h=await sha256Hex(new TextEncoder().encode(c.body));
       if(h===s.body_sha256){st.outcome='resolved-confirmed';st.block=c.block_num;}
       else{st.outcome='resolved-diverged';st.block=c.block_num;st.note='the chain body differs from this operation\u2019s committed bytes';}
-    }else if(o.signed_tx&&expired(o.signed_tx)){
-      st.outcome='resolved-expired';st.note='not landed and the signed transaction has expired — it cannot land anymore';
     }else{
+      /* expiry establishes neither non-execution nor endpoint completeness — it never resolves */
       st.outcome='unresolved';
-      st.note=o.signed_tx?'not landed and the signed transaction is still live — it may be in flight':'not landed and no signed transaction is held — its broadcast state is unknowable from this desk';
+      st.note=(o.signed_tx&&expired(o.signed_tx)
+        ?'not landed at this read and the signed transaction has expired — expiry is NOT proof it never executed: reads can be stale or incomplete; it stays unresolved'
+        :(o.signed_tx
+          ?'not landed at this read and the signed transaction is still live — it may be in flight'
+          :'not landed at this read and no signed bytes are held — a handoff may or may not have broadcast it; unknowable from here'));
     }
+    quarUpsert(q,o,st.outcome,st.note,st.block); /* every outcome is durable: restarts keep what was established */
   }
+  saveQuar(q);
   renderOutbox();
   if(quarantine()){
     log('the damaged journal still holds unresolved operations or unparseable bytes — submissions stay refused. each resolved outcome above is recorded; the raw bytes stay preserved; recovering one operation never clears the others\u2019 uncertainty.','bad');
@@ -725,13 +815,20 @@ $('recover').addEventListener('click',async function(){
   log('reading the chain alone for @'+author+'/'+permlink+' — a content read: it proves presence, never a signature. nothing is broadcast.','dim');
   var c;
   try{c=await rpcCall(rpc,'condenser_api.get_content',{author:author,permlink:permlink});}
-  catch(e){log('the chain read failed ('+e.message+') — nothing was recovered; nothing beyond the read was attempted.','bad');return;}
+  catch(e){
+    if(isNotFound(e)){log('the chain shows no such drop at @'+author+'/'+permlink+' — the endpoint\u2019s own not-found answer (a chain read is not proof it never existed elsewhere; nothing was recovered).','bad');return;}
+    log('the chain read failed ('+e.message+') — nothing was recovered; nothing beyond the read was attempted.','bad');return;
+  }
   if(!(c&&typeof c==='object'&&typeof c.body==='string'&&c.body.length)){
     log('the endpoint\u2019s answer did not read as content — nothing was recovered and nothing was manufactured. an untrusted endpoint cannot make this desk invent a record.','bad');return;
   }
   var chainHash=await sha256Hex(new TextEncoder().encode(c.body));
   var deskBytes=currentBytes();
-  var expected=deskBytes&&deskBytes.length?await sha256Hex(deskBytes):null;
+  /* the commitment: the desk's own bytes, or — when the desk is empty — the
+     quarantine ledger's recorded commitment for this exact scope */
+  var lede=quarFor(author,permlink);
+  var expFrom=deskBytes&&deskBytes.length?'desk':(lede?'quarantine-ledger':'none');
+  var expected=expFrom==='desk'?await sha256Hex(deskBytes):(expFrom==='quarantine-ledger'?lede.scope.body_sha256:null);
   var verdict=expected===null?'UNVERIFIED':(expected===chainHash?'MATCH':'DIVERGED');
   var rec={v:1,id:'@'+author+'/'+permlink,created_at:new Date().toISOString(),
     stage:verdict==='DIVERGED'?'diverged':'confirmed',
@@ -751,23 +848,42 @@ $('recover').addEventListener('click',async function(){
     created:(typeof c.created==='string'?c.created:null),
     rpc_endpoint:rpc,disclosure_version:DISCLOSURE_VERSION,
     recovered_at:new Date().toISOString(),body_byte_compare:verdict,events:rec.events};
+  if(lede){
+    /* recovery is also how a quarantined operation's fate gets established */
+    var q3=loadQuar();
+    var e3=q3.find(function(e2){return e2.scope&&e2.scope.author===author&&e2.scope.permlink===permlink;});
+    if(e3){
+      if(verdict==='MATCH'){e3.outcome='resolved-confirmed';e3.note='recovered from the chain: the committed bytes hold (block '+c.block_num+')';}
+      else if(verdict==='DIVERGED'){e3.outcome='resolved-diverged';e3.note='recovered from the chain: the permlink holds different bytes';}
+      else{e3.note='chain body present but no commitment comparable — the operation\u2019s fate stays unknown';}
+      e3.updated_at=new Date().toISOString();
+      saveQuar(q3);
+    }
+  }
   var a=loadOutbox();
   a=a.filter(function(x){return x.id!==rec.id;});
   a.push(rec);
   saveOutbox(a);renderOutbox(a);renderReceipt(rec);
-  var line={MATCH:'recovered: the chain body equals the desk\u2019s committed bytes (MATCH). the signature evidence is still NONE — presence proven, signing never.',
-    DIVERGED:'recovered: the chain body DIFFERS from the desk\u2019s committed bytes (DIVERGED) — both digests ride the record; the desk edits nothing.',
-    UNVERIFIED:'recovered with NO commitment in the desk (UNVERIFIED): the chain body is recorded as-found; nothing claims what was signed — a missing commitment never converts to MATCH.'}[verdict];
+  var line={MATCH:'recovered: the chain body equals the committed bytes (MATCH, from the '+(expFrom==='desk'?'desk':'quarantine ledger')+'). the signature evidence is still NONE — presence proven, signing never.',
+    DIVERGED:'recovered: the chain body DIFFERS from the committed bytes (DIVERGED, from the '+(expFrom==='desk'?'desk':'quarantine ledger')+') — both digests ride the record; the desk edits nothing.',
+    UNVERIFIED:'recovered with NO commitment anywhere (UNVERIFIED): the chain body is recorded as-found; nothing claims what was signed — a missing commitment never converts to MATCH.'}[verdict];
   log(line+' the recovered bytes ride the record. no key, no journal import, nothing broadcast.','ok');
 });
 $('damaged-archive').addEventListener('click',function(){
   if(!CORRUPT)return;
-  if(!window.confirm('archive the damaged journal? its bytes stay preserved under '+OUTBOX_DAMAGED_KEY+' — this only starts a clean journal and unblocks submissions.'))return;
+  var unres=CORRUPT.statuses.filter(function(s){return s.outcome==='unresolved';}).length;
+  if(!window.confirm('archive the damaged journal? its bytes stay preserved under '+OUTBOX_DAMAGED_KEY+(unres?', and its '+unres+' unresolved operation(s) stay in the quarantine ledger — their scopes stay refused until the chain establishes their fate':'')+'. this reorganizes evidence; it reconciles nothing.'))return;
   localStorage.setItem(OUTBOX_DAMAGED_KEY,JSON.stringify({archived_at:new Date().toISOString(),why:CORRUPT.why,raw:CORRUPT.raw}));
+  /* archiving never erases unresolved-operation markers: every readable operation
+     rides the durable ledger — resolved as established, unresolved as unresolved */
+  var q=loadQuar();
+  CORRUPT.statuses.forEach(function(s,i){quarUpsert(q,CORRUPT.ops[i],s.outcome,s.note,s.block);});
+  saveQuar(q);
+  var carried=q.filter(function(e){return e.outcome==='unresolved';}).length;
   CORRUPT=null;
   saveOutbox([]);
   renderOutbox([]);
-  log('the damaged journal was archived deliberately — its bytes remain preserved under '+OUTBOX_DAMAGED_KEY+'. a clean journal begins; submissions are unblocked.','dim');
+  log('the damaged journal was archived deliberately — its bytes remain preserved under '+OUTBOX_DAMAGED_KEY+'. '+(carried?carried+' unresolved operation(s) ride the quarantine ledger: their scopes stay refused (a replacement submission is not authorized) until the chain establishes their fate.':'no unresolved operations remained — the ledger records their established outcomes.'),'dim');
 });
 
 /* ─── receipt download + the preservation bundle ─── */
@@ -805,14 +921,25 @@ $('bundle').addEventListener('click',function(){
 });
 
 /* hosted ANT preservation — Agent 20's shared module (ant-pay.js), the
-   bpay-invoice pattern: priced invoice, the founder's wallet signs, ceilings
-   enforced by the module, nothing spent silently. */
+   bpay-invoice pattern: priced invoice, ceilings enforced by the module,
+   nothing spent silently. The FIRST-PARTY signer is the estate's isolated
+   keychain (the same KCX signer() the purchase suites exercise); a browser
+   wallet is an external door that must be chosen explicitly. No budget is
+   invented here and the purchasing module is untouched. */
 $('preserve-ant').addEventListener('click',async function(){
   var ps=$('pstatus');ps.hidden=false;
   var line=function(t,cls){ps.innerHTML='';var d=document.createElement('div');if(cls)d.className=cls;d.textContent=t;ps.appendChild(d);};
   if(!lastRec||!lastRec.receipt||lastRec.stage!=='confirmed'){line('preservation needs a confirmed drop first.','bad');return;}
   if(!window.AntPay){line('the hosted purchaser module (ant-pay.js) did not load — preservation unavailable, nothing attempted.','bad');return;}
-  if(!window.ethereum){line('no EVM wallet detected — the hosted ANT purchase needs your wallet to sign the priced invoice. nothing was attempted or spent.','bad');return;}
+  var evmSigner=null,who='';
+  if(KCX&&KCX.state&&KCX.state.state==='unlocked'&&KCX.state.evm){
+    evmSigner=KCX.signer();who='the isolated keychain at keys.skaists.dev (first-party)';
+  }else if(window.ethereum){
+    if(!window.confirm('the first-party keychain is not unlocked here. use the connected BROWSER WALLET (external) for this one purchase? nothing happens before you sign inside it, and the choice is yours.')){line('no signer chosen — nothing was attempted or spent.','dim');return;}
+    evmSigner=window.ethereum;who='your browser wallet (external, your explicit choice)';
+  }else{
+    line('no first-party signer: the isolated keychain is not unlocked here and no external wallet was offered. unlock the keychain in its frame above or connect a wallet — nothing was attempted or spent.','bad');return;
+  }
   var rec=lastRec;
   try{
     line('composing the bundle and loading the Autonomi browser kit…','dim');
@@ -829,13 +956,13 @@ $('preserve-ant').addEventListener('click',async function(){
       if(!r.ok)throw new Error('payment rpc unavailable');
       var j=await r.json();if(j.error)throw new Error('payment rpc refused '+method);return j.result;
     };
-    var payer=window.AntPay.createHosted({artifact:{name:file.name,sha256:sha,bytes:file.size},network:defaults.payment,storage:localStorage,rpc:rpc,ethereum:window.ethereum});
+    var payer=window.AntPay.createHosted({artifact:{name:file.name,sha256:sha,bytes:file.size},network:defaults.payment,storage:localStorage,rpc:rpc,ethereum:evmSigner});
     await payer.retryUnpaid();
     line('asking Autonomi for the price of '+file.size.toLocaleString()+' bytes — nothing is signed yet.','dim');
     var paid=await client.upload(file,{visibility:'public',paymentMode:'single',payment:{
       pay:async function(network,quotes,context){
         var inv=await payer.invoice(network,quotes,'20000000000000000',null);
-        line('invoice ready: review it in your wallet before signing. aggregate ceilings are enforced by the shared module.','dim');
+        line('invoice ready: review it in '+who+' before signing. aggregate ceilings are enforced by the shared module.','dim');
         var out=await payer.provider(inv.id).pay(network,quotes,context);
         return out;
       },
@@ -875,10 +1002,11 @@ renderSigner();
 renderOutbox();
 loadEditions();
 rehash();
-reconcileAll(true).then(function(a){
+reconcileAll(true).then(async function(a){
   var pend=a.filter(function(r){return r.stage==='signed'||r.stage==='submitted';});
   if(pend.length)log('recovered state: '+pend.length+' drop(s) in flight — reconciled against the chain on load; nothing was re-signed or re-published blind.','dim');
   if(CORRUPT)log('the recoverable journal is damaged — bytes preserved verbatim; every readable operation reconciles on its own (press "recover a drop from the chain alone"); submissions stay refused while any operation or residue is unresolved.','bad');
+  await reconcileQuar(true); /* quarantined operations reconcile on their own too — expiry never resolves them */
   renderOutbox(a);
 });
 })();
