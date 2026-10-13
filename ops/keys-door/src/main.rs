@@ -40,7 +40,11 @@ fn flag(args: &[String], name: &str) -> Option<PathBuf> {
 fn setup(args: &[String]) -> Result<(Config, Verifiers), String> {
     let path = flag(args, "--config").ok_or(USAGE)?;
     let cfg = Config::load(&path)?;
-    let verifiers = Verifiers::new(&cfg.bsigner_path, &std::env::temp_dir())?;
+    let verifiers = Verifiers::new(
+        &cfg.bsigner_path,
+        &cfg.bsigner_sha256,
+        &std::env::temp_dir(),
+    )?;
     Ok((cfg, verifiers))
 }
 

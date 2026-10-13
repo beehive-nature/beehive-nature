@@ -40,6 +40,8 @@ pub struct Config {
     pub health_listen: SocketAddr,
     /// the second verifier; required, and empty refuses to serve
     pub bsigner_path: String,
+    /// base64url SHA-256 of the exact bsigner build at bsigner_path; required
+    pub bsigner_sha256: String,
     #[serde(default = "default_poll")]
     pub poll_secs: u64,
     #[serde(default)]
@@ -79,6 +81,12 @@ impl Config {
         if self.genesis_signers.is_empty() || !self.genesis_signers.iter().all(|s| is_signer_id(s))
         {
             return Err("genesis_signers must be a non-empty list of bzpq1 or mldsa65: ids".into());
+        }
+        if unb64u32(&self.bsigner_sha256).is_none() {
+            return Err(
+                "bsigner_sha256 must be the base64url SHA-256 (43 characters) of the bsigner binary at bsigner_path"
+                    .into(),
+            );
         }
         if self.min_seq == 0 || self.min_seq > MAX_SAFE {
             return Err("min_seq must be >= 1".into());

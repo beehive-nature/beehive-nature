@@ -203,6 +203,65 @@ test('anchor: sig.bpq keeps its name and carries the mldsa65: id; assess reads t
   await assert.rejects(assess([], async () => true, { recordBytes: r2.bytes, sigBytes: two, vk: OTHER.vk }), /key_id is not the bsigner key id/);
 });
 
+// ── the shared fixture (ops/keys-door/tests/vectors/profile-separation.json) ──────
+// keys-door's profile_separation_vector_verdicts reads the same cases; both must reach each verdict.
+const VECTOR = JSON.parse(readFileSync(join(ROOT, 'ops', 'keys-door', 'tests', 'vectors', 'profile-separation.json'), 'utf8'));
+function jsVerdict(c) {
+  try {
+    const o = openEnvelope(Buffer.from(canon(c.envelope), 'latin1'));
+    parseRecord(o.recordBytes);
+    const v = verifySig(readSig(o.sigBytes), o.recordBytes, o.vk);
+    return v.ok ? { accept: true, id: v.id } : { accept: false, why: v.why };
+  } catch (e) { return { accept: false, why: e.message }; }
+}
+
+test('profile separation: the JS reader reaches every verdict of the shared fixture, no fallback between profiles', () => {
+  assert.ok(VECTOR.cases.length >= 13);
+  for (const c of VECTOR.cases) {
+    const v = jsVerdict(c);
+    console.log(`profile ${c.name}: ${v.accept ? `accept ${v.id}` : `refuse (${v.why})`}`);
+    if (c.expect === 'accept') assert.deepEqual(v, { accept: true, id: c.signer }, c.name);
+    else assert.equal(v.accept, false, c.name);
+  }
+  const why = n => jsVerdict(VECTOR.cases.find(c => c.name === n)).why;
+  // a bheart object without its type is not re-read as §3b; a §3b object with a type is not re-read as bheart
+  assert.match(why('bheart_type_removed'), /envelope\.vk is forbidden with a SPEC-BPQ-1 §3b signature/);
+  assert.match(why('bheart_type_removed_no_vk'), /unknown field "agility"/);
+  assert.match(why('bpq_with_type_added'), /envelope\.vk is required with a bheart\.signature\/1/);
+  assert.match(why('bpq_with_type_added_and_vk'), /unknown field "at"/);
+  assert.match(why('bpq_with_vk'), /envelope\.vk is forbidden/);
+  assert.match(why('bheart_without_vk'), /envelope\.vk is required/);
+  // and verifySig itself, handed each object directly, with no envelope around it
+  const sigOf = n => VECTOR.cases.find(c => c.name === n).envelope.sig;
+  const rec = Buffer.from(VECTOR.cases[0].envelope.record, 'base64url'), vk = Buffer.from(VECTOR.cases[1].envelope.vk, 'base64url');
+  assert.match(verifySig(sigOf('bheart_type_removed'), rec, vk).why, /unknown field "agility"/);
+  assert.match(verifySig(sigOf('bpq_with_type_added'), rec, undefined).why, /unknown field "at"/);
+  assert.match(verifySig(sigOf('bpq_valid'), rec, vk).why, /vk is forbidden/);
+});
+
+test('signed_at_ms is unauthenticated and ignored: 0, far future and the original are one verdict, one signer, and never reported', () => {
+  const sig = H.sign(hg.bytes);
+  const at = n => ({ ...sig, signed_at_ms: n });
+  const results = [sig, at(0), at(253402300799999)].map(s => verifySig(s, hg.bytes, H.vk));
+  for (const r of results) assert.deepEqual(r, { ok: true, id: H.id, profile: 'bheart.signature/1' });
+  // verifyRelease reports no time for a bheart release: nothing downstream can read one as truth
+  const out = verifyRelease({ recordBytes: hg.bytes, sigBytes: sigBytesOf(at(1)), vk: H.vk, signers: [H.id], genesisSha3: b64u(sha3(hg.bytes)), law: NO_LAW });
+  assert.equal(out.ok, true);
+  assert.ok(!JSON.stringify(out).includes('signed_at') && out.at === undefined, JSON.stringify(out));
+  // the shared fixture: the same signature bytes under different signed_at_ms, the same verdict
+  const ids = ['bheart_valid', 'bheart_signed_at_ms_zero', 'bheart_signed_at_ms_far_future'].map(n => jsVerdict(VECTOR.cases.find(c => c.name === n)));
+  assert.deepEqual(ids[1], ids[0]); assert.deepEqual(ids[2], ids[0]);
+});
+
+test('key_id is consistency with vk, never an authority: a bheart- key id is no signer id anywhere', () => {
+  assert.ok(!isId(H.key_id));
+  assert.throws(() => assemble({ files: FILES, seq: 1, prev: null, signers: [H.key_id], commit: COMMIT }), /not a bzpq1 or mldsa65: id/);
+  // pinning the key id authorizes nothing, even with a good signature
+  const v = verifyRelease({ recordBytes: hg.bytes, sigBytes: signH(H, hg.bytes), vk: H.vk, signers: [H.key_id], genesisSha3: b64u(sha3(hg.bytes)), law: NO_LAW });
+  assert.equal(v.ok, false); assert.match(v.why, /is not a genesis signer/);
+  assert.equal(v.id, H.id, 'the signer is named by the full key, mldsa65:sha3(vk)');
+});
+
 // ── noble vs bsigner (BSIGNER = a bsigner binary) ─────────────────────────────
 const BSIGNER = process.env.BSIGNER;
 const PHRASE = [...Array(23).fill('abandon'), 'art'].join(' ');   // the public BIP-39 test phrase, never a real key

@@ -301,7 +301,7 @@ fn cached_verify(verifiers: &Verifiers, cache: &mut Cache, p: &Parsed) -> Result
         return r.clone();
     }
     let r = verifiers.verify(p);
-    if !matches!(r, Err(Refusal::VerifierFailed(_))) {
+    if !matches!(r, Err(Refusal::VerifierFailed(_) | Refusal::BsignerPin(_))) {
         if cache.len() >= CACHE_MAX {
             cache.clear();
         }
@@ -404,6 +404,13 @@ impl Door {
     /// inbox are read.
     pub fn poll(&mut self, network: bool) {
         let mut notes: Vec<String> = self.load_error.take().into_iter().collect();
+        // the second verifier must still be the pinned build: a swapped bsigner refuses every
+        // new release (named bsigner_pin_mismatch); what is served stays served, as with an
+        // unreadable floor
+        if let Err(e) = self.verifiers.pin_ok() {
+            self.refuse(e, notes);
+            return;
+        }
         let floor = match self.store.floor() {
             Ok(f) => f.max(self.cfg.min_seq),
             Err(e) => {

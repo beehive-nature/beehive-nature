@@ -2,7 +2,12 @@
 # replace.sh — the replacement test outside GitHub Actions: no GitHub, no Docker, no network beyond
 # 127.0.0.1. Edges are keys-door processes; rails and hostile peers are small python servers.
 #
-#   replace.sh CHAIN_DIR KEYS_DOOR_BIN BSIGNER_BIN
+#   replace.sh CHAIN_DIR KEYS_DOOR_BIN BSIGNER_BIN [BSIGNER_SHA256]
+#
+# BSIGNER_SHA256 is the edge's bsigner pin (edge.toml bsigner_sha256, base64url SHA-256 of
+# BSIGNER_BIN). Given, it is used as is, and keys-door refuses to start if BSIGNER_BIN does not
+# hash to it. Not given, it is computed here from BSIGNER_BIN, and the run says so: then the pin
+# only says "the binary did not change during the run", not "this is the build that was tested".
 #
 # CHAIN_DIR holds r1, r2, r3 and r3x (release.mjs prepare + sign-test, one throwaway signer whose
 # id is in CHAIN_DIR/id; r3x is a second valid seq 3 after r2), and CHAIN_DIR/genesis (r1's sha3).
@@ -17,8 +22,15 @@
 #      truncated pack, two peers on conflicting branches; and a fresh edge with a wrong genesis pin
 #   6. edge B's floor file corrupted, then restarted
 set -uo pipefail
-CHAIN=$1 KD=$2 BS=$3
+CHAIN=$1 KD=$2 BS=$3 PIN=${4:-}
 HERE=$(cd "$(dirname "$0")" && pwd)
+HERE_PIN=$(python3 -c 'import base64, hashlib, sys; print(base64.urlsafe_b64encode(hashlib.sha256(open(sys.argv[1], "rb").read()).digest()).rstrip(b"=").decode())' "$BS")
+if [[ -z $PIN ]]; then
+  PIN=$HERE_PIN
+  echo "== bsigner pin: none given, COMPUTED here from $BS: $PIN"
+else
+  echo "== bsigner pin: given $PIN; $BS hashes to $HERE_PIN"
+fi
 ROOT=$(cd "$HERE/../../.." && pwd)
 RELEASE="$ROOT/tools/keychain-release/release.mjs"
 W=$(mktemp -d /tmp/keys-replace.XXXXXX)
@@ -96,6 +108,7 @@ inbox_dir = "$W/$n/inbox"
 listen = "127.0.0.1:$lp"
 health_listen = "127.0.0.1:$hp"
 bsigner_path = "$BS"
+bsigner_sha256 = "$PIN"
 poll_secs = 5
 ant_doors = $ants
 arweave_gateways = []

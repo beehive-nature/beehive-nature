@@ -9,6 +9,7 @@ on:
   push:
     paths:
       - 'tools/keychain-release/**'
+      - 'ops/keys-door/tests/vectors/profile-separation.json'
       - 'keychain/**'
       - 'scripts/build-keychain.mjs'
       - 'docs/KEYCHAIN-RELEASE-SIGNERS.json'
@@ -16,6 +17,7 @@ on:
   pull_request:
     paths:
       - 'tools/keychain-release/**'
+      - 'ops/keys-door/tests/vectors/profile-separation.json'
       - 'keychain/**'
       - 'scripts/build-keychain.mjs'
       - 'docs/KEYCHAIN-RELEASE-SIGNERS.json'

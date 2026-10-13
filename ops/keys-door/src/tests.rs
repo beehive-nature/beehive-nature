@@ -258,17 +258,23 @@ fn bsigner_env() -> Option<PathBuf> {
 
 fn verifiers(scratch: &Path) -> Verifiers {
     match bsigner_env() {
-        Some(p) => Verifiers::new(p.to_str().expect("utf-8 path"), scratch)
+        Some(p) => Verifiers::new(p.to_str().expect("utf-8 path"), &pin_of(&p), scratch)
             .expect("KEYS_DOOR_BSIGNER names a runnable bsigner"),
         None => Verifiers::with_second(Second::Stub(|p, _| pq::fips204_ok(p)), scratch),
     }
+}
+
+/// The base64url SHA-256 of a file: the bsigner_sha256 pin of the binary under test.
+fn pin_of(p: &Path) -> String {
+    b64u(&crate::verify::file_sha256(p).expect("the binary under test is readable"))
 }
 
 fn real_verifiers(scratch: &Path) -> Verifiers {
     let p = bsigner_env().expect(
         "KEYS_DOOR_BSIGNER is not set: this test exists to run the real bsigner subprocess, and a skipped gate is not a pass",
     );
-    Verifiers::new(p.to_str().expect("utf-8 path"), scratch).expect("a runnable bsigner")
+    Verifiers::new(p.to_str().expect("utf-8 path"), &pin_of(&p), scratch)
+        .expect("a runnable bsigner, hashing to its own pin")
 }
 
 struct Fx {
@@ -299,6 +305,7 @@ fn fx_pinned(name: &str, genesis_sha3: [u8; 32], signers: &[String]) -> Fx {
         listen: "127.0.0.1:0".parse().unwrap(),
         health_listen: "127.0.0.1:0".parse().unwrap(),
         bsigner_path: String::new(),
+        bsigner_sha256: b64u(&[0u8; 32]),
         poll_secs: 60,
         arweave_gateways: vec![],
         arweave_owners: vec![],
@@ -615,10 +622,11 @@ fn id_derivation_matches_the_browser_vectors() {
 #[test]
 fn an_empty_bsigner_path_refuses_to_serve() {
     let dir = tmpdir("nobsigner");
-    let e = Verifiers::new("", &dir).unwrap_err();
+    let pin0 = b64u(&[0u8; 32]);
+    let e = Verifiers::new("", &pin0, &dir).unwrap_err();
     assert!(e.contains("two ML-DSA-65 verifiers are mandatory"), "{e}");
-    assert!(Verifiers::new(dir.join("absent").to_str().unwrap(), &dir).is_err());
-    assert!(Verifiers::new(dir.to_str().unwrap(), &dir).is_err());
+    assert!(Verifiers::new(dir.join("absent").to_str().unwrap(), &pin0, &dir).is_err());
+    assert!(Verifiers::new(dir.to_str().unwrap(), &pin0, &dir).is_err());
     let _ = fs::remove_dir_all(&dir);
 }
 
@@ -688,7 +696,7 @@ fn a_lying_second_verifier_on_the_subprocess_path() {
         let path = dir.join(name);
         fs::write(&path, format!("#!/bin/sh\n{body}\n")).unwrap();
         fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
-        Verifiers::new(path.to_str().unwrap(), &dir.join("scratch")).unwrap()
+        Verifiers::new(path.to_str().unwrap(), &pin_of(&path), &dir.join("scratch")).unwrap()
     };
     let echoes = liar(
         "yes-echo.sh",
@@ -2833,7 +2841,7 @@ fn a_lying_bsigner_verify_on_the_bheart_path() {
         let path = dir.join(name);
         fs::write(&path, format!("#!/bin/sh\n{body}\n")).unwrap();
         fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
-        Verifiers::new(path.to_str().unwrap(), &dir.join("scratch")).unwrap()
+        Verifiers::new(path.to_str().unwrap(), &pin_of(&path), &dir.join("scratch")).unwrap()
     };
     // argv: verify --key-id K --file F --envelope S --keydir D
     let echoes = liar(
@@ -2879,4 +2887,500 @@ fn a_lying_bsigner_verify_on_the_bheart_path() {
     );
     assert_eq!(lies_exit.verify(&p).unwrap_err().name(), "verifier_failed");
     let _ = fs::remove_dir_all(&dir);
+}
+
+// ---------------------------------------------------------------------------
+// profile close: the bsigner pin, public-only compatibility against the
+// pinned binary, authority = full public key + exact record, and strict
+// profile separation (the same fixture the JS reader is held to)
+
+#[test]
+fn the_bsigner_pin_is_checked_at_startup_before_each_spawn_and_every_poll() {
+    let dir = tmpdir("pin");
+    let bin = dir.join("fake-bsigner");
+    fs::write(&bin, b"#!/bin/sh\nexit 1\n").unwrap();
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(&bin, fs::Permissions::from_mode(0o755)).unwrap();
+    }
+    let path = bin.to_str().unwrap();
+    let pin = pin_of(&bin);
+    // startup: an unparseable pin, then a wrong one, refuse to serve
+    for bad in ["", "UNFILLED-sha256-of-bsigner-b64u", "AAAA"] {
+        let e = Verifiers::new(path, bad, &dir).unwrap_err();
+        assert!(e.starts_with("bsigner_sha256 must be"), "{e}");
+    }
+    let e = Verifiers::new(path, &b64u(&[7u8; 32]), &dir).unwrap_err();
+    assert!(e.starts_with("bsigner_pin_mismatch: "), "{e}");
+    assert!(e.contains(&pin) && e.contains(&b64u(&[7u8; 32])), "{e}");
+    let v = Verifiers::new(path, &pin, &dir).expect("the file hashes to its pin");
+    assert_eq!(v.pin_ok(), Ok(()));
+
+    // swapped under a running edge: the next spawn is refused by name, not run
+    let k = key(0);
+    let g = release(1, None, &[k], "pin-g");
+    let p = parse_envelope(&envelope(&g, k), ORIGIN, RP).unwrap();
+    fs::write(
+        &bin,
+        b"#!/bin/sh\nprintf '{\"kind\":\"detached\",\"verified\":true}'\n",
+    )
+    .unwrap();
+    let r = v.verify(&p).unwrap_err();
+    assert_eq!(r.name(), "bsigner_pin_mismatch", "{r}");
+    assert!(v
+        .pin_ok()
+        .unwrap_err()
+        .starts_with("bsigner_pin_mismatch: "));
+
+    // and the door: a swapped bsigner refuses every new release, and says so on health
+    let fx = fx("pin-door", &g, &[k]);
+    fx.inbox("g.json", &envelope(&g, k));
+    fx.offer(&g);
+    let mut door = fx.door_with(v);
+    door.poll(true);
+    let h = fx.health();
+    assert_eq!(h.seq, None);
+    assert!(
+        h.last_error
+            .as_deref()
+            .is_some_and(|e| e.starts_with("bsigner_pin_mismatch: ")),
+        "{h:?}"
+    );
+    // the example config's placeholder is refused by the config itself
+    let mut cfg = fx.cfg.clone();
+    cfg.bsigner_sha256 = "UNFILLED-sha256-of-the-pinned-bsigner".into();
+    assert!(cfg
+        .validate()
+        .unwrap_err()
+        .starts_with("bsigner_sha256 must be"));
+    let _ = fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn the_edge_toml_example_placeholder_is_refused() {
+    let text = include_str!("../../keys-edge/edge.toml.example");
+    let line = text
+        .lines()
+        .find(|l| l.starts_with("bsigner_sha256 = "))
+        .expect("edge.toml.example names bsigner_sha256");
+    assert!(line.contains("UNFILLED"), "{line}");
+    let v: Value = toml::from_str::<toml::Value>(line)
+        .map(|t| serde_json::to_value(t).unwrap())
+        .unwrap();
+    assert!(crate::b64::unb64u32(v["bsigner_sha256"].as_str().unwrap()).is_none());
+}
+
+/// One raw `bsigner verify` run, its stdout, stderr and exit printed so the
+/// CI log carries every case. Accepted = exit 0 and stdout says verified true.
+fn raw_verify(
+    case: &str,
+    bin: &Path,
+    key_id: &str,
+    file: &Path,
+    sig: &Path,
+    keydir: &Path,
+) -> bool {
+    let out = std::process::Command::new(bin)
+        .args(["verify", "--key-id", key_id, "--file"])
+        .arg(file)
+        .arg("--envelope")
+        .arg(sig)
+        .arg("--keydir")
+        .arg(keydir)
+        .output()
+        .expect("bsigner runs");
+    let (stdout, stderr) = (
+        String::from_utf8_lossy(&out.stdout),
+        String::from_utf8_lossy(&out.stderr),
+    );
+    println!(
+        "compat {case}: exit {:?} stdout {} stderr {}",
+        out.status.code(),
+        stdout.trim(),
+        stderr.trim()
+    );
+    let said: Value = serde_json::from_str(stdout.trim()).unwrap_or(Value::Null);
+    let accepted = out.status.success() && said["verified"] == true;
+    // the same discipline keys-door applies: a verdict never disagrees with the exit status
+    if said["verified"].is_boolean() {
+        assert_eq!(said["verified"] == true, out.status.success(), "{case}");
+    }
+    accepted
+}
+
+/// A keyset file written as is (NOT through keys-door's writer): what the
+/// pinned bsigner does with each shape is the fact under test.
+fn raw_keyset(dir: &Path, key_id: &str, v: &Value) -> PathBuf {
+    let _ = fs::remove_dir_all(dir);
+    fs::create_dir_all(dir).unwrap();
+    fs::write(dir.join(format!("{key_id}.json")), v.to_string()).unwrap();
+    dir.to_path_buf()
+}
+
+/// Compatibility of the PINNED bsigner with public-only keysets, case by
+/// case, recorded raw. Fails (never skips) without KEYS_DOOR_BSIGNER. Two
+/// cases are accepted by bsigner where the reviewer's table says refuse: a
+/// keyset with private or extra fields, and a keyset whose alg is ml-dsa-87
+/// (verify dispatches on the envelope's alg). Both are recorded as what the
+/// binary does, and keys-door's writer is shown to refuse to write either, and
+/// to refuse before any spawn.
+#[test]
+fn bsigner_public_only_keyset_compatibility() {
+    let bin = bsigner_env().expect(
+        "KEYS_DOOR_BSIGNER is not set: the public-only compatibility suite runs against the pinned binary, and a skipped gate is not a pass",
+    );
+    println!("compat binary: {} sha256 {}", bin.display(), pin_of(&bin));
+    let dir = tmpdir("compat");
+    let keygen = |name: &str| {
+        let made = bsigner_run(
+            &bin,
+            &[
+                "keygen",
+                "--alg",
+                "ml-dsa-65",
+                "--rec-env",
+                REC_ENV,
+                "--keydir",
+                dir.join(name).to_str().unwrap(),
+            ],
+        );
+        let vk = unb64u(made["verifying_key_b64u"].as_str().unwrap()).unwrap();
+        (made["key_id"].as_str().unwrap().to_string(), vk)
+    };
+    let ((k1, vk1), (k2, vk2)) = (keygen("k1"), keygen("k2"));
+    let rec = release_ids(1, None, &[pq::mldsa65_id(&vk1).unwrap()], "compat");
+    let sig = bsigner_sign(&bin, &dir, &dir.join("k1"), &k1, &rec.bytes);
+    let (file, sig_path) = (dir.join("record.json"), dir.join("bsigner-sig.json"));
+    fs::write(&file, &rec.bytes).unwrap();
+    fs::write(&sig_path, serde_json::to_vec_pretty(&sig).unwrap()).unwrap();
+    let write_sig = |name: &str, v: &Value| {
+        let p = dir.join(name);
+        fs::write(&p, v.to_string()).unwrap();
+        p
+    };
+    let sig_v = serde_json::to_value(&sig).unwrap();
+    let edited = |f: &dyn Fn(&mut Value)| {
+        let mut v = sig_v.clone();
+        f(&mut v);
+        v
+    };
+    let ks1 = crate::verify::public_keyset_for(&vk1);
+    let pub1 = raw_keyset(&dir.join("pub1"), &k1, &ks1);
+
+    // (a) valid
+    assert!(raw_verify("a valid", &bin, &k1, &file, &sig_path, &pub1));
+    // (b) wrong key: another keygen's public key under the first key id; and
+    // a correct public-only keyset of a different key
+    let swapped = json!({"type":"bheart.keyset/2","kind":"signature","alg":"ml-dsa-65","key_id":k1,"verifying_key_b64u":b64u(&vk2)});
+    let d = raw_keyset(&dir.join("swapped"), &k1, &swapped);
+    assert!(!raw_verify(
+        "b wrong-key-under-first-id",
+        &bin,
+        &k1,
+        &file,
+        &sig_path,
+        &d
+    ));
+    assert!(
+        crate::verify::public_keyset(&swapped).is_err(),
+        "keys-door never writes it"
+    );
+    let d = raw_keyset(
+        &dir.join("pub2"),
+        &k2,
+        &crate::verify::public_keyset_for(&vk2),
+    );
+    assert!(!raw_verify(
+        "b correct-keyset-other-key",
+        &bin,
+        &k2,
+        &file,
+        &sig_path,
+        &d
+    ));
+    // (c) one byte of the file
+    let mut altered = rec.bytes.clone();
+    altered[10] ^= 1;
+    let alt = dir.join("altered.json");
+    fs::write(&alt, &altered).unwrap();
+    assert!(!raw_verify(
+        "c altered-file",
+        &bin,
+        &k1,
+        &alt,
+        &sig_path,
+        &pub1
+    ));
+    // (d) malformed envelope
+    let text = serde_json::to_string_pretty(&sig).unwrap();
+    let trunc = dir.join("truncated.json");
+    fs::write(&trunc, &text[..text.len() / 2]).unwrap();
+    assert!(!raw_verify(
+        "d truncated-json",
+        &bin,
+        &k1,
+        &file,
+        &trunc,
+        &pub1
+    ));
+    let p = write_sig(
+        "nosig.json",
+        &edited(&|v| {
+            v.as_object_mut().unwrap().remove("signature");
+        }),
+    );
+    assert!(!raw_verify(
+        "d missing-signature",
+        &bin,
+        &k1,
+        &file,
+        &p,
+        &pub1
+    ));
+    let p = write_sig(
+        "baddigest.json",
+        &edited(&|v| {
+            v["content"]["digest"]["b64u"] = json!("!!not base64url!!");
+        }),
+    );
+    assert!(!raw_verify(
+        "d digest-not-b64u",
+        &bin,
+        &k1,
+        &file,
+        &p,
+        &pub1
+    ));
+    // (e) unsupported algorithms, in the envelope and in the keyset
+    for alg in ["ml-dsa-87", "ml-dsa-65-hedged"] {
+        let p = write_sig(
+            "alg.json",
+            &edited(&|v| {
+                v["alg"] = json!(alg);
+                v["signature"]["alg"] = json!(alg);
+            }),
+        );
+        assert!(!raw_verify(
+            &format!("e envelope-alg-{alg}"),
+            &bin,
+            &k1,
+            &file,
+            &p,
+            &pub1
+        ));
+    }
+    let hedged = json!({"type":"bheart.keyset/2","kind":"signature","alg":"ml-dsa-65-hedged","key_id":k1,"verifying_key_b64u":b64u(&vk1)});
+    let d = raw_keyset(&dir.join("hedged"), &k1, &hedged);
+    assert!(!raw_verify(
+        "e keyset-alg-ml-dsa-65-hedged",
+        &bin,
+        &k1,
+        &file,
+        &sig_path,
+        &d
+    ));
+    assert!(crate::verify::public_keyset(&hedged).is_err());
+    // RECORDED: the pinned bsigner verifies with the envelope's alg and does
+    // not refuse a keyset whose alg is ml-dsa-87. keys-door never writes one.
+    let k87 = json!({"type":"bheart.keyset/2","kind":"signature","alg":"ml-dsa-87","key_id":k1,"verifying_key_b64u":b64u(&vk1)});
+    let d = raw_keyset(&dir.join("k87"), &k1, &k87);
+    let raw87 = raw_verify(
+        "e keyset-alg-ml-dsa-87 (recorded)",
+        &bin,
+        &k1,
+        &file,
+        &sig_path,
+        &d,
+    );
+    println!("compat e keyset-alg-ml-dsa-87: the pinned bsigner accepted = {raw87}; keys-door's writer refuses this keyset");
+    assert!(crate::verify::public_keyset(&k87).is_err());
+    // (f) unexpected private fields. RECORDED: the pinned bsigner reads past
+    // them. keys-door's writer refuses the keyset, and refuses before any spawn.
+    let mut private = ks1.clone();
+    private["sealed_b64u"] = json!("AAAA");
+    private["seed"] = json!("AAAA");
+    private["secret"] = json!(true);
+    let d = raw_keyset(&dir.join("private"), &k1, &private);
+    let rawp = raw_verify(
+        "f keyset-private-fields (recorded)",
+        &bin,
+        &k1,
+        &file,
+        &sig_path,
+        &d,
+    );
+    println!("compat f keyset-private-fields: the pinned bsigner accepted = {rawp}; keys-door's writer refuses this keyset");
+    for field in [
+        "sealed_b64u",
+        "seed",
+        "secret",
+        "verifying_key_bytes",
+        "law",
+    ] {
+        let mut ks = ks1.clone();
+        ks[field] = json!("x");
+        let e = crate::verify::public_keyset(&ks).unwrap_err();
+        assert!(e.contains("not public-only") && e.contains(field), "{e}");
+    }
+    // bsigner given such a keyset is not consulted: a sentinel in its place
+    // would leave a mark if it ran
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mark = dir.join("sentinel-ran");
+        let sentinel = dir.join("sentinel.sh");
+        fs::write(
+            &sentinel,
+            format!(
+                "#!/bin/sh\ntouch {}\nprintf '{{\"verified\":true}}'\n",
+                mark.display()
+            ),
+        )
+        .unwrap();
+        fs::set_permissions(&sentinel, fs::Permissions::from_mode(0o755)).unwrap();
+        fs::create_dir_all(dir.join("scratch")).unwrap();
+        let e =
+            crate::verify::run_verify(&sentinel, &dir.join("scratch"), &private, &sig, &rec.bytes)
+                .unwrap_err();
+        assert!(e.contains("not public-only"), "{e}");
+        assert!(
+            !mark.exists(),
+            "bsigner was consulted with a keyset that is not public-only"
+        );
+        // control: the sentinel runs, and leaves its mark, for an exact keyset
+        let _ = crate::verify::run_verify(&sentinel, &dir.join("scratch"), &ks1, &sig, &rec.bytes);
+        assert!(
+            mark.exists(),
+            "control: the sentinel never ran, so its silence above proved nothing"
+        );
+    }
+    // and through keys-door with the pinned binary, end to end: accept
+    let v = real_verifiers(&dir.join("scratch"));
+    let o = v
+        .check_sig(&Sig::Bheart(sig.clone()), Some(&b64u(&vk1)), &rec.bytes)
+        .unwrap();
+    assert_eq!((o.fips204, o.bsigner), (true, Ok(true)));
+    let _ = fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn signed_at_ms_feeds_nothing() {
+    let h = hkey(0);
+    let g = release_ids(1, None, std::slice::from_ref(&h.id), "at-ms");
+    let base = hsign(h, &g.bytes);
+    let mut zero = base.clone();
+    zero.signed_at_ms = 0;
+    let mut far = base.clone();
+    far.signed_at_ms = 253_402_300_799_999; // 9999-12-31T23:59:59.999Z
+    let scratch = tmpdir("at-ms");
+    let v = verifiers(&scratch);
+    let verdicts: Vec<_> = [&base, &zero, &far]
+        .iter()
+        .map(|s| {
+            let p = parse_envelope(&henvelope(&g, (*s).clone(), &h.vk), ORIGIN, RP).unwrap();
+            (p.pre.clone(), v.verify(&p))
+        })
+        .collect();
+    for (pre, r) in &verdicts {
+        assert_eq!(pre, &verdicts[0].0, "the prechecked parts are the same");
+        assert_eq!(r, &Ok(h.id.clone()));
+    }
+    // on the door: all three offered at once are one record, one signer, no fork
+    let fx = fx_pinned("at-ms-door", g.sha3, std::slice::from_ref(&h.id));
+    fx.offer(&g);
+    for (i, s) in [&base, &zero, &far].iter().enumerate() {
+        fx.inbox(&format!("{i}.json"), &henvelope(&g, (*s).clone(), &h.vk));
+    }
+    let mut door = fx.door_with(verifiers(&fx.dir.join("scratch")));
+    door.poll(true);
+    let hl = fx.health();
+    assert_eq!(hl.seq, Some(1), "{:?}", door.notes());
+    assert!(hl.equivocation.is_none());
+    let _ = fs::remove_dir_all(&scratch);
+}
+
+#[test]
+fn key_id_is_consistency_never_authority() {
+    let h = hkey(0);
+    // a bheart key id is not a signer id: not in a record, not in a config
+    let g = release_ids(1, None, std::slice::from_ref(&h.id), "kid");
+    let mut r = g.record.clone();
+    r.signers = vec![h.key_id.clone()];
+    assert_eq!(r.validate().unwrap_err().name(), "bad_field");
+    let fxk = fx_pinned("kid-cfg", g.sha3, std::slice::from_ref(&h.id));
+    let mut cfg = fxk.cfg.clone();
+    cfg.genesis_signers = vec![h.key_id.clone()];
+    assert!(cfg.validate().unwrap_err().starts_with("genesis_signers"));
+    // the only authority is the mldsa65: id of the full key: pinning the key
+    // id authorizes nothing, even when the signature is good
+    let p = parse_envelope(&henvelope(&g, hsign(h, &g.bytes), &h.vk), ORIGIN, RP).unwrap();
+    let scratch = tmpdir("kid");
+    let stub = Verifiers::with_second(Second::Stub(|p, _| pq::fips204_ok(p)), &scratch);
+    let mut verify = |q: &Parsed| stub.verify(q);
+    let by_key_id = crate::chain::extends(
+        None,
+        &p,
+        &g.sha3,
+        std::slice::from_ref(&h.key_id),
+        &mut verify,
+    );
+    assert_eq!(
+        by_key_id.unwrap_err(),
+        "no signature by an authorized signer"
+    );
+    // a matching key id with another key is an id mismatch, before any lattice math
+    let mut s = hsign(h, &g.bytes);
+    s.key_id = hkey(1).key_id.clone();
+    let e = henvelope_with(&g.bytes, Sig::Bheart(s), Some(&h.vk), Hints::default());
+    assert_eq!(
+        parse_envelope(&e, ORIGIN, RP).unwrap_err(),
+        Refusal::IdMismatch
+    );
+    let _ = fs::remove_dir_all(&scratch);
+}
+
+/// The shared fixture (tests/vectors/profile-separation.json, also read by
+/// tools/keychain-release/test/bheart.test.mjs): every case's verdict here.
+#[test]
+fn profile_separation_vector_verdicts() {
+    let vector: Value =
+        serde_json::from_str(include_str!("../tests/vectors/profile-separation.json")).unwrap();
+    let cases = vector["cases"].as_array().unwrap();
+    assert!(cases.len() >= 13);
+    let scratch = tmpdir("profile-vector");
+    let v = verifiers(&scratch);
+    for c in cases {
+        let name = c["name"].as_str().unwrap();
+        let bytes = serde_json::to_vec(&c["envelope"]).unwrap();
+        let got = parse_envelope(&bytes, ORIGIN, RP).and_then(|p| v.verify(&p));
+        println!(
+            "profile {name}: {}",
+            match &got {
+                Ok(id) => format!("accept {id}"),
+                Err(r) => format!("refuse {} ({r})", r.name()),
+            }
+        );
+        match c["expect"].as_str().unwrap() {
+            "accept" => assert_eq!(got.as_deref().ok(), c["signer"].as_str(), "{name}"),
+            "refuse" => assert!(got.is_err(), "{name}"),
+            other => panic!("{other}"),
+        }
+    }
+    // the separation cases are refused for their shape, never by the lattice:
+    // no object is read as the other profile
+    for (name, want) in [
+        ("bheart_type_removed", "unknown_field"),
+        ("bheart_type_removed_no_vk", "unknown_field"),
+        ("bpq_with_type_added", "unknown_field"),
+        ("bpq_with_type_added_and_vk", "unknown_field"),
+        ("bpq_with_vk", "bad_field"),
+        ("bheart_without_vk", "bad_field"),
+    ] {
+        let c = cases.iter().find(|c| c["name"] == name).expect(name);
+        let r =
+            parse_envelope(&serde_json::to_vec(&c["envelope"]).unwrap(), ORIGIN, RP).unwrap_err();
+        assert_eq!(r.name(), want, "{name}: {r}");
+    }
+    let _ = fs::remove_dir_all(&scratch);
 }

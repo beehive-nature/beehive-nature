@@ -57,6 +57,39 @@ plus an optional `"vk"`. `sig` is one of:
   promise that a keyset with no sealed seed is accepted. A bsigner change there turns
   every bheart release into `verifier_failed` (refused, never accepted).
 
+Authority is the full public key and the exact record bytes. A signer is named only by
+`mldsa65:` SHA3-256(vk) (or its `bzpq1…` id); `key_id` is checked only as consistency with
+`vk` and is never a pin or a signer id (a `bheart-…` key id in `signers` or
+`genesis_signers` is refused). **`signed_at_ms` is unauthenticated and ignored**: it feeds
+no authorization, freshness, ordering, revocation or report, and two signatures that differ
+only in it are the same verdict by the same signer (0 and year 9999 included). Its only rule
+is the shape every integer here has (a non-negative integer a JavaScript reader holds
+exactly). The two profiles never fall back to each other: an object with `type` is read
+only as bheart.signature/1 and one without only as §3b, each with its exact field set, so a
+bheart object with `type` removed, or a §3b object with `type` added, is refused.
+`tests/vectors/profile-separation.json` holds those cases; keys-door's tests and
+`tools/keychain-release/test/bheart.test.mjs` must reach the same verdict on each.
+
+## The bsigner pin
+
+`bsigner_sha256` (required) is the base64url SHA-256 of the exact bsigner build at
+`bsigner_path`. keys-door hashes the file at startup (a mismatch, or an unfilled pin,
+refuses to start), before every bsigner spawn, and at every poll: a binary swapped under a
+running edge refuses every new release as `bsigner_pin_mismatch`, on health, and what it
+already serves stays served (as with an unreadable floor). The file is hashed, then run by
+path, so a swap inside that window is not caught. The image records its bsigner's pin in
+`/usr/local/share/keys-door/bsigner.sha256` and the label
+`org.beehive-nature.bsigner.sha256` (ops/keys-edge/Dockerfile).
+
+The pin is **version-specific compatibility, not a guarantee of bsigner's frozen
+interface.** `bsigner_public_only_keyset_compatibility` in `src/tests.rs` runs the pinned
+binary through public-only keysets case by case and prints each raw stdout and exit (CI
+runs it with `--nocapture`). It also records what the pinned build does NOT check: it
+accepts a keyset carrying sealed or other extra fields, and one whose `alg` is
+`ml-dsa-87` (verify dispatches on the envelope's alg). keys-door's keyset writer
+(`verify::public_keyset`) refuses both, before anything is written or spawned. Changing
+bsigner means re-running that suite against the new build and pinning it anew.
+
 Kept evidence is never deleted, at any seq and under any config (an envelope the config
 cannot parse is refused in the pool and stays on disk). So a fork whose branches both
 continue holds the edge for good, below the floor too, as rule 5 says.

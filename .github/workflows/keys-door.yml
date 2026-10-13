@@ -12,6 +12,7 @@ on:
   push:
     paths:
       - 'ops/keys-door/**'
+      - 'ops/keys-edge/edge.toml.example'
       - 'crates/**'
       - 'Cargo.toml'
       - 'Cargo.lock'
@@ -21,6 +22,7 @@ on:
   pull_request:
     paths:
       - 'ops/keys-door/**'
+      - 'ops/keys-edge/edge.toml.example'
       - 'crates/**'
       - 'Cargo.toml'
       - 'Cargo.lock'
@@ -48,6 +50,14 @@ jobs:
         run: |
           test -x "$KEYS_DOOR_BSIGNER" || { echo "bsigner binary missing for keys-door: a skipped gate is not a pass"; exit 1; }
           cargo test --locked --manifest-path ops/keys-door/Cargo.toml
+      - name: bsigner compatibility record (every case's raw stdout and exit, the pinned binary)
+        if: always()
+        env:
+          KEYS_DOOR_BSIGNER: ${{ github.workspace }}/target/debug/bsigner
+        run: |
+          test -x "$KEYS_DOOR_BSIGNER" || { echo "bsigner binary missing for keys-door: a skipped gate is not a pass"; exit 1; }
+          cargo test --locked --manifest-path ops/keys-door/Cargo.toml -- --nocapture --exact \
+            tests::bsigner_public_only_keyset_compatibility tests::profile_separation_vector_verdicts
       - name: Version stamp (--version names the commit it was built from)
         if: always()
         env:

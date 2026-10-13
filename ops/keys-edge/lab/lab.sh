@@ -46,6 +46,7 @@ ALPINE_IMAGE=alpine:3.22
 DEBIAN_SUITE=bookworm
 PROJECT=keys-edge-lab
 IMAGE=keys-door:lab
+BUILDER=keys-door-builder:lab
 TOOLS=keys-lab-tools:local
 KD1=keys-door
 KD2=keys-lab-kd2
@@ -79,6 +80,9 @@ run() { printf '+ %s\n' "$*"; "$@"; }
 die() { printf '\nLAB FAIL: %s\n' "$*" >&2; exit 1; }
 pass() { printf 'PASS %s\n' "$*"; RESULTS+=("PASS  $*"); }
 labjs() { node "$HERE/lab.mjs" "$@"; }
+# b64u_sha256 FILE: base64url (no padding) SHA-256 of FILE, the form of edge.toml bsigner_sha256
+b64u_sha256() { node -e 'process.stdout.write(require("crypto").createHash("sha256").update(require("fs").readFileSync(process.argv[1])).digest("base64url"))' "$1"; }
+BSIGNER_PIN=""
 record_paths() { node -e 'for (const f of JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).files) console.log(f.path)' "$1"; }
 compose() { docker compose -p "$PROJECT" -f "$EDGE/compose.yml" "$@"; }
 
@@ -212,10 +216,29 @@ step_a() {
   echo "builder image: $rust_ref@$rust_d"
   echo "runtime image: $run_ref@$run_d"
   COMMIT=$(git -C "$ROOT" rev-parse HEAD)
+  # the bsigner pin: build the builder stage, hash the bsigner it made, then build the image with
+  # that value; the final stage refuses to build unless its copy hashes to it
+  run docker build --progress=plain -f "$EDGE/Dockerfile" --target builder \
+    --build-arg RUST_VERSION="$RUST_VERSION" --build-arg DEBIAN_SUITE="$DEBIAN_SUITE" \
+    --build-arg RUST_IMAGE_DIGEST="$rust_d" --build-arg RUNTIME_IMAGE_DIGEST="$run_d" \
+    -t "$BUILDER" "$ROOT"
+  docker run --rm --entrypoint /bin/cat "$BUILDER" /src/target/release/bsigner > "$LAB/bsigner.builder"
+  BSIGNER_PIN=$(b64u_sha256 "$LAB/bsigner.builder")
+  echo "bsigner pin (base64url SHA-256 of the builder's bsigner): $BSIGNER_PIN"
   run docker build --progress=plain -f "$EDGE/Dockerfile" \
     --build-arg RUST_VERSION="$RUST_VERSION" --build-arg DEBIAN_SUITE="$DEBIAN_SUITE" \
     --build-arg RUST_IMAGE_DIGEST="$rust_d" --build-arg RUNTIME_IMAGE_DIGEST="$run_d" \
-    --build-arg KEYS_DOOR_COMMIT="$COMMIT" -t "$IMAGE" "$ROOT"
+    --build-arg KEYS_DOOR_COMMIT="$COMMIT" --build-arg BSIGNER_SHA256="$BSIGNER_PIN" -t "$IMAGE" "$ROOT"
+  local label recorded shipped
+  label=$(docker image inspect --format '{{index .Config.Labels "org.beehive-nature.bsigner.sha256"}}' "$IMAGE")
+  recorded=$(docker run --rm --entrypoint /bin/cat "$IMAGE" /usr/local/share/keys-door/bsigner.sha256)
+  docker run --rm --entrypoint /bin/cat "$IMAGE" /usr/local/bin/bsigner > "$LAB/bsigner.image"
+  shipped=$(b64u_sha256 "$LAB/bsigner.image")
+  printf 'bsigner pin: label %s; file %s; sha256 of /usr/local/bin/bsigner %s\n' "$label" "$recorded" "$shipped"
+  [[ -n $shipped && $label == "$recorded" && $recorded == "$shipped" && $shipped == "$BSIGNER_PIN" ]] \
+    || die "the bsigner pin disagrees: label '$label', file '$recorded', binary '$shipped', builder '$BSIGNER_PIN'"
+  rm -f "$LAB/bsigner.builder" "$LAB/bsigner.image"
+  pass "a. bsigner pinned: image label = /usr/local/share/keys-door/bsigner.sha256 = SHA-256 of /usr/local/bin/bsigner ($shipped)"
   local user rev bins
   user=$(docker image inspect --format '{{.Config.User}}' "$IMAGE")
   rev=$(docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' "$IMAGE")
@@ -232,6 +255,15 @@ step_a() {
   printf '+ keys-door serve --config edge.toml.example -> exit %s\n%s\n' "$rc" "$out"
   [[ $rc == 2 && $out == *genesis_sha3* ]] || die "the unfilled example config was not refused at genesis_sha3"
   pass "a. edge.toml.example parses and keys-door refuses it until the genesis pins are filled"
+
+  # a config whose pins are well formed but whose bsigner_sha256 is not this image's bsigner
+  labjs render-toml "$EDGE/edge.toml.example" "$LAB/wrong-pin.toml" "genesis_sha3=\"$(printf 'A%.0s' {1..43})\"" \
+    "genesis_signers=[\"mldsa65:$(printf 'A%.0s' {1..43})\"]" "bsigner_sha256=\"$(printf 'A%.0s' {1..43})\""
+  chmod a+r "$LAB/wrong-pin.toml"
+  out=$(docker run --rm -v "$LAB/wrong-pin.toml:/etc/keys-door/edge.toml:ro" "$IMAGE" 2>&1) && rc=0 || rc=$?
+  printf '+ keys-door serve with a wrong bsigner_sha256 -> exit %s\n%s\n' "$rc" "$out"
+  [[ $rc == 2 && $out == *bsigner_pin_mismatch* ]] || die "a wrong bsigner pin was not refused at startup"
+  pass "a. keys-door refuses to start when bsigner_sha256 is not its bsigner (bsigner_pin_mismatch)"
 
   build_tools
 }
@@ -317,10 +349,12 @@ step_b() {
   # forwarder on its own loopback (step f says why).
   mkdir -p "$LAB/kd1/inbox" "$LAB/kd2/inbox" "$LAB/tamper" "$LAB/share" "$LAB/out"
   g="genesis_sha3=\"$GENESIS\""
+  # the bsigner pin step a measured; chain mode builds no image, so its configs stay unfilled there
+  local pin="bsigner_sha256=\"${BSIGNER_PIN:-UNFILLED-chain-mode-builds-no-image}\""
   labjs render-toml "$EDGE/edge.toml.example" "$LAB/kd1/edge.toml" "$g" "genesis_signers=[\"$ID\"]" \
-    'poll_secs=5' "ant_doors=[\"$MOCK_DOOR\"]"
+    'poll_secs=5' "ant_doors=[\"$MOCK_DOOR\"]" "$pin"
   labjs render-toml "$EDGE/edge.toml.example" "$LAB/kd2/edge.toml" "$g" "genesis_signers=[\"$ID\"]" \
-    'poll_secs=5' 'ant_doors=[]' "peers=[\"$PEER_FWD\"]"
+    'poll_secs=5' 'ant_doors=[]' "peers=[\"$PEER_FWD\"]" "$pin"
   for k in kd1 kd2; do
     printf '+ diff edge.toml.example %s/edge.toml\n' "$k"
     diff -u "$EDGE/edge.toml.example" "$LAB/$k/edge.toml" || true
