@@ -45,8 +45,16 @@ note() {
 }
 
 S=$(mktemp -d)
-trap 'rm -rf "$S" "$S2" "$S3"' EXIT
-ROOT_HEX=$(printf 'fe%.0s' {1..32})
+S2=
+S3=
+# The trap may run before S2/S3 exist (early exit), so they are pre-bound
+# and passed to rm only when non-empty — `set -u` plus dash, not bash.
+trap 'rm -rf "$S" ${S2:+"$S2"} ${S3:+"$S3"}' EXIT
+# POSIX sh has no {1..32} brace expansion (bash-only; dash rendered "fe" and
+# init refused the 2-char root) — build the 64-hex-char demo root in a loop.
+ROOT_HEX=
+_i=0
+while [ "$_i" -lt 32 ]; do ROOT_HEX="${ROOT_HEX}fe"; _i=$((_i + 1)); done
 NOW=1800000000
 
 note "# BNROSE-RUST-001 recovery demonstration"
