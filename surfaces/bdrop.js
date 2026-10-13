@@ -256,6 +256,14 @@ async function rpcCall(endpoint,method,params){
   if(j.error)throw new Error('rpc error: '+(j.error.message||JSON.stringify(j.error)));
   return j.result;
 }
+/* Hive's condenser_api.get_content ASSERTS for a post that does not exist —
+   "Assert Exception:Post author/permlink does not exist" — that assert IS the
+   endpoint's own not-found answer, never an outage (the founder's live finding
+   at the desk, 2026-10-13 05:16:36). Reading it as a failure would block every
+   first publication and every reconciliation on mainnet. */
+function isNotFound(e){
+  return /does not exist/i.test(String((e&&e.message)||e));
+}
 
 /* ─── hash verdict ─── */
 var lastHash='';
@@ -309,7 +317,10 @@ async function reconcileOne(a,r,quiet){
   var s=r.scope;
   var c;
   try{c=await rpcCall(s.rpc,'condenser_api.get_content',{author:s.author,permlink:s.permlink});}
-  catch(e){r.last_error='reconcile lookup failed: '+e.message;if(!quiet)log(r.id+' — reconcile lookup failed: '+e.message,'bad');saveOutbox(a);return r;}
+  catch(e){
+    if(!isNotFound(e)){r.last_error='reconcile lookup failed: '+e.message;if(!quiet)log(r.id+' — reconcile lookup failed: '+e.message,'bad');saveOutbox(a);return r;}
+    /* the assert IS the not-found answer: fall through as not landed */
+  }
   if(c&&c.body&&c.body.length){
     var pubHash=await sha256Hex(new TextEncoder().encode(c.body));
     if(pubHash===s.body_sha256){
@@ -453,10 +464,14 @@ $('publish').addEventListener('click',async function(){
   }
   /* prepared: recoverable state persists before any network step or key */
   upsert(a,scope,function(r){r.body=body;if(!r.events.length)r.events.push(ev('prepared',scope.body_sha256));});
-  /* pre-flight: the chain is read before any signature — duplicates reconcile, divergences refuse */
+  /* pre-flight: the chain is read before any signature — duplicates reconcile, divergences refuse.
+     the endpoint's assert-shaped "does not exist" IS its not-found answer: not landed. */
   var pre;
   try{pre=await rpcCall(scope.rpc,'condenser_api.get_content',{author:scope.author,permlink:scope.permlink});}
-  catch(e){log('pre-flight lookup failed ('+e.message+'). the desk will not sign blind — retry when the endpoint answers.','bad');return;}
+  catch(e){
+    if(!isNotFound(e)){log('pre-flight lookup failed ('+e.message+'). the desk will not sign blind — retry when the endpoint answers.','bad');return;}
+    pre=null;
+  }
   if(pre&&pre.body&&pre.body.length){
     var preHash=await sha256Hex(new TextEncoder().encode(pre.body));
     if(preHash===scope.body_sha256){
@@ -754,7 +769,10 @@ async function reconcileDamaged(){
     st.note='';
     var c;
     try{c=await rpcCall(rpc,'condenser_api.get_content',{author:s.author,permlink:s.permlink});}
-    catch(e){st.outcome='unresolved';st.note='chain read failed: '+e.message;continue;}
+    catch(e){
+      if(!isNotFound(e)){st.outcome='unresolved';st.note='chain read failed: '+e.message;continue;}
+      /* the assert IS the not-found answer: fall through as not landed */
+    }
     if(c&&typeof c==='object'&&typeof c.body==='string'&&c.body.length){
       var h=await sha256Hex(new TextEncoder().encode(c.body));
       if(h===s.body_sha256){st.outcome='resolved-confirmed';st.block=c.block_num;}
@@ -797,7 +815,10 @@ $('recover').addEventListener('click',async function(){
   log('reading the chain alone for @'+author+'/'+permlink+' — a content read: it proves presence, never a signature. nothing is broadcast.','dim');
   var c;
   try{c=await rpcCall(rpc,'condenser_api.get_content',{author:author,permlink:permlink});}
-  catch(e){log('the chain read failed ('+e.message+') — nothing was recovered; nothing beyond the read was attempted.','bad');return;}
+  catch(e){
+    if(isNotFound(e)){log('the chain shows no such drop at @'+author+'/'+permlink+' — the endpoint\u2019s own not-found answer (a chain read is not proof it never existed elsewhere; nothing was recovered).','bad');return;}
+    log('the chain read failed ('+e.message+') — nothing was recovered; nothing beyond the read was attempted.','bad');return;
+  }
   if(!(c&&typeof c==='object'&&typeof c.body==='string'&&c.body.length)){
     log('the endpoint\u2019s answer did not read as content — nothing was recovered and nothing was manufactured. an untrusted endpoint cannot make this desk invent a record.','bad');return;
   }

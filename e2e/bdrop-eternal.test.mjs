@@ -50,6 +50,11 @@ const rpcResult = (method, params) => {
     if (mock.content && mock.content.permlink === params.permlink)
       return { author: params.author, permlink: params.permlink, body: mock.content.body, block_num: 48000111, created: new Date().toISOString().slice(0, 19) };
     if (mock.mode === 'noland' || mock.mode === 'swallow') return { author: params.author, permlink: params.permlink, body: '' };
+    /* MAINNET's not-found shape (the founder's live finding, verbatim): unknown
+       permlink + nothing broadcast yet ⇒ the endpoint ASSERTS instead of answering
+       an empty body. mock.hive models api.hive.blog's actual behavior. */
+    if (mock.hive && !mock.lastBody)
+      throw Object.assign(new Error('rpc error: Assert Exception:Post ' + params.author + '/' + params.permlink + ' does not exist'), { http: 200 });
     return mock.lastBody
       ? { author: params.author, permlink: params.permlink, body: mock.lastBody, block_num: 49000123, created: new Date().toISOString().slice(0, 19) }
       : { author: params.author, permlink: params.permlink, body: '' };
@@ -78,6 +83,7 @@ const server = createServer(async (q, s) => {
     mock.mode = o.mode ?? mock.mode; mock.content = o.content ?? null; mock.contents = o.contents ?? null; mock.junk = !!o.junk;
     if ('accounts' in o) mock.accounts = o.accounts; /* per-account posting authorities (the native door's authority gate) */
     if ('lastBody' in o) mock.lastBody = o.lastBody;
+    if ('hive' in o) mock.hive = !!o.hive; /* model mainnet's assert-shaped not-found */
     s.writeHead(200); s.end('ok'); return;
   }
   const rel = decodeURIComponent(q.url.split('?')[0].replace(/^\//, '')) || 'index.html';
@@ -683,11 +689,39 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     ok('9b the whole quarantine-gap sequence broadcast nothing', mock.broadcasts.length === 0, 'broadcasts=' + mock.broadcasts.length);
     ok('9 scenario produced no page errors', q9.errs.length === 0, q9.errs[0] || '');
     await q9.ctx.close();
+
+    /* ── scenario 10: MAINNET's not-found shape — get_content ASSERTS for a post that
+       does not exist (the founder's live finding 2026-10-13 05:16:36, verbatim:
+       "rpc error: Assert Exception:Post loviswater/bdrop-0001-genesis-… does not exist").
+       The desk must read that assert as NOT LANDED — reading it as an outage would
+       block every first publication and every reconciliation on mainnet ── */
+    await setMock({ mode: 'normal', content: null, contents: null, junk: false, accounts: {}, lastBody: null, hive: true });
+    mock.broadcasts.length = 0;
+    const dir10 = profile('hiveassert'); dirs.push(dir10);
+    const h10 = await open(dir10);
+    await h10.page.fill('#author', 'loviswater');
+    await h10.page.fill('#permlink', 'bdrop-first-publication-probe');
+    await h10.page.fill('#body', BODY);
+    await h10.page.fill('#expected', BODY_SHA);
+    await h10.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await h10.page.fill('#wif', await h10.page.evaluate(() => String(window.hiveTx.PrivateKey.randomKey())));
+    await h10.page.click('#publish');
+    await step('10 the mainnet assert-shaped not-found is read as NOT LANDED — the first publication proceeds and lands', () => h10.page.waitForFunction(() => /LANDED/.test(document.getElementById('receipt').textContent || ''), null, { timeout: 30000 }));
+    ok('10 a FIRST publication survives the assert-shaped not-found, byte-exact', /byte-compare MATCH/.test(await h10.page.textContent('#receipt')));
+    ok('10 exactly one broadcast', mock.broadcasts.length === 1, 'broadcasts=' + mock.broadcasts.length);
+    /* recovery for a permlink the chain does not hold: the assert is the endpoint's own not-found */
+    await setMock({ mode: 'normal', content: null, contents: null, junk: false, accounts: {}, lastBody: null, hive: true });
+    await h10.page.fill('#permlink', 'bdrop-never-published');
+    await h10.page.click('#recover');
+    await step('10 recovery reports the honest not-found through the assert', () => h10.page.waitForFunction(() => /no such drop/.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    ok('10 recovery manufactured no record from the not-found', !(await outboxOf(h10.page)).some(r => r.scope.permlink === 'bdrop-never-published'));
+    ok('10 scenario produced no page errors', h10.errs.length === 0, h10.errs[0] || '');
+    await h10.ctx.close();
   } finally {
     for (const c of ctxs) { try { await c.close(); } catch {} }
     for (const d of dirs) { try { rmSync(d, { recursive: true, force: true }); } catch {} }
     server.close();
   }
   assert.equal(failures, 0, failures + ' lifecycle assertion(s) failed — see the ✗ lines above');
-  console.log(failures === 0 ? 'BDROP LIFECYCLE GREEN — editions, happy path, duplicates, restart, ambiguity, unavailability, divergence, retrieval, key hygiene, the quarantined journal, the contract-faithful keychain signer, mid-handoff closure, evidence-honest fresh-client recovery, the native keychain door (authority-checked, signature-verified, no extension, no paste) and the two quarantine gaps (expiry never proves non-execution; an archive never authorizes a replacement) all held. nothing touched hive.' : 'BDROP LIFECYCLE RED.');
+  console.log(failures === 0 ? 'BDROP LIFECYCLE GREEN — editions, happy path, duplicates, restart, ambiguity, unavailability, divergence, retrieval, key hygiene, the quarantined journal, the contract-faithful keychain signer, mid-handoff closure, evidence-honest fresh-client recovery, the native keychain door (authority-checked, signature-verified, no extension, no paste), the two quarantine gaps (expiry never proves non-execution; an archive never authorizes a replacement) and mainnet\u2019s assert-shaped not-found (a first publication still proceeds) all held. nothing touched hive.' : 'BDROP LIFECYCLE RED.');
 });
