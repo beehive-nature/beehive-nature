@@ -50,14 +50,16 @@ export const DECEASED_EXTRAMURAL_SYNC = {
   "MLCS-M2Q": { name: "Oline Christensen", lifespan: "1850–", basis: "hint-census dispatch 2026-10-07 + authed-wake dispatch 2026-10-10 (christening vein)" },
   "MLCS-MVB": { name: "Karen Christensen", lifespan: "1845–", basis: "hint-census dispatch 2026-10-07 + authed-wake dispatch 2026-10-10 (christening vein)" },
   "MLCS-MKV": { name: "Dorthe Catherine Christensen", lifespan: "1847–", basis: "hint-census dispatch 2026-10-07 + authed-wake dispatch 2026-10-10 (christening vein)" },
+  "LZDH-WB1": { name: "Ane Sophie Christensen", lifespan: "1841–", basis: "authed-wake dispatch 2026-10-07 (christening QG8Q-P964, 19th-century Danish church records)" },
 };
 
 // The walked set: persons touched by the post-freeze attaches this pass
-// transcribes (10-06d + 10-07 + 10-10 dispatch sets). Ane Sophie LZDH-WB1
-// (10-03/10-07 attaches) is a named follow-on pid, not in this run.
+// transcribes (10-06d + 10-07 + 10-10 dispatch sets + the 10-13 follow-on:
+// Ane Sophie LZDH-WB1, the 10-03/10-07 attaches named by order-23 NEXT OWNER).
 export const WALKED_PIDS = [
   "LJDG-CYG", "LN5V-3N2", "GWXR-H2K", "GWXR-3TD",
   "LZDH-WYF", "MHRT-169", "MLCS-MN5", "MLCS-M2L", "MLCS-M2Q", "MLCS-MVB", "MLCS-MKV",
+  "LZDH-WB1",
 ];
 
 export function buildPayload(index) {
