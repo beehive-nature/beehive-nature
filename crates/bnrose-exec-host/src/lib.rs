@@ -34,12 +34,7 @@ pub mod worker;
 use bnrose_exec_core::{OpState, Policy, Refusal};
 
 /// Build an admission request (the core's wire form).
-pub fn admit_request(
-    clock: u64,
-    authority: &[u8; 32],
-    policy: &Policy,
-    env: &[u8],
-) -> Vec<u8> {
+pub fn admit_request(clock: u64, authority: &[u8; 32], policy: &Policy, env: &[u8]) -> Vec<u8> {
     let mut r = Vec::with_capacity(env.len() + 600);
     r.push(1);
     r.push(bnrose_exec_core::K_ADMIT);
@@ -94,9 +89,9 @@ pub fn parse_admit_verdict(v: &[u8]) -> Result<AdmitVerdict, String> {
             env_sha: v[33..65].try_into().unwrap(),
             effect: v[65..97].try_into().unwrap(),
         }),
-        Some(2) if v.len() == 5 => Ok(AdmitVerdict::Refused(code_to_refusal(
-            u32::from_le_bytes([v[1], v[2], v[3], v[4]]),
-        )?)),
+        Some(2) if v.len() == 5 => Ok(AdmitVerdict::Refused(code_to_refusal(u32::from_le_bytes(
+            [v[1], v[2], v[3], v[4]],
+        ))?)),
         _ => Err(format!("malformed admit verdict: {} bytes", v.len())),
     }
 }
@@ -113,9 +108,9 @@ pub fn parse_step_verdict(v: &[u8]) -> Result<StepVerdict, String> {
         Some(1) if v.len() == 1 + bnrose_exec_core::STATE_BLOB => Ok(StepVerdict::Next(
             OpState::parse(&v[1..]).map_err(|e| e.word().to_string())?,
         )),
-        Some(2) if v.len() == 5 => Ok(StepVerdict::Refused(code_to_refusal(
-            u32::from_le_bytes([v[1], v[2], v[3], v[4]]),
-        )?)),
+        Some(2) if v.len() == 5 => Ok(StepVerdict::Refused(code_to_refusal(u32::from_le_bytes(
+            [v[1], v[2], v[3], v[4]],
+        ))?)),
         _ => Err(format!("malformed step verdict: {} bytes", v.len())),
     }
 }
@@ -160,7 +155,7 @@ pub fn hex(bytes: &[u8]) -> String {
 }
 
 pub fn unhex(s: &str) -> Result<Vec<u8>, String> {
-    if s.len() % 2 != 0 {
+    if !s.len().is_multiple_of(2) {
         return Err("odd hex length".into());
     }
     let mut v = Vec::with_capacity(s.len() / 2);
@@ -187,7 +182,11 @@ pub fn b64(bytes: &[u8]) -> String {
         } else {
             '='
         });
-        s.push(if c.len() > 2 { T[n as usize & 63] as char } else { '=' });
+        s.push(if c.len() > 2 {
+            T[n as usize & 63] as char
+        } else {
+            '='
+        });
     }
     s
 }
@@ -204,13 +203,13 @@ pub fn unb64(s: &str) -> Result<Vec<u8>, String> {
         })
     }
     let b = s.as_bytes();
-    if b.len() % 4 != 0 {
+    if !b.len().is_multiple_of(4) {
         return Err("base64 length".into());
     }
     let mut v = Vec::with_capacity(b.len() / 4 * 3);
     for c in b.chunks(4) {
         let pad = c.iter().filter(|&&x| x == b'=').count();
-        if c[..4 - pad.min(2)].iter().any(|&x| x == b'=') {
+        if c[..4 - pad.min(2)].contains(&b'=') {
             return Err("base64 padding".into());
         }
         let n = (val(c[0])? << 18)

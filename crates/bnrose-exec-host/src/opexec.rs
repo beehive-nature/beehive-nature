@@ -22,12 +22,15 @@ use crate::journal::{self, Journal};
 use crate::keys::SupervisorKeys;
 use crate::ledger::{self, EffectLedger};
 use crate::receipt::{state_word, Receipt};
-use crate::worker::{Bounds, Worker, WorkerError};
-use crate::{admit_request, hex, parse_admit_verdict, parse_step_verdict, step_request, AdmitVerdict, StepVerdict};
+use crate::worker::{Bounds, Worker};
+use crate::{
+    admit_request, hex, parse_admit_verdict, parse_step_verdict, step_request, AdmitVerdict,
+    StepVerdict,
+};
 use bnrose_exec_core::{
-    effect_digest, env_sha as env_sha_of, op_id as op_id_of, policy_digest, OpState, Policy,
-    E_ADMITTED, E_BOUNDED_FAIL, E_DISPATCH, E_RECOVERY_EVIDENCE, E_RECOVERY_NONE, E_RESPONSE,
-    E_RESERVE, S_ADMITTED, S_COMPLETED, S_DISPATCHED, S_FAILED, S_RESERVED, S_UNKNOWN,
+    env_sha as env_sha_of, op_id as op_id_of, policy_digest, OpState, Policy, E_ADMITTED,
+    E_BOUNDED_FAIL, E_DISPATCH, E_RECOVERY_EVIDENCE, E_RECOVERY_NONE, E_RESPONSE, S_ADMITTED,
+    S_DISPATCHED, S_RESERVED, S_UNKNOWN,
 };
 use serde_json::{json, Value};
 use std::collections::BTreeMap;
@@ -81,12 +84,22 @@ impl Supervisor {
             .map_err(|e| e.to_string())?;
         let ledger = EffectLedger::open(&state_dir.join("effects.bin"), &keys.ledger_mac)
             .map_err(|e| e.to_string())?;
-        Ok(Supervisor { keys, journal, ledger, worker, policy, state_dir: state_dir.to_path_buf() })
+        Ok(Supervisor {
+            keys,
+            journal,
+            ledger,
+            worker,
+            policy,
+            state_dir: state_dir.to_path_buf(),
+        })
     }
 
     fn write_receipt(&self, r: &Receipt) -> Result<(PathBuf, Value), String> {
         let v = r.to_json();
-        let p = self.state_dir.join("receipts").join(format!("op-{}.json", hex(&r.op)));
+        let p = self
+            .state_dir
+            .join("receipts")
+            .join(format!("op-{}.json", hex(&r.op)));
         std::fs::write(&p, serde_json::to_string_pretty(&v).unwrap()).map_err(|e| e.to_string())?;
         Ok((p, v))
     }
@@ -132,7 +145,8 @@ impl Supervisor {
                     return Err("journal: admitted record shorter than its envelope".into());
                 }
                 let env = &r.payload[130..130 + env_len];
-                let intent = btungsten_wb001::decode(env).map_err(|e| format!("journal:wb001:{}", e.code()))?;
+                let intent = btungsten_wb001::decode(env)
+                    .map_err(|e| format!("journal:wb001:{}", e.code()))?;
                 m.insert((authority, intent.nonce), r.op_id);
             }
         }
@@ -162,11 +176,19 @@ impl Supervisor {
         //    structurally and cryptographically (the frozen contract's own
         //    verifier; nothing downstream sees a signature again)
         if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
-            return RunOutcome { refused: Some("wb001:binding-refused".into()), ..none };
+            return RunOutcome {
+                refused: Some("wb001:binding-refused".into()),
+                ..none
+            };
         }
         let decoded = match btungsten_wb001::decode(&intent.env) {
             Ok(i) => i,
-            Err(_) => return RunOutcome { refused: Some("wb001:undecodable".into()), ..none },
+            Err(_) => {
+                return RunOutcome {
+                    refused: Some("wb001:undecodable".into()),
+                    ..none
+                }
+            }
         };
         // 2. no second logical operation: this authority has spent this nonce
         if self
@@ -174,25 +196,48 @@ impl Supervisor {
             .map(|m| m.contains_key(&(intent.authority, decoded.nonce)))
             .unwrap_or(true)
         {
-            return RunOutcome { refused: Some("admission:nonce-reuse".into()), ..none };
+            return RunOutcome {
+                refused: Some("admission:nonce-reuse".into()),
+                ..none
+            };
         }
         // 3. the worker's admission verdict (paranoid: native + wasm equal)
         let req = admit_request(clock, &intent.authority, &self.policy, &intent.env);
         let verdict = match self.worker.admit(&req) {
             Ok(v) => v,
-            Err(e) => return RunOutcome { refused: Some(format!("worker:{e}")), ..none },
+            Err(e) => {
+                return RunOutcome {
+                    refused: Some(format!("worker:{e}")),
+                    ..none
+                }
+            }
         };
         let (op, env_sha, effect) = match parse_admit_verdict(&verdict) {
-            Ok(AdmitVerdict::Admitted { op, env_sha, effect }) => (op, env_sha, effect),
+            Ok(AdmitVerdict::Admitted {
+                op,
+                env_sha,
+                effect,
+            }) => (op, env_sha, effect),
             Ok(AdmitVerdict::Refused(r)) => {
-                return RunOutcome { refused: Some(format!("admission:{}", r.word())), ..none }
+                return RunOutcome {
+                    refused: Some(format!("admission:{}", r.word())),
+                    ..none
+                }
             }
-            Err(e) => return RunOutcome { refused: Some(format!("worker:{e}")), ..none },
+            Err(e) => {
+                return RunOutcome {
+                    refused: Some(format!("worker:{e}")),
+                    ..none
+                }
+            }
         };
         // cross-check: the supervisor derives the identity itself; a worker
         // (even the paranoid pair, were both corrupted) cannot rename an op
         if op != op_id_of(&intent.authority, &intent.env) || env_sha != env_sha_of(&intent.env) {
-            return RunOutcome { refused: Some("worker:identity-mismatch".into()), ..none };
+            return RunOutcome {
+                refused: Some("worker:identity-mismatch".into()),
+                ..none
+            };
         }
         // 4. journal the admission: identity, authorized scope, the binding
         //    (authority + signature + policy digest + the envelope itself),
@@ -206,28 +251,60 @@ impl Supervisor {
         payload.push(self.worker.name().len() as u8);
         payload.extend_from_slice(self.worker.name().as_bytes());
         if let Err(e) = self.journal.append(&op, E_ADMITTED, &payload) {
-            return RunOutcome { refused: Some(format!("journal:{e}")), op: Some(op), ..none };
+            return RunOutcome {
+                refused: Some(format!("journal:{e}")),
+                op: Some(op),
+                ..none
+            };
         }
         let mut state = OpState::ADMITTED_ZERO;
         state.seq = 0;
         // 5. reserve (bounded worker, its budget journaled before it runs)
         let res = reservations_payload(bounds);
         let expiry = decoded.expiry;
-        match self.step_and_journal(&op, &env_sha, &mut state, bnrose_exec_core::E_RESERVE, &res, clock, expiry) {
+        match self.step_and_journal(
+            &op,
+            &env_sha,
+            &mut state,
+            bnrose_exec_core::E_RESERVE,
+            &res,
+            clock,
+            expiry,
+        ) {
             Ok(()) => {}
-            Err(w) => return RunOutcome { refused: Some(w), op: Some(op), ..none },
+            Err(w) => {
+                return RunOutcome {
+                    refused: Some(w),
+                    op: Some(op),
+                    ..none
+                }
+            }
         }
         // 6. dispatch: THE DURABILITY LINE — the record (and its fsync)
         //    precedes the effect door below, always
-        match self.step_and_journal(&op, &env_sha, &mut state, E_DISPATCH, &effect, clock, expiry) {
+        match self.step_and_journal(
+            &op, &env_sha, &mut state, E_DISPATCH, &effect, clock, expiry,
+        ) {
             Ok(()) => {}
-            Err(w) => return RunOutcome { refused: Some(w), op: Some(op), ..none },
+            Err(w) => {
+                return RunOutcome {
+                    refused: Some(w),
+                    op: Some(op),
+                    ..none
+                }
+            }
         }
         // 7. the effect door: the ledger accepts only the bound digest,
         //    idempotently, once, forever
         match self.ledger.apply(&op, &env_sha, &effect, clock) {
             Ok(_) => {}
-            Err(e) => return RunOutcome { refused: Some(format!("ledger:{e}")), op: Some(op), ..none },
+            Err(e) => {
+                return RunOutcome {
+                    refused: Some(format!("ledger:{e}")),
+                    op: Some(op),
+                    ..none
+                }
+            }
         }
         if lose_response {
             return RunOutcome {
@@ -242,7 +319,13 @@ impl Supervisor {
         // 8. the worker's response and the receipt
         match self.step_and_journal(&op, &env_sha, &mut state, E_RESPONSE, &[1], clock, expiry) {
             Ok(()) => {}
-            Err(w) => return RunOutcome { refused: Some(w), op: Some(op), ..none },
+            Err(w) => {
+                return RunOutcome {
+                    refused: Some(w),
+                    op: Some(op),
+                    ..none
+                }
+            }
         }
         match self.issue_receipt(&op, &env_sha, state, &effect, clock) {
             Ok((r, p, v)) => RunOutcome {
@@ -253,7 +336,11 @@ impl Supervisor {
                 receipt_path: Some(p),
                 receipt_json: Some(v),
             },
-            Err(e) => RunOutcome { refused: Some(e), op: Some(op), ..none },
+            Err(e) => RunOutcome {
+                refused: Some(e),
+                op: Some(op),
+                ..none
+            },
         }
     }
 
@@ -271,7 +358,9 @@ impl Supervisor {
         let verdict = self.worker.step(&req).map_err(|e| format!("worker:{e}"))?;
         match parse_step_verdict(&verdict).map_err(|e| format!("worker:{e}"))? {
             StepVerdict::Next(next) => {
-                self.journal.append(op, event, payload).map_err(|e| format!("journal:{e}"))?;
+                self.journal
+                    .append(op, event, payload)
+                    .map_err(|e| format!("journal:{e}"))?;
                 *state = next;
                 state.seq = self.journal.next_seq() - 1;
                 Ok(())
@@ -295,9 +384,8 @@ impl Supervisor {
     /// reconciles both directions. Never re-dispatches; never admits.
     pub fn recover(&mut self, clock: u64) -> Result<Value, String> {
         // 1. chain-verify everything BEFORE any decision
-        let records =
-            journal::load(&self.state_dir.join("journal.bin"), &self.keys.journal_mac)
-                .map_err(|e| format!("journal:{e}"))?;
+        let records = journal::load(&self.state_dir.join("journal.bin"), &self.keys.journal_mac)
+            .map_err(|e| format!("journal:{e}"))?;
         let rows = ledger::load(&self.state_dir.join("effects.bin"), &self.keys.ledger_mac)
             .map_err(|e| format!("ledger:{e}"))?;
         // 2. replay through the SAME core (relaxed clock: transitions that
@@ -324,11 +412,9 @@ impl Supervisor {
                     return Err("journal:admitted-record-short".into());
                 }
                 let env = r.payload[130..130 + env_len].to_vec();
-                let intent = btungsten_wb001::decode(&env).map_err(|e| format!("journal:wb001:{}", e.code()))?;
-                if nonces
-                    .insert((authority, intent.nonce), r.op_id)
-                    .is_some()
-                {
+                let intent = btungsten_wb001::decode(&env)
+                    .map_err(|e| format!("journal:wb001:{}", e.code()))?;
+                if nonces.insert((authority, intent.nonce), r.op_id).is_some() {
                     return Err(format!(
                         "journal:nonce-duplicate — two admitted operations share one authorization ({})",
                         hex(&r.op_id)
@@ -338,21 +424,20 @@ impl Supervisor {
                 st.seq = r.seq;
                 ops.insert(
                     r.op_id,
-                    Replay { env, authority, sig, state: st },
+                    Replay {
+                        env,
+                        authority,
+                        sig,
+                        state: st,
+                    },
                 );
                 continue;
             }
             let Some(rp) = ops.get_mut(&r.op_id) else {
                 return Err(format!("journal:event for unknown op {}", hex(&r.op_id)));
             };
-            let next = bnrose_exec_core::transition(
-                &rp.state,
-                r.event,
-                &r.payload,
-                0,
-                u64::MAX,
-            )
-            .map_err(|e| format!("journal:replay-refused-{}-{}", hex(&r.op_id), e.word()))?;
+            let next = bnrose_exec_core::transition(&rp.state, r.event, &r.payload, 0, u64::MAX)
+                .map_err(|e| format!("journal:replay-refused-{}-{}", hex(&r.op_id), e.word()))?;
             rp.state = next;
             rp.state.seq = r.seq;
         }
@@ -384,22 +469,38 @@ impl Supervisor {
                         clock,
                         u64::MAX,
                     )?;
-                    let (r, _p, v) = self.issue_receipt(op, &env_hash, rp.state, &row.effect_digest, clock)?;
+                    let (r, _p, v) =
+                        self.issue_receipt(op, &env_hash, rp.state, &row.effect_digest, clock)?;
                     let _ = r;
                     recovered_receipt = Some(v);
                 }
                 (S_DISPATCHED, None) => {
-                    self.step_and_journal(op, &env_hash, &mut rp.state, bnrose_exec_core::E_LOST_RESPONSE, &[], clock, u64::MAX)?;
+                    self.step_and_journal(
+                        op,
+                        &env_hash,
+                        &mut rp.state,
+                        bnrose_exec_core::E_LOST_RESPONSE,
+                        &[],
+                        clock,
+                        u64::MAX,
+                    )?;
                 }
-                (S_UNKNOWN, None) => {
-                    if last_event.get(op) != Some(&E_RECOVERY_NONE) {
-                        self.step_and_journal(op, &env_hash, &mut rp.state, E_RECOVERY_NONE, &[], clock, u64::MAX)?;
-                    }
+                (S_UNKNOWN, None) if last_event.get(op) != Some(&E_RECOVERY_NONE) => {
+                    self.step_and_journal(
+                        op,
+                        &env_hash,
+                        &mut rp.state,
+                        E_RECOVERY_NONE,
+                        &[],
+                        clock,
+                        u64::MAX,
+                    )?;
                 }
                 _ => {}
             }
             if rp.state.state == S_UNKNOWN {
-                let (_r, _p, v) = self.issue_receipt(op, &env_hash, rp.state, &rp.state.bound_effect, clock)?;
+                let (_r, _p, v) =
+                    self.issue_receipt(op, &env_hash, rp.state, &rp.state.bound_effect, clock)?;
                 recovered_receipt = Some(v);
                 unknowns.push(hex(op));
             }

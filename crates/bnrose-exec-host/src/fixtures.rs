@@ -5,7 +5,7 @@
 //! "this exact envelope" needs.
 
 use crate::{b64, hex};
-use btungsten_wb001::{Text, IntentIn};
+use btungsten_wb001::{IntentIn, Text};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 
@@ -47,6 +47,10 @@ pub struct Fixture {
     pub env: Vec<u8>,
     pub sig: [u8; 64],
     pub authority: [u8; 32],
+    /// The signing seed (TEST FIXTURE ONLY — deterministic by design so the
+    /// battery can re-sign edited envelopes and attack the policy layer
+    /// behind a valid WB001 binding).
+    pub seed: [u8; 32],
     pub nonce: [u8; 32],
     pub expiry: u64,
     pub epoch: u64,
@@ -80,7 +84,16 @@ pub fn fixture(index: u64, now: u64, ttl: u64) -> Fixture {
     .expect("the fixture is a valid intent");
     let env = btungsten_wb001::canonical(&intent).expect("canonical");
     let sig = btungsten_wb001::sign(&seed, &intent).expect("sign");
-    Fixture { env, sig, authority, nonce, expiry, epoch, amount }
+    Fixture {
+        env,
+        sig,
+        authority,
+        seed,
+        nonce,
+        expiry,
+        epoch,
+        amount,
+    }
 }
 
 impl Fixture {
@@ -106,6 +119,7 @@ impl Fixture {
 }
 
 /// Read an intent file (what the CLI's `run-op` consumes).
+#[derive(Clone)]
 pub struct IntentFile {
     pub env: Vec<u8>,
     pub sig: [u8; 64],
@@ -114,7 +128,9 @@ pub struct IntentFile {
 
 pub fn read_intent(v: &Value) -> Result<IntentFile, String> {
     let s = |k: &str| -> Result<&str, String> {
-        v.get(k).and_then(Value::as_str).ok_or(format!("missing {k}"))
+        v.get(k)
+            .and_then(Value::as_str)
+            .ok_or(format!("missing {k}"))
     };
     Ok(IntentFile {
         env: crate::unb64(s("envB64")?)?,
@@ -141,7 +157,10 @@ mod tests {
         assert!(a.binding_holds());
         let mut broken = a.clone();
         broken.env[10] ^= 1;
-        assert!(!broken.binding_holds(), "one flipped envelope byte breaks the binding");
+        assert!(
+            !broken.binding_holds(),
+            "one flipped envelope byte breaks the binding"
+        );
         // the JSON round trip is what the CLI reads
         let f = read_intent(&a.to_json()).unwrap();
         assert_eq!(f.env, a.env);

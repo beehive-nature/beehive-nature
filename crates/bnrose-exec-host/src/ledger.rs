@@ -48,10 +48,18 @@ pub struct Row {
 #[derive(Debug)]
 pub enum LedgerError {
     Io(String),
-    Tampered { row: usize, why: String },
-    Malformed { row: usize, why: String },
+    Tampered {
+        row: usize,
+        why: String,
+    },
+    Malformed {
+        row: usize,
+        why: String,
+    },
     /// The presented effect does not hash to the digest dispatch bound.
-    DigestMismatch { op: [u8; 32] },
+    DigestMismatch {
+        op: [u8; 32],
+    },
 }
 
 impl std::fmt::Display for LedgerError {
@@ -59,9 +67,15 @@ impl std::fmt::Display for LedgerError {
         match self {
             LedgerError::Io(e) => write!(f, "ledger io: {e}"),
             LedgerError::Tampered { row, why } => write!(f, "ledger tampered at row {row}: {why}"),
-            LedgerError::Malformed { row, why } => write!(f, "ledger malformed at row {row}: {why}"),
+            LedgerError::Malformed { row, why } => {
+                write!(f, "ledger malformed at row {row}: {why}")
+            }
             LedgerError::DigestMismatch { op } => {
-                write!(f, "effect refused: {} does not match its bound digest", hex(op))
+                write!(
+                    f,
+                    "effect refused: {} does not match its bound digest",
+                    hex(op)
+                )
             }
         }
     }
@@ -86,7 +100,13 @@ fn digest_of(op_id: &[u8; 32], env_sha: &[u8; 32]) -> [u8; 32] {
     h.finalize().into()
 }
 
-fn row_body(seq: u64, op_id: &[u8; 32], env_sha: &[u8; 32], digest: &[u8; 32], wall: u64) -> Vec<u8> {
+fn row_body(
+    seq: u64,
+    op_id: &[u8; 32],
+    env_sha: &[u8; 32],
+    digest: &[u8; 32],
+    wall: u64,
+) -> Vec<u8> {
     let mut b = Vec::with_capacity(113);
     b.push(1u8);
     b.extend_from_slice(&seq.to_le_bytes());
@@ -138,7 +158,13 @@ impl EffectLedger {
             .read(true)
             .open(path)
             .map_err(|e| LedgerError::Io(e.to_string()))?;
-        Ok(EffectLedger { file, key: *key, head, seq, rows: map })
+        Ok(EffectLedger {
+            file,
+            key: *key,
+            head,
+            seq,
+            rows: map,
+        })
     }
 
     pub fn head(&self) -> [u8; 32] {
@@ -243,7 +269,11 @@ pub fn load(path: &Path, key: &[u8; 32]) -> Result<Vec<Row>, LedgerError> {
         if want != tag {
             return Err(LedgerError::Tampered {
                 row: row_index,
-                why: format!("tag mismatch: recorded {} computed {}", hex(&tag), hex(&want)),
+                why: format!(
+                    "tag mismatch: recorded {} computed {}",
+                    hex(&tag),
+                    hex(&want)
+                ),
             });
         }
         if body[0] != 1 {
@@ -288,7 +318,8 @@ mod tests {
     use super::*;
 
     fn tmp(name: &str) -> std::path::PathBuf {
-        let d = std::env::temp_dir().join(format!("bnrose-ledger-test-{name}-{}", std::process::id()));
+        let d =
+            std::env::temp_dir().join(format!("bnrose-ledger-test-{name}-{}", std::process::id()));
         std::fs::create_dir_all(&d).unwrap();
         d.join("effects.bin")
     }

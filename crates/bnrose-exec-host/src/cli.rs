@@ -36,7 +36,9 @@ fn need(args: &[String], name: &str) -> Result<String, String> {
 fn make_worker(which: &str) -> Result<Box<dyn Worker>, String> {
     match which {
         "native" => Ok(Box::new(NativeWorker::new())),
-        "wasm" => Ok(Box::new(WasmWorker::new(&wasm_module_bytes()?, Bounds::default()).map_err(|e| e.to_string())?)),
+        "wasm" => Ok(Box::new(
+            WasmWorker::new(&wasm_module_bytes()?, Bounds::default()).map_err(|e| e.to_string())?,
+        )),
         "paranoid" => Ok(Box::new(ParanoidWorker::around(Box::new(
             WasmWorker::new(&wasm_module_bytes()?, Bounds::default()).map_err(|e| e.to_string())?,
         )))),
@@ -51,7 +53,9 @@ pub fn run_cli(argv: Vec<String>) -> i32 {
     let (cmd, args) = match argv.split_first() {
         Some((c, rest)) => (c.as_str(), rest.to_vec()),
         None => {
-            eprintln!("usage: bnrose-exec <init|make-fixture|run-op|recover|verify-receipt|status> ...");
+            eprintln!(
+                "usage: bnrose-exec <init|make-fixture|run-op|recover|verify-receipt|status> ..."
+            );
             return 1;
         }
     };
@@ -115,7 +119,10 @@ fn cmd_init(args: &[String]) -> Result<(), String> {
 fn cmd_fixture(args: &[String]) -> Result<(), String> {
     let index: u64 = need(args, "--index")?.parse().map_err(|_| "index")?;
     let now: u64 = need(args, "--now")?.parse().map_err(|_| "now")?;
-    let ttl: u64 = flag(args, "--ttl").unwrap_or("600".into()).parse().map_err(|_| "ttl")?;
+    let ttl: u64 = flag(args, "--ttl")
+        .unwrap_or("600".into())
+        .parse()
+        .map_err(|_| "ttl")?;
     let f = fixture(index, now, ttl);
     let v = f.to_json();
     match flag(args, "--out") {
@@ -129,7 +136,10 @@ fn cmd_fixture(args: &[String]) -> Result<(), String> {
 fn cmd_run(args: &[String]) -> i32 {
     let state = PathBuf::from(need(args, "--state").unwrap_or_default());
     let intent_path = need(args, "--intent").unwrap_or_default();
-    let clock: u64 = need(args, "--clock").unwrap_or_default().parse().unwrap_or(0);
+    let clock: u64 = need(args, "--clock")
+        .unwrap_or_default()
+        .parse()
+        .unwrap_or(0);
     let which = flag(args, "--worker").unwrap_or_else(|| "paranoid".into());
     let lose = args.iter().any(|a| a == "--lose-response");
     let intent_v: Value = match std::fs::read_to_string(&intent_path)
@@ -193,7 +203,10 @@ fn cmd_run(args: &[String]) -> i32 {
 
 fn cmd_recover(args: &[String]) -> i32 {
     let state = PathBuf::from(need(args, "--state").unwrap_or_default());
-    let clock: u64 = need(args, "--clock").unwrap_or_default().parse().unwrap_or(0);
+    let clock: u64 = need(args, "--clock")
+        .unwrap_or_default()
+        .parse()
+        .unwrap_or(0);
     let which = flag(args, "--worker").unwrap_or_else(|| "paranoid".into());
     let worker = match make_worker(&which) {
         Ok(w) => w,
@@ -211,7 +224,10 @@ fn cmd_recover(args: &[String]) -> i32 {
     };
     match sup.recover(clock) {
         Ok(report) => {
-            let unknowns = report["unknownsPreserved"].as_array().map(|a| a.len()).unwrap_or(0);
+            let unknowns = report["unknownsPreserved"]
+                .as_array()
+                .map(|a| a.len())
+                .unwrap_or(0);
             println!("{}", serde_json::to_string_pretty(&report).unwrap());
             if unknowns > 0 {
                 4
@@ -229,7 +245,9 @@ fn cmd_recover(args: &[String]) -> i32 {
 fn cmd_verify(args: &[String]) -> Result<i32, String> {
     let pk_hex = need(args, "--pk")?;
     let path = need(args, "--receipt")?;
-    let pk: [u8; 32] = unhex(&pk_hex)?.try_into().map_err(|_| "pk must be 32 bytes")?;
+    let pk: [u8; 32] = unhex(&pk_hex)?
+        .try_into()
+        .map_err(|_| "pk must be 32 bytes")?;
     let v: Value = std::fs::read_to_string(&path)
         .map_err(|e| e.to_string())
         .and_then(|s| serde_json::from_str(&s).map_err(|e| e.to_string()))?;

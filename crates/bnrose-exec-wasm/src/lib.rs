@@ -75,8 +75,7 @@ unsafe fn run(
     f: fn(&[u8], &mut [u8]) -> Result<usize, bnrose_exec_core::Refusal>,
 ) -> u32 {
     let req = core::slice::from_raw_parts(req_off as usize as *const u8, req_len as usize);
-    let out =
-        core::slice::from_raw_parts_mut(out_off as usize as *mut u8, out_cap as usize);
+    let out = core::slice::from_raw_parts_mut(out_off as usize as *mut u8, out_cap as usize);
     match f(req, out) {
         Ok(n) => n as u32,
         Err(rf) => refusal_verdict(rf, out) as u32,
@@ -102,7 +101,10 @@ pub extern "C" fn bnrose_step(req_off: u32, req_len: u32, out_off: u32, out_cap:
 // Wasmtime integration exercises. The paranoid dual-run compares the two
 // end to end regardless.
 
-fn native_call(req: &[u8], f: fn(&[u8], &mut [u8]) -> Result<usize, bnrose_exec_core::Refusal>) -> Vec<u8> {
+fn native_call(
+    req: &[u8],
+    f: fn(&[u8], &mut [u8]) -> Result<usize, bnrose_exec_core::Refusal>,
+) -> Vec<u8> {
     let n = req.len().min(MAX_REQUEST);
     let mut out = [0u8; MAX_VERDICT];
     let written = match f(&req[..n], &mut out) {

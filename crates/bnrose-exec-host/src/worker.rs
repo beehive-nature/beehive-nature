@@ -73,10 +73,9 @@ impl std::fmt::Display for WorkerError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             WorkerError::Trap { kind, message } => write!(f, "worker trap ({kind:?}): {message}"),
-            WorkerError::Disagreement { .. } => write!(
-                f,
-                "worker disagreement: native and worker verdicts differ"
-            ),
+            WorkerError::Disagreement { .. } => {
+                write!(f, "worker disagreement: native and worker verdicts differ")
+            }
             WorkerError::Unusable(w) => write!(f, "worker unusable: {w}"),
         }
     }
@@ -192,13 +191,22 @@ impl WasmWorker {
         cfg.consume_fuel(true)
             .epoch_interruption(true)
             .max_wasm_stack(512 * 1024);
-        let engine = wt::Engine::new(&cfg).map_err(|e| WorkerError::Unusable(format!("engine: {e}")))?;
+        let engine =
+            wt::Engine::new(&cfg).map_err(|e| WorkerError::Unusable(format!("engine: {e}")))?;
         let module = wt::Module::new(&engine, module_bytes)
             .map_err(|e| WorkerError::Unusable(format!("module: {e}")))?;
         // THE NARROW INTERFACE: nothing is linked. Any import the module
         // declares makes instantiation fail right here.
         let linker = wt::Linker::<Ctx>::new(&engine);
-        let mut store = wt::Store::new(&engine, Ctx { limiter: MemLimiter { cap: bounds.memory_cap, peak: 0 } });
+        let mut store = wt::Store::new(
+            &engine,
+            Ctx {
+                limiter: MemLimiter {
+                    cap: bounds.memory_cap,
+                    peak: 0,
+                },
+            },
+        );
         store.limiter(|ctx| &mut ctx.limiter);
         // a fuel-metered store starts EMPTY: instantiation and the ABI
         // handshake calls below run on fuel too, so pour it in first —
@@ -208,16 +216,18 @@ impl WasmWorker {
             .set_fuel(bounds.fuel)
             .map_err(|e| WorkerError::Unusable(format!("prime fuel: {e}")))?;
         store.set_epoch_deadline(bounds.ticks);
-        let instance = linker
-            .instantiate(&mut store, &module)
-            .map_err(|e| WorkerError::Unusable(format!("instantiate (undeclared imports refuse here): {e}")))?;
+        let instance = linker.instantiate(&mut store, &module).map_err(|e| {
+            WorkerError::Unusable(format!("instantiate (undeclared imports refuse here): {e}"))
+        })?;
         let memory = instance
             .get_memory(&mut store, "memory")
             .ok_or_else(|| WorkerError::Unusable("module exports no memory".into()))?;
         let version: wt::TypedFunc<(), i32> = instance
             .get_typed_func(&mut store, "bnrose_abi_version")
             .map_err(|e| WorkerError::Unusable(format!("bnrose_abi_version: {e}")))?;
-        if version.call(&mut store, ()).map_err(|e| WorkerError::Unusable(format!("abi version call: {e}")))? as u32
+        if version
+            .call(&mut store, ())
+            .map_err(|e| WorkerError::Unusable(format!("abi version call: {e}")))? as u32
             != bnrose_exec_core::ABI_VERSION
         {
             return Err(WorkerError::Unusable(
@@ -251,8 +261,14 @@ impl WasmWorker {
             })
             .map_err(|e| WorkerError::Unusable(format!("watchdog: {e}")))?;
         started.wait();
-        let req_off = req_fn.call(&mut store, ()).map_err(|e| WorkerError::Unusable(format!("req arena: {e}")))? as u32;
-        let verdict_off = verdict_fn.call(&mut store, ()).map_err(|e| WorkerError::Unusable(format!("verdict arena: {e}")))? as u32;
+        let req_off = req_fn
+            .call(&mut store, ())
+            .map_err(|e| WorkerError::Unusable(format!("req arena: {e}")))?
+            as u32;
+        let verdict_off = verdict_fn
+            .call(&mut store, ())
+            .map_err(|e| WorkerError::Unusable(format!("verdict arena: {e}")))?
+            as u32;
         Ok(WasmWorker {
             engine: Arc::new(engine),
             store,
@@ -291,11 +307,17 @@ impl WasmWorker {
         }
         self.store
             .set_fuel(self.bounds.fuel)
-            .map_err(|e| WorkerError::Trap { kind: TrapKind::Other, message: format!("set fuel: {e}") })?;
+            .map_err(|e| WorkerError::Trap {
+                kind: TrapKind::Other,
+                message: format!("set fuel: {e}"),
+            })?;
         self.store.set_epoch_deadline(self.bounds.ticks);
         self.memory
             .write(&mut self.store, self.req_off as usize, req)
-            .map_err(|e| WorkerError::Trap { kind: TrapKind::Other, message: format!("write req: {e}") })?;
+            .map_err(|e| WorkerError::Trap {
+                kind: TrapKind::Other,
+                message: format!("write req: {e}"),
+            })?;
         let out = f.call(
             &mut self.store,
             (
@@ -310,11 +332,18 @@ impl WasmWorker {
         self.peak_mem = self.peak_mem.max(self.store.data().limiter.peak);
         let n = match out {
             Ok(n) => n as usize,
-            Err(trap) => {
-                let message = trap.to_string();
-                let kind = if message.contains("fuel") {
+            Err(err) => {
+                // the fuel/epoch cause lives at the error CHAIN's root
+                // ("all fuel consumed by WebAssembly", "wasm trap:
+                // interrupt"); the head of the chain is just the backtrace
+                let chain: Vec<String> = err.chain().map(|c| c.to_string()).collect();
+                let message = chain.join("; ");
+                let kind = if chain.iter().any(|c| c.contains("fuel")) {
                     TrapKind::FuelExhausted
-                } else if message.contains("epoch") {
+                } else if chain
+                    .iter()
+                    .any(|c| c.contains("interrupt") || c.contains("epoch"))
+                {
                     TrapKind::EpochDeadline
                 } else {
                     TrapKind::Other
@@ -325,7 +354,10 @@ impl WasmWorker {
         let mut verdict = vec![0u8; n];
         self.memory
             .read(&mut self.store, self.verdict_off as usize, &mut verdict)
-            .map_err(|e| WorkerError::Trap { kind: TrapKind::Other, message: format!("read verdict: {e}") })?;
+            .map_err(|e| WorkerError::Trap {
+                kind: TrapKind::Other,
+                message: format!("read verdict: {e}"),
+            })?;
         Ok(verdict)
     }
 }
@@ -354,7 +386,10 @@ pub struct ParanoidWorker {
 
 impl ParanoidWorker {
     pub fn around(worker: Box<dyn Worker>) -> ParanoidWorker {
-        ParanoidWorker { native: NativeWorker::new(), worker }
+        ParanoidWorker {
+            native: NativeWorker::new(),
+            worker,
+        }
     }
 }
 

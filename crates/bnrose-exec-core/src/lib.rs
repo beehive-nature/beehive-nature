@@ -249,10 +249,7 @@ pub fn effect_digest(op: &[u8; 32], env_hash: &[u8; 32]) -> [u8; 32] {
 pub fn record_digest(seq: u64, op: &[u8; 32], event: u8, payload: &[u8]) -> [u8; 32] {
     let mut seqb = [0u8; 8];
     put_u64(&mut seqb, seq);
-    tagged(
-        b"bnrose-exec/rec/1",
-        &[&seqb, op, &[event], payload],
-    )
+    tagged(b"bnrose-exec/rec/1", &[&seqb, op, &[event], payload])
 }
 
 /// The policy's own digest (bound into the Admitted record at admission).
@@ -261,8 +258,7 @@ pub fn policy_digest(wire_policy: &[u8]) -> [u8; 32] {
 }
 
 pub const STMT_TAG: &[u8] = b"bnrose-exec/receipt/1";
-pub const STMT_LEN: usize =
-    STMT_TAG.len() + 32 + 32 + 1 + 1 + 4 + 32 + 32 + 8 + 8;
+pub const STMT_LEN: usize = STMT_TAG.len() + 32 + 32 + 1 + 1 + 4 + 32 + 32 + 8 + 8;
 
 /// The receipt statement the supervisor signs: everything a verifier needs to
 /// know about how one operation ended, in one preimage.
@@ -443,7 +439,13 @@ pub fn reservations_ok(payload: &[u8]) -> bool {
 
 /// One event against one state. Returns the next state, or the refusal that
 /// names why this event may not touch this operation.
-pub fn transition(st: &OpState, event: u8, payload: &[u8], clock: u64, expiry: u64) -> Result<OpState, Refusal> {
+pub fn transition(
+    st: &OpState,
+    event: u8,
+    payload: &[u8],
+    clock: u64,
+    expiry: u64,
+) -> Result<OpState, Refusal> {
     let mut next = *st;
     match (st.state, event) {
         (S_ADMITTED, E_RESERVE) => {
@@ -644,11 +646,7 @@ pub fn admit(
     }
     // scope laws: the envelope's own bytes against the policy's slots
     let d = &intent.domain[..intent.domain_len as usize];
-    if !policy
-        .domains
-        .iter()
-        .any(|(s, l)| &s[..*l as usize] == d)
-    {
+    if !policy.domains.iter().any(|(s, l)| &s[..*l as usize] == d) {
         return refused(Refusal::PolicyDomain, out);
     }
     let c = &intent.capability[..intent.capability_len as usize];
@@ -679,8 +677,8 @@ pub fn admit(
 #[cfg(test)]
 mod tests {
     extern crate alloc;
-    use alloc::vec::Vec;
     use super::*;
+    use alloc::vec::Vec;
 
     fn domain_policy() -> Policy {
         let slot = |s: &str| {
@@ -718,8 +716,7 @@ mod tests {
     fn oversize_envelope_refuses_before_decode() {
         let mut out = [0u8; MAX_VERDICT];
         let p = domain_policy();
-        let n = admit(&[9; 32], &[0u8; MAX_ENV + 1], &p, 1_000, &mut out)
-            .unwrap();
+        let n = admit(&[9; 32], &[0u8; MAX_ENV + 1], &p, 1_000, &mut out).unwrap();
         assert_eq!(&out[..n], &[2u8, 7, 0, 0, 0][..]);
     }
 
@@ -743,7 +740,12 @@ mod tests {
             b
         };
         // the happy path
-        assert_eq!(transition(&st(S_ADMITTED), E_RESERVE, &res, 0, u64::MAX).unwrap().state, S_RESERVED);
+        assert_eq!(
+            transition(&st(S_ADMITTED), E_RESERVE, &res, 0, u64::MAX)
+                .unwrap()
+                .state,
+            S_RESERVED
+        );
         assert_eq!(
             transition(&st(S_RESERVED), E_DISPATCH, &[7; 32], 0, u64::MAX)
                 .unwrap()
@@ -763,8 +765,7 @@ mod tests {
                 .state,
             S_UNKNOWN
         );
-        let done = transition(&st(S_UNKNOWN), E_RECOVERY_EVIDENCE, &[7; 32], 0, u64::MAX)
-            .unwrap();
+        let done = transition(&st(S_UNKNOWN), E_RECOVERY_EVIDENCE, &[7; 32], 0, u64::MAX).unwrap();
         assert_eq!((done.state, done.recovered), (S_COMPLETED, 1));
         // evidence must be the digest dispatch bound
         assert_eq!(
@@ -788,10 +789,16 @@ mod tests {
         let mut wild = res;
         put_u64(&mut wild, MAX_FUEL + 1);
         let next = transition(&st(S_ADMITTED), E_RESERVE, &wild, 0, u64::MAX).unwrap();
-        assert_eq!((next.state, next.fail), (S_FAILED, Refusal::ReservationCaps.code()));
+        assert_eq!(
+            (next.state, next.fail),
+            (S_FAILED, Refusal::ReservationCaps.code())
+        );
         // dispatch past expiry is a terminal failure, not a dispatch
         let next = transition(&st(S_RESERVED), E_DISPATCH, &[7; 32], 500, 499).unwrap();
-        assert_eq!((next.state, next.fail), (S_FAILED, Refusal::DispatchExpired.code()));
+        assert_eq!(
+            (next.state, next.fail),
+            (S_FAILED, Refusal::DispatchExpired.code())
+        );
     }
 
     #[test]
@@ -855,7 +862,18 @@ mod tests {
             effect_digest(&a, &env_sha(b"env-b"))
         );
         let mut stmt = [0u8; STMT_LEN];
-        receipt_statement(&a, &env_sha(b"x"), S_COMPLETED, 1, 0, &[7; 32], &[8; 32], 5, 9, &mut stmt);
+        receipt_statement(
+            &a,
+            &env_sha(b"x"),
+            S_COMPLETED,
+            1,
+            0,
+            &[7; 32],
+            &[8; 32],
+            5,
+            9,
+            &mut stmt,
+        );
         assert_eq!(stmt[..STMT_TAG.len()], *STMT_TAG);
     }
 
@@ -870,7 +888,18 @@ mod tests {
     #[test]
     fn truncated_requests_refuse_never_panic() {
         let mut out = [0u8; MAX_VERDICT];
-        let full: Vec<u8> = [alloc::vec![1u8, K_STEP], alloc::vec![0x41; 32], alloc::vec![0x42; 32], st(S_RESERVED).wire().to_vec(), alloc::vec![E_DISPATCH], alloc::vec![0u8; 8], alloc::vec![0xff; 8], alloc::vec![32, 0], alloc::vec![7; 32]].concat();
+        let full: Vec<u8> = [
+            alloc::vec![1u8, K_STEP],
+            alloc::vec![0x41; 32],
+            alloc::vec![0x42; 32],
+            st(S_RESERVED).wire().to_vec(),
+            alloc::vec![E_DISPATCH],
+            alloc::vec![0u8; 8],
+            alloc::vec![0xff; 8],
+            alloc::vec![32, 0],
+            alloc::vec![7; 32],
+        ]
+        .concat();
         let n = handle_step(&full, &mut out).unwrap();
         assert_eq!(out[0], 1);
         for cut in [1usize, 5, 40, 80, 90, full.len() - 1] {

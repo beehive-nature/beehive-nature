@@ -77,10 +77,14 @@ impl Receipt {
 
     pub fn from_json(v: &Value) -> Result<Receipt, String> {
         let s = |k: &str| -> Result<&str, String> {
-            v.get(k).and_then(Value::as_str).ok_or(format!("missing {k}"))
+            v.get(k)
+                .and_then(Value::as_str)
+                .ok_or(format!("missing {k}"))
         };
         let u = |k: &str| -> Result<u64, String> {
-            v.get(k).and_then(Value::as_u64).ok_or(format!("missing {k}"))
+            v.get(k)
+                .and_then(Value::as_u64)
+                .ok_or(format!("missing {k}"))
         };
         if s("format")? != RECEIPT_FORMAT {
             return Err(format!("unknown receipt format {}", s("format")?));

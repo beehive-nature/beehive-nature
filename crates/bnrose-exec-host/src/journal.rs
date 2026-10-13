@@ -53,9 +53,15 @@ pub struct Record {
 pub enum JournalError {
     Io(String),
     /// A record failed its chain tag — the file was touched after writing.
-    Tampered { record: usize, why: String },
+    Tampered {
+        record: usize,
+        why: String,
+    },
     /// Structural garbage (a short prefix, an unknown version).
-    Malformed { record: usize, why: String },
+    Malformed {
+        record: usize,
+        why: String,
+    },
 }
 
 impl std::fmt::Display for JournalError {
@@ -116,7 +122,12 @@ impl Journal {
             .read(true)
             .open(path)
             .map_err(|e| JournalError::Io(e.to_string()))?;
-        Ok(Journal { file, key: *key, head, seq })
+        Ok(Journal {
+            file,
+            key: *key,
+            head,
+            seq,
+        })
     }
 
     pub fn head(&self) -> [u8; 32] {
@@ -203,7 +214,11 @@ pub fn load(path: &Path, key: &[u8; 32]) -> Result<Vec<Record>, JournalError> {
         if want != tag {
             return Err(JournalError::Tampered {
                 record: rec_index,
-                why: format!("tag mismatch: recorded {} computed {}", hex(&tag), hex(&want)),
+                why: format!(
+                    "tag mismatch: recorded {} computed {}",
+                    hex(&tag),
+                    hex(&want)
+                ),
             });
         }
         if body[0] != 1 {
@@ -247,7 +262,8 @@ mod tests {
     use super::*;
 
     fn tmp(name: &str) -> std::path::PathBuf {
-        let d = std::env::temp_dir().join(format!("bnrose-journal-test-{name}-{}", std::process::id()));
+        let d =
+            std::env::temp_dir().join(format!("bnrose-journal-test-{name}-{}", std::process::id()));
         std::fs::create_dir_all(&d).unwrap();
         d.join("journal.bin")
     }
