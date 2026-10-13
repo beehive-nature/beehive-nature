@@ -1,0 +1,8 @@
+ 
+no abi file found [0m
+pfake PREACTIVATE_FEATURE -> FAILED
+pfake CRYPTO_PRIMITIVES -> FAILED
+pfake BLS_PRIMITIVES2 -> FAILED
+pfake GET_BLOCK_NUM -> FAILED
+── verification: deploy bench.wasm (needs CRYPTO_PRIMITIVES intrinsics)
+unresolveable

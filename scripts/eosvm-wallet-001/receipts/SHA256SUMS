@@ -1,0 +1,8 @@
+# artifact hashes (sha256) — EOSVM-WALLET-001
+410c3fb0d6d4ca8dd47f1ee5a50c322accdcec0d27cd411182e698c13f4f8059 PUBLIC-CONSTANT  component/zkr_component.wasm
+7ee28b2afff79f6e688c3d8a58227a0f9b6b61e1661100355efce4322fd5ef23 PUBLIC-CONSTANT  harness/micro.wasm
+7b450929091fbccf1e4dcbb89937d8c0dbeda5ab10da6deb539221fec774f54a PUBLIC-CONSTANT  chain/probefree.wasm
+74118785b4d65bd097ee11c52b57778e8e571a9b62960e4acdf702d8021cd7eb PUBLIC-CONSTANT  chain/bootfree.wasm
+c6b98f446f9b8a33122e20c093248b3d47f2402c4e167edbb9a0f7674909aa73 PUBLIC-CONSTANT  blsprobe/blsprobe_free.wasm
+# zkrcount.wasm (closed zkr lane build, plonkport)
+7a86ac34ddf15489a90775a2e0e8f1baa7e5337a268af73e43e41c884af6f40d PUBLIC-CONSTANT  ~/plonkport/zkrcount.wasm

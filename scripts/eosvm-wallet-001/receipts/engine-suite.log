@@ -1,0 +1,64 @@
+fixtures ready
+── malformed battery
+{"mode":"malformed","case":"empty","rejected":true}
+{"mode":"malformed","case":"magic-only","rejected":false}
+{"mode":"malformed","case":"truncated-section","rejected":true}
+{"mode":"malformed","case":"bad-section-id","rejected":true}
+{"mode":"malformed","case":"bad-magic","rejected":true}
+{"mode":"malformed","case":"garbage-256","rejected":true}
+{"mode":"malformed","pass":5,"fail":1}
+{"mode":"malformed","case":"empty","rejected":true}
+{"mode":"malformed","case":"magic-only","rejected":false}
+{"mode":"malformed","case":"truncated-section","rejected":true}
+{"mode":"malformed","case":"bad-section-id","rejected":true}
+{"mode":"malformed","case":"bad-magic","rejected":true}
+{"mode":"malformed","case":"garbage-256","rejected":true}
+{"mode":"malformed","pass":5,"fail":1}
+── parse/instantiation (cold + repeat ctor)
+{"backend":"interp","mode":"parse","n":12,"cold_first_ns":1002637,"ctor_p50_ns":502411,"ctor_p95_ns":688803,"wasm_bytes":31762,"rss_kb":6060}
+{"backend":"interp","mode":"parse","n":12,"cold_first_ns":261051,"ctor_p50_ns":43213,"ctor_p95_ns":64222,"wasm_bytes":1222,"rss_kb":4836}
+{"backend":"jit","mode":"parse","n":12,"cold_first_ns":1396935,"ctor_p50_ns":732066,"ctor_p95_ns":786595,"wasm_bytes":31762,"rss_kb":5980}
+{"backend":"jit","mode":"parse","n":12,"cold_first_ns":158085,"ctor_p50_ns":59983,"ctor_p95_ns":71626,"wasm_bytes":1222,"rss_kb":4852}
+── micro workloads (engine-only decomposition)
+{"backend":"interp","mode":"warm","entry":"loop","n":31,"first_ns":720715977,"p50_ns":739474047,"p95_ns":1022097487,"max_ns":1344917598,"slot":0,"result":"n/a","host":"stub","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache":0,"add_n":0,"add_ns":0,"mul_n":0,"mul_ns":0,"pair_n":0,"pair_ns":0,"dbput_n":0,"dbget_n":0,"calllog_fnv":"14650fb0739d0383","rss_kb":4856}
+{"backend":"interp","mode":"warm","entry":"kecloop","n":31,"first_ns":235120310,"p50_ns":1396648,"p95_ns":1942133,"max_ns":2967692,"slot":0,"result":"n/a","host":"stub","kec_n":62000,"kec_ns":241418349,"kec_exec":1,"kec_cache":61999,"add_n":0,"add_ns":0,"mul_n":0,"mul_ns":0,"pair_n":0,"pair_ns":0,"dbput_n":0,"dbget_n":0,"calllog_fnv":"0687db4855403183","rss_kb":5928}
+{"backend":"interp","mode":"warm","error":"first call: wasm memory exception","detail":"wasm memory out-of-bounds"}
+{"backend":"interp","mode":"warm","entry":"dbloop","n":31,"first_ns":183418,"p50_ns":159498,"p95_ns":237730,"max_ns":408383,"slot":0,"result":"n/a","host":"stub","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache":0,"add_n":0,"add_ns":0,"mul_n":0,"mul_ns":0,"pair_n":0,"pair_ns":0,"dbput_n":15500,"dbget_n":15500,"calllog_fnv":"8abbfa8f09a234ab","rss_kb":5200}
+{"backend":"jit","mode":"warm","entry":"loop","n":31,"first_ns":108698173,"p50_ns":107995573,"p95_ns":159651254,"max_ns":186594828,"slot":0,"result":"n/a","host":"stub","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache":0,"add_n":0,"add_ns":0,"mul_n":0,"mul_ns":0,"pair_n":0,"pair_ns":0,"dbput_n":0,"dbget_n":0,"calllog_fnv":"14650fb0739d0383","rss_kb":4812}
+{"backend":"jit","mode":"warm","entry":"kecloop","n":31,"first_ns":256213704,"p50_ns":1640215,"p95_ns":1898371,"max_ns":2828094,"slot":0,"result":"n/a","host":"stub","kec_n":62000,"kec_ns":262874354,"kec_exec":1,"kec_cache":61999,"add_n":0,"add_ns":0,"mul_n":0,"mul_ns":0,"pair_n":0,"pair_ns":0,"dbput_n":0,"dbget_n":0,"calllog_fnv":"0687db4855403183","rss_kb":5888}
+{"backend":"jit","mode":"warm","error":"first call: wasm memory exception","detail":"wasm memory out-of-bounds"}
+{"backend":"jit","mode":"warm","entry":"dbloop","n":31,"first_ns":108150,"p50_ns":137434,"p95_ns":209476,"max_ns":282789,"slot":0,"result":"n/a","host":"stub","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache":0,"add_n":0,"add_ns":0,"mul_n":0,"mul_ns":0,"pair_n":0,"pair_ns":0,"dbput_n":15500,"dbget_n":15500,"calllog_fnv":"8abbfa8f09a234ab","rss_kb":5180}
+── memory growth to cap
+{"backend":"interp","mode":"mem","pages_grown":4096,"max_pages_wasm":4096,"rss_kb":266988}
+{"backend":"jit","mode":"mem","pages_grown":4096,"max_pages_wasm":4096,"rss_kb":266956}
+── component verify: the REAL count proof (oracle pairing)
+{"backend":"interp","mode":"verify","entry":"zkr_verify","n":1,"first_ns":50065721192,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MATCH","host":"pyecc","kec_n":6,"kec_ns":1312697834,"kec_exec":6,"kec_cache":0,"add_n":18,"add_ns":23860964255,"mul_n":18,"mul_ns":23602961550,"pair_n":1,"pair_ns":1247319755,"dbput_n":0,"dbget_n":0,"calllog_fnv":"a4060989da93bc26","rss_kb":6116}
+{"backend":"jit","mode":"verify","entry":"zkr_verify","n":1,"first_ns":46126573763,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MATCH","host":"pyecc","kec_n":6,"kec_ns":1403836238,"kec_exec":6,"kec_cache":0,"add_n":18,"add_ns":21984130002,"mul_n":18,"mul_ns":21458860478,"pair_n":1,"pair_ns":1273437412,"dbput_n":0,"dbget_n":0,"calllog_fnv":"a4060989da93bc26","rss_kb":5892}
+── component mutation battery (every one must reject)
+mutation proof_b0 [interp]: {"backend":"interp","mode":"verify","entry":"zkr_verify","n":1,"first_ns":531140,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache":0,"add_n":0,"add_ns":0,"mul_n":0,"mul_ns":0,"pair_n":0,"
+mutation proof_b0 [jit]: {"backend":"jit","mode":"verify","entry":"zkr_verify","n":1,"first_ns":102560,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache":0,"add_n":0,"add_ns":0,"mul_n":0,"mul_ns":0,"pair_n":0,"pai
+mutation proof_b100 [interp]: {"backend":"interp","mode":"verify","entry":"zkr_verify","n":1,"first_ns":775487,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache":0,"add_n":0,"add_ns":0,"mul_n":0,"mul_ns":0,"pair_n":0,"
+mutation proof_b100 [jit]: {"backend":"jit","mode":"verify","entry":"zkr_verify","n":1,"first_ns":59707,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache":0,"add_n":0,"add_ns":0,"mul_n":0,"mul_ns":0,"pair_n":0,"pair
+mutation proof_b384 [interp]: {"backend":"interp","mode":"verify","entry":"zkr_verify","n":1,"first_ns":1886396,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache":0,"add_n":0,"add_ns":0,"mul_n":0,"mul_ns":0,"pair_n":0,
+mutation proof_b384 [jit]: {"backend":"jit","mode":"verify","entry":"zkr_verify","n":1,"first_ns":359776,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache":0,"add_n":0,"add_ns":0,"mul_n":0,"mul_ns":0,"pair_n":0,"pai
+mutation proof_b543 [interp]: {"backend":"interp","mode":"verify","entry":"zkr_verify","n":1,"first_ns":8709133,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache":0,"add_n":0,"add_ns":0,"mul_n":0,"mul_ns":0,"pair_n":0,
+mutation proof_b543 [jit]: {"backend":"jit","mode":"verify","entry":"zkr_verify","n":1,"first_ns":162589,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache":0,"add_n":0,"add_ns":0,"mul_n":0,"mul_ns":0,"pair_n":0,"pai
+mutation proof_b767 [interp]: {"backend":"interp","mode":"verify","entry":"zkr_verify","n":1,"first_ns":51450899518,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":6,"kec_ns":4042440302,"kec_exec":6,"kec_cache":0,"add_n":18,"add_ns":21784100065,"mul_n":
+mutation proof_b767 [jit]: {"backend":"jit","mode":"verify","entry":"zkr_verify","n":1,"first_ns":55388934078,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":6,"kec_ns":1437718703,"kec_exec":6,"kec_cache":0,"add_n":18,"add_ns":26141397974,"mul_n":18,
+mutation pubs_b0 [interp]: {"backend":"interp","mode":"verify","entry":"zkr_verify","n":1,"first_ns":47105591020,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":6,"kec_ns":1862334706,"kec_exec":6,"kec_cache":0,"add_n":18,"add_ns":21570798208,"mul_n":
+mutation pubs_b0 [jit]: {"backend":"jit","mode":"verify","entry":"zkr_verify","n":1,"first_ns":48303642985,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":6,"kec_ns":1764416703,"kec_exec":6,"kec_cache":0,"add_n":18,"add_ns":22804504554,"mul_n":18,
+mutation pubs_b32 [interp]: {"backend":"interp","mode":"verify","entry":"zkr_verify","n":1,"first_ns":47176278738,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":6,"kec_ns":1346319811,"kec_exec":6,"kec_cache":0,"add_n":18,"add_ns":22414230033,"mul_n":
+mutation pubs_b32 [jit]: {"backend":"jit","mode":"verify","entry":"zkr_verify","n":1,"first_ns":46597210546,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":6,"kec_ns":1354177118,"kec_exec":6,"kec_cache":0,"add_n":18,"add_ns":21730286696,"mul_n":18,
+mutation pubs_b95 [interp]: {"backend":"interp","mode":"verify","entry":"zkr_verify","n":1,"first_ns":47874728429,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":6,"kec_ns":1472147655,"kec_exec":6,"kec_cache":0,"add_n":18,"add_ns":22789410949,"mul_n":
+mutation pubs_b95 [jit]: {"backend":"jit","mode":"verify","entry":"zkr_verify","n":1,"first_ns":46120416584,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":0,"result":"MISMATCH","host":"pyecc","kec_n":6,"kec_ns":1953294908,"kec_exec":6,"kec_cache":0,"add_n":18,"add_ns":21433265208,"mul_n":18,
+── POST result-slot-fix rerun 2026-10-13T01:12:05Z
+{"backend":"interp","mode":"verify","entry":"zkr_verify","n":1,"first_ns":34216287660,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":1,"result":"MISMATCH","host":"pyecc","kec_n":6,"kec_ns":937811046,"kec_exec":6,"kec_cache":0,"add_n":18,"add_ns":16178892281,"mul_n":18,"mul_ns":16128968978,"pair_n":1,"pair_ns":939875144,"dbput_n":0,"dbget_n":0,"calllog_fnv":"a4060989da93bc26","rss_kb":6112}
+{"backend":"jit","mode":"verify","entry":"zkr_verify","n":1,"first_ns":34737261583,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":1,"result":"MISMATCH","host":"pyecc","kec_n":6,"kec_ns":1151668622,"kec_exec":6,"kec_cache":0,"add_n":18,"add_ns":16588298437,"mul_n":18,"mul_ns":16039109297,"pair_n":1,"pair_ns":954094615,"dbput_n":0,"dbget_n":0,"calllog_fnv":"a4060989da93bc26","rss_kb":5892}
+{"backend":"interp","mode":"verify","entry":"zkr_verify","n":1,"first_ns":579769,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":1,"result":"MATCH","host":"pyecc","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache"
+{"backend":"jit","mode":"verify","entry":"zkr_verify","n":1,"first_ns":96799,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":1,"result":"MATCH","host":"pyecc","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache":0,"
+{"backend":"interp","mode":"verify","entry":"zkr_verify","n":1,"first_ns":4143968,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":1,"result":"MATCH","host":"pyecc","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache
+{"backend":"jit","mode":"verify","entry":"zkr_verify","n":1,"first_ns":320322,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":1,"result":"MATCH","host":"pyecc","kec_n":0,"kec_ns":0,"kec_exec":0,"kec_cache":0,
+{"backend":"interp","mode":"verify","entry":"zkr_verify","n":1,"first_ns":41651559750,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":1,"result":"MATCH","host":"pyecc","kec_n":6,"kec_ns":933532505,"kec_exec":
+{"backend":"jit","mode":"verify","entry":"zkr_verify","n":1,"first_ns":36690933600,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":1,"result":"MATCH","host":"pyecc","kec_n":6,"kec_ns":2019051867,"kec_exec":6,
+{"backend":"interp","mode":"verify","entry":"zkr_verify","n":1,"first_ns":37175839018,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":1,"result":"MATCH","host":"pyecc","kec_n":6,"kec_ns":1041835641,"kec_exec"
+{"backend":"jit","mode":"verify","entry":"zkr_verify","n":1,"first_ns":38104989297,"p50_ns":0,"p95_ns":0,"max_ns":0,"slot":1,"result":"MATCH","host":"pyecc","kec_n":6,"kec_ns":1130402119,"kec_exec":6,

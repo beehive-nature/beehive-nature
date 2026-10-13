@@ -1,0 +1,6 @@
+label	call	n	cpu_p50_us	cpu_max_us	status
+noop	probe probe []	21	234	1436	executed
+spin_1m	probe spin ["1000000"]	21	230	4131	executed
+spin_5m	probe spin ["5000000"]	21	226	285	executed
+spin_20m	probe spin ["20000000"]	21	232	1049	executed
+putx	probe putx ["2","42"]	21	218	246	executed

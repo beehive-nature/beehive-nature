@@ -1,0 +1,11 @@
+FAIL rollback :: wrth unexpectedly succeeded
+FAIL rollback :: {"code":500,"message":"Internal Service Error","error":{"code":3060003,"name":"contract_table_query_exception","what":"Contract Table Query Exception","details":[{"message":"Table 
+NOTE unauthorized ::   }}
+PASS malformed-abi :: {"code":404,"message":"Not Found","error":{"code":0,"name":"exception","what":"unspecified","details":[{"message":"Unkno
+grow(520 pages): executed 223
+PASS memory :: node alive after grow-to-cap: head_block_num":513
+head_block_num":513
+PASS concurrent-read :: 8x10s parallel reads, zero errors
+FAIL restart :: 
+NOTE restart-post :: spin after restart: 
+NOTE state-dump :: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 (PUBLIC-CONSTANT receipt hash)

@@ -1,0 +1,11 @@
+== deploy start 2026-10-13T00:31:40Z (genesis-preactivated features)
+account bench EXISTS/FAIL
+account verifymin OK
+account note OK
+account probe OK
+account zkrcount OK
+contract bench FAIL
+contract verifymin FAIL
+contract note FAIL
+contract zkrcount FAIL
+== deploy done
