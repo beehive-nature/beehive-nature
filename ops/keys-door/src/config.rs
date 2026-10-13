@@ -102,15 +102,16 @@ impl Config {
                 return Err(format!("{name}: at most {MAX_LIST} entries"));
             }
         }
-        if let Some(u) = self
-            .arweave_gateways
-            .iter()
-            .chain(&self.peers)
-            .find(|u| !url_ok(u, false))
-        {
-            return Err(format!(
-                "{u}: peers and arweave_gateways must be https://host[/path]"
-            ));
+        if let Some(u) = self.arweave_gateways.iter().find(|u| !url_ok(u, false)) {
+            return Err(format!("{u}: arweave_gateways must be https://host[/path]"));
+        }
+        // A peer is untrusted like every source: its envelopes pass both
+        // verifiers and the chain walk, its pack the hash checks. So a
+        // configured peer takes the ant_doors rule (contract §7 A3): https,
+        // or plain http only to loopback (a forwarder beside the edge). Peers
+        // an envelope hints at stay https only (door.rs).
+        if let Some(u) = self.peers.iter().find(|u| !url_ok(u, true)) {
+            return Err(format!("{u}: peers must be https, or http to loopback"));
         }
         if let Some(u) = self.ant_doors.iter().find(|u| !url_ok(u, true)) {
             return Err(format!("{u}: ant_doors must be https, or http to loopback"));
