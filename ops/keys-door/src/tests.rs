@@ -2207,6 +2207,36 @@ fn urls_are_https_endpoints_only() {
     assert!(!sources::url_ok("http://10.0.0.1:8082", true));
 }
 
+/// A configured peer may be http to loopback, as an ANT door may (contract
+/// §7 A3); anywhere else it is https. An Arweave gateway is https only.
+#[test]
+fn configured_peers_take_the_ant_door_rule_gateways_stay_https() {
+    let fx = fx_pinned("cfg-peers", [7; 32], &[key(0).id.clone()]);
+    let with = |peers: &[&str], gateways: &[&str]| {
+        let mut c = fx.cfg.clone();
+        c.peers = peers.iter().map(|s| s.to_string()).collect();
+        c.arweave_gateways = gateways.iter().map(|s| s.to_string()).collect();
+        c.validate()
+    };
+    assert_eq!(
+        with(&["https://peer.example", "http://127.0.0.1:8099"], &[]),
+        Ok(())
+    );
+    for bad in [
+        "http://10.80.96.2:8096",
+        "http://peer.example",
+        "http://127.0.0.1:8099/",
+    ] {
+        let e = with(&[bad], &[]).expect_err(bad);
+        assert!(
+            e.contains("peers must be https, or http to loopback"),
+            "{e}"
+        );
+    }
+    let e = with(&[], &["http://127.0.0.1:1984"]).expect_err("an http gateway");
+    assert!(e.contains("arweave_gateways must be https"), "{e}");
+}
+
 // ---------------------------------------------------------------------------
 // keys-door verify
 

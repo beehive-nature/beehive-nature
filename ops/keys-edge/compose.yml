@@ -1,0 +1,57 @@
+# keys-edge: keys-door, the keyless edge for keys.skaists.dev (keychain release + edge contract,
+# 2026-10-12, §4 and §6), on its own network. Caddy (buzz-prod-caddy-1) joins keys-net at
+# 10.80.96.3 and reaches keys-door at 10.80.96.2:8096 by address: no name on the shared
+# buzz-prod_buzz-net can stand in for it, and keys-door never joins that network. No port is
+# published. ANT is read over https://relay.skaists.dev/ant (contract §7 A3).
+#
+#   KEYS_DOOR_IMAGE=keys-door:<commit> docker compose -f ops/keys-edge/compose.yml up -d
+#
+# KEYS_EDGE_CONFIG and KEYS_EDGE_INBOX default to the host paths below; the CI lab points them at
+# its own files and otherwise runs this file unchanged.
+name: keys-edge
+
+services:
+  keys-door:
+    image: ${KEYS_DOOR_IMAGE:?set KEYS_DOOR_IMAGE to the image built from ops/keys-edge/Dockerfile}
+    container_name: keys-door
+    restart: unless-stopped
+    user: "10096:10096"
+    read_only: true
+    tmpfs:
+      # bsigner's scratch (one signature and one record per check)
+      - /tmp:size=16m,mode=1777,noexec,nosuid,nodev
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 256m
+    networks:
+      keys-net:
+        ipv4_address: 10.80.96.2
+    volumes:
+      # serve state, floor and fork evidence (state_dir)
+      - keys-state:/var/lib/keys-door/state
+      # envelopes dropped on the host (inbox_dir); keys-door only reads it
+      - ${KEYS_EDGE_INBOX:-/opt/keys-edge/inbox}:/var/lib/keys-door/inbox:ro
+      - ${KEYS_EDGE_CONFIG:-/opt/keys-edge/edge.toml}:/etc/keys-door/edge.toml:ro
+    healthcheck:
+      # health_listen (127.0.0.1:8097) answers 200 only while a verified release is served;
+      # bash's /dev/tcp asks it, so the image carries no HTTP client
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8097 && printf 'GET /health HTTP/1.0\\r\\n\\r\\n' >&3 && read -r _ code _ <&3 && test \"$$code\" = 200"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+
+volumes:
+  keys-state:
+
+networks:
+  keys-net:
+    name: keys-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.80.96.0/29
+          gateway: 10.80.96.1
