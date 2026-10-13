@@ -51,8 +51,12 @@ additive evaluation tooling; no existing implementation was replaced.
 - Licenses: Spring = **Business Source License 1.1** (ENF licensor; free use
   only "Directly in Service of or Materially Dependent on the EOS Blockchain
   Network"; Change Date four years per version). eos-vm (all four repos) =
-  **EOS VM License** (MIT-style grant + source-availability condition for
-  adaptations used for "Other Blockchain Purposes").
+  **EOS VM License V1.0** — exactly that license, not plain MIT: a grant in
+  the style of MIT PLUS an additional condition requiring covered works
+  adapted for "Other Blockchain Purposes" to have their corresponding
+  source made available free of charge under the same license (founder
+  closeout rider 2026-10-13: the "MIT-style" shorthand is retired from the
+  inventory).
 - The four repos: `EOSIO/eos-vm` (block.one root, quiet since 2023-07),
   `AntelopeIO/eos-vm` (ENF root, quiet since 2025-07 — the Spring pin
   source), `gofractally/eos-vm` (root, STILL ACTIVE 2026-10),
@@ -85,6 +89,16 @@ additive evaluation tooling; no existing implementation was replaced.
   ffjavascript generator cross-check constants) and ready.
 
 ## Results (measured; receipts/)
+
+> **FOUNDER DISPOSITION (2026-10-13, closeout)**: the evaluation's
+> recommendation to add the standalone backend was ahead of its acceptance
+> results. The backend stays an EXPERIMENTAL COMPARISON CANDIDATE, outside
+> the production path; EOS VM is preserved as a pinned reference, not a
+> required dependency. Identical rejection across backends establishes
+> agreement for those executions, not a correct verifier. The performance
+> numbers below are workload-specific and support per-workload execution-
+> strategy choice only. Successor lane: BNROSE-RUST-001 (fresh session).
+> Full text: the dispatch's §FOUNDER DISPOSITION.
 
 ### Engine — interpreter vs JIT (same wasm, same host)
 | workload | interp | JIT | ratio |
