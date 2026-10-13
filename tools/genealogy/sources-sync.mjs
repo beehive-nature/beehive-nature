@@ -38,7 +38,7 @@
 // next authed wake per the standing SESSION-ORACLE law.
 
 import { readFileSync, writeFileSync } from "node:fs";
-import { publicSourceRecord } from "./fs-adapter.mjs";
+import { publicSourceRecord, parseSourceDescriptions } from "./fs-adapter.mjs";
 
 // dispatch-proven deceased extramural persons on this pass's walked set
 // (name + basis required — same law as hint-census DECEASED_EXTRAMURAL)
@@ -81,15 +81,35 @@ export function buildPayload(index) {
 
 const ARK_IN = (hay) => (typeof hay === "string" ? hay : "");
 
-// does a links/sources record correspond to a ledger ark? Matches the ark on
-// the record id, the about URI, or any URL (the citation ark forms differ:
-// 4-3 tree-source ids and 4-4 record arks both occur).
-function recordMatchesArk(rec, ark) {
-  if (rec.id === ark) return true;
-  for (const h of [ARK_IN(rec.about), ...rec.urls.map((u) => ARK_IN(typeof u === "string" ? u : u.url))]) {
-    if (h.includes(ark)) return true;
+// the walker dump's src values are RAW links/sources payloads — parse them
+// through the proven fs-adapter parser before any projection/matching (the
+// original staging pipeline law: parseSourceDescriptions → publicSourceRecord;
+// raw records may lack urls/evidence entirely)
+function parseRawSrc(dump) {
+  const parsed = {};
+  for (const [sid, raw] of Object.entries(dump.src || {})) {
+    const recs = parseSourceDescriptions({ sources: [raw] });
+    if (recs.length) parsed[sid] = recs[0];
   }
-  return false;
+  return parsed;
+}
+
+// does a parsed links/sources record correspond to a ledger ark? Live-wire
+// proof (2026-10-12): the record bodies carry NO about/urls — the ark rides
+// inside the citation prose ("…/ark:/61903/1:1:MCL8-D19 : …") and the uri
+// field; tree-source ids are a different universe (WFP3/WFPS-style), so id
+// equality only helps when the ledger ark IS the id form.
+function recordMatchesArk(rec, ark) {
+  if (!rec) return false;
+  if (rec.id === ark) return true;
+  const urls = Array.isArray(rec.urls) ? rec.urls : [];
+  const hays = [
+    ARK_IN(rec.about),
+    ARK_IN(rec.uri),
+    ARK_IN(rec.citation),
+    ...urls.map((u) => ARK_IN(typeof u === "string" ? u : u.url)),
+  ];
+  return hays.some((h) => h.includes(ark));
 }
 
 export function validateRedactInput(text) {
@@ -105,6 +125,7 @@ export function buildSync({ dump, index, ledger, generated, redactNames, walkedP
   }
   const persons = Array.isArray(index.persons) ? index.persons : Object.values(index.persons);
   const byFsid = new Map(persons.map((p) => [p.fsid, p]));
+  const src = parseRawSrc(dump);
   const ledgerByArk = new Map();
   for (const r of ledger.records || []) {
     ledgerByArk.set(r.ark, r);
@@ -165,7 +186,7 @@ export function buildSync({ dump, index, ledger, generated, redactNames, walkedP
     const ledgerRows = (ledger.records || []).filter((r) => (r.attachedTo || []).includes(pid));
     const newSources = [];
     for (const row of ledgerRows) {
-      const rec = Object.values(dump.src || {}).find((s) => recordMatchesArk(s, row.ark));
+      const rec = Object.values(src).find((s) => recordMatchesArk(s, row.ark));
       const inRef = [...currentIds].some((id) => id === row.ark);
       if (!rec && !inRef) {
         newSources.push({ ark: row.ark, status: "ledger-expected-not-found", dispatch: row.dispatch });
@@ -187,9 +208,9 @@ export function buildSync({ dump, index, ledger, generated, redactNames, walkedP
       for (const id of currentIds) {
         if (frozenIds.has(id)) continue;
         const matched = [...ledgerArks].some((ark) => recordMatchesArk({ id, urls: [], about: null }, ark)) ||
-          (dump.src?.[id] && [...ledgerArks].some((ark) => recordMatchesArk(dump.src[id], ark)));
+          (src[id] && [...ledgerArks].some((ark) => recordMatchesArk(src[id], ark)));
         if (matched) continue;
-        const rec = dump.src?.[id];
+        const rec = src[id];
         const pub = rec ? publicSourceRecord(rec, { redactNames }) : { id, title: null, citation: null };
         newSources.push({ ...pub, status: "attached", dispatch: "post-freeze delta (unattributed to a dispatch)" });
         unattributed++;

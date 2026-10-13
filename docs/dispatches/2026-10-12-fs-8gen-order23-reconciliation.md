@@ -133,3 +133,65 @@ Don Ray records-search pass; the KWJ4-XBD read-only lock.
 NEXT OWNER: the next authed wake (founder sign-in in the pane) — run the
 transcription pass first (the tooling is staged and tested offline), then
 the standing veins above; the codex seat owns the ANT gate (#346/#347).
+
+---
+
+## ADDENDUM (same wake, founder signed in — the transcription pass EXECUTED)
+
+The founder signed into the staged pane mid-wake; oracle re-proven
+wire-side (v8 KWJ4-XBD details = 200, 120,644 B — the known byte-shape).
+The pass ran under standing orders, no ceremony:
+
+- **Walk**: PAGE_SOURCE_WALKER over the 11-pid payload (extramural at dep
+  9, `known` = 809) — **27 fetches / 27 ok / 0 errors / 13.7s**, 75 source
+  ids in 5 links/sources batches, authStreak 0. GOTCHA BANKED: the walker's
+  localStorage checkpoint (`__zb_source_walk_v1`) survives runs in the
+  browser profile — the first install came up `resumed: true` with stale
+  09-18 refs for 5 pids (would poison the diff); cleared + reloaded +
+  reinstalled fresh (`resumed: false`). Any sync-scale run clears it first.
+- **Private tier**: raw dump
+  `C:/Users/travi/family-lineage/sources-sync-2026-10-12/raw-dump.json`
+  (171,442 B, 16 persons / 11 refs / 75 records) + the redact list derived
+  by the ORIGINAL staging rule verbatim (walk living flags MINUS the 4
+  founder-attested deceased overrides) = **5 names, 0 hits** — the same
+  numbers as the standing 09-26 battery.
+- **Live-wire tool fixes (the honest boundary from the morning, now cured
+  on live proof)**: (1) the dump's src values are RAW links/sources
+  payloads — the build now parses through `parseSourceDescriptions` before
+  projection (the original pipeline law; raw records lack urls/evidence
+  fields entirely); (2) **the ark rides inside the citation prose**
+  ("…/ark:/61903/1:1:MCL8-D19 : …") — record bodies carry NO about/urls on
+  this wire; the matcher scans citation + uri + about + urls. Tests 12/12;
+  full genealogy suite 33 files 0 fail.
+- **Artifact**: `assets/profile-archive/lineage/sources/`
+  `sources-sync-2026-10-12.json` (skaists.sources-sync/1) — 11 persons
+  (4 cohort + 7 extramural), **37 ledger rows transcribed attached, 0 null
+  citations, redactedLiving 0**. Cohort sync debt vs the frozen index:
+  LJDG-CYG +1, LN5V-3N2 +1, GWXR-H2K +1, **GWXR-3TD +2**. Extramural
+  standing sources counted, never transcribed without provenance. The
+  FROZEN manifest is untouched — the sync rides as a new layer.
+- **DISCREPANCY recorded, not resolved** (corrective-receipt discipline):
+  the 10-10 dispatch describes QG8Q-V3C5 as "Maren's OWN birth/christening,
+  b. 22 Jul 1811 Sønderup" — the live citation reads *"Maren Nielsdr in
+  entry for Ane Sophie Christensen, 1841"* (child-event class, the same
+  citation shape as QG8Q-N45H/15JW/78S6; possibly the same-event re-index
+  twin of QG8Q-P964 across the Baptisms/Church-Records collections). The
+  "new birth source for Maren's birth-side conclusions" claim is
+  contradicted on the wire; the artifact carries the wire's citation and
+  the founder rules. Maren's true 1811 birth record, if attached, is not
+  among the ledger arks checked this pass.
+- **GWXR-3TD's second delta** (WFPS-YWL, "England, Somerset, Church
+  Records" for Ann) is unattributed to any lane dispatch — founder manual
+  work or a re-index twin of 6D9D-2ZCT; named, not resolved.
+- **KWJ4-XBD lock recheck (standing vein, read-only)**: summary wire =
+  `readOnly: true` STANDS (Albert Perry Rockwood, sourceCount 108). The 5
+  parked items + the NUMIDENT verify-then-refuse candidate stay behind the
+  founder call.
+- **Zero FamilySearch mutations this wake** — the walk and the lock check
+  are reads. Repo writes: the artifact, the tool fixes + tests, and this
+  addendum.
+
+NEXT OWNER (updated): the founder's QG8Q-V3C5 ruling; optionally fold Ane
+Sophie LZDH-WB1 (10-03/10-07 attaches) into a follow-on sync run — the tool
+takes any walked set; then the standing veins (L1N9-S2L parked, KWJ4-XBD
+lock, tasks/tasks-queue recheck on a future authed wake); codex owns ANT.

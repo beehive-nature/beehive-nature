@@ -51,14 +51,17 @@ const mkDump = (overrides = {}) => ({
     ...overrides.refs,
   },
   src: {
+    // RAW links/sources wire shapes — the tool parses via parseSourceDescriptions
+    // (raw records may lack urls/evidence entirely; parsed guarantees the shape)
     "MCL8-D19": { id: "MCL8-D19", title: "Syn Census 1860", citation: "\"Syn Census, 1860\" (household of Syn Cohort One)",
       urls: [{ url: "https://www.familysearch.org/ark:/61903/1:1:MCL8-D19" }], about: "ark:/61903/1:1:MCL8-D19",
-      evidence: [], notes: ["private note stays private"], retrieved: "2026-10-12", provider: "familysearch" },
+      evidence: { facts: [{ factType: "http://gedcomx.org/Birth", fieldType: "Birth", value: "Syn Place 1860" }] },
+      notes: ["private note stays private"] },
     "NEWX-ZZ9": { id: "NEWX-ZZ9", title: "Syn Attributed Later", citation: "\"Syn Record\" mentioning Living Name",
-      urls: [], about: null, evidence: [], notes: [], retrieved: "2026-10-12", provider: "familysearch" },
+      urls: [], about: null, evidence: { facts: [] }, notes: [] },
     "QG8Q-V3C5": { id: "QG8Q-V3C5", title: "Syn Church Record 1811", citation: "\"Syn Church Records\" (birth 1811)",
       urls: [{ url: "https://www.familysearch.org/ark:/61903/1:1:QG8Q-V3C5" }], about: "ark:/61903/1:1:QG8Q-V3C5",
-      evidence: [], notes: [], retrieved: "2026-10-12", provider: "familysearch" },
+      evidence: { facts: [] }, notes: [] },
     ...overrides.src,
   },
 });
@@ -87,6 +90,7 @@ test("cohort sync debt: fresh id outside the frozen baseline is transcribed with
   assert.equal(mcl.status, "attached");
   assert.equal(mcl.dispatch, "2026-10-10-fs-authed-wake-labor");
   assert.match(mcl.citation, /Syn Census, 1860/);
+  assert.equal(mcl.evidence[0].value, "Syn Place 1860", "raw wire facts parse through to the public projection");
   assert.equal(mcl.notes, undefined, "public projection drops notes");
   assert.equal(art.reconciliation.cohortSyncDebt["LJDG-CYG"], 1);
 });
@@ -106,7 +110,7 @@ test("ark matching: 4-4 record arks match through about/urls when the id differs
   dump.refs["GWXR-H2K"].sources = [{ id: "OLD4-DDD" }, { id: "TRE1-EEE" }];
   dump.src["TRE1-EEE"] = { id: "TRE1-EEE", title: "Somerset church record", citation: "\"Somestead, Somerset\"",
     urls: [{ url: "https://www.familysearch.org/ark:/61903/1:1:6D9D-2ZCT" }], about: "ark:/61903/1:1:6D9D-2ZCT",
-    evidence: [], notes: [], retrieved: "2026-10-12", provider: "familysearch" };
+    evidence: { facts: [] }, notes: [] };
   const art = buildSync({ dump, index: syntheticIndex, ledger: syntheticLedger, generated: "2026-10-12T00:00Z", redactNames: REDACT });
   const p = art.persons["GWXR-H2K"];
   const som = p.newSources.find((s) => s.ark === "6D9D-2ZCT");
@@ -115,6 +119,19 @@ test("ark matching: 4-4 record arks match through about/urls when the id differs
   // and it must NOT double-count as an unattributed delta (this scenario
   // replaced NEWX-ZZ9 with the ark-matched TRE1-EEE row)
   assert.equal(art.reconciliation.unattributedDelta, 0, "the matched ledger row is the only delta on GWXR-H2K");
+});
+
+test("ark matching: live-wire form — the ark rides inside the citation prose", () => {
+  const dump = mkDump();
+  dump.refs["LJDG-CYG"].sources = [{ id: "OLD1-AAA" }, { id: "OLD2-BBB" }, { id: "OLD3-CCC" }, { id: "TRE2-FFF" }];
+  dump.src["TRE2-FFF"] = { id: "TRE2-FFF", title: "Joseph Benedum, \"United States, Census, 1860\"",
+    citation: "\"United States, Census, 1860\", <i>FamilySearch</i> (https://www.familysearch.org/ark:/61903/1:1:MCL8-D19 : Mon Jul 08 2024), Joseph Benedum, 1860.",
+    urls: [], about: undefined, evidence: { facts: [] }, notes: [] };
+  const art = buildSync({ dump, index: syntheticIndex, ledger: syntheticLedger, generated: "2026-10-12T00:00Z", redactNames: REDACT });
+  const mcl = art.persons["LJDG-CYG"].newSources.find((s) => s.ark === "MCL8-D19");
+  assert.ok(mcl, "ledger ark matched through the citation");
+  assert.equal(mcl.status, "attached");
+  assert.equal(art.reconciliation.cohortSyncDebt["LJDG-CYG"], 1);
 });
 
 test("extramural allowlisted: only ledger-proven attaches transcribed; standing sources counted, never mixed in", () => {
