@@ -151,6 +151,44 @@ fn links_after(
         .collect()
 }
 
+/// One envelope checked on its own as the record right after `base`
+/// (rule 3): with no base, the pinned genesis signed by a genesis signer;
+/// otherwise seq base+1, prev selecting base, signed by an id base lists.
+/// Both verifiers run only after those fit. The peer walk uses this to
+/// stop at the first envelope that does not extend what it holds.
+pub fn extends(
+    base: Option<&Parsed>,
+    p: &Parsed,
+    genesis_sha3: &[u8; 32],
+    genesis_signers: &[String],
+    verify: &mut VerifyFn<'_>,
+) -> Result<String, String> {
+    let allowed = match base {
+        None if p.record.seq != 1 => return Err("not seq 1, and nothing is held below it".into()),
+        None if p.record_sha3 != *genesis_sha3 => {
+            return Err("seq 1 is not the pinned genesis".into())
+        }
+        None => genesis_signers,
+        Some(b) if p.record.seq != b.record.seq + 1 => {
+            return Err(format!(
+                "seq {} does not follow seq {}",
+                p.record.seq, b.record.seq
+            ))
+        }
+        Some(b) if p.record.prev.as_deref() != Some(b64u(&b.record_sha3).as_str()) => {
+            return Err(format!(
+                "prev does not select the record this edge holds at seq {}",
+                b.record.seq
+            ))
+        }
+        Some(b) => &b.record.signers,
+    };
+    if !allowed.contains(&p.pre.id) {
+        return Err("no signature by an authorized signer".into());
+    }
+    verify(p).map_err(|r| format!("{} ({r})", r.name()))
+}
+
 pub fn walk(
     pool: &Pool,
     genesis_sha3: &[u8; 32],

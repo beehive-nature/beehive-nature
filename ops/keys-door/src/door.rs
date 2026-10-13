@@ -1,12 +1,13 @@
-//! One poll of the edge (contract §4 rules 1-7): gather candidate envelopes
-//! from every source and the kept fork evidence, parse them (rule 1), walk
-//! the chain from the pinned genesis with both verifiers (rules 2, 3, 5),
-//! keep what the walk met at a fork (rule 5), pick the highest record at or
-//! above the floor (rule 4), find bytes that hash to what it names (rule
-//! 6), raise the floor, persist, swap, serve. A corrupt serve state is
-//! discarded and the edge answers 503 until a release at or above the floor
-//! verifies again (rule 7). A floor or evidence store that cannot be read
-//! refuses every new release; the one already served stays served.
+//! One poll of the edge (contract §4 rules 1-7, §7 A1): gather candidate
+//! envelopes from every source and the kept fork evidence, parse them (rule
+//! 1), walk each peer's chain endpoint one seq at a time, walk the chain
+//! from the pinned genesis with both verifiers (rules 2, 3, 5), keep what
+//! the walk met at a fork (rule 5), pick the highest record at or above the
+//! floor (rule 4), find bytes that hash to what it names (rule 6), raise
+//! the floor, persist, swap, serve. A corrupt serve state is discarded and
+//! the edge answers 503 until a release at or above the floor verifies
+//! again (rule 7). A floor or evidence store that cannot be read refuses
+//! every new release; the one already served stays served.
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -26,6 +27,15 @@ use crate::verify::Verifiers;
 
 const HINT_LIMIT: usize = 8;
 const CACHE_MAX: usize = 4096;
+/// What one poll's peer walk may spend over every peer (contract §7 A1):
+/// requests to the chain endpoints, and the bytes they return (checked
+/// before each request, so at most one envelope more).
+pub const WALK_REQUESTS: usize = 64;
+pub const WALK_BYTES: usize = 2 * 1024 * 1024;
+/// Envelope bytes of the verified records above the served one that are
+/// held between polls, so a walk its budget cut short resumes where it
+/// stopped rather than from the served seq again.
+pub const AHEAD_BYTES: usize = 64 * 1024 * 1024;
 
 type Cache = HashMap<([u8; 32], [u8; 32]), Result<String, Refusal>>;
 /// a pack that hashes to what its record names, and its SHA3-256
@@ -86,6 +96,112 @@ fn admit(
     }
 }
 
+/// One poll's walk of the peers' chain endpoints (contract §7 A1), within
+/// its budget.
+struct PeerWalk<'a, F: FnMut(&Parsed) -> Result<String, Refusal>> {
+    cfg: &'a Config,
+    genesis: &'a [u8; 32],
+    http: &'a dyn Http,
+    verify: F,
+    requests: usize,
+    bytes: usize,
+}
+
+impl<F: FnMut(&Parsed) -> Result<String, Refusal>> PeerWalk<'_, F> {
+    /// `<peer>/.well-known/bnr-keychain/release/<seq>`: Some(envelope),
+    /// None on 404 (the end of the peer's chain), Err on anything else or
+    /// when the budget is spent.
+    fn get(&mut self, peer: &str, seq: u64) -> Result<Option<Vec<u8>>, String> {
+        if self.requests == 0 || self.bytes == 0 {
+            return Err(format!(
+                "this poll's walk budget is spent; the walk resumes at seq {seq}"
+            ));
+        }
+        self.requests -= 1;
+        match sources::peer_release_at(self.http, peer, seq) {
+            Ok(b) => {
+                self.bytes = self.bytes.saturating_sub(b.len());
+                Ok(Some(b))
+            }
+            Err(e) if e == sources::NOT_FOUND => Ok(None),
+            Err(e) => Err(e),
+        }
+    }
+
+    /// Walk one peer from `base` (genesis when None) upward until 404. Every
+    /// envelope is checked on its own as the one after the record before it
+    /// (chain::extends: seq, prev, signer, both verifiers); the first that
+    /// fails ends the walk and nothing above it is fetched. Returns the
+    /// record the peer's chain ends at when the walk reached its 404: the
+    /// only seq whose pack that peer is asked for.
+    fn walk(
+        &mut self,
+        peer: &str,
+        base: Option<&Arc<Parsed>>,
+        served_seq: u64,
+        pool: &mut Pool,
+        notes: &mut Vec<String>,
+    ) -> Option<(u64, [u8; 32])> {
+        let mut prev = base.cloned();
+        let mut end = None;
+        loop {
+            let seq = prev.as_ref().map_or(1, |p| p.record.seq + 1);
+            let bytes = match self.get(peer, seq) {
+                Ok(Some(b)) => b,
+                Ok(None) => break,
+                Err(e) => {
+                    notes.push(format!("peer {peer} seq {seq}: {e}"));
+                    return None;
+                }
+            };
+            let p = match parse_envelope(&bytes, &self.cfg.origin, &self.cfg.rp_id) {
+                Ok(p) if p.record.seq == seq => Arc::new(p),
+                Ok(p) => {
+                    notes.push(format!(
+                        "peer {peer} seq {seq}: it answers with seq {}",
+                        p.record.seq
+                    ));
+                    return None;
+                }
+                Err(r) => {
+                    notes.push(format!("peer {peer} seq {seq}: {} ({r})", r.name()));
+                    return None;
+                }
+            };
+            if let Err(e) = chain::extends(
+                prev.as_deref(),
+                &p,
+                self.genesis,
+                &self.cfg.genesis_signers,
+                &mut self.verify,
+            ) {
+                notes.push(format!("peer {peer} seq {seq}: {e}"));
+                return None;
+            }
+            pool.add(p.clone());
+            end = Some((seq, p.record_sha3));
+            prev = Some(p);
+        }
+        if end.is_some() {
+            return end;
+        }
+        // nothing past the base: the peer may hold the base itself as its
+        // current, which matters only while the base's pack is still wanted
+        let b = base.filter(|b| b.record.seq > served_seq)?;
+        match self.get(peer, b.record.seq) {
+            Ok(Some(bytes)) => parse_envelope(&bytes, &self.cfg.origin, &self.cfg.rp_id)
+                .ok()
+                .filter(|p| p.record.seq == b.record.seq && p.record_sha3 == b.record_sha3)
+                .map(|p| (p.record.seq, p.record_sha3)),
+            Ok(None) => None,
+            Err(e) => {
+                notes.push(format!("peer {peer} seq {}: {e}", b.record.seq));
+                None
+            }
+        }
+    }
+}
+
 fn cached_verify(verifiers: &Verifiers, cache: &mut Cache, p: &Parsed) -> Result<String, Refusal> {
     let key = (p.record_sha3, p.sig_key);
     if let Some(r) = cache.get(&key) {
@@ -122,6 +238,15 @@ pub struct Door {
     /// the last walk's unresolved fork, reported again by a poll that
     /// refuses before it walks
     equivocation: Option<Equivocation>,
+    /// the last walk's verified records above the served one, genesis side
+    /// first: put back in every pool, and the peer walk resumes past them
+    /// (at most AHEAD_BYTES of envelopes; they are walked again every poll)
+    ahead: Vec<Arc<Parsed>>,
+    /// where each configured peer's chain ended (a 404 right after it) in
+    /// the last peer walk: the only record whose pack that peer is asked for
+    peer_ends: HashMap<String, (u64, [u8; 32])>,
+    /// (requests, bytes) one poll's peer walk may spend
+    walk_budget: (usize, usize),
     notes: Vec<String>,
 }
 
@@ -141,8 +266,17 @@ impl Door {
             tip: 0,
             unkept: Vec::new(),
             equivocation: None,
+            ahead: Vec::new(),
+            peer_ends: HashMap::new(),
+            walk_budget: (WALK_REQUESTS, WALK_BYTES),
             notes: Vec::new(),
         }
+    }
+
+    /// A smaller peer walk budget, so a test can cut a walk short.
+    #[cfg(test)]
+    pub fn set_walk_budget(&mut self, requests: usize, bytes: usize) {
+        self.walk_budget = (requests, bytes);
     }
 
     /// The notes of the last poll (refusals, fetch failures), oldest first.
@@ -178,21 +312,24 @@ impl Door {
                 return;
             }
         };
-        let evidence = match self.evidence(&mut notes) {
+        let evidence = match self.evidence(floor, &mut notes) {
             Ok(e) => e,
             Err(e) => {
                 self.refuse(e, notes);
                 return;
             }
         };
-        let pool = self.gather(network, &evidence, &mut notes);
+        let mut pool = self.gather(network, &evidence, &mut notes);
+        if network {
+            self.walk_peers(&mut pool, &mut notes);
+        }
         let (verifiers, cache) = (&self.verifiers, &mut self.cache);
         let mut verify = |p: &Parsed| cached_verify(verifiers, cache, p);
         let w = chain::walk(&pool, &self.genesis, &self.cfg.genesis_signers, &mut verify);
         notes.extend(w.notes);
         self.tip = w.path.last().map_or(0, Link::seq);
         self.equivocation = w.equivocation;
-        if !self.remember(&w.evidence, evidence, &mut notes) {
+        if !self.remember(&w.evidence, evidence, floor, &mut notes) {
             self.report(notes);
             return;
         }
@@ -218,7 +355,8 @@ impl Door {
                 }
                 break;
             }
-            match self.fetch(t, &pool, current.as_deref(), network) {
+            let top = idx + 1 == w.path.len();
+            match self.fetch(t, top, &pool, current.as_deref(), network) {
                 Ok((pack, h)) => {
                     self.swap(&w.path[..=idx], pack, h, &mut notes);
                     break;
@@ -226,6 +364,18 @@ impl Door {
                 Err(e) => notes.push(format!("seq {} bytes: {e}", t.seq())),
             }
         }
+        let served = self.serving().map_or(0, |s| s.seq);
+        let mut held = 0usize;
+        self.ahead = w
+            .path
+            .iter()
+            .filter(|l| l.seq() > served)
+            .take_while(|l| {
+                held += l.env.bytes.len();
+                held <= AHEAD_BYTES
+            })
+            .map(|l| l.env.clone())
+            .collect();
         self.report(notes);
     }
 
@@ -239,34 +389,66 @@ impl Door {
         self.report(notes);
     }
 
-    /// Every fork evidence envelope (rule 5): the kept ones, and any whose
-    /// write failed, written again now.
-    fn evidence(&mut self, notes: &mut Vec<String>) -> Result<Vec<Vec<u8>>, String> {
-        let mut all = self.store.evidence()?;
+    /// The fork evidence kept for rule 5: the kept envelopes and any whose
+    /// write failed (written again now), each at or above the floor. Below
+    /// the floor nothing is accepted again (rule 4) and the served chain
+    /// already took its branch, so evidence there is dropped, as is an
+    /// envelope that no longer parses under this config (it can never enter
+    /// a pool). A fork below the floor then holds the edge only while a
+    /// source still offers both branches, not for good.
+    fn evidence(&mut self, floor: u64, notes: &mut Vec<String>) -> Result<Vec<Vec<u8>>, String> {
+        let mut all = Vec::new();
+        for e in self.store.evidence()? {
+            match self.spent_evidence(&e, floor) {
+                None => all.push(e),
+                Some(why) => match self.store.drop_evidence(&e) {
+                    Ok(()) => eprintln!("keys-door: evidence dropped: {why}"),
+                    Err(err) => notes.push(err),
+                },
+            }
+        }
         for e in std::mem::take(&mut self.unkept) {
+            if self.spent_evidence(&e, floor).is_some() || all.contains(&e) {
+                continue;
+            }
             if let Err(err) = self.store.keep_evidence(&e) {
                 notes.push(err);
                 self.unkept.push(e.clone());
             }
-            if !all.contains(&e) {
-                all.push(e);
-            }
+            all.push(e);
         }
         Ok(all)
     }
 
-    /// Keep what the walk met at a fork (rule 5), so the fork is not
-    /// forgotten when a source stops offering one branch. False when there
-    /// is no room: a fork the edge cannot remember is one it could forget,
-    /// so it holds at the release it serves.
+    /// Why an evidence envelope can no longer matter; None while it can.
+    fn spent_evidence(&self, e: &[u8], floor: u64) -> Option<String> {
+        match parse_envelope(e, &self.cfg.origin, &self.cfg.rp_id) {
+            Ok(p) if p.record.seq >= floor => None,
+            Ok(p) => Some(format!(
+                "seq {} record {} is below the floor {floor}",
+                p.record.seq,
+                b64u(&p.record_sha3)
+            )),
+            Err(r) => Some(format!(
+                "an envelope that does not parse under this config ({})",
+                r.name()
+            )),
+        }
+    }
+
+    /// Keep what the walk met at a fork (rule 5) at or above the floor, so
+    /// the fork is not forgotten when a source stops offering one branch.
+    /// False when there is no room: a fork the edge cannot remember is one
+    /// it could forget, so it holds at the release it serves.
     fn remember(
         &mut self,
         found: &[Arc<Parsed>],
         mut all: Vec<Vec<u8>>,
+        floor: u64,
         notes: &mut Vec<String>,
     ) -> bool {
         for p in found {
-            if all.contains(&p.bytes) {
+            if p.record.seq < floor || all.contains(&p.bytes) {
                 continue;
             }
             if all.len() >= MAX_EVIDENCE {
@@ -301,18 +483,10 @@ impl Door {
                 notes,
             );
         }
-        if !network {
-            return pool;
+        for p in &self.ahead {
+            pool.add(p.clone());
         }
-        for peer in &self.cfg.peers {
-            match sources::peer_release(self.http.as_ref(), peer) {
-                Ok(b) => {
-                    admit(&self.cfg, &b, &format!("peer {peer}"), &mut pool, notes);
-                }
-                Err(e) => notes.push(format!("peer {peer}: {e}")),
-            }
-        }
-        if self.cfg.arweave_owners.is_empty() {
+        if !network || self.cfg.arweave_owners.is_empty() {
             return pool;
         }
         for gw in &self.cfg.arweave_gateways {
@@ -367,8 +541,59 @@ impl Door {
         pool
     }
 
-    /// Bytes for `t`, from the first locator whose bytes hash right.
-    fn fetch(&self, t: &Link, pool: &Pool, current: Option<&Serving>, network: bool) -> Found {
+    /// The peer walk (contract §7 A1): every configured peer, from the
+    /// highest record this edge holds verified (the last of `ahead`, else
+    /// the served one, else genesis) up its chain endpoint one seq at a
+    /// time until 404, within one budget per poll. A peer's claim of its
+    /// current (the bare `release`) is never read. Where each walk reached
+    /// its 404 is kept for `fetch`.
+    fn walk_peers(&mut self, pool: &mut Pool, notes: &mut Vec<String>) {
+        let served = self.serving();
+        let served_seq = served.as_ref().map_or(0, |s| s.seq);
+        let held: usize = self.ahead.iter().map(|p| p.bytes.len()).sum();
+        if held >= AHEAD_BYTES {
+            notes.push(format!(
+                "{} verified records above the served one fill the {AHEAD_BYTES} bytes held for them: the peer walk waits until one is served",
+                self.ahead.len()
+            ));
+            self.peer_ends.clear();
+            return;
+        }
+        let base = self
+            .ahead
+            .last()
+            .cloned()
+            .or_else(|| served.map(|s| s.tip.env.clone()));
+        let (verifiers, cache) = (&self.verifiers, &mut self.cache);
+        let mut walk = PeerWalk {
+            cfg: &self.cfg,
+            genesis: &self.genesis,
+            http: self.http.as_ref(),
+            verify: |p: &Parsed| cached_verify(verifiers, cache, p),
+            requests: self.walk_budget.0,
+            bytes: self.walk_budget.1,
+        };
+        let mut ends = HashMap::new();
+        for peer in &self.cfg.peers {
+            if let Some(end) = walk.walk(peer, base.as_ref(), served_seq, pool, notes) {
+                ends.insert(peer.clone(), end);
+            }
+        }
+        self.peer_ends = ends;
+    }
+
+    /// Bytes for `t`, from the first locator whose bytes hash right. A
+    /// peer's pack is its current one, so a configured peer is asked only
+    /// for the record its walk ended at, and a peer an envelope hints at
+    /// only for `top`, the walk's final target.
+    fn fetch(
+        &self,
+        t: &Link,
+        top: bool,
+        pool: &Pool,
+        current: Option<&Serving>,
+        network: bool,
+    ) -> Found {
         let r = &t.env.record;
         let mut tried: Vec<String> = Vec::new();
         let mut attempt = |from: String, got: Result<Vec<u8>, String>| -> Option<Found> {
@@ -399,13 +624,23 @@ impl Door {
         }
         if network {
             let envs = pool.envelopes(t.seq(), &t.sha3());
-            let mut peers: Vec<&str> = self.cfg.peers.iter().map(String::as_str).collect();
+            let ended_here = Some((t.seq(), t.sha3()));
+            let mut peers: Vec<&str> = self
+                .cfg
+                .peers
+                .iter()
+                .filter(|p| self.peer_ends.get(*p).copied() == ended_here)
+                .map(String::as_str)
+                .collect();
             let mut ants: Vec<&str> = Vec::new();
             let mut ars: Vec<&str> = Vec::new();
             for e in envs {
                 let h = &e.env.hints;
-                for p in h.peers.iter().take(HINT_LIMIT) {
-                    if sources::url_ok(p, false) && !peers.contains(&p.as_str()) {
+                for p in h.peers.iter().take(if top { HINT_LIMIT } else { 0 }) {
+                    if sources::url_ok(p, false)
+                        && !self.cfg.peers.contains(p)
+                        && !peers.contains(&p.as_str())
+                    {
                         peers.push(p);
                     }
                 }
@@ -475,7 +710,7 @@ impl Door {
             notes.push(format!("not swapped: {e}"));
             return;
         }
-        let serving = Arc::new(Serving::new(t, pack, pack_sha3));
+        let serving = Arc::new(Serving::new(chain, pack, pack_sha3));
         if let Ok(mut s) = self.shared.write() {
             s.serving = Some(serving);
         }

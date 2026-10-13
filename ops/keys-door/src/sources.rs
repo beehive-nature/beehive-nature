@@ -3,7 +3,8 @@
 //! Every read is bounded in size, count and time.
 //!
 //! - inbox_dir: `*.json` envelopes, at most 64 KiB each, at most 256 read per poll.
-//! - peers: `GET <peer>/.well-known/bnr-keychain/release` and `/pack`.
+//! - peers: `GET <peer>/.well-known/bnr-keychain/release/<seq>`, walked one
+//!   seq at a time until 404, and `/pack` for the seq a walk ended at.
 //! - ANT doors: antd 0.12.0 REST `GET <door>/v1/data/public/<address>` ->
 //!   `{"data":"<base64>"}` (tools/connect-store/adapters.mjs `AutonomiReadStore`;
 //!   the live door is relay.skaists.dev/ant, Caddy strips `/ant`, see
@@ -176,8 +177,15 @@ pub fn read_inbox(dir: &Path, notes: &mut Vec<String>) -> Vec<(String, Vec<u8>)>
     out
 }
 
-pub fn peer_release(http: &dyn Http, peer: &str) -> Result<Vec<u8>, String> {
-    http.get(&format!("{peer}{RELEASE_PATH}"), MAX_ENVELOPE as u64)
+/// The answer an [`Http`] gives for a 404, the only answer that ends a
+/// peer's chain.
+pub const NOT_FOUND: &str = "HTTP 404";
+
+/// A peer's envelope at one seq, from its chain endpoint
+/// `<peer>/.well-known/bnr-keychain/release/<seq>` (contract §7 A1). The
+/// bare `release` (a peer's claim of its current) is never read.
+pub fn peer_release_at(http: &dyn Http, peer: &str, seq: u64) -> Result<Vec<u8>, String> {
+    http.get(&format!("{peer}{RELEASE_PATH}/{seq}"), MAX_ENVELOPE as u64)
 }
 
 pub fn peer_pack(http: &dyn Http, peer: &str, size: u64) -> Result<Vec<u8>, String> {

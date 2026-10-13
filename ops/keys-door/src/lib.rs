@@ -1,5 +1,5 @@
 //! keys-door — the keychain edge for keys.skaists.dev (contract: the
-//! keychain release + edge contract of 2026-10-12, §1-§4).
+//! keychain release + edge contract of 2026-10-12, §1-§4 and §7 A1).
 //!
 //! A keyless resolver, verifier and server. It holds no key and signs
 //! nothing. It serves only bytes named by a `bnr.keychain-release/1` record
@@ -27,6 +27,16 @@ pub mod server;
 pub mod sources;
 pub mod store;
 pub mod verify;
+
+/// `keys-door --version`: the crate version and the git commit the binary
+/// was built from, as `KEYS_DOOR_COMMIT` named it at build time ("unknown"
+/// when it was unset or empty: nothing here guesses a commit).
+pub fn version() -> String {
+    let commit = option_env!("KEYS_DOOR_COMMIT")
+        .filter(|c| !c.is_empty())
+        .unwrap_or("unknown");
+    format!("keys-door {} (commit {commit})", env!("CARGO_PKG_VERSION"))
+}
 
 #[cfg(test)]
 mod tests;
