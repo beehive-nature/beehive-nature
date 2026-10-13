@@ -6,9 +6,11 @@ Keyless resolver, verifier and server (contract: keychain release + edge, 2026-1
 
 1. the envelope (≤ 64 KiB) and record parse strictly: canonical JSON, no duplicate key,
    no unknown or missing field; schema, kind, origin and rp_id equal the config;
-2. the SPEC-BPQ-1 §3b signature verifies in BOTH ML-DSA-65 implementations, the
-   `fips204` crate in-process and `bsigner bpq-verify` as a subprocess. Disagreement
-   is refused and reported on health as `verifier disagreement`;
+2. the signature verifies in BOTH ML-DSA-65 implementations, the `fips204` crate
+   in-process and the frozen bsigner CLI as a subprocess. Disagreement is refused and
+   reported on health as `verifier disagreement`. Two signature profiles are accepted
+   (see "Signature profiles" below): SPEC-BPQ-1 §3b (`bsigner bpq-verify`) and
+   `bheart.signature/1` (`bsigner verify`);
 3. the record chains from the pinned genesis (`genesis_sha3` + `genesis_signers`), one
    seq at a time (prev hash + a signer from the previous record's `signers`);
 4. its seq is ≥ `min_seq` and ≥ the persisted floor (`state_dir/floor`, its own file),
@@ -19,6 +21,41 @@ Keyless resolver, verifier and server (contract: keychain release + edge, 2026-1
    back in every poll, so a fork is not forgotten when a source stops offering a
    branch, or on restart. A full store holds the edge where it is;
 6. the pack and every file match their size, SHA-256 and SHA3-256.
+
+## Signature profiles
+
+A signer id in `record.signers`, `genesis_signers` (and
+`docs/KEYCHAIN-RELEASE-SIGNERS.json`) is either form, validated strictly: a `bzpq1…`
+id (bech32m, SPEC-BPQ-1 §2), or `mldsa65:` + base64url without padding of
+SHA3-256(the 1952-byte ML-DSA-65 verifying key), 43 characters. Rotation between the
+profiles is a record whose `signers` name the other form; the next record is then
+accepted only in that form.
+
+The envelope is `{"bnr":"keychain-release-envelope/1","hints":{…},"record":"…","sig":{…}}`
+plus an optional `"vk"`. `sig` is one of:
+
+- a SPEC-BPQ-1 §3b detached signature (`{at,bpq,dsa,file,id,kind,sig,succ}`). `vk` is
+  FORBIDDEN with it (the signature carries its key and its id commits to it). Second
+  verifier: `bsigner bpq-verify --file SIG --target RECORD`.
+- a `bheart.signature/1` exactly as `bsigner sign` writes it, the exact field set
+  `{agility, alg, content{bytes, digest{alg,b64u,bytes}}, key_id, signature{alg,b64u,bytes},
+  signed_at_ms, type}` and nothing else. It is ML-DSA-65 over the RAW record bytes, empty
+  context, no domain prefix; `signed_at_ms` and `agility` are NOT covered by the
+  signature, so they say nothing. `vk` (base64url of the 1952-byte verifying key) is
+  REQUIRED. Before any lattice math: `type` is `bheart.signature/1`; `alg` and
+  `signature.alg` are `ml-dsa-65`; `key_id` is `bheart-` + the first 16 characters of
+  base64url(SHA3-256(UTF-8 `ml-dsa-65` ‖ vk)) (bsigner `derive_key_id`); `content.bytes`
+  and `digest.bytes` are the record length; `digest.alg` is `sha3-256` and `digest.b64u`
+  the record's SHA3-256; `signature.bytes` is 3309 and so is the decoded signature. The
+  signer id is the `mldsa65:` id of `vk`. Second verifier: `bsigner verify --key-id K
+  --file RECORD --envelope SIG --keydir TMP`, where TMP holds only a public-only keyset
+  `K.json` = `{type:"bheart.keyset/2", kind:"signature", alg:"ml-dsa-65", key_id:K,
+  verifying_key_b64u}` written from `vk`; stdout must say `verified:true` and `key_id:K`
+  with exit 0 (a verdict that disagrees with the exit status is an error, not a vote).
+  **Relied on, not frozen:** the frozen bsigner reads that keyset by `type` and `kind`
+  and then the public key only (`read_keyset`, `load_dsa_public`); CONTRACT.md does not
+  promise that a keyset with no sealed seed is accepted. A bsigner change there turns
+  every bheart release into `verifier_failed` (refused, never accepted).
 
 Kept evidence is never deleted, at any seq and under any config (an envelope the config
 cannot parse is refused in the pool and stays on disk). So a fork whose branches both
@@ -77,6 +114,10 @@ CI runs the same in `.github/workflows/keys-door.yml`):
 
     cargo build --locked -p bsigner --target-dir ~/kd-bsigner-target   # repo root
     KEYS_DOOR_BSIGNER=~/kd-bsigner-target/debug/bsigner cargo test      # here
+
+The bheart test makes its key with the real `bsigner keygen --alg ml-dsa-65 --rec-env V`
+(V = the public BIP-39 test phrase, 23 × `abandon` then `art`) and signs with `bsigner
+sign --rec-env V`, in a temporary keydir; nothing is committed from it.
 
 `tests/vectors/bpqjs-genesis.json` is a release signed by `surfaces/bpq.js`; regenerate
 with `node ops/keys-door/tests/vectors/make-bpqjs-vector.mjs` from the repo root.

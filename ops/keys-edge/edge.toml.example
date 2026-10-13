@@ -8,8 +8,9 @@ rp_id = "keys.skaists.dev"
 
 # base64url SHA3-256 (43 characters) of the ruled seq-1 record.json bytes
 genesis_sha3 = "UNFILLED-ruled-genesis-record-sha3"
-# bzpq1 ids allowed to sign seq 1; genesis only, later records name their own signers
-genesis_signers = ["UNFILLED-ruled-release-signer-bzpq1-id"]
+# signer ids allowed to sign seq 1 (bzpq1... for SPEC-BPQ-1 §3b, or mldsa65:... for a
+# bheart.signature/1 from bsigner); genesis only, later records name their own signers
+genesis_signers = ["UNFILLED-ruled-release-signer-id"]
 # the configured floor; state_dir/floor only rises above it
 min_seq = 1
 

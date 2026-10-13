@@ -8,7 +8,8 @@
 #   bash ops/keys-edge/lab/lab.sh all      a. image  b. release chain  c. keys-door #1 (compose.yml)
 #                                          d. caddy + Caddyfile.keys  e. TLS and HTTP probes
 #                                          f. a fresh edge from a peer (contract §7 A1)
-#                                          g. tamper, rollback with the floor kept, a fork
+#                                          g. tamper, rollback with the floor kept, a fork, and
+#                                             a rotation to the bheart.signature/1 profile (seq 5)
 #   bash ops/keys-edge/lab/lab.sh chain    b only (node, no docker): the chain, configs and mock
 #                                          door files under KEYS_EDGE_LAB_DIR
 #   bash ops/keys-edge/lab/lab.sh host ENVELOPE
@@ -238,16 +239,24 @@ step_a() {
 # ── b. the release chain ────────────────────────────────────────────────────
 SEED=""
 LINK_SHA3=""
-# link DIR PREV SIGNERS: prepare DIR after PREV, sign it with the throwaway key, verify, envelope
+# link DIR PREV SIGNERS [bheart]: prepare DIR after PREV, sign it with the throwaway key (the §3b
+# key; with bheart, the throwaway bheart.signature/1 key whose vk goes to $LAB/bheart.vk), verify,
+# envelope
 link() {
-  local dir=$1 prev=$2 signers=$3 p ant
+  local dir=$1 prev=$2 signers=$3 profile=${4:-bpq} p ant vk=()
   printf '+ release.mjs prepare --out %s --prev %s --signers %s\n' "${dir#"$LAB"/}" "${prev#"$LAB"/}" "$signers"
   p=$(node "$RELEASE" prepare --out "$dir" --prev "$prev" --signers "$signers")
   printf '%s\n' "$p"
-  node "$RELEASE" sign-test --seed "$SEED" --record "$dir/record.json" --out "$dir/record.json.relsig.json" --i-understand-this-is-a-test-key
-  run node "$RELEASE" verify --record "$dir/record.json" --sig "$dir/record.json.relsig.json" --prev "$prev"
+  if [[ $profile == bheart ]]; then
+    node "$RELEASE" sign-test --profile bheart --seed "$SEED-bheart" --record "$dir/record.json" --out "$dir/record.json.relsig.json" \
+      --vk-out "$LAB/bheart.vk" --i-understand-this-is-a-test-key
+    vk=(--vk "$LAB/bheart.vk")
+  else
+    node "$RELEASE" sign-test --seed "$SEED" --record "$dir/record.json" --out "$dir/record.json.relsig.json" --i-understand-this-is-a-test-key
+  fi
+  run node "$RELEASE" verify --record "$dir/record.json" --sig "$dir/record.json.relsig.json" "${vk[@]}" --prev "$prev"
   ant=$(sha256sum "$dir/pack.bin" | cut -c1-64)
-  run node "$RELEASE" envelope --record "$dir/record.json" --sig "$dir/record.json.relsig.json" --hint-ant "$ant" --out "$dir/envelope.json"
+  run node "$RELEASE" envelope --record "$dir/record.json" --sig "$dir/record.json.relsig.json" "${vk[@]}" --hint-ant "$ant" --out "$dir/envelope.json"
   LINK_SHA3=$(labjs get sha3 <<<"$p")
 }
 
@@ -258,7 +267,10 @@ step_b() {
   ID=$(node "$RELEASE" sign-test --seed "$SEED" --i-understand-this-is-a-test-key | labjs get id)
   # a second throwaway id, named only in r3x's signers: it signs nothing
   id2=$(node "$RELEASE" sign-test --seed "$SEED-second" --i-understand-this-is-a-test-key | labjs get id)
-  echo "throwaway signer: $ID; second id (named, never signing): $id2"
+  # a throwaway bheart.signature/1 key (the profile `bsigner sign` writes): seq 4 rotates to its
+  # mldsa65: id and it signs seq 5
+  HID=$(node "$RELEASE" sign-test --profile bheart --seed "$SEED-bheart" --i-understand-this-is-a-test-key | labjs get id)
+  echo "throwaway signer: $ID; second id (named, never signing): $id2; bheart signer (seq 5): $HID"
   printf '+ release.mjs prepare --out r1 --signers <throwaway>\n'
   p1=$(node "$RELEASE" prepare --out "$LAB/r1" --signers "$ID")
   printf '%s\n' "$p1"
@@ -278,19 +290,24 @@ step_b() {
   SEQ3_SHA3=$LINK_SHA3
   link "$LAB/r3x" "$LAB/r2/record.json" "$ID,$id2"
   SEQ3X_SHA3=$LINK_SHA3
-  link "$LAB/r4" "$LAB/r3/record.json" "$ID"
+  # r4 names only the bheart id as the next signer (a rotation between profiles); r5 is signed in
+  # that profile
+  link "$LAB/r4" "$LAB/r3/record.json" "$HID"
   SEQ4_SHA3=$LINK_SHA3
+  link "$LAB/r5" "$LAB/r4/record.json" "$HID" bheart
+  SEQ5_SHA3=$LINK_SHA3
   [[ $SEQ3_SHA3 != "$SEQ3X_SHA3" && $(labjs get seq "$LAB/r3x/record.json") == 3 && $(labjs get prev "$LAB/r3x/record.json") == "$SEQ2_SHA3" ]] \
     || die "r3x is not a second seq 3 after r2"
-  echo "seq 1 (genesis) $GENESIS; seq 2 $SEQ2_SHA3; seq 3 $SEQ3_SHA3; seq 3 fork $SEQ3X_SHA3; seq 4 (after seq 3) $SEQ4_SHA3"
-  pass "b. seq 1-4 and a second seq 3 prepared from this checkout, signed by one throwaway key, enveloped (noble verify accepts each)"
+  [[ $(labjs get seq "$LAB/r5/record.json") == 5 && $(labjs get prev "$LAB/r5/record.json") == "$SEQ4_SHA3" ]] || die "r5 is not seq 5 after r4"
+  echo "seq 1 (genesis) $GENESIS; seq 2 $SEQ2_SHA3; seq 3 $SEQ3_SHA3; seq 3 fork $SEQ3X_SHA3; seq 4 (after seq 3) $SEQ4_SHA3; seq 5 (bheart) $SEQ5_SHA3"
+  pass "b. seq 1-4 and a second seq 3 prepared from this checkout and signed by one throwaway §3b key; seq 4 rotates to a throwaway bheart key, which signs seq 5; all enveloped (noble verify accepts each)"
 
   # The mock ANT door answers GET /v1/data/public/<address> as antd does. The address is a lab
   # label (the pack's sha256 in hex, the 64-hex shape keys-door takes); bytes count only by hash.
   # Every record here is one build of this checkout, so every pack is the same bytes and one
   # address serves them all.
   mkdir -p "$LAB/antmock/v1/data/public"
-  for g in r1 r2 r3 r3x r4; do
+  for g in r1 r2 r3 r3x r4 r5; do
     labjs ant-body "$LAB/$g/pack.bin" "$LAB/antmock/v1/data/public/$(sha256sum "$LAB/$g/pack.bin" | cut -c1-64)"
   done
   ls -l "$LAB/antmock/v1/data/public"
@@ -739,6 +756,20 @@ step_g() {
   offline loser 003-seq3x.json "not chained"
   offline rollback 001-seq1.json "seq 1 is below the floor 4 (rule 4)"
   pass "g. r4 (prev = r3) resolved the fork: seq 4 served, release/3 is r3, r3x refused as not chained, seq 1 refused below the floor 4"
+
+  say "g. rotation live: seq 5 signed in the bheart.signature/1 profile by the id seq 4 names"
+  drop "$LAB/r5/envelope.json" 005-seq5.json
+  HEALTH=$(wait_seq "$KD1" 5 60) || { docker logs --tail 60 "$KD1"; die "keys-door #1 did not walk to the bheart-signed seq 5"; }
+  printf 'health: %s\n' "$HEALTH"
+  [[ $(labjs get record_sha3 <<<"$HEALTH") == "$SEQ5_SHA3" ]] || die "keys-door #1 serves another seq 5"
+  labjs equivocation-is null <<<"$HEALTH" || die "seq 5 made a fork"
+  fetch release-5 "https://$HOST/.well-known/bnr-keychain/release"
+  labjs same-bytes "$LAB/r5/envelope.json" "$OUTDIR/release-5.body" || die "the served release is not r5"
+  fetch release-5-n "https://$HOST/.well-known/bnr-keychain/release/5"
+  labjs same-bytes "$LAB/r5/envelope.json" "$OUTDIR/release-5-n.body" || die "release/5 is not r5"
+  fetch release-4-n "https://$HOST/.well-known/bnr-keychain/release/4"
+  labjs same-bytes "$LAB/r4/envelope.json" "$OUTDIR/release-4-n.body" || die "release/4 is not r4"
+  pass "g. seq 5, a bheart.signature/1 by the mldsa65: id seq 4 names, accepted by both verifiers (fips204 + bsigner verify): served; release/5 is r5, release/4 is r4"
 }
 
 summary() {
