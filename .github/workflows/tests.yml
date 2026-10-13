@@ -1018,7 +1018,7 @@ jobs:
         if: always()
         timeout-minutes: 10
         run: node e2e/ant-hosted-browser.mjs
-      - name: Isolated keychain — own origin, passkey-born root, decoded confirm, refusals, the hosted purchase paid from it, the Hive drop door, host-loss succession, the TEST BUILD keychain on the test network, network confinement, and replacement-client recovery
+      - name: Isolated keychain — own origin, passkey-born root, decoded confirm, refusals, the hosted purchase paid from it, the Hive drop door, host-loss succession, the TEST BUILD keychain on the test network, network confinement, the named recovery cases, and the record importer
         if: always()
         timeout-minutes: 25
         run: |
@@ -1029,6 +1029,7 @@ jobs:
           node e2e/keychain-devnet.mjs
           node e2e/ant-testnet-confinement.mjs
           node e2e/ant-replacement-recovery.mjs
+          node e2e/ant-record-import.mjs
       - name: Wallet guided flow — identity confirmation and retained invoice inputs in all three styles
         if: always()
         timeout-minutes: 10
