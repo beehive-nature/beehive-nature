@@ -1762,9 +1762,10 @@ fn a_fresh_edge_with_peers_only_walks_the_chain_from_genesis() {
 }
 
 /// The walk's controls. Each envelope stands or falls on its own, the
-/// first that does not extend what the edge holds ends the walk, nothing
-/// above it is fetched, and no peer pack is asked for a chain that did not
-/// end cleanly. The edge stays at seq 1 (its pack from the ANT door).
+/// first that does not extend what the edge holds ends the walk and nothing
+/// above it is fetched. The peer's pack may be asked for (any configured
+/// peer may hold the bytes), but it is not seq 1's by hash, so the edge
+/// stays at seq 1 (its pack from the ANT door).
 #[test]
 fn the_peer_walk_refuses_what_does_not_chain() {
     let k = key(0);
@@ -1811,7 +1812,6 @@ fn the_peer_walk_refuses_what_does_not_chain() {
         let calls = fx.http.calls();
         assert!(calls.contains(&release_get(2)), "{name}: {calls:?}");
         assert!(!calls.contains(&release_get(3)), "{name}: {calls:?}");
-        assert!(!calls.contains(&pack_get()), "{name}: {calls:?}");
         // and the next poll still refuses it: the edge stays at 1
         door.poll(true);
         assert_eq!(fx.health().seq, Some(1), "{name}: {:?}", door.notes());
@@ -1843,9 +1843,9 @@ fn a_peer_that_lies_about_its_current_is_ignored() {
 }
 
 /// The walk is bounded per poll. One its budget cuts short resumes where
-/// it stopped (the verified records above the served one are held), and
-/// the peer's pack is asked for only once a walk reaches the end of the
-/// peer's chain.
+/// it stopped (the verified records above the served one are held); the
+/// peer's pack, asked for on any poll, counts only once it hashes to a
+/// record the walk reached.
 #[test]
 fn a_peer_walk_cut_short_by_its_budget_resumes_next_poll() {
     let k = key(0);
@@ -1864,7 +1864,7 @@ fn a_peer_walk_cut_short_by_its_budget_resumes_next_poll() {
         fx.http
             .calls()
             .into_iter()
-            .filter(|c| c.contains("/bnr-keychain/"))
+            .filter(|c| c.contains("/bnr-keychain/release"))
             .collect::<Vec<_>>()
     };
     door.poll(true);
@@ -1880,10 +1880,8 @@ fn a_peer_walk_cut_short_by_its_budget_resumes_next_poll() {
     assert_eq!(walked(&fx)[2..], [release_get(3), release_get(4)]);
     door.poll(true);
     assert_eq!(fx.health().seq, Some(5), "{:?}", door.notes());
-    assert_eq!(
-        walked(&fx)[4..],
-        [release_get(5), release_get(6), pack_get()]
-    );
+    assert_eq!(walked(&fx)[4..], [release_get(5), release_get(6)]);
+    assert_eq!(fx.http.calls().last(), Some(&pack_get()));
     assert_eq!(fx.store().load().unwrap().unwrap().chain, envs);
 
     // the byte budget bounds a walk too: checked before each request, so

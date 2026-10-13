@@ -651,9 +651,9 @@ impl Door {
     }
 
     /// Bytes for `t`, from the first locator whose bytes hash right. A
-    /// peer's pack is its current one, so a configured peer is asked only
-    /// for the record its walk ended at, and a peer an envelope hints at
-    /// only for `top`, the walk's final target.
+    /// peer's pack is its current one: configured peers whose walk ended at
+    /// `t` are asked first, then the others; a peer an envelope hints at is
+    /// asked only for `top`, the walk's final target.
     fn fetch(
         &self,
         t: &Link,
@@ -693,13 +693,17 @@ impl Door {
         if network {
             let envs = pool.envelopes(t.seq(), &t.sha3());
             let ended_here = Some((t.seq(), t.sha3()));
-            let mut peers: Vec<&str> = self
+            // peers whose walk ended at `t` first; then every other configured
+            // peer, whose current pack may still be these bytes (a peer whose
+            // tip is forked or forged still holds the honest earlier pack
+            // when the release did not change it). Bytes count only by hash.
+            let (mut peers, rest): (Vec<&str>, Vec<&str>) = self
                 .cfg
                 .peers
                 .iter()
-                .filter(|p| self.peer_ends.get(*p).copied() == ended_here)
                 .map(String::as_str)
-                .collect();
+                .partition(|p| self.peer_ends.get(*p).copied() == ended_here);
+            peers.extend(rest);
             let mut ants: Vec<&str> = Vec::new();
             let mut ars: Vec<&str> = Vec::new();
             for e in envs {
