@@ -28,3 +28,8 @@ tower = { version = "0.5", features = ["util"] }
 http-body-util = "0.1"
 
 [workspace]
+
+# the bsigner pin hashes a ~30 MB binary before every spawn and at every poll; an unoptimized
+# sha2 makes the debug test suite minutes long
+[profile.dev.package.sha2]
+opt-level = 3

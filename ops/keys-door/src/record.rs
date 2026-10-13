@@ -51,6 +51,8 @@ pub enum Refusal {
     },
     /// the second verifier could not give a verdict (spawn, timeout, output)
     VerifierFailed(String),
+    /// the file at bsigner_path is not the build edge.toml bsigner_sha256 pins
+    BsignerPin(String),
 }
 
 impl Refusal {
@@ -70,6 +72,7 @@ impl Refusal {
             Refusal::BadSignature => "bad_signature",
             Refusal::Disagreement { .. } => "verifier_disagreement",
             Refusal::VerifierFailed(_) => "verifier_failed",
+            Refusal::BsignerPin(_) => "bsigner_pin_mismatch",
         }
     }
 }
@@ -94,6 +97,7 @@ impl fmt::Display for Refusal {
                 verdict(*bsigner)
             ),
             Refusal::VerifierFailed(m) => write!(f, "second verifier failed: {m}"),
+            Refusal::BsignerPin(m) => write!(f, "bsigner is not the pinned build: {m}"),
         }
     }
 }

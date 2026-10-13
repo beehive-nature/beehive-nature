@@ -5,7 +5,15 @@
 #     --build-arg RUST_VERSION=<channel in rust-toolchain.toml> \
 #     --build-arg RUST_IMAGE_DIGEST=<registry digest of rust:RUST_VERSION-slim-DEBIAN_SUITE> \
 #     --build-arg RUNTIME_IMAGE_DIGEST=<registry digest of debian:DEBIAN_SUITE-slim> \
-#     --build-arg KEYS_DOOR_COMMIT=<40-hex commit> -t keys-door:<commit> .
+#     --build-arg KEYS_DOOR_COMMIT=<40-hex commit> \
+#     --build-arg BSIGNER_SHA256=<base64url SHA-256 of the built bsigner> -t keys-door:<commit> .
+#
+# BSIGNER_SHA256 is the edge's bsigner pin (edge.toml bsigner_sha256). Take it from the builder
+# stage first (`docker build ... --target builder -t keys-door-builder .`, then the SHA-256 of
+# /src/target/release/bsigner in it, base64url without padding), as lab.sh step a does. The
+# final stage hashes the binary it copies and refuses to build unless it is that value, then
+# records it in /usr/local/share/keys-door/bsigner.sha256 and the image label
+# org.beehive-nature.bsigner.sha256. A build that is refused prints the value it found.
 #
 # No digest is written here: one copied by hand is one nobody checked. The lab
 # (ops/keys-edge/lab/lab.sh, step a) reads each from the registry, prints it and builds with it;
@@ -44,8 +52,19 @@ RUN printf '%s' "${KEYS_DOOR_COMMIT}" | grep -Eqx '[0-9a-f]{40}' \
 # bsigner_path = "/usr/local/bin/bsigner"). Root-owned, so the edge cannot rewrite either.
 COPY --from=builder /src/ops/keys-door/target/release/keys-door /usr/local/bin/keys-door
 COPY --from=builder /src/target/release/bsigner /usr/local/bin/bsigner
+# The bsigner pin: the copied binary must hash to BSIGNER_SHA256 (base64url SHA-256, no padding);
+# the value is kept beside it for edge.toml, and as a label.
+ARG BSIGNER_SHA256
+RUN got=$(sha256sum /usr/local/bin/bsigner | cut -c1-64 | sed 's/../\\x&/g' | tr -d '\n' | xargs -0 bash -c 'printf "$0"' | base64 -w0 | tr '+/' '-_' | tr -d '=') \
+ && printf '%s' "$got" | grep -Eqx '[A-Za-z0-9_-]{43}' \
+ && { [ "$got" = "${BSIGNER_SHA256}" ] \
+      || { echo "the built bsigner hashes to $got; BSIGNER_SHA256 is '${BSIGNER_SHA256}' (pass --build-arg BSIGNER_SHA256=$got after checking it)" >&2; exit 1; }; } \
+ && install -d -m 0755 /usr/local/share/keys-door \
+ && printf '%s\n' "$got" > /usr/local/share/keys-door/bsigner.sha256 \
+ && chmod 0444 /usr/local/share/keys-door/bsigner.sha256
 # The commit is a label for whoever inspects the image; keys-door itself does not read it.
-LABEL org.opencontainers.image.revision="${KEYS_DOOR_COMMIT}" \
+LABEL org.beehive-nature.bsigner.sha256="${BSIGNER_SHA256}" \
+      org.opencontainers.image.revision="${KEYS_DOOR_COMMIT}" \
       org.opencontainers.image.source="https://github.com/beehive-nature/beehive-nature" \
       org.opencontainers.image.title="keys-door"
 USER 10096:10096

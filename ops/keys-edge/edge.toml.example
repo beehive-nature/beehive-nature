@@ -24,6 +24,12 @@ listen = "0.0.0.0:8096"
 health_listen = "127.0.0.1:8097"
 # rule 2's second verifier, copied into the image beside keys-door
 bsigner_path = "/usr/local/bin/bsigner"
+# base64url SHA-256 of that exact bsigner build: the image records it in
+# /usr/local/share/keys-door/bsigner.sha256 and its label org.beehive-nature.bsigner.sha256.
+# keys-door hashes the binary at startup, before every spawn and at every poll, and refuses on
+# mismatch. Version-specific compatibility, not a guarantee of bsigner's interface: a new bsigner
+# means re-running keys-door's compatibility tests against it and pinning it anew.
+bsigner_sha256 = "UNFILLED-sha256-of-the-pinned-bsigner"
 poll_secs = 60
 
 # Contract §7 A3: https anywhere, plain http only to loopback. The public ANT read door; keys-door
