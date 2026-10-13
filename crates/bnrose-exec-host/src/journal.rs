@@ -1,0 +1,312 @@
+//! The operation journal — the authenticated durable record of identity,
+//! authorized scope, resource reservations and execution progress
+//! (BNROSE-RUST-001).
+//!
+//! One append-only file of chained records. Every record's tag is
+//! HMAC-SHA256 over a domain label, the previous tag and the body, so any
+//! flip, insert or reorder anywhere is detectable at load; the chain root
+//! is all-zeros. The head tag is what receipts bind, so a receipt names
+//! exactly the journal prefix it was issued under.
+//!
+//! The ORDER LAW: the `Dispatched` record is appended and fsynced BEFORE
+//! the effect door opens. An effect without a prior durable dispatch is
+//! not a state this system can be in; the effect ledger checks the digest
+//! the dispatch bound, and the recovery reconciles both directions.
+//!
+//! Record body (little-endian):
+//! `version u8 | seq u64 | op_id 32 | event u8 | payload_len u32 | payload`
+//! then `len_prefix u32` in front of `body|tag` in the file.
+//!
+//! Payloads per event (see opexec for their producers):
+//! - Admitted: `authority 32 | sig 64 | policy_digest 32 | env_len u16 | env`
+//!   (the operation's identity, its authorized scope, and the WB001 binding
+//!   re-verified at recovery)
+//! - Reserve: `fuel u64 | mem u32 | secs u32 | worker_len u8 | worker ≤15`
+//! - Dispatch: `effect_digest 32`
+//! - Response: `ok u8`
+//! - LostResponse / RecoveryNone: empty
+//! - RecoveryEvidence: `effect_digest 32`
+//! - BoundedFail: `code u32 | word_len u8 | word ≤31`
+
+use crate::hex;
+use hmac::{Hmac, Mac};
+use sha2::Sha256;
+use std::fs::{File, OpenOptions};
+use std::io::{Read, Write};
+use std::path::Path;
+
+type HmacSha256 = Hmac<Sha256>;
+
+pub const JOURNAL_LABEL: &[u8] = b"bnrose/journal/1";
+pub const GENESIS_TAG: [u8; 32] = [0; 32];
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Record {
+    pub seq: u64,
+    pub op_id: [u8; 32],
+    pub event: u8,
+    pub payload: Vec<u8>,
+    pub tag: [u8; 32],
+}
+
+#[derive(Debug)]
+pub enum JournalError {
+    Io(String),
+    /// A record failed its chain tag — the file was touched after writing.
+    Tampered { record: usize, why: String },
+    /// Structural garbage (a short prefix, an unknown version).
+    Malformed { record: usize, why: String },
+}
+
+impl std::fmt::Display for JournalError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            JournalError::Io(e) => write!(f, "journal io: {e}"),
+            JournalError::Tampered { record, why } => {
+                write!(f, "journal tampered at record {record}: {why}")
+            }
+            JournalError::Malformed { record, why } => {
+                write!(f, "journal malformed at record {record}: {why}")
+            }
+        }
+    }
+}
+
+fn mac(key: &[u8; 32], label: &[u8], prev: &[u8; 32], body: &[u8]) -> [u8; 32] {
+    let mut m = <HmacSha256 as Mac>::new_from_slice(key).expect("hmac takes any key size");
+    m.update(label);
+    m.update(prev);
+    m.update(body);
+    m.finalize().into_bytes().into()
+}
+
+fn body_of(seq: u64, op_id: &[u8; 32], event: u8, payload: &[u8]) -> Vec<u8> {
+    let mut b = Vec::with_capacity(payload.len() + 46);
+    b.push(1u8);
+    b.extend_from_slice(&seq.to_le_bytes());
+    b.extend_from_slice(op_id);
+    b.push(event);
+    b.extend_from_slice(&(payload.len() as u32).to_le_bytes());
+    b.extend_from_slice(payload);
+    b
+}
+
+/// The open, writable tail of the journal.
+pub struct Journal {
+    file: File,
+    key: [u8; 32],
+    head: [u8; 32],
+    seq: u64,
+}
+
+impl Journal {
+    /// Open (creating) the journal at `path`, continuing from whatever
+    /// verifiable prefix is already there. A tampered existing file is a
+    /// hard error: the supervisor never writes over damage it cannot
+    /// account for.
+    pub fn open(path: &Path, key: &[u8; 32]) -> Result<Journal, JournalError> {
+        let records = load(path, key)?;
+        let (head, seq) = match records.last() {
+            Some(r) => (r.tag, r.seq + 1),
+            None => (GENESIS_TAG, 0),
+        };
+        let file = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .read(true)
+            .open(path)
+            .map_err(|e| JournalError::Io(e.to_string()))?;
+        Ok(Journal { file, key: *key, head, seq })
+    }
+
+    pub fn head(&self) -> [u8; 32] {
+        self.head
+    }
+
+    pub fn next_seq(&self) -> u64 {
+        self.seq
+    }
+
+    /// Append one record: body, tag, length prefix — then fsync. The
+    /// fsync is the durability line the effect door stands behind.
+    pub fn append(
+        &mut self,
+        op_id: &[u8; 32],
+        event: u8,
+        payload: &[u8],
+    ) -> Result<Record, JournalError> {
+        let body = body_of(self.seq, op_id, event, payload);
+        let tag = mac(&self.key, JOURNAL_LABEL, &self.head, &body);
+        let mut frame = Vec::with_capacity(body.len() + 40);
+        frame.extend_from_slice(&((body.len() + 32) as u32).to_le_bytes());
+        frame.extend_from_slice(&body);
+        frame.extend_from_slice(&tag);
+        self.file
+            .write_all(&frame)
+            .and_then(|_| self.file.sync_data())
+            .map_err(|e| JournalError::Io(e.to_string()))?;
+        let rec = Record {
+            seq: self.seq,
+            op_id: *op_id,
+            event,
+            payload: payload.to_vec(),
+            tag,
+        };
+        self.head = tag;
+        self.seq += 1;
+        Ok(rec)
+    }
+}
+
+/// Load and fully verify a journal file. Every record's tag is checked
+/// against the chain; the first mismatch names its index.
+pub fn load(path: &Path, key: &[u8; 32]) -> Result<Vec<Record>, JournalError> {
+    let mut bytes = Vec::new();
+    match File::open(path) {
+        Ok(mut f) => {
+            f.read_to_end(&mut bytes)
+                .map_err(|e| JournalError::Io(e.to_string()))?;
+        }
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
+        Err(e) => return Err(JournalError::Io(e.to_string())),
+    }
+    let mut out = Vec::new();
+    let mut prev = GENESIS_TAG;
+    let mut i = 0usize;
+    let mut expect_seq = 0u64;
+    while i < bytes.len() {
+        let rec_index = out.len();
+        if i + 4 > bytes.len() {
+            return Err(JournalError::Malformed {
+                record: rec_index,
+                why: "truncated length prefix".into(),
+            });
+        }
+        let frame_len =
+            u32::from_le_bytes([bytes[i], bytes[i + 1], bytes[i + 2], bytes[i + 3]]) as usize;
+        if frame_len < 32 + 46 {
+            return Err(JournalError::Malformed {
+                record: rec_index,
+                why: format!("impossible frame length {frame_len}"),
+            });
+        }
+        let end = i + 4 + frame_len;
+        if end > bytes.len() {
+            return Err(JournalError::Malformed {
+                record: rec_index,
+                why: "truncated frame".into(),
+            });
+        }
+        let body = &bytes[i + 4..end - 32];
+        let tag: [u8; 32] = bytes[end - 32..end].try_into().unwrap();
+        let want = mac(key, JOURNAL_LABEL, &prev, body);
+        if want != tag {
+            return Err(JournalError::Tampered {
+                record: rec_index,
+                why: format!("tag mismatch: recorded {} computed {}", hex(&tag), hex(&want)),
+            });
+        }
+        if body[0] != 1 {
+            return Err(JournalError::Malformed {
+                record: rec_index,
+                why: format!("unknown version {}", body[0]),
+            });
+        }
+        let seq = u64::from_le_bytes(body[1..9].try_into().unwrap());
+        if seq != expect_seq {
+            return Err(JournalError::Malformed {
+                record: rec_index,
+                why: format!("seq {seq} where {expect_seq} was due"),
+            });
+        }
+        let op_id: [u8; 32] = body[9..41].try_into().unwrap();
+        let event = body[41];
+        let plen = u32::from_le_bytes(body[42..46].try_into().unwrap()) as usize;
+        if body.len() < 46 + plen {
+            return Err(JournalError::Malformed {
+                record: rec_index,
+                why: "payload shorter than its word".into(),
+            });
+        }
+        out.push(Record {
+            seq,
+            op_id,
+            event,
+            payload: body[46..46 + plen].to_vec(),
+            tag,
+        });
+        prev = tag;
+        expect_seq += 1;
+        i = end;
+    }
+    Ok(out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn tmp(name: &str) -> std::path::PathBuf {
+        let d = std::env::temp_dir().join(format!("bnrose-journal-test-{name}-{}", std::process::id()));
+        std::fs::create_dir_all(&d).unwrap();
+        d.join("journal.bin")
+    }
+
+    #[test]
+    fn the_chain_detects_every_touch_and_reorders_nothing() {
+        let p = tmp("chain");
+        let _ = std::fs::remove_file(&p);
+        let key = [7u8; 32];
+        let mut j = Journal::open(&p, &key).unwrap();
+        for k in 0u8..5 {
+            j.append(&[k; 32], 1, &[k; 8]).unwrap();
+        }
+        let clean = load(&p, &key).unwrap();
+        assert_eq!(clean.len(), 5);
+        assert_eq!(clean[3].seq, 3);
+        drop(j);
+        // flip one payload byte deep inside
+        let orig = std::fs::read(&p).unwrap();
+        let mut b = orig.clone();
+        let mid = b.len() / 2;
+        b[mid] ^= 1;
+        std::fs::write(&p, &b).unwrap();
+        match load(&p, &key) {
+            Err(JournalError::Tampered { record, .. }) => assert!(record >= 2),
+            other => panic!("expected tamper, got {other:?}"),
+        }
+        // truncating the CLEAN tail is structural, not tamper: fewer records load
+        std::fs::write(&p, &orig[..orig.len() - 10]).unwrap();
+        match load(&p, &key) {
+            Err(JournalError::Malformed { .. }) => {}
+            other => panic!("expected malformed tail, got {other:?}"),
+        }
+        // a fresh journal under another key refuses every record
+        assert!(matches!(
+            load(&p, &[8u8; 32]),
+            Err(JournalError::Tampered { record: 0, .. })
+        ));
+    }
+
+    #[test]
+    fn reopening_continues_the_chain() {
+        let p = tmp("continue");
+        let _ = std::fs::remove_file(&p);
+        let key = [9u8; 32];
+        {
+            let mut j = Journal::open(&p, &key).unwrap();
+            j.append(&[1; 32], 1, &[1]).unwrap();
+        }
+        let head_before = load(&p, &key).unwrap().last().unwrap().tag;
+        {
+            let mut j = Journal::open(&p, &key).unwrap();
+            assert_eq!(j.next_seq(), 1);
+            assert_eq!(j.head(), head_before);
+            j.append(&[1; 32], 2, &[2]).unwrap();
+            assert_eq!(j.head(), load(&p, &key).unwrap().last().unwrap().tag);
+        }
+        let recs = load(&p, &key).unwrap();
+        assert_eq!(recs.len(), 2);
+        assert_eq!(recs[1].seq, 1);
+    }
+}
