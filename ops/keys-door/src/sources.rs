@@ -69,11 +69,50 @@ fn read_body(
     if r.status() != 200 {
         return Err(format!("HTTP {}", r.status().as_u16()));
     }
-    r.body_mut()
+    // ureq refuses a body that reaches its limit, so a pack of exactly its
+    // recorded size would be refused: read one byte past the limit and
+    // enforce `<= limit` here.
+    let body = r
+        .body_mut()
         .with_config()
-        .limit(limit)
+        .limit(limit.saturating_add(1))
         .read_to_vec()
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string())?;
+    if body.len() as u64 > limit {
+        return Err(format!("the response body is larger than {limit} bytes"));
+    }
+    Ok(body)
+}
+
+#[cfg(test)]
+mod ureq_limit {
+    use super::{Http, UreqHttp};
+    use std::io::{Read, Write};
+    use std::net::TcpListener;
+
+    /// One HTTP/1.1 response with a body of `n` bytes, on a loopback port.
+    fn serve_once(n: usize) -> String {
+        let l = TcpListener::bind("127.0.0.1:0").unwrap();
+        let url = format!("http://{}", l.local_addr().unwrap());
+        std::thread::spawn(move || {
+            let (mut s, _) = l.accept().unwrap();
+            let mut buf = [0u8; 4096];
+            let _ = s.read(&mut buf);
+            let head =
+                format!("HTTP/1.1 200 OK\r\nContent-Length: {n}\r\nConnection: close\r\n\r\n");
+            s.write_all(head.as_bytes()).unwrap();
+            s.write_all(&vec![7u8; n]).unwrap();
+        });
+        url
+    }
+
+    #[test]
+    fn a_body_of_exactly_the_limit_is_read_and_one_byte_more_is_refused() {
+        let http = UreqHttp::default();
+        let exact = http.get(&serve_once(691_503), 691_503).unwrap();
+        assert_eq!(exact.len(), 691_503);
+        assert!(http.get(&serve_once(691_504), 691_503).is_err());
+    }
 }
 
 impl Http for UreqHttp {
