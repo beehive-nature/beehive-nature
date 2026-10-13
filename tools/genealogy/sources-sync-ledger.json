@@ -18,6 +18,23 @@
     { "ark": "QG8Q-15JW", "title": "Denmark, Church Records — Karen's christening", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["LZDH-WYF", "MHRT-169", "MLCS-MVB"] },
     { "ark": "QG87-WZVK", "title": "Denmark, Church Records", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["LZDH-WYF", "MHRT-169"] },
     { "ark": "QG8Q-1526", "title": "Denmark, Church Records — Christen Olsen", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["MHRT-169"] },
-    { "ark": "QG8Q-78S6", "title": "Denmark, Church Records — Dorthe Cathrine's christening", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["LZDH-WYF", "MHRT-169", "MLCS-MKV"] }
+    { "ark": "QG8Q-78S6", "title": "Denmark, Church Records — Dorthe Cathrine's christening", "dispatch": "2026-10-10-fs-authed-wake-labor", "attachedTo": ["LZDH-WYF", "MHRT-169", "MLCS-MKV"] },
+    { "ark": "H29J-NL3Z", "title": "Denmark, Baptisms 1618-1923 — Johanne Marie Christensen, 1835", "dispatch": "2026-10-03-fs-holes-nels-lars-censuses (assistant tally)", "attachedTo": ["MLCS-MN5"] },
+    { "ark": "H2S7-W1MM", "title": "Denmark, Baptisms 1618-1923 — Mette Kirstine, 1843", "dispatch": "2026-10-03-fs-holes-nels-lars-censuses (assistant tally)", "attachedTo": ["L1NW-6M1"] },
+    { "ark": "QG8Q-V3CN", "title": "Denmark, Church Records — Ane Sophie Christensen christening 1841 (Christen Olsen named)", "dispatch": "2026-10-03-fs-holes-nels-lars-censuses (assistant tally)", "attachedTo": ["LZDH-WB1"] },
+    { "ark": "6KQ4-CRGB", "title": "US, NUMIDENT — Martin Olaf Martinsen (Nels named)", "dispatch": "2026-10-03-fs-holes-nels-lars-censuses", "attachedTo": ["LBYC-QZ8", "PNC6-GJQ", "PNCX-S8Q"] },
+    { "ark": "QG8Q-GRKK", "title": "Denmark, Church Records — Lars christening 1839 Bakkendrup (Christian Olsen + Maren Nielsdr named)", "dispatch": "2026-10-03-fs-holes-nels-lars-censuses", "attachedTo": ["L1N9-SL2", "LW9Z-S11", "LZDH-WYF"] },
+    { "ark": "62XG-3FTR", "title": "LDS Record of Members, Worldwide — Walter Dow baptism (mother Mary A Hadlock named)", "dispatch": "2026-10-04-fs-tasks-harvest", "attachedTo": ["KWCT-391", "LCZ5-8QV", "KWJZ-YG2"] },
+    { "ark": "6XBC-99QD", "title": "United States Census, 1950 — Cook household", "dispatch": "2026-10-04-fs-tasks-harvest", "attachedTo": ["LJDF-JY4", "L49V-3DJ"] },
+    { "ark": "F6DZ-8TB", "title": "Ohio, Death Index — Irving Albert Cook", "dispatch": "2026-10-04-fs-tasks-harvest", "attachedTo": ["LJDF-JY4"] },
+    { "ark": "X3J9-XF11", "title": "GenealogyBank obituary — Daniel L Briggs (Chester/Theodora/Jim/David named)", "dispatch": "2026-10-04-fs-tasks-harvest", "attachedTo": ["PNC5-R9G", "PNCP-RDN", "L21W-9ZT", "LL4G-322", "KCN3-1P6"] },
+    { "ark": "Q57B-6Z9J", "title": "WWI Draft Registration — Rollin Eugene Lawton (indexed Rowlin)", "dispatch": "2026-10-04-fs-tasks-harvest", "attachedTo": ["KWCL-VJS"] },
+    { "ark": "61FV-SF96", "title": "Obituary — Lewis Rockwood (wife Muriel named)", "dispatch": "2026-10-04-fs-tasks-harvest", "attachedTo": ["KWZR-P2Y"] },
+    { "ark": "MD15-G6P", "title": "United States Census, 1920 — Schneider household", "dispatch": "2026-10-04-fs-tasks-harvest", "attachedTo": ["GC86-D18", "GC86-FL9", "GC86-D1K", "GBKX-TGP"] },
+    { "ark": "X74W-2X8", "title": "United States Census, 1930 — Draper household (Ruby M indexed)", "dispatch": "2026-10-04-fs-tasks-harvest", "attachedTo": ["LCJS-38R", "LVXM-WHK"] },
+    { "ark": "XQ3P-7926", "title": "Find a Grave — Daniel L Briggs (Cranberry Horn Cemetery, East Harpswell, Maine)", "dispatch": "2026-10-04-fs-tasks-harvest (second pass)", "attachedTo": ["PNC5-R9G"] },
+    { "ark": "X3R1-XZLL", "title": "GenealogyBank obituary — Chester Arthur Briggs (Theodora/Jim/Daniel/David named)", "dispatch": "2026-10-04-fs-8gen-order14-seed-attaches", "attachedTo": ["L21W-9ZT", "KCN3-1P6", "PNCP-RDN", "PNC5-R9G", "LL4G-322"] },
+    { "ark": "KD57-L28", "title": "US, Civil War Pension — Irving A Cook (place-trail verified)", "dispatch": "2026-10-04-fs-8gen-order14-seed-attaches", "attachedTo": ["LJDF-JY4"] },
+    { "ark": "6FSD-RHF4", "title": "United States Census, 1950 — Briggs household (parents Chester A + Theodora B)", "dispatch": "2026-10-06-fs-hint-harvest", "attachedTo": ["PNCP-RDN"] }
   ]
 }
