@@ -20,12 +20,9 @@ Keyless resolver, verifier and server (contract: keychain release + edge, 2026-1
    branch, or on restart. A full store holds the edge where it is;
 6. the pack and every file match their size, SHA-256 and SHA3-256.
 
-Evidence is kept only for seqs at or above the floor: each poll drops the rest (and any
-envelope that no longer parses under the config), so the 64 slots hold only forks at
-seqs this edge can still accept. Below the floor nothing is accepted again (rule 4) and
-the served chain already took its branch there. What dropping changes: a fork below
-the floor whose branches both continue holds the edge only while a source still offers
-both, not for good once its sources go quiet.
+Kept evidence is never deleted, at any seq and under any config (an envelope the config
+cannot parse is refused in the pool and stays on disk). So a fork whose branches both
+continue holds the edge for good, below the floor too, as rule 5 says.
 
 A floor or evidence store that is there and cannot be read refuses every new release
 until it is repaired: that poll reads no rail and fetches, keeps and swaps nothing, and

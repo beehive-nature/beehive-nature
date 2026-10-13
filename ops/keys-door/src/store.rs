@@ -10,11 +10,9 @@
 //!   before serve.json names it.
 //! - `evidence/<b64u SHA3-256>`: the envelopes of every valid record seen at
 //!   a fork and after one (rule 5), content-addressed, at most
-//!   [`MAX_EVIDENCE`]. Kept while its seq is at or above the floor: a fork
-//!   stays known after the sources that showed it go quiet, and across a
-//!   restart. The door drops an envelope once the floor passes its seq
-//!   (nothing below the floor is accepted again, rule 4). Like the floor,
-//!   it is never read as absent when it is there and unreadable.
+//!   [`MAX_EVIDENCE`]. Kept for good: a fork stays known after the sources
+//!   that showed it go quiet, and across a restart. Like the floor, it is
+//!   never read as absent when it is there and unreadable.
 //!
 //! Nothing here is trusted on load: the envelopes go back through the same
 //! parse, two verifiers and chain walk as any other source, and the pack
@@ -190,16 +188,6 @@ impl Store {
         }
         self.write_atomic(&path, envelope)
             .map_err(|e| format!("keep evidence: {e}"))
-    }
-
-    /// Drop one evidence envelope; one that is not there is already dropped.
-    pub fn drop_evidence(&self, envelope: &[u8]) -> Result<(), String> {
-        let path = self.dir.join(EVIDENCE).join(b64u(&sha3(&[envelope])));
-        match fs::remove_file(&path) {
-            Ok(()) => Ok(()),
-            Err(e) if e.kind() == ErrorKind::NotFound => Ok(()),
-            Err(e) => Err(format!("drop evidence {}: {e}", path.display())),
-        }
     }
 
     /// The serve state, or None when there is none. An error means it

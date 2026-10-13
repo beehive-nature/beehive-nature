@@ -1245,67 +1245,107 @@ fn a_full_evidence_store_holds_the_edge() {
     assert_eq!(evidence_names(&fx).len(), MAX_EVIDENCE);
 }
 
-/// Evidence is kept only at or above the floor: nothing below the floor is
-/// accepted again (rule 4), and the served chain already fixed the branch
-/// there. So evidence below the floor never fills the store for good, and
-/// evidence the floor passes is dropped.
+/// Rule 5 at any seq. An edge serving x3 (floor 3) meets a valid fork at
+/// seq 2 whose branches both continue (x3, y3): it holds at x3. The fork is
+/// kept although it is below the floor, so once the source of y2/y3 goes
+/// quiet and x4 arrives, the edge still holds: no seq+1 record picked a
+/// branch. A restart does not forget it either.
 #[test]
-fn evidence_below_the_floor_is_dropped() {
+fn a_fork_below_the_floor_holds_the_edge_after_its_sources_go_quiet() {
     let k = key(0);
     let g = release(1, None, &[k], "g");
-    let r2 = release(2, Some(&g), &[k], "r2");
-    let r3 = release(3, Some(&r2), &[k], "r3");
-    let a4 = release(4, Some(&r3), &[k], "a4");
-    let b4 = release(4, Some(&r3), &[k], "b4");
-    let b5 = release(5, Some(&b4), &[k], "b5");
-    let fx = fx("evidence-floor", &g, &[k]);
-    let offer = |r: &Rel| {
+    let x2 = release(2, Some(&g), &[k], "x2");
+    let x3 = release(3, Some(&x2), &[k], "x3");
+    let x4 = release(4, Some(&x3), &[k], "x4");
+    let y2 = release(2, Some(&g), &[k], "y2");
+    let y3 = release(3, Some(&y2), &[k], "y3");
+    let mut fx = fx("evidence-below-floor", &g, &[k]);
+    let offer = |fx: &Fx, r: &Rel| {
         fx.offer(r);
         fx.inbox(&format!("{}.json", b64u(&r.sha3)), &envelope(r, k));
     };
-    for r in [&g, &r2, &r3] {
-        offer(r);
+    for r in [&g, &x2, &x3] {
+        offer(&fx, r);
     }
     let mut door = fx.door();
     door.poll(true);
     assert_eq!(fx.health().seq, Some(3), "{:?}", door.notes());
+    assert_eq!(fx.store().floor().unwrap(), 3);
 
-    // a store full of evidence below the floor (seq 2 < 3), and a fork at
-    // 4 that b5 resolves
-    let other = release(1, None, &[k], "other");
-    let stray = release(2, Some(&other), &[k], "stray");
-    plant_evidence(&fx, &variants(&stray, k, MAX_EVIDENCE));
-    for r in [&a4, &b4, &b5] {
-        offer(r);
+    for r in [&y2, &y3] {
+        offer(&fx, r);
     }
     door.poll(true);
-    let h = fx.health();
-    assert_eq!(
-        (h.seq, h.equivocation),
-        (Some(5), None),
-        "{:?}",
-        door.notes()
-    );
+    let held = |fx: &Fx| {
+        let h = fx.health();
+        (h.seq, h.equivocation.map(|e| e.seq))
+    };
+    assert_eq!(held(&fx), (Some(3), Some(2)), "{:?}", door.notes());
     let name = |r: &Rel| b64u(&pq::sha3(&[&envelope(r, k)]));
-    let mut fork = vec![name(&a4), name(&b4), name(&b5)];
+    let mut fork = vec![name(&x2), name(&x3), name(&y2), name(&y3)];
     fork.sort();
-    assert_eq!(
-        evidence_names(&fx),
-        fork,
-        "every envelope below the floor is gone; the fork at 4 is kept"
-    );
+    assert_eq!(evidence_names(&fx), fork, "kept although below the floor");
 
-    // the floor is 5 now: the fork at 4 is dropped (and not kept again,
-    // though the inbox still offers it); b5 stays
+    // the source of y2/y3 goes quiet; x4 arrives
+    for r in [&y2, &y3] {
+        fs::remove_file(fx.cfg.inbox_dir.join(format!("{}.json", b64u(&r.sha3)))).unwrap();
+    }
+    offer(&fx, &x4);
     door.poll(true);
-    assert_eq!(evidence_names(&fx), vec![name(&b5)]);
-    let h = fx.health();
-    assert_eq!(
-        (h.seq, h.equivocation),
-        (Some(5), None),
-        "{:?}",
-        door.notes()
+    assert_eq!(held(&fx), (Some(3), Some(2)), "{:?}", door.notes());
+    assert_eq!(evidence_names(&fx), fork);
+    // restarted, the edge cannot walk past the fork to x3 again, so it
+    // serves nothing, and it still reports the fork
+    let mut door = fx.restart();
+    door.poll(true);
+    assert_eq!(held(&fx), (None, Some(2)), "{:?}", door.notes());
+    assert_eq!(fx.store().floor().unwrap(), 3);
+}
+
+/// Kept evidence is never deleted, not even by a restart under a config
+/// that cannot parse it (a typo in rp_id): that poll refuses it in the
+/// pool and leaves it on disk, and the corrected edge still knows the fork.
+#[test]
+fn evidence_outlives_a_config_that_cannot_parse_it() {
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let a2 = release(2, Some(&g), &[k], "a2");
+    let b2 = release(2, Some(&g), &[k], "b2");
+    let mut fx = fx("evidence-typo", &g, &[k]);
+    for r in [&g, &a2, &b2] {
+        fx.offer(r);
+        fx.inbox(&format!("{}.json", b64u(&r.sha3)), &envelope(r, k));
+    }
+    let mut door = fx.door();
+    door.poll(true);
+    let fork = |fx: &Fx| {
+        let h = fx.health();
+        (h.seq, h.equivocation.map(|e| e.seq))
+    };
+    assert_eq!(fork(&fx), (Some(1), Some(2)), "{:?}", door.notes());
+    let kept = evidence_names(&fx);
+    assert_eq!(kept.len(), 2);
+
+    let mut typo = fx.cfg.clone();
+    typo.rp_id = "keys.skaists.dex".into();
+    typo.validate()
+        .expect("the shape is valid; the value is a typo");
+    let mut door = Door::new(
+        typo,
+        verifiers(&fx.dir.join("scratch")),
+        Box::new(fx.http.clone()),
+        Arc::new(RwLock::new(Shared::default())),
     );
+    door.load();
+    door.poll(true);
+    assert!(noted(&door, "evidence: "), "{:?}", door.notes());
+    assert_eq!(evidence_names(&fx), kept, "nothing kept is deleted");
+
+    // corrected, with b2 gone from every source but the kept evidence
+    fs::remove_file(fx.cfg.inbox_dir.join(format!("{}.json", b64u(&b2.sha3)))).unwrap();
+    let mut door = fx.restart();
+    door.poll(true);
+    assert_eq!(fork(&fx), (Some(1), Some(2)), "{:?}", door.notes());
 }
 
 #[test]

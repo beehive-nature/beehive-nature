@@ -312,7 +312,7 @@ impl Door {
                 return;
             }
         };
-        let evidence = match self.evidence(floor, &mut notes) {
+        let evidence = match self.evidence(&mut notes) {
             Ok(e) => e,
             Err(e) => {
                 self.refuse(e, notes);
@@ -329,7 +329,7 @@ impl Door {
         notes.extend(w.notes);
         self.tip = w.path.last().map_or(0, Link::seq);
         self.equivocation = w.equivocation;
-        if !self.remember(&w.evidence, evidence, floor, &mut notes) {
+        if !self.remember(&w.evidence, evidence, &mut notes) {
             self.report(notes);
             return;
         }
@@ -389,66 +389,38 @@ impl Door {
         self.report(notes);
     }
 
-    /// The fork evidence kept for rule 5: the kept envelopes and any whose
-    /// write failed (written again now), each at or above the floor. Below
-    /// the floor nothing is accepted again (rule 4) and the served chain
-    /// already took its branch, so evidence there is dropped, as is an
-    /// envelope that no longer parses under this config (it can never enter
-    /// a pool). A fork below the floor then holds the edge only while a
-    /// source still offers both branches, not for good.
-    fn evidence(&mut self, floor: u64, notes: &mut Vec<String>) -> Result<Vec<Vec<u8>>, String> {
-        let mut all = Vec::new();
-        for e in self.store.evidence()? {
-            match self.spent_evidence(&e, floor) {
-                None => all.push(e),
-                Some(why) => match self.store.drop_evidence(&e) {
-                    Ok(()) => eprintln!("keys-door: evidence dropped: {why}"),
-                    Err(err) => notes.push(err),
-                },
-            }
-        }
+    /// Every fork evidence envelope (rule 5): the kept ones, and any whose
+    /// write failed, written again now. Nothing kept is ever deleted, at any
+    /// seq and under any config: rule 5 has a fork resolve only by a seq+1
+    /// record selecting one branch, so forgetting a fork is not the door's
+    /// call (one that no longer parses is refused in the pool and stays on
+    /// disk).
+    fn evidence(&mut self, notes: &mut Vec<String>) -> Result<Vec<Vec<u8>>, String> {
+        let mut all = self.store.evidence()?;
         for e in std::mem::take(&mut self.unkept) {
-            if self.spent_evidence(&e, floor).is_some() || all.contains(&e) {
-                continue;
-            }
             if let Err(err) = self.store.keep_evidence(&e) {
                 notes.push(err);
                 self.unkept.push(e.clone());
             }
-            all.push(e);
+            if !all.contains(&e) {
+                all.push(e);
+            }
         }
         Ok(all)
     }
 
-    /// Why an evidence envelope can no longer matter; None while it can.
-    fn spent_evidence(&self, e: &[u8], floor: u64) -> Option<String> {
-        match parse_envelope(e, &self.cfg.origin, &self.cfg.rp_id) {
-            Ok(p) if p.record.seq >= floor => None,
-            Ok(p) => Some(format!(
-                "seq {} record {} is below the floor {floor}",
-                p.record.seq,
-                b64u(&p.record_sha3)
-            )),
-            Err(r) => Some(format!(
-                "an envelope that does not parse under this config ({})",
-                r.name()
-            )),
-        }
-    }
-
-    /// Keep what the walk met at a fork (rule 5) at or above the floor, so
-    /// the fork is not forgotten when a source stops offering one branch.
-    /// False when there is no room: a fork the edge cannot remember is one
-    /// it could forget, so it holds at the release it serves.
+    /// Keep what the walk met at a fork (rule 5), at any seq, so the fork
+    /// is not forgotten when a source stops offering one branch. False
+    /// when there is no room: a fork the edge cannot remember is one it
+    /// could forget, so it holds at the release it serves.
     fn remember(
         &mut self,
         found: &[Arc<Parsed>],
         mut all: Vec<Vec<u8>>,
-        floor: u64,
         notes: &mut Vec<String>,
     ) -> bool {
         for p in found {
-            if p.record.seq < floor || all.contains(&p.bytes) {
+            if all.contains(&p.bytes) {
                 continue;
             }
             if all.len() >= MAX_EVIDENCE {
