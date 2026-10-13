@@ -20,8 +20,8 @@ const sha256 = b => new Uint8Array(createHash('sha256').update(b).digest());
 const bytes = h => new Uint8Array(Buffer.from(h.replace(/^0x/, ''), 'hex'));
 
 const VAULT = '0x9a3ecac693b699fc0b2b6a50b5549e50c2320a26', TOKEN = '0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684';
-const KEYS = {'/': 'keychain/index.html', '/keychain.js': 'keychain/keychain.js', '/genesis.js': 'keychain/genesis.js',
-  '/vendor/bzdid-key.js': 'surfaces/onboarding/bzdid-key.js', '/vendor/bnr-sign.js': 'surfaces/onboarding/vendor/bnr-sign.js'};
+const KEYS = {'/': 'keychain/index.html', '/prelude.js': 'keychain/prelude.js', '/keychain.js': 'keychain/keychain.js', '/genesis.js': 'keychain/genesis.js',
+  '/vendor/bzdid-key.js': 'surfaces/onboarding/bzdid-key.js', '/vendor/bnr-sign.js': 'surfaces/onboarding/vendor/bnr-sign.js', '/vendor/hive-tx.min.js': 'surfaces/onboarding/vendor/hive-tx.min.js'};
 const type = p => p.endsWith('.js') ? 'text/javascript' : 'text/html';
 const parentHtml = `<!doctype html><meta charset="utf-8"><body><div id="slot"></div><script src="/surfaces/keychain-client.js"></script>
 <script>window.kcReady=KeychainClient.mount(document.getElementById('slot')).then(c=>{window.kc=c;window.states=[];c&&c.onstate(s=>states.push(s));return !!c;});</script>`;
@@ -131,7 +131,7 @@ try {
   const evil = await context.newPage();
   await evil.goto('https://evil.example/');
   const evilFrame = evil.frames().find(f => f.url().startsWith('https://keys.skaists.dev/'));
-  await evilFrame.waitForFunction(() => /only opens inside/.test(document.getElementById('kc').innerText));
+  await evilFrame.waitForFunction(() => /only opens on its own, or inside the wallet at https:\/\/skaists\.dev/.test(document.getElementById('kc').innerText));
 
   console.log('PASS keychain isolation: own origin, passkey-born root, BDID-GENESIS-V1 did, decoded confirm with delayed trusted press, independent envelope check, refusals, lock/unlock, inert copy, foreign embedder refused');
 } finally { await browser.close(); }
