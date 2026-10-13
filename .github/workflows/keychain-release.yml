@@ -1,0 +1,53 @@
+# Keychain release records (tools/keychain-release): the canonical record and its strict reader,
+# the test-key signature path, the anchor builder, and a prepare → check round trip that rebuilds
+# keys.skaists.dev from the commit the record names and requires every byte to match. No secret,
+# no network, no real key: sign-test makes a throwaway key inside the job, and the release signer
+# stays unruled (docs/KEYCHAIN-RELEASE-SIGNERS.json is empty until the founder names it).
+name: keychain-release
+
+on:
+  push:
+    paths:
+      - 'tools/keychain-release/**'
+      - 'keychain/**'
+      - 'scripts/build-keychain.mjs'
+      - 'docs/KEYCHAIN-RELEASE-SIGNERS.json'
+      - '.github/workflows/keychain-release.yml'
+  pull_request:
+    paths:
+      - 'tools/keychain-release/**'
+      - 'keychain/**'
+      - 'scripts/build-keychain.mjs'
+      - 'docs/KEYCHAIN-RELEASE-SIGNERS.json'
+      - '.github/workflows/keychain-release.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  release-tools:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      # every suite step fires every run (the lint-ci-shape.mjs law for tests.yml, kept here too)
+      - name: Release tool tests — canonical record, strict reader, prepare → check, signatures, anchors
+        if: always()
+        run: node --test 'tools/keychain-release/test/*.test.mjs'
+      - name: prepare → check round trip on this commit, then a throwaway-key signature, envelope and anchor
+        if: always()
+        env:
+          OUT: ${{ runner.temp }}/keychain-release
+        run: |
+          set -euo pipefail
+          R=tools/keychain-release/release.mjs
+          ID=$(node "$R" sign-test --seed ci-round-trip --i-understand-this-is-a-test-key | jq -r .id)
+          node "$R" prepare --out "$OUT/r1" --signers "$ID"
+          node "$R" check "$OUT/r1"
+          node "$R" sign-test --seed ci-round-trip --record "$OUT/r1/record.json" --out "$OUT/r1/record.json.relsig.json" --i-understand-this-is-a-test-key
+          node "$R" verify --record "$OUT/r1/record.json" --sig "$OUT/r1/record.json.relsig.json" --signers "$ID"
+          node "$R" envelope --record "$OUT/r1/record.json" --sig "$OUT/r1/record.json.relsig.json" --out "$OUT/r1/envelope.json"
+          node tools/keychain-release/anchor.mjs build --record "$OUT/r1/record.json" --sig "$OUT/r1/record.json.relsig.json" --prev-json tools/keychain-release/test/genesis-anchor.json --seq 1
