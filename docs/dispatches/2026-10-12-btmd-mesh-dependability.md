@@ -133,5 +133,144 @@ staged #622 capture packet (not this lane's to run).
 
 ## Status
 
-IN FLIGHT — crate, battery, receipts, and the integration PR land on this
-branch.
+DELIVERED (first milestone) — see §Receipts below. The branch carries the
+crate, the frozen budgets, the distilled evidence, and this dispatch; the
+integration PR is open from `zcode/btmd-001`.
+
+## Receipts (written by the run, 2026-10-12/13)
+
+**Executables (pinned, per-version dirs under WSL `~/btmd/pins/`).**
+Tarball digests verified against each release's own `.sha256` at download
+time. `x0xd` binary sha256 (PUBLIC-CONSTANT digests of public release
+artifacts):
+
+```
+64f0dbf6eeea4c729cc969f4f100302340699671eae1ae3be38b9c2bc880131a  v0.45.0 x0xd PUBLIC-CONSTANT
+adba317bda409b6eeb47326e28fdb89e7ed66317959c3db23a1a34b74142b317  v0.46.0 x0xd PUBLIC-CONSTANT
+1e71b115050a435c88bf5ad564dfad9e033c0cdc1aa8db7fb7cb7559b8b8dfcb  v0.46.6 x0xd PUBLIC-CONSTANT
+812af81d5d6b233d36cbd157e58c9f489794c37f79a52310a1026c919e25d24d  v0.47.1 x0xd PUBLIC-CONSTANT
+```
+
+Signature state, honestly: each `.asc` carries key id
+`EDDA4827D89C0F29` (David Irvine code signing — the same key as every
+prior verified install per `ops/x0x/README.md`); the WSL keyring is fresh
+and the box was unreachable at closeout, so full key-holder verification
+was NOT re-performed this session — the TOFU state carries from prior
+verified installs, and the sha256-vs-release-`.sha256` checks bound the
+bytes actually run. Source pins: v0.46.0 = `cea64f20e`, v0.47.1 =
+`ae064f6dd` (shallow clones, upstream saorsa-labs/x0x).
+
+**Battery runs.** Raw receipts (spec, budget hash, per-second kernel
+samples, ledger journals, app-level diagnostics, verdicts) live outside
+temp dirs in WSL `~/btmd/runs/<run-id>/receipts/`; the sanitized,
+committable distillation is in-tree:
+`docs/dispatches/evidence/2026-10-12-btmd-mesh-dependability/`
+(verdicts.json + summary.md; no 64-hex identity rides them).
+
+**P1 acceptance sanity** (p1f, v0.47.1, scale 3): `verdicts_pass=true` —
+targeted DM 12/12, group 12/12, state sync 20/20, class probes 160/160;
+lost 0, unknown 0; every budget gate green; calibration probe re-proved
+the egress=root-side-rx mapping.
+
+**P2 matched cost A/B** (identical workload shape, interleaved
+baseline/shed_normal; canonical rows in the evidence summary):
+
+| scale | baseline delivery | shed_normal delivery | shed verdict |
+|---|---|---|---|
+| 3 | all classes full | all classes full | PASS |
+| 6 | all classes full | all classes full | PASS |
+| 9 | all classes full | **KV sync 10/20 within the 30s gate** (rerun with 180s observation: 20/20, all within gate) | FAIL (sync gate) |
+
+Cost, honestly scoped: on this small local mesh the idle bill
+(~0.3–2.0 MB/min combined per leaf) sits far below the public-mesh
+figures, as expected — the rig's cost signal is the MECHANISM direction
+(class-selective shedding; diagnostics show `shed_suppressed` engaged on
+leaf rows in shed trials) and the total-work accounting across roles
+(seed/relay columns in the summary; a lower leaf bill was never bought by
+an unbounded relay bill). The public-mesh absolute bill stays with the
+#622 packet. **Unsafe retries: 0 in every canonical trial** — no
+operation ever retried under UNKNOWN with a fresh identity.
+
+**Recovery drills** (rec02): kill-9 → restart in 1.0 s with identity
+PRESERVED and the in-flight DM UNKNOWN preserved (resolved later only by
+its identical-logical-id retry; the fresh-identity conviction row was
+executed once and counted, never accepted). Partition (mesh link down,
+management up): the node answered `/health` READY while partitioned — the
+ready≠delivered law demonstrated live; outcomes resolved only from
+post-heal evidence. Revocation: sacrificial agent self-revocation
+reached **3/3 observers** (self MACHINE-key revocation is refused 403 —
+convicted, and the drill switched to the always-allowed agent form).
+Corrupt state: one flipped byte in a data file → the node REFUSED to come
+healthy (fail-closed; identity on disk untouched). Bootstrap removal:
+seed killed → leaves rejoined from peer cache in **0.003 s**.
+
+**Continuity** (con02): cold replacement v0.46.0 → v0.47.1 on the same
+identity+data dirs with fresh processes — identity preserved, group
+visible, store value readable at its owner, DM delivery works: ALL GREEN.
+Downgrade probe v0.47.1 → v0.45.0 on the same state: the KV store value
+is NOT served — the upstream X0XKVS2 fail-closed law **verified live**,
+not assumed.
+
+**Bounded adaptation** (run04, hostile flood under shed_normal): a rig
+peer flooding a leaf-subscribed topic (1200×1 KiB) left revocation
+delivery intact (3/3 observers, mid-flood), targeted DM delivered, RSS
+flat (~58–70 MiB) — but the leaf bill ran **~32–83× its idle rate**:
+shed_normal never bounds INBOUND delivery to a subscribed leaf (by
+design — own-inbox is never shed). The adaptation gate (≤3× idle) FAILED
+and is published as-is. Verdicts read kernel veth counters only; daemon
+telemetry cannot flatter this table by construction.
+
+**Environment law found and code-enforced** (the rig's own finding):
+WSL2/docker hosts route bridged IP packets through iptables FORWARD where
+the docker default-DROP policy silently kills them; the rig now inserts
+a scoped FORWARD ACCEPT for its own bridges at build and removes it at
+teardown.
+
+## The profile deliverable (smallest justified improvement)
+
+`crates/btungsten-meshdep/profiles/leaf-shed-normal.toml` —
+LEAF-SHED-NORMAL-1: the measured, delivery-preserving leaf profile
+(`[gossip] byte_policy = "shed_normal"`, stock thresholds, eager degree
+2) WITH its honest constraints in the header: state-sync-heavy leaves
+(the W@tch shape) should not adopt at stock budgets until the s9 sync
+variance is quantified; inbound floods are a trust/block-surface
+question, not a byte_policy one; the constrained-leaf idle target was
+missed at s9 and the budget file stands unchanged. Adopting it on any
+host is a founder gesture (ops/ stays verbatim-only).
+
+## Verdict (scoped)
+
+- **Mechanism:** shed_normal is delivery-preserving at small/mid mesh
+  scale on every class the battery exercises, and revocation is never
+  shed — including under a hostile flood. At scale 9 the KV state-sync
+  gate was run-variable (10/20 vs 20/20 across two trials inside the
+  same gate; full convergence with a longer window): UNRELIABLE-within-
+  gate is the honest status, not "broken" and not "passing".
+- **Recovery/continuity:** identity, UNKNOWN-preservation, fail-closed
+  corruption handling, bootstrap-loss rejoin, and the version-replacement
+  trial all PASS on pinned binaries; the X0XKVS2 downgrade law verified.
+- **Not proven here (and not claimed):** public-mesh absolute idle
+  reduction (622 packet's capture), ten-billion-user scale (nothing in
+  this battery extrapolates), and always-on deployability on home
+  broadband — the embedder's 75 GB/day observation stands untouched.
+
+## Remaining bTunGsTeN obligations (precise next tasks)
+
+1. **Quantify the s9 sync variance**: N≥10 matched trials at scale 9,
+   per-topic classification of custom store topics (Normal vs
+   Critical), and the upstream question: should joined-store topics get
+   a delivery carve-out (the S4 "revocation topics exempt first"
+   precedent extends naturally to subscribed store convergence)?
+2. **Inbound bounding for constrained leaves**: the flood result names
+   the surface — trust/block + subscribe-set discipline; a mechanism
+   proposal belongs upstream (Track E), evidenced by this battery's
+   flood drill.
+3. **#1170 per-kind counters** (upstream, OPEN) would replace the
+   driver-side delivered/published capture once landed; this battery's
+   ledger remains the independent check either way.
+4. The **#622 public-mesh capture** stays staged for Astra re-acceptance
+   and a founder-named host — this lane's numbers never substitute for
+   it.
+5. The daily upstream watch continues untouched; nothing was posted
+   upstream from this lane (no unsolicited posts; the watch carries
+   outward communication).

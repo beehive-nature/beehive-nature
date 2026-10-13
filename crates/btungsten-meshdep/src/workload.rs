@@ -483,25 +483,26 @@ impl<'a> WorkloadCtx<'a> {
         Ok(false)
     }
 
-    /// A revocation: the sacrificial node self-revokes its MACHINE key.
-    /// Observer evidence = the revocation appears in the observer's
-    /// `/identity/revocations` (matched by the revoked id).
-    pub fn revoke_machine(
+    /// A revocation: the sacrificial node self-revokes its AGENT identity
+    /// (self-revocation is always allowed; a self MACHINE-key revocation
+    /// is refused 403 — convicted live). The node's identity is spent by
+    /// this drill; that is what makes it sacrificial. Observer evidence =
+    /// the revocation appears in the observer's `/identity/revocations`.
+    pub fn revoke_agent(
         &mut self,
         ledger: &mut Ledger,
         node: &str,
-        machine_id: &str,
+        agent_id: &str,
         intended: &[&str],
     ) -> Result<String, String> {
-        let payload = machine_id.as_bytes().to_vec();
+        let payload = agent_id.as_bytes().to_vec();
         let (mut op, env) = self.build_op(OpClass::Revocation, node, &payload);
         op.sender = node.to_string();
         op.intended = intended.iter().map(|s| s.to_string()).collect();
         let op_id = op.op_id.clone();
         ledger.record_op(op);
         let c = self.client(node)?;
-        let body =
-            serde_json::json!({"machine_id": machine_id, "reason": "btmd rig revocation drill"});
+        let body = serde_json::json!({"agent_id": agent_id, "reason": "btmd rig revocation drill"});
         let (s, b) = c.post_json("/identity/revoke", &body.to_string())?;
         ledger.record(Event::Published {
             op_id: op_id.clone(),
@@ -513,12 +514,12 @@ impl<'a> WorkloadCtx<'a> {
         Ok(op_id)
     }
 
-    /// Observer-side revocation visibility.
-    pub fn revocation_observe(&self, node: &str, machine_id: &str) -> Result<bool, String> {
+    /// Observer-side revocation visibility (matched by the revoked id).
+    pub fn revocation_observe(&self, node: &str, revoked_id: &str) -> Result<bool, String> {
         let c = self.client(node)?;
         let v = c.get_json("/identity/revocations")?;
         let s = v.to_string();
-        Ok(s.contains(machine_id))
+        Ok(s.contains(revoked_id))
     }
 
     /// A discovery browse (the workload, not just a health check).

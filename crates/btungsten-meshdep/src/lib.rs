@@ -12,8 +12,8 @@
 //! | [`identity`] | canonical operation identities (WB001 `Intent`, SAW-proven codec) | invent a second identity shape |
 //! | [`ledger`] | the delivered/acked/lost/duplicated/delayed/replayed/UNKNOWN ledger | call a "ready" peer a delivery |
 //! | [`client`] | hand-rolled HTTP/1.1 + SSE against the node loopback API | trust daemon telemetry for bytes |
-//! | [`config`] | the rig/trial/workload specs (serde, receipt artifacts) | leave `bootstrap_peers` implicit |
-//! | [`rig`] | netns/veth topology, node lifecycle, OS-level accounting | touch any interface it did not create |
+//! | [`rig`] | netns/veth topology, node lifecycle, OS-level accounting, the rig/trial specs | leave `bootstrap_peers` implicit |
+//! | [`rig`] | — | touch any interface it did not create |
 //! | [`workload`] | the workload classes (idle, targeted DM, discovery, sync, revocation, reconnect) | save bytes by dropping a required revocation |
 //! | [`battery`] | phase orchestration, interleaved matched trials, recovery drills | interleave without matching |
 //! | [`report`] | raw JSONL receipts + sanitized in-tree summaries | emit a 64-hex peer id in sanitized output |

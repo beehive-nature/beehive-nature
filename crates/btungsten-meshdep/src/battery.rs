@@ -315,7 +315,10 @@ fn trial_body(
             thread::sleep(Duration::from_millis(150));
         }
         for _ in 0..profile.group_msgs {
-            let intended: Vec<&str> = intended_all.iter().map(|s| s.as_str()).collect();
+            // Group delivery is judged at the MEMBER roster (the two
+            // joiners) — a non-member leaf cannot observe group messages
+            // and must never be counted as an intended recipient.
+            let intended: Vec<&str> = intended_sync.iter().map(|s| s.as_str()).collect();
             let _ = w.group_send(&mut ledger, &leaf_labels[0], &group_id, &intended)?;
             thread::sleep(Duration::from_millis(400));
         }
@@ -337,7 +340,16 @@ fn trial_body(
     // Observation sweep: recipient-side evidence until settled or bounded.
     {
         let w = WorkloadCtx::new(rig, 1, 10_000);
-        let sweep_deadline = crate::client::now_ms() + 45_000;
+        // The observation window bounds how long recipient-side evidence
+        // is waited for. Extending it (BTMD_SWEEP_MS) tests lazy recovery
+        // without changing the DELIVERY GATE (convergence_secs_max stays
+        // in the frozen budgets — late convergence still counts against
+        // the gate as DelayedDelivered, never as on-time).
+        let sweep_ms: u64 = std::env::var("BTMD_SWEEP_MS")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(45_000);
+        let sweep_deadline = crate::client::now_ms() + sweep_ms;
         loop {
             // Snapshot pending (op, node) pairs first: the ledger is
             // mutated inside the loop.

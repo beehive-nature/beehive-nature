@@ -1,0 +1,61 @@
+# bTunGsTeN leaf profile — LEAF-SHED-NORMAL-1 (BT-MESH-DEPENDABILITY-001)
+#
+# The measured, delivery-preserving low-overhead transport profile for
+# x0x Leaf roles (desktop clients, embedded/mobile agents), justified by
+# the local-rig battery evidence (see the lane dispatch and
+# docs/dispatches/evidence/2026-10-12-btmd-mesh-dependability/).
+#
+# WHAT THE EVIDENCE SHOWS (local rig, pinned v0.47.1, matched workloads):
+#   - shed_normal preserved EVERY delivery gate at mesh scales 3 and 6
+#     (targeted DM, group, KV state sync, class probes — zero losses,
+#     zero UNKNOWN residues attributable to the policy).
+#   - revocation reached every online observer in every drill, INCLUDING
+#     mid-flood under shed — Critical-class traffic is never shed
+#     (upstream design; battery-verified under hostility).
+#   - cost reduction is class-selective (announce/bulk family shed;
+#     Critical flows untouched) — the mechanism corroborates the public-
+#     mesh slice-2 field result WITHOUT combining the datasets.
+#
+# MEASURED CONSTRAINTS (the honest boundary of this profile):
+#   - At mesh scale 9, KV state-sync convergence INSIDE the 30s gate was
+#     run-variable under shed_normal (one trial 10/20 within the gate,
+#     a rerun 20/20 within it; all records converged with a 180s window).
+#     STATE-SYNC-HEAVY LEAVES (the W@tch shape: one CRDT KV store) should
+#     NOT adopt shed_normal at stock budgets until this variance is
+#     quantified and the custom-store-topic classification is settled
+#     upstream. Precise next task in the lane dispatch.
+#   - A hostile peer flooding a topic the leaf SUBSCRIBES to inflates the
+#     leaf's INBOUND bill ~30-80x idle in the flood trial (own-inbox
+#     delivery is never shed BY DESIGN; RSS/CPU stayed flat and targeted
+#     DMs + revocation still delivered). Inbound bounding is a trust/
+#     block-surface question, not a byte_policy one.
+#   - The proposed constrained-leaf idle target (2 MiB/min combined) was
+#     MISSED at scale 9 (2.60 MiB/min measured) — the frozen budget
+#     stands; the miss is published, not re-labeled.
+#
+# WHAT THIS FILE IS NOT:
+#   - not an installed config. ops/ carries only what runs verbatim on a
+#     host; adopting this profile anywhere is a founder gesture with the
+#     dispatch's adoption note (the 622 correction law).
+#   - not a claim about the public-mesh absolute idle bill — that number
+#     belongs to the #622 capture packet.
+#
+# DEPLOYMENT: merge into an existing x0xd.toml for any LEAF-role node.
+
+[gossip]
+# The one mechanism knob: shed forwarded Normal/Bulk gossip once the leaf
+# egress budget is exhausted. Locally-originated publishes, own-inbox
+# delivery, targeted sends, and ALL Critical-class topics (DM inbox,
+# control plane, revocations) are never shed by design — and the battery
+# holds the daemon to that on every trial.
+byte_policy = "shed_normal"
+
+# Budget thresholds (stock defaults shown; the meter, not a cap, until
+# the policy above says what exhaustion may DO):
+leaf_egress_soft_bytes_per_sec = 65536
+leaf_egress_hard_bytes_per_sec = 131072
+leaf_egress_burst_bytes = 4194304
+
+# The fan-out ceiling for leaf eager degree (upstream default since the
+# #504 slice-1 work; kept explicit here for profile self-description):
+leaf_max_eager_degree = 2
