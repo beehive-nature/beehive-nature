@@ -3,7 +3,10 @@
 Lane: `zcode/wb004-jungle-live-correction` (worktree `wt-zcode-wb004live`).
 Order: founder 2026-10-13 — CONTINUE bounded correction + handoff → ARCHIVE.
 No new live transactions were made; the regression is offline and
-deterministic (throwaway key, simulator endpoint, zero spend).
+deterministic (simulator endpoint, zero spend; real codec packing with a
+deterministic signing stand-in — CI's first run proved the point by failing
+on @noble/curves, which resolves only on the live-run box: the JavaScript
+signer is characterization-only and is NOT a CI dependency).
 
 ## 1 · The ruling, recorded
 

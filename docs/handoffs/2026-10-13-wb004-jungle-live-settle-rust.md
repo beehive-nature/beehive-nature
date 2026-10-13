@@ -19,7 +19,8 @@ carried into the new core.
   `scripts/btungsten/wb004-retry-safety.test.mjs` (CI-wired through the
   existing `scripts/btungsten/*.test.mjs` glob; no workflow edits). Two
   CONVICTION rows demonstrate the current failure offline (zero chain, zero
-  spend, throwaway key): unresolved inclusion → four replacement signatures
+  spend; real codec packing/hashes with a deterministic
+  signing stand-in — the real K1 signer is deliberately NOT a CI dependency): unresolved inclusion → four replacement signatures
   for one logical step; restart with an unpersisted txid → a second proposal
   instance executes. One REQUIRED row is the executable acceptance criterion
   your Rust implementation must match. Translate it into the Rust battery;

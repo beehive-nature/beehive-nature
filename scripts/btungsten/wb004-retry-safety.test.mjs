@@ -27,9 +27,9 @@
 //                 refused — executable acceptance criteria for the Rust
 //                 implementation to match.
 //
-// Model honesty: the transaction packing, digests and signatures are the
-// lane's REAL codec/keys code (a throwaway key, no custody, no chain). The
-// endpoint is a deterministic simulator carrying exactly the three
+// Model honesty: the transaction packing, digests and transaction ids use
+// the lane's REAL codec (pure node:crypto, CI-clean); signatures are the
+// deterministic stand-in named above. The endpoint is a deterministic simulator carrying exactly the three
 // safety-relevant semantics measured live on Jungle4: per-transaction-id
 // dedup ("duplicate transaction <id>", observed in the P6 control), row
 // creation on propose / erasure on exec (name becomes reusable), and reads
@@ -42,12 +42,23 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync, existsSync, readFileSync, appendFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { createHmac, randomBytes } from 'node:crypto';
 import {
   packTransaction, transactionId, signatureDigest, taposFromHeadBlockId,
   packProposeData, packTransferData, Writer,
 } from './wb004-live/codec.mjs';
-import { signDigest, randomSecret } from './wb004-live/keys.mjs';
 import { JUNGLE4_CHAIN_ID } from './wb004-live/rpc.mjs';
+
+// Signing here is a DETERMINISTIC STAND-IN (HMAC over the real digest), not
+// the lane's K1 signer: keys.mjs depends on @noble/curves, which resolves
+// only on the live-run box — deliberately NOT a CI dependency, per the
+// founder ruling that the JavaScript signer is characterization-only (CI
+// itself proved this: ERR_MODULE_NOT_FOUND on first wiring). The invariant
+// under test is the retry STATE MACHINE (distinct digests → distinct
+// signatures → distinct txids per attempt), which the stand-in exercises
+// identically; the real-signer compatibility vectors live in the handoff.
+const keyMaterial = randomBytes(32); // test-only material, never a credential
+const signDigest = (digest) => 'SIG_STANDIN_' + createHmac('sha256', keyMaterial).update(digest).digest('base64url');
 
 // --- deterministic endpoint simulator ---------------------------------------
 
@@ -98,7 +109,7 @@ class FakeChain {
   }
 }
 
-const key = randomSecret(); // throwaway; no custody, never a credential
+// test-only signing material lives above (deterministic stand-in)
 
 function buildMsigTx(chain, actionData, intentName) {
   const info = chain.getInfo();
@@ -115,7 +126,7 @@ function buildMsigTx(chain, actionData, intentName) {
       data: actionData,
     }],
   });
-  const sig = signDigest(key, signatureDigest(JUNGLE4_CHAIN_ID, packed));
+  const sig = signDigest(signatureDigest(JUNGLE4_CHAIN_ID, packed));
   return { packed, sig, txid: transactionId(packed) };
 }
 
