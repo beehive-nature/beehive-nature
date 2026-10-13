@@ -21,13 +21,28 @@
 //   4. lost submission acknowledgement, same context — the chain took the payment but the
 //      submission reply never arrived (the page waited on it when it was closed); resume reads the
 //      kept hash from the chain and sends nothing
-//   5. abrupt browser-process termination (SIGKILL) after submission, receipts withheld — a
-//      persistent profile on disk; the whole browser process is killed, not closed; a new process on
-//      the same profile resumes from the journal: no press, no send
+//   5. abrupt browser-process termination (SIGKILL) after submission, receipts withheld, DELAYED past
+//      the browser's storage commit timer (12 s) — a persistent profile on disk; the whole browser
+//      process is killed, not closed; a new process on the same profile resumes from the journal: no
+//      press, no send. This establishes the delayed-crash case only; it is not a durability repair.
+//   6. abrupt termination immediately BEFORE the submission boundary — the payment awaits its press,
+//      nothing is signed for it; the kill loses nothing that was sent; the new process can only OFFER a
+//      fresh invoice and pays nothing without a press (this suite presses nothing)
+//   7. abrupt termination immediately AFTER the acknowledged submission write (within about a tenth of
+//      a second of localStorage.setItem returning) — the chain holds the payment; whether the browser's
+//      profile still knows it is MEASURED and printed, never assumed. If it survived, resume sends
+//      nothing. If it did not, this is THE OPEN CASE, named: the page can only offer a new invoice for a
+//      payment the chain already holds; it pays nothing without a press, and this suite presses nothing.
+//
+// The acknowledged persistence boundary, precisely: the page's journal write is localStorage.setItem
+// returning — the application's acknowledgement, synchronous in the page. Whether those bytes reach
+// disk is the browser's business (Chromium commits DOM storage on its own timer), so an immediate kill
+// can lose an acknowledged write. On this box, 3 s after the write was not enough; 12 s was.
 //
 // NOT covered, and OPEN: a paid-but-incomplete upload where ALL original browser state is lost
-// before any record was saved. No fixture here finishes that case, and nothing invents a payment to
-// make it finish; it needs an authenticated durable-state path, which this suite does not claim.
+// before any record was saved (case 7's lost branch shows exactly what that looks like). No fixture
+// here finishes that case, and nothing invents a payment to make it finish; it needs an
+// independently recoverable record acknowledged before the effect, which this suite does not claim.
 import assert from 'node:assert/strict';
 import {readFileSync, mkdtempSync} from 'node:fs';
 import {createRequire} from 'node:module';
@@ -54,7 +69,9 @@ const FILES = {
   A: Buffer.from('Recovery fixture A: receipt reply lost, page restarted in the same profile; never live funds.'),
   B: Buffer.from('Recovery fixture B: upload lost, record saved, replacement client; never live funds.'),
   C: Buffer.from('Recovery fixture C: submission acknowledgement lost, same profile; never live funds.'),
-  D: Buffer.from('Recovery fixture D: browser process killed after submission; never live funds.'),
+  D: Buffer.from('Recovery fixture D: browser process killed after submission, past the commit timer; never live funds.'),
+  E: Buffer.from('Recovery fixture E: browser process killed before the submission boundary; never live funds.'),
+  F: Buffer.from('Recovery fixture F: browser process killed immediately after the acknowledged submission write; never live funds.'),
 };
 const GAS = '0.00000000002';
 // the storage network and the chain, outside every browser
@@ -265,12 +282,36 @@ try {
     console.log('ok   4. lost submission acknowledgement: the kept hash was found on the chain; no second payment, no second press');
   }
 
-  // ── 5. abrupt browser-process termination (SIGKILL) after submission, receipts withheld ──
-  {
+  // ── persistent-profile harness for the termination cases: the browser is KILLED, never closed ──
+  const killable = () => {
     const dir = mkdtempSync(join(tmpdir(), 'ant-recovery-profile-'));
-    const launch = () => chromium.launchPersistentContext(dir, {viewport: {width: 390, height: 1100}, serviceWorkers: 'block'});
+    const launch = async () => { const c = await chromium.launchPersistentContext(dir, {viewport: {width: 390, height: 1100}, serviceWorkers: 'block'}); await routeWalletSource(c, root); await wire(c); return c; };
+    const kill = async ctx => {
+      // the browser's own process id, from the browser itself (CDP SystemInfo): killed, not closed
+      const cdp = await ctx.browser().newBrowserCDPSession();
+      const info = await cdp.send('SystemInfo.getProcessInfo');
+      const pid = (info.processInfo.find(p => p.type === 'browser') || {}).id;
+      assert.ok(pid, 'the browser process is known, so it can be killed rather than closed');
+      process.kill(pid, 'SIGKILL');
+      await new Promise(r => setTimeout(r, 2000));
+      try { await ctx.close(); } catch (e) { /* already dead */ }
+    };
+    return {launch, kill};
+  };
+  // resume may only ever OFFER a fresh invoice; it pays nothing without a press, and this suite presses nothing
+  const offersOnly = async (page, kc, name, buffer, sends) => {
+    await page.locator('#ant-buy-file').setInputFiles({name, mimeType: 'text/plain', buffer}); await page.locator('#ant-buy-gas').fill(GAS);
+    await page.locator('#ant-buy-start').click();
+    await page.getByRole('button', {name: 'Authorize this invoice and ask my wallet'}).waitFor({timeout: 120000});
+    assert.equal(net.sends, sends, 'nothing was sent by resuming');
+    assert.equal(await kc.getByRole('button', {name: 'Sign this payment'}).count(), 0, 'nothing was asked to be signed');
+    return (await page.locator('#ant-buy-invoice').innerText()).match(/(\d+) planned transactions?/)[1];
+  };
+
+  // ── 5. abrupt termination after submission, receipts withheld, delayed past the commit timer ──
+  {
+    const {launch, kill} = killable();
     let ctx = await launch();
-    await routeWalletSource(ctx, root); await wire(ctx);
     const {page, kc} = await openPurchase(ctx);
     const sendsBefore = net.sends;
     await begin(page, kc, 'd.txt', FILES.D);
@@ -278,27 +319,63 @@ try {
     await press(page, kc, /Pay 0\.0+1 ANT to 1 Autonomi storage node/);
     const payment = await paymentState(page, shaOf('D'), 'submitted');
     assert.equal(net.sends, sendsBefore + 2); assert.equal(payment && payment.state, 'submitted');
-    // The profile's localStorage reaches disk on Chromium's own commit timer, not at the write. The kill
-    // comes after that delay has had its chance: a kill INSIDE it loses the last seconds of the journal
-    // (measured here: 3 s was not enough), which is a property of the browser this suite records, not hides.
-    await page.waitForTimeout(12000);
-    // the browser's own process id, from the browser itself (CDP SystemInfo): killed, not closed
-    const cdp = await ctx.browser().newBrowserCDPSession();
-    const info = await cdp.send('SystemInfo.getProcessInfo');
-    const pid = (info.processInfo.find(p => p.type === 'browser') || {}).id;
-    assert.ok(pid, 'the browser process is known, so it can be killed rather than closed');
-    process.kill(pid, 'SIGKILL');
-    await new Promise(r => setTimeout(r, 2000));
-    try { await ctx.close(); } catch (e) { /* already dead */ }
+    await page.waitForTimeout(12000); // the browser's own commit timer is given its chance: this is the DELAYED-crash case, nothing more
+    await kill(ctx);
     net.holdReceipts = false;
     ctx = await launch();
-    await routeWalletSource(ctx, root); await wire(ctx);
     const again = await openPurchase(ctx);
     const kept = await journal(again.page, shaOf('D'));
-    assert.ok(kept && kept.plans[0].txs.find(t => t.kind === 'payment').state === 'submitted', 'the journal survived the killed process on disk');
+    assert.ok(kept && kept.plans[0].txs.find(t => t.kind === 'payment').state === 'submitted', 'the journal survived the killed process on disk (12 s after the write)');
     await resumeAndCheck(again.page, again.kc, 'd.txt', FILES.D, sendsBefore + 2, lastTwo());
     await ctx.close();
-    console.log('ok   5. abrupt browser-process termination after submission: a new process on the same profile resumed from the journal; no second payment, no second press');
+    console.log('ok   5. abrupt browser-process termination after submission, 12 s past the acknowledged write: a new process on the same profile resumed from the journal; no second payment, no second press (the delayed-crash case only)');
   }
-  console.log('PASS recovery (exactly these): same-context page restart after a lost receipt; saved-record replacement; already-stored no-payment reuse; lost submission acknowledgement; abrupt process termination — never a second payment, never a second press. NOT covered and OPEN: paid-but-incomplete upload with all original browser state lost before any record was saved.');
+
+  // ── 6. abrupt termination immediately BEFORE the submission boundary ──
+  {
+    const {launch, kill} = killable();
+    let ctx = await launch();
+    const {page, kc} = await openPurchase(ctx);
+    const sendsBefore = net.sends;
+    await begin(page, kc, 'e.txt', FILES.E); // the approval is on chain; the payment is on the card, unsigned
+    await kill(ctx);
+    assert.equal(net.sends, sendsBefore + 1, 'only the approval was ever sent');
+    ctx = await launch();
+    const again = await openPurchase(ctx);
+    const kept = await journal(again.page, shaOf('E'));
+    const survived = !!(kept && kept.plans && kept.plans.length);
+    const planned = await offersOnly(again.page, again.kc, 'e.txt', FILES.E, sendsBefore + 1);
+    await ctx.close();
+    console.log('ok   6. abrupt termination immediately BEFORE the submission boundary: nothing sent was lost; the journal ' + (survived ? 'survived' : 'did not survive') + ' the kill; resume offered a fresh invoice (' + planned + ' planned) and paid nothing without a press');
+  }
+
+  // ── 7. abrupt termination immediately AFTER the acknowledged submission write ──
+  {
+    const {launch, kill} = killable();
+    let ctx = await launch();
+    const {page, kc} = await openPurchase(ctx);
+    const sendsBefore = net.sends;
+    await begin(page, kc, 'f.txt', FILES.F);
+    net.holdReceipts = true;
+    await press(page, kc, /Pay 0\.0+1 ANT to 1 Autonomi storage node/);
+    const payment = await paymentState(page, shaOf('F'), 'submitted'); // the acknowledged write, seen within about 100 ms
+    assert.equal(net.sends, sendsBefore + 2); assert.equal(payment && payment.state, 'submitted');
+    await kill(ctx); // immediately: the browser's commit timer gets no chance
+    net.holdReceipts = false;
+    ctx = await launch();
+    const again = await openPurchase(ctx);
+    const kept = await journal(again.page, shaOf('F'));
+    const survived = !!(kept && kept.plans && kept.plans[0] && kept.plans[0].txs.find(t => t.kind === 'payment' && t.state === 'submitted'));
+    if (survived) {
+      await resumeAndCheck(again.page, again.kc, 'f.txt', FILES.F, sendsBefore + 2, lastTwo());
+      console.log('ok   7. abrupt termination immediately AFTER the acknowledged submission write: the journal survived this time; resumed with no second payment, no second press');
+    } else {
+      // THE OPEN CASE, named: the chain holds the payment and the browser no longer knows it. The page can
+      // only offer a NEW invoice; it pays nothing without a press, and this suite presses nothing.
+      const planned = await offersOnly(again.page, again.kc, 'f.txt', FILES.F, sendsBefore + 2);
+      console.log('ok   7. abrupt termination immediately AFTER the acknowledged submission write: the journal did NOT survive on this box — the chain holds the payment, the browser does not know it; resume offered a NEW invoice (' + planned + ' planned) and paid nothing without a press. This is the OPEN case (paid-but-incomplete upload, all browser state lost before any record was saved); nothing here finishes it');
+    }
+    await ctx.close();
+  }
+  console.log('PASS recovery (exactly these): same-context page restart after a lost receipt; saved-record replacement; already-stored no-payment reuse; lost submission acknowledgement; abrupt process termination 12 s after the write; abrupt termination before the submission boundary; abrupt termination immediately after the acknowledged write (outcome measured and printed) — never a second payment, never a second press. NOT covered and OPEN: paid-but-incomplete upload with all original browser state lost before any record was saved.');
 } finally { await browser.close(); }
