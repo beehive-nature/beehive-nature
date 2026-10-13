@@ -74,3 +74,27 @@ The order allows resuming live acceptance "only under applicable authorization".
 - **Milestone delivered:** issue #405 closed by construction (native Hive signing through the isolated keychain, desk door + regressions), and the deployment receipt's three open recovery items closed with a proof.
 - **Remaining, with owners:** live ANT purchase → agent20 + founder. bDroP surface → Agent 30 (this door included). Wallet-lane migrations off the in-page keychain → unassigned (the #404 receipt's "migrating the other wallet lanes"). Signed handover from the old soul + grants → unassigned, unchanged from #404's remaining list.
 - **This seat archives after this dispatch lands**; the worktree branch carries everything.
+
+## Deployment receipt (added at closeout, 2026-10-13)
+
+| Item | Value |
+|---|---|
+| Source | beehive-nature/beehive-nature `f00b6e50c` (main after PR #407), built with `node scripts/build-keychain.mjs --out` |
+| Site repository | beehive-nature/keys `66819d7bd3e2dea6b88bb6b15eb3d8d446ee48b8` (main), Pages build `built` at 2026-10-13T01:57:17Z |
+| DNS / certificate / Pages settings | untouched — the completed HTTPS deployment was preserved; no DNS work was repeated |
+| Live bytes | verified over HTTPS after the build: every row below matches the build output, the keys-repo blob, and the tested source (three-way) |
+
+| File | SHA-256 (live = build = repo) |
+|---|---|
+| index.html | `78507a1d54ff6e73bce3d447e1ca95e76a0402ec4613614bd3913ef6333e9877` <!-- PUBLIC-CONSTANT: public asset digest --> |
+| prelude.js | `5eb6736f0ada89ee8b05f0aa08a49d991e80c8744939365626dac3617326b965` <!-- PUBLIC-CONSTANT: public asset digest --> |
+| keychain.js | `7a455cd914274b73fb548b977303c96d0f5f25f404b2ea2706c4e816c245186f` <!-- PUBLIC-CONSTANT: public asset digest --> |
+| genesis.js | `109831fe9733e62b58ba56602bfeba517b00e5492bd7295b6f0266c7c8980b46` (unchanged from the 2026-10-12 receipt) <!-- PUBLIC-CONSTANT: public asset digest --> |
+| vendor/bzdid-key.js | `0261df46896fa152c987b6c8b3f2dc4c17d4f744157096733817a343218056fe` (unchanged) <!-- PUBLIC-CONSTANT: public asset digest --> |
+| vendor/bnr-sign.js | `33a4c646c79f966854cf2d5de8b29c340bc47825db39b6b4f7e395a1ae75c378` (unchanged) <!-- PUBLIC-CONSTANT: public asset digest --> |
+| vendor/hive-tx.min.js | `593e23481c17ee5a3ab54932375f114fdaa2bd530a817486caf31fffc6a21255` <!-- PUBLIC-CONSTANT: public asset digest --> |
+
+
+## CI narrative (for the record)
+
+PR #407 ran four rounds: (1) red — the generated `surfaces/stack.html` needed regeneration after the bDroP surface change (cured in-branch, the generated-file rider law); (2) red — the inherited bDroP eternal flake surfaced twice, including on **main's own #406 merge run (`38322545384`) with none of this lane's code near the path**: the eternal job runs ~100 suites under CPU contention and the mid-handoff restart reconcile starved its 20s window — cured by widening that one wait to 45s (same invariant, calmer clock) and by making the desk's keychain-origin mount hermetic in every eternal scenario (an inert origin that answers the probe but never loads a keychain, so nothing heavy parses outside the scenario that drives the real door); (3) fully green at `9f5128526`; (4) fully green at the merge head `e59d41913` — **46 pass, 0 fail** — merged as `f00b6e50c`.
