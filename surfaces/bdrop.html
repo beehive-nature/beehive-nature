@@ -57,6 +57,11 @@ label:first-child{margin-top:0}
 .verdict.differs{border-color:#e86;color:#e86}
 .mono{word-break:break-all}
 .row{display:flex;gap:var(--s2);flex-wrap:wrap;align-items:center}
+/* the edition line carries on-chain facts — the status grew a 53-char posting key at
+   0001-LIVE (eca905aba), and under CI-wide monospace fonts its min-content pushed the
+   390 px layout viewport to 417 px (issue #416). A flex item's min-width:auto is its
+   longest unbreakable run; let the line break inside that run instead of widening the page. */
+#editions .row span.law{min-width:0;overflow-wrap:anywhere}
 details[data-reg-disclose]{margin-top:var(--s3)}
 details summary{cursor:pointer;color:var(--dim);font-size:12px}
 pre.op{
@@ -296,7 +301,7 @@ if(typeof Number.prototype.unref!=='function'){Number.prototype.unref=function()
 <script src="onboarding/vendor/bnr-sign.js?v=1"></script>
 <script src="keychain-client.js?v=2"></script>
 <script src="ant-pay.js?v=1"></script>
-<script src="bdrop.js?v=9"></script>
+<script src="bdrop.js?v=10"></script>
 <script src="tour.js?v=42"></script>
 </body>
 </html>
