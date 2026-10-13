@@ -1,0 +1,62 @@
+name: keys-door
+
+# ops/keys-door, the keychain edge (the keychain release + edge contract of
+# 2026-10-12, §4), in its own lane (§6). A standalone crate: its own
+# [workspace] and Cargo.lock, so the workspace jobs in tests.yml never
+# build it. Rule 2's second verifier is the real frozen bsigner CLI, built
+# here from this tree; the tests that exist to run it (and the bpq.js
+# release vector) fail, never skip, without it: a skipped gate is not a
+# pass. Mock rails only: the tests touch no network.
+
+on:
+  push:
+    paths:
+      - 'ops/keys-door/**'
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - 'surfaces/bpq-vectors.json'
+      - '.github/workflows/keys-door.yml'
+  pull_request:
+    paths:
+      - 'ops/keys-door/**'
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - 'surfaces/bpq-vectors.json'
+      - '.github/workflows/keys-door.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  keys-door:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - name: Build the second verifier (bsigner, from this tree)
+        run: cargo build --locked -p bsigner
+      - name: keys-door tests, the real bsigner as rule 2's second verifier
+        if: always()
+        env:
+          KEYS_DOOR_BSIGNER: ${{ github.workspace }}/target/debug/bsigner
+        run: |
+          test -x "$KEYS_DOOR_BSIGNER" || { echo "bsigner binary missing for keys-door: a skipped gate is not a pass"; exit 1; }
+          cargo test --locked --manifest-path ops/keys-door/Cargo.toml
+      - name: Format
+        if: always()
+        run: cargo fmt --manifest-path ops/keys-door/Cargo.toml --check
+      - name: Lint
+        if: always()
+        run: cargo clippy --locked --manifest-path ops/keys-door/Cargo.toml --all-targets -- -D warnings
+      - name: Audit gate 2 (recorded) — cargo audit of ops/keys-door/Cargo.lock, verbatim
+        if: always()
+        run: |
+          cargo install cargo-audit --locked --version 0.22.2
+          cargo audit --file ops/keys-door/Cargo.lock && rc=0 || rc=$?
+          echo "cargo audit exited $rc (gate 2 records, it does not block)"
