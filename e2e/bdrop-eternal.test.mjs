@@ -25,7 +25,7 @@ const PORT = 9171, ORIGIN = `http://127.0.0.1:${PORT}`;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.woff2': 'font/woff2', '.svg': 'image/svg+xml' };
 
 /* ── the mock chain: modes, content overrides, per-account posting authorities, a broadcast ledger ── */
-const mock = { mode: 'normal', content: null, accounts: {}, broadcasts: [], lastBody: null };
+const mock = { mode: 'normal', content: null, accounts: {}, broadcasts: [], lastBody: null, stallMs: 0 };
 const rpcResult = (method, params) => {
   if (mock.mode === 'down') throw Object.assign(new Error('mock chain unreachable'), { http: 503 });
   if (method === 'condenser_api.get_dynamic_global_properties') {
@@ -92,6 +92,7 @@ const rpcResult = (method, params) => {
 const server = createServer(async (q, s) => {
   if (q.method === 'POST' && q.url === '/rpc') {
     let b = ''; for await (const c of q) b += c;
+    if (mock.stallMs) await new Promise(r => setTimeout(r, mock.stallMs)); /* the stalled-read control (scenario 6d): answers arrive past the desk's read deadline */
     let code = 200, body;
     try {
       const { method, params } = JSON.parse(b);
@@ -115,6 +116,7 @@ const server = createServer(async (q, s) => {
     if ('blockless' in o) mock.blockless = !!o.blockless; /* model mainnet's block_num-less get_content */
     if ('txshape' in o) mock.txshape = o.txshape; /* inclusion-answer faulty shapes: minimal|wrongid|noops|wrongop|wrongbody|ok */
     if ('getblock' in o) mock.getblock = o.getblock; /* block-membership control: ok|empty */
+    if ('stallMs' in o) mock.stallMs = o.stallMs; /* stall every rpc answer by N ms (the stalled-read regression) */
     if ('badlib' in o) { mock.badlib = !!o.badlib; mock.libcalls = 0; } /* malformed irreversible height, first call spared (the page's own tx build) */
     s.writeHead(200); s.end('ok'); return;
   }
@@ -498,12 +500,56 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     page6c.on('pageerror', e => errs6.push('restart: ' + String(e)));
     await page6c.goto(ORIGIN + '/surfaces/bdrop.html#fast');
     await page6c.waitForSelector('body[data-reg]', { timeout: 8000 });
-    /* widened 2026-10-13: the same invariant on a CI-calmer window — the eternal job runs ~100
-       suites under CPU contention, and 20s starved this reconcile twice on main's own runs
-       (38322545384) with no code change anywhere near the path */
-    await step('restart after mid-handoff closure reconciles from the chain', () => page6c.waitForFunction(() => /bdrop-keychain-closed-midhandoff[^\n]*confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 75000 }) /* 45s starved under the grown suite's contention — same invariant, more headroom */);
+    /* EVENT-DRIVEN SETTLE (issues #413/#415, repaired 2026-10-13): the wall-clock windows
+       here (20s → 45s → 75s, each starved in turn: runs 38322545384, 38351639383,
+       38360498738) measured nothing about the desk — instrumented locally the restart
+       page's whole boot is ~0.6s and the reconcile RPC answers at t+180ms with the
+       confirmed render at t+292ms, BEFORE the data-reg gate resolves; the eternal job's
+       concurrent browsers starve the page's renderer for tens of seconds while the
+       node-side clock runs, so any tuned wall can be starved past. The step now waits for
+       the page's OWN settle event — the boot reconcile stamps data-boot-settled on the
+       outbox when its pass completes (after its own bounded read deadline + one retry) —
+       with NO tuned timeout; a broken reconcile settles too and the assertion below names
+       the page's answer. The eternal step's 12-min job cap is the outer backstop. */
+    await step('restart after mid-handoff closure reconciles from the chain', () => page6c.waitForFunction(() => {
+      const box = document.getElementById('outbox');
+      return !!box && (box.getAttribute('data-boot-settled') === '1'
+        || /bdrop-keychain-closed-midhandoff[^\n]*confirmed/.test(box.textContent || ''));
+    }, null, { timeout: 0 }));
+    const out6c = await page6c.textContent('#outbox'); /* renderOutbox emits divs: textContent carries no newlines */
+    ok('mid-handoff closure: the chain reconciles the record to confirmed (the boot pass settled)', /bdrop-keychain-closed-midhandoff · confirmed/.test(out6c), (out6c.match(/@loviswater\/bdrop-keychain-closed-midhandoff[^@]*/) || [''])[0].slice(0, 120));
     ok('mid-handoff closure: no extra broadcast across the whole keychain scenario', mock.broadcasts.length === 2, 'broadcasts=' + mock.broadcasts.length);
     await ctx6c.close();
+
+    /* ── scenario 6d (the #413 repair's own regression): a restart whose chain read
+       STALLS past the desk's read deadline must settle with a NAMED unanswered read —
+       the boot pass is never wedged silent — and once the endpoint answers again the
+       manual reconcile confirms from the chain. Reads only: a stalled read aborts,
+       nothing is broadcast at any point. The waits here carry walls because the page's
+       own work is bounded by its OWN deadlines (10s read + 1.5s backoff + 10s retry),
+       not by a tuned sleep masking the desk. ── */
+    await setMock({ mode: 'normal', content: { permlink: 'bdrop-stalled-read', body: BODY }, stallMs: 12000 });
+    mock.broadcasts.length = 0;
+    const dir6d = profile('stall'); dirs.push(dir6d);
+    const st6d = await open(dir6d);
+    const REC6D = { v: 1, id: '@loviswater/bdrop-stalled-read', created_at: '2026-10-13T00:00:00', stage: 'handoff',
+      scope: { author: 'loviswater', permlink: 'bdrop-stalled-read', body_sha256: BODY_SHA, body_bytes: 0, disclosure_version: 'x', rpc: `http://127.0.0.1:${PORT}/rpc` },
+      body: null, signed_tx: null, events: [], receipt: null, attempts: 0, last_error: null };
+    await st6d.page.evaluate(r => localStorage.setItem('bnr.bdrop.outbox.v1', r), JSON.stringify([REC6D]));
+    await st6d.page.reload();
+    await st6d.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await step('6d the stalled boot read settles (deadline + one retry, then named)', () => st6d.page.waitForFunction(() => document.getElementById('outbox') && document.getElementById('outbox').getAttribute('data-boot-settled') === '1', null, { timeout: 35000 }));
+    const out6d = await st6d.page.textContent('#outbox'); /* divs concatenate: assert the record's own segment */
+    const seg6d = (out6d.match(/@loviswater\/bdrop-stalled-read[^@]*/) || [''])[0];
+    ok('6d the stalled read is NAMED as an unanswered endpoint — the desk is never wedged silent',
+      /bdrop-stalled-read · handoff/.test(seg6d) && /reconcile lookup failed: the endpoint did not answer in 10s — read aborted/.test(seg6d), seg6d.slice(0, 150));
+    ok('6d a stalled read broadcast nothing (reads abort, they never re-sign)', mock.broadcasts.length === 0, 'broadcasts=' + mock.broadcasts.length);
+    await setMock({ stallMs: 0 }); /* the endpoint answers again */
+    await st6d.page.click('#reconcile');
+    await step('6d the manual reconcile confirms once the endpoint answers', () => st6d.page.waitForFunction(() => /bdrop-stalled-read[^\n]*confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 15000 }));
+    ok('6d recovery broadcast nothing either — the chain was only read', mock.broadcasts.length === 0, 'broadcasts=' + mock.broadcasts.length);
+    ok('6d no page errors', st6d.errs.length === 0, st6d.errs[0] || '');
+    await st6d.ctx.close();
 
     /* ── scenario 7: recovery evidence — expected / chain / signature-bound kept SEPARATE ── */
     rmSync(dir1, { recursive: true, force: true }); /* the original browser profile is destroyed, not just closed */
