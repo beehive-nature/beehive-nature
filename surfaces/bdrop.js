@@ -1,4 +1,4 @@
-/* bdrop.js v4 — the drop desk's durable lifecycle.
+/* bdrop.js v5 — the drop desk's durable lifecycle.
    prepared → authorized → [signed | handoff] → submitted → confirmed → reconciled.
    The browser is a client, never the sole keeper: recoverable state (scope,
    body bytes, the signed transaction, the event log) persists in localStorage
@@ -11,11 +11,15 @@
    operations and unparseable residue keep new submissions refused — an explicit,
    dialog-confirmed archive is the only exit, never a silent empty rewrite.
    Signing has three doors, chosen explicitly, nothing auto-selected: the
-   native BNR wallet signer (the keychain contract — handoff issue #405, not
-   built yet), the Hive Keychain extension (external COMPATIBILITY; its
-   upstream requestPost contract is pinned below — callback NINTH), and a
-   one-scope in-tab paste held as zeroable bytes — never persisted, never
-   logged, never sent; only the signed transaction travels. Recovery evidence
+   native BNR wallet signer — the estate's isolated keychain at keys.skaists.dev
+   (the contract of issue #405, delivered: the desk checks the posting key is
+   chain-authorized before asking, one press inside that origin signs, the
+   returned signature is verified here against the drop's own digest, and the
+   desk broadcasts through its own named endpoint), the Hive Keychain extension
+   (external COMPATIBILITY; its upstream requestPost contract is pinned below —
+   callback NINTH), and a one-scope in-tab paste held as zeroable bytes — never
+   persisted, never logged, never sent; only the signed transaction travels.
+   Recovery evidence
    keeps expected, chain-recovered and signature-bound hashes SEPARATE: a
    content read proves presence, never a signature — no commitment means
    UNVERIFIED, never MATCH. */
@@ -334,22 +338,60 @@ function slug(s){return s.toLowerCase().trim().replace(/[^a-z0-9-]+/g,'-').repla
 function jsonMetadata(tags){
   return JSON.stringify({tags:tags&&tags.length?tags:['hive'],app:'bnr/bdrop/2.0',format:'markdown',disclosure_version:DISCLOSURE_VERSION});
 }
-/* two signing doors, no new keychain: the founder's existing hive keychain
-   extension (the key never enters this page), or a one-scope in-tab paste */
+/* three signing doors, chosen explicitly, and no key enters this page: the
+   native BNR wallet door — the estate's isolated keychain at keys.skaists.dev
+   (mounted only when that origin answers; the drop is confirmed by one press
+   inside it, the desk checks the posting key is chain-authorized before
+   asking, and verifies the signature against the drop's own bytes after) —
+   the founder's existing hive keychain extension (compatibility, you choose
+   it), or a one-scope in-tab paste */
 var KC=(typeof window.hive_keychain==='object'&&window.hive_keychain&&typeof window.hive_keychain.requestPost==='function')?window.hive_keychain:null;
+var KCX=null; /* the mounted isolated keychain client — public state and ask-only; the native door of issue #405 */
+if(window.KeychainClient&&document.getElementById('kc-slot')){
+  KeychainClient.mount(document.getElementById('kc-slot')).then(function(c){
+    KCX=c; window.bdropKeychain=c||null; /* public-data handle: state reads and ask-only signers */
+    renderSigner();
+  });
+}
 function signerMode(){var el=document.querySelector('input[name="signer"]:checked');return el?el.value:'paste';}
+/* the returned keychain signature is verified here against the drop's own
+   bytes — the page trusts no one's word for what was signed */
+function verifyHiveSig(out,tx){
+  if(!out||typeof out.raw!=='string'||!/^[0-9a-f]{130}$/.test(out.raw))throw new Error('what came back is not a Hive signature');
+  var rec=parseInt(out.raw.slice(0,2),16)-31;
+  if(!(rec>=0&&rec<=3))throw new Error('the recovery byte is out of range');
+  if(typeof out.pub!=='string'||!/^STM[1-9A-HJ-NP-Za-km-z]{20,60}$/.test(out.pub))throw new Error('no posting public key came back');
+  if(!window.BnrSign)throw new Error('the verification stack did not load');
+  var t=new H.Transaction([]);t.created=true;t.transaction=JSON.parse(JSON.stringify(tx));
+  var d=t.digest();
+  var db=Uint8Array.from(String(d.digest).split(',').map(Number));
+  if(d.txId!==out.hash)throw new Error('the transaction id does not match this drop');
+  var pub33=new Uint8Array(H.PublicKey.fromString(out.pub).key);
+  if(!BnrSign.secp.verify(out.raw.slice(2),db,pub33))throw new Error('the signature does not match the posting key');
+  return true;
+}
 function renderSigner(){
   var kc=$('signer-keychain');if(!kc)return;
+  var nat=$('signer-native');
   var note=$('signer-note'),kt=$('keytruth'),wl=document.querySelector('label[for="wif"]');
   kc.disabled=!KC; /* external signers are NEVER auto-selected — nothing sets this radio but the reader's own choice */
-  if(note)note.textContent=KC
-    ?'the keychain extension is a COMPATIBILITY door you choose yourself. it signs after one press inside it and broadcasts through the endpoint IT is configured with; this desk confirms inclusion from the endpoint named below. the native BNR wallet signer — the assigned path — is handed to the keychain owner (github issue #405) and is not built yet.'
-    :'no hive keychain extension detected — that door is closed. the native BNR wallet signer is handed to the keychain owner (github issue #405) and is not built yet; the manual paste below works today.';
+  if(nat)nat.disabled=!KCX; /* the native door unlocks when the keychain origin answers; the choice stays the reader's */
   var mode=signerMode();
-  if(kt)kt.textContent=mode==='keychain'
+  if(note)note.textContent=mode==='native'
+    ?(KCX
+      ?'the estate\u2019s isolated keychain holds the posting key at keys.skaists.dev — this desk asks, that origin shows the drop and signs after one press there. before asking, the desk checks that key is an authorized posting key of the author at the endpoint below; after, it verifies the signature against the drop\u2019s own bytes and broadcasts through this endpoint. the desk never holds a Hive key, and nothing falls back to another door silently.'
+      :'the keychain at keys.skaists.dev did not answer in this browser — the native door is closed here and now. choose another door; nothing was attempted.')
+    :KC
+    ?'the keychain extension is a COMPATIBILITY door you choose yourself. it signs after one press inside it and broadcasts through the endpoint IT is configured with; this desk confirms inclusion from the endpoint named below. the native BNR wallet signer is the estate\u2019s isolated keychain at keys.skaists.dev (enabled above when it answers).'
+    :(KCX
+      ?'the estate\u2019s isolated keychain at keys.skaists.dev answered — the native door above is open. the manual paste below still works.'
+      :'no hive keychain extension detected — that door is closed. the estate\u2019s isolated keychain did not answer here either; the manual paste below works today.');
+  if(kt)kt.textContent=mode==='native'
+    ?'to no one and never here: your keychain at keys.skaists.dev derives the posting key inside itself and signs after your press there; this page receives only the signature, and checks it against the chain-named authority and the drop\u2019s own digest before broadcasting through the endpoint below.'
+    :mode==='keychain'
     ?'to no one and never here: your keychain extension signs after your press inside it and broadcasts through its own configured endpoint; the desk confirms inclusion from the endpoint named below.'
     :'to no one: it signs in this tab and is wiped after the gesture; only the signed transaction is sent, to the RPC endpoint named below.';
-  if(wl)wl.style.opacity=mode==='keychain'?'0.6':'1';
+  if(wl)wl.style.opacity=(mode==='paste')?'1':'0.6';
 }
 Array.prototype.forEach.call(document.querySelectorAll('input[name="signer"]'),function(r){r.addEventListener('change',renderSigner);});
 $('publish').addEventListener('click',async function(){
@@ -359,7 +401,7 @@ $('publish').addEventListener('click',async function(){
   if(!body){log('no body — nothing to publish, nothing attempted.','bad');return;}
   if(quarantine()){log('the journal is quarantined (damaged, with unresolved operations or unparseable bytes) — the desk refuses new submissions until every readable operation is reconciled against the chain (see the outbox below).','bad');return;}
   var mode0=signerMode();
-  if(mode0==='native'){log('the native BNR wallet signer is not built yet — the signing contract is handed to the keychain owner (github issue #405). choose another door for now.','bad');return;}
+  if(mode0==='native'&&!KCX){log('the native door needs the estate\u2019s isolated keychain at keys.skaists.dev, and it did not answer in this browser — choose another door; nothing was attempted.','bad');return;}
   if(!lastHash)await rehash();
   var bodyHash=lastHash;
   var scope=await currentScope(bodyHash);
@@ -390,6 +432,73 @@ $('publish').addEventListener('click',async function(){
     title:scope.title,body:body,json_metadata:jsonMetadata(scope.tags?scope.tags.split(','):null)}];
   $('opjson').textContent=JSON.stringify(op,null,1);
   var mode=signerMode();
+  if(mode==='native'){
+    /* the estate's keychain door (issue #405): no extension, no paste, no key here */
+    if(!KCX){log('the isolated keychain at keys.skaists.dev is no longer mounted — choose another door; nothing was attempted.','bad');return;}
+    if(!KCX.state||KCX.state.state!=='unlocked'){log('unlock the isolated keychain in its frame above first — nothing was attempted.','bad');return;}
+    var isoPub;
+    try{isoPub=await KCX.signer().hivePub(scope.author);}
+    catch(e){log('the keychain would not name its posting key for @'+scope.author+' ('+e.message+') — a typed refusal, nothing was attempted.','bad');return;}
+    var auth;
+    try{auth=await rpcCall(scope.rpc,'condenser_api.get_accounts',[[scope.author]]);}
+    catch(e){log('the authority lookup at '+scope.rpc+' failed ('+e.message+') — the desk will not ask for a signature blind. retry when the endpoint answers.','bad');return;}
+    var posting=(auth&&auth[0]&&auth[0].posting&&Array.isArray(auth[0].posting.key_auths))?auth[0].posting.key_auths.map(function(k){return String(k[0]);}):[];
+    if(posting.indexOf(isoPub.pub)<0){
+      upsert(a,scope,function(r){r.last_error='authority: the keychain posting key is not an authorized posting key of @'+scope.author;});
+      log('the keychain\u2019s posting key '+isoPub.pub+' is NOT an authorized posting key of @'+scope.author+' at this endpoint — a typed refusal: nothing was signed or sent. authorize that key once on-chain (an account_update signed by any active-key holder), publish under an account that already authorizes it, or choose another door. no fallback happened silently.','bad');
+      return;
+    }
+    log('the keychain will publish as @'+scope.author+' with posting key '+isoPub.pub+' — authorized at this endpoint. the drop is confirmed by one press inside keys.skaists.dev.','dim');
+    H.config.node=scope.rpc;
+    var itx=new H.Transaction([op]);
+    var recN=upsert(a,scope,function(r){r.body=body;r.stage='authorized';r.events.push(ev('authorized',scope.body_sha256,{signer:'native-keychain',pub:isoPub.pub}));});
+    /* the attempted operation persists BEFORE the component that signs sees it — an answer that never comes back is UNKNOWN, never "not signed" */
+    upsert(a,scope,function(r){r.stage='handoff';r.events.push(ev('handoff','native-keychain'));});
+    log('handing the drop to your keychain — persisted first at the handoff stage; if the answer never comes back the outcome is UNKNOWN, and the desk reconciles from the chain instead of guessing.','dim');
+    var outNat;
+    try{
+      log('building the transaction against '+scope.rpc+' (reference block, expiration)…');
+      await itx.create([op]);
+      log('asking your keychain to sign the drop — press once inside it…','dim');
+      outNat=await KCX.signer().signHive(scope.author,itx.transaction);
+    }catch(e){
+      if(/did not answer in time/.test(e&&e.message||'')){
+        upsert(a,scope,function(r){r.stage='submitted';r.last_error='handoff: '+(e&&e.message?e.message:e)+' — outcome UNKNOWN';r.events.push(ev('submitted','outcome-unknown',{signer:'native-keychain'}));});
+        log('the handoff answer never arrived ('+(e&&e.message?e.message:e)+') — the outcome is UNKNOWN, not "not signed". the desk reconciles from the chain before anything is asked again; it never blind-retries.','bad');
+        await confirmFromChain(a,null,scope,null);
+        return;
+      }
+      upsert(a,scope,function(r){r.stage='authorized';r.last_error='keychain refused: '+(e&&e.message?e.message:e);r.events.push(ev('refused','native-keychain'));});
+      log('the keychain REFUSED the request ('+(e&&e.message?e.message:e)+') — an explicit refusal before any signature existed. the record returns to authorized; nothing was broadcast.','bad');
+      return;
+    }
+    try{verifyHiveSig(outNat,itx.transaction);}
+    catch(e){
+      upsert(a,scope,function(r){r.stage='authorized';r.last_error='verify: '+e.message;r.events.push(ev('refused','native-keychain',{why:'signature did not verify'}));});
+      log('what came back did not verify against this drop ('+e.message+') — the signature travels nowhere and nothing was broadcast. the record returns to authorized.','bad');
+      return;
+    }
+    itx.addSignature(outNat.raw);
+    var signedNat=JSON.parse(JSON.stringify(itx.signedTransaction));
+    upsert(a,scope,function(r){r.signed_tx=signedNat;r.stage='signed';r.events.push(ev('signed',outNat.hash,{signer:'native-keychain',expiration:signedNat.expiration}));});
+    $('txjson').textContent=JSON.stringify(signedNat,null,1);
+    log('signed by the keychain and verified here against the drop\u2019s own digest — transaction id '+outNat.hash+'. the signed transaction is persisted before broadcast, so a restart re-broadcasts it without any key.','dim');
+    upsert(a,scope,function(r){r.attempts=(r.attempts||0)+1;});
+    var resNat;
+    try{resNat=await itx.broadcast();}
+    catch(e){
+      upsert(a,scope,function(r){r.stage='submitted';r.last_error='broadcast: '+(e&&e.message?e.message:e);r.events.push(ev('submitted','outcome-unknown',{error:r.last_error}));});
+      log('the broadcast ANSWER was lost or refused ('+(e&&e.message?e.message:e)+'). the state is submitted-outcome-unknown — reconciliation reads the chain before anything is signed again.','bad');
+      await confirmFromChain(a,null,scope,null);
+      return;
+    }
+    var txidNat=outNat.hash||((typeof resNat==='string'&&resNat)?resNat:((resNat&&(resNat.id||resNat.result))||null));
+    var recNS=upsert(a,scope,function(r){r.stage='submitted';r.last_error=null;r.events.push(ev('submitted',txidNat||'no-id',{signer:'native-keychain'}));});
+    if(txidNat)log('broadcast accepted through '+scope.rpc+'. transaction id '+txidNat,'ok');
+    else log('broadcast accepted (endpoint returned no id — the chain lookup below is the receipt).','ok');
+    await confirmFromChain(a,recNS,scope,txidNat);
+    return;
+  }
   if(mode==='keychain'){
     if(!KC){log('the hive keychain extension is not present — choose another door.','bad');return;}
     $('txjson').textContent='the keychain signer holds the signed bytes — this page never sees them; the chain read below is the proof.';

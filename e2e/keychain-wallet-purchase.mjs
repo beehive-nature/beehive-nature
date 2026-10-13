@@ -15,8 +15,8 @@ const realm = {TextEncoder, TextDecoder, Uint8Array, crypto: globalThis.crypto, 
 vm.createContext(realm); vm.runInContext(readFileSync(root + '/surfaces/onboarding/vendor/bnr-sign.js', 'utf8'), realm);
 const verify = _envelope.nobleVerifier(realm.BnrSign);
 const hexOf = b => Buffer.from(b).toString('hex'), bytesOf = h => new Uint8Array(Buffer.from(h.replace(/^0x/, ''), 'hex'));
-const KEYS = {'/': 'keychain/index.html', '/keychain.js': 'keychain/keychain.js', '/genesis.js': 'keychain/genesis.js',
-  '/vendor/bzdid-key.js': 'surfaces/onboarding/bzdid-key.js', '/vendor/bnr-sign.js': 'surfaces/onboarding/vendor/bnr-sign.js'};
+const KEYS = {'/': 'keychain/index.html', '/prelude.js': 'keychain/prelude.js', '/keychain.js': 'keychain/keychain.js', '/genesis.js': 'keychain/genesis.js',
+  '/vendor/bzdid-key.js': 'surfaces/onboarding/bzdid-key.js', '/vendor/bnr-sign.js': 'surfaces/onboarding/vendor/bnr-sign.js', '/vendor/hive-tx.min.js': 'surfaces/onboarding/vendor/hive-tx.min.js'};
 
 const file = Buffer.from('Isolated keychain purchase fixture; never live funds.');
 const sdk = `const bytes=new TextEncoder().encode(${JSON.stringify(file.toString())});

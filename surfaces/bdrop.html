@@ -185,10 +185,11 @@ a{color:var(--ink)}
   <div class="card">
     <p class="law" style="margin-top:0">how this drop is signed — three doors, chosen explicitly; nothing here is auto-selected for you:</p>
     <div class="row">
-      <label><input type="radio" name="signer" value="native" id="signer-native" disabled> native BNR wallet signer — the keychain contract (handoff issue #405; not built yet)</label>
+      <label><input type="radio" name="signer" value="native" id="signer-native" disabled> native BNR wallet signer — the estate’s isolated keychain at keys.skaists.dev (no extension, no paste; enabled when it answers — the contract of issue #405, delivered)</label>
       <label><input type="radio" name="signer" value="keychain" id="signer-keychain"> hive keychain extension (external, compatibility — you choose it; the key never touches this page)</label>
       <label><input type="radio" name="signer" value="paste" checked> paste the posting key in this tab (manual)</label>
     </div>
+    <div id="kc-slot"></div>
     <p class="law" id="signer-note">…</p>
     <div class="grid2">
       <div>
@@ -284,8 +285,10 @@ a{color:var(--ink)}
 if(typeof Number.prototype.unref!=='function'){Number.prototype.unref=function(){};Number.prototype.ref=function(){}}
 </script>
 <script src="onboarding/vendor/hive-tx.min.js?v=1"></script>
+<script src="onboarding/vendor/bnr-sign.js?v=1"></script>
+<script src="keychain-client.js?v=2"></script>
 <script src="ant-pay.js?v=1"></script>
-<script src="bdrop.js?v=4"></script>
+<script src="bdrop.js?v=5"></script>
 <script src="tour.js?v=42"></script>
 </body>
 </html>

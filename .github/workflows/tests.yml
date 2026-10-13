@@ -1018,12 +1018,14 @@ jobs:
         if: always()
         timeout-minutes: 10
         run: node e2e/ant-hosted-browser.mjs
-      - name: Isolated keychain — own origin, passkey-born root, decoded confirm, refusals, and the hosted purchase paid from it
+      - name: Isolated keychain — own origin, passkey-born root, decoded confirm, refusals, the hosted purchase paid from it, the Hive drop door, and host-loss succession
         if: always()
-        timeout-minutes: 10
+        timeout-minutes: 15
         run: |
           node e2e/keychain-isolation.mjs
           node e2e/keychain-wallet-purchase.mjs
+          node e2e/keychain-hive.mjs
+          node e2e/keychain-succession.mjs
       - name: Wallet guided flow — identity confirmation and retained invoice inputs in all three styles
         if: always()
         timeout-minutes: 10
