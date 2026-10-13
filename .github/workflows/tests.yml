@@ -27,10 +27,12 @@ jobs:
           targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       - name: Ensure the wasm32 target is installed (the toolchain file outranks action inputs)
+        if: always()
         run: rustup target add wasm32-unknown-unknown
       - name: Build workspace
         run: cargo build --workspace --locked
       - name: Build the bnrose-exec wasm worker
+        if: always()
         run: cargo build -p bnrose-exec-wasm --target wasm32-unknown-unknown --release --locked
       - name: Test workspace
         if: always()
