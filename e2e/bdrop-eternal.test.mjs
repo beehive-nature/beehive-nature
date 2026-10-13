@@ -28,8 +28,31 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/jav
 const mock = { mode: 'normal', content: null, accounts: {}, broadcasts: [], lastBody: null };
 const rpcResult = (method, params) => {
   if (mock.mode === 'down') throw Object.assign(new Error('mock chain unreachable'), { http: 503 });
-  if (method === 'condenser_api.get_dynamic_global_properties')
-    return { head_block_number: 49000000, head_block_id: '02e0dcb4c89a1a5c1e4e8a5c1e4e8a5c1e4e8a5c', time: new Date().toISOString().slice(0, 19) };
+  if (method === 'condenser_api.get_dynamic_global_properties') {
+    mock.libcalls = (mock.libcalls || 0) + 1;
+    if (mock.badlib && mock.libcalls > 1) return { head_block_number: 49000000, last_irreversible_block_num: 'weird', time: new Date().toISOString().slice(0, 19) };
+    return { head_block_number: 49000000, head_block_id: '02e0dcb4c89a1a5c1e4e8a5c1e4e8a5c1e4e8a5c', last_irreversible_block_num: 48999990, time: new Date().toISOString().slice(0, 19) };
+  }
+  if (method === 'condenser_api.get_transaction') {
+    if (Array.isArray(params)) params = params[0] || {}; /* positional, as mainnet expects */
+    if (mock.gettx === 'fail') throw Object.assign(new Error('rpc error: transaction lookup unavailable (mock)'), { http: 200 });
+    if (mock.gettx === 'missing') throw Object.assign(new Error('rpc error: Assert Exception:unknown transaction'), { http: 200 });
+    const q0 = Array.isArray(params) ? params[0] : params; /* positional: the id IS the element */
+    mock.lastTxId = (q0 && typeof q0 === 'object') ? String(q0.id || '') : String(q0 || '');
+    const S = mock.txshape || 'ok'; /* faulty-response controls (scenario 13) */
+    if (S === 'minimal') return { block_num: 1 }; /* the source counterexample: a numeric block alone */
+    if (S === 'wrongid') return { transaction_id: '0x' + 'f'.repeat(40), block_num: 48999985, operations: [['comment', { author: 'someone', permlink: 'unrelated', body: 'x' }]] };
+    if (S === 'noops') return { transaction_id: mock.lastTxId, block_num: 48999985, operations: [] };
+    if (S === 'wrongop') return { transaction_id: mock.lastTxId, block_num: 48999985, operations: [['vote', {}]] };
+    const OP = mock.lastOp ? JSON.parse(JSON.stringify(mock.lastOp)) : { author: 'none', permlink: 'none', body: '' }; /* echo the actual broadcast op */
+    if (S === 'wrongbody') { OP.body = 'not the drop' + 's bytes at all'; return { transaction_id: mock.lastTxId, block_num: 48999985, operations: [['comment', OP]] }; }
+    return { transaction_id: mock.lastTxId, block_num: 48999985, operations: [['comment', OP]] };
+  }
+  if (method === 'condenser_api.get_block') {
+    if (Array.isArray(params)) params = params[0];
+    if (mock.getblock === 'empty') return { timestamp: '2026-10-13T00:00:00', transactions: [] };
+    return { timestamp: '2026-10-13T00:00:00', transactions: [{ transaction_id: mock.lastTxId || '0x' + 'e'.repeat(40) }] }; /* the named block contains the named tx by default */
+  }
   if (method === 'condenser_api.get_accounts') {
     const names = params[0] || [];
     return names.map(n => (mock.accounts && mock.accounts[n])
@@ -39,17 +62,26 @@ const rpcResult = (method, params) => {
   if (method === 'condenser_api.broadcast_transaction') {
     const trx = params[0];
     mock.broadcasts.push(trx);
+    mock.lastOp = (trx.operations && trx.operations[0] && trx.operations[0][1]) ? JSON.parse(JSON.stringify(trx.operations[0][1])) : null; /* the inclusion answer echoes the actual broadcast op */
     mock.lastBody = trx.operations[0][1].body;
     if (mock.mode === 'swallow') throw Object.assign(new Error('broadcast answer lost (mock)'), { http: 502 });
     return 'fedcba9876543210fedcba9876543210fedcba98';
   }
   if (method === 'condenser_api.get_content') {
     if (mock.junk) return { author: 123, body: { not: 'a string' }, block_num: 'weird' }; /* the untrusted-endpoint shape */
-    if (mock.contents && Object.prototype.hasOwnProperty.call(mock.contents, params.permlink))
-      return { author: params.author, permlink: params.permlink, body: mock.contents[params.permlink], block_num: 48000112, created: new Date().toISOString().slice(0, 19) };
+    if (mock.contents && Object.prototype.hasOwnProperty.call(mock.contents, params.permlink)) {
+      const cc = { author: params.author, permlink: params.permlink, body: mock.contents[params.permlink], created: new Date().toISOString().slice(0, 19) };
+      if (!mock.blockless) cc.block_num = 48000112; /* mainnet's get_content carries NO block_num — mock.blockless models that */
+      return cc;
+    }
     if (mock.content && mock.content.permlink === params.permlink)
       return { author: params.author, permlink: params.permlink, body: mock.content.body, block_num: 48000111, created: new Date().toISOString().slice(0, 19) };
     if (mock.mode === 'noland' || mock.mode === 'swallow') return { author: params.author, permlink: params.permlink, body: '' };
+    /* MAINNET's not-found shape (the founder's live finding, verbatim): unknown
+       permlink + nothing broadcast yet ⇒ the endpoint ASSERTS instead of answering
+       an empty body. mock.hive models api.hive.blog's actual behavior. */
+    if (mock.hive && !mock.lastBody)
+      throw Object.assign(new Error('rpc error: Assert Exception:Post ' + params.author + '/' + params.permlink + ' does not exist'), { http: 200 });
     return mock.lastBody
       ? { author: params.author, permlink: params.permlink, body: mock.lastBody, block_num: 49000123, created: new Date().toISOString().slice(0, 19) }
       : { author: params.author, permlink: params.permlink, body: '' };
@@ -78,6 +110,12 @@ const server = createServer(async (q, s) => {
     mock.mode = o.mode ?? mock.mode; mock.content = o.content ?? null; mock.contents = o.contents ?? null; mock.junk = !!o.junk;
     if ('accounts' in o) mock.accounts = o.accounts; /* per-account posting authorities (the native door's authority gate) */
     if ('lastBody' in o) mock.lastBody = o.lastBody;
+    if ('hive' in o) mock.hive = !!o.hive; /* model mainnet's assert-shaped not-found */
+    if ('gettx' in o) mock.gettx = o.gettx; /* inclusion-lookup modes: ok | fail | missing */
+    if ('blockless' in o) mock.blockless = !!o.blockless; /* model mainnet's block_num-less get_content */
+    if ('txshape' in o) mock.txshape = o.txshape; /* inclusion-answer faulty shapes: minimal|wrongid|noops|wrongop|wrongbody|ok */
+    if ('getblock' in o) mock.getblock = o.getblock; /* block-membership control: ok|empty */
+    if ('badlib' in o) { mock.badlib = !!o.badlib; mock.libcalls = 0; } /* malformed irreversible height, first call spared (the page's own tx build) */
     s.writeHead(200); s.end('ok'); return;
   }
   const rel = decodeURIComponent(q.url.split('?')[0].replace(/^\//, '')) || 'index.html';
@@ -175,6 +213,15 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await one.page.click('#publish');
     await step('the drop lands', () => one.page.waitForFunction(() => /LANDED/.test(document.getElementById('receipt').textContent || ''), null, { timeout: 30000 }));
     ok('LANDED with block, byte-compare MATCH', /byte-compare MATCH/.test(await one.page.textContent('#receipt')));
+    const rc1ev = (await outboxOf(one.page))[0];
+    ok('receipt evidence SEPARATED: content MATCH, inclusion block, finality irreversible',
+      !!(rc1ev.receipt.evidence && rc1ev.receipt.evidence.content_observed.compare === 'MATCH'
+        && rc1ev.receipt.evidence.tx_included && typeof rc1ev.receipt.evidence.tx_included.block_num === 'number'
+        && rc1ev.receipt.evidence.finality && rc1ev.receipt.evidence.finality.irreversible === true
+        && rc1ev.receipt.evidence.signature_verified === 'verified-in-desk'),
+      JSON.stringify(rc1ev.receipt.evidence || {}).slice(0, 160));
+    ok('the rendered receipt names inclusion and finality as their own states',
+      /inclusion: block/.test(await one.page.textContent('#receipt')) && /finality: irreversible/.test(await one.page.textContent('#receipt')));
     ok('key field cleared after the gesture', (await one.page.inputValue('#wif')) === '');
     ok('key session display live (bound scope)', !(await one.page.getAttribute('#keysession', 'hidden')));
 
@@ -208,7 +255,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await two.ctx.close();
 
     /* ── scenario 2: ambiguity, unavailability, divergence ── */
-    await setMock({ mode: 'swallow', content: null });
+    await setMock({ mode: 'swallow', content: null, gettx: 'fail' });
     mock.broadcasts.length = 0; mock.lastBody = null;
     const dir2 = profile('ambig'); dirs.push(dir2);
     const amb = await open(dir2);
@@ -222,10 +269,15 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     ok('lost answer leaves submitted-outcome-unknown state, recoverable', !!(obAmb[0] && obAmb[0].stage === 'submitted' && obAmb[0].signed_tx), obAmb.map(r => r.stage).join(','));
     await amb.ctx.close();
 
-    await setMock({ mode: 'normal', content: null });
+    await setMock({ mode: 'normal', content: null, gettx: 'fail' });
     const rec1 = await open(dir2);
     await step('restart after ambiguity reconciles to confirmed', () => rec1.page.waitForFunction(() => /confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 20000 }));
     ok('ambiguous path broadcast exactly once', mock.broadcasts.length === 1, 'broadcasts=' + mock.broadcasts.length);
+    const rcAmb = (await outboxOf(rec1.page))[0];
+    ok('an unavailable inclusion lookup stays UNCERTAINTY — content confirms, inclusion does not pretend',
+      !!(rcAmb.receipt.evidence && rcAmb.receipt.evidence.content_observed.compare === 'MATCH' && !rcAmb.receipt.evidence.tx_included && /unavailable|no transaction id/.test(String(rcAmb.receipt.evidence.inclusion_note || ''))),
+      JSON.stringify(rcAmb.receipt.evidence || {}));
+    await setMock({ mode: 'normal', content: null, gettx: 'ok' });
     await rec1.ctx.close();
 
     await setMock({ mode: 'down', content: null });
@@ -272,9 +324,9 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
       mkRec('drop-a', BODY_SHA, FUTURE),        /* will resolve: confirmed (chain body matches) */
       mkRec('drop-b', BODY_SHA, FUTURE),        /* will resolve: diverged (chain body differs) */
       mkRec('drop-c', NEVER_SHA, FUTURE),       /* stays unresolved: not landed, signed tx still live */
-      mkRec('drop-d', NEVER_SHA, PAST),         /* will resolve: expired (cannot land anymore) */
+      mkRec('drop-d', NEVER_SHA, PAST),         /* stays unresolved: expiry is NOT proof of non-execution */
     ];
-    const RAW5 = JSON.stringify(J5).slice(0, -1) + ',{"v":1,"id":"@zombie/trunca'; /* whole-parse fails; the four real objects still parse */
+    const RAW5 = JSON.stringify(J5).slice(0, -1) + ',{"junk-residue":true} tail]'; /* whole-parse fails; the four real objects parse; the junk group is unknowable residue */
     await setMock({ mode: 'normal', contents: { 'drop-a': BODY, 'drop-b': 'other bytes live at this permlink' } });
     const dir5 = profile('corrupt'); dirs.push(dir5);
     const cor0 = await open(dir5);
@@ -298,7 +350,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     ok('partial recovery: drop-a confirmed', /drop-a[^\n]*resolved-confirmed/.test(outTxt), outTxt.split('\n').find(l => l.includes('drop-a')) || '');
     ok('partial recovery: drop-b diverged', /drop-b[^\n]*resolved-diverged/.test(outTxt));
     ok('partial recovery: drop-c stays unresolved (live signed tx, not landed)', /drop-c[^\n]*unresolved/.test(outTxt));
-    ok('partial recovery: drop-d resolved-expired (cannot land anymore)', /drop-d[^\n]*resolved-expired/.test(outTxt));
+    ok('partial recovery: drop-d stays unresolved — an expired signed tx is NOT proof it never executed', /drop-d[^\n]*unresolved/.test(outTxt));
     ok('partial recovery: unparseable residue reported', /residue/i.test(outTxt));
     ok('partial recovery did NOT touch the damaged journal bytes',
       (await cor0.page.evaluate(() => localStorage.getItem('bnr.bdrop.outbox.v1'))) === RAW5);
@@ -319,7 +371,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await cor0.page.fill('#body', BODY);
     await cor0.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
     await cor0.page.click('#publish');
-    await step('after the deliberate archive the normal guards apply again', () => cor0.page.waitForFunction(() => /no posting key given/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    await step('after the deliberate archive the residue keeps every scope refused (independence impossible)', () => cor0.page.waitForFunction(() => /independence cannot be established/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
     await cor0.ctx.close();
 
     /* ── scenario 6: the keychain signer — CONTRACT-FAITHFUL to upstream requestPost
@@ -449,7 +501,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     /* widened 2026-10-13: the same invariant on a CI-calmer window — the eternal job runs ~100
        suites under CPU contention, and 20s starved this reconcile twice on main's own runs
        (38322545384) with no code change anywhere near the path */
-    await step('restart after mid-handoff closure reconciles from the chain', () => page6c.waitForFunction(() => /bdrop-keychain-closed-midhandoff[^\n]*confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 45000 }));
+    await step('restart after mid-handoff closure reconciles from the chain', () => page6c.waitForFunction(() => /bdrop-keychain-closed-midhandoff[^\n]*confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 75000 }) /* 45s starved under the grown suite's contention — same invariant, more headroom */);
     ok('mid-handoff closure: no extra broadcast across the whole keychain scenario', mock.broadcasts.length === 2, 'broadcasts=' + mock.broadcasts.length);
     await ctx6c.close();
 
@@ -460,13 +512,13 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await step('fresh client: the outbox starts empty', () => fr.page.waitForFunction(() => /outbox is empty/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 8000 }));
     const before = mock.broadcasts.length;
     /* 7a: commitment present and equal → MATCH, but signature evidence stays NONE */
-    await setMock({ mode: 'normal', content: { permlink: 'drop-r-match', body: BODY } });
+    await setMock({ mode: 'normal', content: null, contents: { 'drop-r-match': BODY }, blockless: true }); /* mainnet shape: no block_num on content reads */
     await fr.page.fill('#author', 'loviswater');
     await fr.page.fill('#permlink', 'drop-r-match');
     await fr.page.fill('#body', BODY);
     await fr.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
     await fr.page.click('#recover');
-    await step('7a recovered with a matching commitment', () => fr.page.waitForFunction(() => /equals the desk/.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    await step('7a recovered with a matching commitment', () => fr.page.waitForFunction(() => /equals the committed bytes/.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
     const obA = await outboxOf(fr.page);
     const rcA = obA.find(r => r.scope.permlink === 'drop-r-match');
     ok('7a MATCH verdict with expected and chain hashes RECORDED SEPARATELY',
@@ -474,12 +526,14 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     ok('7a signature evidence honestly NONE — no signing provenance invented',
       rcA.receipt.signature_bound_hash === null && /NONE/.test(rcA.receipt.signing_evidence) && rcA.receipt.txid === null && /UNVERIFIED/.test(rcA.receipt.inclusion));
     ok('7a the recovered EDITION BYTES ride the record', rcA.body === BODY);
+    ok('7a a blockless chain answer renders created-time, never \'undefined\'', /created \d/.test(await fr.page.textContent('#receipt')) && !(await fr.page.textContent('#receipt')).includes('undefined'), (await fr.page.textContent('#receipt')).slice(0, 120));
+    await setMock({ mode: 'normal', content: null, contents: null, blockless: false });
     /* 7b: commitment differs → DIVERGED, both digests recorded */
     await setMock({ mode: 'normal', content: { permlink: 'drop-r-diverge', body: 'someone replaced the body' } });
     await fr.page.fill('#permlink', 'drop-r-diverge');
     await fr.page.fill('#body', BODY);
     await fr.page.click('#recover');
-    await step('7b divergent recovery reported', () => fr.page.waitForFunction(() => /DIFFERS from the desk/.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    await step('7b divergent recovery reported', () => fr.page.waitForFunction(() => /DIFFERS from the committed bytes/.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
     const rcB = (await outboxOf(fr.page)).find(r => r.scope.permlink === 'drop-r-diverge');
     ok('7b DIVERGED verdict — never a self-compared MATCH', !!(rcB && rcB.receipt && rcB.receipt.body_byte_compare === 'DIVERGED' && rcB.receipt.body_sha256_expected === BODY_SHA && rcB.receipt.body_sha256_chain !== BODY_SHA && rcB.stage === 'diverged'));
     /* 7c: no commitment in the desk → UNVERIFIED, not MATCH */
@@ -598,11 +652,278 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     ok('unauthorized attempt left no signed record and names its refusal',
       !!(rec8b && !rec8b.signed_tx && /not an authorized posting key/i.test(rec8b.last_error || '')), (rec8b && rec8b.last_error || 'no record').slice(0, 80));
     await ctx8.close();
+
+    /* ── scenario 9: the two quarantine gaps (Agent 30, 2026-10-13) ──
+       (a) a transaction that EXECUTED before expiry, first seen through a stale
+       empty read, must never be labeled resolved-expired — expiry establishes
+       neither non-execution nor endpoint completeness;
+       (b) archiving a damaged journal that holds an unresolved HANDOFF must carry
+       that uncertainty across restart and refuse a replacement submission of the
+       SAME operation — until the chain establishes its fate, and then the desk
+       CONFIRMS the landing instead of republishing. Independence: a different
+       scope proceeds under its own pre-flight. ── */
+    await setMock({ mode: 'normal', content: null, junk: false, accounts: {}, lastBody: null });
+    mock.broadcasts.length = 0;
+    const PAST9 = new Date(Date.now() - 7200e3).toISOString().slice(0, 19);
+    const mkOp = (pl, sha, stage, exp) => ({ v: 1, id: '@alice/' + pl, created_at: '2026-10-13T00:00:00', stage: stage,
+      scope: { author: 'alice', permlink: pl, body_sha256: sha, body_bytes: 0, disclosure_version: 'x', rpc: `http://127.0.0.1:${PORT}/rpc` },
+      body: null, signed_tx: exp ? { expiration: exp } : null, events: [], receipt: null, attempts: 0, last_error: null });
+    const dir9 = profile('quargap'); dirs.push(dir9);
+    const q9 = await open(dir9);
+    /* (a) the stale view: drop-stale executed before expiry, but this read is empty */
+    await setMock({ mode: 'normal', contents: { 'drop-stale': '' }, accounts: {}, lastBody: null });
+    const RAW9a = JSON.stringify([mkOp('drop-stale', BODY_SHA, 'signed', PAST9)]).slice(0, -1) + ',"corrupt';
+    await q9.page.evaluate(r => { localStorage.setItem('bnr.bdrop.outbox.v1', r); localStorage.removeItem('bnr.bdrop.outbox.v1.damaged'); }, RAW9a);
+    await q9.page.reload();
+    await q9.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await q9.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await q9.page.click('#recover'); /* corrupt-mode reconciliation against the STALE view */
+    await step('9a reconciliation against the stale view reports the operation', () => q9.page.waitForFunction(() => /drop-stale/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 15000 }));
+    let txt9a = await q9.page.textContent('#outbox');
+    ok('9a an expired signed tx through an empty read stays UNRESOLVED — never resolved-expired',
+      /drop-stale[^\n]*unresolved/.test(txt9a) && !/drop-stale[^\n]*resolved-expired/.test(txt9a),
+      (txt9a.split('\n').find(l => l.includes('drop-stale')) || '').slice(0, 150));
+    ok('9a the note names expiry as non-proof (stale or incomplete reads are possible)', /NOT proof|stale/i.test(txt9a));
+    /* the endpoint catches up: drop-stale HAD executed — proving the label would have been wrong */
+    await setMock({ mode: 'normal', contents: { 'drop-stale': BODY }, accounts: {}, lastBody: null });
+    await q9.page.click('#recover');
+    await step('9a the caught-up view resolves it as LANDED', () => q9.page.waitForFunction(() => /drop-stale[^\n]*resolved-confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 15000 }));
+    ok('9a the op that "expired" actually landed — the mislabel window is closed by construction', /drop-stale[^\n]*resolved-confirmed/.test(await q9.page.textContent('#outbox')));
+    /* (b) a damaged journal holding an unresolved HANDOFF */
+    const RAW9b = JSON.stringify([mkOp('drop-handoff', BODY_SHA, 'handoff', null)]).slice(0, -1) + ','; /* trailing structural comma: whole-parse fails, the operation parses, NO residue */
+    await q9.page.evaluate(r => { localStorage.setItem('bnr.bdrop.outbox.v1', r); localStorage.removeItem('bnr.bdrop.outbox.v1.damaged'); localStorage.removeItem('bnr.bdrop.quarantine.v1'); }, RAW9b);
+    await q9.page.reload();
+    await q9.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await setMock({ mode: 'normal', contents: { 'drop-handoff': '' }, accounts: {}, lastBody: null });
+    await q9.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await q9.page.click('#recover');
+    await step('9b the unresolved handoff is named', () => q9.page.waitForFunction(() => /drop-handoff[^\n]*unresolved/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 15000 }));
+    q9.page.once('dialog', d => d.accept());
+    await q9.page.click('#damaged-archive');
+    await step('9b the deliberate archive completes', () => q9.page.waitForFunction(() => /archived deliberately/.test(document.getElementById('status').textContent || ''), null, { timeout: 8000 }));
+    const ledger9 = await q9.page.evaluate(() => JSON.parse(localStorage.getItem('bnr.bdrop.quarantine.v1') || '[]'));
+    ok('9b the archive CARRIES the unresolved handoff into a durable quarantine ledger',
+      ledger9.some(e => e.scope && e.scope.permlink === 'drop-handoff' && e.outcome === 'unresolved'),
+      JSON.stringify(ledger9.map(e => (e.scope ? e.scope.permlink : '?') + ':' + e.outcome)));
+    /* RESTART: uncertainty and duplicate-prevention must survive */
+    await q9.page.reload();
+    await q9.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await step('9b the quarantine ledger survives the restart and renders', () => q9.page.waitForFunction(() => /quarantine ledger/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 8000 }));
+    await setMock({ mode: 'normal', contents: { 'drop-handoff': '' }, accounts: {}, lastBody: null });
+    await q9.page.fill('#author', 'alice');
+    await q9.page.fill('#permlink', 'drop-handoff');
+    await q9.page.fill('#body', BODY);
+    await q9.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await q9.page.click('#publish');
+    await step('9b the SAME operation is refused after restart — the archive authorized no replacement',
+      () => q9.page.waitForFunction(() => /quarantine ledger/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    ok('9b resubmission attempt broadcast nothing', mock.broadcasts.length === 0, 'broadcasts=' + mock.broadcasts.length);
+    await q9.page.fill('#permlink', 'drop-independent');
+    await q9.page.click('#publish');
+    await step('9b an independent scope proceeds under its own guards (not held hostage by the ledger)',
+      () => q9.page.waitForFunction(() => /no posting key given/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    /* the chain establishes drop-handoff's fate: it HAD landed */
+    await setMock({ mode: 'normal', contents: { 'drop-handoff': BODY }, accounts: {}, lastBody: null });
+    await q9.page.fill('#permlink', 'drop-handoff');
+    await q9.page.fill('#body', ''); /* an empty desk — the LEDGER's own commitment must do the comparing */
+    await q9.page.click('#recover');
+    await step('9b recovery resolves the ledger entry from its own commitment', () => q9.page.waitForFunction(() => /drop-handoff[^\n]*resolved-confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 15000 }));
+    const ledger9b = await q9.page.evaluate(() => JSON.parse(localStorage.getItem('bnr.bdrop.quarantine.v1') || '[]'));
+    ok('9b the ledger entry itself is resolved-confirmed (durable state updated, not just prose)', ledger9b.some(e => e.scope && e.scope.permlink === 'drop-handoff' && e.outcome === 'resolved-confirmed'));
+    await q9.page.fill('#body', BODY);
+    await q9.page.click('#publish');
+    await step('9b after resolution the desk CONFIRMS the landing instead of republishing',
+      () => q9.page.waitForFunction(() => /already published — identical bytes confirmed/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    ok('9b the whole quarantine-gap sequence broadcast nothing', mock.broadcasts.length === 0, 'broadcasts=' + mock.broadcasts.length);
+    ok('9 scenario produced no page errors', q9.errs.length === 0, q9.errs[0] || '');
+    await q9.ctx.close();
+
+    /* ── scenario 10: MAINNET's not-found shape — get_content ASSERTS for a post that
+       does not exist (the founder's live finding 2026-10-13 05:16:36, verbatim:
+       "rpc error: Assert Exception:Post loviswater/bdrop-0001-genesis-… does not exist").
+       The desk must read that assert as NOT LANDED — reading it as an outage would
+       block every first publication and every reconciliation on mainnet ── */
+    await setMock({ mode: 'normal', content: null, contents: null, junk: false, accounts: {}, lastBody: null, hive: true });
+    mock.broadcasts.length = 0;
+    const dir10 = profile('hiveassert'); dirs.push(dir10);
+    const h10 = await open(dir10);
+    await h10.page.fill('#author', 'loviswater');
+    await h10.page.fill('#permlink', 'bdrop-first-publication-probe');
+    await h10.page.fill('#body', BODY);
+    await h10.page.fill('#expected', BODY_SHA);
+    await h10.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await h10.page.fill('#wif', await h10.page.evaluate(() => String(window.hiveTx.PrivateKey.randomKey())));
+    await h10.page.click('#publish');
+    await step('10 the mainnet assert-shaped not-found is read as NOT LANDED — the first publication proceeds and lands', () => h10.page.waitForFunction(() => /LANDED/.test(document.getElementById('receipt').textContent || ''), null, { timeout: 30000 }));
+    ok('10 a FIRST publication survives the assert-shaped not-found, byte-exact', /byte-compare MATCH/.test(await h10.page.textContent('#receipt')));
+    ok('10 exactly one broadcast', mock.broadcasts.length === 1, 'broadcasts=' + mock.broadcasts.length);
+    /* recovery for a permlink the chain does not hold: the assert is the endpoint's own not-found */
+    await setMock({ mode: 'normal', content: null, contents: null, junk: false, accounts: {}, lastBody: null, hive: true });
+    await h10.page.fill('#permlink', 'bdrop-never-published');
+    await h10.page.click('#recover');
+    await step('10 recovery reports the honest not-found through the assert', () => h10.page.waitForFunction(() => /no such drop/.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    ok('10 recovery manufactured no record from the not-found', !(await outboxOf(h10.page)).some(r => r.scope.permlink === 'bdrop-never-published'));
+    ok('10 scenario produced no page errors', h10.errs.length === 0, h10.errs[0] || '');
+    await h10.ctx.close();
+
+    /* ── scenario 11: the quarantine LEDGER's own failure classes (Agent 30, 2026-10-13) ──
+       corruption-after-archive, missing-with-damaged-copy, and the unknown-residue marker
+       that makes independence impossible for ANY scope while it stands ── */
+    await setMock({ mode: 'normal', content: null, contents: null, junk: false, accounts: {}, lastBody: null, hive: false, gettx: 'ok' });
+    mock.broadcasts.length = 0;
+    const dir11 = profile('quargap2'); dirs.push(dir11);
+    const g11 = await open(dir11);
+    const op11 = mkOp('gap-handoff', BODY_SHA, 'handoff', null);
+    const RAW11 = JSON.stringify([op11]).slice(0, -1) + ',{"unknown-junk":1} tail]'; /* whole-parse fails; the junk group is unknowable residue */
+    await g11.page.evaluate(r => { localStorage.setItem('bnr.bdrop.outbox.v1', r); localStorage.removeItem('bnr.bdrop.outbox.v1.damaged'); localStorage.removeItem('bnr.bdrop.quarantine.v1'); localStorage.removeItem('bnr.bdrop.quarantine.v1.damaged'); }, RAW11);
+    await g11.page.reload();
+    await g11.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await setMock({ mode: 'normal', contents: { 'gap-handoff': '' }, accounts: {}, lastBody: null, hive: false, gettx: 'ok' });
+    await g11.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await g11.page.click('#recover');
+    await step('11 the unresolved handoff is named', () => g11.page.waitForFunction(() => /gap-handoff[^\n]*unresolved/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 15000 }));
+    g11.page.once('dialog', d => d.accept());
+    await g11.page.click('#damaged-archive');
+    await step('11 archive completes with residue', () => g11.page.waitForFunction(() => /archived deliberately/.test(document.getElementById('status').textContent || ''), null, { timeout: 8000 }));
+    const q11 = await g11.page.evaluate(() => JSON.parse(localStorage.getItem('bnr.bdrop.quarantine.v1') || '[]'));
+    ok('11 the unparseable residue rides the ledger as an UNKNOWN-SCOPE marker', q11.some(e => e.unknown_scope === true && e.outcome === 'unresolved'));
+    /* (a) restart with the residue marker standing: independence is impossible for ANY scope */
+    await g11.page.reload();
+    await g11.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await step('11 the unknown-residue marker survives restart and renders', () => g11.page.waitForFunction(() => /unknown operation|UNPARSEABLE residue/i.test(document.getElementById('outbox').textContent || ''), null, { timeout: 8000 }));
+    await g11.page.fill('#author', 'alice');
+    await g11.page.fill('#permlink', 'anything-at-all');
+    await g11.page.fill('#body', BODY);
+    await g11.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await g11.page.click('#publish');
+    await step('11 unknown residue refuses EVERY scope — independence is impossible', () => g11.page.waitForFunction(() => /independence cannot be established/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    ok('11 nothing broadcast under the residue marker', mock.broadcasts.length === 0);
+    /* (b) corruption of the ledger itself after archive: the protection must not vanish */
+    await g11.page.evaluate(() => { localStorage.setItem('bnr.bdrop.quarantine.v1', '{"broken'); localStorage.removeItem('bnr.bdrop.quarantine.v1.damaged'); });
+    await g11.page.reload();
+    await g11.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await step('11 a damaged ledger is reported, never emptied', () => g11.page.waitForFunction(() => /LEDGER is DAMAGED|LEDGER is MISSING/i.test(document.getElementById('outbox').textContent || ''), null, { timeout: 8000 }));
+    ok('11 damaged ledger bytes preserved verbatim', (await g11.page.evaluate(() => localStorage.getItem('bnr.bdrop.quarantine.v1'))) === '{"broken');
+    ok('11 damaged ledger copy stored under .damaged', (await g11.page.evaluate(() => localStorage.getItem('bnr.bdrop.quarantine.v1.damaged'))) === '{"broken');
+    await g11.page.fill('#author', 'alice');
+    await g11.page.fill('#permlink', 'while-ledger-damaged');
+    await g11.page.fill('#body', BODY);
+    await g11.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await g11.page.click('#publish');
+    await step('11 a damaged ledger refuses all submissions', () => g11.page.waitForFunction(() => /LEDGER itself is damaged|no submission can be proven independent/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    /* (c) a vanished ledger while its damaged copy exists */
+    await g11.page.evaluate(() => { localStorage.removeItem('bnr.bdrop.quarantine.v1'); });
+    await g11.page.reload();
+    await g11.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await step('11 a vanished ledger with a damaged copy present is reported', () => g11.page.waitForFunction(() => /LEDGER is MISSING/i.test(document.getElementById('outbox').textContent || ''), null, { timeout: 8000 }));
+    await g11.page.fill('#author', 'alice');
+    await g11.page.fill('#permlink', 'while-ledger-missing');
+    await g11.page.fill('#body', BODY);
+    await g11.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await g11.page.click('#publish');
+    await step('11 the missing-ledger state also refuses everything', () => g11.page.waitForFunction(() => /LEDGER itself is missing/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    ok('11 scenario broadcast nothing', mock.broadcasts.length === 0, 'broadcasts=' + mock.broadcasts.length);
+    ok('11 no page errors', g11.errs.length === 0, g11.errs[0] || '');
+    await g11.ctx.close();
+
+    /* ── scenario 12: the preservation door's own gates — no spend, no kit, no price ── */
+    const dir12 = profile('antgate'); dirs.push(dir12);
+    const ctx12 = await chromium.launchPersistentContext(dir12, { headless: true });
+    ctxs.push(ctx12);
+    await ctx12.addInitScript(() => { window.ethereum = { request: async () => { throw new Error('this wallet is never called in this test'); } }; });
+    const p12 = await ctx12.newPage();
+    p12.on('pageerror', e => errs12.push(String(e)));
+    const errs12 = [];
+    let dialogMode = 'accept';
+    p12.on('dialog', d => { dialogMode === 'accept' ? d.accept() : d.dismiss(); });
+    await p12.goto(ORIGIN + '/surfaces/bdrop.html#fast');
+    await p12.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await p12.waitForFunction(() => typeof window.hiveTx === 'object', null, { timeout: 8000 });
+    ok('12 the preservation door stays hidden until a drop confirms', await p12.isVisible('#ant-fee-limit') === false);
+    await setMock({ mode: 'normal', content: null, contents: null, junk: false, accounts: {}, lastBody: null, hive: false, gettx: 'ok' });
+    await p12.fill('#author', 'alice');
+    await p12.fill('#permlink', 'preserve-gate-probe');
+    await p12.fill('#body', BODY);
+    await p12.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await p12.fill('#wif', await p12.evaluate(() => String(window.hiveTx.PrivateKey.randomKey())));
+    await p12.click('#publish');
+    await step('12 the probe drop lands (and unlocks the preservation door)', () => p12.waitForFunction(() => /LANDED/.test(document.getElementById('receipt').textContent || ''), null, { timeout: 30000 }));
+    /* no ceiling set → nothing is priced (the operator's own authorization) */
+    await p12.click('#preserve-ant');
+    await step('12 an absent network-fee limit refuses to price anything', () => p12.waitForFunction(() => /network-fee limit/.test(document.getElementById('pstatus').textContent || '') && /will not price/.test(document.getElementById('pstatus').textContent || ''), null, { timeout: 15000 }));
+    /* a zero ceiling authorizes nothing */
+    await p12.fill('#ant-fee-limit', '0');
+    await p12.click('#preserve-ant');
+    await step('12 a zero ceiling authorizes nothing', () => p12.waitForFunction(() => /zero network-fee limit/.test(document.getElementById('pstatus').textContent || ''), null, { timeout: 15000 }));
+    /* declining the external wallet stops BEFORE any kit load */
+    await p12.fill('#ant-fee-limit', '20000000');
+    dialogMode = 'dismiss';
+    await p12.click('#preserve-ant');
+    await step('12 declining the external wallet stops with nothing attempted', () => p12.waitForFunction(() => /no signer chosen/.test(document.getElementById('pstatus').textContent || ''), null, { timeout: 15000 }));
+    ok('12 the external-wallet choice happened before any kit load', !(await p12.textContent('#pstatus')).includes('Autonomi browser kit'));
+    ok('12 nothing was spent or priced in the gate tests', !(await p12.textContent('#pstatus')).includes('invoice'));
+    ok('12 no page errors', errs12.length === 0, errs12[0] || '');
+    await ctx12.close();
+
+    /* ── scenario 13: the inclusion-VERIFIER adversarial battery (Agent 30, 2026-10-13)
+       a numeric block_num alone is NOT inclusion; the answer must BE the named
+       transaction, carry THIS drop's comment op with the committed body, and the named
+       block must CONTAIN the transaction before any finality rule applies ── */
+    const dir13 = profile('inclverify'); dirs.push(dir13);
+    const i13 = await open(dir13);
+    const CASES = [
+      { name: 'minimal numeric-block answer is REJECTED (the source counterexample)', opts: { txshape: 'minimal' }, note: /no operations|did not read as a transaction/, reject: true },
+      { name: 'a DIFFERENT transaction id is rejected', opts: { txshape: 'wrongid' }, note: /DIFFERENT transaction id/, reject: true },
+      { name: 'empty operations rejected', opts: { txshape: 'noops' }, note: /no operations/, reject: true },
+      { name: 'a transaction without this drop\u2019s comment op rejected', opts: { txshape: 'wrongop' }, note: /does not carry this drop/, reject: true },
+      { name: 'a body that differs from the committed edition rejected', opts: { txshape: 'wrongbody' }, note: /differs from the committed edition/, reject: true },
+      { name: 'a transaction absent from its named block rejected', opts: { txshape: 'ok', getblock: 'empty' }, note: /does not contain it/, reject: true },
+      { name: 'a malformed irreversible height stays uncertainty (inclusion may stand; finality may not)', opts: { txshape: 'ok', badlib: true }, note: /malformed|absent irreversible/, finalityBad: true },
+      { name: 'an unavailable history lookup stays uncertainty', opts: { gettx: 'fail' }, note: /unavailable/, reject: true },
+      { name: 'the truthful full answer is accepted (id + op + body + block membership + LIB)', opts: { txshape: 'ok' }, note: /answered/, reject: false },
+    ];
+    let n13 = 0;
+    for (const c of CASES) {
+      n13++;
+      await setMock(Object.assign({ mode: 'normal', content: null, contents: null, junk: false, accounts: {}, lastBody: null, hive: false, gettx: 'ok', getblock: 'ok', badlib: false, txshape: 'ok' }, c.opts));
+      const pl = 'inc13-' + n13;
+      await i13.page.click('#wipe'); /* a key session is bound to ONE scope — each case presents its own */
+      mock.s13n = String(n13); mock.s13body = BODY; mock.s13pl = pl; mock.s13author = 'alice'; /* the mock answers THIS drop's exact op */
+      await i13.page.fill('#author', 'alice');
+      await i13.page.fill('#permlink', pl);
+      await i13.page.fill('#body', BODY);
+      await i13.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+      await i13.page.fill('#wif', await i13.page.evaluate(() => String(window.hiveTx.PrivateKey.randomKey())));
+      await i13.page.click('#publish');
+      try {
+        await step('13 case ' + n13 + ' settles', () => i13.page.waitForFunction((p2) => {
+          const rs = JSON.parse(localStorage.getItem('bnr.bdrop.outbox.v1') || '[]');
+          return rs.some(r => r.scope && r.scope.permlink === p2 && r.receipt && r.receipt.evidence && r.receipt.evidence.inclusion_note);
+        }, pl, { timeout: 30000 }));
+      } catch (e13) {
+        console.log('S13-CASE-' + n13 + ' STATUS: ' + ((await i13.page.textContent('#status')) || '').slice(0, 500));
+        console.log('S13-CASE-' + n13 + ' OUTBOX: ' + ((await i13.page.textContent('#outbox')) || '').slice(0, 300));
+        throw e13;
+      }
+      const rec13 = (await outboxOf(i13.page)).find(r => r.scope.permlink === pl);
+      const ev13 = (rec13 && rec13.receipt && rec13.receipt.evidence) || {};
+      const included = !!ev13.tx_included;
+      const note = String(ev13.inclusion_note || '');
+      if (c.finalityBad) {
+        ok('13 ' + c.name, included === true && ev13.tx_included.block_checked === true && typeof ev13.finality === 'string' && c.note.test(ev13.finality), 'included=' + included + ' finality=' + JSON.stringify(ev13.finality));
+      } else if (c.reject) {
+        ok('13 ' + c.name, !included && c.note.test(note), 'included=' + included + ' note=' + note.slice(0, 90));
+      } else {
+        ok('13 ' + c.name, included && ev13.tx_included.block_checked === true && ev13.finality && ev13.finality.irreversible === true, JSON.stringify(ev13).slice(0, 120));
+      }
+    }
+    ok('13 no page errors', i13.errs.length === 0, i13.errs[0] || '');
+    await i13.ctx.close();
   } finally {
     for (const c of ctxs) { try { await c.close(); } catch {} }
     for (const d of dirs) { try { rmSync(d, { recursive: true, force: true }); } catch {} }
     server.close();
   }
   assert.equal(failures, 0, failures + ' lifecycle assertion(s) failed — see the ✗ lines above');
-  console.log(failures === 0 ? 'BDROP LIFECYCLE GREEN — editions, happy path, duplicates, restart, ambiguity, unavailability, divergence, retrieval, key hygiene, the quarantined journal, the contract-faithful keychain signer, mid-handoff closure, evidence-honest fresh-client recovery and the native keychain door (authority-checked, signature-verified, no extension, no paste) all held. nothing touched hive.' : 'BDROP LIFECYCLE RED.');
+  console.log(failures === 0 ? 'BDROP LIFECYCLE GREEN — editions, happy path, duplicates, restart, ambiguity, unavailability, divergence, retrieval, key hygiene, the quarantined journal, the contract-faithful keychain signer, mid-handoff closure, evidence-honest fresh-client recovery, the native keychain door (authority-checked, signature-verified, no extension, no paste), the two quarantine gaps (expiry never proves non-execution; an archive never authorizes a replacement) and mainnet\u2019s assert-shaped not-found (a first publication still proceeds) all held. nothing touched hive.' : 'BDROP LIFECYCLE RED.');
 });
