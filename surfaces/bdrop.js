@@ -125,7 +125,10 @@ function renderKeySession(){
    operation never clears uncertainty about the others. */
 var CORRUPT=null; /* {raw,why,seen,ops[],statuses[],residue_bytes} */
 function parseDamaged(raw){
-  var ops=[],depth=0,start=-1,inStr=false,esc=false,covered=0;
+  /* readable operations = balanced groups that parse as records. RESIDUE = balanced
+     groups that are NOT records (or do not parse): their bytes may hold unknown
+     operations, so they are unknowable content, not mere array syntax. */
+  var ops=[],depth=0,start=-1,inStr=false,esc=false,residue=0;
   for(var i=0;i<raw.length;i++){
     var ch=raw[i];
     if(esc){esc=false;continue;}
@@ -135,11 +138,12 @@ function parseDamaged(raw){
     else if(ch==='}'&&depth>0){depth--;if(depth===0&&start>=0){
       var span=raw.slice(start,i+1),o=null;
       try{o=JSON.parse(span);}catch(e){}
-      if(o&&typeof o==='object'&&o.id&&o.stage&&o.scope){ops.push(o);covered+=span.length;}
+      if(o&&typeof o==='object'&&o.id&&o.stage&&o.scope){ops.push(o);}
+      else{residue+=span.length;}
       start=-1;
     }}
   }
-  return {ops:ops,residue_bytes:Math.max(0,raw.length-covered)};
+  return {ops:ops,residue_bytes:residue};
 }
 /* the quarantine ledger: unresolved operations carried OUT of damaged journals.
    Archiving reorganizes evidence; it reconciles nothing. An unresolved operation's
@@ -147,7 +151,26 @@ function parseDamaged(raw){
    stays refused until the chain establishes its fate, and an independent scope
    proceeds under its own guards. Expiry never resolves an entry. */
 var QUAR_KEY='bnr.bdrop.quarantine.v1';
-function loadQuar(){try{var q=JSON.parse(localStorage.getItem(QUAR_KEY)||'[]');return Array.isArray(q)?q:[];}catch(e){return[];}}
+var QUAR_DAMAGED_KEY='bnr.bdrop.quarantine.v1.damaged';
+var QUAR_STATE=null; /* {raw,why} when the ledger itself is damaged, or {missing:true} when it vanished while a damaged copy exists */
+function loadQuar(){
+  var raw=localStorage.getItem(QUAR_KEY);
+  var dam=localStorage.getItem(QUAR_DAMAGED_KEY);
+  QUAR_STATE=null;
+  if(raw===null){
+    if(dam!==null)QUAR_STATE={missing:true,note:'the quarantine ledger is MISSING while its damaged copy exists — unresolved operations may have left the guard'};
+    return [];
+  }
+  try{
+    var q=JSON.parse(raw);
+    if(!Array.isArray(q))throw new Error('the saved ledger is not a list');
+    return q;
+  }catch(e){
+    if(dam===null)localStorage.setItem(QUAR_DAMAGED_KEY,raw);
+    QUAR_STATE={raw:raw,why:e&&e.message?e.message:String(e)};
+    return [];
+  }
+}
 function saveQuar(q){localStorage.setItem(QUAR_KEY,JSON.stringify(q));}
 function quarFor(author,permlink){return loadQuar().find(function(e){return e.scope&&e.scope.author===author&&e.scope.permlink===permlink;})||null;}
 function quarUpsert(q,o,outcome,note,block){
@@ -231,7 +254,14 @@ function renderOutbox(a){
   renderQuar(box);
 }
 function renderQuar(box){
-  var ql=loadQuar();if(!ql.length)return;
+  if(QUAR_STATE){
+    var qd0=document.createElement('div');qd0.className='bad';
+    qd0.textContent='the quarantine LEDGER is '+(QUAR_STATE.missing?'MISSING while its damaged copy exists':'DAMAGED ('+QUAR_STATE.why+')')+' — bytes preserved, protection uncertain: unresolved operations may be outside the guard. submissions are refused until it is reconciled or restored.';
+    box.appendChild(qd0);
+  }
+  var ql=loadQuar();
+  if(!ql.length&&!QUAR_STATE)return;
+  if(!ql.length)return;
   var un=ql.filter(function(e){return e.outcome==='unresolved';});
   var qd=document.createElement('div');qd.className=un.length?'bad':'ok';
   qd.textContent='quarantine ledger: '+un.length+' unresolved operation(s) carried out of damaged journals'+(un.length?' — their scopes stay refused until the chain establishes their fate (name the scope and press "recover a drop from the chain alone")':'.');
@@ -263,6 +293,35 @@ async function rpcCall(endpoint,method,params){
    first publication and every reconciliation on mainnet. */
 function isNotFound(e){
   return /does not exist/i.test(String((e&&e.message)||e));
+}
+/* mainnet's get_content answer carries NO block_num (the offline mock invented one —
+   the founder saw "block undefined" live on 2026-10-13). The honest label is what
+   the chain actually said: the block number when present, else the created time. */
+function chainLabel(c){
+  if(!c)return 'the chain\u2019s word';
+  if(typeof c.block_num==='number')return 'block '+c.block_num;
+  if(c.created)return 'created '+c.created;
+  return 'the chain\u2019s word';
+}
+/* evidence states stay SEPARATE: content observed is not inclusion, inclusion is not
+   finality, and an unavailable lookup is uncertainty — never silence, never proof.
+   condenser_api.get_transaction answers inclusion by the desk's own txid;
+   last_irreversible_block_num answers finality. */
+async function evidenceFor(scope,txid){
+  var e={tx_included:null,finality:null,inclusion_note:'not-attempted'};
+  if(!txid){e.inclusion_note='no transaction id held';return e;}
+  var t;
+  try{t=await rpcCall(scope.rpc,'condenser_api.get_transaction',[txid]);}
+  catch(err){e.inclusion_note='lookup unavailable: '+(isNotFound(err)?'the endpoint does not know this transaction':err.message);return e;}
+  if(!(t&&typeof t==='object')||typeof t.block_num!=='number'){e.inclusion_note='the endpoint’s answer did not read as a transaction';return e;}
+  e.tx_included={block_num:t.block_num,txid:txid};e.inclusion_note='answered';
+  var g;
+  try{g=await rpcCall(scope.rpc,'condenser_api.get_dynamic_global_properties',[]);}
+  catch(err){e.finality='lookup unavailable: '+err.message;return e;}
+  var lib=(g&&typeof g.last_irreversible_block_num==='number')?g.last_irreversible_block_num:null;
+  if(lib===null)e.finality='no irreversible head in the answer';
+  else e.finality={lib_block:lib,irreversible:t.block_num<=lib};
+  return e;
 }
 
 /* ─── hash verdict ─── */
@@ -326,9 +385,15 @@ async function reconcileOne(a,r,quiet){
     if(pubHash===s.body_sha256){
       r.stage='confirmed';
       r.receipt=assembleReceipt(r,c,pubHash,null);
+      /* inclusion and finality attempt here too: the txid is recovered from the
+         held signed bytes when possible — an unavailable lookup stays uncertainty */
+      var rid=null;
+      if(r.signed_tx){try{var vt=new H.Transaction([]);vt.created=true;vt.transaction=JSON.parse(JSON.stringify(r.signed_tx));var dg=vt.digest();rid=(dg&&dg.txId)||null;}catch(e){}}
+      var evd2=await evidenceFor(s,rid);
+      if(r.receipt&&r.receipt.evidence){r.receipt.evidence.tx_included=evd2.tx_included;r.receipt.evidence.finality=evd2.finality;r.receipt.evidence.inclusion_note=evd2.inclusion_note;}
       r.events.push(ev('reconciled','chain:'+c.block_num,{from:'recovery',body_byte_compare:'MATCH'}));
       r.last_error=null;
-      if(!quiet)log(r.id+' — reconciled against the chain: landed in block '+c.block_num+', byte-compare MATCH. no re-publication.','ok');
+      if(!quiet)log(r.id+' — reconciled against the chain: landed, '+chainLabel(c)+', byte-compare MATCH. no re-publication.','ok');
     }else{
       r.stage='diverged';
       r.events.push(ev('diverged','chain:'+c.block_num,{body_sha256_chain:pubHash}));
@@ -372,6 +437,14 @@ function assembleReceipt(r,c,pubHash,txid){
     txid:txid||(r.receipt&&r.receipt.txid)||'not returned by endpoint',
     block_num:c?c.block_num:null,created:c?c.created:null,
     rpc_endpoint:r.scope.rpc,disclosure_version:r.scope.disclosure_version,
+    evidence:(function(){var p2=(r.receipt&&r.receipt.evidence)||{};
+      return {
+        content_observed:c?{block:c.block_num,body_sha256:pubHash,compare:(pubHash===r.scope.body_sha256)?'MATCH':'DIFFERS'}:null,
+        signature_verified:p2.signature_verified||(r.events.some(function(x){return x.event==='signed';})?'verified-in-desk':'not-held-by-desk'),
+        tx_included:p2.tx_included||null,finality:p2.finality||null,
+        storage_retrieved:p2.storage_retrieved||null,recovery_demonstrated:p2.recovery_demonstrated||null,
+        inclusion_note:p2.inclusion_note||null
+      };})(),
     surface:'surfaces/bdrop.html',signed_at:r.created_at,
     events:r.events
   };
@@ -444,6 +517,10 @@ $('publish').addEventListener('click',async function(){
   var wif=$('wif').value.trim();
   if(!body){log('no body — nothing to publish, nothing attempted.','bad');return;}
   if(quarantine()){log('the journal is quarantined (damaged, with unresolved operations or unparseable bytes) — the desk refuses new submissions until every readable operation is reconciled against the chain (see the outbox below).','bad');return;}
+  if(QUAR_STATE){log('the quarantine LEDGER itself is '+(QUAR_STATE.missing?'missing while its damaged copy exists':'damaged ('+QUAR_STATE.why+')')+' — its unresolved operations are unknowable, so no submission can be proven independent of them. the damaged bytes are preserved; reconcile or restore the ledger before publishing.','bad');return;}
+  if(loadQuar().some(function(e){return e.outcome==='unresolved'&&e.unknown_scope;})){
+    log('an archived journal left UNPARSEABLE residue that may contain unknown operations — independence cannot be established for ANY scope while it stands. the residue stays preserved verbatim; the desk refuses new submissions.','bad');return;
+  }
   var mode0=signerMode();
   if(mode0==='native'&&!KCX){log('the native door needs the estate\u2019s isolated keychain at keys.skaists.dev, and it did not answer in this browser — choose another door; nothing was attempted.','bad');return;}
   if(!lastHash)await rehash();
@@ -476,7 +553,7 @@ $('publish').addEventListener('click',async function(){
     var preHash=await sha256Hex(new TextEncoder().encode(pre.body));
     if(preHash===scope.body_sha256){
       var rr=upsert(a,scope,function(r){r.stage='confirmed';r.receipt=assembleReceipt(r,pre,preHash,null);r.events.push(ev('reconciled','chain:'+pre.block_num,{from:'preflight-duplicate'}));});
-      log('already published — identical bytes confirmed in block '+pre.block_num+'. no new signature, no re-publication.','ok');
+      log('already published — identical bytes confirmed, '+chainLabel(pre)+'. no new signature, no re-publication.','ok');
       renderReceipt(rr);return;
     }
     upsert(a,scope,function(r){r.stage='diverged';r.events.push(ev('diverged','chain:'+pre.block_num,{body_sha256_chain:preHash}));});
@@ -666,12 +743,21 @@ async function confirmFromChain(a,rec,scope,txid){
         r.receipt=assembleReceipt(r,c,pubHash,txid);
         r.events.push(ev('confirmed','chain:'+c.block_num,{body_byte_compare:match?'MATCH':'DIFFERS'}));
       });
+      /* inclusion and finality are SEPARATE evidence: a content read is neither */
+      var txForEv=(txid||(done.receipt&&typeof done.receipt.txid==='string'&&done.receipt.txid.indexOf('not returned')<0?done.receipt.txid:null));
+      var evd=await evidenceFor(scope,txForEv);
+      done=upsert(a,scope,function(r){
+        r.receipt=assembleReceipt(r,c,pubHash,txid);
+        r.receipt.evidence.tx_included=evd.tx_included;
+        r.receipt.evidence.finality=evd.finality;
+        r.receipt.evidence.inclusion_note=evd.inclusion_note;
+      });
       renderReceipt(done);
       if(match){
         var u='https://hive.blog/@'+scope.author+'/'+scope.permlink;
         $('permlinkurl').href=u;
         $('permlinkurl').textContent='the drop on hive.blog — '+u+' (opens a new tab)';
-        $('permwrap').hidden=false;$('download').hidden=false;$('bundle').hidden=false;$('preserve-ant').hidden=false;
+        $('permwrap').hidden=false;$('download').hidden=false;$('bundle').hidden=false;$('preserve-ant').hidden=false;$('ant-fee-limit').hidden=false;
         log('receipt complete. the chain — not prose — is the proof; the outbox and the tree are mirrors.','ok');
       }else{
         log('the published bytes DIFFER from the signed bytes — both digests ride the record; the signed digest is the edition\u2019s.','bad');
@@ -690,12 +776,20 @@ function renderReceipt(r){
   var head=document.createElement('div');
   if(rc.what==='bDroP chain-recovery record'){
     head.className=rc.body_byte_compare==='MATCH'?'ok':(rc.body_byte_compare==='DIVERGED'?'bad':'dim');
-    head.textContent='RECOVERED (chain read — proves presence, never a signature) · block '+rc.block_num+' · expected '+(rc.body_sha256_expected||'NONE in this desk')+' · chain '+rc.body_sha256_chain+' · '+rc.body_byte_compare+' · signing evidence NONE · inclusion UNVERIFIED';
+    head.textContent='RECOVERED (chain read — proves presence, never a signature) · '+chainLabel(rc.block_num!=null?rc:(rc&&rc.created?rc:null))+' · expected '+(rc.body_sha256_expected||'NONE in this desk')+' · chain '+rc.body_sha256_chain+' · '+rc.body_byte_compare+' · signing evidence NONE · inclusion UNVERIFIED';
   }else{
     head.className=(rc.body_byte_compare==='MATCH')?'ok':'bad';
-    head.textContent=(r.stage==='diverged'?'DIVERGED':'LANDED')+' · block '+rc.block_num+' · created '+rc.created+' · body sha-256 '+rc.body_sha256_published+' · byte-compare '+rc.body_byte_compare;
+    head.textContent=(r.stage==='diverged'?'DIVERGED':'LANDED')+' · '+chainLabel(rc)+' · body sha-256 '+rc.body_sha256_published+' · byte-compare '+rc.body_byte_compare;
   }
   box.appendChild(head);
+  var evLine=document.createElement('div');evLine.className='dim';
+  var E=rc.evidence||{};
+  evLine.textContent='evidence — content: '+(E.content_observed?(E.content_observed.compare+(typeof E.content_observed.block==='number'?' @block '+E.content_observed.block:' @created '+(rc.created||'chain-reported'))):'none observed')
+    +' · signature: '+(E.signature_verified||'UNVERIFIED')
+    +' · inclusion: '+(E.tx_included?('block '+E.tx_included.block_num):(E.inclusion_note||'UNVERIFIED'))
+    +' · finality: '+(E.finality&&E.finality.irreversible?('irreversible at LIB '+E.finality.lib_block):('not established'+(E.finality&&E.finality.lib_block?' (LIB '+E.finality.lib_block+' ahead)':'')))
+    +' · storage: '+(E.storage_retrieved?('retrieved '+E.storage_retrieved.bytes+' bytes'):'not yet');
+  box.appendChild(evLine);
   var meta=document.createElement('div');meta.className='dim';
   meta.textContent='transaction id: '+rc.txid+' · events: '+r.events.map(function(e){return e.event;}).join(' → ');
   box.appendChild(meta);
@@ -732,7 +826,7 @@ async function reconcileQuar(quiet){
   var changed=false;
   for(var i=0;i<q.length;i++){
     var e=q[i];
-    if(e.outcome!=='unresolved'||!e.scope)continue;
+    if(e.outcome!=='unresolved'||!e.scope)continue; /* unknown-scope residue has no chain read: it stands */
     var c;
     try{c=await rpcCall(rpc,'condenser_api.get_content',{author:e.scope.author,permlink:e.scope.permlink});}
     catch(err){continue;}
@@ -847,7 +941,8 @@ $('recover').addEventListener('click',async function(){
     block_num:(typeof c.block_num==='number'?c.block_num:null),
     created:(typeof c.created==='string'?c.created:null),
     rpc_endpoint:rpc,disclosure_version:DISCLOSURE_VERSION,
-    recovered_at:new Date().toISOString(),body_byte_compare:verdict,events:rec.events};
+    recovered_at:new Date().toISOString(),body_byte_compare:verdict,events:rec.events,
+    evidence:{content_observed:{block:(typeof c.block_num==='number'?c.block_num:null),body_sha256:chainHash,compare:verdict},signature_verified:'NONE-a-content-read',tx_included:null,finality:null,storage_retrieved:null,recovery_demonstrated:{from:'chain-content-read',at:new Date().toISOString()},inclusion_note:'a content read cannot establish transaction inclusion'}};
   if(lede){
     /* recovery is also how a quarantined operation's fate gets established */
     var q3=loadQuar();
@@ -878,6 +973,13 @@ $('damaged-archive').addEventListener('click',function(){
      rides the durable ledger — resolved as established, unresolved as unresolved */
   var q=loadQuar();
   CORRUPT.statuses.forEach(function(s,i){quarUpsert(q,CORRUPT.ops[i],s.outcome,s.note,s.block);});
+  /* unparseable residue may hold UNKNOWN operations — independence is impossible for
+     any scope while this marker stands; it survives every restart */
+  if(CORRUPT.residue_bytes>0){
+    q.push({v:1,id:'@unknown/residue@'+Date.now(),scope:null,unknown_scope:true,outcome:'unresolved',
+      note:CORRUPT.residue_bytes+' unparseable byte(s) from an archived damaged journal may contain unknown operations — no new submission can be proven independent of them',
+      residue_bytes:CORRUPT.residue_bytes,archived_at:new Date().toISOString(),updated_at:new Date().toISOString()});
+  }
   saveQuar(q);
   var carried=q.filter(function(e){return e.outcome==='unresolved';}).length;
   CORRUPT=null;
@@ -899,16 +1001,6 @@ $('download').addEventListener('click',function(){
   a.click();
   setTimeout(function(){URL.revokeObjectURL(a.href)},2000);
 });
-function bundleBytes(rec){
-  var manifest={
-    v:1,what:'bDroP preservation bundle',
-    edition:{permlink:rec.scope.permlink,sha256:rec.scope.body_sha256,bytes:rec.scope.body_bytes,disclosure_version:rec.scope.disclosure_version},
-    receipt_sha256:null,edition_body_sha256:rec.scope.body_sha256,composed_at:new Date().toISOString()
-  };
-  var receiptJson=JSON.stringify(rec.receipt,null,2);
-  return {manifest:manifest,receipt:receiptJson,edition_body:rec.body,
-    all:JSON.stringify({manifest:manifest,receipt:rec.receipt,edition_body:rec.body},null,2)};
-}
 $('bundle').addEventListener('click',function(){
   if(!lastRec||!lastRec.receipt)return;
   var b=bundleBytes(lastRec);
@@ -920,33 +1012,69 @@ $('bundle').addEventListener('click',function(){
   setTimeout(function(){URL.revokeObjectURL(a.href)},2000);
 });
 
-/* hosted ANT preservation — Agent 20's shared module (ant-pay.js), the
-   bpay-invoice pattern: priced invoice, ceilings enforced by the module,
-   nothing spent silently. The FIRST-PARTY signer is the estate's isolated
-   keychain (the same KCX signer() the purchase suites exercise); a browser
-   wallet is an external door that must be chosen explicitly. No budget is
-   invented here and the purchasing module is untouched. */
+/* the frozen preservation operation: the exact bundle bytes, digest and artifact
+   identity are persisted BEFORE the first price is asked; every retry — after a lost
+   answer, a restart, anything — resumes those same bytes and the same purchase journal
+   (the purchaser keys its ledger by the artifact sha-256). a retry is never a second
+   purchase, and a receipt may link to the artifact without mutating it. */
+var PRESERVE_KEY='bnr.bdrop.preserve.v1';
+var pendingAuthorize=null;
+function loadPreserveOps(){try{var o=JSON.parse(localStorage.getItem(PRESERVE_KEY)||'{}');return (o&&typeof o==='object'&&!Array.isArray(o))?o:{};}catch(e){return {};}}
+function savePreserveOps(o){localStorage.setItem(PRESERVE_KEY,JSON.stringify(o));}
+function bundleBytes(rec,frozenAt){
+  var manifest={
+    v:1,what:'bDroP preservation bundle',
+    edition:{permlink:rec.scope.permlink,sha256:rec.scope.body_sha256,bytes:rec.scope.body_bytes,disclosure_version:rec.scope.disclosure_version},
+    receipt_sha256:null,edition_body_sha256:rec.scope.body_sha256,
+    composed_at:frozenAt||new Date().toISOString()};
+  var receiptJson=JSON.stringify(rec.receipt,null,2);
+  return {manifest:manifest,receipt:receiptJson,edition_body:rec.body,
+    all:JSON.stringify({manifest:manifest,receipt:rec.receipt,edition_body:rec.body},null,2)};
+}
 $('preserve-ant').addEventListener('click',async function(){
   var ps=$('pstatus');ps.hidden=false;
   var line=function(t,cls){ps.innerHTML='';var d=document.createElement('div');if(cls)d.className=cls;d.textContent=t;ps.appendChild(d);};
+  $('ant-invoice').hidden=true;$('ant-authorize').hidden=true;pendingAuthorize=null;
   if(!lastRec||!lastRec.receipt||lastRec.stage!=='confirmed'){line('preservation needs a confirmed drop first.','bad');return;}
   if(!window.AntPay){line('the hosted purchaser module (ant-pay.js) did not load — preservation unavailable, nothing attempted.','bad');return;}
-  var evmSigner=null,who='';
+  var signerCfg=null,who='';
   if(KCX&&KCX.state&&KCX.state.state==='unlocked'&&KCX.state.evm){
-    evmSigner=KCX.signer();who='the isolated keychain at keys.skaists.dev (first-party)';
+    /* the first-party route: the keychain signer travels under 'signer' — the option
+       createHosted actually reads for the bzDiD shape (address + signed envelope) */
+    signerCfg={signer:KCX.signer()};who='the isolated keychain at keys.skaists.dev (first-party)';
   }else if(window.ethereum){
     if(!window.confirm('the first-party keychain is not unlocked here. use the connected BROWSER WALLET (external) for this one purchase? nothing happens before you sign inside it, and the choice is yours.')){line('no signer chosen — nothing was attempted or spent.','dim');return;}
-    evmSigner=window.ethereum;who='your browser wallet (external, your explicit choice)';
+    signerCfg={ethereum:window.ethereum};who='your browser wallet (external, your explicit choice)';
   }else{
     line('no first-party signer: the isolated keychain is not unlocked here and no external wallet was offered. unlock the keychain in its frame above or connect a wallet — nothing was attempted or spent.','bad');return;
   }
+  /* the ETH network-fee ceiling is the operator's own authorization — never invented here */
+  var ceiling=String($('ant-fee-limit').value||'').trim();
+  if(!/^\d+$/.test(ceiling)){
+    line('set the ETH network-fee limit (wei) for THIS purchase — it is your authorization and the desk will not price anything without it. a hardcoded default is not evidence of a budget.','bad');return;
+  }
+  if(ceiling==='0'){line('a zero network-fee limit authorizes nothing — set a real ceiling or do not preserve.','bad');return;}
   var rec=lastRec;
+  var ops=loadPreserveOps();
+  var op=ops[rec.scope.permlink];
+  if(op&&op.sha256&&typeof op.bundle==='string'){
+    line('resuming the FROZEN preservation operation for this drop — the same bytes, the same digest '+op.sha256.slice(0,16)+'\u2026, the same purchase journal. a retry is never a second artifact.','dim');
+  }else{
+    var frozenAt=new Date().toISOString();
+    var b0=bundleBytes(rec,frozenAt);
+    var sha0=await sha256Hex(new Text8ToU8(b0.all));
+    op={bundle:b0.all,sha256:sha0,bytes:b0.all.length,name:'bdrop-bundle-'+rec.scope.permlink+'.json',frozen_at:frozenAt,ceiling:ceiling,status:'frozen'};
+    ops[rec.scope.permlink]=op;savePreserveOps(ops);
+    line('the bundle is FROZEN and persisted before any price is asked: '+op.bytes.toLocaleString()+' bytes, sha-256 '+sha0+'. every later press resumes exactly these bytes.','dim');
+  }
+  if(op.ceiling&&op.ceiling!==ceiling){
+    line('this purchase was first asked with a '+op.ceiling+' wei network-fee limit, and the purchaser requires resuming with the original aggregate limit — set it back to resume (no new purchase starts either way).','bad');return;
+  }
+  op.ceiling=ceiling;if(op.status!=='stored')op.status='invoiced';savePreserveOps(ops);
   try{
-    line('composing the bundle and loading the Autonomi browser kit…','dim');
-    var b=bundleBytes(rec);
-    var bytes=new Text8ToU8(b.all);
-    var sha=await sha256Hex(bytes);
-    var file=new File([bytes],'bdrop-bundle-'+rec.scope.permlink+'.json',{type:'application/json'});
+    var bytes=new Text8ToU8(op.bundle);
+    var file=new File([bytes],op.name,{type:'application/json'});
+    line('loading the Autonomi browser kit (the frozen bytes are already safe)\u2026','dim');
     var kit=await import(ANT_KIT+'index.js');
     var defaults=await kit.getNetworkDefaults({});
     var client=await kit.AutonomiClient.connect({});
@@ -956,14 +1084,38 @@ $('preserve-ant').addEventListener('click',async function(){
       if(!r.ok)throw new Error('payment rpc unavailable');
       var j=await r.json();if(j.error)throw new Error('payment rpc refused '+method);return j.result;
     };
-    var payer=window.AntPay.createHosted({artifact:{name:file.name,sha256:sha,bytes:file.size},network:defaults.payment,storage:localStorage,rpc:rpc,ethereum:evmSigner});
+    var payerOpts={artifact:{name:file.name,sha256:op.sha256,bytes:file.size},network:defaults.payment,storage:localStorage,rpc:rpc};
+    Object.keys(signerCfg).forEach(function(k){payerOpts[k]=signerCfg[k];});
+    var payer=window.AntPay.createHosted(payerOpts);
     await payer.retryUnpaid();
-    line('asking Autonomi for the price of '+file.size.toLocaleString()+' bytes — nothing is signed yet.','dim');
+    line('asking Autonomi for the price of '+file.size.toLocaleString()+' frozen bytes — nothing is signed yet.','dim');
     var paid=await client.upload(file,{visibility:'public',paymentMode:'single',payment:{
       pay:async function(network,quotes,context){
-        var inv=await payer.invoice(network,quotes,'20000000000000000',null);
-        line('invoice ready: review it in '+who+' before signing. aggregate ceilings are enforced by the shared module.','dim');
-        var out=await payer.provider(inv.id).pay(network,quotes,context);
+        var inv=await payer.invoice(network,quotes,ceiling,null);
+        /* the review gate: the bound invoice is shown, and the purchaser's own
+           authorization transition happens only on the explicit press below */
+        var box=$('ant-invoice');box.hidden=false;box.innerHTML='';
+        var show=function(k,v){var d2=document.createElement('div');d2.className='law';d2.textContent=k+': '+v;box.appendChild(d2);};
+        show('file','bdrop-bundle-'+rec.scope.permlink+'.json · '+inv.payments.length+' quote(s) · sha-256 '+op.sha256.slice(0,16)+'\u2026');
+        show('price','ANT '+inv.total+' · payer '+inv.payer);
+        show('your ETH network-fee ceiling',ceiling+' wei (enforced by the shared module)');
+        show('expiry',new Date(inv.expiresAt).toISOString().slice(11,19)+' UTC — the quote lives about two minutes');
+        var btn=$('ant-authorize');btn.hidden=false;btn.disabled=false;
+        line('review the bound invoice above, then press "authorize this exact invoice" — nothing is signed until then ('+who+' signs after).','dim');
+        var granted=await new Promise(function(ok2,no2){
+          pendingAuthorize={ok:ok2,no:no2};
+          setTimeout(function(){if(pendingAuthorize){pendingAuthorize=null;btn.hidden=true;no2(new Error('the invoice expired without your authorization — nothing was signed or sent; press the price button again, the frozen artifact resumes'));}},110000);
+        });
+        $('ant-authorize').hidden=true;
+        await granted;
+        var id2=payer.authorize(inv); /* the payer's own bound transition: invoice+scope+payer+ceiling */
+        line('invoice '+String(id2).slice(0,16)+'\u2026 authorized by your press — '+who+' signs next, and only these bound bytes travel.','dim');
+        var out;
+        try{out=await payer.provider(inv.id).pay(network,quotes,context);}
+        catch(epay){
+          var ops2=loadPreserveOps();if(ops2[rec.scope.permlink]){ops2[rec.scope.permlink].status='payment-uncertain';savePreserveOps(ops2);}
+          throw epay;
+        }
         return out;
       },
       recover:function(network,quotes,attempt,context){return payer.provider(null).recover(network,quotes,attempt,context);}
@@ -971,14 +1123,33 @@ $('preserve-ant').addEventListener('click',async function(){
     payer.uploaded(paid);
     var back=await client.download(paid.file,{});
     var reconciled=await payer.reconcile(back.bytes);
+    var ops3=loadPreserveOps();if(ops3[rec.scope.permlink]){ops3[rec.scope.permlink].status='stored';ops3[rec.scope.permlink].addr=String((paid.file&&paid.file.addr)||paid);savePreserveOps(ops3);}
     var a2=loadOutbox();
     var r2=a2.find(function(x){return x.id===rec.id;});
-    if(r2){r2.stage='reconciled';r2.events.push(ev('reconciled','bpay.ant.reconciled/1',{addr:String((paid.file&&paid.file.addr)||paid)}));saveOutbox(a2);renderOutbox(a2);}
-    line('stored and retrieved on Autonomi: '+reconciled.retrievedBytes+' bytes match the bundle\u2019s sha-256. receipt reconciled; the record\u2019s durable copy no longer depends on this browser or on github.','ok');
+    if(r2){
+      r2.stage='reconciled';
+      if(!r2.receipt)r2.receipt=lastRec.receipt;
+      if(!r2.receipt.evidence)r2.receipt.evidence={};
+      r2.receipt.evidence.storage_retrieved={bytes:reconciled.retrievedBytes,addr:String((paid.file&&paid.file.addr)||paid),sha256:op.sha256};
+      r2.events.push(ev('reconciled','bpay.ant.reconciled/1',{addr:String((paid.file&&paid.file.addr)||paid)}));
+      saveOutbox(a2);renderOutbox(a2);lastRec=r2;
+    }
+    line('stored and retrieved on Autonomi: '+reconciled.retrievedBytes+' bytes match the FROZEN bundle\u2019s sha-256 ('+op.sha256.slice(0,16)+'\u2026). receipt reconciled; the record\u2019s durable copy no longer depends on this browser or on github.','ok');
   }catch(e){
-    line('preservation stopped: '+(e&&e.message?e.message:e)+'. nothing further attempted; the bundle download and the chain record remain.','bad');
+    var opsE=loadPreserveOps();
+    if(opsE[rec.scope.permlink]&&opsE[rec.scope.permlink].status!=='stored'){
+      if(!/expired without your authorization/.test(e&&e.message||'')){opsE[rec.scope.permlink].status='payment-uncertain';}
+      savePreserveOps(opsE);
+    }
+    line('preservation stopped: '+(e&&e.message?e.message:e)+'. the frozen artifact and its purchase journal resume on the next press — no second purchase starts. the bundle download and the chain record remain.','bad');
   }
 });
+$('ant-authorize').addEventListener('click',function(){
+  if(!pendingAuthorize)return;
+  var p2=pendingAuthorize;pendingAuthorize=null;
+  p2.ok(true);
+});
+
 function Text8ToU8(s){return new TextEncoder().encode(s);}
 
 /* ─── wiring ─── */

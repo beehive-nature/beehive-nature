@@ -29,7 +29,13 @@ const mock = { mode: 'normal', content: null, accounts: {}, broadcasts: [], last
 const rpcResult = (method, params) => {
   if (mock.mode === 'down') throw Object.assign(new Error('mock chain unreachable'), { http: 503 });
   if (method === 'condenser_api.get_dynamic_global_properties')
-    return { head_block_number: 49000000, head_block_id: '02e0dcb4c89a1a5c1e4e8a5c1e4e8a5c1e4e8a5c', time: new Date().toISOString().slice(0, 19) };
+    return { head_block_number: 49000000, head_block_id: '02e0dcb4c89a1a5c1e4e8a5c1e4e8a5c1e4e8a5c', last_irreversible_block_num: 48999990, time: new Date().toISOString().slice(0, 19) };
+  if (method === 'condenser_api.get_transaction') {
+    if (Array.isArray(params)) params = params[0] || {}; /* positional, as mainnet expects */
+    if (mock.gettx === 'fail') throw Object.assign(new Error('rpc error: transaction lookup unavailable (mock)'), { http: 200 });
+    if (mock.gettx === 'missing') throw Object.assign(new Error('rpc error: Assert Exception:unknown transaction'), { http: 200 });
+    return { id: params.id, block_num: 48999985, trx: { operations: [] } };
+  }
   if (method === 'condenser_api.get_accounts') {
     const names = params[0] || [];
     return names.map(n => (mock.accounts && mock.accounts[n])
@@ -45,8 +51,11 @@ const rpcResult = (method, params) => {
   }
   if (method === 'condenser_api.get_content') {
     if (mock.junk) return { author: 123, body: { not: 'a string' }, block_num: 'weird' }; /* the untrusted-endpoint shape */
-    if (mock.contents && Object.prototype.hasOwnProperty.call(mock.contents, params.permlink))
-      return { author: params.author, permlink: params.permlink, body: mock.contents[params.permlink], block_num: 48000112, created: new Date().toISOString().slice(0, 19) };
+    if (mock.contents && Object.prototype.hasOwnProperty.call(mock.contents, params.permlink)) {
+      const cc = { author: params.author, permlink: params.permlink, body: mock.contents[params.permlink], created: new Date().toISOString().slice(0, 19) };
+      if (!mock.blockless) cc.block_num = 48000112; /* mainnet's get_content carries NO block_num — mock.blockless models that */
+      return cc;
+    }
     if (mock.content && mock.content.permlink === params.permlink)
       return { author: params.author, permlink: params.permlink, body: mock.content.body, block_num: 48000111, created: new Date().toISOString().slice(0, 19) };
     if (mock.mode === 'noland' || mock.mode === 'swallow') return { author: params.author, permlink: params.permlink, body: '' };
@@ -84,6 +93,8 @@ const server = createServer(async (q, s) => {
     if ('accounts' in o) mock.accounts = o.accounts; /* per-account posting authorities (the native door's authority gate) */
     if ('lastBody' in o) mock.lastBody = o.lastBody;
     if ('hive' in o) mock.hive = !!o.hive; /* model mainnet's assert-shaped not-found */
+    if ('gettx' in o) mock.gettx = o.gettx; /* inclusion-lookup modes: ok | fail | missing */
+    if ('blockless' in o) mock.blockless = !!o.blockless; /* model mainnet's block_num-less get_content */
     s.writeHead(200); s.end('ok'); return;
   }
   const rel = decodeURIComponent(q.url.split('?')[0].replace(/^\//, '')) || 'index.html';
@@ -181,6 +192,15 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await one.page.click('#publish');
     await step('the drop lands', () => one.page.waitForFunction(() => /LANDED/.test(document.getElementById('receipt').textContent || ''), null, { timeout: 30000 }));
     ok('LANDED with block, byte-compare MATCH', /byte-compare MATCH/.test(await one.page.textContent('#receipt')));
+    const rc1ev = (await outboxOf(one.page))[0];
+    ok('receipt evidence SEPARATED: content MATCH, inclusion block, finality irreversible',
+      !!(rc1ev.receipt.evidence && rc1ev.receipt.evidence.content_observed.compare === 'MATCH'
+        && rc1ev.receipt.evidence.tx_included && typeof rc1ev.receipt.evidence.tx_included.block_num === 'number'
+        && rc1ev.receipt.evidence.finality && rc1ev.receipt.evidence.finality.irreversible === true
+        && rc1ev.receipt.evidence.signature_verified === 'verified-in-desk'),
+      JSON.stringify(rc1ev.receipt.evidence || {}).slice(0, 160));
+    ok('the rendered receipt names inclusion and finality as their own states',
+      /inclusion: block/.test(await one.page.textContent('#receipt')) && /finality: irreversible/.test(await one.page.textContent('#receipt')));
     ok('key field cleared after the gesture', (await one.page.inputValue('#wif')) === '');
     ok('key session display live (bound scope)', !(await one.page.getAttribute('#keysession', 'hidden')));
 
@@ -214,7 +234,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await two.ctx.close();
 
     /* ── scenario 2: ambiguity, unavailability, divergence ── */
-    await setMock({ mode: 'swallow', content: null });
+    await setMock({ mode: 'swallow', content: null, gettx: 'fail' });
     mock.broadcasts.length = 0; mock.lastBody = null;
     const dir2 = profile('ambig'); dirs.push(dir2);
     const amb = await open(dir2);
@@ -228,10 +248,15 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     ok('lost answer leaves submitted-outcome-unknown state, recoverable', !!(obAmb[0] && obAmb[0].stage === 'submitted' && obAmb[0].signed_tx), obAmb.map(r => r.stage).join(','));
     await amb.ctx.close();
 
-    await setMock({ mode: 'normal', content: null });
+    await setMock({ mode: 'normal', content: null, gettx: 'fail' });
     const rec1 = await open(dir2);
     await step('restart after ambiguity reconciles to confirmed', () => rec1.page.waitForFunction(() => /confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 20000 }));
     ok('ambiguous path broadcast exactly once', mock.broadcasts.length === 1, 'broadcasts=' + mock.broadcasts.length);
+    const rcAmb = (await outboxOf(rec1.page))[0];
+    ok('an unavailable inclusion lookup stays UNCERTAINTY — content confirms, inclusion does not pretend',
+      !!(rcAmb.receipt.evidence && rcAmb.receipt.evidence.content_observed.compare === 'MATCH' && !rcAmb.receipt.evidence.tx_included && /unavailable|no transaction id/.test(String(rcAmb.receipt.evidence.inclusion_note || ''))),
+      JSON.stringify(rcAmb.receipt.evidence || {}));
+    await setMock({ mode: 'normal', content: null, gettx: 'ok' });
     await rec1.ctx.close();
 
     await setMock({ mode: 'down', content: null });
@@ -280,7 +305,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
       mkRec('drop-c', NEVER_SHA, FUTURE),       /* stays unresolved: not landed, signed tx still live */
       mkRec('drop-d', NEVER_SHA, PAST),         /* stays unresolved: expiry is NOT proof of non-execution */
     ];
-    const RAW5 = JSON.stringify(J5).slice(0, -1) + ',{"v":1,"id":"@zombie/trunca'; /* whole-parse fails; the four real objects still parse */
+    const RAW5 = JSON.stringify(J5).slice(0, -1) + ',{"junk-residue":true} tail]'; /* whole-parse fails; the four real objects parse; the junk group is unknowable residue */
     await setMock({ mode: 'normal', contents: { 'drop-a': BODY, 'drop-b': 'other bytes live at this permlink' } });
     const dir5 = profile('corrupt'); dirs.push(dir5);
     const cor0 = await open(dir5);
@@ -325,7 +350,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await cor0.page.fill('#body', BODY);
     await cor0.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
     await cor0.page.click('#publish');
-    await step('after the deliberate archive the normal guards apply again', () => cor0.page.waitForFunction(() => /no posting key given/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    await step('after the deliberate archive the residue keeps every scope refused (independence impossible)', () => cor0.page.waitForFunction(() => /independence cannot be established/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
     await cor0.ctx.close();
 
     /* ── scenario 6: the keychain signer — CONTRACT-FAITHFUL to upstream requestPost
@@ -466,7 +491,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await step('fresh client: the outbox starts empty', () => fr.page.waitForFunction(() => /outbox is empty/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 8000 }));
     const before = mock.broadcasts.length;
     /* 7a: commitment present and equal → MATCH, but signature evidence stays NONE */
-    await setMock({ mode: 'normal', content: { permlink: 'drop-r-match', body: BODY } });
+    await setMock({ mode: 'normal', content: null, contents: { 'drop-r-match': BODY }, blockless: true }); /* mainnet shape: no block_num on content reads */
     await fr.page.fill('#author', 'loviswater');
     await fr.page.fill('#permlink', 'drop-r-match');
     await fr.page.fill('#body', BODY);
@@ -480,6 +505,8 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     ok('7a signature evidence honestly NONE — no signing provenance invented',
       rcA.receipt.signature_bound_hash === null && /NONE/.test(rcA.receipt.signing_evidence) && rcA.receipt.txid === null && /UNVERIFIED/.test(rcA.receipt.inclusion));
     ok('7a the recovered EDITION BYTES ride the record', rcA.body === BODY);
+    ok('7a a blockless chain answer renders created-time, never \'undefined\'', /created \d/.test(await fr.page.textContent('#receipt')) && !(await fr.page.textContent('#receipt')).includes('undefined'), (await fr.page.textContent('#receipt')).slice(0, 120));
+    await setMock({ mode: 'normal', content: null, contents: null, blockless: false });
     /* 7b: commitment differs → DIVERGED, both digests recorded */
     await setMock({ mode: 'normal', content: { permlink: 'drop-r-diverge', body: 'someone replaced the body' } });
     await fr.page.fill('#permlink', 'drop-r-diverge');
@@ -642,7 +669,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await step('9a the caught-up view resolves it as LANDED', () => q9.page.waitForFunction(() => /drop-stale[^\n]*resolved-confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 15000 }));
     ok('9a the op that "expired" actually landed — the mislabel window is closed by construction', /drop-stale[^\n]*resolved-confirmed/.test(await q9.page.textContent('#outbox')));
     /* (b) a damaged journal holding an unresolved HANDOFF */
-    const RAW9b = JSON.stringify([mkOp('drop-handoff', BODY_SHA, 'handoff', null)]).slice(0, -1) + ',"trunc';
+    const RAW9b = JSON.stringify([mkOp('drop-handoff', BODY_SHA, 'handoff', null)]).slice(0, -1) + ','; /* trailing structural comma: whole-parse fails, the operation parses, NO residue */
     await q9.page.evaluate(r => { localStorage.setItem('bnr.bdrop.outbox.v1', r); localStorage.removeItem('bnr.bdrop.outbox.v1.damaged'); localStorage.removeItem('bnr.bdrop.quarantine.v1'); }, RAW9b);
     await q9.page.reload();
     await q9.page.waitForSelector('body[data-reg]', { timeout: 8000 });
@@ -717,6 +744,105 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     ok('10 recovery manufactured no record from the not-found', !(await outboxOf(h10.page)).some(r => r.scope.permlink === 'bdrop-never-published'));
     ok('10 scenario produced no page errors', h10.errs.length === 0, h10.errs[0] || '');
     await h10.ctx.close();
+
+    /* ── scenario 11: the quarantine LEDGER's own failure classes (Agent 30, 2026-10-13) ──
+       corruption-after-archive, missing-with-damaged-copy, and the unknown-residue marker
+       that makes independence impossible for ANY scope while it stands ── */
+    await setMock({ mode: 'normal', content: null, contents: null, junk: false, accounts: {}, lastBody: null, hive: false, gettx: 'ok' });
+    mock.broadcasts.length = 0;
+    const dir11 = profile('quargap2'); dirs.push(dir11);
+    const g11 = await open(dir11);
+    const op11 = mkOp('gap-handoff', BODY_SHA, 'handoff', null);
+    const RAW11 = JSON.stringify([op11]).slice(0, -1) + ',{"unknown-junk":1} tail]'; /* whole-parse fails; the junk group is unknowable residue */
+    await g11.page.evaluate(r => { localStorage.setItem('bnr.bdrop.outbox.v1', r); localStorage.removeItem('bnr.bdrop.outbox.v1.damaged'); localStorage.removeItem('bnr.bdrop.quarantine.v1'); localStorage.removeItem('bnr.bdrop.quarantine.v1.damaged'); }, RAW11);
+    await g11.page.reload();
+    await g11.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await setMock({ mode: 'normal', contents: { 'gap-handoff': '' }, accounts: {}, lastBody: null, hive: false, gettx: 'ok' });
+    await g11.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await g11.page.click('#recover');
+    await step('11 the unresolved handoff is named', () => g11.page.waitForFunction(() => /gap-handoff[^\n]*unresolved/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 15000 }));
+    g11.page.once('dialog', d => d.accept());
+    await g11.page.click('#damaged-archive');
+    await step('11 archive completes with residue', () => g11.page.waitForFunction(() => /archived deliberately/.test(document.getElementById('status').textContent || ''), null, { timeout: 8000 }));
+    const q11 = await g11.page.evaluate(() => JSON.parse(localStorage.getItem('bnr.bdrop.quarantine.v1') || '[]'));
+    ok('11 the unparseable residue rides the ledger as an UNKNOWN-SCOPE marker', q11.some(e => e.unknown_scope === true && e.outcome === 'unresolved'));
+    /* (a) restart with the residue marker standing: independence is impossible for ANY scope */
+    await g11.page.reload();
+    await g11.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await step('11 the unknown-residue marker survives restart and renders', () => g11.page.waitForFunction(() => /unknown operation|UNPARSEABLE residue/i.test(document.getElementById('outbox').textContent || ''), null, { timeout: 8000 }));
+    await g11.page.fill('#author', 'alice');
+    await g11.page.fill('#permlink', 'anything-at-all');
+    await g11.page.fill('#body', BODY);
+    await g11.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await g11.page.click('#publish');
+    await step('11 unknown residue refuses EVERY scope — independence is impossible', () => g11.page.waitForFunction(() => /independence cannot be established/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    ok('11 nothing broadcast under the residue marker', mock.broadcasts.length === 0);
+    /* (b) corruption of the ledger itself after archive: the protection must not vanish */
+    await g11.page.evaluate(() => { localStorage.setItem('bnr.bdrop.quarantine.v1', '{"broken'); localStorage.removeItem('bnr.bdrop.quarantine.v1.damaged'); });
+    await g11.page.reload();
+    await g11.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await step('11 a damaged ledger is reported, never emptied', () => g11.page.waitForFunction(() => /LEDGER is DAMAGED|LEDGER is MISSING/i.test(document.getElementById('outbox').textContent || ''), null, { timeout: 8000 }));
+    ok('11 damaged ledger bytes preserved verbatim', (await g11.page.evaluate(() => localStorage.getItem('bnr.bdrop.quarantine.v1'))) === '{"broken');
+    ok('11 damaged ledger copy stored under .damaged', (await g11.page.evaluate(() => localStorage.getItem('bnr.bdrop.quarantine.v1.damaged'))) === '{"broken');
+    await g11.page.fill('#author', 'alice');
+    await g11.page.fill('#permlink', 'while-ledger-damaged');
+    await g11.page.fill('#body', BODY);
+    await g11.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await g11.page.click('#publish');
+    await step('11 a damaged ledger refuses all submissions', () => g11.page.waitForFunction(() => /LEDGER itself is damaged|no submission can be proven independent/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    /* (c) a vanished ledger while its damaged copy exists */
+    await g11.page.evaluate(() => { localStorage.removeItem('bnr.bdrop.quarantine.v1'); });
+    await g11.page.reload();
+    await g11.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await step('11 a vanished ledger with a damaged copy present is reported', () => g11.page.waitForFunction(() => /LEDGER is MISSING/i.test(document.getElementById('outbox').textContent || ''), null, { timeout: 8000 }));
+    await g11.page.fill('#author', 'alice');
+    await g11.page.fill('#permlink', 'while-ledger-missing');
+    await g11.page.fill('#body', BODY);
+    await g11.page.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await g11.page.click('#publish');
+    await step('11 the missing-ledger state also refuses everything', () => g11.page.waitForFunction(() => /LEDGER itself is missing/i.test(document.getElementById('status').textContent || ''), null, { timeout: 15000 }));
+    ok('11 scenario broadcast nothing', mock.broadcasts.length === 0, 'broadcasts=' + mock.broadcasts.length);
+    ok('11 no page errors', g11.errs.length === 0, g11.errs[0] || '');
+    await g11.ctx.close();
+
+    /* ── scenario 12: the preservation door's own gates — no spend, no kit, no price ── */
+    const dir12 = profile('antgate'); dirs.push(dir12);
+    const ctx12 = await chromium.launchPersistentContext(dir12, { headless: true });
+    ctxs.push(ctx12);
+    await ctx12.addInitScript(() => { window.ethereum = { request: async () => { throw new Error('this wallet is never called in this test'); } }; });
+    const p12 = await ctx12.newPage();
+    p12.on('pageerror', e => errs12.push(String(e)));
+    const errs12 = [];
+    let dialogMode = 'accept';
+    p12.on('dialog', d => { dialogMode === 'accept' ? d.accept() : d.dismiss(); });
+    await p12.goto(ORIGIN + '/surfaces/bdrop.html#fast');
+    await p12.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await p12.waitForFunction(() => typeof window.hiveTx === 'object', null, { timeout: 8000 });
+    ok('12 the preservation door stays hidden until a drop confirms', await p12.isVisible('#ant-fee-limit') === false);
+    await setMock({ mode: 'normal', content: null, contents: null, junk: false, accounts: {}, lastBody: null, hive: false, gettx: 'ok' });
+    await p12.fill('#author', 'alice');
+    await p12.fill('#permlink', 'preserve-gate-probe');
+    await p12.fill('#body', BODY);
+    await p12.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
+    await p12.fill('#wif', await p12.evaluate(() => String(window.hiveTx.PrivateKey.randomKey())));
+    await p12.click('#publish');
+    await step('12 the probe drop lands (and unlocks the preservation door)', () => p12.waitForFunction(() => /LANDED/.test(document.getElementById('receipt').textContent || ''), null, { timeout: 30000 }));
+    /* no ceiling set → nothing is priced (the operator's own authorization) */
+    await p12.click('#preserve-ant');
+    await step('12 an absent network-fee limit refuses to price anything', () => p12.waitForFunction(() => /network-fee limit/.test(document.getElementById('pstatus').textContent || '') && /will not price/.test(document.getElementById('pstatus').textContent || ''), null, { timeout: 15000 }));
+    /* a zero ceiling authorizes nothing */
+    await p12.fill('#ant-fee-limit', '0');
+    await p12.click('#preserve-ant');
+    await step('12 a zero ceiling authorizes nothing', () => p12.waitForFunction(() => /zero network-fee limit/.test(document.getElementById('pstatus').textContent || ''), null, { timeout: 15000 }));
+    /* declining the external wallet stops BEFORE any kit load */
+    await p12.fill('#ant-fee-limit', '20000000');
+    dialogMode = 'dismiss';
+    await p12.click('#preserve-ant');
+    await step('12 declining the external wallet stops with nothing attempted', () => p12.waitForFunction(() => /no signer chosen/.test(document.getElementById('pstatus').textContent || ''), null, { timeout: 15000 }));
+    ok('12 the external-wallet choice happened before any kit load', !(await p12.textContent('#pstatus')).includes('Autonomi browser kit'));
+    ok('12 nothing was spent or priced in the gate tests', !(await p12.textContent('#pstatus')).includes('invoice'));
+    ok('12 no page errors', errs12.length === 0, errs12[0] || '');
+    await ctx12.close();
   } finally {
     for (const c of ctxs) { try { await c.close(); } catch {} }
     for (const d of dirs) { try { rmSync(d, { recursive: true, force: true }); } catch {} }
