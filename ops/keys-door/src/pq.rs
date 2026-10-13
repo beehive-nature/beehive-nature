@@ -1,10 +1,15 @@
-//! SPEC-BPQ-1 §3b detached signatures, verified in-process with the
-//! integritychain `fips204` crate: the first of the two ML-DSA-65
-//! implementations rule 2 requires (the second is `bsigner bpq-verify`,
-//! RustCrypto ml-dsa, see verify.rs). The id derivation and the signed
-//! message are reproduced from crates/bsigner/src/bpq.rs (`id_from`,
-//! `succession_commit`, `verify_detached`) and surfaces/bpq.js
-//! (`idFrom`, `detachedMsg`, `AT_RE`).
+//! The two accepted release-signature profiles, verified in-process with
+//! the integritychain `fips204` crate: the first of the two ML-DSA-65
+//! implementations rule 2 requires (the second is the frozen bsigner CLI,
+//! RustCrypto ml-dsa, see verify.rs).
+//!
+//! - SPEC-BPQ-1 §3b detached signatures. The id derivation and the signed
+//!   message are reproduced from crates/bsigner/src/bpq.rs (`id_from`,
+//!   `succession_commit`, `verify_detached`) and surfaces/bpq.js (`idFrom`,
+//!   `detachedMsg`, `AT_RE`).
+//! - `bheart.signature/1`, what `bsigner sign` emits (crates/bsigner/src/
+//!   envelope.rs), with the verifying key carried in the envelope's `vk`
+//!   and the signer id `mldsa65:` + base64url(SHA3-256(vk)).
 
 use bech32::{FromBase32, ToBase32, Variant};
 use fips204::ml_dsa_65;
@@ -12,7 +17,7 @@ use fips204::traits::{SerDes, Verifier};
 use serde::{Deserialize, Serialize};
 use sha3::{Digest, Sha3_256};
 
-use crate::b64::{unb64u, unb64u32};
+use crate::b64::{b64u, unb64u, unb64u32};
 use crate::record::Refusal;
 
 const DOM_ID: &[u8] = b"bpq1/id";
@@ -170,6 +175,168 @@ pub fn fips204_ok(pre: &Pre) -> bool {
         return false;
     };
     pk.verify(&pre.message, &sig, &[])
+}
+
+// ---------------------------------------------------------------------------
+// The second profile: `bheart.signature/1`, as the frozen `bsigner sign`
+// writes it (crates/bsigner/src/envelope.rs `sign_envelope`): ML-DSA-65 over
+// the RAW record bytes, empty context, no domain prefix. `signed_at_ms` and
+// `agility` are NOT covered by the signature. The envelope carries the
+// verifying key beside it (`vk`), and the signer id is
+// `mldsa65:` + base64url(SHA3-256(verifying key)).
+
+pub const BHEART_TYPE: &str = "bheart.signature/1";
+pub const BHEART_ALG: &str = "ml-dsa-65";
+pub const BHEART_DIGEST: &str = "sha3-256";
+pub const MLDSA65_PREFIX: &str = "mldsa65:";
+
+/// The signer id of the bheart profile: `mldsa65:` + base64url without
+/// padding of SHA3-256(verifying key bytes), 43 characters after the prefix.
+pub fn mldsa65_id(vk: &[u8]) -> Option<String> {
+    (vk.len() == DSA_PK_LEN).then(|| format!("{MLDSA65_PREFIX}{}", b64u(&sha3(&[vk]))))
+}
+
+/// A well-formed `mldsa65:` id: the prefix and a strict 32-byte base64url digest.
+pub fn is_mldsa65_id(s: &str) -> bool {
+    s.strip_prefix(MLDSA65_PREFIX)
+        .is_some_and(|d| d.len() == 43 && unb64u32(d).is_some())
+}
+
+/// A signer id of either accepted profile (record.signers, genesis_signers).
+pub fn is_signer_id(s: &str) -> bool {
+    is_bzpq_id(s) || is_mldsa65_id(s)
+}
+
+/// bsigner's key id (crates/bsigner/src/keys.rs `derive_key_id`):
+/// `bheart-` + the first 16 characters of base64url(SHA3-256(UTF-8(alg) || key)).
+pub fn bheart_key_id(vk: &[u8]) -> String {
+    let d = b64u(&sha3(&[BHEART_ALG.as_bytes(), vk]));
+    format!("bheart-{}", &d[..16])
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct BheartDigest {
+    pub alg: String,
+    pub b64u: String,
+    pub bytes: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct BheartContent {
+    pub bytes: u64,
+    pub digest: BheartDigest,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct BheartSignature {
+    pub alg: String,
+    pub b64u: String,
+    pub bytes: u64,
+}
+
+/// `bheart.signature/1`, the exact field set bsigner writes and nothing else
+/// (fields in bytewise order, so the serialization is canonical).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct BheartSig {
+    pub agility: String,
+    pub alg: String,
+    pub content: BheartContent,
+    pub key_id: String,
+    pub signature: BheartSignature,
+    pub signed_at_ms: u64,
+    #[serde(rename = "type")]
+    pub kind: String,
+}
+
+/// An envelope's `sig`: a SPEC-BPQ-1 §3b detached signature, or a
+/// `bheart.signature/1`. An object with a `type` field is read as the
+/// second, anything else as the first; each is then parsed strictly
+/// (deny_unknown_fields), so no object is both.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(untagged)]
+pub enum Sig {
+    Bpq(DetachedSig),
+    Bheart(BheartSig),
+}
+
+impl<'de> Deserialize<'de> for Sig {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        use serde::de::Error;
+        let v = serde_json::Value::deserialize(d)?;
+        let bheart = v.as_object().is_some_and(|o| o.contains_key("type"));
+        let out = if bheart {
+            serde_json::from_value(v).map(Sig::Bheart)
+        } else {
+            serde_json::from_value(v).map(Sig::Bpq)
+        };
+        out.map_err(|e| D::Error::custom(e.to_string()))
+    }
+}
+
+/// Every check of a `bheart.signature/1` that is not the lattice
+/// arithmetic, against the envelope's `vk` and the record bytes: the type,
+/// both algorithm ids, the key id bsigner derives from `vk`, the content
+/// size and SHA3-256, the signature length. The message is the record bytes
+/// themselves; the id is the `mldsa65:` id of `vk`.
+pub fn precheck_bheart(b: &BheartSig, vk: &str, file: &[u8]) -> Result<Pre, Refusal> {
+    if b.kind != BHEART_TYPE {
+        return Err(Refusal::Field("sig.type (bheart.signature/1)"));
+    }
+    if b.alg != BHEART_ALG || b.signature.alg != BHEART_ALG {
+        return Err(Refusal::Field("sig.alg and sig.signature.alg (ml-dsa-65)"));
+    }
+    if b.content.digest.alg != BHEART_DIGEST {
+        return Err(Refusal::Field("sig.content.digest.alg (sha3-256)"));
+    }
+    if b.agility.is_empty()
+        || b.agility.len() > 256
+        || !b.agility.bytes().all(|c| (0x20..=0x7e).contains(&c))
+    {
+        return Err(Refusal::Field("sig.agility"));
+    }
+    if b.signed_at_ms > crate::record::MAX_SAFE {
+        return Err(Refusal::Field("sig.signed_at_ms"));
+    }
+    let dsa = unb64u(vk)
+        .filter(|k| k.len() == DSA_PK_LEN)
+        .ok_or(Refusal::Field(
+            "vk (base64url of a 1952-byte ML-DSA-65 key)",
+        ))?;
+    let sig = unb64u(&b.signature.b64u)
+        .filter(|s| s.len() == DSA_SIG_LEN && b.signature.bytes == DSA_SIG_LEN as u64)
+        .ok_or(Refusal::Field("sig.signature (3309 bytes)"))?;
+    if b.key_id != bheart_key_id(&dsa) {
+        return Err(Refusal::IdMismatch);
+    }
+    let n = file.len() as u64;
+    if b.content.bytes != n
+        || b.content.digest.bytes != n
+        || b.content.digest.b64u != b64u(&sha3(&[file]))
+    {
+        return Err(Refusal::FileMismatch);
+    }
+    Ok(Pre {
+        id: mldsa65_id(&dsa).expect("a 1952-byte key"),
+        dsa,
+        sig,
+        message: file.to_vec(),
+    })
+}
+
+/// The precheck of either profile. `vk` is REQUIRED with a
+/// bheart.signature/1 and FORBIDDEN with a §3b signature (which carries its
+/// own key and commits to it in its id).
+pub fn precheck_sig(s: &Sig, vk: Option<&str>, file: &[u8]) -> Result<Pre, Refusal> {
+    match (s, vk) {
+        (Sig::Bpq(d), None) => precheck(d, file),
+        (Sig::Bpq(_), Some(_)) => Err(Refusal::Field("vk (forbidden with a §3b signature)")),
+        (Sig::Bheart(b), Some(vk)) => precheck_bheart(b, vk, file),
+        (Sig::Bheart(_), None) => Err(Refusal::Field("vk (required with bheart.signature/1)")),
+    }
 }
 
 #[cfg(test)]

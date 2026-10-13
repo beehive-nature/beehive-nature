@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // anchor.mjs — Hive witness anchors for keychain release records (custom_json id bnr.anchor).
 //
-//   build --record R --sig S --prev-json FILE --seq N [--loc L]... [--out FILE]
+//   build --record R --sig S [--vk FILE|B64U] --prev-json FILE --seq N [--loc L]... [--out FILE]
 //       the canonical ASCII anchor json A and the full custom_json op (posting auth loviswater);
 //       FILE holds the exact previous bnr.anchor json string (first release: the pinned genesis, as
 //       `genesis --out` writes it); N is the record's own seq; --out writes A's exact bytes
-//   verify [--account loviswater] [--subject keys.skaists.dev] [--nodes url,...] [--record R --sig S | --envelope E]
+//   verify [--account loviswater] [--subject keys.skaists.dev] [--nodes url,...] [--record R --sig S [--vk FILE|B64U] | --envelope E]
 //       quorum read of every bnr.anchor op on the account, a class per anchor and for the release
 //   genesis [--nodes url,...] [--out FILE]
 //       read the genesis anchor (block 108404167) from every node and print the SHA3-256 (b64u) of
@@ -26,14 +26,16 @@
 // that omits or alters one side of an equivocation cannot hide it and so choose the head.
 // A release anchor carries its record's seq (the genesis is seq 0, so record seq 1 anchors as
 // seq 1), and it names the release only when its rec digests, its sig.bpq and its sig.sha3 (of the
-// signature's one byte form) all match.
+// signature's one byte form) all match. sig.bpq keeps its name whatever the profile: it carries the
+// signer id, a bzpq1 id (SPEC-BPQ-1 §3b) or an mldsa65: id (bheart.signature/1, whose verifying key
+// comes from --vk or the envelope's vk, as release.mjs reads it).
 // Read paths as the July receipt measured them (DISPATCH-RECEIPTS-2026-07-24.md:293-346):
 // condenser_api.* takes positional params and account_history_api.* named ones; the custom_json id
 // is filtered client-side; never bridge.* (HiveMind is a second layer, not consensus).
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BPQ, b64u, canon, checkIdentity, cli, fields, isCount, isDigest, isId, openEnvelope, parseRecord, parseStrict, readSig, sha256, sha3, sigSha3 } from './release.mjs';
+import { b64u, canon, checkIdentity, cli, fields, isCount, isDigest, isId, openEnvelope, parseRecord, parseStrict, readSig, readVk, sha256, sha3, sigSha3, verifySig } from './release.mjs';
 
 // The genesis is this block, this trx and these 620 bytes (tools/keychain-release/test/genesis-anchor.json).
 // The same bytes posted again later are a repeat, never the genesis: the reader pins this trx.
@@ -54,7 +56,7 @@ export function parseAnchor(bytes) {
   if (!isDigest(a.rec.sha256) || !isDigest(a.rec.sha3) || !isCount(a.rec.size)) throw new Error('anchor.rec must carry sha256, sha3 (base64url) and size');
   if (!Number.isSafeInteger(a.seq) || a.seq < 1) throw new Error('anchor.seq must be an integer >= 1');
   fields(a.sig, ['bpq', 'sha3'], 'anchor.sig');
-  if (!isId(a.sig.bpq) || !isDigest(a.sig.sha3)) throw new Error('anchor.sig must carry a bzpq1 id and the sha3 of the signature file');
+  if (!isId(a.sig.bpq) || !isDigest(a.sig.sha3)) throw new Error('anchor.sig must carry a signer id (bzpq1 or mldsa65:) and the sha3 of the signature file');
   if (typeof a.subject !== 'string' || !a.subject) throw new Error('anchor.subject must be a non-empty string');
   if (bytes.length > JSON_MAX) throw new Error(`anchor json is ${bytes.length} bytes, over Hive's ${JSON_MAX}`);
   return a;
@@ -65,9 +67,9 @@ export function anchorJson({ loc, prev, rec, seq, sig, subject = SUBJECT }) {
   return s;
 }
 
-export function buildAnchor({ recordBytes, sigBytes, prevJson, seq, loc = [] }) {
+export function buildAnchor({ recordBytes, sigBytes, vk, prevJson, seq, loc = [] }) {
   const r = checkIdentity(parseRecord(recordBytes));
-  const v = BPQ.verifyFile(readSig(sigBytes), new Uint8Array(recordBytes));
+  const v = verifySig(readSig(sigBytes), recordBytes, vk);
   if (!v.ok) throw new Error(`the signature is not over this record: ${v.why}`);
   if (/[\r\n]$/.test(prevJson.toString('latin1'))) throw new Error('--prev-json ends in a newline; an anchor json string on chain has none (write it with genesis --out)');
   let p;
@@ -188,7 +190,7 @@ const jsonSha3 = s => b64u(sha3(Buffer.from(s, 'utf8')));
 // views: per operator {url, ok, lib, ops: Map(trx:op_in_trx -> {block, trx, op_in_trx, json})};
 // confirm(url, op) -> true | false | null (unknown). The chain is the pinned genesis, then the
 // subject's release anchors linked by prev (sha3 of the previous json) and seq (previous seq + 1).
-export async function assess(views0, confirm, { subject = SUBJECT, recordBytes, sigBytes } = {}) {
+export async function assess(views0, confirm, { subject = SUBJECT, recordBytes, sigBytes, vk } = {}) {
   // one operator, one view: a second spelling of an operator already read is dropped, not counted
   const seen = new Set(), views = [], duplicates = [];
   for (const v of views0) {
@@ -255,7 +257,7 @@ export async function assess(views0, confirm, { subject = SUBJECT, recordBytes, 
   };
   if (recordBytes) {
     const r = checkIdentity(parseRecord(recordBytes));
-    const v = BPQ.verifyFile(readSig(sigBytes), new Uint8Array(recordBytes));
+    const v = verifySig(readSig(sigBytes), recordBytes, vk);
     if (!v.ok) throw new Error(`the signature is not over this record: ${v.why}`);
     const rec = { sha256: b64u(sha256(recordBytes)), sha3: b64u(sha3(recordBytes)), size: recordBytes.length };
     const sig = { bpq: v.id, sha3: sigSha3(sigBytes) };
@@ -303,22 +305,24 @@ export async function readGenesis(nodes) {
 // ── command line ─────────────────────────────────────────────────────────
 const nodesOf = o => normalizeNodes(o.nodes ? o.nodes.split(',').map(s => s.trim()).filter(Boolean) : NODES);
 const COMMANDS = {
-  build: [{ value: ['record', 'sig', 'prev-json', 'seq', 'out'], list: ['loc'] }, o => {
+  build: [{ value: ['record', 'sig', 'vk', 'prev-json', 'seq', 'out'], list: ['loc'] }, o => {
     for (const k of ['record', 'sig', 'prev-json', 'seq']) if (o[k] === undefined) throw new Error(`--${k} is required`);
     if (!/^[1-9][0-9]*$/.test(o.seq)) throw new Error('--seq must be an integer >= 1');
-    const { json, op } = buildAnchor({ recordBytes: readFileSync(o.record), sigBytes: readFileSync(o.sig), prevJson: readFileSync(o['prev-json']), seq: Number(o.seq), loc: o.loc || [] });
+    const { json, op } = buildAnchor({ recordBytes: readFileSync(o.record), sigBytes: readFileSync(o.sig), vk: o.vk === undefined ? undefined : readVk(o.vk), prevJson: readFileSync(o['prev-json']), seq: Number(o.seq), loc: o.loc || [] });
     if (o.out) writeFileSync(o.out, json);
     return { json, size: json.length, sha3: b64u(sha3(Buffer.from(json, 'latin1'))), op };
   }],
-  verify: [{ value: ['account', 'subject', 'nodes', 'record', 'sig', 'envelope'] }, async o => {
+  verify: [{ value: ['account', 'subject', 'nodes', 'record', 'sig', 'vk', 'envelope'] }, async o => {
     if (!o.record !== !o.sig) throw new Error('--record and --sig go together');
     if (o.envelope && o.record) throw new Error('--envelope or --record/--sig, not both');
+    if (o.vk !== undefined && !o.record) throw new Error('--vk goes with --record/--sig (an envelope carries its own vk)');
     const account = o.account || ACCOUNT, nodes = nodesOf(o);
     // an envelope is the same evidence: its record bytes and canon(sig), the relsig file's one byte form
     const e = o.envelope ? openEnvelope(readFileSync(o.envelope)) : null;
     const recordBytes = e ? e.recordBytes : o.record && readFileSync(o.record), sigBytes = e ? e.sigBytes : o.sig && readFileSync(o.sig);
+    const vk = e ? e.vk : o.vk === undefined ? undefined : readVk(o.vk);
     const views = await readNodes(nodes, account);
-    return { account, nodes, ...(await assess(views, inBlock, { subject: o.subject || SUBJECT, recordBytes, sigBytes })) };
+    return { account, nodes, ...(await assess(views, inBlock, { subject: o.subject || SUBJECT, recordBytes, sigBytes, vk })) };
   }],
   genesis: [{ value: ['nodes', 'out'] }, async o => {
     const { json, ...g } = await readGenesis(nodesOf(o));

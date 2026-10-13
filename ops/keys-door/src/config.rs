@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use serde::Deserialize;
 
 use crate::b64::unb64u32;
-use crate::pq::is_bzpq_id;
+use crate::pq::is_signer_id;
 use crate::record::MAX_SAFE;
 use crate::sources::{ar_txid_ok, url_ok};
 
@@ -76,8 +76,9 @@ impl Config {
         if unb64u32(&self.genesis_sha3).is_none() {
             return Err("genesis_sha3 must be a base64url SHA3-256 digest (43 chars)".into());
         }
-        if self.genesis_signers.is_empty() || !self.genesis_signers.iter().all(|s| is_bzpq_id(s)) {
-            return Err("genesis_signers must be a non-empty list of bzpq1 ids".into());
+        if self.genesis_signers.is_empty() || !self.genesis_signers.iter().all(|s| is_signer_id(s))
+        {
+            return Err("genesis_signers must be a non-empty list of bzpq1 or mldsa65: ids".into());
         }
         if self.min_seq == 0 || self.min_seq > MAX_SAFE {
             return Err("min_seq must be >= 1".into());

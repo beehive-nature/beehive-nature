@@ -8,7 +8,7 @@ use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::b64::{unb64u, unb64u32};
 use crate::canon::{self, CanonError};
-use crate::pq::{self, DetachedSig, Pre};
+use crate::pq::{self, Pre, Sig};
 
 pub const SCHEMA: &str = "bnr.keychain-release/1";
 pub const ENVELOPE: &str = "keychain-release-envelope/1";
@@ -226,14 +226,14 @@ impl Record {
             return Err(Refusal::Field("pack digest"));
         }
         if self.signers.is_empty()
-            || !self.signers.iter().all(|s| pq::is_bzpq_id(s))
+            || !self.signers.iter().all(|s| pq::is_signer_id(s))
             || self
                 .signers
                 .windows(2)
                 .any(|w| w[0].as_bytes() >= w[1].as_bytes())
         {
             return Err(Refusal::Field(
-                "signers (non-empty, sorted, unique bzpq1 ids)",
+                "signers (non-empty, sorted, unique bzpq1 or mldsa65: ids)",
             ));
         }
         if self.source.build != BUILD {
@@ -310,7 +310,12 @@ pub struct Envelope {
     #[serde(default)]
     pub hints: Hints,
     pub record: String,
-    pub sig: DetachedSig,
+    /// a §3b detached signature or a bheart.signature/1
+    pub sig: Sig,
+    /// base64url of the 1952-byte ML-DSA-65 verifying key: REQUIRED with a
+    /// bheart.signature/1, FORBIDDEN with a §3b signature
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vk: Option<String>,
 }
 
 /// One envelope that parsed: its bytes as received, the record it carries
@@ -322,13 +327,14 @@ pub struct Parsed {
     pub record_bytes: Vec<u8>,
     pub record: Record,
     pub record_sha3: [u8; 32],
-    /// SHA3-256 of the signature object as both verifiers receive it
+    /// SHA3-256 of the signature object (and `vk`) as both verifiers receive it
     pub sig_key: [u8; 32],
     pub pre: Pre,
 }
 
 /// Parse an envelope (§3) and its record (§1), check rule 1 against the
-/// config, and precheck the §3b signature shape, id and file binding.
+/// config, and precheck the signature (§3b, or bheart.signature/1 with its
+/// `vk`): shape, id and file binding.
 pub fn parse_envelope(bytes: &[u8], origin: &str, rp_id: &str) -> Result<Parsed, Refusal> {
     if bytes.len() > MAX_ENVELOPE {
         return Err(Refusal::TooLarge);
@@ -346,8 +352,12 @@ pub fn parse_envelope(bytes: &[u8], origin: &str, rp_id: &str) -> Result<Parsed,
     if record.rp_id != rp_id {
         return Err(Refusal::ConfigMismatch("rp_id"));
     }
-    let pre = pq::precheck(&env.sig, &record_bytes)?;
-    let sig_key = pq::sha3(&[&serde_json::to_vec(&env.sig).expect("a signature serializes")]);
+    let pre = pq::precheck_sig(&env.sig, env.vk.as_deref(), &record_bytes)?;
+    let sig_key = pq::sha3(&[
+        &serde_json::to_vec(&env.sig).expect("a signature serializes"),
+        b"\n",
+        env.vk.as_deref().unwrap_or("").as_bytes(),
+    ]);
     Ok(Parsed {
         bytes: bytes.to_vec(),
         record_sha3: pq::sha3(&[&record_bytes]),

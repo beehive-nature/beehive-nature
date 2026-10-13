@@ -28,10 +28,10 @@ use crate::b64::{b64_std, b64u, unb64u};
 use crate::canon;
 use crate::config::Config;
 use crate::door::{offline_verdict, Door, WALK_BYTES};
-use crate::pq::{self, DetachedSig, SigFile};
+use crate::pq::{self, BheartSig, DetachedSig, Sig, SigFile};
 use crate::record::{
-    parse_envelope, parse_record, Envelope, FileEntry, Hints, Pack, Record, Refusal, Source, BUILD,
-    ENVELOPE, KIND, SCHEMA,
+    parse_envelope, parse_record, Envelope, FileEntry, Hints, Pack, Parsed, Record, Refusal,
+    Source, BUILD, ENVELOPE, KIND, SCHEMA,
 };
 use crate::server::{health_router, router, Health, Shared, SharedRef};
 use crate::sources::{self, Http};
@@ -113,6 +113,12 @@ fn hex(b: &[u8]) -> String {
 }
 
 fn release(seq: u64, prev: Option<&Rel>, signers: &[&Key], tag: &str) -> Rel {
+    let ids: Vec<String> = signers.iter().map(|k| k.id.clone()).collect();
+    release_ids(seq, prev, &ids, tag)
+}
+
+/// A release whose `signers` are these ids, of either profile.
+fn release_ids(seq: u64, prev: Option<&Rel>, signers: &[String], tag: &str) -> Rel {
     let files: Vec<(&str, Vec<u8>)> = vec![
         (
             "index.html",
@@ -125,7 +131,7 @@ fn release(seq: u64, prev: Option<&Rel>, signers: &[&Key], tag: &str) -> Rel {
         ),
     ];
     let pack: Vec<u8> = files.iter().flat_map(|(_, b)| b.clone()).collect();
-    let mut ids: Vec<String> = signers.iter().map(|k| k.id.clone()).collect();
+    let mut ids = signers.to_vec();
     ids.sort();
     let record = Record {
         files: files
@@ -178,7 +184,8 @@ fn envelope_with(record: &[u8], sig: &DetachedSig, hints: Hints) -> Vec<u8> {
         bnr: ENVELOPE.into(),
         hints,
         record: b64u(record),
-        sig: sig.clone(),
+        sig: Sig::Bpq(sig.clone()),
+        vk: None,
     })
     .expect("serializes")
 }
@@ -253,10 +260,7 @@ fn verifiers(scratch: &Path) -> Verifiers {
     match bsigner_env() {
         Some(p) => Verifiers::new(p.to_str().expect("utf-8 path"), scratch)
             .expect("KEYS_DOOR_BSIGNER names a runnable bsigner"),
-        None => Verifiers::with_second(
-            Second::Stub(|s, f| pq::precheck(s, f).is_ok_and(|p| pq::fips204_ok(&p))),
-            scratch,
-        ),
+        None => Verifiers::with_second(Second::Stub(|p, _| pq::fips204_ok(p)), scratch),
     }
 }
 
@@ -841,7 +845,9 @@ fn bpqjs_release_vector_passes_both_verifiers_and_is_served() {
         t[i] ^= 1;
         t
     };
-    let mut s = p.env.sig.clone();
+    let Sig::Bpq(mut s) = p.env.sig.clone() else {
+        panic!("the bpq.js vector is a §3b signature")
+    };
     s.file.sha3 = b64u(&pq::sha3(&[&t]));
     let q = parse_envelope(&envelope_with(&t, &s, Hints::default()), ORIGIN, RP).unwrap();
     let v = real_verifiers(&fx.dir.join("scratch"));
@@ -2266,4 +2272,613 @@ fn offline_verify_prints_a_verdict() {
         out["reason"].as_str().unwrap().starts_with("missing_field"),
         "{out}"
     );
+}
+
+// ---------------------------------------------------------------------------
+// the second profile: bheart.signature/1 (what `bsigner sign` emits), with
+// the verifying key in the envelope's `vk` and the signer id `mldsa65:…`
+
+/// bsigner's `agility` text (crates/bsigner/src/envelope.rs). Not signed.
+const AGILITY: &str =
+    "verify dispatches on the alg fields above; unknown ids are refused, never defaulted";
+
+/// A throwaway bheart signer made in this process (fips204 keygen from a
+/// fixed seed), signing the raw bytes with an empty context as bsigner does.
+struct HKey {
+    sk: ml_dsa_65::PrivateKey,
+    vk: Vec<u8>,
+    id: String,
+    key_id: String,
+}
+
+fn hkey(n: usize) -> &'static HKey {
+    static KEYS: [OnceLock<HKey>; 2] = [const { OnceLock::new() }; 2];
+    KEYS[n].get_or_init(|| {
+        let (pk, sk) = ml_dsa_65::KG::keygen_from_seed(&[n as u8 + 101; 32]);
+        let vk = pk.into_bytes().to_vec();
+        HKey {
+            sk,
+            id: pq::mldsa65_id(&vk).expect("a 1952-byte key"),
+            key_id: pq::bheart_key_id(&vk),
+            vk,
+        }
+    })
+}
+
+fn bheart_of(key_id: &str, file: &[u8], sig: &[u8]) -> BheartSig {
+    let n = file.len() as u64;
+    BheartSig {
+        agility: AGILITY.into(),
+        alg: "ml-dsa-65".into(),
+        content: pq::BheartContent {
+            bytes: n,
+            digest: pq::BheartDigest {
+                alg: "sha3-256".into(),
+                b64u: b64u(&pq::sha3(&[file])),
+                bytes: n,
+            },
+        },
+        key_id: key_id.into(),
+        signature: pq::BheartSignature {
+            alg: "ml-dsa-65".into(),
+            b64u: b64u(sig),
+            bytes: sig.len() as u64,
+        },
+        signed_at_ms: 1_760_227_200_000,
+        kind: "bheart.signature/1".into(),
+    }
+}
+
+fn hsign(k: &HKey, file: &[u8]) -> BheartSig {
+    let sig = k.sk.try_sign_with_seed(&[7; 32], file, &[]).expect("signs");
+    bheart_of(&k.key_id, file, &sig)
+}
+
+fn henvelope_with(record: &[u8], sig: Sig, vk: Option<&[u8]>, hints: Hints) -> Vec<u8> {
+    serde_json::to_vec(&Envelope {
+        bnr: ENVELOPE.into(),
+        hints,
+        record: b64u(record),
+        sig,
+        vk: vk.map(b64u),
+    })
+    .expect("serializes")
+}
+
+/// An envelope carrying a bheart signature by `vk`, hinting the pack's ANT address.
+fn henvelope(r: &Rel, sig: BheartSig, vk: &[u8]) -> Vec<u8> {
+    let hints = Hints {
+        ant: Some(ant_addr(r)),
+        ..Hints::default()
+    };
+    henvelope_with(&r.bytes, Sig::Bheart(sig), Some(vk), hints)
+}
+
+#[test]
+fn mldsa65_ids_are_validated_strictly() {
+    let h = hkey(0);
+    assert!(h.id.starts_with("mldsa65:") && h.id.len() == 8 + 43);
+    assert!(pq::is_mldsa65_id(&h.id) && pq::is_signer_id(&h.id));
+    assert!(pq::is_signer_id(&key(0).id) && !pq::is_mldsa65_id(&key(0).id));
+    assert_eq!(h.key_id.len(), "bheart-".len() + 16);
+    let digest = &h.id[8..];
+    // the last base64url digit of 32 bytes carries 2 spare bits: setting one
+    // spells other text for the same bytes, and it is refused
+    const URL: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    let last = URL
+        .iter()
+        .position(|&c| c == digest.as_bytes()[42])
+        .unwrap();
+    let respelt = format!("mldsa65:{}{}", &digest[..42], URL[last | 1] as char);
+    for bad in [
+        String::new(),
+        digest.to_string(),
+        respelt,
+        format!("MLDSA65:{digest}"),
+        format!("mldsa65:{digest}="),
+        format!("mldsa65:{}", &digest[..42]),
+        format!("mldsa65:{digest}A"),
+        format!("mldsa65: {}", &digest[1..]),
+        format!("mldsa87:{digest}"),
+        "mldsa65:".to_string(),
+    ] {
+        assert!(!pq::is_signer_id(&bad), "{bad:?}");
+    }
+
+    // a record may name either form; the config too
+    let g = release_ids(1, None, &[key(0).id.clone(), h.id.clone()], "mixed");
+    assert_eq!(parse_record(&g.bytes).unwrap(), g.record);
+    let mut bad = g.record.clone();
+    bad.signers = vec!["mldsa65:short".into()];
+    assert_eq!(
+        bad.validate().unwrap_err(),
+        Refusal::Field("signers (non-empty, sorted, unique bzpq1 or mldsa65: ids)")
+    );
+    let fx = fx_pinned("mldsa-cfg", g.sha3, std::slice::from_ref(&h.id));
+    let mut cfg = fx.cfg.clone();
+    cfg.genesis_signers = vec!["mldsa65:short".into()];
+    assert!(cfg.validate().is_err());
+}
+
+#[test]
+fn bheart_envelope_is_parsed_strictly_before_any_lattice_math() {
+    let (h, other) = (hkey(0), hkey(1));
+    let g = release_ids(1, None, std::slice::from_ref(&h.id), "hg");
+    let good = hsign(h, &g.bytes);
+    let env = henvelope(&g, good.clone(), &h.vk);
+    let p = parse_envelope(&env, ORIGIN, RP).unwrap();
+    assert_eq!(p.pre.id, h.id);
+    assert_eq!(
+        p.pre.message, g.bytes,
+        "the message is the raw record bytes"
+    );
+    assert!(pq::fips204_ok(&p.pre));
+    let scratch = tmpdir("bheart-pre");
+    let stub = Verifiers::with_second(Second::Stub(|p, _| pq::fips204_ok(p)), &scratch);
+    assert_eq!(stub.verify(&p).unwrap(), h.id);
+
+    let refused = |sig: BheartSig, vk: Option<&[u8]>, rec: &[u8]| {
+        parse_envelope(
+            &henvelope_with(rec, Sig::Bheart(sig), vk, Hints::default()),
+            ORIGIN,
+            RP,
+        )
+        .unwrap_err()
+    };
+    let with = |f: &dyn Fn(&mut BheartSig)| {
+        let mut s = good.clone();
+        f(&mut s);
+        s
+    };
+    // wrong vk: the key id bsigner derives from it is not the one signed
+    assert_eq!(
+        refused(good.clone(), Some(&other.vk), &g.bytes),
+        Refusal::IdMismatch
+    );
+    // key_id mismatch
+    assert_eq!(
+        refused(
+            with(&|s| s.key_id = other.key_id.clone()),
+            Some(&h.vk),
+            &g.bytes
+        ),
+        Refusal::IdMismatch
+    );
+    // algorithm ids
+    let alg = Refusal::Field("sig.alg and sig.signature.alg (ml-dsa-65)");
+    assert_eq!(
+        refused(with(&|s| s.alg = "ml-dsa-87".into()), Some(&h.vk), &g.bytes),
+        alg
+    );
+    assert_eq!(
+        refused(
+            with(&|s| s.signature.alg = "ml-dsa-44".into()),
+            Some(&h.vk),
+            &g.bytes
+        ),
+        alg
+    );
+    assert_eq!(
+        refused(
+            with(&|s| s.content.digest.alg = "sha3-512".into()),
+            Some(&h.vk),
+            &g.bytes
+        ),
+        Refusal::Field("sig.content.digest.alg (sha3-256)")
+    );
+    assert_eq!(
+        refused(
+            with(&|s| s.kind = "bheart.signature/2".into()),
+            Some(&h.vk),
+            &g.bytes
+        ),
+        Refusal::Field("sig.type (bheart.signature/1)")
+    );
+    // vk: required with bheart, forbidden with §3b, exactly 1952 bytes
+    assert_eq!(
+        refused(good.clone(), None, &g.bytes),
+        Refusal::Field("vk (required with bheart.signature/1)")
+    );
+    let bpq_with_vk = henvelope_with(
+        &g.bytes,
+        Sig::Bpq(sign(key(0), &g.bytes)),
+        Some(&h.vk),
+        Hints::default(),
+    );
+    assert_eq!(
+        parse_envelope(&bpq_with_vk, ORIGIN, RP).unwrap_err(),
+        Refusal::Field("vk (forbidden with a §3b signature)")
+    );
+    assert_eq!(
+        refused(good.clone(), Some(&h.vk[..1951]), &g.bytes),
+        Refusal::Field("vk (base64url of a 1952-byte ML-DSA-65 key)")
+    );
+    // digest, sizes
+    assert_eq!(
+        refused(
+            with(&|s| s.content.digest.b64u = b64u(&pq::sha3(&[b"x"]))),
+            Some(&h.vk),
+            &g.bytes
+        ),
+        Refusal::FileMismatch
+    );
+    assert_eq!(
+        refused(with(&|s| s.content.bytes += 1), Some(&h.vk), &g.bytes),
+        Refusal::FileMismatch
+    );
+    assert_eq!(
+        refused(
+            with(&|s| s.content.digest.bytes -= 1),
+            Some(&h.vk),
+            &g.bytes
+        ),
+        Refusal::FileMismatch
+    );
+    // signature length: the field, and the decoded bytes
+    let len = Refusal::Field("sig.signature (3309 bytes)");
+    assert_eq!(
+        refused(with(&|s| s.signature.bytes = 3308), Some(&h.vk), &g.bytes),
+        len
+    );
+    let short = with(&|s| {
+        let mut raw = unb64u(&s.signature.b64u).unwrap();
+        raw.pop();
+        s.signature.b64u = b64u(&raw);
+    });
+    assert_eq!(refused(short, Some(&h.vk), &g.bytes), len);
+    // one bit of the record: the digest no longer names it
+    let t = tamper(&g);
+    assert_eq!(
+        refused(good.clone(), Some(&h.vk), &t),
+        Refusal::FileMismatch
+    );
+    // ... and rebound to the tampered bytes, only ML-DSA refuses it
+    let rebound = bheart_of(&h.key_id, &t, &unb64u(&good.signature.b64u).unwrap());
+    let q = parse_envelope(
+        &henvelope_with(&t, Sig::Bheart(rebound), Some(&h.vk), Hints::default()),
+        ORIGIN,
+        RP,
+    )
+    .unwrap();
+    assert!(!pq::fips204_ok(&q.pre));
+    assert_eq!(stub.verify(&q).unwrap_err(), Refusal::BadSignature);
+    // the field set is exact
+    let text = String::from_utf8(env.clone()).unwrap();
+    for (from, to) in [
+        ("\"type\":", "\"note\":\"x\",\"type\":"),
+        ("\"signed_at_ms\":", "\"signed\":1,\"signed_at_ms\":"),
+        ("\"digest\":{", "\"digest\":{\"extra\":1,"),
+        ("\"agility\":", "\"agility_x\":"),
+    ] {
+        let e = text.replacen(from, to, 1);
+        assert_ne!(e, text);
+        assert!(
+            matches!(
+                parse_envelope(e.as_bytes(), ORIGIN, RP).unwrap_err().name(),
+                "unknown_field" | "missing_field"
+            ),
+            "{from}"
+        );
+    }
+    // a signer the genesis pins do not name authorizes nothing
+    let mut verify = |q: &Parsed| stub.verify(q);
+    let not_pinned = crate::chain::extends(
+        None,
+        &p,
+        &g.sha3,
+        std::slice::from_ref(&key(0).id),
+        &mut verify,
+    );
+    assert_eq!(
+        not_pinned.unwrap_err(),
+        "no signature by an authorized signer"
+    );
+    let pinned = crate::chain::extends(None, &p, &g.sha3, std::slice::from_ref(&h.id), &mut verify);
+    assert_eq!(pinned.unwrap(), h.id);
+    let _ = fs::remove_dir_all(&scratch);
+}
+
+/// Rotation between profiles through record.signers, on the door: a §3b
+/// genesis names an mldsa65: id; a §3b seq 2 by the old key is refused, a
+/// bheart seq 2 by the named key is accepted and served.
+fn rotation_on_the_door(
+    name: &str,
+    vk: &[u8],
+    bheart_sign: &dyn Fn(&[u8]) -> BheartSig,
+    v: Verifiers,
+) {
+    let old = key(0);
+    let id = pq::mldsa65_id(vk).unwrap();
+    let g = release_ids(1, None, std::slice::from_ref(&id), "rot-g");
+    let r2 = release_ids(2, Some(&g), std::slice::from_ref(&id), "rot-2");
+    let fx = fx(name, &g, &[old]);
+    fx.offer(&g);
+    fx.offer(&r2);
+    fx.inbox("1.json", &envelope(&g, old));
+    // the old key signs seq 2: g's signers no longer name it
+    fx.inbox("2-old.json", &envelope(&r2, old));
+    let mut door = fx.door_with(v);
+    door.poll(true);
+    assert_eq!(fx.health().seq, Some(1), "{:?}", door.notes());
+    assert!(
+        noted(&door, "no signature by an authorized signer"),
+        "{:?}",
+        door.notes()
+    );
+    // the rotated-to key signs the same seq 2 in the bheart profile
+    fx.inbox("2-new.json", &henvelope(&r2, bheart_sign(&r2.bytes), vk));
+    door.poll(true);
+    assert_eq!(fx.health().seq, Some(2), "{:?}", door.notes());
+    assert_eq!(fx.store().load().unwrap().unwrap().chain.len(), 2);
+    let (status, _, body) = block_on(call(router(fx.shared.clone()), "GET", "/keychain.js"));
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(body, b"// keychain rot-2\n");
+    // the chain endpoint hands the bheart envelope on, and it parses again
+    let (status, _, body) = block_on(call(
+        router(fx.shared.clone()),
+        "GET",
+        &format!("{}/2", sources::RELEASE_PATH),
+    ));
+    assert_eq!(status, StatusCode::OK);
+    let served = parse_envelope(&body, ORIGIN, RP).unwrap();
+    assert_eq!(served.pre.id, id);
+    assert!(matches!(served.env.sig, Sig::Bheart(_)));
+}
+
+#[test]
+fn rotation_from_bzpq1_to_mldsa65_through_record_signers() {
+    let h = hkey(1);
+    let dir = tmpdir("rot-stub");
+    let v = Verifiers::with_second(Second::Stub(|p, _| pq::fips204_ok(p)), &dir);
+    rotation_on_the_door("rot-in-process", &h.vk, &|b| hsign(h, b), v);
+    let _ = fs::remove_dir_all(&dir);
+}
+
+// --- the real bsigner: keygen + sign with its own CLI, verify with both ---
+
+const REC_ENV: &str = "KEYS_DOOR_TEST_REC";
+
+/// The 24-word test phrase (23 x "abandon", then "art"): a public BIP-39
+/// test vector, never a real key.
+fn test_phrase() -> String {
+    let mut w = vec!["abandon"; 23];
+    w.push("art");
+    w.join(" ")
+}
+
+fn bsigner_run(bin: &Path, args: &[&str]) -> Value {
+    let out = std::process::Command::new(bin)
+        .args(args)
+        .env(REC_ENV, test_phrase())
+        .output()
+        .expect("bsigner runs");
+    assert!(
+        out.status.success(),
+        "bsigner {args:?}: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    serde_json::from_slice(&out.stdout).expect("bsigner prints JSON")
+}
+
+/// `bsigner sign --rec-env V --key-id K --file F --out S`, read back.
+fn bsigner_sign(bin: &Path, dir: &Path, keydir: &Path, key_id: &str, file: &[u8]) -> BheartSig {
+    let (f, s) = (dir.join("to-sign.json"), dir.join("sig.json"));
+    fs::write(&f, file).unwrap();
+    let _ = fs::remove_file(&s);
+    let said = bsigner_run(
+        bin,
+        &[
+            "sign",
+            "--rec-env",
+            REC_ENV,
+            "--key-id",
+            key_id,
+            "--file",
+            f.to_str().unwrap(),
+            "--out",
+            s.to_str().unwrap(),
+            "--keydir",
+            keydir.to_str().unwrap(),
+        ],
+    );
+    assert_eq!(said["envelope_type"], "bheart.signature/1");
+    // bsigner writes it pretty-printed; the strict struct reads every field
+    serde_json::from_slice(&fs::read(&s).unwrap()).expect("an exact bheart.signature/1")
+}
+
+#[test]
+fn a_bsigner_made_bheart_signature_passes_both_verifiers() {
+    let bin = bsigner_env().expect(
+        "KEYS_DOOR_BSIGNER is not set: this test exists to run the real bsigner keygen, sign and verify, and a skipped gate is not a pass",
+    );
+    let dir = tmpdir("bheart-real");
+    let keydir = dir.join("keys");
+    let made = bsigner_run(
+        &bin,
+        &[
+            "keygen",
+            "--alg",
+            "ml-dsa-65",
+            "--rec-env",
+            REC_ENV,
+            "--keydir",
+            keydir.to_str().unwrap(),
+        ],
+    );
+    let key_id = made["key_id"].as_str().unwrap().to_string();
+    let vk = unb64u(made["verifying_key_b64u"].as_str().unwrap()).unwrap();
+    assert_eq!(vk.len(), 1952);
+    assert_eq!(key_id, pq::bheart_key_id(&vk), "bsigner derive_key_id");
+    let id = pq::mldsa65_id(&vk).unwrap();
+
+    // a bsigner-made signature over a release record, as bsigner wrote it
+    let g = release_ids(1, None, std::slice::from_ref(&id), "real-g");
+    let sig = bsigner_sign(&bin, &dir, &keydir, &key_id, &g.bytes);
+    assert_eq!(sig.key_id, key_id);
+    let env = henvelope(&g, sig.clone(), &vk);
+    let p = parse_envelope(&env, ORIGIN, RP).unwrap();
+    assert_eq!(p.pre.id, id);
+    let v = real_verifiers(&dir.join("scratch"));
+    let o = v.outcome(&p);
+    assert_eq!((o.fips204, o.bsigner.clone()), (true, Ok(true)));
+    assert_eq!(v.verify(&p).unwrap(), id);
+    // check_sig is the same pair outside an envelope
+    let o = v
+        .check_sig(&Sig::Bheart(sig.clone()), Some(&b64u(&vk)), &g.bytes)
+        .unwrap();
+    assert_eq!((o.fips204, o.bsigner), (true, Ok(true)));
+
+    // one bit of the record, the digest rebound: both refuse
+    let t = tamper(&g);
+    let rebound = bheart_of(&key_id, &t, &unb64u(&sig.signature.b64u).unwrap());
+    let q = parse_envelope(
+        &henvelope_with(&t, Sig::Bheart(rebound), Some(&vk), Hints::default()),
+        ORIGIN,
+        RP,
+    )
+    .unwrap();
+    let o = v.outcome(&q);
+    assert_eq!((o.fips204, o.bsigner), (false, Ok(false)));
+    assert_eq!(v.verify(&q).unwrap_err(), Refusal::BadSignature);
+    // one bit of the signature: both refuse
+    let mut raw = unb64u(&sig.signature.b64u).unwrap();
+    raw[1000] ^= 0x10;
+    let forged = bheart_of(&key_id, &g.bytes, &raw);
+    let q = parse_envelope(
+        &henvelope_with(&g.bytes, Sig::Bheart(forged), Some(&vk), Hints::default()),
+        ORIGIN,
+        RP,
+    )
+    .unwrap();
+    assert_eq!(v.verify(&q).unwrap_err(), Refusal::BadSignature);
+    // the prechecks, on the bsigner-made signature
+    let refused = |s: BheartSig, vk: Option<&[u8]>| {
+        parse_envelope(
+            &henvelope_with(&g.bytes, Sig::Bheart(s), vk, Hints::default()),
+            ORIGIN,
+            RP,
+        )
+        .unwrap_err()
+    };
+    let with = |f: &dyn Fn(&mut BheartSig)| {
+        let mut s = sig.clone();
+        f(&mut s);
+        s
+    };
+    assert_eq!(refused(sig.clone(), Some(&hkey(0).vk)), Refusal::IdMismatch);
+    assert_eq!(
+        refused(with(&|s| s.key_id = hkey(0).key_id.clone()), Some(&vk)),
+        Refusal::IdMismatch
+    );
+    assert_eq!(
+        refused(with(&|s| s.alg = "ml-dsa-44".into()), Some(&vk)).name(),
+        "bad_field"
+    );
+    assert_eq!(refused(sig.clone(), None).name(), "bad_field");
+    assert_eq!(
+        refused(
+            with(&|s| s.content.digest.b64u = b64u(&pq::sha3(&[b"x"]))),
+            Some(&vk)
+        ),
+        Refusal::FileMismatch
+    );
+    assert_eq!(
+        refused(with(&|s| s.signature.bytes = 3310), Some(&vk)).name(),
+        "bad_field"
+    );
+    let bpq_with_vk = henvelope_with(
+        &g.bytes,
+        Sig::Bpq(sign(key(0), &g.bytes)),
+        Some(&vk),
+        Hints::default(),
+    );
+    assert_eq!(
+        parse_envelope(&bpq_with_vk, ORIGIN, RP).unwrap_err().name(),
+        "bad_field"
+    );
+    // a bsigner-made genesis the pins do not name authorizes nothing
+    let mut verify = |q: &Parsed| v.verify(q);
+    let pins = std::slice::from_ref(&key(0).id);
+    assert_eq!(
+        crate::chain::extends(None, &p, &g.sha3, pins, &mut verify).unwrap_err(),
+        "no signature by an authorized signer"
+    );
+    let pins = std::slice::from_ref(&id);
+    assert_eq!(
+        crate::chain::extends(None, &p, &g.sha3, pins, &mut verify).unwrap(),
+        id
+    );
+
+    // rotation on the door, both verifiers real
+    let sign_with = |b: &[u8]| bsigner_sign(&bin, &dir, &keydir, &key_id, b);
+    rotation_on_the_door(
+        "rot-bsigner",
+        &vk,
+        &sign_with,
+        real_verifiers(&dir.join("scratch")),
+    );
+    let _ = fs::remove_dir_all(&dir);
+}
+
+/// The lying-verifier controls for the bheart subprocess path: a script that
+/// says yes about the key id it is asked for shows a forgery up only as a
+/// disagreement, a yes about another key id is a no, and a yes with exit 1
+/// is no verdict at all.
+#[cfg(unix)]
+#[test]
+fn a_lying_bsigner_verify_on_the_bheart_path() {
+    use std::os::unix::fs::PermissionsExt;
+    let h = hkey(0);
+    let g = release_ids(1, None, std::slice::from_ref(&h.id), "liar-h");
+    let dir = tmpdir("liar-h");
+    let liar = |name: &str, body: &str| {
+        let path = dir.join(name);
+        fs::write(&path, format!("#!/bin/sh\n{body}\n")).unwrap();
+        fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
+        Verifiers::new(path.to_str().unwrap(), &dir.join("scratch")).unwrap()
+    };
+    // argv: verify --key-id K --file F --envelope S --keydir D
+    let echoes = liar(
+        "yes-echo.sh",
+        r#"printf '{"verified":true,"key_id":"%s","alg":"ml-dsa-65"}\n' "$3""#,
+    );
+    let other = liar(
+        "yes-other.sh",
+        r#"printf '{"verified":true,"key_id":"bheart-AAAAAAAAAAAAAAAA"}\n'"#,
+    );
+    let lies_exit = liar(
+        "yes-exit1.sh",
+        r#"printf '{"verified":true,"key_id":"%s"}\n' "$3"; exit 1"#,
+    );
+    let p = parse_envelope(&henvelope(&g, hsign(h, &g.bytes), &h.vk), ORIGIN, RP).unwrap();
+    let mut raw = unb64u(&hsign(h, &g.bytes).signature.b64u).unwrap();
+    raw[7] ^= 1;
+    let q = parse_envelope(
+        &henvelope_with(
+            &g.bytes,
+            Sig::Bheart(bheart_of(&h.key_id, &g.bytes, &raw)),
+            Some(&h.vk),
+            Hints::default(),
+        ),
+        ORIGIN,
+        RP,
+    )
+    .unwrap();
+    assert_eq!(echoes.verify(&p).unwrap(), h.id);
+    assert_eq!(
+        echoes.verify(&q).unwrap_err(),
+        Refusal::Disagreement {
+            fips204: false,
+            bsigner: true
+        }
+    );
+    assert_eq!(
+        other.verify(&p).unwrap_err(),
+        Refusal::Disagreement {
+            fips204: true,
+            bsigner: false
+        }
+    );
+    assert_eq!(lies_exit.verify(&p).unwrap_err().name(), "verifier_failed");
+    let _ = fs::remove_dir_all(&dir);
 }

@@ -24,8 +24,10 @@
 //   seq, seq 1..N with no gap, each holding exactly record.json, record.json.relsig.json and
 //   envelope.json; an unfinished place, .place-*, refuses). Each record strict (contract §1,
 //   release.mjs's reader: one strict reader for the tools and the probe; the edge, ops/keys-door,
-//   reads with its own), each prev naming the record before, each SPEC-BPQ-1 §3b signature in its one
-//   byte form (canonical JSON, no trailing newline) and valid (surfaces/bpq.js) by a signer pinned in
+//   reads with its own), each prev naming the record before, each signature (a SPEC-BPQ-1 §3b
+//   signature, or a bheart.signature/1 whose verifying key is the envelope's vk) in its one byte form
+//   (canonical JSON, no trailing newline) and valid (surfaces/bpq.js, or noble ML-DSA-65 for the
+//   bheart profile, as release.mjs verifySig reads both) by a signer pinned in
 //   docs/KEYCHAIN-RELEASE-SIGNERS.json at seq 1 and by an id the previous record names after it, and
 //   each envelope.json carrying exactly that record and signature.
 //   The highest is the expectation; any defect is NOT MEASURED, never a fallback to the build.
@@ -68,7 +70,7 @@ import {rootCertificates} from 'node:tls';
 import {tmpdir} from 'node:os';
 import {join, relative} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
-import {BPQ as RELEASE_BPQ, canon as releaseCanon, checkIdentity, checkPlacedEnvelope, checkSig, isId as releaseIsId, parseRecord, readPlaced, readSig} from './release.mjs';
+import {BPQ as RELEASE_BPQ, canon as releaseCanon, checkIdentity, checkPlacedEnvelope, checkSig, isBheart, isId as releaseIsId, parseRecord, placedVk, readPlaced, readSig, verifySig, vkBytes} from './release.mjs';
 
 export const SCHEMA = 'bnr.keychain-edge-receipt/1';
 export const ORIGIN = 'https://keys.skaists.dev';
@@ -123,10 +125,11 @@ const exactly = (o, keys, where) => {
 // origin and RP ID.
 export const readRecord = bytes => checkIdentity(parseRecord(bytes), {origin: ORIGIN, rp_id: HOST});
 
-// A SPEC-BPQ-1 §3b detached signature over exactly these bytes → its signer id; anything else throws.
-export function signerOf(sig, bytes) {
+// A signature over exactly these bytes → its signer id; anything else throws. Either profile: a
+// SPEC-BPQ-1 §3b detached signature (no vk), or a bheart.signature/1 with its verifying key vk.
+export function signerOf(sig, bytes, vk) {
   checkSig(sig);
-  const v = BPQ.verifyFile(sig, new Uint8Array(bytes));
+  const v = verifySig(sig, bytes, vk);
   if (!v.ok) throw new Error(`signature: ${v.why}`);
   return v.id;
 }
@@ -153,7 +156,8 @@ export function expectedFromRecords(releases, auth) {
   const found = placed.map(p => {
     const where = `${p.where}/record.json`;
     let r, id;
-    try { r = readRecord(p.recordBytes); id = signerOf(readSig(p.sigBytes), p.recordBytes); } catch (e) { throw new Error(`${where}: ${e.message}`); }
+    // a bheart release's verifying key is kept only in its envelope.json (vk)
+    try { r = readRecord(p.recordBytes); id = signerOf(readSig(p.sigBytes), p.recordBytes, placedVk(p)); } catch (e) { throw new Error(`${where}: ${e.message}`); }
     checkPlacedEnvelope(p);   // its messages name keychain/releases/<seq>/envelope.json
     return {r, where, id, sha3: hash('sha3-256', p.recordBytes)};
   });
@@ -400,7 +404,8 @@ const isHints = h => !!h && typeof h === 'object' && !Array.isArray(h) && Object
   : k === 'peers' ? Array.isArray(v) && v.every(p => typeof p === 'string' && /^https:\/\/[A-Za-z0-9.-]+(:[0-9]{1,5})?(\/[\x21-\x7e]*)?$/.test(p))
   : false);
 
-// Contract §3: {"bnr":"keychain-release-envelope/1","hints":{…},"record":"<b64u>","sig":{…}}, at most 64 KiB.
+// Contract §3: {"bnr":"keychain-release-envelope/1","hints":{…},"record":"<b64u>","sig":{…}}, at most 64 KiB,
+// plus "vk" (base64url of the ML-DSA-65 verifying key) exactly when sig is a bheart.signature/1.
 // expected: the repository's expectation (with its chain when records are committed); auth:
 // authority(); pages: pagesFromDns().
 export function wellKnownCheck(name, got, {expected = null, auth = {pins: [], law: []}, pages = null} = {}) {
@@ -417,18 +422,20 @@ export function wellKnownCheck(name, got, {expected = null, auth = {pins: [], la
     if (got.bytes.length > 65536) throw new Error(`${got.bytes.length} B exceeds 64 KiB`);
     let env;
     try { env = JSON.parse(got.bytes.toString('utf8')); } catch { throw new Error('not JSON'); }
-    exactly(env, ['bnr', 'hints', 'record', 'sig'], 'envelope');
+    const hasVk = !!env && typeof env === 'object' && Object.hasOwn(env, 'vk');
+    exactly(env, ['bnr', 'hints', 'record', 'sig', ...(hasVk ? ['vk'] : [])], 'envelope');
+    if (isBheart(env.sig) !== hasVk) throw new Error(hasVk ? 'vk is forbidden with a SPEC-BPQ-1 §3b signature' : 'vk is required with a bheart.signature/1');
     if (env.bnr !== 'keychain-release-envelope/1') throw new Error('bnr is not keychain-release-envelope/1');
     if (!isHints(env.hints)) throw new Error('hints are not contract §3 hints');
     if (typeof env.record !== 'string' || !/^[A-Za-z0-9_-]+$/.test(env.record)) throw new Error('record is not base64url');
     recBytes = Buffer.from(env.record, 'base64url');
     if (b64u(recBytes) !== env.record) throw new Error('record is not canonical base64url');
     r = readRecord(recBytes);
-    id = signerOf(env.sig, recBytes);
+    id = signerOf(env.sig, recBytes, hasVk ? vkBytes(env.vk) : undefined);
     if (auth.law.includes(id)) throw new Error(`signed by the law key ${id}, never a release authority`);
   } catch (e) { return say('FAIL', `refused: ${e.message}`); }
   const sha3 = hash('sha3-256', recBytes);
-  Object.assign(ev, {seq: r.seq, record: digests(recBytes), signer: id, verified_with: 'surfaces/bpq.js (ML-DSA-65)'});
+  Object.assign(ev, {seq: r.seq, record: digests(recBytes), signer: id, verified_with: id.startsWith('mldsa65:') ? 'noble ml_dsa65 (bpq-lib.js), bheart.signature/1' : 'surfaces/bpq.js (ML-DSA-65)'});
   const chain = expected?.chain ?? [];
   if (chain.length) {
     const top = chain.at(-1);

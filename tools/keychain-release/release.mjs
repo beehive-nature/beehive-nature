@@ -7,19 +7,31 @@
 //       DIR/record.json (canonical), DIR/pack.bin and DIR/site/
 //   check DIR
 //       rebuild from the commit the record names and require byte-identical files, record and pack
-//   sign-test [--record R --out SIG] [--seed S] --i-understand-this-is-a-test-key
-//       TEST ONLY: a throwaway ML-DSA-65 key made in this process signs R (SPEC-BPQ-1 §3b);
-//       without --record it prints the throwaway id the seed gives
-//   envelope --record R --sig S [--hint-ant A] [--hint-ar T]... [--hint-hive BLOCK:TRX] [--hint-peer URL]... [--out FILE]
-//   verify --record R --sig S [--signers id,...] [--prev R0] [--genesis-sha3 B | --no-genesis-pin]
+//   sign-test [--profile bpq|bheart] [--record R --out SIG] [--vk-out FILE] [--seed S] --i-understand-this-is-a-test-key
+//       TEST ONLY: a throwaway ML-DSA-65 key made in this process signs R, as a SPEC-BPQ-1 §3b
+//       signature (bpq, the default) or as a bheart.signature/1 (bheart; --vk-out writes its
+//       verifying key, base64url); without --record it prints the throwaway id the seed gives
+//   import-sig --sig FILE --out RELSIG
+//       a signature as its signer wrote it (bsigner sign writes pretty-printed JSON) checked for its
+//       exact field set and written in its one byte form
+//   envelope --record R --sig S [--vk FILE|B64U] [--hint-ant A] [--hint-ar T]... [--hint-hive BLOCK:TRX] [--hint-peer URL]... [--out FILE]
+//   verify --record R --sig S [--vk FILE|B64U] [--signers id,...] [--prev R0] [--genesis-sha3 B | --no-genesis-pin]
 //       the signature and the seq/prev/signer rules an edge applies (one implementation here: noble);
 //       seq 1 needs the genesis pin, and --no-genesis-pin is a signature-only check, never ok:true.
 //       Exit 0 only for ok:true; 1 for a refusal; 3 for a good signature-only check (no chain verdict)
-//   place --dir DIR --record R --sig S [--envelope E] --signers id,... --genesis-sha3 B
+//   place --dir DIR --record R --sig S [--envelope E] [--vk FILE|B64U] --signers id,... --genesis-sha3 B
 //       verify the chain already placed under DIR (rules 1-3 from the genesis pin, every envelope.json,
 //       A2's layout and nothing else), then R as the next record, and write
 //       DIR/keychain/releases/<seq>/{record.json, record.json.relsig.json, envelope.json};
 //       an existing seq directory with other bytes is refused, never rewritten
+//
+// Two signature profiles are accepted, as the edge accepts them (ops/keys-door):
+//   - SPEC-BPQ-1 §3b detached signatures, signer id bzpq1…; the envelope carries no vk.
+//   - bheart.signature/1, what the frozen `bsigner sign` writes: ML-DSA-65 over the RAW record bytes,
+//     empty context, no domain prefix (signed_at_ms and agility are not signed). Its verifying key
+//     travels as the envelope's vk (REQUIRED there), and its signer id is
+//     mldsa65:<base64url SHA3-256(vk)>. --vk FILE|B64U: the base64url text, or a file holding it, the
+//     raw 1952 bytes, or a JSON object with verifying_key_b64u (bsigner keygen's output).
 //
 // A signature file (record.json.relsig.json) has ONE byte form: the canonical JSON of the record
 // (§1 canon), no trailing newline. The envelope's sig is that same object, so canon(envelope.sig)
@@ -68,9 +80,44 @@ const DIGEST_RE = /^[A-Za-z0-9_-]{43}$/;
 // 32 bytes as base64url without padding; the round trip refuses non-zero spare bits. Hex never.
 export const isDigest = s => typeof s === 'string' && DIGEST_RE.test(s) && b64u(Buffer.from(s, 'base64url')) === s;
 export const isCount = n => Number.isSafeInteger(n) && n >= 0;
-export function isId(s) {
+export function isBzpqId(s) {
   if (typeof s !== 'string' || s !== s.toLowerCase()) return false;
   try { const d = L.bech32m.decodeToBytes(s, 120); return d.prefix === 'bzpq' && d.bytes.length === 32; } catch { return false; }
+}
+// The bheart profile's signer id: "mldsa65:" + base64url (no padding) of SHA3-256(verifying key).
+export const MLDSA_PREFIX = 'mldsa65:';
+export const isMldsaId = s => typeof s === 'string' && s.startsWith(MLDSA_PREFIX) && isDigest(s.slice(MLDSA_PREFIX.length));
+// A signer id of either accepted profile (record.signers, the genesis signers, the pins).
+export const isId = s => isBzpqId(s) || isMldsaId(s);
+export const DSA_PK_LEN = 1952, DSA_SIG_LEN = 3309;
+export const mldsaId = vk => MLDSA_PREFIX + b64u(sha3(vkBytes(vk)));
+// bsigner's key id (crates/bsigner/src/keys.rs derive_key_id): "bheart-" + the first 16 characters of
+// base64url(SHA3-256(UTF-8 "ml-dsa-65" || verifying key)).
+export const bheartKeyId = vk => 'bheart-' + b64u(sha3(Buffer.concat([Buffer.from('ml-dsa-65'), vkBytes(vk)]))).slice(0, 16);
+// A verifying key as bytes, from bytes or strict base64url; exactly 1952 bytes or refused.
+export function vkBytes(vk) {
+  let b;
+  if (typeof vk === 'string') {
+    b = /^[A-Za-z0-9_-]+$/.test(vk) ? Buffer.from(vk, 'base64url') : null;
+    if (!b || b64u(b) !== vk) throw new Error('vk is not canonical base64url');
+  } else if (vk instanceof Uint8Array) b = Buffer.from(vk);
+  else throw new Error('vk is missing');
+  if (b.length !== DSA_PK_LEN) throw new Error(`vk is ${b.length} bytes, not the 1952 of an ML-DSA-65 verifying key`);
+  return b;
+}
+// --vk FILE|B64U: the base64url text itself, or a file holding the text (one trailing newline
+// allowed), the raw 1952 bytes, or a JSON object with verifying_key_b64u (bsigner keygen's output).
+export function readVk(arg) {
+  if (/^[A-Za-z0-9_-]{2603}$/.test(arg)) return vkBytes(arg);
+  const raw = readFileSync(arg);
+  if (raw.length === DSA_PK_LEN) return Buffer.from(raw);
+  const text = raw.toString('latin1').replace(/\n$/, '');
+  if (text.startsWith('{')) {
+    let j;
+    try { j = JSON.parse(text); } catch { throw new Error(`${arg} is not JSON`); }
+    return vkBytes(j && j.verifying_key_b64u);
+  }
+  return vkBytes(text);
 }
 const PATH_RE = /^[A-Za-z0-9._-]+(\/[A-Za-z0-9._-]+)*$/;
 const isPath = p => typeof p === 'string' && PATH_RE.test(p) && !p.split('/').some(s => s === '.' || s === '..');
@@ -217,7 +264,7 @@ export function parseRecord(bytes) {
   if (r.pack.size !== total) throw new Error(`record.pack.size ${r.pack.size} is not the sum of the file sizes ${total}`);
   if (!Array.isArray(r.signers) || !r.signers.length) throw new Error('record.signers must name at least one id for the next record');
   r.signers.forEach((s, n) => {
-    if (!isId(s)) throw new Error(`record.signers[${n}] is not a bzpq1 id`);
+    if (!isId(s)) throw new Error(`record.signers[${n}] is not a bzpq1 or mldsa65: id`);
     if (n && bytewise(r.signers[n - 1], s) >= 0) throw new Error('record.signers must be sorted and unique');
   });
   fields(r.source, ['build', 'commit', 'repo'], 'record.source');
@@ -348,7 +395,7 @@ export function prepare(o) {
   }
   const signers = o.signers !== undefined ? list(o.signers) : pinnedSigners(root);
   if (!signers.length) throw new Error('no --signers and docs/KEYCHAIN-RELEASE-SIGNERS.json pins none: the release signer is unruled (R-SIGNER)');
-  for (const s of signers) if (!isId(s)) throw new Error(`${s} is not a bzpq1 id`);
+  for (const s of signers) if (!isId(s)) throw new Error(`${s} is not a bzpq1 or mldsa65: id`);
   refuseLaw(signers);
   const files = buildSite(root);
   const { record, bytes, pack } = assemble({ files, seq, prev, signers, commit });
@@ -394,13 +441,82 @@ export function testKeys(seed) {
   try { return BPQ.keys(root, TEST_CONTEXT); } finally { root.fill(0); }
 }
 
+// TEST ONLY. A throwaway bheart signer: a noble ML-DSA-65 key from a random seed (or a named one,
+// for repeatable tests). It signs as `bsigner sign` does: the raw bytes, empty context.
+export function testBheartKey(seed) {
+  const s = new Uint8Array(seed === undefined ? randomBytes(32) : sha3(Buffer.from('bnr.keychain-release/test-seed-bheart\n' + seed, 'utf8')));
+  let k;
+  try { k = L.ml_dsa65.keygen(s); } finally { s.fill(0); }
+  const vk = Buffer.from(k.publicKey);
+  return {
+    vk, id: mldsaId(vk), key_id: bheartKeyId(vk),
+    sign: bytes => bheartSig(bheartKeyId(vk), bytes, L.ml_dsa65.sign(new Uint8Array(bytes), k.secretKey)),
+    wipe: () => k.secretKey.fill(0)
+  };
+}
+
+export const BHEART_TYPE = 'bheart.signature/1', BHEART_ALG = 'ml-dsa-65';
+// bsigner's agility text (crates/bsigner/src/envelope.rs); not covered by the signature.
+const AGILITY = 'verify dispatches on the alg fields above; unknown ids are refused, never defaulted';
+// A bheart.signature/1 object, field for field as bsigner's sign_envelope writes it.
+export function bheartSig(keyId, bytes, sig, signedAtMs = Date.now()) {
+  return {
+    agility: AGILITY, alg: BHEART_ALG,
+    content: { bytes: bytes.length, digest: { alg: 'sha3-256', b64u: b64u(sha3(bytes)), bytes: bytes.length } },
+    key_id: keyId, signature: { alg: BHEART_ALG, b64u: b64u(sig), bytes: sig.length },
+    signed_at_ms: signedAtMs, type: BHEART_TYPE
+  };
+}
+
 const SIG = ['at', 'bpq', 'dsa', 'file', 'id', 'kind', 'sig', 'succ'];
-// The shape of a §3b detached signature object, wherever it came from (a file, an envelope).
+const BHEART = ['agility', 'alg', 'content', 'key_id', 'signature', 'signed_at_ms', 'type'];
+// An object with a "type" field is read as a bheart.signature/1, anything else as §3b; each is then
+// held to its exact field set, so no object is both.
+export const isBheart = d => !!d && typeof d === 'object' && Object.hasOwn(d, 'type');
+const B64U_RE = /^[A-Za-z0-9_-]*$/;
+// The shape of a signature object of either profile, wherever it came from (a file, an envelope).
 export function checkSig(d) {
+  if (isBheart(d)) {
+    fields(d, BHEART, 'signature');
+    fields(d.content, ['bytes', 'digest'], 'signature.content');
+    fields(d.content.digest, ['alg', 'b64u', 'bytes'], 'signature.content.digest');
+    fields(d.signature, ['alg', 'b64u', 'bytes'], 'signature.signature');
+    if (d.type !== BHEART_TYPE) throw new Error(`signature.type is not ${BHEART_TYPE}`);
+    if (d.alg !== BHEART_ALG || d.signature.alg !== BHEART_ALG) throw new Error('signature.alg and signature.signature.alg must both be ml-dsa-65');
+    if (d.content.digest.alg !== 'sha3-256') throw new Error('signature.content.digest.alg is not sha3-256');
+    if (typeof d.agility !== 'string' || !d.agility || d.agility.length > 256 || !PRINTABLE.test(d.agility)) throw new Error('signature.agility is not printable ASCII');
+    if (typeof d.key_id !== 'string' || !/^bheart-[A-Za-z0-9_-]{16}$/.test(d.key_id)) throw new Error('signature.key_id is not a bsigner key id');
+    for (const s of [d.content.digest.b64u, d.signature.b64u]) if (typeof s !== 'string' || !B64U_RE.test(s)) throw new Error('signature digests and bytes are base64url');
+    for (const n of [d.content.bytes, d.content.digest.bytes, d.signature.bytes, d.signed_at_ms]) if (!isCount(n)) throw new Error('signature byte counts and signed_at_ms are whole numbers');
+    return d;
+  }
   fields(d, SIG, 'signature');
   fields(d.file, ['sha3', 'size'], 'signature.file');
   if (d.bpq !== 1 || d.kind !== 'detached') throw new Error('not a SPEC-BPQ-1 §3b detached signature');
   return d;
+}
+
+// The signature of either profile over exactly these record bytes, before any chain rule:
+// { ok, id, profile, at? } or { ok: false, why }. vk is the envelope's verifying key (bytes or
+// base64url): REQUIRED with a bheart.signature/1, FORBIDDEN with a §3b signature.
+export function verifySig(d, recordBytes, vk) {
+  try { checkSig(d); } catch (e) { return { ok: false, why: e.message }; }
+  if (!isBheart(d)) {
+    if (vk !== undefined) return { ok: false, why: 'vk is forbidden with a SPEC-BPQ-1 §3b signature (it carries its own key)' };
+    const v = BPQ.verifyFile(d, new Uint8Array(recordBytes));
+    return v.ok ? { ok: true, id: v.id, at: v.at, profile: 'bpq1/detached' } : { ok: false, why: v.why };
+  }
+  if (vk === undefined) return { ok: false, why: 'a bheart.signature/1 needs its verifying key (vk)' };
+  let k;
+  try { k = vkBytes(vk); } catch (e) { return { ok: false, why: e.message }; }
+  if (d.key_id !== bheartKeyId(k)) return { ok: false, why: 'signature.key_id is not the bsigner key id of vk' };
+  const n = recordBytes.length;
+  if (d.content.bytes !== n || d.content.digest.bytes !== n || d.content.digest.b64u !== b64u(sha3(recordBytes))) return { ok: false, why: 'the signature names other bytes than this record (size or SHA3-256)' };
+  const sig = Buffer.from(d.signature.b64u, 'base64url');
+  if (b64u(sig) !== d.signature.b64u || sig.length !== DSA_SIG_LEN || d.signature.bytes !== DSA_SIG_LEN) return { ok: false, why: 'signature.signature is not 3309 bytes of canonical base64url' };
+  let ok = false;
+  try { ok = L.ml_dsa65.verify(new Uint8Array(sig), new Uint8Array(recordBytes), new Uint8Array(k)) === true; } catch { ok = false; }
+  return ok ? { ok: true, id: mldsaId(k), profile: BHEART_TYPE } : { ok: false, why: 'the ML-DSA-65 signature does not verify' };
 }
 // The one byte form of a signature: what sign-test writes, what an envelope's sig re-serializes to,
 // and what an anchor's sig.sha3 hashes.
@@ -418,11 +534,11 @@ export const sigSha3 = sigBytes => b64u(sha3(sigBytesOf(readSig(sigBytes))));
 // seq N > 1 only as prev.seq + 1, signed by an id the previous record names.
 // noGenesisPin: a signature-only check of a seq 1 record. It reports signature_ok and is never
 // ok: true, because without the pin nothing here says this record is the genesis.
-export function verifyRelease({ recordBytes, sigBytes, signers, prevBytes, genesisSha3, noGenesisPin = false, cfg = CFG, law = lawIds() }) {
+export function verifyRelease({ recordBytes, sigBytes, vk, signers, prevBytes, genesisSha3, noGenesisPin = false, cfg = CFG, law = lawIds() }) {
   try {
     const r = checkIdentity(parseRecord(recordBytes), cfg);
     const d = readSig(sigBytes);
-    const v = BPQ.verifyFile(d, new Uint8Array(recordBytes));
+    const v = verifySig(d, recordBytes, vk);
     if (!v.ok) return { ok: false, why: `signature: ${v.why}` };
     if (law.has(v.id)) return { ok: false, id: v.id, why: 'signed by the law key, which is never a release authority' };
     const sha = b64u(sha3(recordBytes));
@@ -433,20 +549,20 @@ export function verifyRelease({ recordBytes, sigBytes, signers, prevBytes, genes
       if (r.prev !== b64u(sha3(prevBytes))) return { ok: false, id: v.id, why: 'record.prev does not name the previous record' };
       if (!p.signers.includes(v.id)) return { ok: false, id: v.id, why: `${v.id} is not among the previous record's signers` };
       if (signers && !signers.includes(v.id)) return { ok: false, id: v.id, why: `${v.id} is not among --signers` };
-      return { ok: true, id: v.id, at: v.at, seq: r.seq, sha3: sha, authorized_by: 'previous record signers' };
+      return { ok: true, id: v.id, at: v.at, profile: v.profile, seq: r.seq, sha3: sha, authorized_by: 'previous record signers' };
     }
     if (r.seq !== 1) return { ok: false, id: v.id, why: `seq ${r.seq} needs the record it follows (--prev): genesis pins authorize genesis only` };
     if (!signers || !signers.length) return { ok: false, id: v.id, why: 'seq 1 needs the genesis signers (--signers)' };
     if (!signers.includes(v.id)) return { ok: false, id: v.id, why: `${v.id} is not a genesis signer` };
     if (noGenesisPin) {
       if (genesisSha3 !== undefined) return { ok: false, id: v.id, why: '--no-genesis-pin and --genesis-sha3 contradict each other' };
-      return { ok: false, signature_ok: true, checked: 'signature only (--no-genesis-pin)', id: v.id, at: v.at, seq: 1, sha3: sha,
+      return { ok: false, signature_ok: true, checked: 'signature only (--no-genesis-pin)', id: v.id, at: v.at, profile: v.profile, seq: 1, sha3: sha,
         authorized_by: 'genesis signers', genesis_pin: 'not checked', why: 'signature only: rule 3 accepts a genesis by its pinned sha3, which was not given, so this is no verdict on the chain' };
     }
     if (genesisSha3 === undefined) return { ok: false, id: v.id, why: 'seq 1 needs the genesis pin (--genesis-sha3): rule 3 accepts a genesis only by its pinned sha3 and its signers' };
     if (!isDigest(genesisSha3)) return { ok: false, id: v.id, why: `the genesis pin ${genesisSha3} is not a base64url SHA3-256 digest` };
     if (genesisSha3 !== sha) return { ok: false, id: v.id, why: `record sha3 ${sha} is not the genesis pin ${genesisSha3}` };
-    return { ok: true, id: v.id, at: v.at, seq: 1, sha3: sha, authorized_by: 'genesis signers', genesis_pin: 'matched' };
+    return { ok: true, id: v.id, at: v.at, profile: v.profile, seq: 1, sha3: sha, authorized_by: 'genesis signers', genesis_pin: 'matched' };
   } catch (e) { return { ok: false, why: e.message }; }
 }
 
@@ -472,10 +588,12 @@ export function checkHints(h) {
   return h;
 }
 
-export function envelope(recordBytes, sigBytes, hints = {}) {
+// vk: the verifying key of a bheart.signature/1 (bytes or base64url), carried as envelope.vk;
+// refused with a §3b signature.
+export function envelope(recordBytes, sigBytes, hints = {}, vk) {
   checkIdentity(parseRecord(recordBytes));
   const sig = readSig(sigBytes);
-  const v = BPQ.verifyFile(sig, new Uint8Array(recordBytes));
+  const v = verifySig(sig, recordBytes, vk);
   if (!v.ok) throw new Error(`the signature is not over this record: ${v.why}`);
   const h = {};
   if (hints.ant !== undefined) {
@@ -495,26 +613,33 @@ export function envelope(recordBytes, sigBytes, hints = {}) {
     for (const p of hints.peers) if (!PEER_RE.test(p)) throw new Error(`--hint-peer ${p} is not an https URL`);
     h.peers = hints.peers;
   }
-  const bytes = Buffer.from(canon({ bnr: ENVELOPE, hints: checkHints(h), record: b64u(recordBytes), sig }), 'latin1');
+  const e = { bnr: ENVELOPE, hints: checkHints(h), record: b64u(recordBytes), sig };
+  if (vk !== undefined) e.vk = b64u(vkBytes(vk));
+  const bytes = Buffer.from(canon(e), 'latin1');
   if (bytes.length > ENVELOPE_MAX) throw new Error(`the envelope is ${bytes.length} bytes, over the 64 KiB limit`);
   return bytes;
 }
 
 // The strict envelope reader: the canonical bytes envelope() writes, and nothing else. It returns
-// the record bytes and the signature in its one byte form, so an envelope and a record.json beside
-// its record.json.relsig.json are the same evidence. It verifies nothing; verifyRelease does.
+// the record bytes, the signature in its one byte form and the verifying key (vk, bytes; only with
+// a bheart.signature/1, where it is required), so an envelope and a record.json beside its
+// record.json.relsig.json are the same evidence. It verifies nothing; verifyRelease does.
 export function openEnvelope(bytes) {
   const b = Buffer.from(bytes);
   if (b.length > ENVELOPE_MAX) throw new Error(`the envelope is ${b.length} bytes, over the 64 KiB limit`);
   let e;
   try { e = parseStrict(b); } catch (err) { throw new Error(`the envelope is not canonical JSON: ${err.message}`); }
-  fields(e, ['bnr', 'hints', 'record', 'sig'], 'envelope');
+  const hasVk = !!e && typeof e === 'object' && Object.hasOwn(e, 'vk');
+  fields(e, ['bnr', 'hints', 'record', 'sig', ...(hasVk ? ['vk'] : [])], 'envelope');
   if (e.bnr !== ENVELOPE) throw new Error(`envelope.bnr is not ${ENVELOPE}`);
+  if (isBheart(e.sig) !== hasVk) throw new Error(hasVk ? 'envelope.vk is forbidden with a SPEC-BPQ-1 §3b signature' : 'envelope.vk is required with a bheart.signature/1');
+  let vk;
+  if (hasVk) { try { vk = vkBytes(e.vk); } catch (err) { throw new Error(`envelope.${err.message}`); } }
   checkHints(e.hints);
   if (typeof e.record !== 'string' || !/^[A-Za-z0-9_-]+$/.test(e.record)) throw new Error('envelope.record is not base64url');
   const recordBytes = Buffer.from(e.record, 'base64url');
   if (b64u(recordBytes) !== e.record) throw new Error('envelope.record is not canonical base64url');
-  return { recordBytes, sigBytes: sigBytesOf(e.sig), hints: e.hints };
+  return { recordBytes, sigBytes: sigBytesOf(e.sig), hints: e.hints, vk };
 }
 
 // ── committed releases (contract §7 A2) ──────────────────────────────────
@@ -548,15 +673,20 @@ export function readPlaced(releases) {
   return out;
 }
 // A placed envelope.json is the same evidence as the record.json and record.json.relsig.json beside
-// it, byte for byte: an envelope that carries another record or signature is refused.
+// it, byte for byte: an envelope that carries another record or signature is refused. Returns the
+// opened envelope (its vk is the only place a bheart release's verifying key is kept).
 export function checkPlacedEnvelope({ where, recordBytes, sigBytes, envelopeBytes }) {
   let e;
   try { e = openEnvelope(envelopeBytes); } catch (err) { throw new Error(`${where}/envelope.json: ${err.message}`); }
   if (!e.recordBytes.equals(recordBytes)) throw new Error(`${where}/envelope.json carries another record than ${where}/record.json`);
   if (!e.sigBytes.equals(sigBytes)) throw new Error(`${where}/envelope.json carries another signature than ${where}/record.json.relsig.json`);
+  return e;
 }
+// The vk a placed envelope carries, read before the chain is verified (a broken envelope gives none,
+// and checkPlacedEnvelope then names what is wrong with it).
+export const placedVk = p => { try { return openEnvelope(p.envelopeBytes).vk; } catch { return undefined; } };
 
-export function place({ dir, recordBytes, sigBytes, envelopeBytes, signers, genesisSha3, law = lawIds() }) {
+export function place({ dir, recordBytes, sigBytes, envelopeBytes, vk, signers, genesisSha3, law = lawIds() }) {
   if (!signers || !signers.length) throw new Error('--signers is required: the genesis signers rule 3 starts the chain from');
   if (!isDigest(genesisSha3)) throw new Error('--genesis-sha3 is required: the pinned SHA3-256 (base64url) of the seq 1 record');
   const r = checkIdentity(parseRecord(recordBytes));
@@ -567,21 +697,25 @@ export function place({ dir, recordBytes, sigBytes, envelopeBytes, signers, gene
   const placed = readPlaced(releases);
   let prevBytes;
   for (const p of placed) {
-    const v = verifyRelease({ recordBytes: p.recordBytes, sigBytes: p.sigBytes, signers: p.seq === 1 ? signers : undefined, genesisSha3: p.seq === 1 ? genesisSha3 : undefined, prevBytes, law });
+    const v = verifyRelease({ recordBytes: p.recordBytes, sigBytes: p.sigBytes, vk: placedVk(p), signers: p.seq === 1 ? signers : undefined, genesisSha3: p.seq === 1 ? genesisSha3 : undefined, prevBytes, law });
     if (!v.ok) throw new Error(`${p.where} does not verify: ${v.why}`);
     checkPlacedEnvelope(p);
     prevBytes = p.recordBytes;
   }
   if (r.seq > placed.length + 1) throw new Error(`keychain/releases/${placed.length + 1} is not placed: seq ${r.seq} is accepted only after every record before it`);
-  const v = verifyRelease({ recordBytes, sigBytes, signers: r.seq === 1 ? signers : undefined, genesisSha3: r.seq === 1 ? genesisSha3 : undefined, prevBytes: r.seq === 1 ? undefined : placed[r.seq - 2].recordBytes, law });
+  // a bheart release's verifying key: --vk, or the given envelope's vk (the same key when both are given)
+  const given = envelopeBytes ? openEnvelope(envelopeBytes) : null;
+  if (vk !== undefined) vk = vkBytes(vk);
+  if (given && vk !== undefined && !(given.vk && given.vk.equals(vk))) throw new Error('--vk is not the vk --envelope carries');
+  if (given) vk = given.vk;
+  const v = verifyRelease({ recordBytes, sigBytes, vk, signers: r.seq === 1 ? signers : undefined, genesisSha3: r.seq === 1 ? genesisSha3 : undefined, prevBytes: r.seq === 1 ? undefined : placed[r.seq - 2].recordBytes, law });
   if (!v.ok) throw new Error(`the record does not verify: ${v.why}`);
   let env;
-  if (envelopeBytes) {
-    const e = openEnvelope(envelopeBytes);
-    if (!e.recordBytes.equals(recordBytes)) throw new Error('--envelope carries another record');
-    if (!e.sigBytes.equals(sigBytes)) throw new Error('--envelope carries another signature');
+  if (given) {
+    if (!given.recordBytes.equals(recordBytes)) throw new Error('--envelope carries another record');
+    if (!given.sigBytes.equals(sigBytes)) throw new Error('--envelope carries another signature');
     env = Buffer.from(envelopeBytes);
-  } else env = envelope(recordBytes, sigBytes);
+  } else env = envelope(recordBytes, sigBytes, {}, vk);
   const want = { 'envelope.json': env, 'record.json': Buffer.from(recordBytes), 'record.json.relsig.json': Buffer.from(sigBytes) };
   const target = join(releases, String(r.seq)), out = { placed: target, seq: r.seq, sha3: b64u(sha3(recordBytes)) };
   if (r.seq <= placed.length) {
@@ -622,29 +756,44 @@ export function args(argv, spec) {
 const COMMANDS = {
   prepare: [{ value: ['out', 'seq', 'prev', 'signers', 'commit'] }, prepare],
   check: [{ positional: 1 }, o => { if (!o._[0]) throw new Error('check needs DIR'); return check(o._[0]); }],
-  'sign-test': [{ value: ['record', 'out', 'seed'], flag: ['i-understand-this-is-a-test-key'] }, o => {
+  'sign-test': [{ value: ['record', 'out', 'seed', 'profile', 'vk-out'], flag: ['i-understand-this-is-a-test-key'] }, o => {
     if (!o['i-understand-this-is-a-test-key']) throw new Error('sign-test signs with a THROWAWAY key that authorizes nothing; pass --i-understand-this-is-a-test-key');
     if (o.out && !o.record) throw new Error('--out needs --record');
-    const k = testKeys(o.seed);
+    const profile = o.profile ?? 'bpq';
+    if (profile !== 'bpq' && profile !== 'bheart') throw new Error('--profile is bpq (SPEC-BPQ-1 §3b) or bheart (bheart.signature/1)');
+    if (profile === 'bpq' && o['vk-out']) throw new Error('--vk-out is for --profile bheart: a §3b signature carries its own key');
+    const k = profile === 'bheart' ? testBheartKey(o.seed) : testKeys(o.seed);
     try {
-      if (!o.record) return { test_key: true, id: k.id, sig: null };
+      const vk = profile === 'bheart' ? { key_id: k.key_id, vk_out: o['vk-out'] ?? null } : {};
+      if (profile === 'bheart' && o['vk-out']) writeFileSync(o['vk-out'], b64u(k.vk));
+      if (!o.record) return { test_key: true, profile, id: k.id, ...vk, sig: null };
       const bytes = readFileSync(o.record);
       checkIdentity(parseRecord(bytes));
-      const d = BPQ.signFile(k, new Uint8Array(bytes), new Date().toISOString());
+      const d = profile === 'bheart' ? k.sign(bytes) : BPQ.signFile(k, new Uint8Array(bytes), new Date().toISOString());
       const sigBytes = sigBytesOf(d);   // the one byte form: canonical, no trailing newline
       writeFileSync(need(o, 'out'), sigBytes);
-      return { test_key: true, id: k.id, sig: o.out, record_sha3: b64u(sha3(bytes)), sig_sha3: b64u(sha3(sigBytes)) };
+      return { test_key: true, profile, id: k.id, ...vk, sig: o.out, record_sha3: b64u(sha3(bytes)), sig_sha3: b64u(sha3(sigBytes)) };
     } finally { k.wipe(); }
   }],
-  envelope: [{ value: ['record', 'sig', 'hint-ant', 'hint-hive', 'out'], list: ['hint-ar', 'hint-peer'] }, o => {
-    const bytes = envelope(readFileSync(need(o, 'record')), readFileSync(need(o, 'sig')), { ant: o['hint-ant'], ar: o['hint-ar'], hive: o['hint-hive'], peers: o['hint-peer'] });
+  'import-sig': [{ value: ['sig', 'out'] }, o => {
+    // as its signer wrote it: bsigner sign pretty-prints. Read as JSON, held to its exact field set,
+    // written in the one byte form. Nothing is verified here; envelope/verify/place verify.
+    const text = readFileSync(need(o, 'sig'), 'utf8');
+    let d;
+    try { d = JSON.parse(text); } catch { throw new Error(`${o.sig} is not JSON`); }
+    const sigBytes = sigBytesOf(d);
+    writeFileSync(need(o, 'out'), sigBytes);
+    return { sig: o.out, profile: isBheart(d) ? BHEART_TYPE : 'bpq1/detached', sig_sha3: b64u(sha3(sigBytes)) };
+  }],
+  envelope: [{ value: ['record', 'sig', 'vk', 'hint-ant', 'hint-hive', 'out'], list: ['hint-ar', 'hint-peer'] }, o => {
+    const bytes = envelope(readFileSync(need(o, 'record')), readFileSync(need(o, 'sig')), { ant: o['hint-ant'], ar: o['hint-ar'], hive: o['hint-hive'], peers: o['hint-peer'] }, o.vk === undefined ? undefined : readVk(o.vk));
     if (!o.out) { process.stdout.write(bytes + '\n'); return undefined; }
     writeFileSync(o.out, bytes);
     return { envelope: o.out, size: bytes.length };
   }],
-  verify: [{ value: ['record', 'sig', 'signers', 'prev', 'genesis-sha3'], flag: ['no-genesis-pin'] }, o => {
+  verify: [{ value: ['record', 'sig', 'vk', 'signers', 'prev', 'genesis-sha3'], flag: ['no-genesis-pin'] }, o => {
     const r = verifyRelease({
-      recordBytes: readFileSync(need(o, 'record')), sigBytes: readFileSync(need(o, 'sig')),
+      recordBytes: readFileSync(need(o, 'record')), sigBytes: readFileSync(need(o, 'sig')), vk: o.vk === undefined ? undefined : readVk(o.vk),
       signers: o.signers ? list(o.signers) : undefined, prevBytes: o.prev ? readFileSync(o.prev) : undefined,
       genesisSha3: o['genesis-sha3'], noGenesisPin: !!o['no-genesis-pin']
     });
@@ -655,9 +804,9 @@ const COMMANDS = {
     console.log(JSON.stringify(r));
     return undefined;
   }],
-  place: [{ value: ['dir', 'record', 'sig', 'envelope', 'signers', 'genesis-sha3'] }, o => place({
+  place: [{ value: ['dir', 'record', 'sig', 'envelope', 'vk', 'signers', 'genesis-sha3'] }, o => place({
     dir: need(o, 'dir'), recordBytes: readFileSync(need(o, 'record')), sigBytes: readFileSync(need(o, 'sig')),
-    envelopeBytes: o.envelope ? readFileSync(o.envelope) : undefined,
+    envelopeBytes: o.envelope ? readFileSync(o.envelope) : undefined, vk: o.vk === undefined ? undefined : readVk(o.vk),
     signers: list(need(o, 'signers')), genesisSha3: need(o, 'genesis-sha3')
   })]
 };
@@ -674,5 +823,5 @@ export async function cli(commands, argv, usage) {
 
 const self = fileURLToPath(import.meta.url), argv1 = process.argv[1] ? resolve(process.argv[1]) : '';
 if (process.platform === 'win32' ? self.toLowerCase() === argv1.toLowerCase() : self === argv1) {
-  await cli(COMMANDS, process.argv.slice(2), 'usage: release.mjs prepare|check|sign-test|envelope|verify|place (see the header of tools/keychain-release/release.mjs)');
+  await cli(COMMANDS, process.argv.slice(2), 'usage: release.mjs prepare|check|sign-test|import-sig|envelope|verify|place (see the header of tools/keychain-release/release.mjs)');
 }
