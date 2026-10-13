@@ -53,7 +53,7 @@ The payer (`ant-pay.js`) already persisted, before each consequential step, the 
 
 ## 6. CI, exact
 
-[CI-LINE]
+Local at head `a3948d1f3`: 47 node tests pass; keychain-isolation, keychain-wallet-purchase, keychain-hive, keychain-succession, keychain-devnet, ant-testnet-confinement, ant-replacement-recovery, ant-hosted-browser and wallet-guided-flow all PASS; build-keychain and stack checks pass. PR #410 opened at `a3948d1f3`: 46 check-runs pending at 2026-10-13T05:52:00Z, 0 passing, 0 failing. The repository's own PR monitor carries the run to its conclusion; its verdict on the exact merge head is the receipt, read from the PR, not from this document, and no second watcher or status-only commit is started here. A running PQ SAW workflow counts as unfinished until it finishes.
 
 ## 7. Mainnet, separate
 
