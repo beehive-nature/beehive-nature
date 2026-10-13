@@ -9,6 +9,10 @@
 //! - Two valid links at one seq with different SHA3-256 are an equivocation:
 //!   the walk stops before them. It resolves only when exactly one of them
 //!   has a valid link at seq+1 selecting it (that branch wins).
+//! - The walk sees only the pool it is given. Every valid record it meets
+//!   at a fork, and every valid record after one, is returned as evidence:
+//!   the door keeps it and puts it back in every later pool, so a fork is
+//!   not forgotten when a source stops offering one branch.
 //!
 //! Signatures are verified lazily, only for a candidate whose prev and
 //! signer id already fit, so a flood of records signed by unpinned keys
@@ -82,6 +86,9 @@ pub struct Walk {
     /// genesis first; each entry links to the one before it
     pub path: Vec<Link>,
     pub equivocation: Option<Equivocation>,
+    /// the envelopes of every valid record at a fork and after one, for
+    /// the door to keep (rule 5)
+    pub evidence: Vec<Arc<Parsed>>,
     pub notes: Vec<String>,
 }
 
@@ -166,11 +173,15 @@ pub fn walk(
             0 => break,
             1 => w.path.push(valid.pop().expect("one link")),
             _ => {
-                let mut winners: Vec<Link> = valid
-                    .iter()
-                    .filter(|b| !links_after(pool, b, verify, &mut Vec::new()).is_empty())
-                    .cloned()
-                    .collect();
+                w.evidence.extend(valid.iter().map(|l| l.env.clone()));
+                let mut winners: Vec<Link> = Vec::new();
+                for b in &valid {
+                    let after = links_after(pool, b, verify, &mut Vec::new());
+                    if !after.is_empty() {
+                        w.evidence.extend(after.into_iter().map(|l| l.env));
+                        winners.push(b.clone());
+                    }
+                }
                 if winners.len() == 1 {
                     w.path.push(winners.pop().expect("one winner"));
                     continue;

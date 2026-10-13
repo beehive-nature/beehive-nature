@@ -8,6 +8,11 @@
 //!   record. Written tmp + rename: this rename IS the atomic swap (rule 6).
 //! - `packs/<b64u SHA3-256>`: the served pack, content-addressed, written
 //!   before serve.json names it.
+//! - `evidence/<b64u SHA3-256>`: the envelopes of every valid record seen at
+//!   a fork and after one (rule 5), content-addressed, at most
+//!   [`MAX_EVIDENCE`]. Kept for good: a fork stays known after the sources
+//!   that showed it go quiet, and across a restart. Like the floor, it is
+//!   never read as absent when it is there and unreadable.
 //!
 //! Nothing here is trusted on load: the envelopes go back through the same
 //! parse, two verifiers and chain walk as any other source, and the pack
@@ -27,8 +32,12 @@ use crate::record::{MAX_ENVELOPE, MAX_PACK, MAX_SAFE};
 const FLOOR: &str = "floor";
 const SERVE: &str = "serve.json";
 const PACKS: &str = "packs";
+const EVIDENCE: &str = "evidence";
 /// serve.json holds base64url envelopes of at most 64 KiB each
 const SERVE_MAX: u64 = 256 * 1024 * 1024;
+/// evidence envelopes kept at most; only signers a record authorizes can
+/// make a fork, so a full store means they made dozens
+pub const MAX_EVIDENCE: usize = 64;
 
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -123,6 +132,62 @@ impl Store {
         self.write_atomic(&self.dir.join(FLOOR), format!("{seq}\n").as_bytes())
             .map_err(|e| format!("floor: {e}"))?;
         Ok(seq)
+    }
+
+    /// The kept evidence envelopes: none when the directory does not exist;
+    /// an error when it exists and anything in it cannot be read, is not a
+    /// regular file, is too large or too many, or does not hash to its name
+    /// (never read as no evidence). An interrupted write's tmp file is
+    /// skipped.
+    pub fn evidence(&self) -> Result<Vec<Vec<u8>>, String> {
+        let dir = self.dir.join(EVIDENCE);
+        let rd = match fs::read_dir(&dir) {
+            Ok(rd) => rd,
+            Err(e) if e.kind() == ErrorKind::NotFound => return Ok(Vec::new()),
+            Err(e) => return Err(format!("evidence {}: {e}", dir.display())),
+        };
+        let mut out = Vec::new();
+        for entry in rd {
+            let path = entry
+                .map_err(|e| format!("evidence {}: {e}", dir.display()))?
+                .path();
+            let corrupt = || format!("evidence file {} is corrupt", path.display());
+            let name = path
+                .file_name()
+                .and_then(|n| n.to_str())
+                .ok_or_else(corrupt)?;
+            if name.starts_with(".tmp-") {
+                continue;
+            }
+            let digest = unb64u32(name).ok_or_else(corrupt)?;
+            if !fs::symlink_metadata(&path).is_ok_and(|m| m.file_type().is_file()) {
+                return Err(corrupt());
+            }
+            let bytes = read_capped(&path, MAX_ENVELOPE as u64)
+                .map_err(|e| format!("evidence file {}: {e}", path.display()))?;
+            if sha3(&[&bytes]) != digest {
+                return Err(corrupt());
+            }
+            out.push(bytes);
+            if out.len() > MAX_EVIDENCE {
+                return Err(format!(
+                    "evidence {} holds more than {MAX_EVIDENCE} envelopes",
+                    dir.display()
+                ));
+            }
+        }
+        out.sort();
+        Ok(out)
+    }
+
+    /// Keep one evidence envelope; keeping it again changes nothing.
+    pub fn keep_evidence(&self, envelope: &[u8]) -> Result<(), String> {
+        let path = self.dir.join(EVIDENCE).join(b64u(&sha3(&[envelope])));
+        if path.exists() {
+            return Ok(());
+        }
+        self.write_atomic(&path, envelope)
+            .map_err(|e| format!("keep evidence: {e}"))
     }
 
     /// The serve state, or None when there is none. An error means it

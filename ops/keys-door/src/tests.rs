@@ -11,6 +11,7 @@
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, OnceLock, RwLock};
 
 use axum::body::Body;
@@ -34,7 +35,7 @@ use crate::record::{
 };
 use crate::server::{health_router, router, Health, Shared, SharedRef};
 use crate::sources::{self, Http};
-use crate::store::Store;
+use crate::store::{Store, MAX_EVIDENCE};
 use crate::verify::{Second, Verifiers};
 
 const ORIGIN: &str = "https://keys.skaists.dev";
@@ -205,6 +206,10 @@ struct Mock(Arc<Mutex<MockInner>>);
 impl Mock {
     fn get_ok(&self, url: &str, body: Vec<u8>) {
         self.0.lock().unwrap().gets.insert(url.into(), body);
+    }
+    /// The source at `url` goes quiet (404 from now on).
+    fn get_gone(&self, url: &str) {
+        self.0.lock().unwrap().gets.remove(url);
     }
     fn post_ok(&self, url: &str, body: Vec<u8>) {
         self.0.lock().unwrap().posts.insert(url.into(), body);
@@ -619,7 +624,11 @@ fn verifier_disagreement_is_refused_and_reported() {
         RP,
     )
     .unwrap();
+    // a second verifier that always says yes adds nothing on a valid
+    // signature (rule 2 needs both to accept, and both do); only a forgery
+    // shows it up, as a disagreement
     let says_yes = Verifiers::with_second(Second::Stub(|_, _| true), &scratch);
+    assert_eq!(says_yes.verify(&p).unwrap(), k.id);
     assert_eq!(
         says_yes.verify(&q).unwrap_err(),
         Refusal::Disagreement {
@@ -636,6 +645,67 @@ fn verifier_disagreement_is_refused_and_reported() {
     let h = fx.health();
     assert_eq!(h.state, "unverified");
     assert!(h.last_error.unwrap().contains("verifier disagreement"));
+}
+
+/// The same negative controls on the subprocess path, with sh scripts in
+/// bsigner's place: one says yes to everything and names the id from the
+/// signature file it is given, one says yes about another id.
+#[cfg(unix)]
+#[test]
+fn a_lying_second_verifier_on_the_subprocess_path() {
+    use std::os::unix::fs::PermissionsExt;
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let dir = tmpdir("liar");
+    let liar = |name: &str, body: &str| {
+        let path = dir.join(name);
+        fs::write(&path, format!("#!/bin/sh\n{body}\n")).unwrap();
+        fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
+        Verifiers::new(path.to_str().unwrap(), &dir.join("scratch")).unwrap()
+    };
+    let echoes = liar(
+        "yes-echo.sh",
+        r#"id=$(sed -n 's/.*"id":"\([^"]*\)".*/\1/p' "$3")
+printf '{"kind":"detached","id":"%s","verified":true}\n' "$id""#,
+    );
+    let other = liar(
+        "yes-other.sh",
+        r#"printf '{"kind":"detached","id":"bzpq1x","verified":true}\n'"#,
+    );
+    let p = parse_envelope(&envelope(&g, k), ORIGIN, RP).unwrap();
+    let mut forged = sign(k, &g.bytes);
+    let mut raw = unb64u(&forged.sig).unwrap();
+    raw[7] ^= 1;
+    forged.sig = b64u(&raw);
+    let q = parse_envelope(
+        &envelope_with(&g.bytes, &forged, Hints::default()),
+        ORIGIN,
+        RP,
+    )
+    .unwrap();
+
+    assert_eq!(
+        echoes.verify(&p).unwrap(),
+        k.id,
+        "not caught on a valid one"
+    );
+    assert_eq!(
+        echoes.verify(&q).unwrap_err(),
+        Refusal::Disagreement {
+            fips204: false,
+            bsigner: true
+        },
+        "caught on a forgery"
+    );
+    assert_eq!(
+        other.verify(&p).unwrap_err(),
+        Refusal::Disagreement {
+            fips204: true,
+            bsigner: false
+        },
+        "another id is a no"
+    );
+    let _ = fs::remove_dir_all(&dir);
 }
 
 /// Flip one bit of a base64url digit inside the record, keeping it canonical.
@@ -1030,6 +1100,99 @@ fn equivocation_stops_the_edge_until_a_successor_picks_a_branch() {
     assert_eq!(second.record_sha3, b2.sha3, "the branch r3 selects won");
 }
 
+/// The fork outlives the sources that showed it: a peer serves only its
+/// current envelope, so once it moves from b2 to b3 no source offers b2,
+/// and a2 alone must not be taken. Only the kept evidence still holds b2.
+#[test]
+fn an_equivocation_is_remembered_after_its_sources_go_quiet() {
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let a2 = release(2, Some(&g), &[k], "a2");
+    let b2 = release(2, Some(&g), &[k], "b2");
+    let b3 = release(3, Some(&b2), &[k], "b3");
+    let b4 = release(4, Some(&b3), &[k], "b4");
+    let mut fx = fx("equivocation-memory", &g, &[k]);
+    for r in [&g, &a2, &b2, &b3, &b4] {
+        fx.offer(r);
+    }
+    let peer = format!("{PEER}{}", sources::RELEASE_PATH);
+    fx.inbox("1.json", &envelope(&g, k));
+    fx.inbox("a2.json", &envelope(&a2, k));
+    fx.http.get_ok(&peer, envelope(&b2, k));
+    let mut door = fx.door();
+    door.poll(true);
+    let fork = |fx: &Fx| {
+        let h = fx.health();
+        (h.seq, h.equivocation.map(|e| e.seq))
+    };
+    assert_eq!(fork(&fx), (Some(1), Some(2)), "{:?}", door.notes());
+
+    // the peer goes quiet for a poll: a2 is the only seq 2 any source offers
+    fx.http.get_gone(&peer);
+    door.poll(true);
+    assert_eq!(fork(&fx), (Some(1), Some(2)), "{:?}", door.notes());
+    // and a restarted edge remembers it too (state_dir/evidence)
+    let mut door = fx.restart();
+    door.poll(true);
+    assert_eq!(fork(&fx), (Some(1), Some(2)), "{:?}", door.notes());
+
+    // the peer moves on to b3, whose prev selects b2: that branch wins
+    fx.http.get_ok(&peer, envelope(&b3, k));
+    door.poll(true);
+    assert_eq!(fork(&fx), (Some(3), None), "{:?}", door.notes());
+    let chain = fx.store().load().unwrap().unwrap().chain;
+    let second = parse_envelope(&chain[1], ORIGIN, RP).unwrap();
+    assert_eq!(
+        second.record_sha3, b2.sha3,
+        "the branch b3 selects, never a2"
+    );
+
+    // evidence that does not hash to its name is never read as none: no
+    // new release is accepted, and the one already served stays served
+    let kept = fx.cfg.state_dir.join("evidence");
+    let one = fs::read_dir(&kept).unwrap().next().unwrap().unwrap().path();
+    fs::write(&one, b"junk").unwrap();
+    fx.http.get_ok(&peer, envelope(&b4, k));
+    door.poll(true);
+    let h = fx.health();
+    assert_eq!((h.seq, h.state), (Some(3), "serving"), "{:?}", door.notes());
+    assert!(
+        h.last_error.unwrap().contains("refusing every new release"),
+        "{:?}",
+        door.notes()
+    );
+    assert_eq!(
+        block_on(call(router(fx.shared.clone()), "GET", "/")).0,
+        StatusCode::OK
+    );
+}
+
+/// A fork the edge has no room to remember is one it could forget, so a
+/// full evidence store holds the edge where it is.
+#[test]
+fn a_full_evidence_store_holds_the_edge() {
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let a2 = release(2, Some(&g), &[k], "a2");
+    let b2 = release(2, Some(&g), &[k], "b2");
+    let b3 = release(3, Some(&b2), &[k], "b3");
+    let fx = fx("evidence-full", &g, &[k]);
+    let kept = fx.cfg.state_dir.join("evidence");
+    fs::create_dir_all(&kept).unwrap();
+    for i in 0..MAX_EVIDENCE {
+        let junk = format!("junk {i}").into_bytes();
+        fs::write(kept.join(b64u(&pq::sha3(&[&junk]))), junk).unwrap();
+    }
+    for r in [&g, &a2, &b2, &b3] {
+        fx.offer(r);
+        fx.inbox(&format!("{}.json", b64u(&r.sha3)), &envelope(r, k));
+    }
+    let mut door = fx.door();
+    door.poll(true);
+    assert_eq!(fx.health().state, "unverified", "{:?}", door.notes());
+    assert!(noted(&door, "evidence is full"), "{:?}", door.notes());
+}
+
 #[test]
 fn bytes_must_hash_to_what_the_record_names() {
     let k = key(0);
@@ -1139,9 +1302,10 @@ fn a_corrupt_state_is_discarded_and_answers_503() {
 }
 
 #[test]
-fn the_floor_only_rises_and_a_corrupt_floor_refuses_everything() {
+fn the_floor_only_rises_and_a_corrupt_floor_refuses_every_new_release() {
     let k = key(0);
     let g = release(1, None, &[k], "g");
+    let r2 = release(2, Some(&g), &[k], "r2");
     let fx = fx("floor", &g, &[k]);
     let store = fx.store();
     assert_eq!(store.floor().unwrap(), 0);
@@ -1163,16 +1327,114 @@ fn the_floor_only_rises_and_a_corrupt_floor_refuses_everything() {
             String::from_utf8_lossy(junk)
         );
     }
+    // nothing served yet: nothing is, so 503
     fx.inbox("g.json", &envelope(&g, k));
     fx.offer(&g);
     let mut door = fx.door();
     door.poll(true);
     assert_eq!(fx.health().state, "unverified");
     assert!(fx.health().last_error.unwrap().contains("floor"));
+
+    // a running edge whose floor turns corrupt accepts nothing new; what
+    // it serves stays served (it was accepted while the floor could be read)
+    let floor = fx.cfg.state_dir.join("floor");
+    fs::write(&floor, b"1\n").unwrap();
+    door.poll(true);
+    assert_eq!(fx.health().seq, Some(1), "{:?}", door.notes());
+    fx.inbox("r2.json", &envelope(&r2, k));
+    fx.offer(&r2);
+    fs::write(&floor, b"x\n").unwrap();
+    door.poll(true);
+    let h = fx.health();
+    assert_eq!((h.seq, h.state), (Some(1), "serving"), "{:?}", door.notes());
+    assert!(h
+        .last_error
+        .unwrap()
+        .contains("is corrupt: refusing every new release"));
+    let (s, _, b) = block_on(call(router(fx.shared.clone()), "GET", "/"));
+    assert_eq!(
+        (s, b.as_slice()),
+        (StatusCode::OK, &b"<!doctype html><title>g</title>\n"[..])
+    );
 }
 
+/// Rails that turn the floor file into a directory the first time a pack
+/// is fetched from an ANT door: the floor reads fine when the poll starts
+/// and cannot be raised when the swap comes.
+struct FloorBreaker {
+    rails: Mock,
+    floor: PathBuf,
+    armed: Arc<AtomicBool>,
+}
+
+impl Http for FloorBreaker {
+    fn get(&self, url: &str, limit: u64) -> Result<Vec<u8>, String> {
+        if url.contains("/v1/data/public/") && self.armed.swap(false, Ordering::SeqCst) {
+            let _ = fs::remove_file(&self.floor);
+            fs::create_dir_all(self.floor.join("blocked")).unwrap();
+        }
+        self.rails.get(url, limit)
+    }
+    fn post_json(&self, url: &str, body: &[u8], limit: u64) -> Result<Vec<u8>, String> {
+        self.rails.post_json(url, body, limit)
+    }
+}
+
+/// Rule 4's floor is raised before a release is persisted or served, so
+/// the served seq is never above the floor on disk: a floor that cannot
+/// be raised means no swap at all, never a release served over a stale
+/// floor that a lost serve state would let a rollback through.
 #[test]
-fn any_member_edge_seeds_another() {
+fn the_floor_is_raised_before_a_release_is_served() {
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let r2 = release(2, Some(&g), &[k], "r2");
+    let fx = fx("floor-first", &g, &[k]);
+    let floor = fx.cfg.state_dir.join("floor");
+    let armed = Arc::new(AtomicBool::new(false));
+    let rails = FloorBreaker {
+        rails: fx.http.clone(),
+        floor: floor.clone(),
+        armed: armed.clone(),
+    };
+    let mut door = Door::new(
+        fx.cfg.clone(),
+        verifiers(&fx.dir.join("scratch")),
+        Box::new(rails),
+        fx.shared.clone(),
+    );
+    fx.inbox("1.json", &envelope(&g, k));
+    fx.offer(&g);
+    door.poll(true);
+    assert_eq!(fx.health().seq, Some(1), "{:?}", door.notes());
+
+    fx.inbox("2.json", &envelope(&r2, k));
+    fx.offer(&r2);
+    armed.store(true, Ordering::SeqCst);
+    door.poll(true);
+    assert!(noted(&door, "not swapped: floor"), "{:?}", door.notes());
+    assert_eq!(fx.health().seq, Some(1), "{:?}", door.notes());
+    assert_eq!(
+        fx.store().load().unwrap().unwrap().chain.len(),
+        1,
+        "nothing on disk names seq 2"
+    );
+
+    // repaired: the next poll raises the floor to 2, then serves 2
+    fs::remove_dir_all(&floor).unwrap();
+    fs::write(&floor, b"1\n").unwrap();
+    door.poll(true);
+    assert_eq!(fx.health().seq, Some(2), "{:?}", door.notes());
+    assert_eq!(fx.store().floor().unwrap(), 2);
+}
+
+/// A member edge serves its current envelope and its pack (§4). That seeds
+/// another edge only together with every record below the current one:
+/// rule 3 never jumps, and a peer serves no record but its current one.
+/// Peers alone seed a fresh edge only at genesis; past it, the records
+/// below come from another rail (here the inbox; Arweave would do).
+#[test]
+fn a_member_edge_seeds_another_that_holds_the_records_below() {
     let k = key(0);
     let g = release(1, None, &[k], "g");
     let r2 = release(2, Some(&g), &[k], "r2");
@@ -1183,8 +1445,7 @@ fn any_member_edge_seeds_another() {
     }
     a.door().poll(true);
     assert_eq!(a.health().seq, Some(2));
-    // edge B knows nothing but a peer: A's /.well-known answers. It must
-    // also see genesis (a peer serves only its current record), here in its inbox
+    // edge B knows nothing but a peer, and A's /.well-known answers it
     let b = fx("seed-b", &g, &[k]);
     let (rel_b, pack_b) = block_on(async {
         let app = router(a.shared.clone());
@@ -1199,9 +1460,15 @@ fn any_member_edge_seeds_another() {
         .get_ok(&format!("{PEER}/.well-known/bnr-keychain/release"), rel_b);
     b.http
         .get_ok(&format!("{PEER}/.well-known/bnr-keychain/pack"), pack_b);
-    b.inbox("1.json", &envelope(&g, k));
     b.offer(&g);
     let mut door = b.door();
+    door.poll(true);
+    assert_eq!(
+        b.health().state,
+        "unverified",
+        "the peer alone cannot seed past genesis"
+    );
+    b.inbox("1.json", &envelope(&g, k));
     door.poll(true);
     assert_eq!(b.health().seq, Some(2), "{:?}", door.notes());
 }

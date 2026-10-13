@@ -1,10 +1,12 @@
 //! One poll of the edge (contract §4 rules 1-7): gather candidate envelopes
-//! from every source, parse them (rule 1), walk the chain from the pinned
-//! genesis with both verifiers (rules 2, 3, 5), pick the highest record at
-//! or above the floor (rule 4), find bytes that hash to what it names
-//! (rule 6), persist, swap, serve. A corrupt serve state is discarded and
-//! the edge answers 503 until a release at or above the floor verifies
-//! again (rule 7).
+//! from every source and the kept fork evidence, parse them (rule 1), walk
+//! the chain from the pinned genesis with both verifiers (rules 2, 3, 5),
+//! keep what the walk met at a fork (rule 5), pick the highest record at or
+//! above the floor (rule 4), find bytes that hash to what it names (rule
+//! 6), raise the floor, persist, swap, serve. A corrupt serve state is
+//! discarded and the edge answers 503 until a release at or above the floor
+//! verifies again (rule 7). A floor or evidence store that cannot be read
+//! refuses every new release; the one already served stays served.
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -19,7 +21,7 @@ use crate::pq::sha3;
 use crate::record::{parse_envelope, Parsed, Record, Refusal, MAX_ENVELOPE};
 use crate::server::{Health, Serving, SharedRef};
 use crate::sources::{self, Http};
-use crate::store::Store;
+use crate::store::{Store, MAX_EVIDENCE};
 use crate::verify::Verifiers;
 
 const HINT_LIMIT: usize = 8;
@@ -114,6 +116,12 @@ pub struct Door {
     load_error: Option<String>,
     /// the highest seq the last walk reached (the Arweave window starts here)
     tip: u64,
+    /// fork evidence whose write to state_dir/evidence failed; retried
+    /// every poll and put in every pool meanwhile
+    unkept: Vec<Vec<u8>>,
+    /// the last walk's unresolved fork, reported again by a poll that
+    /// refuses before it walks
+    equivocation: Option<Equivocation>,
     notes: Vec<String>,
 }
 
@@ -131,6 +139,8 @@ impl Door {
             state_pack: None,
             load_error: None,
             tip: 0,
+            unkept: Vec::new(),
+            equivocation: None,
             notes: Vec::new(),
         }
     }
@@ -157,23 +167,35 @@ impl Door {
         self.shared.read().ok().and_then(|s| s.serving.clone())
     }
 
-    /// One poll. With `network` false only the state and the inbox are read.
+    /// One poll. With `network` false only the state, the evidence and the
+    /// inbox are read.
     pub fn poll(&mut self, network: bool) {
         let mut notes: Vec<String> = self.load_error.take().into_iter().collect();
         let floor = match self.store.floor() {
             Ok(f) => f.max(self.cfg.min_seq),
             Err(e) => {
-                notes.push(format!("{e}: refusing every release until it is repaired"));
-                self.report(None, notes);
+                self.refuse(e, notes);
                 return;
             }
         };
-        let pool = self.gather(network, &mut notes);
+        let evidence = match self.evidence(&mut notes) {
+            Ok(e) => e,
+            Err(e) => {
+                self.refuse(e, notes);
+                return;
+            }
+        };
+        let pool = self.gather(network, &evidence, &mut notes);
         let (verifiers, cache) = (&self.verifiers, &mut self.cache);
         let mut verify = |p: &Parsed| cached_verify(verifiers, cache, p);
         let w = chain::walk(&pool, &self.genesis, &self.cfg.genesis_signers, &mut verify);
         notes.extend(w.notes);
         self.tip = w.path.last().map_or(0, Link::seq);
+        self.equivocation = w.equivocation;
+        if !self.remember(&w.evidence, evidence, &mut notes) {
+            self.report(notes);
+            return;
+        }
 
         let current = self.serving();
         let cur = current.as_ref().map(|s| (s.seq, s.record_sha3));
@@ -204,13 +226,71 @@ impl Door {
                 Err(e) => notes.push(format!("seq {} bytes: {e}", t.seq())),
             }
         }
-        self.report(w.equivocation, notes);
+        self.report(notes);
     }
 
-    fn gather(&self, network: bool, notes: &mut Vec<String>) -> Pool {
+    /// A poll that cannot read the floor or the evidence accepts nothing
+    /// new. The release already served stays served: it was accepted while
+    /// both could be read.
+    fn refuse(&mut self, e: String, mut notes: Vec<String>) {
+        notes.push(format!(
+            "{e}: refusing every new release until it is repaired"
+        ));
+        self.report(notes);
+    }
+
+    /// Every fork evidence envelope (rule 5): the kept ones, and any whose
+    /// write failed, written again now.
+    fn evidence(&mut self, notes: &mut Vec<String>) -> Result<Vec<Vec<u8>>, String> {
+        let mut all = self.store.evidence()?;
+        for e in std::mem::take(&mut self.unkept) {
+            if let Err(err) = self.store.keep_evidence(&e) {
+                notes.push(err);
+                self.unkept.push(e.clone());
+            }
+            if !all.contains(&e) {
+                all.push(e);
+            }
+        }
+        Ok(all)
+    }
+
+    /// Keep what the walk met at a fork (rule 5), so the fork is not
+    /// forgotten when a source stops offering one branch. False when there
+    /// is no room: a fork the edge cannot remember is one it could forget,
+    /// so it holds at the release it serves.
+    fn remember(
+        &mut self,
+        found: &[Arc<Parsed>],
+        mut all: Vec<Vec<u8>>,
+        notes: &mut Vec<String>,
+    ) -> bool {
+        for p in found {
+            if all.contains(&p.bytes) {
+                continue;
+            }
+            if all.len() >= MAX_EVIDENCE {
+                notes.push(format!(
+                    "evidence is full ({MAX_EVIDENCE} envelopes): holding at the current release (rule 5)"
+                ));
+                return false;
+            }
+            if let Err(e) = self.store.keep_evidence(&p.bytes) {
+                notes.push(e);
+                self.unkept.push(p.bytes.clone());
+            }
+            all.push(p.bytes.clone());
+        }
+        true
+    }
+
+    fn gather(&self, network: bool, evidence: &[Vec<u8>], notes: &mut Vec<String>) -> Pool {
         let mut pool = Pool::default();
         for e in &self.state_chain {
             admit(&self.cfg, e, "state", &mut pool, notes);
+        }
+        for e in evidence {
+            admit(&self.cfg, e, "evidence", &mut pool, notes);
         }
         for (name, bytes) in sources::read_inbox(&self.cfg.inbox_dir, notes) {
             admit(
@@ -373,7 +453,11 @@ impl Door {
         })
     }
 
-    /// Persist (pack, then serve.json by rename), raise the floor, serve.
+    /// Raise the floor, persist (pack, then serve.json by rename), serve.
+    /// The floor goes first, so the persisted floor is never below the
+    /// served seq: losing the serve state later can never reopen a seq this
+    /// edge has served (rule 4). If the persist then fails, the edge keeps
+    /// serving what it served and the next poll tries again.
     fn swap(
         &mut self,
         chain: &[Link],
@@ -381,14 +465,15 @@ impl Door {
         pack_sha3: [u8; 32],
         notes: &mut Vec<String>,
     ) {
+        let t = chain.last().expect("a non-empty chain");
+        if let Err(e) = self.store.raise_floor(t.seq()) {
+            notes.push(format!("not swapped: {e}"));
+            return;
+        }
         let envs: Vec<&[u8]> = chain.iter().map(|l| &l.env.bytes[..]).collect();
         if let Err(e) = self.store.commit(&envs, &pack) {
             notes.push(format!("not swapped: {e}"));
             return;
-        }
-        let t = chain.last().expect("a non-empty chain");
-        if let Err(e) = self.store.raise_floor(t.seq()) {
-            notes.push(e);
         }
         let serving = Arc::new(Serving::new(t, pack, pack_sha3));
         if let Ok(mut s) = self.shared.write() {
@@ -398,7 +483,7 @@ impl Door {
         self.state_pack = None;
     }
 
-    fn report(&mut self, equivocation: Option<Equivocation>, notes: Vec<String>) {
+    fn report(&mut self, notes: Vec<String>) {
         for n in &notes {
             eprintln!("keys-door: {n}");
         }
@@ -424,7 +509,7 @@ impl Door {
                 seq,
                 record_sha3,
                 state,
-                equivocation,
+                equivocation: self.equivocation.clone(),
                 last_error,
             };
         }
@@ -464,6 +549,10 @@ pub fn offline_verdict(
         Ok(None) => {}
         Err(e) => notes.push(format!("serve state not usable: {e}")),
     }
+    let evidence = store.evidence();
+    for e in evidence.iter().flatten() {
+        admit(cfg, e, "evidence", &mut pool, &mut notes);
+    }
     pool.add(p.clone());
     let mut verify = |q: &Parsed| verifiers.verify(q);
     let w = chain::walk(&pool, &cfg.genesis(), &cfg.genesis_signers, &mut verify);
@@ -480,7 +569,7 @@ pub fn offline_verdict(
         }),
         (_, _, Err(e)) => Some(e.clone()),
         (_, _, Ok(f)) if p.record.seq < *f => Some(format!("seq {} is below the floor {f} (rule 4)", p.record.seq)),
-        _ => None,
+        _ => evidence.err(),
     };
     let ok = reason.is_none();
     (
