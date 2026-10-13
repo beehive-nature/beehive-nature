@@ -27,14 +27,18 @@ use crate::verify::Verifiers;
 
 const HINT_LIMIT: usize = 8;
 const CACHE_MAX: usize = 4096;
-/// What one poll's peer walk may spend over every peer (contract §7 A1):
-/// requests to the chain endpoints, and the bytes they return (checked
-/// before each request, so at most one envelope more).
+/// What one poll's walk of ONE peer may spend (contract §7 A1): requests
+/// to its chain endpoint, and the bytes they return (checked before each
+/// request, so at most one envelope more). Every configured peer (at most
+/// 16) has its own, so a peer with a long chain never starves the others.
 pub const WALK_REQUESTS: usize = 64;
 pub const WALK_BYTES: usize = 2 * 1024 * 1024;
-/// Envelope bytes of the verified records above the served one that are
-/// held between polls, so a walk its budget cut short resumes where it
-/// stopped rather than from the served seq again.
+/// Envelope bytes of one peer's chain above the served record held between
+/// polls, so a walk its budget cut short resumes where it stopped.
+pub const PEER_HELD_BYTES: usize = 8 * 1024 * 1024;
+/// Envelope bytes of the last chain walk's records above the served one
+/// put back in every pool, so a record a rail offered once (an Arweave
+/// window moves on) is not lost while its pack is still sought.
 pub const AHEAD_BYTES: usize = 64 * 1024 * 1024;
 
 type Cache = HashMap<([u8; 32], [u8; 32]), Result<String, Refusal>>;
@@ -96,8 +100,35 @@ fn admit(
     }
 }
 
+/// What of a peer's held chain still extends the served record: from its
+/// entry at the served seq + 1, when that entry's prev selects the served
+/// record; nothing otherwise, so the peer is walked from the served seq + 1
+/// again. With nothing served the held chain starts at genesis, as the
+/// walk that built it did.
+fn rebase(mut held: Vec<Arc<Parsed>>, served: Option<&Parsed>) -> Vec<Arc<Parsed>> {
+    let Some(s) = served else {
+        return held;
+    };
+    let want = b64u(&s.record_sha3);
+    match held.iter().position(|p| p.record.seq == s.record.seq + 1) {
+        Some(i) if held[i].record.prev.as_deref() == Some(want.as_str()) => held.split_off(i),
+        _ => Vec::new(),
+    }
+}
+
+/// How one climb up a peer's chain endpoint ended.
+enum Climb {
+    /// a 404 right after this record: where the peer's chain ends
+    End(u64, [u8; 32]),
+    /// no end reached: nothing above the base, or a refusal, a failed fetch
+    /// or a spent budget (those are noted)
+    Short,
+    /// the peer no longer answers the chain an earlier poll held from it
+    Parted(String),
+}
+
 /// One poll's walk of the peers' chain endpoints (contract §7 A1), within
-/// its budget.
+/// each peer's own budget.
 struct PeerWalk<'a, F: FnMut(&Parsed) -> Result<String, Refusal>> {
     cfg: &'a Config,
     genesis: &'a [u8; 32],
@@ -128,30 +159,73 @@ impl<F: FnMut(&Parsed) -> Result<String, Refusal>> PeerWalk<'_, F> {
         }
     }
 
-    /// Walk one peer from `base` (genesis when None) upward until 404. Every
-    /// envelope is checked on its own as the one after the record before it
-    /// (chain::extends: seq, prev, signer, both verifiers); the first that
-    /// fails ends the walk and nothing above it is fetched. Returns the
-    /// record the peer's chain ends at when the walk reached its 404: the
-    /// only seq whose pack that peer is asked for.
+    /// Walk one peer (contract §7 A1). `held` is the peer's chain above the
+    /// served record as earlier polls verified it (served seq + 1 first;
+    /// from genesis when nothing is served), already rebased: the walk
+    /// resumes past it. A peer that no longer answers that chain is walked
+    /// again from the served seq + 1 at once. So every peer's own chain
+    /// above the served record is fetched whole, seq by seq, whatever
+    /// another peer holds, and a valid record that conflicts with one held
+    /// from elsewhere reaches the pool, where rule 5 sees it. Returns where
+    /// the peer's chain ends when the walk reached its 404: the only record
+    /// whose pack that peer is asked for.
     fn walk(
         &mut self,
         peer: &str,
-        base: Option<&Arc<Parsed>>,
-        served_seq: u64,
+        served: Option<&Arc<Parsed>>,
+        held: &mut Vec<Arc<Parsed>>,
         pool: &mut Pool,
         notes: &mut Vec<String>,
     ) -> Option<(u64, [u8; 32])> {
-        let mut prev = base.cloned();
-        let mut end = None;
+        let mut climb = self.climb(peer, served, held, pool, notes);
+        if let Climb::Parted(why) = climb {
+            let from = served.map_or(1, |s| s.record.seq + 1);
+            notes.push(format!(
+                "peer {peer}: {why}; walking it again from seq {from}"
+            ));
+            held.clear();
+            climb = self.climb(peer, served, held, pool, notes);
+        }
+        match climb {
+            Climb::End(seq, h) => Some((seq, h)),
+            Climb::Short | Climb::Parted(_) => None,
+        }
+    }
+
+    /// Up the peer's chain endpoint from the top of `held` (else the served
+    /// record, else genesis) until 404. Every envelope is checked on its
+    /// own as the one after the record before it (chain::extends: seq,
+    /// prev, signer, both verifiers); the first that fails ends the climb
+    /// and nothing above it is fetched. Parted only when what the peer
+    /// answers no longer extends what an earlier poll held from it (with
+    /// `held` empty, a climb never parts).
+    fn climb(
+        &mut self,
+        peer: &str,
+        served: Option<&Arc<Parsed>>,
+        held: &mut Vec<Arc<Parsed>>,
+        pool: &mut Pool,
+        notes: &mut Vec<String>,
+    ) -> Climb {
+        let resumed = !held.is_empty();
+        let mut size: usize = held.iter().map(|p| p.bytes.len()).sum();
+        let mut prev = held.last().or(served).cloned();
+        let mut first = true;
         loop {
             let seq = prev.as_ref().map_or(1, |p| p.record.seq + 1);
+            if size >= PEER_HELD_BYTES {
+                notes.push(format!(
+                    "peer {peer}: {} envelopes above the served record fill the {PEER_HELD_BYTES} bytes held for it; its walk resumes at seq {seq} once one is served",
+                    held.len()
+                ));
+                return Climb::Short;
+            }
             let bytes = match self.get(peer, seq) {
                 Ok(Some(b)) => b,
                 Ok(None) => break,
                 Err(e) => {
                     notes.push(format!("peer {peer} seq {seq}: {e}"));
-                    return None;
+                    return Climb::Short;
                 }
             };
             let p = match parse_envelope(&bytes, &self.cfg.origin, &self.cfg.rp_id) {
@@ -161,13 +235,21 @@ impl<F: FnMut(&Parsed) -> Result<String, Refusal>> PeerWalk<'_, F> {
                         "peer {peer} seq {seq}: it answers with seq {}",
                         p.record.seq
                     ));
-                    return None;
+                    return Climb::Short;
                 }
                 Err(r) => {
                     notes.push(format!("peer {peer} seq {seq}: {} ({r})", r.name()));
-                    return None;
+                    return Climb::Short;
                 }
             };
+            if let (true, true, Some(b)) = (first, resumed, &prev) {
+                if p.record.prev.as_deref() != Some(b64u(&b.record_sha3).as_str()) {
+                    return Climb::Parted(format!(
+                        "its seq {seq} does not select the seq {} it answered before",
+                        b.record.seq
+                    ));
+                }
+            }
             if let Err(e) = chain::extends(
                 prev.as_deref(),
                 &p,
@@ -176,27 +258,38 @@ impl<F: FnMut(&Parsed) -> Result<String, Refusal>> PeerWalk<'_, F> {
                 &mut self.verify,
             ) {
                 notes.push(format!("peer {peer} seq {seq}: {e}"));
-                return None;
+                return Climb::Short;
             }
             pool.add(p.clone());
-            end = Some((seq, p.record_sha3));
+            size += p.bytes.len();
+            held.push(p.clone());
             prev = Some(p);
+            first = false;
         }
-        if end.is_some() {
-            return end;
+        let Some(top) = prev.filter(|_| !first || resumed) else {
+            // nothing above the served record (or no genesis): no end to
+            // ask a pack for
+            return Climb::Short;
+        };
+        if !first {
+            return Climb::End(top.record.seq, top.record_sha3);
         }
-        // nothing past the base: the peer may hold the base itself as its
-        // current, which matters only while the base's pack is still wanted
-        let b = base.filter(|b| b.record.seq > served_seq)?;
-        match self.get(peer, b.record.seq) {
-            Ok(Some(bytes)) => parse_envelope(&bytes, &self.cfg.origin, &self.cfg.rp_id)
-                .ok()
-                .filter(|p| p.record.seq == b.record.seq && p.record_sha3 == b.record_sha3)
-                .map(|p| (p.record.seq, p.record_sha3)),
-            Ok(None) => None,
+        // the 404 is right above what an earlier poll held from this peer:
+        // its chain still ends there only if it still answers that record
+        match self.get(peer, top.record.seq) {
+            Ok(Some(bytes)) => match parse_envelope(&bytes, &self.cfg.origin, &self.cfg.rp_id) {
+                Ok(p) if p.record.seq == top.record.seq && p.record_sha3 == top.record_sha3 => {
+                    Climb::End(top.record.seq, top.record_sha3)
+                }
+                _ => Climb::Parted(format!(
+                    "its seq {} is not the record it answered before",
+                    top.record.seq
+                )),
+            },
+            Ok(None) => Climb::Parted(format!("it no longer has seq {}", top.record.seq)),
             Err(e) => {
-                notes.push(format!("peer {peer} seq {}: {e}", b.record.seq));
-                None
+                notes.push(format!("peer {peer} seq {}: {e}", top.record.seq));
+                Climb::Short
             }
         }
     }
@@ -239,13 +332,17 @@ pub struct Door {
     /// refuses before it walks
     equivocation: Option<Equivocation>,
     /// the last walk's verified records above the served one, genesis side
-    /// first: put back in every pool, and the peer walk resumes past them
-    /// (at most AHEAD_BYTES of envelopes; they are walked again every poll)
+    /// first: put back in every pool (at most AHEAD_BYTES of envelopes;
+    /// they are walked again every poll)
     ahead: Vec<Arc<Parsed>>,
+    /// each configured peer's own chain above the served record, as its
+    /// walks verified it (served seq + 1 first): put back in every pool,
+    /// and that peer's next walk resumes past it (PEER_HELD_BYTES each)
+    peer_chains: HashMap<String, Vec<Arc<Parsed>>>,
     /// where each configured peer's chain ended (a 404 right after it) in
     /// the last peer walk: the only record whose pack that peer is asked for
     peer_ends: HashMap<String, (u64, [u8; 32])>,
-    /// (requests, bytes) one poll's peer walk may spend
+    /// (requests, bytes) one poll's walk of one peer may spend
     walk_budget: (usize, usize),
     notes: Vec<String>,
 }
@@ -267,13 +364,15 @@ impl Door {
             unkept: Vec::new(),
             equivocation: None,
             ahead: Vec::new(),
+            peer_chains: HashMap::new(),
             peer_ends: HashMap::new(),
             walk_budget: (WALK_REQUESTS, WALK_BYTES),
             notes: Vec::new(),
         }
     }
 
-    /// A smaller peer walk budget, so a test can cut a walk short.
+    /// A smaller budget for the walk of each peer, so a test can cut a
+    /// walk short.
     #[cfg(test)]
     pub fn set_walk_budget(&mut self, requests: usize, bytes: usize) {
         self.walk_budget = (requests, bytes);
@@ -513,45 +612,42 @@ impl Door {
         pool
     }
 
-    /// The peer walk (contract §7 A1): every configured peer, from the
-    /// highest record this edge holds verified (the last of `ahead`, else
-    /// the served one, else genesis) up its chain endpoint one seq at a
-    /// time until 404, within one budget per poll. A peer's claim of its
-    /// current (the bare `release`) is never read. Where each walk reached
-    /// its 404 is kept for `fetch`.
+    /// The peer walk (contract §7 A1): every configured peer up its own
+    /// chain endpoint from the served seq + 1 (genesis when nothing is
+    /// served) one seq at a time until 404, each peer within its own budget
+    /// per poll; a walk its budget cut short resumes next poll past what it
+    /// verified of that peer's chain. A peer's claim of its current (the
+    /// bare `release`) is never read. Where each walk reached its 404 is
+    /// kept for `fetch`.
     fn walk_peers(&mut self, pool: &mut Pool, notes: &mut Vec<String>) {
-        let served = self.serving();
-        let served_seq = served.as_ref().map_or(0, |s| s.seq);
-        let held: usize = self.ahead.iter().map(|p| p.bytes.len()).sum();
-        if held >= AHEAD_BYTES {
-            notes.push(format!(
-                "{} verified records above the served one fill the {AHEAD_BYTES} bytes held for them: the peer walk waits until one is served",
-                self.ahead.len()
-            ));
-            self.peer_ends.clear();
-            return;
-        }
-        let base = self
-            .ahead
-            .last()
-            .cloned()
-            .or_else(|| served.map(|s| s.tip.env.clone()));
+        let served = self.serving().map(|s| s.tip.env.clone());
+        let mut before = std::mem::take(&mut self.peer_chains);
         let (verifiers, cache) = (&self.verifiers, &mut self.cache);
         let mut walk = PeerWalk {
             cfg: &self.cfg,
             genesis: &self.genesis,
             http: self.http.as_ref(),
             verify: |p: &Parsed| cached_verify(verifiers, cache, p),
-            requests: self.walk_budget.0,
-            bytes: self.walk_budget.1,
+            requests: 0,
+            bytes: 0,
         };
         let mut ends = HashMap::new();
+        let mut chains = HashMap::new();
         for peer in &self.cfg.peers {
-            if let Some(end) = walk.walk(peer, base.as_ref(), served_seq, pool, notes) {
+            let mut held = rebase(before.remove(peer).unwrap_or_default(), served.as_deref());
+            for p in &held {
+                pool.add(p.clone());
+            }
+            (walk.requests, walk.bytes) = self.walk_budget;
+            if let Some(end) = walk.walk(peer, served.as_ref(), &mut held, pool, notes) {
                 ends.insert(peer.clone(), end);
+            }
+            if !held.is_empty() {
+                chains.insert(peer.clone(), held);
             }
         }
         self.peer_ends = ends;
+        self.peer_chains = chains;
     }
 
     /// Bytes for `t`, from the first locator whose bytes hash right. A

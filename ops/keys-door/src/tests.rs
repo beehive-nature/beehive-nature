@@ -42,6 +42,8 @@ const ORIGIN: &str = "https://keys.skaists.dev";
 const RP: &str = "keys.skaists.dev";
 const COMMIT: &str = "38c394fac7e9ad1b70b87b3b95e6702fd4b5c244";
 const PEER: &str = "https://peer.test";
+/// a second peer, configured only where a test adds it
+const PEER2: &str = "https://peer2.test";
 const ANT: &str = "https://ant.test";
 const AR: &str = "https://ar.test";
 const AT: &str = "2026-10-12T00:00:00Z";
@@ -344,11 +346,17 @@ impl Fx {
     /// The configured peer's chain endpoint answers these envelopes at
     /// `/release/1..=n` (and 404 above).
     fn peer_chain(&self, envs: &[Vec<u8>]) {
-        for (i, e) in envs.iter().enumerate() {
-            self.http.get_ok(
-                &format!("{PEER}{}/{}", sources::RELEASE_PATH, i + 1),
-                e.clone(),
-            );
+        self.chain_at(PEER, envs);
+    }
+    /// `peer`'s chain endpoint answers these envelopes at `/release/1..=n`
+    /// and 404 above (whatever it answered there before).
+    fn chain_at(&self, peer: &str, envs: &[Vec<u8>]) {
+        for n in 1..=64 {
+            let url = format!("{peer}{}/{n}", sources::RELEASE_PATH);
+            match envs.get(n - 1) {
+                Some(e) => self.http.get_ok(&url, e.clone()),
+                None => self.http.get_gone(&url),
+            }
         }
     }
     /// The configured peer's `/pack`.
@@ -1644,7 +1652,11 @@ fn the_floor_is_raised_before_a_release_is_served() {
 }
 
 fn release_get(n: u64) -> String {
-    format!("GET {PEER}{}/{n}", sources::RELEASE_PATH)
+    release_get_at(PEER, n)
+}
+
+fn release_get_at(peer: &str, n: u64) -> String {
+    format!("GET {peer}{}/{n}", sources::RELEASE_PATH)
 }
 
 fn pack_get() -> String {
@@ -1882,6 +1894,164 @@ fn a_peer_walk_cut_short_by_its_budget_resumes_next_poll() {
     door.set_walk_budget(64, 1);
     door.poll(true);
     assert_eq!(walked(&fx), vec![release_get(1)]);
+}
+
+/// Every peer is walked from the served seq + 1, whatever another peer
+/// holds above it. Peer 1's walk reaches x4, whose pack is nowhere yet.
+/// Then peer 2 offers y2, y3, a valid branch from the served g, and peer 1's
+/// pack turns up. Peer 2 is still walked from seq 2, so the fork reaches the
+/// pool and the edge holds at g (rule 5) instead of taking x4.
+#[test]
+fn every_peer_is_walked_from_the_served_seq_whatever_another_holds() {
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let x2 = release(2, Some(&g), &[k], "x2");
+    let x3 = release(3, Some(&x2), &[k], "x3");
+    let x4 = release(4, Some(&x3), &[k], "x4");
+    let y2 = release(2, Some(&g), &[k], "y2");
+    let y3 = release(3, Some(&y2), &[k], "y3");
+    let mut fx = fx("walk-two-peers", &g, &[k]);
+    fx.cfg.peers.push(PEER2.into());
+    fx.offer(&g);
+    fx.inbox("g.json", &envelope(&g, k));
+    let mut door = fx.door();
+    door.poll(true);
+    assert_eq!(fx.health().seq, Some(1), "{:?}", door.notes());
+
+    fx.peer_chain(&[&g, &x2, &x3, &x4].map(|r| envelope(r, k)));
+    door.poll(true);
+    assert_eq!(fx.health().seq, Some(1), "no pack for x2..x4 anywhere yet");
+
+    fx.chain_at(PEER2, &[&g, &y2, &y3].map(|r| envelope(r, k)));
+    fx.peer_pack(&x4.pack);
+    let before = fx.http.calls().len();
+    door.poll(true);
+    let h = fx.health();
+    assert_eq!(
+        (h.seq, h.equivocation.map(|e| e.seq)),
+        (Some(1), Some(2)),
+        "{:?}",
+        door.notes()
+    );
+    let polled = fx.http.calls()[before..].to_vec();
+    assert!(polled.contains(&release_get_at(PEER2, 2)), "{polled:?}");
+}
+
+/// Each peer has its own walk budget, so a peer with a long chain cannot
+/// spend a poll's walk before another peer is asked. Peer 1 offers x2..x6
+/// (every pack on the ANT door) and spends its 3 requests on seq 1..3;
+/// peer 2's y2, y3 reach the same poll's pool, and the edge holds at g.
+#[test]
+fn a_long_chain_on_one_peer_does_not_starve_another() {
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let mut xs: Vec<Rel> = Vec::new();
+    for n in 2..=6 {
+        let r = release(n, Some(xs.last().unwrap_or(&g)), &[k], &format!("x{n}"));
+        xs.push(r);
+    }
+    let y2 = release(2, Some(&g), &[k], "y2");
+    let y3 = release(3, Some(&y2), &[k], "y3");
+    let mut fx = fx("walk-starve", &g, &[k]);
+    fx.cfg.peers.push(PEER2.into());
+    fx.offer(&g);
+    for r in &xs {
+        fx.offer(r);
+    }
+    let mut chain = vec![envelope(&g, k)];
+    chain.extend(xs.iter().map(|r| envelope(r, k)));
+    fx.peer_chain(&chain);
+    fx.chain_at(PEER2, &[&g, &y2, &y3].map(|r| envelope(r, k)));
+    let mut door = fx.door();
+    door.set_walk_budget(3, WALK_BYTES);
+    door.poll(true);
+    let h = fx.health();
+    assert_eq!(
+        (h.seq, h.equivocation.map(|e| e.seq)),
+        (Some(1), Some(2)),
+        "{:?}",
+        door.notes()
+    );
+    let calls = fx.http.calls();
+    for n in 1..=3 {
+        assert!(calls.contains(&release_get(n)), "{calls:?}");
+        assert!(calls.contains(&release_get_at(PEER2, n)), "{calls:?}");
+    }
+    assert!(!calls.contains(&release_get(4)), "{calls:?}");
+}
+
+/// A peer that no longer answers the chain an earlier poll held from it is
+/// walked again from the served seq + 1 in the same poll, so its other
+/// branch reaches the pool. Two ways: the record above what it answered
+/// before does not select it, or the record its chain ended at is gone.
+#[test]
+fn a_peer_that_changes_branch_is_walked_again_from_the_served_seq() {
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let x2 = release(2, Some(&g), &[k], "x2");
+    let x3 = release(3, Some(&x2), &[k], "x3");
+    let y2 = release(2, Some(&g), &[k], "y2");
+    let y3 = release(3, Some(&y2), &[k], "y3");
+    let y4 = release(4, Some(&y3), &[k], "y4");
+    let env = |r: &Rel| envelope(r, k);
+    let serving_g = |name: &str| {
+        let fx = fx(name, &g, &[k]);
+        fx.offer(&g);
+        fx.inbox("g.json", &env(&g));
+        let mut door = fx.door();
+        door.poll(true);
+        assert_eq!(fx.health().seq, Some(1), "{:?}", door.notes());
+        (fx, door)
+    };
+
+    // a budget cut leaves x2, x3 held; then seq 4 selects y3, not x3
+    let (fx, mut door) = serving_g("walk-parted");
+    fx.peer_chain(&[&g, &x2, &x3].map(env));
+    door.set_walk_budget(2, WALK_BYTES);
+    door.poll(true);
+    assert!(
+        noted(&door, "walk budget is spent; the walk resumes at seq 4"),
+        "{:?}",
+        door.notes()
+    );
+    fx.peer_chain(&[&g, &y2, &y3, &y4].map(env));
+    door.set_walk_budget(8, WALK_BYTES);
+    door.poll(true);
+    assert!(
+        noted(
+            &door,
+            "peer https://peer.test: its seq 4 does not select the seq 3 it answered before; walking it again from seq 2"
+        ),
+        "{:?}",
+        door.notes()
+    );
+    let h = fx.health();
+    assert_eq!(
+        (h.seq, h.equivocation.map(|e| e.seq)),
+        (Some(1), Some(2)),
+        "{:?}",
+        door.notes()
+    );
+
+    // the chain ended at x3 (no pack anywhere); then the peer has only y2
+    let (fx, mut door) = serving_g("walk-shortened");
+    fx.peer_chain(&[&g, &x2, &x3].map(env));
+    door.poll(true);
+    assert_eq!(fx.health().seq, Some(1), "{:?}", door.notes());
+    fx.peer_chain(&[&g, &y2].map(env));
+    door.poll(true);
+    assert!(
+        noted(
+            &door,
+            "peer https://peer.test: it no longer has seq 3; walking it again from seq 2"
+        ),
+        "{:?}",
+        door.notes()
+    );
+    // x3 selects x2, so x wins the fork at 2 (rule 5); y2 is kept as
+    // evidence of it
+    let y2_kept = b64u(&pq::sha3(&[&env(&y2)]));
+    assert!(evidence_names(&fx).contains(&y2_kept), "{:?}", door.notes());
 }
 
 #[test]

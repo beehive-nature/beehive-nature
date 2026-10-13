@@ -34,21 +34,25 @@ Sources, all untrusted: the serve state, `inbox_dir/*.json` (≤ 256 per poll), 
 ANT doors (`GET <door>/v1/data/public/<addr>`, address from the envelope's unsigned
 hints), Arweave GraphQL (owner filter required).
 
-Peers (§7 A1). A peer is walked through its chain endpoint
-`/.well-known/bnr-keychain/release/<seq>` from the highest record this edge holds
-verified (the served one, or past the verified records above it that a walk cut short
-left in memory; genesis when nothing is held), one seq at a time until 404. Each
+Peers (§7 A1). Every configured peer is walked through its own chain endpoint
+`/.well-known/bnr-keychain/release/<seq>` from the served seq + 1 (genesis when nothing
+is served), one seq at a time until 404, whatever another peer holds above it, so a
+valid record that conflicts with one from elsewhere reaches the pool and rule 5. Each
 envelope is checked on its own as the one after the record before it (seq, prev, a
 signer that record lists, both verifiers); the first that fails ends that peer's walk
 and nothing above it is fetched. A peer's claim of its current (its bare `/release`) is
-never read. One poll's walk spends at most 64 requests and about 2 MiB over all peers;
-the verified records above the served one (≤ 64 MiB of envelopes) are held in memory,
-so the next poll resumes where the budget stopped. A peer's `/pack` is its current
-pack, so it is asked only for the record that peer's chain ended at (a peer named in an
-envelope's hints: only for the walk's final target), and taken by hash only. A fresh
-edge configured with peers only resumes from genesis. A peer whose chain parts from
-this edge's at or below the record the walk starts from shows as a refused link in the
-notes; its other branch is not walked back.
+never read. Each peer has its own budget per poll (64 requests, about 2 MiB), so one
+long chain never starves another peer. What a walk verified of a peer's chain above
+the served record (≤ 8 MiB of envelopes per peer) is held, and the next poll resumes
+past it; a peer that no longer answers it (the record above does not select it, or the
+record its chain ended at is gone or different) is walked again from the served
+seq + 1 in the same poll, with a note. A peer's `/pack` is its current pack, so it is
+asked only for the record that peer's chain ended at (a peer named in an envelope's
+hints: only for the walk's final target), and taken by hash only. A fresh edge
+configured with peers only resumes from genesis. Not seen: a peer's records at or below
+the served seq are never fetched (A1 starts above it), so a peer whose chain parts from
+this edge's there shows only as a refused link at the served seq + 1, or not at all
+when it has nothing above it; and a source that withholds a branch hides it.
 
 Serving: GET/HEAD only (else 405), `/` is index.html, unknown path 404, 503 until a
 release verifies (except `/.well-known`). `/.well-known/bnr-keychain/release` is the
