@@ -261,12 +261,20 @@ a{color:var(--ink)}
     <div id="preserve" class="law">after a drop is confirmed, this panel composes the
     preservation bundle — the receipt and the edition, with manifest sha-256s — and can store
     it on Autonomi through the estate's hosted ANT purchaser (Agent 20's shared module,
-    bound invoices, 100-ANT per-file ceiling, your wallet signs the priced invoice; nothing is
-    ever spent silently).</div>
+    bound invoices, 100-ANT per-file ceiling). the bundle is FROZEN once with its digest
+    before any price is asked — a retry resumes the same artifact and the same purchase
+    journal, never a second purchase. the ETH network-fee limit you set below is your own
+    authorization; the invoice is authorized only after you review the bound file, payer,
+    amounts and ceiling. the first-party signer is the estate's isolated keychain; a
+    browser wallet is an external door you choose explicitly. nothing is ever spent
+    silently.</div>
     <div class="row" style="margin-top:var(--s3)">
       <button id="bundle" hidden>download the preservation bundle</button>
-      <button id="preserve-ant" hidden class="primary">preserve on autonomi (priced, my wallet signs)</button>
+      <input id="ant-fee-limit" hidden inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="ETH network-fee limit in wei (your ceiling — nothing is priced without it)" style="flex:2;min-width:220px">
+      <button id="preserve-ant" hidden class="primary">ask for the price (frozen bundle, nothing signed)</button>
+      <button id="ant-authorize" hidden>authorize this exact invoice (bound file · payer · ceiling)</button>
     </div>
+    <div class="log" id="ant-invoice" hidden></div>
     <div class="log" id="pstatus" hidden></div>
   </div>
 </main>
@@ -288,7 +296,7 @@ if(typeof Number.prototype.unref!=='function'){Number.prototype.unref=function()
 <script src="onboarding/vendor/bnr-sign.js?v=1"></script>
 <script src="keychain-client.js?v=2"></script>
 <script src="ant-pay.js?v=1"></script>
-<script src="bdrop.js?v=6"></script>
+<script src="bdrop.js?v=7"></script>
 <script src="tour.js?v=42"></script>
 </body>
 </html>
