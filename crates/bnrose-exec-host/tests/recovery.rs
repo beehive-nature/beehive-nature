@@ -259,27 +259,33 @@ fn a_duplicate_admission_in_the_journal_is_an_alarm_not_a_fact() {
     bnrose_exec_host::keys::SupervisorKeys::init(&state, &[0x35; 32]).unwrap();
     let f = fixture(6, NOW, 600);
     {
-        let mut j = bnrose_exec_host::journal::Journal::open(
-            &state.join("journal.bin"),
-            &bnrose_exec_host::keys::SupervisorKeys::from_root(&[0x35; 32]).journal_mac,
-        )
-        .unwrap();
-        // the same admitted record twice, chain-valid (written by the
-        // journal itself): the REPLAY layer must still refuse the world
-        // where one authorization lives in two operations
-        let payload = {
-            let mut p = Vec::new();
-            p.extend_from_slice(&f.authority);
-            let sig = f.sig;
-            p.extend_from_slice(&sig);
-            let pd = bnrose_exec_core::policy_digest(&test_policy().wire());
-            p.extend_from_slice(&pd);
-            p.extend_from_slice(&(f.env.len() as u16).to_le_bytes());
-            p.extend_from_slice(&f.env);
-            p
-        };
-        j.append(&[1; 32], E_ADMITTED, &payload).unwrap();
-        j.append(&[2; 32], E_ADMITTED, &payload).unwrap();
+        // write the duplicate records to BOTH replicas (a single-replica
+        // write would be divergence, a different and also-fatal alarm)
+        let paths = bnrose_exec_host::opexec::replica_paths(&state);
+        std::fs::create_dir_all(paths[1].parent().unwrap()).unwrap();
+        for p in &paths {
+            let mut j = bnrose_exec_host::journal::Journal::open(
+                p,
+                &bnrose_exec_host::keys::SupervisorKeys::from_root(&[0x35; 32]).journal_mac,
+            )
+            .unwrap();
+            // the same admitted record twice, chain-valid (written by the
+            // journal itself): the REPLAY layer must still refuse the world
+            // where one authorization lives in two operations
+            let payload = {
+                let mut p = Vec::new();
+                p.extend_from_slice(&f.authority);
+                let sig = f.sig;
+                p.extend_from_slice(&sig);
+                let pd = bnrose_exec_core::policy_digest(&test_policy().wire());
+                p.extend_from_slice(&pd);
+                p.extend_from_slice(&(f.env.len() as u16).to_le_bytes());
+                p.extend_from_slice(&f.env);
+                p
+            };
+            j.append(&[1; 32], E_ADMITTED, &payload).unwrap();
+            j.append(&[2; 32], E_ADMITTED, &payload).unwrap();
+        }
     }
     let mut s = Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
     let err = s.recover(NOW).unwrap_err();

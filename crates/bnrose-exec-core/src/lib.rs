@@ -97,6 +97,12 @@ pub const E_LOST_RESPONSE: u8 = 5;
 pub const E_RECOVERY_EVIDENCE: u8 = 6;
 pub const E_RECOVERY_NONE: u8 = 7;
 
+/// A custody-transfer record (SPEC-RUSTEOSVM-1 §2.6): journal-level, not
+/// per-operation — replay skips it the way it skips creation. Its payload
+/// names the old and new supervisor fingerprints and the record count
+/// carried across.
+pub const E_MIGRATION: u8 = 8;
+
 /// Every refusal the core can name. The string is the receipt's word for it.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Refusal {

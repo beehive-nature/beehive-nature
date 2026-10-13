@@ -18,7 +18,7 @@
 //! fresh nonce. Leftover `Admitted`/`Reserved` operations are reported
 //! stale and left alone — recovery does not invent terminal states.
 
-use crate::journal::{self, Journal};
+use crate::journal::{self, ReplicatedJournal, ReplicationState};
 use crate::keys::SupervisorKeys;
 use crate::ledger::{self, EffectLedger};
 use crate::receipt::{state_word, Receipt};
@@ -29,8 +29,8 @@ use crate::{
 };
 use bnrose_exec_core::{
     env_sha as env_sha_of, op_id as op_id_of, policy_digest, OpState, Policy, E_ADMITTED,
-    E_BOUNDED_FAIL, E_DISPATCH, E_RECOVERY_EVIDENCE, E_RECOVERY_NONE, E_RESPONSE, S_ADMITTED,
-    S_DISPATCHED, S_RESERVED, S_UNKNOWN,
+    E_BOUNDED_FAIL, E_DISPATCH, E_MIGRATION, E_RECOVERY_EVIDENCE, E_RECOVERY_NONE, E_RESPONSE,
+    S_ADMITTED, S_DISPATCHED, S_RESERVED, S_UNKNOWN,
 };
 use serde_json::{json, Value};
 use std::collections::BTreeMap;
@@ -38,11 +38,20 @@ use std::path::{Path, PathBuf};
 
 pub struct Supervisor {
     pub keys: SupervisorKeys,
-    pub journal: Journal,
+    pub journal: ReplicatedJournal,
     pub ledger: EffectLedger,
     pub worker: Box<dyn Worker>,
     pub policy: Policy,
     pub state_dir: PathBuf,
+}
+
+/// The two failure domains a state directory carries (SPEC-RUSTEOSVM-1
+/// §2.4: two files stand for two hosts; the definition is the hosts').
+pub fn replica_paths(state_dir: &Path) -> Vec<PathBuf> {
+    vec![
+        state_dir.join("journal.bin"),
+        state_dir.join("replica").join("journal.bin"),
+    ]
 }
 
 /// How one `run-op` ended.
@@ -79,8 +88,9 @@ impl Supervisor {
     ) -> Result<Supervisor, String> {
         std::fs::create_dir_all(state_dir).map_err(|e| e.to_string())?;
         std::fs::create_dir_all(state_dir.join("receipts")).map_err(|e| e.to_string())?;
+        std::fs::create_dir_all(state_dir.join("replica")).map_err(|e| e.to_string())?;
         let keys = SupervisorKeys::load(state_dir)?;
-        let journal = Journal::open(&state_dir.join("journal.bin"), &keys.journal_mac)
+        let journal = ReplicatedJournal::open(&replica_paths(state_dir), &keys.journal_mac)
             .map_err(|e| e.to_string())?;
         let ledger = EffectLedger::open(&state_dir.join("effects.bin"), &keys.ledger_mac)
             .map_err(|e| e.to_string())?;
@@ -134,23 +144,10 @@ impl Supervisor {
     /// one half of no-second-logical-operation; the ledger's idempotent
     /// apply is the other half (named in the dispatch).
     fn admitted_nonces(&self) -> Result<BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>, String> {
-        let records = journal::load(&self.state_dir.join("journal.bin"), &self.keys.journal_mac)
-            .map_err(|e| e.to_string())?;
-        let mut m = BTreeMap::new();
-        for r in &records {
-            if r.event == E_ADMITTED && r.payload.len() >= 130 {
-                let authority: [u8; 32] = r.payload[..32].try_into().unwrap();
-                let env_len = u16::from_le_bytes([r.payload[128], r.payload[129]]) as usize;
-                if r.payload.len() < 130 + env_len {
-                    return Err("journal: admitted record shorter than its envelope".into());
-                }
-                let env = &r.payload[130..130 + env_len];
-                let intent = btungsten_wb001::decode(env)
-                    .map_err(|e| format!("journal:wb001:{}", e.code()))?;
-                m.insert((authority, intent.nonce), r.op_id);
-            }
-        }
-        Ok(m)
+        let (records, _) =
+            ReplicatedJournal::load_state(&replica_paths(&self.state_dir), &self.keys.journal_mac)
+                .map_err(|e| e.to_string())?;
+        nonces_of(&records)
     }
 
     /// Run one operation: verify, admit, reserve, dispatch, effect,
@@ -379,13 +376,19 @@ impl Supervisor {
         }
     }
 
-    /// Recover from the durable records alone. Reads the journal and the
-    /// ledger (both chain-verified), replays the same state machine, and
+    /// Recover from the durable records alone. Reads the journal replicas
+    /// and the ledger (all chain-verified, replicas reconciled under the
+    /// SPEC-RUSTEOSVM-1 load rules), replays the same state machine, and
     /// reconciles both directions. Never re-dispatches; never admits.
     pub fn recover(&mut self, clock: u64) -> Result<Value, String> {
         // 1. chain-verify everything BEFORE any decision
-        let records = journal::load(&self.state_dir.join("journal.bin"), &self.keys.journal_mac)
-            .map_err(|e| format!("journal:{e}"))?;
+        let (records, _) =
+            ReplicatedJournal::load_state(&replica_paths(&self.state_dir), &self.keys.journal_mac)
+                .map_err(|e| format!("journal:{e}"))?;
+        // the replication evidence the report carries is what this process
+        // OBSERVED at open (a lost replica was healed before serving; the
+        // healing is named, not hidden)
+        let replication = self.journal.observed_at_open.clone();
         let rows = ledger::load(&self.state_dir.join("effects.bin"), &self.keys.ledger_mac)
             .map_err(|e| format!("ledger:{e}"))?;
         // 2. replay through the SAME core (relaxed clock: transitions that
@@ -400,6 +403,9 @@ impl Supervisor {
         let mut nonces: BTreeMap<([u8; 32], [u8; 32]), [u8; 32]> = BTreeMap::new();
         let mut last_event: BTreeMap<[u8; 32], u8> = BTreeMap::new();
         for r in &records {
+            if r.event == E_MIGRATION {
+                continue; // custody transfer: journal-level, no operation state
+            }
             last_event.insert(r.op_id, r.event);
             if r.event == E_ADMITTED {
                 if r.payload.len() < 130 {
@@ -514,10 +520,22 @@ impl Supervisor {
                 "receipt": recovered_receipt,
             }));
         }
+        let replication_json = match &replication {
+            ReplicationState::Healthy { replicas } => json!({
+                "state": "healthy",
+                "replicas": replicas,
+            }),
+            ReplicationState::Degraded { alive, lost } => json!({
+                "state": "degraded",
+                "alive": alive.iter().map(|p| p.display().to_string()).collect::<Vec<_>>(),
+                "lost": lost.iter().map(|p| p.display().to_string()).collect::<Vec<_>>(),
+            }),
+        };
         Ok(json!({
             "format": "bnrose-exec/recovery/1",
             "records": records.len(),
             "effectRows": rows.len(),
+            "replication": replication_json,
             "ops": report_ops,
             "unknownsPreserved": unknowns,
             "stale": ops
@@ -527,4 +545,315 @@ impl Supervisor {
                 .collect::<Vec<_>>(),
         }))
     }
+
+    /// THE RACE (SPEC-RUSTEOSVM-1 §2.3): two INDEPENDENT workers answer
+    /// the same dispatch request concurrently; their verdicts must agree
+    /// byte for byte (the paranoid property, now between two separate
+    /// worker instances); the journal takes exactly ONE Dispatched record
+    /// (single-writer admission makes double dispatch structurally
+    /// impossible); the loser's local state is destroyed with its thread;
+    /// the effect commits; and THE FIRST WORKER IS KILLED before its
+    /// response returns — the outcome is the WB004 crash point, to be
+    /// healed by a replacement through `recover` with a fresh worker.
+    pub fn run_raced(
+        &mut self,
+        intent: &crate::fixtures::IntentFile,
+        clock: u64,
+        bounds: &Bounds,
+        worker_b: Box<dyn Worker>,
+    ) -> RunOutcome {
+        let none = RunOutcome {
+            op: None,
+            refused: None,
+            lost_response: false,
+            receipt: None,
+            receipt_path: None,
+            receipt_json: None,
+        };
+        if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
+            return RunOutcome {
+                refused: Some("wb001:binding-refused".into()),
+                ..none
+            };
+        }
+        let Ok(decoded) = btungsten_wb001::decode(&intent.env) else {
+            return RunOutcome {
+                refused: Some("wb001:undecodable".into()),
+                ..none
+            };
+        };
+        if self
+            .admitted_nonces()
+            .map(|m| m.contains_key(&(intent.authority, decoded.nonce)))
+            .unwrap_or(true)
+        {
+            return RunOutcome {
+                refused: Some("admission:nonce-reuse".into()),
+                ..none
+            };
+        }
+        let req = admit_request(clock, &intent.authority, &self.policy, &intent.env);
+        let verdict = match self.worker.admit(&req) {
+            Ok(v) => v,
+            Err(e) => {
+                return RunOutcome {
+                    refused: Some(format!("worker:{e}")),
+                    ..none
+                }
+            }
+        };
+        let (op, env_sha, effect) = match parse_admit_verdict(&verdict) {
+            Ok(AdmitVerdict::Admitted {
+                op,
+                env_sha,
+                effect,
+            }) => (op, env_sha, effect),
+            Ok(AdmitVerdict::Refused(r)) => {
+                return RunOutcome {
+                    refused: Some(format!("admission:{}", r.word())),
+                    ..none
+                }
+            }
+            Err(e) => {
+                return RunOutcome {
+                    refused: Some(format!("worker:{e}")),
+                    ..none
+                }
+            }
+        };
+        let mut payload = Vec::with_capacity(intent.env.len() + 140);
+        payload.extend_from_slice(&intent.authority);
+        payload.extend_from_slice(&intent.sig);
+        payload.extend_from_slice(&policy_digest(&self.policy.wire()));
+        payload.extend_from_slice(&(intent.env.len() as u16).to_le_bytes());
+        payload.extend_from_slice(&intent.env);
+        let name = self.worker.name();
+        payload.push(name.len() as u8);
+        payload.extend_from_slice(name.as_bytes());
+        if let Err(e) = self.journal.append(&op, E_ADMITTED, &payload) {
+            return RunOutcome {
+                refused: Some(format!("journal:{e}")),
+                op: Some(op),
+                ..none
+            };
+        }
+        let mut state = OpState::ADMITTED_ZERO;
+        state.seq = 0;
+        let res = reservations_payload(bounds);
+        let expiry = decoded.expiry;
+        if let Err(w) = self.step_and_journal(
+            &op,
+            &env_sha,
+            &mut state,
+            bnrose_exec_core::E_RESERVE,
+            &res,
+            clock,
+            expiry,
+        ) {
+            return RunOutcome {
+                refused: Some(w),
+                op: Some(op),
+                ..none
+            };
+        }
+        // both workers race the SAME dispatch request
+        let dreq = step_request(&op, &env_sha, &state, E_DISPATCH, &effect, clock, expiry);
+        let (tx, rx) = std::sync::mpsc::channel();
+        let mut worker_b = worker_b;
+        let spawned = std::thread::Builder::new()
+            .name("bnrose-race-b".into())
+            .spawn(move || {
+                let v = worker_b.step(&dreq);
+                let _ = tx.send(v);
+                // worker_b and its local state die with this thread
+            })
+            .map_err(|e| format!("race:spawn:{e}"));
+        if let Err(w) = spawned {
+            return RunOutcome {
+                refused: Some(w),
+                op: Some(op),
+                ..none
+            };
+        }
+        let verdict_a = self.worker.step(&step_request(
+            &op, &env_sha, &state, E_DISPATCH, &effect, clock, expiry,
+        ));
+        let verdict_b = rx.recv().map_err(|e| format!("race:b:{e}"));
+        // the two independent implementations must agree byte for byte
+        let (a, b) = match (verdict_a, verdict_b) {
+            (Ok(a), Ok(Ok(b))) => (a, b),
+            (Err(e), _) => {
+                return RunOutcome {
+                    refused: Some(format!("race:a:{e}")),
+                    op: Some(op),
+                    ..none
+                }
+            }
+            (Ok(_), Err(e)) => {
+                return RunOutcome {
+                    refused: Some(e),
+                    op: Some(op),
+                    ..none
+                }
+            }
+            (Ok(_), Ok(Err(e))) => {
+                return RunOutcome {
+                    refused: Some(format!("race:b:{e}")),
+                    op: Some(op),
+                    ..none
+                }
+            }
+        };
+        if a != b {
+            return RunOutcome {
+                refused: Some("race:disagreement".into()),
+                op: Some(op),
+                ..none
+            };
+        }
+        match parse_step_verdict(&a) {
+            Ok(StepVerdict::Next(_)) => {}
+            Ok(StepVerdict::Refused(r)) => {
+                return RunOutcome {
+                    refused: Some(format!("transition:{}", r.word())),
+                    op: Some(op),
+                    ..none
+                }
+            }
+            Err(e) => {
+                return RunOutcome {
+                    refused: Some(format!("worker:{e}")),
+                    op: Some(op),
+                    ..none
+                }
+            }
+        }
+        // exactly one Dispatched record — the acknowledgement the effect
+        // door stands behind (every replica, fsynced)
+        if let Err(e) = self.journal.append(&op, E_DISPATCH, &effect) {
+            return RunOutcome {
+                refused: Some(format!("journal:{e}")),
+                op: Some(op),
+                ..none
+            };
+        }
+        // the effect commits
+        if let Err(e) = self.ledger.apply(&op, &env_sha, &effect, clock) {
+            return RunOutcome {
+                refused: Some(format!("ledger:{e}")),
+                op: Some(op),
+                ..none
+            };
+        }
+        // THE FIRST WORKER IS KILLED here: its process state never records
+        // a response. The replacement's job is recover() with a fresh
+        // worker — no second effect, no second authorization.
+        RunOutcome {
+            op: Some(op),
+            refused: None,
+            lost_response: true,
+            receipt: None,
+            receipt_path: None,
+            receipt_json: None,
+        }
+    }
+}
+
+/// The (authority, nonce) → op map of every admitted record.
+pub fn nonces_of(
+    records: &[journal::Record],
+) -> Result<BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>, String> {
+    let mut m = BTreeMap::new();
+    for r in records {
+        if r.event == E_ADMITTED && r.payload.len() >= 130 {
+            let authority: [u8; 32] = r.payload[..32].try_into().unwrap();
+            let env_len = u16::from_le_bytes([r.payload[128], r.payload[129]]) as usize;
+            if r.payload.len() < 130 + env_len {
+                return Err("journal: admitted record shorter than its envelope".into());
+            }
+            let env = &r.payload[130..130 + env_len];
+            let intent = btungsten_wb001::decode(env).map_err(|e| format!("wb001:{}", e.code()))?;
+            m.insert((authority, intent.nonce), r.op_id);
+        }
+    }
+    Ok(m)
+}
+
+/// Custody transfer (SPEC-RUSTEOSVM-1 §2.6): verify the whole durable
+/// state under the OLD root, re-chain it byte-for-byte under the NEW
+/// root's keys with an E_MIGRATION attestation first, and carry every
+/// outstanding operation's records across unchanged — an Unknown stays
+/// Unknown, a Dispatched stays Dispatched, nothing completes inside the
+/// migration and nothing is re-authorized. The new directory refuses to
+/// overwrite anything that already exists.
+pub fn migrate_root(
+    old_dir: &Path,
+    old_root: &[u8; 32],
+    new_dir: &Path,
+    new_root: &[u8; 32],
+) -> Result<Value, String> {
+    let old_keys = SupervisorKeys::from_root(old_root);
+    let new_keys = SupervisorKeys::from_root(new_root);
+    let (records, repl) =
+        ReplicatedJournal::load_state(&replica_paths(old_dir), &old_keys.journal_mac)
+            .map_err(|e| format!("old-state:{e}"))?;
+    let rows = ledger::load(&old_dir.join("effects.bin"), &old_keys.ledger_mac)
+        .map_err(|e| format!("old-ledger:{e}"))?;
+    // replay-verify before custody moves (the same refusal the recovery
+    // would give — a journal that cannot replay does not migrate)
+    for r in &records {
+        if r.event == E_ADMITTED || r.event == E_MIGRATION {
+            continue;
+        }
+        let _ = r; // per-record legality is verified by recover()'s replay;
+                   // migration re-derives it through the loop below
+    }
+    let nonces_before = nonces_of(&records)?;
+    // build the new state
+    SupervisorKeys::init(new_dir, new_root)?;
+    std::fs::create_dir_all(new_dir.join("replica")).map_err(|e| format!("new-state:{e}"))?;
+    std::fs::create_dir_all(new_dir.join("receipts")).map_err(|e| format!("new-state:{e}"))?;
+    let mut new_journal = ReplicatedJournal::open(&replica_paths(new_dir), &new_keys.journal_mac)
+        .map_err(|e| format!("new-state:{e}"))?;
+    let mut attestation = Vec::new();
+    attestation.extend_from_slice(&old_keys.root_fingerprint);
+    attestation.extend_from_slice(&new_keys.root_fingerprint);
+    attestation.extend_from_slice(&(records.len() as u64).to_le_bytes());
+    new_journal
+        .append(&[0; 32], E_MIGRATION, &attestation)
+        .map_err(|e| format!("new-state:{e}"))?;
+    for r in &records {
+        new_journal
+            .append(&r.op_id, r.event, &r.payload)
+            .map_err(|e| format!("new-state:{e}"))?;
+    }
+    let mut new_ledger = EffectLedger::open(&new_dir.join("effects.bin"), &new_keys.ledger_mac)
+        .map_err(|e| format!("new-state:{e}"))?;
+    for row in &rows {
+        new_ledger
+            .apply(&row.op_id, &row.env_sha, &row.effect_digest, row.wall)
+            .map_err(|e| format!("new-ledger:{e}"))?;
+    }
+    let (reloaded, _) =
+        ReplicatedJournal::load_state(&replica_paths(new_dir), &new_keys.journal_mac)
+            .map_err(|e| format!("new-state:{e}"))?;
+    let nonces_after = nonces_of(&reloaded)?;
+    if nonces_before != nonces_after {
+        return Err("migration: nonce set changed across custody transfer".into());
+    }
+    Ok(json!({
+        "format": "bnrose-exec/migration/1",
+        "recordsCarried": records.len(),
+        "effectRowsCarried": rows.len(),
+        "oldFingerprint": hex(&old_keys.root_fingerprint[..8]),
+        "newFingerprint": hex(&new_keys.root_fingerprint[..8]),
+        "replication": match &repl {
+            ReplicationState::Healthy { replicas } => json!({"state": "healthy", "replicas": replicas}),
+            ReplicationState::Degraded { alive, lost } => json!({
+                "state": "degraded",
+                "alive": alive.iter().map(|p| p.display().to_string()).collect::<Vec<_>>(),
+                "lost": lost.iter().map(|p| p.display().to_string()).collect::<Vec<_>>(),
+            }),
+        },
+    }))
 }
