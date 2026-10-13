@@ -19,9 +19,21 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+        with:
+          # BNROSE-RUST-001: the wasm worker the agreement battery runs
+          # builds for wasm32-unknown-unknown (the lane's own workflow
+          # runs the fuller battery; this weld keeps the workspace test
+          # honest about the module too)
+          targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Ensure the wasm32 target is installed (the toolchain file outranks action inputs)
+        if: always()
+        run: rustup target add wasm32-unknown-unknown
       - name: Build workspace
         run: cargo build --workspace --locked
+      - name: Build the bnrose-exec wasm worker
+        if: always()
+        run: cargo build -p bnrose-exec-wasm --target wasm32-unknown-unknown --release --locked
       - name: Test workspace
         if: always()
         env:
@@ -30,8 +42,12 @@ jobs:
           # locally. The gate below is the settle-nerve precedent: a
           # skipped suite is not a pass.
           BZDID_BSIGNER_BIN: ${{ github.workspace }}/target/debug/bsigner
+          # BNROSE-RUST-001: the wasm module the agreement battery runs;
+          # the guard below keeps a missing module from becoming a skip
+          BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm
         run: |
           test -x "$BZDID_BSIGNER_BIN" || { echo "bsigner binary missing for bzdid's organ suite: a skipped suite is not a pass"; exit 1; }
+          test -s "$BNROSE_EXEC_WASM" || { echo "bnrose-exec wasm module missing: a skipped agreement suite is not a pass"; exit 1; }
           cargo test --workspace --locked
       # the same SETTLE contract on a second rail: the binary this job just built
       - name: bPay SETTLE — Solana native carrier through the built settle-solana binary

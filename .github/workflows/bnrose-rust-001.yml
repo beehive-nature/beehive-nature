@@ -1,0 +1,55 @@
+name: BNROSE-RUST-001
+
+# The BNRoSe L2 execution-core lane: battery (acceptance, rejection,
+# agreement, recovery, sandbox, WB004 end-to-end), mutation controls
+# (teeth), the recovery demonstration, and benchmarks — every push.
+# The wasm module is built first: a missing module is an ERROR, not a skip
+# (a skipped agreement suite is not a pass).
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lane:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Ensure the wasm32 target is installed (the toolchain file outranks action inputs)
+        run: rustup target add wasm32-unknown-unknown
+      - name: Build the wasm worker (wasm32-unknown-unknown, release)
+        run: cargo build -p bnrose-exec-wasm --target wasm32-unknown-unknown --release --locked
+      - name: Battery
+        env:
+          BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm
+        run: cargo test -p bnrose-exec-core -p bnrose-exec-wasm -p bnrose-exec-host --locked
+      - name: Mutation controls (teeth)
+        run: sh scripts/bnrose-rust-001/teeth.sh
+      - name: Build the CLI and bench (release)
+        run: cargo build --release -p bnrose-exec-host --locked
+      - name: Recovery demonstration (separate processes, durable records only)
+        env:
+          BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm
+        run: sh scripts/bnrose-rust-001/recovery-demo.sh target/release/bnrose-exec-host docs/receipts/bnrose-rust-001/recovery-demo-ci.txt
+      - name: "Benchmarks (labeled workload + this runner)"
+        env:
+          BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm
+          BNROSE_BENCH_HW: github-actions ubuntu-22.04 runner (2 vCPU)
+        run: target/release/bnrose-bench docs/receipts/bnrose-rust-001/bench-ci.json
+      - name: Preserve receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: bnrose-rust-001-${{ github.run_id }}-${{ github.run_attempt }}
+          path: docs/receipts/bnrose-rust-001/*
+          if-no-files-found: error
+          retention-days: 14
