@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af67726 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
         with:
           targets: wasm32-unknown-unknown
@@ -45,7 +45,7 @@ jobs:
         run: target/release/bnrose-bench docs/receipts/bnrose-rust-001/bench-ci.json
       - name: Preserve receipts
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f36707fa02 # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: bnrose-rust-001-${{ github.run_id }}-${{ github.run_attempt }}
           path: docs/receipts/bnrose-rust-001/*
