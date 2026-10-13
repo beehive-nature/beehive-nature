@@ -1,0 +1,30 @@
+[package]
+name = "keys-door"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "The keychain edge (keys.skaists.dev): resolves bnr.keychain-release/1 records from untrusted rails (state, inbox, peer edges, ANT doors, Arweave), accepts one only when two independent ML-DSA-65 verifiers agree and the chain rules hold, and serves exactly the bytes it names. Keyless."
+
+[dependencies]
+axum = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.9"
+sha2 = "0.10"
+sha3 = "0.10"
+# the in-process ML-DSA-65 verifier (verify only: no RNG feature is compiled in)
+fips204 = { version = "=0.4.6", default-features = false, features = ["ml-dsa-65"] }
+# the bzpq1 id: bech32m, the same crate line crates/bsigner uses for it
+bech32 = "0.9"
+# blocking HTTPS client for the rails; rustls on ring (never aws-lc-rs), webpki roots
+ureq = { version = "3", default-features = false, features = ["rustls"] }
+
+[dev-dependencies]
+# a throwaway SLH-DSA-SHAKE-256f succession key per test signer, so the
+# bzpq1 id is derived the whole way (SPEC-BPQ-1 §2); the pin crates/bsigner uses
+fips205 = { version = "=0.4.1", default-features = false, features = ["slh_dsa_shake_256f"] }
+tower = { version = "0.5", features = ["util"] }
+http-body-util = "0.1"
+
+[workspace]
