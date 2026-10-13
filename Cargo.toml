@@ -12,6 +12,7 @@ members = [
     "crates/adapter-carrier",
     "crates/adapter-lti",
     "crates/adapter-pixellab",
+    "crates/adapter-store",
     "crates/atmirror",
     "crates/b-token",
     "crates/bswap",
@@ -74,7 +75,7 @@ members = [
     "crates/btungsten-bench",
     "crates/bpq-core",
     "crates/bheraldry",
-    "crates/bpq-device-xcheck",
+    "crates/bpq-device-xcheck", "crates/adapter-store",
 ]
 
 [workspace.metadata]
