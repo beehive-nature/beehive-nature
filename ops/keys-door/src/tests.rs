@@ -2054,16 +2054,23 @@ fn a_peer_that_changes_branch_is_walked_again_from_the_served_seq() {
     assert!(evidence_names(&fx).contains(&y2_kept), "{:?}", door.notes());
 }
 
+/// The `--version` line names the commit it is given, and "unknown" for
+/// none or an empty one. Whether a build embeds KEYS_DOOR_COMMIT at all is
+/// not checked here (a test binary sees only its own build's value): CI's
+/// version stamp step builds with it and compares the binary's output.
 #[test]
-fn version_names_the_crate_and_the_build_commit() {
-    let v = crate::version();
-    let commit = option_env!("KEYS_DOOR_COMMIT")
-        .filter(|c| !c.is_empty())
-        .unwrap_or("unknown");
+fn version_line_names_the_given_commit_or_unknown() {
+    let pkg = env!("CARGO_PKG_VERSION");
     assert_eq!(
-        v,
-        format!("keys-door {} (commit {commit})", env!("CARGO_PKG_VERSION"))
+        crate::version_line(Some(COMMIT)),
+        format!("keys-door {pkg} (commit {COMMIT})")
     );
+    for none in [Some(""), None] {
+        assert_eq!(
+            crate::version_line(none),
+            format!("keys-door {pkg} (commit unknown)")
+        );
+    }
 }
 
 // ---------------------------------------------------------------------------

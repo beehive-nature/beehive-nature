@@ -32,9 +32,12 @@ pub mod verify;
 /// was built from, as `KEYS_DOOR_COMMIT` named it at build time ("unknown"
 /// when it was unset or empty: nothing here guesses a commit).
 pub fn version() -> String {
-    let commit = option_env!("KEYS_DOOR_COMMIT")
-        .filter(|c| !c.is_empty())
-        .unwrap_or("unknown");
+    version_line(option_env!("KEYS_DOOR_COMMIT"))
+}
+
+/// The `--version` line for the commit a build was given.
+fn version_line(commit: Option<&str>) -> String {
+    let commit = commit.filter(|c| !c.is_empty()).unwrap_or("unknown");
     format!("keys-door {} (commit {commit})", env!("CARGO_PKG_VERSION"))
 }
 
