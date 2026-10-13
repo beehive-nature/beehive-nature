@@ -11,8 +11,17 @@
 //       TEST ONLY: a throwaway ML-DSA-65 key made in this process signs R (SPEC-BPQ-1 §3b);
 //       without --record it prints the throwaway id the seed gives
 //   envelope --record R --sig S [--hint-ant A] [--hint-ar T]... [--hint-hive BLOCK:TRX] [--hint-peer URL]... [--out FILE]
-//   verify --record R --sig S [--signers id,...] [--prev R0] [--genesis-sha3 B]
-//       the signature and the seq/prev/signer rules an edge applies (one implementation here: noble)
+//   verify --record R --sig S [--signers id,...] [--prev R0] [--genesis-sha3 B | --no-genesis-pin]
+//       the signature and the seq/prev/signer rules an edge applies (one implementation here: noble);
+//       seq 1 needs the genesis pin, and --no-genesis-pin is a signature-only check, never ok:true
+//   place --dir DIR --record R --sig S [--envelope E] --signers id,... --genesis-sha3 B
+//       verify R against the chain already placed under DIR (rules 1-3, from the genesis pin), then
+//       write DIR/keychain/releases/<seq>/{record.json, record.json.relsig.json, envelope.json};
+//       an existing seq directory with other bytes is refused, never rewritten
+//
+// A signature file (record.json.relsig.json) has ONE byte form: the canonical JSON of the record
+// (§1 canon), no trailing newline. The envelope's sig is that same object, so canon(envelope.sig)
+// is the file byte for byte and an anchor's sig.sha3 can be recomputed from either.
 //
 // The record is the authority over what keys.skaists.dev serves: every byte by size, SHA-256 and
 // SHA3-256, and the post-quantum ids allowed to sign the next record. No storage address is inside
@@ -22,7 +31,7 @@
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -280,22 +289,23 @@ export function buildSite(cwd) {
   } finally { rmSync(out, { recursive: true, force: true }); }
 }
 
-const git = (args, opts = {}) => execFileSync('git', args, { cwd: ROOT, maxBuffer: 256 << 20, stdio: ['pipe', 'pipe', 'pipe'], ...opts });
-function commitOf(rev) {
+// `root` is the clone that builds: this one unless a caller (the tests' scratch repositories) names another.
+const git = (args, root = ROOT, opts = {}) => execFileSync('git', args, { cwd: root, maxBuffer: 256 << 20, stdio: ['pipe', 'pipe', 'pipe'], ...opts });
+function commitOf(rev, root = ROOT) {
   let c;
-  try { c = git(['rev-parse', '--verify', '--quiet', `${rev}^{commit}`]).toString().trim(); } catch { c = ''; }
+  try { c = git(['rev-parse', '--verify', '--quiet', `${rev}^{commit}`], root).toString().trim(); } catch { c = ''; }
   if (!/^[0-9a-f]{40}$/.test(c)) throw new Error(`${rev} is not a commit in this clone`);
   return c;
 }
 // The build inputs as stored at `commit` (raw blobs: what a checkout writes, the repo being eol=lf).
-export function inputsAt(commit) {
-  const entries = git(['ls-tree', '-r', '-z', commit, '--', ...INPUTS]).toString('utf8').split('\0').filter(Boolean).map(line => {
+export function inputsAt(commit, root = ROOT) {
+  const entries = git(['ls-tree', '-r', '-z', commit, '--', ...INPUTS], root).toString('utf8').split('\0').filter(Boolean).map(line => {
     const tab = line.indexOf('\t'), [mode, type, oid] = line.slice(0, tab).split(' ');
     return { mode, type, oid, path: line.slice(tab + 1) };
   });
   if (!entries.some(e => e.path === 'scripts/build-keychain.mjs')) throw new Error(`${commit} has no scripts/build-keychain.mjs`);
   for (const e of entries) if (e.type !== 'blob' || !/^100(644|755)$/.test(e.mode)) throw new Error(`${e.path} at ${commit} is not a regular file (${e.mode} ${e.type})`);
-  const out = git(['cat-file', '--batch'], { input: entries.map(e => e.oid).join('\n') + '\n' });
+  const out = git(['cat-file', '--batch'], root, { input: entries.map(e => e.oid).join('\n') + '\n' });
   const files = new Map();
   let o = 0;
   for (const e of entries) {
@@ -307,22 +317,23 @@ export function inputsAt(commit) {
   return files;
 }
 
-const readJson = p => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
+const readJson = (p, root = ROOT) => JSON.parse(readFileSync(join(root, p), 'utf8'));
+// The law ids are always this repository's: no clone a caller names can make the law key a release key.
 export const lawIds = () => new Set((existsSync(join(ROOT, 'docs', 'PQ-SIGNERS.json')) ? readJson('docs/PQ-SIGNERS.json').signers : []).map(s => s.id));
-const pinnedSigners = () => readJson('docs/KEYCHAIN-RELEASE-SIGNERS.json').signers.map(s => (typeof s === 'string' ? s : s && s.id));
+const pinnedSigners = root => readJson('docs/KEYCHAIN-RELEASE-SIGNERS.json', root).signers.map(s => (typeof s === 'string' ? s : s && s.id));
 function refuseLaw(ids, law = lawIds()) {
   for (const id of ids) if (law.has(id)) throw new Error(`${id} is the law key (docs/PQ-SIGNERS.json); the law key is never a release authority`);
 }
 const list = s => s.split(',').map(x => x.trim()).filter(Boolean);
 
 export function prepare(o) {
-  const out = need(o, 'out');
+  const out = need(o, 'out'), root = o.root ?? ROOT;
   if (existsSync(out) && readdirSync(out).length) throw new Error(`${out} is not empty`);
-  const commit = commitOf(o.commit ?? 'HEAD');
+  const commit = commitOf(o.commit ?? 'HEAD', root);
   // The record names a commit, so its bytes must be that commit's: a build input edited, staged or
   // re-ended (CRLF) in this working tree refuses here instead of being misnamed.
-  for (const [path, blob] of inputsAt(commit)) {
-    const p = fileAt(ROOT, path);
+  for (const [path, blob] of inputsAt(commit, root)) {
+    const p = fileAt(root, path);
     if (!existsSync(p) || !readFileSync(p).equals(blob)) throw new Error(`${path} in the working tree is not its bytes at ${commit}`);
   }
   let seq = 1, prev = null;
@@ -333,11 +344,11 @@ export function prepare(o) {
   if (o.seq !== undefined && (!/^[1-9][0-9]*$/.test(o.seq) || Number(o.seq) !== seq)) {
     throw new Error(o.prev ? `--seq must be ${seq}: the previous record is seq ${seq - 1}` : '--seq above 1 needs --prev (the record it follows)');
   }
-  const signers = o.signers !== undefined ? list(o.signers) : pinnedSigners();
+  const signers = o.signers !== undefined ? list(o.signers) : pinnedSigners(root);
   if (!signers.length) throw new Error('no --signers and docs/KEYCHAIN-RELEASE-SIGNERS.json pins none: the release signer is unruled (R-SIGNER)');
   for (const s of signers) if (!isId(s)) throw new Error(`${s} is not a bzpq1 id`);
   refuseLaw(signers);
-  const files = buildSite(ROOT);
+  const files = buildSite(root);
   const { record, bytes, pack } = assemble({ files, seq, prev, signers, commit });
   for (const f of files) {
     mkdirSync(dirname(fileAt(join(out, 'site'), f.path)), { recursive: true });
@@ -348,17 +359,17 @@ export function prepare(o) {
   return { record: join(out, 'record.json'), seq, prev, commit, files: record.files.length, pack: record.pack, sha3: b64u(sha3(bytes)), size: bytes.length };
 }
 
-export function check(dir) {
+export function check(dir, { root = ROOT } = {}) {
   const recordBytes = readFileSync(join(dir, 'record.json'));
   const r = checkIdentity(parseRecord(recordBytes));
   const pack = readFileSync(join(dir, 'pack.bin'));
   const site = join(dir, 'site'), held = walk(site), named = r.files.map(f => f.path);
   if (held.join('\n') !== named.join('\n')) throw new Error(`${site} holds [${held}] but the record names [${named}]`);
   checkBytes(r, new Map(held.map(p => [p, readFileSync(fileAt(site, p))])), pack);
-  if (commitOf(r.source.commit) !== r.source.commit) throw new Error(`${r.source.commit} is not a commit in this clone`);
+  if (commitOf(r.source.commit, root) !== r.source.commit) throw new Error(`${r.source.commit} is not a commit in this clone`);
   const tmp = mkdtempSync(join(tmpdir(), 'kc-release-src-'));
   try {
-    for (const [path, blob] of inputsAt(r.source.commit)) {
+    for (const [path, blob] of inputsAt(r.source.commit, root)) {
       mkdirSync(dirname(fileAt(tmp, path)), { recursive: true });
       writeFileSync(fileAt(tmp, path), blob);
     }
@@ -382,18 +393,30 @@ export function testKeys(seed) {
 }
 
 const SIG = ['at', 'bpq', 'dsa', 'file', 'id', 'kind', 'sig', 'succ'];
-export function readSig(bytes) {
-  const d = JSON.parse(Buffer.from(bytes).toString('utf8'));
+// The shape of a §3b detached signature object, wherever it came from (a file, an envelope).
+export function checkSig(d) {
   fields(d, SIG, 'signature');
   fields(d.file, ['sha3', 'size'], 'signature.file');
   if (d.bpq !== 1 || d.kind !== 'detached') throw new Error('not a SPEC-BPQ-1 §3b detached signature');
   return d;
 }
+// The one byte form of a signature: what sign-test writes, what an envelope's sig re-serializes to,
+// and what an anchor's sig.sha3 hashes.
+export const sigBytesOf = d => Buffer.from(canon(checkSig(d)), 'latin1');
+// A signature file is read strictly: canonical JSON, no trailing newline, so its sha3 is one value.
+export function readSig(bytes) {
+  let d;
+  try { d = parseStrict(bytes); } catch (e) { throw new Error(`the signature file is not its one byte form (canonical JSON, no trailing newline): ${e.message}`); }
+  return checkSig(d);
+}
+export const sigSha3 = sigBytes => b64u(sha3(sigBytesOf(readSig(sigBytes))));
 
 // Edge rules 1-3 over one step: strict record, a valid ML-DSA-65 signature by an authorized id,
-// and seq/prev. seq 1 is authorized by the genesis signers (and, if given, the genesis sha3 pin);
+// and seq/prev. seq 1 is authorized by the genesis signers AND the genesis sha3 pin (rule 3);
 // seq N > 1 only as prev.seq + 1, signed by an id the previous record names.
-export function verifyRelease({ recordBytes, sigBytes, signers, prevBytes, genesisSha3, cfg = CFG, law = lawIds() }) {
+// noGenesisPin: a signature-only check of a seq 1 record. It reports signature_ok and is never
+// ok: true, because without the pin nothing here says this record is the genesis.
+export function verifyRelease({ recordBytes, sigBytes, signers, prevBytes, genesisSha3, noGenesisPin = false, cfg = CFG, law = lawIds() }) {
   try {
     const r = checkIdentity(parseRecord(recordBytes), cfg);
     const d = readSig(sigBytes);
@@ -402,6 +425,7 @@ export function verifyRelease({ recordBytes, sigBytes, signers, prevBytes, genes
     if (law.has(v.id)) return { ok: false, id: v.id, why: 'signed by the law key, which is never a release authority' };
     const sha = b64u(sha3(recordBytes));
     if (prevBytes) {
+      if (noGenesisPin) return { ok: false, id: v.id, why: '--no-genesis-pin is for a seq 1 record alone; a record after it is checked against the record it follows' };
       const p = checkIdentity(parseRecord(prevBytes), cfg);
       if (r.seq !== p.seq + 1) return { ok: false, id: v.id, why: `seq ${r.seq} is not ${p.seq + 1}: a record is accepted only as current+1, never a jump` };
       if (r.prev !== b64u(sha3(prevBytes))) return { ok: false, id: v.id, why: 'record.prev does not name the previous record' };
@@ -412,12 +436,40 @@ export function verifyRelease({ recordBytes, sigBytes, signers, prevBytes, genes
     if (r.seq !== 1) return { ok: false, id: v.id, why: `seq ${r.seq} needs the record it follows (--prev): genesis pins authorize genesis only` };
     if (!signers || !signers.length) return { ok: false, id: v.id, why: 'seq 1 needs the genesis signers (--signers)' };
     if (!signers.includes(v.id)) return { ok: false, id: v.id, why: `${v.id} is not a genesis signer` };
-    if (genesisSha3 !== undefined && genesisSha3 !== sha) return { ok: false, id: v.id, why: `record sha3 ${sha} is not the genesis pin ${genesisSha3}` };
-    return { ok: true, id: v.id, at: v.at, seq: 1, sha3: sha, authorized_by: 'genesis signers', genesis_pin: genesisSha3 === undefined ? 'not given' : 'matched' };
+    if (noGenesisPin) {
+      if (genesisSha3 !== undefined) return { ok: false, id: v.id, why: '--no-genesis-pin and --genesis-sha3 contradict each other' };
+      return { ok: false, signature_ok: true, checked: 'signature only (--no-genesis-pin)', id: v.id, at: v.at, seq: 1, sha3: sha,
+        authorized_by: 'genesis signers', genesis_pin: 'not checked', why: 'signature only: rule 3 accepts a genesis by its pinned sha3, which was not given, so this is no verdict on the chain' };
+    }
+    if (genesisSha3 === undefined) return { ok: false, id: v.id, why: 'seq 1 needs the genesis pin (--genesis-sha3): rule 3 accepts a genesis only by its pinned sha3 and its signers' };
+    if (!isDigest(genesisSha3)) return { ok: false, id: v.id, why: `the genesis pin ${genesisSha3} is not a base64url SHA3-256 digest` };
+    if (genesisSha3 !== sha) return { ok: false, id: v.id, why: `record sha3 ${sha} is not the genesis pin ${genesisSha3}` };
+    return { ok: true, id: v.id, at: v.at, seq: 1, sha3: sha, authorized_by: 'genesis signers', genesis_pin: 'matched' };
   } catch (e) { return { ok: false, why: e.message }; }
 }
 
 // ── envelope (contract §3) ───────────────────────────────────────────────
+const HINTS = ['ant', 'ar', 'hive', 'peers'];
+const PEER_RE = /^https:\/\/[A-Za-z0-9.-]+(:[0-9]{1,5})?(\/[\x21-\x7e]*)?$/;
+export function checkHints(h) {
+  if (!h || typeof h !== 'object' || Array.isArray(h)) throw new Error('envelope.hints must be an object');
+  fields(h, Object.keys(h).filter(k => HINTS.includes(k)), 'envelope.hints');
+  if (h.ant !== undefined && (typeof h.ant !== 'string' || !/^[A-Za-z0-9:._-]{1,256}$/.test(h.ant))) throw new Error('hints.ant is not an address');
+  if (h.ar !== undefined) {
+    if (!Array.isArray(h.ar) || !h.ar.length) throw new Error('hints.ar must be a non-empty list');
+    for (const t of h.ar) if (typeof t !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(t)) throw new Error(`hints.ar ${t} is not an Arweave transaction id`);
+  }
+  if (h.hive !== undefined) {
+    fields(h.hive, ['block', 'trx'], 'envelope.hints.hive');
+    if (!Number.isSafeInteger(h.hive.block) || h.hive.block < 1 || typeof h.hive.trx !== 'string' || !/^[0-9a-f]{40}$/.test(h.hive.trx)) throw new Error('hints.hive must be {block, trx}: a block number and a 40-hex transaction id');
+  }
+  if (h.peers !== undefined) {
+    if (!Array.isArray(h.peers) || !h.peers.length) throw new Error('hints.peers must be a non-empty list');
+    for (const p of h.peers) if (typeof p !== 'string' || !PEER_RE.test(p)) throw new Error(`hints.peers ${p} is not an https URL`);
+  }
+  return h;
+}
+
 export function envelope(recordBytes, sigBytes, hints = {}) {
   checkIdentity(parseRecord(recordBytes));
   const sig = readSig(sigBytes);
@@ -438,12 +490,75 @@ export function envelope(recordBytes, sigBytes, hints = {}) {
     h.hive = { block: Number(m[1]), trx: m[2] };
   }
   if (hints.peers && hints.peers.length) {
-    for (const p of hints.peers) if (!/^https:\/\/[A-Za-z0-9.-]+(:[0-9]{1,5})?(\/[\x21-\x7e]*)?$/.test(p)) throw new Error(`--hint-peer ${p} is not an https URL`);
+    for (const p of hints.peers) if (!PEER_RE.test(p)) throw new Error(`--hint-peer ${p} is not an https URL`);
     h.peers = hints.peers;
   }
-  const bytes = Buffer.from(canon({ bnr: ENVELOPE, hints: h, record: b64u(recordBytes), sig }), 'latin1');
+  const bytes = Buffer.from(canon({ bnr: ENVELOPE, hints: checkHints(h), record: b64u(recordBytes), sig }), 'latin1');
   if (bytes.length > ENVELOPE_MAX) throw new Error(`the envelope is ${bytes.length} bytes, over the 64 KiB limit`);
   return bytes;
+}
+
+// The strict envelope reader: the canonical bytes envelope() writes, and nothing else. It returns
+// the record bytes and the signature in its one byte form, so an envelope and a record.json beside
+// its record.json.relsig.json are the same evidence. It verifies nothing; verifyRelease does.
+export function openEnvelope(bytes) {
+  const b = Buffer.from(bytes);
+  if (b.length > ENVELOPE_MAX) throw new Error(`the envelope is ${b.length} bytes, over the 64 KiB limit`);
+  let e;
+  try { e = parseStrict(b); } catch (err) { throw new Error(`the envelope is not canonical JSON: ${err.message}`); }
+  fields(e, ['bnr', 'hints', 'record', 'sig'], 'envelope');
+  if (e.bnr !== ENVELOPE) throw new Error(`envelope.bnr is not ${ENVELOPE}`);
+  checkHints(e.hints);
+  if (typeof e.record !== 'string' || !/^[A-Za-z0-9_-]+$/.test(e.record)) throw new Error('envelope.record is not base64url');
+  const recordBytes = Buffer.from(e.record, 'base64url');
+  if (b64u(recordBytes) !== e.record) throw new Error('envelope.record is not canonical base64url');
+  return { recordBytes, sigBytes: sigBytesOf(e.sig), hints: e.hints };
+}
+
+// ── committed releases (contract §7 A2) ──────────────────────────────────
+// DIR/keychain/releases/<seq>/ holds record.json, record.json.relsig.json and envelope.json.
+// build-keychain.mjs copies an explicit file list, so nothing here reaches the site.
+const PLACED = ['envelope.json', 'record.json', 'record.json.relsig.json'];
+export function place({ dir, recordBytes, sigBytes, envelopeBytes, signers, genesisSha3, law = lawIds() }) {
+  if (!signers || !signers.length) throw new Error('--signers is required: the genesis signers rule 3 starts the chain from');
+  if (!isDigest(genesisSha3)) throw new Error('--genesis-sha3 is required: the pinned SHA3-256 (base64url) of the seq 1 record');
+  const r = checkIdentity(parseRecord(recordBytes));
+  const releases = join(dir, 'keychain', 'releases');
+  // Rule 3, from the genesis pin: every placed record before this one verifies, in order.
+  let prevBytes;
+  for (let n = 1; n <= r.seq; n++) {
+    const here = n === r.seq;
+    const at = join(releases, String(n));
+    if (!here && !existsSync(join(at, 'record.json'))) throw new Error(`keychain/releases/${n} is not placed: seq ${r.seq} is accepted only after every record before it`);
+    const rb = here ? recordBytes : readFileSync(join(at, 'record.json'));
+    const sb = here ? sigBytes : readFileSync(join(at, 'record.json.relsig.json'));
+    const v = verifyRelease({ recordBytes: rb, sigBytes: sb, signers: n === 1 ? signers : undefined, genesisSha3: n === 1 ? genesisSha3 : undefined, prevBytes, law });
+    if (!v.ok) throw new Error(`${here ? 'the record' : `keychain/releases/${n}`} does not verify: ${v.why}`);
+    prevBytes = rb;
+  }
+  let env;
+  if (envelopeBytes) {
+    const e = openEnvelope(envelopeBytes);
+    if (!e.recordBytes.equals(recordBytes)) throw new Error('--envelope carries another record');
+    if (!e.sigBytes.equals(sigBytes)) throw new Error('--envelope carries another signature');
+    env = Buffer.from(envelopeBytes);
+  } else env = envelope(recordBytes, sigBytes);
+  const want = { 'envelope.json': env, 'record.json': Buffer.from(recordBytes), 'record.json.relsig.json': Buffer.from(sigBytes) };
+  const target = join(releases, String(r.seq)), out = { placed: target, seq: r.seq, sha3: b64u(sha3(recordBytes)) };
+  if (existsSync(target)) {
+    const held = walk(target);
+    if (held.join('\n') !== PLACED.join('\n') || PLACED.some(f => !readFileSync(join(target, f)).equals(want[f]))) {
+      throw new Error(`keychain/releases/${r.seq} exists with different bytes; a placed release is never rewritten`);
+    }
+    return { ...out, unchanged: true };
+  }
+  mkdirSync(releases, { recursive: true });
+  const tmp = mkdtempSync(join(releases, `.place-${r.seq}-`));
+  try {
+    for (const f of PLACED) writeFileSync(join(tmp, f), want[f]);
+    renameSync(tmp, target);
+  } catch (e) { rmSync(tmp, { recursive: true, force: true }); throw e; }
+  return { ...out, unchanged: false, files: PLACED };
 }
 
 // ── command line ─────────────────────────────────────────────────────────
@@ -479,8 +594,9 @@ const COMMANDS = {
       const bytes = readFileSync(o.record);
       checkIdentity(parseRecord(bytes));
       const d = BPQ.signFile(k, new Uint8Array(bytes), new Date().toISOString());
-      writeFileSync(need(o, 'out'), JSON.stringify(d, null, 1) + '\n');
-      return { test_key: true, id: k.id, sig: o.out, record_sha3: b64u(sha3(bytes)) };
+      const sigBytes = sigBytesOf(d);   // the one byte form: canonical, no trailing newline
+      writeFileSync(need(o, 'out'), sigBytes);
+      return { test_key: true, id: k.id, sig: o.out, record_sha3: b64u(sha3(bytes)), sig_sha3: b64u(sha3(sigBytes)) };
     } finally { k.wipe(); }
   }],
   envelope: [{ value: ['record', 'sig', 'hint-ant', 'hint-hive', 'out'], list: ['hint-ar', 'hint-peer'] }, o => {
@@ -489,15 +605,23 @@ const COMMANDS = {
     writeFileSync(o.out, bytes);
     return { envelope: o.out, size: bytes.length };
   }],
-  verify: [{ value: ['record', 'sig', 'signers', 'prev', 'genesis-sha3'] }, o => {
+  verify: [{ value: ['record', 'sig', 'signers', 'prev', 'genesis-sha3'], flag: ['no-genesis-pin'] }, o => {
     const r = verifyRelease({
       recordBytes: readFileSync(need(o, 'record')), sigBytes: readFileSync(need(o, 'sig')),
       signers: o.signers ? list(o.signers) : undefined, prevBytes: o.prev ? readFileSync(o.prev) : undefined,
-      genesisSha3: o['genesis-sha3']
+      genesisSha3: o['genesis-sha3'], noGenesisPin: !!o['no-genesis-pin']
     });
-    if (!r.ok) { console.log(JSON.stringify(r)); process.exitCode = 1; return undefined; }
-    return r;
-  }]
+    // exit 0: the chain verdict (ok), or, under --no-genesis-pin only, the signature verdict;
+    // the JSON keeps ok:false there, because a signature-only check says nothing about the chain
+    if (!r.ok && !(o['no-genesis-pin'] && r.signature_ok)) process.exitCode = 1;
+    console.log(JSON.stringify(r));
+    return undefined;
+  }],
+  place: [{ value: ['dir', 'record', 'sig', 'envelope', 'signers', 'genesis-sha3'] }, o => place({
+    dir: need(o, 'dir'), recordBytes: readFileSync(need(o, 'record')), sigBytes: readFileSync(need(o, 'sig')),
+    envelopeBytes: o.envelope ? readFileSync(o.envelope) : undefined,
+    signers: list(need(o, 'signers')), genesisSha3: need(o, 'genesis-sha3')
+  })]
 };
 
 export async function cli(commands, argv, usage) {
@@ -512,5 +636,5 @@ export async function cli(commands, argv, usage) {
 
 const self = fileURLToPath(import.meta.url), argv1 = process.argv[1] ? resolve(process.argv[1]) : '';
 if (process.platform === 'win32' ? self.toLowerCase() === argv1.toLowerCase() : self === argv1) {
-  await cli(COMMANDS, process.argv.slice(2), 'usage: release.mjs prepare|check|sign-test|envelope|verify (see the header of tools/keychain-release/release.mjs)');
+  await cli(COMMANDS, process.argv.slice(2), 'usage: release.mjs prepare|check|sign-test|envelope|verify|place (see the header of tools/keychain-release/release.mjs)');
 }

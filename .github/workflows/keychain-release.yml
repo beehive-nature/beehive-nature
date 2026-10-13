@@ -37,7 +37,7 @@ jobs:
       - name: Release tool tests — canonical record, strict reader, prepare → check, signatures, anchors
         if: always()
         run: node --test 'tools/keychain-release/test/*.test.mjs'
-      - name: prepare → check round trip on this commit, then a throwaway-key signature, envelope and anchor
+      - name: prepare → check round trip on this commit, then a throwaway-key signature, envelope, place and anchor
         if: always()
         env:
           OUT: ${{ runner.temp }}/keychain-release
@@ -45,9 +45,11 @@ jobs:
           set -euo pipefail
           R=tools/keychain-release/release.mjs
           ID=$(node "$R" sign-test --seed ci-round-trip --i-understand-this-is-a-test-key | jq -r .id)
-          node "$R" prepare --out "$OUT/r1" --signers "$ID"
+          # the genesis pin of this throwaway chain is the sha3 of the record prepare wrote
+          PIN=$(node "$R" prepare --out "$OUT/r1" --signers "$ID" | jq -r .sha3)
           node "$R" check "$OUT/r1"
           node "$R" sign-test --seed ci-round-trip --record "$OUT/r1/record.json" --out "$OUT/r1/record.json.relsig.json" --i-understand-this-is-a-test-key
-          node "$R" verify --record "$OUT/r1/record.json" --sig "$OUT/r1/record.json.relsig.json" --signers "$ID"
+          node "$R" verify --record "$OUT/r1/record.json" --sig "$OUT/r1/record.json.relsig.json" --signers "$ID" --genesis-sha3 "$PIN"
           node "$R" envelope --record "$OUT/r1/record.json" --sig "$OUT/r1/record.json.relsig.json" --out "$OUT/r1/envelope.json"
+          node "$R" place --dir "$OUT/placed" --record "$OUT/r1/record.json" --sig "$OUT/r1/record.json.relsig.json" --envelope "$OUT/r1/envelope.json" --signers "$ID" --genesis-sha3 "$PIN"
           node tools/keychain-release/anchor.mjs build --record "$OUT/r1/record.json" --sig "$OUT/r1/record.json.relsig.json" --prev-json tools/keychain-release/test/genesis-anchor.json --seq 1

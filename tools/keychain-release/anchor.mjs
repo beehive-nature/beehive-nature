@@ -3,13 +3,13 @@
 //
 //   build --record R --sig S --prev-json FILE --seq N [--loc L]... [--out FILE]
 //       the canonical ASCII anchor json A and the full custom_json op (posting auth loviswater);
-//       FILE holds the exact previous bnr.anchor json string (first release: the genesis, as
-//       `genesis --out` writes it); --out writes A's exact bytes
-//   verify [--account loviswater] [--subject keys.skaists.dev] [--nodes url,...] [--record R --sig S]
+//       FILE holds the exact previous bnr.anchor json string (first release: the pinned genesis, as
+//       `genesis --out` writes it); N is the record's own seq; --out writes A's exact bytes
+//   verify [--account loviswater] [--subject keys.skaists.dev] [--nodes url,...] [--record R --sig S | --envelope E]
 //       quorum read of every bnr.anchor op on the account, a class per anchor and for the release
 //   genesis [--nodes url,...] [--out FILE]
 //       read the genesis anchor (block 108404167) from every node and print the SHA3-256 (b64u) of
-//       its json string; --out writes those exact bytes, only when two operators agree
+//       its json string; --out writes those exact bytes, only when two operators agree on the pin
 //
 // An anchor witnesses that a record existed, and in what order; it authorizes nothing. It is
 // classical (Hive's secp256k1 posting key), so its class is REPORTED and never a serving gate.
@@ -18,15 +18,22 @@
 // (one operator), SIGNED-UNANCHORED (the release's signature verifies and no anchor names it),
 // DIVERGENT (operators, or one operator's two read paths, disagree; or an operator past the block
 // in irreversible history omits it), INCONCLUSIVE (nothing irreversible to count yet).
+// An operator is its scheme, host and port: --nodes listing one twice counts it once.
+// The chain starts only at the pinned genesis (block, trx AND json sha3), ANCHORED-TERMINAL, and
+// links only through anchors that are not DIVERGENT. A release anchor carries its record's seq
+// (the genesis is seq 0, so record seq 1 anchors as seq 1), and it names the release only when its
+// rec digests, its sig.bpq and its sig.sha3 (of the signature's one byte form) all match.
 // Read paths as the July receipt measured them (DISPATCH-RECEIPTS-2026-07-24.md:293-346):
 // condenser_api.* takes positional params and account_history_api.* named ones; the custom_json id
 // is filtered client-side; never bridge.* (HiveMind is a second layer, not consensus).
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BPQ, b64u, canon, checkIdentity, cli, fields, isCount, isDigest, isId, parseRecord, parseStrict, readSig, sha256, sha3 } from './release.mjs';
+import { BPQ, b64u, canon, checkIdentity, cli, fields, isCount, isDigest, isId, openEnvelope, parseRecord, parseStrict, readSig, sha256, sha3, sigSha3 } from './release.mjs';
 
-export const GENESIS = Object.freeze({ block: 108404167, trx: '7d404d75b82ac38fc5b27b1dd4cf2727c9c583b8', size: 620 });
+// The genesis is this block, this trx and these 620 bytes (tools/keychain-release/test/genesis-anchor.json).
+// The same bytes posted again later are a repeat, never the genesis: the reader pins this trx.
+export const GENESIS = Object.freeze({ block: 108404167, trx: '7d404d75b82ac38fc5b27b1dd4cf2727c9c583b8', size: 620, sha3: 'O4n0MUUDIN24chEO6f07XnGXUgFlqi16PauvsAp0zUs' });
 export const NODES = ['https://api.hive.blog', 'https://api.openhive.network', 'https://api.deathwing.me', 'https://techcoderx.com'];
 export const ACCOUNT = 'loviswater', SUBJECT = 'keys.skaists.dev', ANCHOR_ID = 'bnr.anchor';
 const CUSTOM_JSON = 262144;   // operation_filter_low bit 18, custom_json_operation (receipt :316-318)
@@ -55,21 +62,44 @@ export function anchorJson({ loc, prev, rec, seq, sig, subject = SUBJECT }) {
 }
 
 export function buildAnchor({ recordBytes, sigBytes, prevJson, seq, loc = [] }) {
-  checkIdentity(parseRecord(recordBytes));
+  const r = checkIdentity(parseRecord(recordBytes));
   const v = BPQ.verifyFile(readSig(sigBytes), new Uint8Array(recordBytes));
   if (!v.ok) throw new Error(`the signature is not over this record: ${v.why}`);
   if (/[\r\n]$/.test(prevJson.toString('latin1'))) throw new Error('--prev-json ends in a newline; an anchor json string on chain has none (write it with genesis --out)');
   let p;
   try { p = JSON.parse(prevJson.toString('utf8')); } catch { throw new Error('--prev-json is not JSON'); }
   if (!p || !Number.isSafeInteger(p.seq) || p.seq < 0) throw new Error('--prev-json carries no integer seq');
-  if (!Number.isSafeInteger(seq) || seq !== p.seq + 1) throw new Error(`--seq ${seq} does not follow the previous anchor's seq ${p.seq}`);
+  if (p.seq === 0 && b64u(sha3(prevJson)) !== GENESIS.sha3) throw new Error(`--prev-json is seq 0 but not the pinned genesis (sha3 ${GENESIS.sha3}); a release chain starts there only`);
+  if (!Number.isSafeInteger(seq) || seq !== r.seq) throw new Error(`--seq ${seq} is not the record's seq ${r.seq}: a release anchor carries its record's seq (record seq 1 anchors as seq 1)`);
+  if (seq !== p.seq + 1) throw new Error(`--seq ${seq} does not follow the previous anchor's seq ${p.seq}`);
   const json = anchorJson({
     loc, prev: b64u(sha3(prevJson)), seq,
     rec: { sha256: b64u(sha256(recordBytes)), sha3: b64u(sha3(recordBytes)), size: recordBytes.length },
-    sig: { bpq: v.id, sha3: b64u(sha3(sigBytes)) }
+    sig: { bpq: v.id, sha3: sigSha3(sigBytes) }
   });
   return { json, op: ['custom_json', { required_auths: [], required_posting_auths: [ACCOUNT], id: ANCHOR_ID, json }] };
 }
+
+// ── operators ────────────────────────────────────────────────────────────
+// An operator is scheme://host[:port], lower case, no default port, no trailing slash: the same
+// operator spelled twice is one vote, never a quorum. A path, query, fragment or credentials is
+// refused rather than guessed at; plain http only to loopback.
+const LOOPBACK = new Set(['localhost', '127.0.0.1', '[::1]']);
+export function normalizeNode(s) {
+  let u;
+  try { u = new URL(String(s).trim()); } catch { throw new Error(`node ${s} is not a URL`); }
+  if (u.protocol !== 'https:' && !(u.protocol === 'http:' && LOOPBACK.has(u.hostname))) throw new Error(`node ${s}: https only (plain http to loopback alone)`);
+  if (u.username || u.password || u.search || u.hash || (u.pathname !== '/' && u.pathname !== '')) throw new Error(`node ${s}: an operator is scheme://host[:port], with no path, query, fragment or credentials`);
+  return `${u.protocol}//${u.host}`.toLowerCase();
+}
+export function normalizeNodes(list) {
+  const out = [];
+  for (const s of list) { const n = normalizeNode(s); if (!out.includes(n)) out.push(n); }
+  if (!out.length) throw new Error('no node');
+  return out;
+}
+// The operator a view came from; a view whose url is not a URL (a test label) is its own name.
+const operatorKey = url => { try { return normalizeNode(url); } catch { return String(url).toLowerCase().replace(/\/+$/, ''); } };
 
 // ── reading Hive ─────────────────────────────────────────────────────────
 async function rpc(url, method, params) {
@@ -125,6 +155,9 @@ export async function readNodes(nodes, account) {
 
 // ── classes ──────────────────────────────────────────────────────────────
 const RANK = ['ANCHORED-TERMINAL', 'ANCHORED-AS-REPORTED', 'INCONCLUSIVE', 'DIVERGENT'];
+// json is the bytes every reporting operator agrees on (null when they disagree). It stays on a
+// DIVERGENT anchor whose bytes agree (an omission, a block that does not carry it) so the release
+// verdict can name it; assess() never links a DIVERGENT anchor into the chain.
 async function classify(views, key, confirm) {
   const live = views.filter(v => v.ok), reporters = live.filter(v => v.ops.has(key));
   const first = reporters[0].ops.get(key), out = { key, block: first.block, trx: first.trx, op_in_trx: first.op_in_trx, json: null, operators: reporters.length, confirmed: 0 };
@@ -141,27 +174,40 @@ async function classify(views, key, confirm) {
   return { ...out, class: out.confirmed >= 2 ? RANK[0] : out.confirmed === 1 ? RANK[1] : RANK[2] };
 }
 const brief = a => a && { ...(a.anchor ? { seq: a.anchor.seq } : {}), block: a.block, trx: a.trx, class: a.class, ...(a.why ? { why: a.why } : {}) };
+const jsonSha3 = s => b64u(sha3(Buffer.from(s, 'utf8')));
 
 // views: per operator {url, ok, lib, ops: Map(trx:op_in_trx -> {block, trx, op_in_trx, json})};
-// confirm(url, op) -> true | false | null (unknown). The chain is genesis, then the subject's
-// release anchors linked by prev (sha3 of the previous json) and seq (previous seq + 1).
-export async function assess(views, confirm, { subject = SUBJECT, recordBytes, sigBytes } = {}) {
+// confirm(url, op) -> true | false | null (unknown). The chain is the pinned genesis, then the
+// subject's release anchors linked by prev (sha3 of the previous json) and seq (previous seq + 1).
+export async function assess(views0, confirm, { subject = SUBJECT, recordBytes, sigBytes } = {}) {
+  // one operator, one view: a second spelling of an operator already read is dropped, not counted
+  const seen = new Set(), views = [], duplicates = [];
+  for (const v of views0) {
+    const k = operatorKey(v.url);
+    if (seen.has(k)) duplicates.push(v.url); else { seen.add(k); views.push(v); }
+  }
   const live = views.filter(v => v.ok);
   const anchors = [];
   for (const key of new Set(live.flatMap(v => [...v.ops.keys()]))) anchors.push(await classify(views, key, confirm));
   const genesis = anchors.find(a => a.trx === GENESIS.trx && a.block === GENESIS.block) || null;
-  const releases = [], malformed = [];
+  const genesisSha3 = genesis && genesis.json !== null ? jsonSha3(genesis.json) : null;
+  const genesisWhy = !genesis ? `no operator returns block ${GENESIS.block} trx ${GENESIS.trx}`
+    : genesis.class !== 'ANCHORED-TERMINAL' ? `the genesis is ${genesis.class}, not ANCHORED-TERMINAL`
+    : genesisSha3 !== GENESIS.sha3 ? `the genesis json sha3 ${genesisSha3} is not the pin ${GENESIS.sha3}` : null;
+  const releases = [], malformed = [], repeats = [];
   let other = 0;
   for (const a of anchors) {
+    if (a === genesis) continue;
+    if (a.json !== null && jsonSha3(a.json) === GENESIS.sha3) { repeats.push(brief(a)); continue; }
     let j = null;
     try { j = a.json === null ? null : JSON.parse(a.json); } catch { j = null; }
-    if (!j || j.subject !== subject) { if (a !== genesis) other++; continue; }
+    if (!j || j.subject !== subject) { other++; continue; }
     try { releases.push({ ...a, anchor: parseAnchor(Buffer.from(a.json, 'utf8')) }); } catch (e) { malformed.push({ block: a.block, trx: a.trx, why: e.message }); }
   }
-  const chain = [], used = new Set();
-  let cur = genesis && genesis.class !== 'DIVERGENT' ? genesis.json : null, seq = 0, fork = null;
+  const chain = [], used = new Set(), linkable = releases.filter(a => a.class !== 'DIVERGENT');
+  let cur = genesisWhy === null ? genesis.json : null, seq = 0, fork = null;
   while (cur !== null) {
-    const want = b64u(sha3(Buffer.from(cur, 'utf8'))), next = releases.filter(a => a.anchor.prev === want && a.anchor.seq === seq + 1);
+    const want = jsonSha3(cur), next = linkable.filter(a => a.anchor.prev === want && a.anchor.seq === seq + 1);
     if (!next.length) break;
     if (new Set(next.map(a => a.json)).size > 1) { fork = { seq: seq + 1, anchors: next.map(brief) }; break; }
     next.sort((x, y) => x.block - y.block);   // the same json posted again is a repeat; the earliest is the anchor
@@ -170,23 +216,34 @@ export async function assess(views, confirm, { subject = SUBJECT, recordBytes, s
   }
   const out = {
     subject, operators: views.map(v => (v.ok ? { url: v.url, ok: true, lib: v.lib, anchors: v.ops.size } : { url: v.url, ok: false, error: v.error })),
-    genesis: genesis ? { block: genesis.block, trx: genesis.trx, class: genesis.class, ...(genesis.json !== null ? { size: Buffer.byteLength(genesis.json), sha3: b64u(sha3(Buffer.from(genesis.json, 'utf8'))) } : {}) } : null,
+    ...(duplicates.length ? { duplicate_operators: duplicates } : {}),
+    genesis: genesis
+      ? { block: genesis.block, trx: genesis.trx, class: genesis.class, ...(genesis.json !== null ? { size: Buffer.byteLength(genesis.json), sha3: genesisSha3 } : {}), pinned: genesisSha3 === GENESIS.sha3, starts_chain: genesisWhy === null, ...(genesisWhy ? { why: genesisWhy } : {}) }
+      : { block: GENESIS.block, trx: GENESIS.trx, class: null, pinned: false, starts_chain: false, why: genesisWhy },
+    genesis_repeats: repeats,
     chain: chain.map(a => ({ ...brief(a), rec_sha3: a.anchor.rec.sha3, signer: a.anchor.sig.bpq })),
-    fork, orphans: releases.filter(a => !used.has(a.key)).map(brief), malformed, other_anchors: other,
-    divergent: anchors.filter(a => a.json === null).map(brief),
+    fork, orphans: releases.filter(a => !used.has(a.key) && a.class !== 'DIVERGENT').map(brief), malformed, other_anchors: other,
+    divergent: anchors.filter(a => a.class === 'DIVERGENT').map(brief),
     head: chain.length ? brief(chain[chain.length - 1]) : null
   };
   if (recordBytes) {
-    checkIdentity(parseRecord(recordBytes));
+    const r = checkIdentity(parseRecord(recordBytes));
     const v = BPQ.verifyFile(readSig(sigBytes), new Uint8Array(recordBytes));
     if (!v.ok) throw new Error(`the signature is not over this record: ${v.why}`);
     const rec = { sha256: b64u(sha256(recordBytes)), sha3: b64u(sha3(recordBytes)), size: recordBytes.length };
-    const hits = releases.filter(a => a.anchor.rec.sha3 === rec.sha3 && a.anchor.rec.sha256 === rec.sha256 && a.anchor.rec.size === rec.size)
+    const sig = { bpq: v.id, sha3: sigSha3(sigBytes) };
+    const named = releases.filter(a => a.anchor.rec.sha3 === rec.sha3 && a.anchor.rec.sha256 === rec.sha256 && a.anchor.rec.size === rec.size);
+    const mismatch = a => a.anchor.sig.bpq !== sig.bpq ? `it witnesses a signature by ${a.anchor.sig.bpq}, not ${sig.bpq}`
+      : a.anchor.sig.sha3 !== sig.sha3 ? `it witnesses another signature file (sha3 ${a.anchor.sig.sha3}, not ${sig.sha3})`
+      : a.anchor.seq !== r.seq ? `anchor seq ${a.anchor.seq} is not the record's seq ${r.seq}` : null;
+    const hits = named.filter(a => mismatch(a) === null)
       .sort((x, y) => (used.has(y.key) - used.has(x.key)) || RANK.indexOf(x.class) - RANK.indexOf(y.class));
+    const elsewhere = named.filter(a => mismatch(a) !== null).map(a => ({ ...brief(a), not_this_release: mismatch(a) }));
     out.release = hits.length
-      ? { sha3: rec.sha3, signer: v.id, class: hits[0].class, on_chain: used.has(hits[0].key), anchor: brief(hits[0]) }
+      ? { sha3: rec.sha3, seq: r.seq, signer: v.id, sig_sha3: sig.sha3, class: hits[0].class, on_chain: used.has(hits[0].key), anchor: brief(hits[0]) }
       // no anchor names it: unanchored only if two operators answered and none returned bytes in dispute
-      : { sha3: rec.sha3, signer: v.id, class: live.length < 2 ? 'INCONCLUSIVE' : anchors.some(a => a.json === null) ? 'DIVERGENT' : 'SIGNED-UNANCHORED', anchor: null };
+      : { sha3: rec.sha3, seq: r.seq, signer: v.id, sig_sha3: sig.sha3, class: live.length < 2 ? 'INCONCLUSIVE' : anchors.some(a => a.json === null) ? 'DIVERGENT' : 'SIGNED-UNANCHORED', anchor: null };
+    if (elsewhere.length) out.release.same_record_other_anchors = elsewhere;
   }
   return out;
 }
@@ -211,12 +268,13 @@ export async function readGenesis(nodes) {
   return {
     block: GENESIS.block, trx: GENESIS.trx, class: cls, agree,
     size: one ? one.size : null, size_matches_contract: one ? one.size === GENESIS.size : false, sha3: one ? one.sha3 : null,
+    pinned: one ? one.sha3 === GENESIS.sha3 : false,
     operators: views.map(({ json, ...v }) => v), json: one ? one.json : null
   };
 }
 
 // ── command line ─────────────────────────────────────────────────────────
-const nodesOf = o => (o.nodes ? o.nodes.split(',').map(s => s.trim()).filter(Boolean) : NODES);
+const nodesOf = o => normalizeNodes(o.nodes ? o.nodes.split(',').map(s => s.trim()).filter(Boolean) : NODES);
 const COMMANDS = {
   build: [{ value: ['record', 'sig', 'prev-json', 'seq', 'out'], list: ['loc'] }, o => {
     for (const k of ['record', 'sig', 'prev-json', 'seq']) if (o[k] === undefined) throw new Error(`--${k} is required`);
@@ -225,15 +283,19 @@ const COMMANDS = {
     if (o.out) writeFileSync(o.out, json);
     return { json, size: json.length, sha3: b64u(sha3(Buffer.from(json, 'latin1'))), op };
   }],
-  verify: [{ value: ['account', 'subject', 'nodes', 'record', 'sig'] }, async o => {
+  verify: [{ value: ['account', 'subject', 'nodes', 'record', 'sig', 'envelope'] }, async o => {
     if (!o.record !== !o.sig) throw new Error('--record and --sig go together');
+    if (o.envelope && o.record) throw new Error('--envelope or --record/--sig, not both');
     const account = o.account || ACCOUNT, nodes = nodesOf(o);
+    // an envelope is the same evidence: its record bytes and canon(sig), the relsig file's one byte form
+    const e = o.envelope ? openEnvelope(readFileSync(o.envelope)) : null;
+    const recordBytes = e ? e.recordBytes : o.record && readFileSync(o.record), sigBytes = e ? e.sigBytes : o.sig && readFileSync(o.sig);
     const views = await readNodes(nodes, account);
-    return { account, ...(await assess(views, inBlock, { subject: o.subject || SUBJECT, recordBytes: o.record && readFileSync(o.record), sigBytes: o.sig && readFileSync(o.sig) })) };
+    return { account, nodes, ...(await assess(views, inBlock, { subject: o.subject || SUBJECT, recordBytes, sigBytes })) };
   }],
   genesis: [{ value: ['nodes', 'out'] }, async o => {
     const { json, ...g } = await readGenesis(nodesOf(o));
-    const good = g.class === 'ANCHORED-TERMINAL' && g.size_matches_contract;
+    const good = g.class === 'ANCHORED-TERMINAL' && g.size_matches_contract && g.pinned;
     if (good && o.out) writeFileSync(o.out, json);
     if (!good) process.exitCode = 1;
     return { ...g, out: good && o.out ? o.out : null };

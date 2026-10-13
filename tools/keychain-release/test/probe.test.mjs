@@ -232,12 +232,12 @@ const EXPECTED = {source: 'the fixture build', files: [want], pack: digests(KEYC
 
 test('record: canonical bytes with exactly the contract fields, or refused', () => {
   assert.equal(readRecord(R1).seq, 1);
-  assert.throws(() => readRecord(Buffer.from(JSON.stringify(recordOf(), null, 1))), /not printable ASCII/, 'newlines');
-  assert.throws(() => readRecord(SPACED), /not the canonical form/);
+  assert.throws(() => readRecord(Buffer.from(JSON.stringify(recordOf(), null, 1))), /control byte/, 'newlines');
+  assert.throws(() => readRecord(SPACED), /insignificant whitespace/);
   assert.throws(() => readRecord(Buffer.from(canon(recordOf()).replace('"kind"', '"kind":"release","kind"'))), /canonical/, 'a duplicate key');
-  assert.throws(() => readRecord(bytesOf(recordOf({unknown: 1}))), /record has fields/);
-  assert.throws(() => readRecord(bytesOf(recordOf({origin: 'https://evil.example'}))), /record names/);
-  assert.throws(() => readRecord(bytesOf(recordOf({seq: 2}))), /prev at seq 2/);
+  assert.throws(() => readRecord(bytesOf(recordOf({unknown: 1}))), /record: unknown field "unknown"/);
+  assert.throws(() => readRecord(bytesOf(recordOf({origin: 'https://evil.example'}))), /record\.origin https:\/\/evil\.example is not https:\/\/keys\.skaists\.dev/);
+  assert.throws(() => readRecord(bytesOf(recordOf({seq: 2}))), /record\.prev must be the base64url SHA3-256/);
   assert.throws(() => readRecord(bytesOf(recordOf({files: [{path: '../x', sha256: want.sha256, sha3: want.sha3, size: want.size}]}))), /path/);
   assert.throws(() => readRecord(bytesOf(recordOf({signers: ['bzpq1nope']}))), /signers/);
   assert.throws(() => readRecord(bytesOf(recordOf({source: {...recordOf().source, build: 'node scripts/build-keychain.mjs --out DIR --origin x'}}))), /source/);
@@ -260,12 +260,12 @@ test('well-known: the review fixture (sig {}, seq 999, an unknown field, files [
   assert.equal(wellKnownCheck(WK, ok(review, {}), {expected: EXPECTED, auth: PINNED}).verdict, 'FAIL');
   const ctx = {expected: EXPECTED, auth: PINNED};
   const fail = (got, re) => { const c = wellKnownCheck(WK, got, ctx); assert.equal(c.verdict, 'FAIL', re.source); assert.match(c.evidence.brief, re); };
-  fail(ok(R1, {}), /signature has fields/);
+  fail(ok(R1, {}), /signature: missing field "at"/);
   fail(ok(R1, {...sign(K1, R1), kind: 'binding'}), /not a SPEC-BPQ-1/);
   fail(ok(R1, sign(K1, R2)), /signature: this is not the file that was signed/);
   const unknown = bytesOf(recordOf({unknown: 1}));
-  fail(ok(unknown, sign(K1, unknown)), /record has fields/);
-  fail(ok(SPACED, sign(K1, SPACED)), /not the canonical form/);
+  fail(ok(unknown, sign(K1, unknown)), /record: unknown field "unknown"/);
+  fail(ok(SPACED, sign(K1, SPACED)), /not canonical JSON at byte \d+: insignificant whitespace/);
   const evil = bytesOf(recordOf({files: [{path: 'evil.js', ...digests(EVIL)}], pack: digests(EVIL)}));
   fail(ok(evil, sign(K1, evil)), /its files are not the files of the fixture build/);
   fail(ok(R1, sign(K2, R1)), /not an id the repository authorizes for seq 1/);
@@ -306,7 +306,7 @@ test('well-known: absent is NOT MEASURED only while both resolvers name GitHub P
 const commit = (dir, name, bytes, sig) => {
   mkdirSync(join(dir, name), {recursive: true});
   writeFileSync(join(dir, name, 'record.json'), bytes);
-  if (sig) writeFileSync(join(dir, name, 'record.json.relsig.json'), JSON.stringify(sig, null, 1) + '\n');
+  if (sig) writeFileSync(join(dir, name, 'record.json.relsig.json'), canon(sig));   // the one byte form
 };
 const scratch = fn => { const dir = mkdtempSync(join(tmpdir(), 'kc-probe-test-')); try { fn(dir); } finally { rmSync(dir, {recursive: true, force: true}); } };
 
@@ -323,6 +323,9 @@ test('expectation: committed records are a verified chain from the pinned signer
   assert.throws(() => expectedFromRecords(dir, {pins: [K1.id], law: [K1.id]}), /seq 1/);
   commit(dir, '0002', R2, sign(K1, R2));
   assert.throws(() => expectedFromRecords(dir, PINNED), /0002\/record\.json: signed by .* not an id the repository authorizes for seq 2/);
+  // the right signer in any byte form but the one (canonical JSON, no trailing newline): refused
+  writeFileSync(join(dir, '0002', 'record.json.relsig.json'), JSON.stringify(sign(K2, R2), null, 1) + '\n');
+  assert.throws(() => expectedFromRecords(dir, PINNED), /0002\/record\.json: the signature file is not its one byte form/);
   rmSync(join(dir, '0002', 'record.json.relsig.json'));
   assert.throws(() => expectedFromRecords(dir, PINNED), /no record\.json\.relsig\.json beside it/);
 }));
@@ -342,13 +345,13 @@ test('expectation: a gap, a repeat anywhere, a broken prev or a non-canonical re
   commit(dir, '0002', R2x, sign(K2, R2x));
   assert.throws(() => expectedFromRecords(dir, PINNED), /prev does not name the committed seq 1/);
   commit(dir, '0001', SPACED, sign(K1, SPACED));
-  assert.throws(() => expectedFromRecords(dir, PINNED), /0001\/record\.json: record bytes are not the canonical form/);
+  assert.throws(() => expectedFromRecords(dir, PINNED), /0001\/record\.json: not canonical JSON at byte \d+: insignificant whitespace/);
   // a second spelling of the same 32 bytes (non-zero padding bits in the last character)
   const A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_', alias = want.sha256.slice(0, 42) + A[A.indexOf(want.sha256[42]) ^ 1];
   assert.deepEqual(Buffer.from(alias, 'base64url'), Buffer.from(want.sha256, 'base64url'));
   const aliased = bytesOf(recordOf({files: [{...want, sha256: alias}]}));
   commit(dir, '0001', aliased, sign(K1, aliased));
-  assert.throws(() => expectedFromRecords(dir, PINNED), /digests/);
+  assert.throws(() => expectedFromRecords(dir, PINNED), /record\.files\[0\]\.sha256 is not a base64url SHA digest/);
 }));
 
 test('well-known: against committed records the edge serves exactly the top one', () => scratch(dir => {
