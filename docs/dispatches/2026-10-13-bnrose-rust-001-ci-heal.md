@@ -59,11 +59,23 @@ Rust code untouched — the battery, teeth and CLI are as delivered.
   supervisor fingerprint (447a5d32aa5ccb70) and the same
   deterministic op id as the local run.
 - **Static:** `build-stack-inventory.mjs --check` passes on this
-  tree (74/74). Because `static` runs on the PR's merge commit and
-  main had since moved `surfaces/stack.html` (the #417 heal, one
-  unrelated generated line), origin/main was merged into the branch
-  (b4c9be986) and `--check` re-run on the merged tree: PASS — the
-  two heals coexist; the push re-runs lane + tests on that merge.
+  tree (74/74). Because `static` runs on the PR's frozen merge
+  commit and main had since moved `surfaces/stack.html` (the #417
+  heal, one unrelated generated line), origin/main was merged into
+  the branch (b4c9be986) and `--check` re-run on the merged tree:
+  PASS — the two heals coexist; the push re-runs lane + tests on
+  that merge.
+- **Static, second red classified (run 38455879518):** that job's
+  inventory check PASSED on CI (`workspaceCrates:74, checked`) and
+  then failed on the NEXT generator in the same step,
+  `build-stack-surfaces.mjs --check`. It tested the frozen merge
+  `25b6a2473` = e66710e07 into main@8f9633c30 (mid-flight main,
+  since superseded). Faithful repro worktrees: e66710e07 standalone
+  PASSES both checks (130 surfaces/121 registered, git-mode), and
+  current origin/main (e5945069d, post-#417 closeout) PASSES — the
+  red was the frozen merge's mixed generated lines, not either
+  parent. The pushed tip 13ba2ee6b contains main, so the PR's merge
+  ref is that exact tree; both checks verified green on it.
 
 ## Boundaries not crossed
 
