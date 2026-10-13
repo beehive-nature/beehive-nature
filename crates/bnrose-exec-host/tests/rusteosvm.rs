@@ -35,24 +35,31 @@ fn records_of(s: &Supervisor) -> Vec<bnrose_exec_host::journal::Record> {
 
 #[test]
 fn the_race_lands_exactly_one_dispatch_and_the_killed_first_recovers() {
-    let mut s = sup("race");
+    let state = tmp("race");
+    bnrose_exec_host::keys::SupervisorKeys::init(&state, &[0x71; 32]).unwrap();
     let f = fixture(1, NOW, 600);
     let intent = read_intent(&f.to_json()).unwrap();
-    // two INDEPENDENT implementations racing: the supervisor's wasm-backed
-    // paranoid worker, and a native worker in its own thread
+    // run through ONE wasm-backed supervisor: the race is between two
+    // genuinely independent WORKER implementations (wasm-paranoid vs
+    // native) inside the single authority the claim admits
     let wasm = WasmWorker::new(
         &bnrose_exec_host::worker::wasm_module_bytes().expect("wasm module"),
         Bounds::default(),
     )
     .expect("wasm worker");
-    let mut raced = {
-        // swap the supervisor onto the wasm-backed worker for the race
-        let mut on_wasm = Supervisor::open(&s.state_dir, Box::new(wasm), test_policy()).unwrap();
-        on_wasm.run_raced(
+    let (raced, dir, journal_mac, ledger_mac) = {
+        let mut on_wasm = Supervisor::open(&state, Box::new(wasm), test_policy()).unwrap();
+        let raced = on_wasm.run_raced(
             &intent,
             NOW,
             &Bounds::default(),
             Box::new(NativeWorker::new()),
+        );
+        (
+            raced,
+            on_wasm.state_dir.clone(),
+            on_wasm.keys.journal_mac,
+            on_wasm.keys.ledger_mac,
         )
     };
     // the WB004 crash point: the first worker was killed after the effect
@@ -60,7 +67,12 @@ fn the_race_lands_exactly_one_dispatch_and_the_killed_first_recovers() {
     assert!(raced.refused.is_none());
     let op = raced.op.unwrap();
     // exactly one admission, one dispatch — the race could not double it
-    let recs = records_of(&s);
+    let recs = bnrose_exec_host::journal::ReplicatedJournal::load_state(
+        &bnrose_exec_host::opexec::replica_paths(&dir),
+        &journal_mac,
+    )
+    .unwrap()
+    .0;
     let admitted = recs
         .iter()
         .filter(|r| r.event == bnrose_exec_core::E_ADMITTED)
@@ -72,20 +84,18 @@ fn the_race_lands_exactly_one_dispatch_and_the_killed_first_recovers() {
         "the race landed one of each"
     );
     // one effect row
-    let rows = bnrose_exec_host::ledger::load(&s.state_dir.join("effects.bin"), &s.keys.ledger_mac)
-        .unwrap();
+    let rows = bnrose_exec_host::ledger::load(&dir.join("effects.bin"), &ledger_mac).unwrap();
     assert_eq!(rows.len(), 1);
-    // the replacement (a fresh worker, fresh supervisor process worth)
+    // the replacement (a fresh worker, a fresh claim after the release)
     let mut replacement =
-        Supervisor::open(&s.state_dir, Box::new(NativeWorker::new()), test_policy()).unwrap();
+        Supervisor::open(&dir, Box::new(NativeWorker::new()), test_policy()).unwrap();
     let report = replacement.recover(NOW + 10).unwrap();
     let rop = &report["ops"][0];
     assert_eq!(rop["op"].as_str().unwrap(), bnrose_exec_host::hex(&op));
     assert_eq!(rop["stateAfter"], "completed");
     assert_eq!(rop["recovered"], serde_json::json!(true));
     // still one effect row, and the authorization is spent
-    let rows = bnrose_exec_host::ledger::load(&s.state_dir.join("effects.bin"), &s.keys.ledger_mac)
-        .unwrap();
+    let rows = bnrose_exec_host::ledger::load(&dir.join("effects.bin"), &ledger_mac).unwrap();
     assert_eq!(rows.len(), 1);
     let again = replacement.run(&intent, NOW + 10, false, &Bounds::default());
     assert_eq!(again.refused.as_deref(), Some("admission:nonce-reuse"));
@@ -104,10 +114,12 @@ fn the_acknowledging_host_dies_and_the_survivor_recovers() {
     );
     assert!(out.lost_response);
     // the second replica's host is DESTROYED after the acknowledgement
-    let replica_b = replica_paths(&s.state_dir)[1].clone();
+    let dir = s.state_dir.clone();
+    let ledger_mac = s.keys.ledger_mac;
+    drop(s);
+    let replica_b = replica_paths(&dir)[1].clone();
     std::fs::remove_file(&replica_b).unwrap();
-    let mut s2 =
-        Supervisor::open(&s.state_dir, Box::new(NativeWorker::new()), test_policy()).unwrap();
+    let mut s2 = Supervisor::open(&dir, Box::new(NativeWorker::new()), test_policy()).unwrap();
     let report = s2.recover(NOW + 10).unwrap();
     assert_eq!(report["replication"]["state"], "degraded");
     let alive = report["replication"]["alive"].as_array().unwrap().len();
@@ -115,8 +127,7 @@ fn the_acknowledging_host_dies_and_the_survivor_recovers() {
     let rop = &report["ops"][0];
     assert_eq!(rop["stateAfter"], "completed");
     assert_eq!(rop["recovered"], serde_json::json!(true));
-    let rows = bnrose_exec_host::ledger::load(&s.state_dir.join("effects.bin"), &s.keys.ledger_mac)
-        .unwrap();
+    let rows = bnrose_exec_host::ledger::load(&dir.join("effects.bin"), &ledger_mac).unwrap();
     assert_eq!(rows.len(), 1);
     println!("rusteosvm: acknowledging host destroyed → degraded recovery from the survivor, same outcome, one effect");
 }
@@ -265,7 +276,12 @@ fn stale_authority_is_refused_at_admission_by_the_supervisor() {
     );
     assert_eq!(out.refused.as_deref(), Some("admission:policy:expired"));
     // nothing was journaled for the stale attempt
-    let recs = records_of(&s);
+    let recs = bnrose_exec_host::journal::ReplicatedJournal::load_state(
+        &bnrose_exec_host::opexec::replica_paths(&s.state_dir),
+        &s.keys.journal_mac,
+    )
+    .unwrap()
+    .0;
     assert!(
         recs.is_empty(),
         "{} records appeared for a stale authority",

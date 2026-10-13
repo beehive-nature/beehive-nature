@@ -35,9 +35,12 @@ fn crash_after_effect_recovers_the_same_operation_from_ledger_evidence() {
             .unwrap();
     assert_eq!(rows_before.len(), 1);
     // a clean replacement supervisor (new process would be the same thing:
-    // nothing in memory survives) recovers from the records alone
-    let mut s2 =
-        Supervisor::open(&s.state_dir, Box::new(NativeWorker::new()), test_policy()).unwrap();
+    // nothing in memory survives) recovers from the records alone — under
+    // the claim law the crashed holder's authority releases first
+    let dir = s.state_dir.clone();
+    let ledger_mac = s.keys.ledger_mac;
+    drop(s);
+    let mut s2 = Supervisor::open(&dir, Box::new(NativeWorker::new()), test_policy()).unwrap();
     let report = s2.recover(NOW + 10).unwrap();
     assert_eq!(report["ops"].as_array().unwrap().len(), 1);
     let rop = &report["ops"][0];
@@ -47,15 +50,12 @@ fn crash_after_effect_recovers_the_same_operation_from_ledger_evidence() {
     assert_eq!(rop["invariantReverified"], serde_json::json!(true));
     assert!(report["unknownsPreserved"].as_array().unwrap().is_empty());
     // still exactly one effect row, and the same operation
-    let rows_after =
-        bnrose_exec_host::ledger::load(&s.state_dir.join("effects.bin"), &s.keys.ledger_mac)
-            .unwrap();
+    let rows_after = bnrose_exec_host::ledger::load(&dir.join("effects.bin"), &ledger_mac).unwrap();
     assert_eq!(rows_after.len(), 1);
     assert_eq!(rows_after[0].op_id, op);
     // the recovered receipt verifies and says recovered
     let receipt = std::fs::read_to_string(
-        s.state_dir
-            .join("receipts")
+        dir.join("receipts")
             .join(format!("op-{}.json", bnrose_exec_host::hex(&op))),
     )
     .unwrap();
@@ -80,12 +80,13 @@ fn lost_durable_evidence_preserves_unknown_and_never_replaces() {
     let out = s.run(&intent, NOW, true, &Bounds::default());
     assert!(out.lost_response);
     let op = out.op.unwrap();
+    let dir = s.state_dir.clone();
+    drop(s);
     // "the ledger lost the row" — outside the system's own operations, the
     // honest name for this run
-    std::fs::remove_file(s.state_dir.join("effects.bin")).unwrap();
+    std::fs::remove_file(dir.join("effects.bin")).unwrap();
     for round in 0..3 {
-        let mut s2 =
-            Supervisor::open(&s.state_dir, Box::new(NativeWorker::new()), test_policy()).unwrap();
+        let mut s2 = Supervisor::open(&dir, Box::new(NativeWorker::new()), test_policy()).unwrap();
         let report = s2.recover(NOW + 10).unwrap();
         let unknowns = report["unknownsPreserved"].as_array().unwrap();
         assert_eq!(unknowns.len(), 1, "round {round}: the unknown must survive");
@@ -164,12 +165,16 @@ fn crash_before_dispatch_is_reported_stale_and_invents_nothing() {
     }
     let mut s2 = Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
     let report = s2.recover(NOW).unwrap();
-    let stale = report["stale"].as_array().unwrap();
-    assert_eq!(stale.len(), 1);
+    // the worker's death at dispatch is now JOURNALED as a bounded failure:
+    // the operation reconstructs conclusively FAILED (never executed)
+    // instead of lingering stale
+    assert_eq!(report["ops"][0]["stateAfter"], "failed");
+    assert!(report["stale"].as_array().unwrap().is_empty());
     assert!(report["unknownsPreserved"].as_array().unwrap().is_empty());
     // no effect row exists, and nothing completed
-    let rows =
-        bnrose_exec_host::ledger::load(&state.join("effects.bin"), &s2.keys.ledger_mac).unwrap();
+    let ledger_mac = s2.keys.ledger_mac;
+    drop(s2);
+    let rows = bnrose_exec_host::ledger::load(&state.join("effects.bin"), &ledger_mac).unwrap();
     assert!(rows.is_empty());
     // a FRESH intent (new nonce) through a healthy worker completes —
     // recovery of the stale one is a human/epoch decision, not forced

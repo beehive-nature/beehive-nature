@@ -43,6 +43,59 @@ pub struct Supervisor {
     pub worker: Box<dyn Worker>,
     pub policy: Policy,
     pub state_dir: PathBuf,
+    /// the exclusive authority over this state directory (see Claim)
+    _claim: Claim,
+}
+
+/// The inter-process claim (the founder's 2026-10-13 order): authority
+/// over a state directory is EXCLUSIVE, and the exclusivity is an
+/// OS-level atomic create — not a convention, not a check-after-acting.
+/// Two genuinely independent supervisors starting concurrently from the
+/// same pre-dispatch durable state: exactly one acquires the claim; the
+/// other refuses BEFORE it can admit, sign, or dispatch anything. The
+/// claim is released on clean drop; a crashed holder leaves it stale,
+/// and adoption is an explicit gesture — never automatic, never a retry.
+pub struct Claim {
+    path: PathBuf,
+}
+
+impl Claim {
+    pub fn acquire(state_dir: &Path) -> Result<Claim, String> {
+        let p = state_dir.join("supervisor.claim");
+        match std::fs::OpenOptions::new().write(true).create_new(true).open(&p) {
+            Ok(mut f) => {
+                use std::io::Write;
+                let _ = write!(
+                    f,
+                    "{{\"pid\":{},\"startedUnixNs\":{}}}",
+                    std::process::id(),
+                    std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .map(|d| d.as_nanos() as u64)
+                        .unwrap_or(0)
+                );
+                Ok(Claim { path: p })
+            }
+            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => Err(format!(
+                "state:already-claimed — another supervisor holds {} (adoption is explicit, never automatic)",
+                p.display()
+            )),
+            Err(e) => Err(e.to_string()),
+        }
+    }
+
+    /// EXPLICIT stale adoption: the holder is known dead (a crash left
+    /// the claim), and a human/epoch decision accepts custody.
+    pub fn adopt_stale(state_dir: &Path) -> Result<Claim, String> {
+        let _ = std::fs::remove_file(state_dir.join("supervisor.claim"));
+        Claim::acquire(state_dir)
+    }
+}
+
+impl Drop for Claim {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_file(&self.path);
+    }
 }
 
 /// The two failure domains a state directory carries (SPEC-RUSTEOSVM-1
@@ -80,13 +133,48 @@ fn reservations_payload(bounds: &Bounds) -> Vec<u8> {
     p
 }
 
+/// Options for step-based workflows. The replacement policy is OPT-IN
+/// and narrow (the founder's 2026-10-13 law): only a step whose prior
+/// attempt is conclusively never-executed (no ledger row for any
+/// attempt) may be replaced, and only when this flag is set. A failed
+/// step WITH a recorded effect, and any unresolved step, are never
+/// replaceable.
+#[derive(Clone, Copy, Debug)]
+pub struct StepOptions {
+    pub replace_never_executed_failed_steps: bool,
+}
+
+impl Default for StepOptions {
+    fn default() -> Self {
+        StepOptions {
+            replace_never_executed_failed_steps: false,
+        }
+    }
+}
+
 impl Supervisor {
     pub fn open(
         state_dir: &Path,
         worker: Box<dyn Worker>,
         policy: Policy,
     ) -> Result<Supervisor, String> {
+        Self::open_with(state_dir, worker, policy, false)
+    }
+
+    /// adopt_stale_claim: the explicit custody gesture after a crashed
+    /// holder. Ordinary opens NEVER adopt.
+    pub fn open_with(
+        state_dir: &Path,
+        worker: Box<dyn Worker>,
+        policy: Policy,
+        adopt_stale_claim: bool,
+    ) -> Result<Supervisor, String> {
         std::fs::create_dir_all(state_dir).map_err(|e| e.to_string())?;
+        let claim = if adopt_stale_claim {
+            Claim::adopt_stale(state_dir)?
+        } else {
+            Claim::acquire(state_dir)?
+        };
         std::fs::create_dir_all(state_dir.join("receipts")).map_err(|e| e.to_string())?;
         std::fs::create_dir_all(state_dir.join("replica")).map_err(|e| e.to_string())?;
         let keys = SupervisorKeys::load(state_dir)?;
@@ -101,6 +189,7 @@ impl Supervisor {
             worker,
             policy,
             state_dir: state_dir.to_path_buf(),
+            _claim: claim,
         })
     }
 
@@ -352,7 +441,24 @@ impl Supervisor {
         expiry: u64,
     ) -> Result<(), String> {
         let req = step_request(op, env_sha, state, event, payload, clock, expiry);
-        let verdict = self.worker.step(&req).map_err(|e| format!("worker:{e}"))?;
+        let verdict = match self.worker.step(&req) {
+            Ok(v) => v,
+            Err(e) => {
+                // a worker that DIES mid-step is a bounded failure of THIS
+                // step, journaled NOW: replay must reconstruct a conclusively
+                // FAILED step (never executed — the dispatch never landed),
+                // never an unresolved one. Host-invented fail codes live at
+                // 1000+ (the core's refusal space stays 0..=22).
+                let word = format!("worker:{e}");
+                let mut p = Vec::new();
+                p.extend_from_slice(&1000u32.to_le_bytes());
+                let w: String = word.chars().take(31).collect();
+                p.push(w.len() as u8);
+                p.extend_from_slice(w.as_bytes());
+                let _ = self.journal.append(op, E_BOUNDED_FAIL, &p);
+                return Err(format!("worker:{e}"));
+            }
+        };
         match parse_step_verdict(&verdict).map_err(|e| format!("worker:{e}"))? {
             StepVerdict::Next(next) => {
                 self.journal
@@ -373,6 +479,134 @@ impl Supervisor {
                 let _ = self.journal.append(op, E_BOUNDED_FAIL, &p);
                 Err(format!("transition:{}", word))
             }
+        }
+    }
+
+    /// whether ANY attempt of this step has a ledger row (an effect that
+    /// was recorded — conclusive execution, or worse, uncertainty)
+    fn step_has_any_recorded_effect(&self, root: &[u8; 32], step: u8) -> bool {
+        let rows = match ledger::load(&self.state_dir.join("effects.bin"), &self.keys.ledger_mac) {
+            Ok(r) => r,
+            Err(_) => return true, // unreadable ledger: assume the worst
+        };
+        (0u8..=15).any(|a| {
+            let id = bnrose_exec_core::step_op_id(root, step | (a << 4));
+            rows.iter().any(|r| r.op_id == id)
+        })
+    }
+
+    /// journal one step admission and run it to its end (or its crash
+    /// point). Shared by first attempts and policy-gated replacements;
+    /// the replacement is a NEW ATTEMPT entity (the old attempt's records
+    /// stand — reconstructions are never erased).
+    #[allow(clippy::too_many_arguments)]
+    fn execute_fresh_step(
+        &mut self,
+        intent: &crate::fixtures::IntentFile,
+        root: &[u8; 32],
+        encoded_step: u8,
+        id: [u8; 32],
+        effect: [u8; 32],
+        label: &str,
+        clock: u64,
+        bounds: &Bounds,
+        lose: bool,
+        decoded: &btungsten_wb001::core::Intent,
+        env_sha: &[u8; 32],
+    ) -> RunOutcome {
+        let none = RunOutcome {
+            op: None,
+            refused: None,
+            lost_response: false,
+            receipt: None,
+            receipt_path: None,
+            receipt_json: None,
+        };
+        let mut payload = Vec::with_capacity(intent.env.len() + 180);
+        payload.extend_from_slice(root);
+        payload.push(encoded_step);
+        let label_b = label.as_bytes();
+        payload.push(label_b.len() as u8);
+        payload.extend_from_slice(label_b);
+        payload.extend_from_slice(&intent.authority);
+        payload.extend_from_slice(&intent.sig);
+        payload.extend_from_slice(&policy_digest(&self.policy.wire()));
+        payload.extend_from_slice(&(intent.env.len() as u16).to_le_bytes());
+        payload.extend_from_slice(&intent.env);
+        let name = self.worker.name();
+        payload.push(name.len() as u8);
+        payload.extend_from_slice(name.as_bytes());
+        if let Err(e) = self
+            .journal
+            .append(&id, bnrose_exec_core::E_STEP_ADMITTED, &payload)
+        {
+            return RunOutcome {
+                refused: Some(format!("journal:{e}")),
+                op: Some(id),
+                ..none
+            };
+        }
+        let mut state = OpState::ADMITTED_ZERO;
+        state.seq = 0;
+        let res = reservations_payload(bounds);
+        let expiry = decoded.expiry;
+        for (event, pl) in [
+            (bnrose_exec_core::E_RESERVE, res.as_slice()),
+            (E_DISPATCH, effect.as_slice()),
+        ] {
+            if let Err(w) =
+                self.step_and_journal(&id, env_sha, &mut state, event, pl, clock, expiry)
+            {
+                return RunOutcome {
+                    refused: Some(w),
+                    op: Some(id),
+                    ..none
+                };
+            }
+        }
+        // the step's EXACT signed bytes and identity are durable (the step
+        // record carries envelope + signature); the effect commits after
+        // the acknowledgement
+        if let Err(e) = self.ledger.apply(&id, env_sha, &effect, clock) {
+            return RunOutcome {
+                refused: Some(format!("ledger:{e}")),
+                op: Some(id),
+                ..none
+            };
+        }
+        if lose {
+            return RunOutcome {
+                op: Some(id),
+                refused: None,
+                lost_response: true,
+                receipt: None,
+                receipt_path: None,
+                receipt_json: None,
+            };
+        }
+        if let Err(w) =
+            self.step_and_journal(&id, env_sha, &mut state, E_RESPONSE, &[1], clock, expiry)
+        {
+            return RunOutcome {
+                refused: Some(w),
+                op: Some(id),
+                ..none
+            };
+        }
+        match self.issue_receipt(&id, env_sha, state, &effect, clock) {
+            Ok((r, p, v)) => RunOutcome {
+                op: Some(id),
+                refused: None,
+                lost_response: false,
+                receipt: Some(r),
+                receipt_path: Some(p),
+                receipt_json: Some(v),
+            },
+            Err(e) => RunOutcome {
+                refused: Some(e),
+                op: Some(id),
+                ..none
+            },
         }
     }
 
@@ -567,6 +801,11 @@ impl Supervisor {
                 recovered_receipt = Some(v);
                 unknowns.push(hex(op));
             }
+            // evidence classes kept SEPARATE (the founder's 2026-10-13
+            // law): submitted/observedLocal/recovered are local facts;
+            // included/executed/final are DESTINATION-SIDE and are never
+            // claimed from a local ledger row — a row is an observation,
+            // not a chain's inclusion, execution, or irreversibility
             report_ops.push(json!({
                 "op": hex(op),
                 "stateBefore": state_word(before),
@@ -574,6 +813,15 @@ impl Supervisor {
                 "recovered": rp.state.recovered == 1,
                 "effectRows": row.is_some() as u8,
                 "invariantReverified": invariant,
+                "evidence": {
+                    "submitted": before >= S_DISPATCHED,
+                    "observedLocal": row.is_some(),
+                    "recovered": rp.state.recovered == 1,
+                    "included": null,
+                    "executed": null,
+                    "final": null,
+                    "destinationSide": "not claimable from a local ledger row"
+                },
                 "receipt": recovered_receipt,
             }));
         }
@@ -954,6 +1202,17 @@ impl Supervisor {
         bounds: &Bounds,
         steps: &[(&str, bool)],
     ) -> RunOutcome {
+        self.run_steps_opt(intent, clock, bounds, steps, &StepOptions::default())
+    }
+
+    pub fn run_steps_opt(
+        &mut self,
+        intent: &crate::fixtures::IntentFile,
+        clock: u64,
+        bounds: &Bounds,
+        steps: &[(&str, bool)],
+        opts: &StepOptions,
+    ) -> RunOutcome {
         let none = RunOutcome {
             op: None,
             refused: None,
@@ -1028,117 +1287,67 @@ impl Supervisor {
             let step = idx as u8;
             match existing.get(&step) {
                 None => {
-                    // run THIS step to its end
+                    // the FIRST attempt of this step
                     let id = bnrose_exec_core::step_op_id(&root, step);
                     let effect = bnrose_exec_core::step_effect_digest(&root, &env_sha, step);
-                    let mut payload = Vec::with_capacity(intent.env.len() + 180);
-                    payload.extend_from_slice(&root);
-                    payload.push(step);
-                    let label_b = label.as_bytes();
-                    payload.push(label_b.len() as u8);
-                    payload.extend_from_slice(label_b);
-                    payload.extend_from_slice(&intent.authority);
-                    payload.extend_from_slice(&intent.sig);
-                    payload.extend_from_slice(&policy_digest(&self.policy.wire()));
-                    payload.extend_from_slice(&(intent.env.len() as u16).to_le_bytes());
-                    payload.extend_from_slice(&intent.env);
-                    let name = self.worker.name();
-                    payload.push(name.len() as u8);
-                    payload.extend_from_slice(name.as_bytes());
-                    if let Err(e) =
-                        self.journal
-                            .append(&id, bnrose_exec_core::E_STEP_ADMITTED, &payload)
-                    {
-                        return RunOutcome {
-                            refused: Some(format!("journal:{e}")),
-                            op: Some(id),
-                            ..none
-                        };
-                    }
-                    let mut state = OpState::ADMITTED_ZERO;
-                    state.seq = 0;
-                    let res = reservations_payload(bounds);
-                    let expiry = decoded.expiry;
-                    for (event, pl) in [
-                        (bnrose_exec_core::E_RESERVE, res.as_slice()),
-                        (E_DISPATCH, effect.as_slice()),
-                    ] {
-                        if let Err(w) = self
-                            .step_and_journal(&id, &env_sha, &mut state, event, pl, clock, expiry)
-                        {
-                            return RunOutcome {
-                                refused: Some(w),
-                                op: Some(id),
-                                ..none
-                            };
-                        }
-                    }
-                    // the step's EXACT signed bytes and identity are already
-                    // durable (the step record carries envelope + signature);
-                    // the effect commits after the acknowledgement
-                    if let Err(e) = self.ledger.apply(&id, &env_sha, &effect, clock) {
-                        return RunOutcome {
-                            refused: Some(format!("ledger:{e}")),
-                            op: Some(id),
-                            ..none
-                        };
-                    }
-                    if *lose {
-                        return RunOutcome {
-                            op: Some(id),
-                            refused: None,
-                            lost_response: true,
-                            receipt: None,
-                            receipt_path: None,
-                            receipt_json: None,
-                        };
-                    }
-                    if let Err(w) = self.step_and_journal(
-                        &id,
+                    return self.execute_fresh_step(
+                        intent, &root, step, id, effect, label, clock, bounds, *lose, &decoded,
                         &env_sha,
-                        &mut state,
-                        E_RESPONSE,
-                        &[1],
-                        clock,
-                        expiry,
-                    ) {
+                    );
+                }
+                Some(ent) => match ent.state.state {
+                    bnrose_exec_core::S_COMPLETED => continue,
+                    bnrose_exec_core::S_FAILED => {
+                        // the founder's exact law: one admitted attempt per
+                        // step, UNLESS the prior attempt is conclusively
+                        // never-executed AND policy explicitly allows the
+                        // replacement. "Never executed" = no ledger row for
+                        // ANY attempt of this step; a failed step WITH a
+                        // row stays refused whatever the policy says.
+                        let never_executed = !self.step_has_any_recorded_effect(&root, step);
+                        if never_executed && opts.replace_never_executed_failed_steps {
+                            let attempt = (step_entity_attempt(&records, &root, step) + 1).min(15);
+                            let encoded = step | (attempt << 4);
+                            let id = bnrose_exec_core::step_op_id(&root, encoded);
+                            let effect =
+                                bnrose_exec_core::step_effect_digest(&root, &env_sha, encoded);
+                            return self.execute_fresh_step(
+                                intent, &root, encoded, id, effect, label, clock, bounds, *lose,
+                                &decoded, &env_sha,
+                            );
+                        }
                         return RunOutcome {
-                            refused: Some(w),
-                            op: Some(id),
+                            op: Some(bnrose_exec_core::step_op_id(&root, step)),
+                            refused: Some(format!(
+                                "step:{}:failed — replacement {} (the prior attempt {})",
+                                ent.label,
+                                if never_executed {
+                                    "not permitted by policy"
+                                } else {
+                                    "never permitted: an effect was recorded"
+                                },
+                                if never_executed {
+                                    "never executed"
+                                } else {
+                                    "may have executed"
+                                },
+                            )),
                             ..none
                         };
                     }
-                    return match self.issue_receipt(&id, &env_sha, state, &effect, clock) {
-                        Ok((r, p, v)) => RunOutcome {
-                            op: Some(id),
-                            refused: None,
-                            lost_response: false,
-                            receipt: Some(r),
-                            receipt_path: Some(p),
-                            receipt_json: Some(v),
-                        },
-                        Err(e) => RunOutcome {
-                            refused: Some(e),
-                            op: Some(id),
+                    _ => {
+                        // an UNRESOLVED step: memory was lost, the step was
+                        // not — replacement refuses; recovery is the resolver
+                        return RunOutcome {
+                            op: Some(bnrose_exec_core::step_op_id(&root, step)),
+                            refused: Some(format!(
+                                "step:{}:unresolved — replacement refused; recovery is the resolver",
+                                ent.label
+                            )),
                             ..none
-                        },
-                    };
-                }
-                Some(ent) => {
-                    use bnrose_exec_core::{S_COMPLETED, S_FAILED};
-                    if matches!(ent.state.state, S_COMPLETED | S_FAILED) {
-                        continue; // a finished step is a finished step
+                        };
                     }
-                    // an UNRESOLVED step: memory was lost, the step was not
-                    return RunOutcome {
-                        op: Some(bnrose_exec_core::step_op_id(&root, step)),
-                        refused: Some(format!(
-                            "step:{}:unresolved — replacement refused; recovery is the resolver",
-                            ent.label
-                        )),
-                        ..none
-                    };
-                }
+                },
             }
         }
         RunOutcome {
@@ -1226,4 +1435,19 @@ pub fn migrate_root(
             }),
         },
     }))
+}
+
+/// The highest attempt index journaled for a step (0 = first attempt).
+pub fn step_entity_attempt(records: &[journal::Record], root: &[u8; 32], step: u8) -> u8 {
+    let mut max_attempt = 0u8;
+    for r in records {
+        if r.event == bnrose_exec_core::E_STEP_ADMITTED && r.payload.len() >= 34 {
+            let rec_root: [u8; 32] = r.payload[..32].try_into().unwrap();
+            let encoded = r.payload[32];
+            if rec_root == *root && (encoded & 0x0f) == step {
+                max_attempt = max_attempt.max(encoded >> 4);
+            }
+        }
+    }
+    max_attempt
 }
