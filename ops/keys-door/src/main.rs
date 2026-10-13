@@ -2,6 +2,10 @@
 //!
 //!   keys-door serve  --config edge.toml
 //!   keys-door verify --config edge.toml --envelope FILE
+//!   keys-door --version
+//!
+//! `--version` prints the crate version and the commit the binary was built
+//! from (`KEYS_DOOR_COMMIT` at build time, else "unknown").
 //!
 //! `serve` refuses to start without both verifiers (an empty bsigner_path is
 //! a refusal, never a skip). It loads the serve state, answers from it once
@@ -25,7 +29,7 @@ use keys_door::server::{health_router, router, Shared};
 use keys_door::sources::UreqHttp;
 use keys_door::verify::Verifiers;
 
-const USAGE: &str = "usage: keys-door serve --config edge.toml\n       keys-door verify --config edge.toml --envelope FILE";
+const USAGE: &str = "usage: keys-door serve --config edge.toml\n       keys-door verify --config edge.toml --envelope FILE\n       keys-door --version";
 
 fn flag(args: &[String], name: &str) -> Option<PathBuf> {
     args.windows(2)
@@ -88,6 +92,10 @@ fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let rest = args.get(1..).unwrap_or(&[]);
     match args.first().map(String::as_str) {
+        Some("--version" | "-V") if rest.is_empty() => {
+            println!("{}", keys_door::version());
+            ExitCode::SUCCESS
+        }
         Some("serve") => match serve(rest) {
             Ok(()) => ExitCode::SUCCESS,
             Err(e) => {

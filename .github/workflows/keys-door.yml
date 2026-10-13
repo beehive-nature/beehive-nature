@@ -48,6 +48,16 @@ jobs:
         run: |
           test -x "$KEYS_DOOR_BSIGNER" || { echo "bsigner binary missing for keys-door: a skipped gate is not a pass"; exit 1; }
           cargo test --locked --manifest-path ops/keys-door/Cargo.toml
+      - name: Version stamp (--version names the commit it was built from)
+        if: always()
+        env:
+          KEYS_DOOR_COMMIT: ${{ github.sha }}
+        run: |
+          cargo build --locked --manifest-path ops/keys-door/Cargo.toml
+          out=$(ops/keys-door/target/debug/keys-door --version)
+          want="keys-door $(cargo pkgid --manifest-path ops/keys-door/Cargo.toml | sed 's/.*[#@]//') (commit $KEYS_DOOR_COMMIT)"
+          echo "$out"
+          test "$out" = "$want" || { echo "want: $want"; exit 1; }
       - name: Format
         if: always()
         run: cargo fmt --manifest-path ops/keys-door/Cargo.toml --check

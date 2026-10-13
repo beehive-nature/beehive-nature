@@ -1,7 +1,9 @@
 //! Serving (contract §4 "Serving"): only the paths the verified record names
 //! (`/` is index.html), GET and HEAD only, 404 for anything else, 503 for
-//! everything but /.well-known while nothing is verified. Health is a
-//! separate router for its own listener.
+//! everything but /.well-known while nothing is verified. Under
+//! /.well-known/bnr-keychain: `release` (the current envelope),
+//! `release/<n>` (the verified envelope of every seq 1..current, contract
+//! §7 A1) and `pack`. Health is a separate router for its own listener.
 
 use std::collections::BTreeMap;
 use std::sync::{Arc, RwLock};
@@ -25,13 +27,23 @@ pub struct FileServe {
     pub etag: String,
 }
 
+/// One verified envelope as served, with its ETag (base64url SHA-256 of
+/// the envelope bytes).
+pub struct ServedEnvelope {
+    pub bytes: Bytes,
+    pub etag: String,
+}
+
 /// A verified release, ready to serve.
 pub struct Serving {
     pub seq: u64,
     pub record_sha3: [u8; 32],
     pub pack_sha3: [u8; 32],
-    pub envelope: Bytes,
-    pub envelope_etag: String,
+    /// the served record's link (the base the next peer walk extends)
+    pub tip: Link,
+    /// every verified envelope from genesis to this one: `chain[n - 1]`
+    /// is seq n (contract §7 A1, `/.well-known/bnr-keychain/release/<n>`)
+    pub chain: Vec<ServedEnvelope>,
     pub pack: Bytes,
     pub pack_etag: String,
     pub files: BTreeMap<String, FileServe>,
@@ -48,9 +60,25 @@ pub fn content_type(path: &str) -> &'static str {
     }
 }
 
+/// A seq as `/.well-known/bnr-keychain/release/<seq>` spells it: plain
+/// decimal, no sign, no leading zero, at least 1.
+pub fn seq_segment(s: &str) -> Option<u64> {
+    let b = s.as_bytes();
+    if b.is_empty() || b.len() > 16 || !b.iter().all(u8::is_ascii_digit) || b[0] == b'0' {
+        return None;
+    }
+    s.parse().ok()
+}
+
 impl Serving {
-    /// The release `link` names, over a pack already checked against it.
-    pub fn new(link: &Link, pack: Vec<u8>, pack_sha3: [u8; 32]) -> Serving {
+    /// The release at the end of `chain` (genesis first, every link
+    /// verified), over a pack already checked against it.
+    pub fn new(chain: &[Link], pack: Vec<u8>, pack_sha3: [u8; 32]) -> Serving {
+        let link = chain.last().expect("a non-empty chain");
+        debug_assert!(chain
+            .iter()
+            .enumerate()
+            .all(|(i, l)| l.seq() == i as u64 + 1));
         let r = &link.env.record;
         let mut files = BTreeMap::new();
         let mut offset = 0usize;
@@ -70,12 +98,25 @@ impl Serving {
             seq: r.seq,
             record_sha3: link.sha3(),
             pack_sha3,
-            envelope_etag: b64u(&Sha256::digest(&link.env.bytes)),
-            envelope: Bytes::from(link.env.bytes.clone()),
+            tip: link.clone(),
+            chain: chain
+                .iter()
+                .map(|l| ServedEnvelope {
+                    etag: b64u(&Sha256::digest(&l.env.bytes)),
+                    bytes: Bytes::from(l.env.bytes.clone()),
+                })
+                .collect(),
             pack: Bytes::from(pack),
             pack_etag: r.pack.sha256.clone(),
             files,
         }
+    }
+
+    /// The verified envelope of seq `n`, when this edge holds it (1..=seq).
+    pub fn envelope(&self, n: u64) -> Option<&ServedEnvelope> {
+        n.checked_sub(1)
+            .and_then(|i| usize::try_from(i).ok())
+            .and_then(|i| self.chain.get(i))
     }
 }
 
@@ -158,20 +199,24 @@ async fn serve(State(shared): State<SharedRef>, method: Method, uri: Uri) -> Res
         let Some(s) = serving else {
             return plain(StatusCode::NOT_FOUND, "no verified release\n");
         };
-        return match rest {
-            "bnr-keychain/release" => bytes(
-                s.envelope.clone(),
-                "application/json",
-                &s.envelope_etag,
-                head,
-            ),
-            "bnr-keychain/pack" => bytes(
-                s.pack.clone(),
-                "application/octet-stream",
-                &s.pack_etag,
-                head,
-            ),
-            _ => plain(StatusCode::NOT_FOUND, "not found\n"),
+        let envelope = match rest {
+            "bnr-keychain/pack" => {
+                return bytes(
+                    s.pack.clone(),
+                    "application/octet-stream",
+                    &s.pack_etag,
+                    head,
+                )
+            }
+            "bnr-keychain/release" => s.envelope(s.seq),
+            _ => rest
+                .strip_prefix("bnr-keychain/release/")
+                .and_then(seq_segment)
+                .and_then(|n| s.envelope(n)),
+        };
+        return match envelope {
+            Some(e) => bytes(e.bytes.clone(), "application/json", &e.etag, head),
+            None => plain(StatusCode::NOT_FOUND, "not found\n"),
         };
     }
     let Some(s) = serving else {

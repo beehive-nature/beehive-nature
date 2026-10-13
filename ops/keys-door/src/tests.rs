@@ -27,7 +27,7 @@ use tower::ServiceExt;
 use crate::b64::{b64_std, b64u, unb64u};
 use crate::canon;
 use crate::config::Config;
-use crate::door::{offline_verdict, Door};
+use crate::door::{offline_verdict, Door, WALK_BYTES};
 use crate::pq::{self, DetachedSig, SigFile};
 use crate::record::{
     parse_envelope, parse_record, Envelope, FileEntry, Hints, Pack, Record, Refusal, Source, BUILD,
@@ -42,6 +42,8 @@ const ORIGIN: &str = "https://keys.skaists.dev";
 const RP: &str = "keys.skaists.dev";
 const COMMIT: &str = "38c394fac7e9ad1b70b87b3b95e6702fd4b5c244";
 const PEER: &str = "https://peer.test";
+/// a second peer, configured only where a test adds it
+const PEER2: &str = "https://peer2.test";
 const ANT: &str = "https://ant.test";
 const AR: &str = "https://ar.test";
 const AT: &str = "2026-10-12T00:00:00Z";
@@ -340,6 +342,27 @@ impl Fx {
         let body = serde_json::to_vec(&json!({ "data": b64_std(&r.pack) })).unwrap();
         self.http
             .get_ok(&format!("{ANT}/v1/data/public/{}", ant_addr(r)), body);
+    }
+    /// The configured peer's chain endpoint answers these envelopes at
+    /// `/release/1..=n` (and 404 above).
+    fn peer_chain(&self, envs: &[Vec<u8>]) {
+        self.chain_at(PEER, envs);
+    }
+    /// `peer`'s chain endpoint answers these envelopes at `/release/1..=n`
+    /// and 404 above (whatever it answered there before).
+    fn chain_at(&self, peer: &str, envs: &[Vec<u8>]) {
+        for n in 1..=64 {
+            let url = format!("{peer}{}/{n}", sources::RELEASE_PATH);
+            match envs.get(n - 1) {
+                Some(e) => self.http.get_ok(&url, e.clone()),
+                None => self.http.get_gone(&url),
+            }
+        }
+    }
+    /// The configured peer's `/pack`.
+    fn peer_pack(&self, pack: &[u8]) {
+        self.http
+            .get_ok(&format!("{PEER}{}", sources::PACK_PATH), pack.to_vec());
     }
     fn health(&self) -> Health {
         self.shared.read().unwrap().health.clone()
@@ -792,8 +815,8 @@ fn bpqjs_release_vector_passes_both_verifiers_and_is_served() {
         .iter()
         .flat_map(|f| unb64u(vector["files"][&f.path].as_str().unwrap()).unwrap())
         .collect();
-    fx.http
-        .get_ok(&format!("{PEER}/.well-known/bnr-keychain/pack"), pack);
+    fx.peer_chain(std::slice::from_ref(&env));
+    fx.peer_pack(&pack);
     fx.inbox("bpqjs.json", &env);
     let mut door = fx.door_with(v);
     door.poll(true);
@@ -921,12 +944,13 @@ fn nothing_verified_is_503() {
             call(app.clone(), "HEAD", "/").await.0,
             StatusCode::SERVICE_UNAVAILABLE
         );
-        assert_eq!(
-            call(app.clone(), "GET", "/.well-known/bnr-keychain/release")
-                .await
-                .0,
-            StatusCode::NOT_FOUND
-        );
+        for p in [
+            "/.well-known/bnr-keychain/release",
+            "/.well-known/bnr-keychain/release/1",
+            "/.well-known/bnr-keychain/pack",
+        ] {
+            assert_eq!(call(app.clone(), "GET", p).await.0, StatusCode::NOT_FOUND);
+        }
         assert_eq!(
             call(app.clone(), "POST", "/").await.0,
             StatusCode::METHOD_NOT_ALLOWED
@@ -1100,9 +1124,9 @@ fn equivocation_stops_the_edge_until_a_successor_picks_a_branch() {
     assert_eq!(second.record_sha3, b2.sha3, "the branch r3 selects won");
 }
 
-/// The fork outlives the sources that showed it: a peer serves only its
-/// current envelope, so once it moves from b2 to b3 no source offers b2,
-/// and a2 alone must not be taken. Only the kept evidence still holds b2.
+/// The fork outlives the sources that showed it: once the peer that
+/// offered b2 goes quiet, a2 (from the inbox) is the only seq 2 any source
+/// offers, and it must not be taken. Only the kept evidence still holds b2.
 #[test]
 fn an_equivocation_is_remembered_after_its_sources_go_quiet() {
     let k = key(0);
@@ -1115,10 +1139,9 @@ fn an_equivocation_is_remembered_after_its_sources_go_quiet() {
     for r in [&g, &a2, &b2, &b3, &b4] {
         fx.offer(r);
     }
-    let peer = format!("{PEER}{}", sources::RELEASE_PATH);
     fx.inbox("1.json", &envelope(&g, k));
     fx.inbox("a2.json", &envelope(&a2, k));
-    fx.http.get_ok(&peer, envelope(&b2, k));
+    fx.peer_chain(&[envelope(&g, k), envelope(&b2, k)]);
     let mut door = fx.door();
     door.poll(true);
     let fork = |fx: &Fx| {
@@ -1127,8 +1150,11 @@ fn an_equivocation_is_remembered_after_its_sources_go_quiet() {
     };
     assert_eq!(fork(&fx), (Some(1), Some(2)), "{:?}", door.notes());
 
-    // the peer goes quiet for a poll: a2 is the only seq 2 any source offers
-    fx.http.get_gone(&peer);
+    // the peer goes quiet: a2 is the only seq 2 any source offers
+    for n in 1..=2 {
+        fx.http
+            .get_gone(&format!("{PEER}{}/{n}", sources::RELEASE_PATH));
+    }
     door.poll(true);
     assert_eq!(fork(&fx), (Some(1), Some(2)), "{:?}", door.notes());
     // and a restarted edge remembers it too (state_dir/evidence)
@@ -1136,8 +1162,9 @@ fn an_equivocation_is_remembered_after_its_sources_go_quiet() {
     door.poll(true);
     assert_eq!(fork(&fx), (Some(1), Some(2)), "{:?}", door.notes());
 
-    // the peer moves on to b3, whose prev selects b2: that branch wins
-    fx.http.get_ok(&peer, envelope(&b3, k));
+    // b3 arrives while no source offers b2; its prev selects b2: that
+    // branch wins
+    fx.inbox("b3.json", &envelope(&b3, k));
     door.poll(true);
     assert_eq!(fork(&fx), (Some(3), None), "{:?}", door.notes());
     let chain = fx.store().load().unwrap().unwrap().chain;
@@ -1152,7 +1179,7 @@ fn an_equivocation_is_remembered_after_its_sources_go_quiet() {
     let kept = fx.cfg.state_dir.join("evidence");
     let one = fs::read_dir(&kept).unwrap().next().unwrap().unwrap().path();
     fs::write(&one, b"junk").unwrap();
-    fx.http.get_ok(&peer, envelope(&b4, k));
+    fx.inbox("b4.json", &envelope(&b4, k));
     door.poll(true);
     let h = fx.health();
     assert_eq!((h.seq, h.state), (Some(3), "serving"), "{:?}", door.notes());
@@ -1167,6 +1194,39 @@ fn an_equivocation_is_remembered_after_its_sources_go_quiet() {
     );
 }
 
+/// `n` distinct envelopes of one record under one signature: they differ
+/// only in their unsigned hints.
+fn variants(r: &Rel, k: &Key, n: usize) -> Vec<Vec<u8>> {
+    let sig = sign(k, &r.bytes);
+    (0..n)
+        .map(|i| {
+            let hints = Hints {
+                ar: vec![b64u(&[i as u8; 32])],
+                ..Hints::default()
+            };
+            envelope_with(&r.bytes, &sig, hints)
+        })
+        .collect()
+}
+
+/// Write envelopes straight into state_dir/evidence, as kept evidence.
+fn plant_evidence(fx: &Fx, envs: &[Vec<u8>]) {
+    let kept = fx.cfg.state_dir.join("evidence");
+    fs::create_dir_all(&kept).unwrap();
+    for e in envs {
+        fs::write(kept.join(b64u(&pq::sha3(&[e.as_slice()]))), e).unwrap();
+    }
+}
+
+fn evidence_names(fx: &Fx) -> Vec<String> {
+    let mut names: Vec<String> = fs::read_dir(fx.cfg.state_dir.join("evidence"))
+        .unwrap()
+        .map(|e| e.unwrap().file_name().into_string().unwrap())
+        .collect();
+    names.sort();
+    names
+}
+
 /// A fork the edge has no room to remember is one it could forget, so a
 /// full evidence store holds the edge where it is.
 #[test]
@@ -1177,12 +1237,11 @@ fn a_full_evidence_store_holds_the_edge() {
     let b2 = release(2, Some(&g), &[k], "b2");
     let b3 = release(3, Some(&b2), &[k], "b3");
     let fx = fx("evidence-full", &g, &[k]);
-    let kept = fx.cfg.state_dir.join("evidence");
-    fs::create_dir_all(&kept).unwrap();
-    for i in 0..MAX_EVIDENCE {
-        let junk = format!("junk {i}").into_bytes();
-        fs::write(kept.join(b64u(&pq::sha3(&[&junk]))), junk).unwrap();
-    }
+    // a store already full of evidence at or above the floor (seq 9, on a
+    // chain this edge does not hold)
+    let other = release(1, None, &[k], "other");
+    let stray = release(9, Some(&other), &[k], "stray");
+    plant_evidence(&fx, &variants(&stray, k, MAX_EVIDENCE));
     for r in [&g, &a2, &b2, &b3] {
         fx.offer(r);
         fx.inbox(&format!("{}.json", b64u(&r.sha3)), &envelope(r, k));
@@ -1191,6 +1250,110 @@ fn a_full_evidence_store_holds_the_edge() {
     door.poll(true);
     assert_eq!(fx.health().state, "unverified", "{:?}", door.notes());
     assert!(noted(&door, "evidence is full"), "{:?}", door.notes());
+    assert_eq!(evidence_names(&fx).len(), MAX_EVIDENCE);
+}
+
+/// Rule 5 at any seq. An edge serving x3 (floor 3) meets a valid fork at
+/// seq 2 whose branches both continue (x3, y3): it holds at x3. The fork is
+/// kept although it is below the floor, so once the source of y2/y3 goes
+/// quiet and x4 arrives, the edge still holds: no seq+1 record picked a
+/// branch. A restart does not forget it either.
+#[test]
+fn a_fork_below_the_floor_holds_the_edge_after_its_sources_go_quiet() {
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let x2 = release(2, Some(&g), &[k], "x2");
+    let x3 = release(3, Some(&x2), &[k], "x3");
+    let x4 = release(4, Some(&x3), &[k], "x4");
+    let y2 = release(2, Some(&g), &[k], "y2");
+    let y3 = release(3, Some(&y2), &[k], "y3");
+    let mut fx = fx("evidence-below-floor", &g, &[k]);
+    let offer = |fx: &Fx, r: &Rel| {
+        fx.offer(r);
+        fx.inbox(&format!("{}.json", b64u(&r.sha3)), &envelope(r, k));
+    };
+    for r in [&g, &x2, &x3] {
+        offer(&fx, r);
+    }
+    let mut door = fx.door();
+    door.poll(true);
+    assert_eq!(fx.health().seq, Some(3), "{:?}", door.notes());
+    assert_eq!(fx.store().floor().unwrap(), 3);
+
+    for r in [&y2, &y3] {
+        offer(&fx, r);
+    }
+    door.poll(true);
+    let held = |fx: &Fx| {
+        let h = fx.health();
+        (h.seq, h.equivocation.map(|e| e.seq))
+    };
+    assert_eq!(held(&fx), (Some(3), Some(2)), "{:?}", door.notes());
+    let name = |r: &Rel| b64u(&pq::sha3(&[&envelope(r, k)]));
+    let mut fork = vec![name(&x2), name(&x3), name(&y2), name(&y3)];
+    fork.sort();
+    assert_eq!(evidence_names(&fx), fork, "kept although below the floor");
+
+    // the source of y2/y3 goes quiet; x4 arrives
+    for r in [&y2, &y3] {
+        fs::remove_file(fx.cfg.inbox_dir.join(format!("{}.json", b64u(&r.sha3)))).unwrap();
+    }
+    offer(&fx, &x4);
+    door.poll(true);
+    assert_eq!(held(&fx), (Some(3), Some(2)), "{:?}", door.notes());
+    assert_eq!(evidence_names(&fx), fork);
+    // restarted, the edge cannot walk past the fork to x3 again, so it
+    // serves nothing, and it still reports the fork
+    let mut door = fx.restart();
+    door.poll(true);
+    assert_eq!(held(&fx), (None, Some(2)), "{:?}", door.notes());
+    assert_eq!(fx.store().floor().unwrap(), 3);
+}
+
+/// Kept evidence is never deleted, not even by a restart under a config
+/// that cannot parse it (a typo in rp_id): that poll refuses it in the
+/// pool and leaves it on disk, and the corrected edge still knows the fork.
+#[test]
+fn evidence_outlives_a_config_that_cannot_parse_it() {
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let a2 = release(2, Some(&g), &[k], "a2");
+    let b2 = release(2, Some(&g), &[k], "b2");
+    let mut fx = fx("evidence-typo", &g, &[k]);
+    for r in [&g, &a2, &b2] {
+        fx.offer(r);
+        fx.inbox(&format!("{}.json", b64u(&r.sha3)), &envelope(r, k));
+    }
+    let mut door = fx.door();
+    door.poll(true);
+    let fork = |fx: &Fx| {
+        let h = fx.health();
+        (h.seq, h.equivocation.map(|e| e.seq))
+    };
+    assert_eq!(fork(&fx), (Some(1), Some(2)), "{:?}", door.notes());
+    let kept = evidence_names(&fx);
+    assert_eq!(kept.len(), 2);
+
+    let mut typo = fx.cfg.clone();
+    typo.rp_id = "keys.skaists.dex".into();
+    typo.validate()
+        .expect("the shape is valid; the value is a typo");
+    let mut door = Door::new(
+        typo,
+        verifiers(&fx.dir.join("scratch")),
+        Box::new(fx.http.clone()),
+        Arc::new(RwLock::new(Shared::default())),
+    );
+    door.load();
+    door.poll(true);
+    assert!(noted(&door, "evidence: "), "{:?}", door.notes());
+    assert_eq!(evidence_names(&fx), kept, "nothing kept is deleted");
+
+    // corrected, with b2 gone from every source but the kept evidence
+    fs::remove_file(fx.cfg.inbox_dir.join(format!("{}.json", b64u(&b2.sha3)))).unwrap();
+    let mut door = fx.restart();
+    door.poll(true);
+    assert_eq!(fork(&fx), (Some(1), Some(2)), "{:?}", door.notes());
 }
 
 #[test]
@@ -1198,10 +1361,10 @@ fn bytes_must_hash_to_what_the_record_names() {
     let k = key(0);
     let g = release(1, None, &[k], "g");
     let fx = fx("bytes", &g, &[k]);
-    fx.inbox(
-        "g.json",
-        &envelope_with(&g.bytes, &sign(k, &g.bytes), Hints::default()),
-    );
+    let env = envelope_with(&g.bytes, &sign(k, &g.bytes), Hints::default());
+    fx.inbox("g.json", &env);
+    // the peer's chain ends at seq 1, so its pack is asked for seq 1
+    fx.peer_chain(&[env]);
     // a truncated pack from the peer
     let pack_url = format!("{PEER}/.well-known/bnr-keychain/pack");
     fx.http
@@ -1302,10 +1465,9 @@ fn a_corrupt_state_is_discarded_and_answers_503() {
 }
 
 #[test]
-fn the_floor_only_rises_and_a_corrupt_floor_refuses_every_new_release() {
+fn the_floor_only_rises_and_a_corrupt_one_is_never_read_as_zero() {
     let k = key(0);
     let g = release(1, None, &[k], "g");
-    let r2 = release(2, Some(&g), &[k], "r2");
     let fx = fx("floor", &g, &[k]);
     let store = fx.store();
     assert_eq!(store.floor().unwrap(), 0);
@@ -1334,28 +1496,89 @@ fn the_floor_only_rises_and_a_corrupt_floor_refuses_every_new_release() {
     door.poll(true);
     assert_eq!(fx.health().state, "unverified");
     assert!(fx.health().last_error.unwrap().contains("floor"));
+}
 
-    // a running edge whose floor turns corrupt accepts nothing new; what
-    // it serves stays served (it was accepted while the floor could be read)
-    let floor = fx.cfg.state_dir.join("floor");
-    fs::write(&floor, b"1\n").unwrap();
+/// Decided (rule 4): a running edge whose floor file turns corrupt keeps
+/// serving the release it last verified (accepted while the floor could be
+/// read) and accepts nothing new: no rail is read, nothing is fetched,
+/// kept or swapped, and the edge never rewrites a floor it cannot read. A
+/// restart with the floor still corrupt serves nothing (503): after a
+/// restart nothing is served, so everything would be new. Repaired, the
+/// edge resumes.
+#[test]
+fn a_corrupt_floor_keeps_the_served_release_and_accepts_nothing_new() {
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let r2 = release(2, Some(&g), &[k], "r2");
+    let r3 = release(3, Some(&r2), &[k], "r3");
+    let mut fx = fx("floor-corrupt", &g, &[k]);
+    let envs: Vec<Vec<u8>> = [&g, &r2, &r3].iter().map(|r| envelope(r, k)).collect();
+    fx.inbox("1.json", &envs[0]);
+    fx.offer(&g);
+    let mut door = fx.door();
     door.poll(true);
     assert_eq!(fx.health().seq, Some(1), "{:?}", door.notes());
-    fx.inbox("r2.json", &envelope(&r2, k));
+
+    // everything that would reach 3 is on offer: inbox, peer chain and
+    // pack, ANT door
+    fx.inbox("2.json", &envs[1]);
+    fx.inbox("3.json", &envs[2]);
+    fx.peer_chain(&envs);
+    fx.peer_pack(&r3.pack);
     fx.offer(&r2);
+    fx.offer(&r3);
+    let floor = fx.cfg.state_dir.join("floor");
     fs::write(&floor, b"x\n").unwrap();
+    let calls = fx.http.calls().len();
     door.poll(true);
     let h = fx.health();
     assert_eq!((h.seq, h.state), (Some(1), "serving"), "{:?}", door.notes());
-    assert!(h
-        .last_error
-        .unwrap()
-        .contains("is corrupt: refusing every new release"));
-    let (s, _, b) = block_on(call(router(fx.shared.clone()), "GET", "/"));
-    assert_eq!(
-        (s, b.as_slice()),
-        (StatusCode::OK, &b"<!doctype html><title>g</title>\n"[..])
+    assert!(
+        h.last_error
+            .unwrap()
+            .contains("is corrupt: refusing every new release"),
+        "{:?}",
+        door.notes()
     );
+    assert_eq!(fx.http.calls().len(), calls, "no rail is read");
+    assert_eq!(fs::read(&floor).unwrap(), b"x\n", "never rewritten");
+    assert_eq!(
+        fx.store().load().unwrap().unwrap().chain,
+        envs[..1].to_vec()
+    );
+    assert!(!fx.cfg.state_dir.join("evidence").exists());
+    block_on(async {
+        let app = router(fx.shared.clone());
+        let (s, _, b) = call(app.clone(), "GET", "/").await;
+        assert_eq!(
+            (s, b.as_slice()),
+            (StatusCode::OK, &b"<!doctype html><title>g</title>\n"[..])
+        );
+        let (s, _, b) = call(app.clone(), "GET", "/.well-known/bnr-keychain/release/1").await;
+        assert_eq!((s, &b), (StatusCode::OK, &envs[0]));
+        assert_eq!(
+            call(app, "GET", "/.well-known/bnr-keychain/release/2")
+                .await
+                .0,
+            StatusCode::NOT_FOUND
+        );
+    });
+
+    // restarted with the floor still corrupt: nothing is served, so
+    // nothing is accepted
+    let mut door = fx.restart();
+    door.poll(true);
+    assert_eq!(fx.health().state, "unverified", "{:?}", door.notes());
+    assert_eq!(
+        block_on(call(router(fx.shared.clone()), "GET", "/")).0,
+        StatusCode::SERVICE_UNAVAILABLE
+    );
+
+    // repaired: the edge resumes and walks on to 3
+    fs::write(&floor, b"1\n").unwrap();
+    door.poll(true);
+    assert_eq!(fx.health().seq, Some(3), "{:?}", door.notes());
+    assert_eq!(fx.store().floor().unwrap(), 3);
 }
 
 /// Rails that turn the floor file into a directory the first time a pack
@@ -1428,49 +1651,426 @@ fn the_floor_is_raised_before_a_release_is_served() {
     assert_eq!(fx.store().floor().unwrap(), 2);
 }
 
-/// A member edge serves its current envelope and its pack (§4). That seeds
-/// another edge only together with every record below the current one:
-/// rule 3 never jumps, and a peer serves no record but its current one.
-/// Peers alone seed a fresh edge only at genesis; past it, the records
-/// below come from another rail (here the inbox; Arweave would do).
+fn release_get(n: u64) -> String {
+    release_get_at(PEER, n)
+}
+
+fn release_get_at(peer: &str, n: u64) -> String {
+    format!("GET {peer}{}/{n}", sources::RELEASE_PATH)
+}
+
+fn pack_get() -> String {
+    format!("GET {PEER}{}", sources::PACK_PATH)
+}
+
+/// Contract §7 A1: a member edge serves the verified envelope of every seq
+/// 1..current at /.well-known/bnr-keychain/release/<seq>, and a fresh edge
+/// configured with a peer only walks that chain from genesis, each
+/// envelope checked on its own, then takes the peer's pack for the record
+/// its chain ends at, by hash.
 #[test]
-fn a_member_edge_seeds_another_that_holds_the_records_below() {
+fn a_fresh_edge_with_peers_only_walks_the_chain_from_genesis() {
     let k = key(0);
     let g = release(1, None, &[k], "g");
     let r2 = release(2, Some(&g), &[k], "r2");
-    let a = fx("seed-a", &g, &[k]);
-    for r in [&g, &r2] {
+    let r3 = release(3, Some(&r2), &[k], "r3");
+    let envs: Vec<Vec<u8>> = [&g, &r2, &r3].iter().map(|r| envelope(r, k)).collect();
+    let a = fx("walk-a", &g, &[k]);
+    for (r, e) in [&g, &r2, &r3].into_iter().zip(&envs) {
         a.offer(r);
-        a.inbox(&format!("{}.json", r.record.seq), &envelope(r, k));
+        a.inbox(&format!("{}.json", r.record.seq), e);
     }
     a.door().poll(true);
-    assert_eq!(a.health().seq, Some(2));
-    // edge B knows nothing but a peer, and A's /.well-known answers it
-    let b = fx("seed-b", &g, &[k]);
-    let (rel_b, pack_b) = block_on(async {
+    assert_eq!(a.health().seq, Some(3));
+
+    // edge A's chain endpoint
+    let (served, pack) = block_on(async {
         let app = router(a.shared.clone());
-        (
-            call(app.clone(), "GET", "/.well-known/bnr-keychain/release")
-                .await
-                .2,
-            call(app, "GET", "/.well-known/bnr-keychain/pack").await.2,
-        )
+        let mut served = Vec::new();
+        for n in 1..=3 {
+            let path = format!("/.well-known/bnr-keychain/release/{n}");
+            let (s, h, b) = call(app.clone(), "GET", &path).await;
+            assert_eq!(s, StatusCode::OK, "{path}");
+            assert_eq!(h["content-type"], "application/json");
+            assert_eq!(h["cache-control"], "no-cache");
+            assert_eq!(
+                h["etag"].to_str().unwrap(),
+                format!("\"{}\"", sha256_b64u(&b))
+            );
+            served.push(b);
+        }
+        let (s, _, current) = call(app.clone(), "GET", "/.well-known/bnr-keychain/release").await;
+        assert_eq!(
+            (s, &current),
+            (StatusCode::OK, &served[2]),
+            "bare = current"
+        );
+        let (s, h, b) = call(app.clone(), "HEAD", "/.well-known/bnr-keychain/release/2").await;
+        assert_eq!((s, b.len()), (StatusCode::OK, 0));
+        assert_eq!(
+            h["content-length"].to_str().unwrap(),
+            served[1].len().to_string()
+        );
+        for seg in [
+            "0",
+            "4",
+            "01",
+            "+1",
+            "-1",
+            "1.0",
+            "",
+            "1/",
+            "x",
+            "99999999999999999999",
+        ] {
+            let path = format!("/.well-known/bnr-keychain/release/{seg}");
+            assert_eq!(
+                call(app.clone(), "GET", &path).await.0,
+                StatusCode::NOT_FOUND,
+                "{path}"
+            );
+        }
+        let pack = call(app, "GET", "/.well-known/bnr-keychain/pack").await.2;
+        (served, pack)
     });
-    b.http
-        .get_ok(&format!("{PEER}/.well-known/bnr-keychain/release"), rel_b);
-    b.http
-        .get_ok(&format!("{PEER}/.well-known/bnr-keychain/pack"), pack_b);
-    b.offer(&g);
+    assert_eq!(served, envs, "every verified envelope, as received");
+
+    // edge B: a peer and nothing else
+    let b = fx("walk-b", &g, &[k]);
+    b.peer_chain(&served);
+    b.peer_pack(&pack);
     let mut door = b.door();
     door.poll(true);
+    assert_eq!(b.health().seq, Some(3), "{:?}", door.notes());
+    assert_eq!(b.store().load().unwrap().unwrap().chain, envs);
     assert_eq!(
-        b.health().state,
-        "unverified",
-        "the peer alone cannot seed past genesis"
+        b.http.calls(),
+        vec![
+            release_get(1),
+            release_get(2),
+            release_get(3),
+            release_get(4),
+            pack_get()
+        ],
+        "one seq at a time until 404, then the pack of the seq the chain ends at"
     );
-    b.inbox("1.json", &envelope(&g, k));
+    // serving 3, a poll asks the peer for seq 4 only
     door.poll(true);
-    assert_eq!(b.health().seq, Some(2), "{:?}", door.notes());
+    assert_eq!(b.http.calls().len(), 6);
+    assert_eq!(b.http.calls()[5], release_get(4));
+    assert_eq!(b.health().seq, Some(3));
+}
+
+/// The walk's controls. Each envelope stands or falls on its own, the
+/// first that does not extend what the edge holds ends the walk, nothing
+/// above it is fetched, and no peer pack is asked for a chain that did not
+/// end cleanly. The edge stays at seq 1 (its pack from the ANT door).
+#[test]
+fn the_peer_walk_refuses_what_does_not_chain() {
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let r2 = release(2, Some(&g), &[k], "r2");
+    let r3 = release(3, Some(&r2), &[k], "r3");
+    // a forged seq 2: one bit of its ML-DSA-65 signature
+    let mut forged = sign(k, &r2.bytes);
+    let mut raw = unb64u(&forged.sig).unwrap();
+    raw[7] ^= 1;
+    forged.sig = b64u(&raw);
+    let forged2 = envelope_with(&r2.bytes, &forged, Hints::default());
+    // a validly signed seq 2 whose prev selects another record, and a seq 3
+    // that links to it
+    let other = release(1, None, &[k], "other");
+    let stray2 = release(2, Some(&other), &[k], "stray2");
+    let stray3 = release(3, Some(&stray2), &[k], "stray3");
+    let cases = [
+        (
+            "forged",
+            vec![envelope(&g, k), forged2, envelope(&r3, k)],
+            "peer https://peer.test seq 2: bad_signature",
+        ),
+        (
+            "prev",
+            vec![envelope(&g, k), envelope(&stray2, k), envelope(&stray3, k)],
+            "peer https://peer.test seq 2: prev does not select the record this edge holds at seq 1",
+        ),
+        (
+            "seq",
+            vec![envelope(&g, k), envelope(&r3, k), envelope(&r3, k)],
+            "peer https://peer.test seq 2: it answers with seq 3",
+        ),
+    ];
+    for (name, chain, why) in cases {
+        let fx = fx(&format!("walk-{name}"), &g, &[k]);
+        fx.offer(&g);
+        fx.peer_chain(&chain);
+        fx.peer_pack(&r3.pack);
+        let mut door = fx.door();
+        door.poll(true);
+        assert_eq!(fx.health().seq, Some(1), "{name}: {:?}", door.notes());
+        assert!(noted(&door, why), "{name}: {:?}", door.notes());
+        let calls = fx.http.calls();
+        assert!(calls.contains(&release_get(2)), "{name}: {calls:?}");
+        assert!(!calls.contains(&release_get(3)), "{name}: {calls:?}");
+        assert!(!calls.contains(&pack_get()), "{name}: {calls:?}");
+        // and the next poll still refuses it: the edge stays at 1
+        door.poll(true);
+        assert_eq!(fx.health().seq, Some(1), "{name}: {:?}", door.notes());
+    }
+}
+
+/// A peer's own claim of its current (the bare `release`) is never read:
+/// here it names seq 1, as a stale or stalling peer would; the edge walks
+/// the chain endpoint to 3 regardless.
+#[test]
+fn a_peer_that_lies_about_its_current_is_ignored() {
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let r2 = release(2, Some(&g), &[k], "r2");
+    let r3 = release(3, Some(&r2), &[k], "r3");
+    let fx = fx("walk-liar", &g, &[k]);
+    fx.peer_chain(&[envelope(&g, k), envelope(&r2, k), envelope(&r3, k)]);
+    fx.peer_pack(&r3.pack);
+    let bare = format!("{PEER}{}", sources::RELEASE_PATH);
+    fx.http.get_ok(&bare, envelope(&g, k));
+    let mut door = fx.door();
+    door.poll(true);
+    assert_eq!(fx.health().seq, Some(3), "{:?}", door.notes());
+    assert!(
+        !fx.http.calls().contains(&format!("GET {bare}")),
+        "{:?}",
+        fx.http.calls()
+    );
+}
+
+/// The walk is bounded per poll. One its budget cuts short resumes where
+/// it stopped (the verified records above the served one are held), and
+/// the peer's pack is asked for only once a walk reaches the end of the
+/// peer's chain.
+#[test]
+fn a_peer_walk_cut_short_by_its_budget_resumes_next_poll() {
+    let k = key(0);
+    let mut rels = vec![release(1, None, &[k], "w1")];
+    for n in 2..=5 {
+        let r = release(n, rels.last(), &[k], &format!("w{n}"));
+        rels.push(r);
+    }
+    let envs: Vec<Vec<u8>> = rels.iter().map(|r| envelope(r, k)).collect();
+    let fx = fx("walk-budget", &rels[0], &[k]);
+    fx.peer_chain(&envs);
+    fx.peer_pack(&rels[4].pack);
+    let mut door = fx.door();
+    door.set_walk_budget(2, WALK_BYTES);
+    let walked = |fx: &Fx| {
+        fx.http
+            .calls()
+            .into_iter()
+            .filter(|c| c.contains("/bnr-keychain/"))
+            .collect::<Vec<_>>()
+    };
+    door.poll(true);
+    assert_eq!(fx.health().state, "unverified", "{:?}", door.notes());
+    assert_eq!(walked(&fx), vec![release_get(1), release_get(2)]);
+    assert!(
+        noted(&door, "walk budget is spent; the walk resumes at seq 3"),
+        "{:?}",
+        door.notes()
+    );
+    door.poll(true);
+    assert_eq!(fx.health().state, "unverified", "{:?}", door.notes());
+    assert_eq!(walked(&fx)[2..], [release_get(3), release_get(4)]);
+    door.poll(true);
+    assert_eq!(fx.health().seq, Some(5), "{:?}", door.notes());
+    assert_eq!(
+        walked(&fx)[4..],
+        [release_get(5), release_get(6), pack_get()]
+    );
+    assert_eq!(fx.store().load().unwrap().unwrap().chain, envs);
+
+    // the byte budget bounds a walk too: checked before each request, so
+    // a poll fetches at most one envelope past it
+    let fx = self::fx("walk-bytes", &rels[0], &[k]);
+    fx.peer_chain(&envs);
+    let mut door = fx.door();
+    door.set_walk_budget(64, 1);
+    door.poll(true);
+    assert_eq!(walked(&fx), vec![release_get(1)]);
+}
+
+/// Every peer is walked from the served seq + 1, whatever another peer
+/// holds above it. Peer 1's walk reaches x4, whose pack is nowhere yet.
+/// Then peer 2 offers y2, y3, a valid branch from the served g, and peer 1's
+/// pack turns up. Peer 2 is still walked from seq 2, so the fork reaches the
+/// pool and the edge holds at g (rule 5) instead of taking x4.
+#[test]
+fn every_peer_is_walked_from_the_served_seq_whatever_another_holds() {
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let x2 = release(2, Some(&g), &[k], "x2");
+    let x3 = release(3, Some(&x2), &[k], "x3");
+    let x4 = release(4, Some(&x3), &[k], "x4");
+    let y2 = release(2, Some(&g), &[k], "y2");
+    let y3 = release(3, Some(&y2), &[k], "y3");
+    let mut fx = fx("walk-two-peers", &g, &[k]);
+    fx.cfg.peers.push(PEER2.into());
+    fx.offer(&g);
+    fx.inbox("g.json", &envelope(&g, k));
+    let mut door = fx.door();
+    door.poll(true);
+    assert_eq!(fx.health().seq, Some(1), "{:?}", door.notes());
+
+    fx.peer_chain(&[&g, &x2, &x3, &x4].map(|r| envelope(r, k)));
+    door.poll(true);
+    assert_eq!(fx.health().seq, Some(1), "no pack for x2..x4 anywhere yet");
+
+    fx.chain_at(PEER2, &[&g, &y2, &y3].map(|r| envelope(r, k)));
+    fx.peer_pack(&x4.pack);
+    let before = fx.http.calls().len();
+    door.poll(true);
+    let h = fx.health();
+    assert_eq!(
+        (h.seq, h.equivocation.map(|e| e.seq)),
+        (Some(1), Some(2)),
+        "{:?}",
+        door.notes()
+    );
+    let polled = fx.http.calls()[before..].to_vec();
+    assert!(polled.contains(&release_get_at(PEER2, 2)), "{polled:?}");
+}
+
+/// Each peer has its own walk budget, so a peer with a long chain cannot
+/// spend a poll's walk before another peer is asked. Peer 1 offers x2..x6
+/// (every pack on the ANT door) and spends its 3 requests on seq 1..3;
+/// peer 2's y2, y3 reach the same poll's pool, and the edge holds at g.
+#[test]
+fn a_long_chain_on_one_peer_does_not_starve_another() {
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let mut xs: Vec<Rel> = Vec::new();
+    for n in 2..=6 {
+        let r = release(n, Some(xs.last().unwrap_or(&g)), &[k], &format!("x{n}"));
+        xs.push(r);
+    }
+    let y2 = release(2, Some(&g), &[k], "y2");
+    let y3 = release(3, Some(&y2), &[k], "y3");
+    let mut fx = fx("walk-starve", &g, &[k]);
+    fx.cfg.peers.push(PEER2.into());
+    fx.offer(&g);
+    for r in &xs {
+        fx.offer(r);
+    }
+    let mut chain = vec![envelope(&g, k)];
+    chain.extend(xs.iter().map(|r| envelope(r, k)));
+    fx.peer_chain(&chain);
+    fx.chain_at(PEER2, &[&g, &y2, &y3].map(|r| envelope(r, k)));
+    let mut door = fx.door();
+    door.set_walk_budget(3, WALK_BYTES);
+    door.poll(true);
+    let h = fx.health();
+    assert_eq!(
+        (h.seq, h.equivocation.map(|e| e.seq)),
+        (Some(1), Some(2)),
+        "{:?}",
+        door.notes()
+    );
+    let calls = fx.http.calls();
+    for n in 1..=3 {
+        assert!(calls.contains(&release_get(n)), "{calls:?}");
+        assert!(calls.contains(&release_get_at(PEER2, n)), "{calls:?}");
+    }
+    assert!(!calls.contains(&release_get(4)), "{calls:?}");
+}
+
+/// A peer that no longer answers the chain an earlier poll held from it is
+/// walked again from the served seq + 1 in the same poll, so its other
+/// branch reaches the pool. Two ways: the record above what it answered
+/// before does not select it, or the record its chain ended at is gone.
+#[test]
+fn a_peer_that_changes_branch_is_walked_again_from_the_served_seq() {
+    let k = key(0);
+    let g = release(1, None, &[k], "g");
+    let x2 = release(2, Some(&g), &[k], "x2");
+    let x3 = release(3, Some(&x2), &[k], "x3");
+    let y2 = release(2, Some(&g), &[k], "y2");
+    let y3 = release(3, Some(&y2), &[k], "y3");
+    let y4 = release(4, Some(&y3), &[k], "y4");
+    let env = |r: &Rel| envelope(r, k);
+    let serving_g = |name: &str| {
+        let fx = fx(name, &g, &[k]);
+        fx.offer(&g);
+        fx.inbox("g.json", &env(&g));
+        let mut door = fx.door();
+        door.poll(true);
+        assert_eq!(fx.health().seq, Some(1), "{:?}", door.notes());
+        (fx, door)
+    };
+
+    // a budget cut leaves x2, x3 held; then seq 4 selects y3, not x3
+    let (fx, mut door) = serving_g("walk-parted");
+    fx.peer_chain(&[&g, &x2, &x3].map(env));
+    door.set_walk_budget(2, WALK_BYTES);
+    door.poll(true);
+    assert!(
+        noted(&door, "walk budget is spent; the walk resumes at seq 4"),
+        "{:?}",
+        door.notes()
+    );
+    fx.peer_chain(&[&g, &y2, &y3, &y4].map(env));
+    door.set_walk_budget(8, WALK_BYTES);
+    door.poll(true);
+    assert!(
+        noted(
+            &door,
+            "peer https://peer.test: its seq 4 does not select the seq 3 it answered before; walking it again from seq 2"
+        ),
+        "{:?}",
+        door.notes()
+    );
+    let h = fx.health();
+    assert_eq!(
+        (h.seq, h.equivocation.map(|e| e.seq)),
+        (Some(1), Some(2)),
+        "{:?}",
+        door.notes()
+    );
+
+    // the chain ended at x3 (no pack anywhere); then the peer has only y2
+    let (fx, mut door) = serving_g("walk-shortened");
+    fx.peer_chain(&[&g, &x2, &x3].map(env));
+    door.poll(true);
+    assert_eq!(fx.health().seq, Some(1), "{:?}", door.notes());
+    fx.peer_chain(&[&g, &y2].map(env));
+    door.poll(true);
+    assert!(
+        noted(
+            &door,
+            "peer https://peer.test: it no longer has seq 3; walking it again from seq 2"
+        ),
+        "{:?}",
+        door.notes()
+    );
+    // x3 selects x2, so x wins the fork at 2 (rule 5); y2 is kept as
+    // evidence of it
+    let y2_kept = b64u(&pq::sha3(&[&env(&y2)]));
+    assert!(evidence_names(&fx).contains(&y2_kept), "{:?}", door.notes());
+}
+
+/// The `--version` line names the commit it is given, and "unknown" for
+/// none or an empty one. Whether a build embeds KEYS_DOOR_COMMIT at all is
+/// not checked here (a test binary sees only its own build's value): CI's
+/// version stamp step builds with it and compares the binary's output.
+#[test]
+fn version_line_names_the_given_commit_or_unknown() {
+    let pkg = env!("CARGO_PKG_VERSION");
+    assert_eq!(
+        crate::version_line(Some(COMMIT)),
+        format!("keys-door {pkg} (commit {COMMIT})")
+    );
+    for none in [Some(""), None] {
+        assert_eq!(
+            crate::version_line(none),
+            format!("keys-door {pkg} (commit unknown)")
+        );
+    }
 }
 
 // ---------------------------------------------------------------------------
