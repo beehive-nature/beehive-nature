@@ -1,0 +1,74 @@
+{
+  "schema": "btmd-budgets-1",
+  "lane": "BT-MESH-DEPENDABILITY-001",
+  "published": "2026-10-12",
+  "scope_note": "ACCEPTANCE BUDGETS for the local controlled rig (netns-isolated x0x mesh, pinned release binaries). These are PROPOSED ENGINEERING TARGETS for the mechanism battery, judged against MEASURED results recorded separately in each receipt. They are NOT public-mesh absolute idle-bill figures; the public-mesh capture belongs to the #622 packet. This file is hash-bound into every receipt before the first trial; a changed budget is a new file and a re-run, never a relabel.",
+  "roles": {
+    "infra-seed": {
+      "description": "always-on bootstrap seed (operator-owned, wired/datacenter); carries bootstrap+discovery duty",
+      "byte_budget": "none (upstream 504-leaf-egress-budget s4.1: no Leaf budget for Full/seed/relay)",
+      "cpu_percent_sustained_max": 100,
+      "rss_mib_max": 512,
+      "join_to_ready_secs_max": 60,
+      "revocation_visibility_secs_max": 15
+    },
+    "relay-full": {
+      "description": "always-on pass-through relay (gossip.relay = true); must relay Critical and revocation",
+      "byte_budget": "none, but total forwarded work is ACCOUNTED in every cost table",
+      "cpu_percent_sustained_max": 100,
+      "rss_mib_max": 512,
+      "revocation_visibility_secs_max": 15
+    },
+    "desktop-leaf": {
+      "description": "ordinary desktop client (Leaf, moderate subscriptions, targeted traffic)",
+      "idle_combined_bytes_per_min_max": 8388608,
+      "cpu_percent_sustained_max": 25,
+      "rss_mib_max": 256,
+      "subscriptions_max": 8,
+      "join_to_ready_secs_max": 60,
+      "targeted_dm_p95_secs_max": 3,
+      "revocation_visibility_secs_max": 15
+    },
+    "constrained-leaf": {
+      "description": "mobile/embedded client (W@tch shape: one small CRDT KV store, targeted sync, bounded bursts)",
+      "idle_combined_bytes_per_min_max": 2097152,
+      "cpu_percent_sustained_max": 15,
+      "rss_mib_max": 128,
+      "subscriptions_max": 4,
+      "join_to_ready_secs_max": 90,
+      "targeted_dm_p95_secs_max": 3,
+      "revocation_visibility_secs_max": 15,
+      "kv_convergence_secs_max": 30
+    }
+  },
+  "delivery_gates": {
+    "targeted_dm": { "delivered_frac_min": 1.0, "deadline_secs": 10, "lost_max": 0 },
+    "revocation": { "visible_frac_min": 1.0, "deadline_secs": 15, "note": "revocation must NEVER be shed by any candidate profile" },
+    "kv_sync": { "convergence_secs_max": 30, "acknowledged_put_survives_restart": true },
+    "group_ops": { "success_frac_min": 1.0 },
+    "duplicates": { "allowed": true, "double_external_apply_max": 0 },
+    "replay": { "allowed": true, "new_authorization_max": 0 }
+  },
+  "recovery_gates": {
+    "restart_to_ready_secs_max": 60,
+    "identity_preserved": true,
+    "unknown_preserved": true,
+    "partition_heal_rejoin_secs_max": 60,
+    "bootstrap_removed_rejoin_secs_max": 120,
+    "bootstrap_removed_degradation": "a named degradation receipt is acceptable; silent failure is not",
+    "corrupted_state": "fail-closed with a receipt; identity preserved; no partial application"
+  },
+  "continuity_gates": {
+    "upgrade_v046_0_to_v047_1": { "identity_preserved": true, "history_and_stores_readable": true, "delivery_works_after": true },
+    "downgrade_x0xkvs2": "fail-closed refusal with no corruption (upstream-documented law; verified, not assumed)",
+    "cold_replacement": "recovery from copied state dirs + fresh binary dir alone, no original installation"
+  },
+  "adaptation_gates": {
+    "hostile_bulk_flood": {
+      "leaf_egress_max_multiple_of_idle_budget": 3,
+      "revocation_still_delivered": true,
+      "no_resource_runaway": "rss/cpu stay within the role budget under a bounded flood"
+    },
+    "verdict_source": "kernel veth counters and /proc only; daemon diagnostics are recorded, never verdict sources"
+  }
+}
