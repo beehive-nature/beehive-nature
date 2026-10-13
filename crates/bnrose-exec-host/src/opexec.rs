@@ -407,24 +407,58 @@ impl Supervisor {
                 continue; // custody transfer: journal-level, no operation state
             }
             last_event.insert(r.op_id, r.event);
-            if r.event == E_ADMITTED {
-                if r.payload.len() < 130 {
-                    return Err("journal:admitted-record-short".into());
+            // both admission kinds create an entity; the NONCE maps to the
+            // LOGICAL root (steps share one authorization by design — the
+            // #408 handoff law), so a duplicate under a DIFFERENT root is
+            // the alarm, and steps of one root are the workflow
+            let admission: Option<([u8; 32], [u8; 64], Vec<u8>, [u8; 32])> = match r.event {
+                E_ADMITTED => {
+                    if r.payload.len() < 130 {
+                        return Err("journal:admitted-record-short".into());
+                    }
+                    let authority: [u8; 32] = r.payload[..32].try_into().unwrap();
+                    let sig: [u8; 64] = r.payload[32..96].try_into().unwrap();
+                    let env_len = u16::from_le_bytes([r.payload[128], r.payload[129]]) as usize;
+                    if r.payload.len() < 130 + env_len {
+                        return Err("journal:admitted-record-short".into());
+                    }
+                    Some((
+                        authority,
+                        sig,
+                        r.payload[130..130 + env_len].to_vec(),
+                        r.op_id,
+                    ))
                 }
-                let authority: [u8; 32] = r.payload[..32].try_into().unwrap();
-                let sig: [u8; 64] = r.payload[32..96].try_into().unwrap();
-                let env_len = u16::from_le_bytes([r.payload[128], r.payload[129]]) as usize;
-                if r.payload.len() < 130 + env_len {
-                    return Err("journal:admitted-record-short".into());
+                bnrose_exec_core::E_STEP_ADMITTED => {
+                    if r.payload.len() < 35 + 130 {
+                        return Err("journal:step-record-short".into());
+                    }
+                    let root: [u8; 32] = r.payload[..32].try_into().unwrap();
+                    let label_len = r.payload[33] as usize;
+                    let rest = &r.payload[34 + label_len..];
+                    if rest.len() < 130 {
+                        return Err("journal:step-record-short".into());
+                    }
+                    let authority: [u8; 32] = rest[..32].try_into().unwrap();
+                    let sig: [u8; 64] = rest[32..96].try_into().unwrap();
+                    let env_len = u16::from_le_bytes([rest[128], rest[129]]) as usize;
+                    if rest.len() < 130 + env_len {
+                        return Err("journal:step-record-short".into());
+                    }
+                    Some((authority, sig, rest[130..130 + env_len].to_vec(), root))
                 }
-                let env = r.payload[130..130 + env_len].to_vec();
+                _ => None,
+            };
+            if let Some((authority, sig, env, root)) = admission {
                 let intent = btungsten_wb001::decode(&env)
                     .map_err(|e| format!("journal:wb001:{}", e.code()))?;
-                if nonces.insert((authority, intent.nonce), r.op_id).is_some() {
-                    return Err(format!(
-                        "journal:nonce-duplicate — two admitted operations share one authorization ({})",
-                        hex(&r.op_id)
-                    ));
+                if let Some(prev_root) = nonces.insert((authority, intent.nonce), root) {
+                    if prev_root != root {
+                        return Err(format!(
+                            "journal:nonce-duplicate — one authorization claimed by two logical operations ({})",
+                            hex(&r.op_id)
+                        ));
+                    }
                 }
                 let mut st = OpState::ADMITTED_ZERO;
                 st.seq = r.seq;
@@ -447,12 +481,35 @@ impl Supervisor {
             rp.state = next;
             rp.state.seq = r.seq;
         }
+        // 2b. ORPHAN-ROW ALARM: an effect row whose entity the journal
+        // never admitted is not evidence of anything — it is unaccounted
+        // history, and recovery fails closed on it (missing history stays
+        // a finding, never a silent downgrade)
+        for row in &rows {
+            if !ops.contains_key(&row.op_id) {
+                return Err(format!(
+                    "ledger:orphan-row — a row exists for {} that no admission accounts for",
+                    hex(&row.op_id)
+                ));
+            }
+        }
         // 3. reconcile each operation against the ledger
         let mut report_ops = Vec::new();
         let mut unknowns = Vec::new();
         for (op, rp) in ops.iter_mut() {
             let env_hash = env_sha_of(&rp.env);
             let row = rows.iter().find(|row| row.op_id == *op);
+            // EVERY row must bind its entity — completed operations too: a
+            // false duplicate that landed first must not survive recovery
+            if let Some(row) = row {
+                let bound = rp.state.bound_effect;
+                if row.env_sha != env_hash || (bound != [0u8; 32] && row.effect_digest != bound) {
+                    return Err(format!(
+                        "ledger:binding-mismatch — row for {} does not match the journal's binding",
+                        hex(op)
+                    ));
+                }
+            }
             // the invariant, re-verified on the healed state: the envelope
             // still binds under the authority the journal recorded
             let invariant = btungsten_wb001::verify_envelope(&rp.authority, &rp.env, &rp.sig);
@@ -759,24 +816,337 @@ impl Supervisor {
     }
 }
 
-/// The (authority, nonce) → op map of every admitted record.
+/// The (authority, nonce) → LOGICAL-OPERATION map: E_ADMITTED entities map
+/// to themselves; E_STEP_ADMITTED entities map to the root operation they
+/// belong to (steps of one workflow share one authorization BY DESIGN —
+/// the #408 handoff law). A second admission of the same authorization
+/// under a DIFFERENT root is the alarm; steps continuing their own root is
+/// the workflow.
 pub fn nonces_of(
     records: &[journal::Record],
 ) -> Result<BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>, String> {
     let mut m = BTreeMap::new();
     for r in records {
-        if r.event == E_ADMITTED && r.payload.len() >= 130 {
-            let authority: [u8; 32] = r.payload[..32].try_into().unwrap();
-            let env_len = u16::from_le_bytes([r.payload[128], r.payload[129]]) as usize;
-            if r.payload.len() < 130 + env_len {
-                return Err("journal: admitted record shorter than its envelope".into());
+        match r.event {
+            E_ADMITTED if r.payload.len() >= 130 => {
+                let authority: [u8; 32] = r.payload[..32].try_into().unwrap();
+                let env_len = u16::from_le_bytes([r.payload[128], r.payload[129]]) as usize;
+                if r.payload.len() < 130 + env_len {
+                    return Err("journal: admitted record shorter than its envelope".into());
+                }
+                let env = &r.payload[130..130 + env_len];
+                let intent =
+                    btungsten_wb001::decode(env).map_err(|e| format!("wb001:{}", e.code()))?;
+                m.insert((authority, intent.nonce), r.op_id);
             }
-            let env = &r.payload[130..130 + env_len];
-            let intent = btungsten_wb001::decode(env).map_err(|e| format!("wb001:{}", e.code()))?;
-            m.insert((authority, intent.nonce), r.op_id);
+            bnrose_exec_core::E_STEP_ADMITTED if r.payload.len() >= 35 + 130 => {
+                let root: [u8; 32] = r.payload[..32].try_into().unwrap();
+                let label_len = r.payload[33] as usize;
+                if r.payload.len() < 34 + label_len + 130 {
+                    return Err("journal: step record shorter than its envelope".into());
+                }
+                let authority: [u8; 32] = r.payload[34 + label_len..34 + label_len + 32]
+                    .try_into()
+                    .unwrap();
+                let env_len = u16::from_le_bytes([
+                    r.payload[34 + label_len + 128],
+                    r.payload[34 + label_len + 129],
+                ]) as usize;
+                if r.payload.len() < 34 + label_len + 130 + env_len {
+                    return Err("journal: step record shorter than its envelope".into());
+                }
+                let env = &r.payload[34 + label_len + 130..34 + label_len + 130 + env_len];
+                let intent =
+                    btungsten_wb001::decode(env).map_err(|e| format!("wb001:{}", e.code()))?;
+                m.insert((authority, intent.nonce), root);
+            }
+            _ => {}
         }
     }
     Ok(m)
+}
+
+/// One reconstructed STEP of one logical operation, rebuilt from the
+/// journal alone (what a genuinely new process sees).
+#[derive(Clone, Debug)]
+pub struct StepEntity {
+    pub root: [u8; 32],
+    pub step: u8,
+    pub label: String,
+    pub env: Vec<u8>,
+    pub sig: [u8; 64],
+    pub authority: [u8; 32],
+    pub state: OpState,
+}
+
+/// Reconstruct every step entity of the journal (the new-process view):
+/// parse each E_STEP_ADMITTED, replay its records through the same core.
+pub fn step_entities(records: &[journal::Record]) -> Result<BTreeMap<u8, StepEntity>, String> {
+    let mut by_id: BTreeMap<[u8; 32], StepEntity> = BTreeMap::new();
+    let mut order: BTreeMap<u8, [u8; 32]> = BTreeMap::new();
+    for r in records {
+        if r.event == bnrose_exec_core::E_STEP_ADMITTED {
+            if r.payload.len() < 35 + 130 {
+                return Err("journal: step record short".into());
+            }
+            let root: [u8; 32] = r.payload[..32].try_into().unwrap();
+            let step = r.payload[32];
+            let label_len = r.payload[33] as usize;
+            if r.payload.len() < 34 + label_len + 1 + 130 {
+                return Err("journal: step label overruns the record".into());
+            }
+            let label = String::from_utf8_lossy(&r.payload[34..34 + label_len]).into_owned();
+            let rest = &r.payload[34 + label_len..];
+            let authority: [u8; 32] = rest[..32].try_into().unwrap();
+            let sig: [u8; 64] = rest[32..96].try_into().unwrap();
+            let env_len = u16::from_le_bytes([rest[128], rest[129]]) as usize;
+            if rest.len() < 130 + env_len {
+                return Err("journal: step record shorter than its envelope".into());
+            }
+            let env = rest[130..130 + env_len].to_vec();
+            let mut st = OpState::ADMITTED_ZERO;
+            st.seq = r.seq;
+            by_id.insert(
+                r.op_id,
+                StepEntity {
+                    root,
+                    step,
+                    label,
+                    env,
+                    sig,
+                    authority,
+                    state: st,
+                },
+            );
+            order.insert(step, r.op_id);
+            continue;
+        }
+        if let Some(ent) = by_id.get_mut(&r.op_id) {
+            let next = bnrose_exec_core::transition(&ent.state, r.event, &r.payload, 0, u64::MAX)
+                .map_err(|e| format!("journal:replay-refused-{}", e.word()))?;
+            ent.state = next;
+            ent.state.seq = r.seq;
+        }
+    }
+    let mut out = BTreeMap::new();
+    for (_, id) in order {
+        if let Some(e) = by_id.get(&id) {
+            out.insert(e.step, e.clone());
+        }
+    }
+    Ok(out)
+}
+
+impl Supervisor {
+    /// Run one step-based workflow under ONE authorization (the #408
+    /// handoff law made executable). Reconstruction is from the JOURNAL —
+    /// a genuinely new process sees the same steps this one does. The
+    /// rules: a terminal step is skipped; an UNRESOLVED step refuses the
+    /// whole invocation (no unauthorized replacement — no new signed
+    /// attempt, no new effect); an unstarted step runs to completion
+    /// (or, with `lose_response_at_last`, to the crash point after its
+    /// effect). Recovery — not re-invocation — is what resolves an
+    /// unresolved step.
+    pub fn run_steps(
+        &mut self,
+        intent: &crate::fixtures::IntentFile,
+        clock: u64,
+        bounds: &Bounds,
+        steps: &[(&str, bool)],
+    ) -> RunOutcome {
+        let none = RunOutcome {
+            op: None,
+            refused: None,
+            lost_response: false,
+            receipt: None,
+            receipt_path: None,
+            receipt_json: None,
+        };
+        if steps.is_empty() || steps.len() > bnrose_exec_core::MAX_STEPS {
+            return RunOutcome {
+                refused: Some(format!("steps:count {} out of 1..=8", steps.len())),
+                ..none
+            };
+        }
+        if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
+            return RunOutcome {
+                refused: Some("wb001:binding-refused".into()),
+                ..none
+            };
+        }
+        let decoded = match btungsten_wb001::decode(&intent.env) {
+            Ok(i) => i,
+            Err(_) => {
+                return RunOutcome {
+                    refused: Some("wb001:undecodable".into()),
+                    ..none
+                }
+            }
+        };
+        let root = op_id_of(&intent.authority, &intent.env);
+        // the new-process reconstruction: what exists, at which state
+        let records = match ReplicatedJournal::load_state(
+            &replica_paths(&self.state_dir),
+            &self.keys.journal_mac,
+        ) {
+            Ok((records, _)) => records,
+            Err(e) => {
+                return RunOutcome {
+                    refused: Some(format!("journal:{e}")),
+                    ..none
+                }
+            }
+        };
+        let nonces = match nonces_of(&records) {
+            Ok(n) => n,
+            Err(e) => {
+                return RunOutcome {
+                    refused: Some(format!("journal:{e}")),
+                    ..none
+                }
+            }
+        };
+        if let Some(prev_root) = nonces.get(&(intent.authority, decoded.nonce)) {
+            if *prev_root != root {
+                return RunOutcome {
+                    refused: Some("admission:nonce-reuse — the authorization already lives in another operation".into()),
+                    ..none
+                };
+            }
+        }
+        let existing = match step_entities(&records) {
+            Ok(e) => e,
+            Err(e) => {
+                return RunOutcome {
+                    refused: Some(format!("journal:{e}")),
+                    ..none
+                }
+            }
+        };
+        let env_sha = env_sha_of(&intent.env);
+        for (idx, (label, lose)) in steps.iter().enumerate() {
+            let step = idx as u8;
+            match existing.get(&step) {
+                None => {
+                    // run THIS step to its end
+                    let id = bnrose_exec_core::step_op_id(&root, step);
+                    let effect = bnrose_exec_core::step_effect_digest(&root, &env_sha, step);
+                    let mut payload = Vec::with_capacity(intent.env.len() + 180);
+                    payload.extend_from_slice(&root);
+                    payload.push(step);
+                    let label_b = label.as_bytes();
+                    payload.push(label_b.len() as u8);
+                    payload.extend_from_slice(label_b);
+                    payload.extend_from_slice(&intent.authority);
+                    payload.extend_from_slice(&intent.sig);
+                    payload.extend_from_slice(&policy_digest(&self.policy.wire()));
+                    payload.extend_from_slice(&(intent.env.len() as u16).to_le_bytes());
+                    payload.extend_from_slice(&intent.env);
+                    let name = self.worker.name();
+                    payload.push(name.len() as u8);
+                    payload.extend_from_slice(name.as_bytes());
+                    if let Err(e) =
+                        self.journal
+                            .append(&id, bnrose_exec_core::E_STEP_ADMITTED, &payload)
+                    {
+                        return RunOutcome {
+                            refused: Some(format!("journal:{e}")),
+                            op: Some(id),
+                            ..none
+                        };
+                    }
+                    let mut state = OpState::ADMITTED_ZERO;
+                    state.seq = 0;
+                    let res = reservations_payload(bounds);
+                    let expiry = decoded.expiry;
+                    for (event, pl) in [
+                        (bnrose_exec_core::E_RESERVE, res.as_slice()),
+                        (E_DISPATCH, effect.as_slice()),
+                    ] {
+                        if let Err(w) = self
+                            .step_and_journal(&id, &env_sha, &mut state, event, pl, clock, expiry)
+                        {
+                            return RunOutcome {
+                                refused: Some(w),
+                                op: Some(id),
+                                ..none
+                            };
+                        }
+                    }
+                    // the step's EXACT signed bytes and identity are already
+                    // durable (the step record carries envelope + signature);
+                    // the effect commits after the acknowledgement
+                    if let Err(e) = self.ledger.apply(&id, &env_sha, &effect, clock) {
+                        return RunOutcome {
+                            refused: Some(format!("ledger:{e}")),
+                            op: Some(id),
+                            ..none
+                        };
+                    }
+                    if *lose {
+                        return RunOutcome {
+                            op: Some(id),
+                            refused: None,
+                            lost_response: true,
+                            receipt: None,
+                            receipt_path: None,
+                            receipt_json: None,
+                        };
+                    }
+                    if let Err(w) = self.step_and_journal(
+                        &id,
+                        &env_sha,
+                        &mut state,
+                        E_RESPONSE,
+                        &[1],
+                        clock,
+                        expiry,
+                    ) {
+                        return RunOutcome {
+                            refused: Some(w),
+                            op: Some(id),
+                            ..none
+                        };
+                    }
+                    return match self.issue_receipt(&id, &env_sha, state, &effect, clock) {
+                        Ok((r, p, v)) => RunOutcome {
+                            op: Some(id),
+                            refused: None,
+                            lost_response: false,
+                            receipt: Some(r),
+                            receipt_path: Some(p),
+                            receipt_json: Some(v),
+                        },
+                        Err(e) => RunOutcome {
+                            refused: Some(e),
+                            op: Some(id),
+                            ..none
+                        },
+                    };
+                }
+                Some(ent) => {
+                    use bnrose_exec_core::{S_COMPLETED, S_FAILED};
+                    if matches!(ent.state.state, S_COMPLETED | S_FAILED) {
+                        continue; // a finished step is a finished step
+                    }
+                    // an UNRESOLVED step: memory was lost, the step was not
+                    return RunOutcome {
+                        op: Some(bnrose_exec_core::step_op_id(&root, step)),
+                        refused: Some(format!(
+                            "step:{}:unresolved — replacement refused; recovery is the resolver",
+                            ent.label
+                        )),
+                        ..none
+                    };
+                }
+            }
+        }
+        RunOutcome {
+            op: Some(root),
+            refused: Some("workflow:complete — every step already terminal".into()),
+            ..none
+        }
+    }
 }
 
 /// Custody transfer (SPEC-RUSTEOSVM-1 §2.6): verify the whole durable

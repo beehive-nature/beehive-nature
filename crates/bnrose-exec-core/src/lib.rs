@@ -103,6 +103,14 @@ pub const E_RECOVERY_NONE: u8 = 7;
 /// carried across.
 pub const E_MIGRATION: u8 = 8;
 
+/// The journal event that creates one STEP of a logical operation
+/// (SPEC-RUSTEOSVM-1 §2, the #408 handoff law: one authorization, many
+/// legitimate steps — no unauthorized replacement of an UNRESOLVED step).
+/// Payload: `root_op 32 | step u8 | label_len u8 | label |` then the same
+/// admission fields as E_ADMITTED (authority, signature, policy digest,
+/// envelope, worker name).
+pub const E_STEP_ADMITTED: u8 = 9;
+
 /// Every refusal the core can name. The string is the receipt's word for it.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Refusal {
@@ -249,6 +257,27 @@ pub fn env_sha(env: &[u8]) -> [u8; 32] {
 /// the committed intent. The effect ledger accepts nothing else for this id.
 pub fn effect_digest(op: &[u8; 32], env_hash: &[u8; 32]) -> [u8; 32] {
     tagged(b"bnrose-exec/effect/1", &[op, env_hash])
+}
+
+/// How many ordered steps one logical operation may declare
+/// (SPEC-RUSTEOSVM-1: propose, approve, execute … — each a legitimate
+/// transaction-bearing step under ONE authorization).
+pub const MAX_STEPS: usize = 8;
+
+/// The journal entity one step's records hang on: derived from the logical
+/// operation's id and the step index, so a step is addressable in the
+/// ledger and the journal without a second authorization.
+pub fn step_op_id(op: &[u8; 32], step: u8) -> [u8; 32] {
+    tagged(b"bnrose-exec/step-id/1", &[op, &[step]])
+}
+
+/// The one external effect one STEP may produce: the step entity's own
+/// op-level digest (the ledger re-derives this formula from the row's
+/// bytes, so the step effect MUST be expressible as
+/// `effect_digest(step_op_id, env_sha)` — distinct from every other
+/// entity's digest, and checkable by the same ledger code).
+pub fn step_effect_digest(op: &[u8; 32], env_hash: &[u8; 32], step: u8) -> [u8; 32] {
+    effect_digest(&step_op_id(op, step), env_hash)
 }
 
 /// A journal record's content digest (the receipt binds the head of these).

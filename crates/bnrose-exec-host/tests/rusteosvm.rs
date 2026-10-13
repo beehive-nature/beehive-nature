@@ -276,3 +276,253 @@ fn stale_authority_is_refused_at_admission_by_the_supervisor() {
     assert!(rows.is_empty());
     let _ = Value::Null;
 }
+
+// ---- the #408 handoff rows: one authorization, many legitimate steps ----
+
+#[test]
+fn a_three_step_workflow_completes_under_one_authorization() {
+    let mut s = sup("steps3");
+    let f = fixture(20, NOW, 600);
+    let intent = read_intent(&f.to_json()).unwrap();
+    for _ in 0..3 {
+        let out = s.run_steps(
+            &intent,
+            NOW,
+            &Bounds::default(),
+            &[("propose", false), ("approve", false), ("execute", false)],
+        );
+        assert!(out.refused.is_none(), "{:?}", out.refused);
+    }
+    // three step effects under ONE authorization (one root, one nonce)
+    let rows = bnrose_exec_host::ledger::load(&s.state_dir.join("effects.bin"), &s.keys.ledger_mac)
+        .unwrap();
+    assert_eq!(rows.len(), 3, "one effect per legitimate step");
+    let (records, _) = bnrose_exec_host::journal::ReplicatedJournal::load_state(
+        &bnrose_exec_host::opexec::replica_paths(&s.state_dir),
+        &s.keys.journal_mac,
+    )
+    .unwrap();
+    let nonces = bnrose_exec_host::opexec::nonces_of(&records).unwrap();
+    assert_eq!(nonces.len(), 1, "one authorization across three steps");
+    // re-invocation of a complete workflow refuses (nothing left to do)
+    let again = s.run_steps(
+        &intent,
+        NOW,
+        &Bounds::default(),
+        &[("propose", false), ("approve", false), ("execute", false)],
+    );
+    assert_eq!(
+        again
+            .refused
+            .as_deref()
+            .map(|r| r.starts_with("workflow:complete")),
+        Some(true)
+    );
+    println!("rusteosvm/#408: propose/approve/execute completed — 3 effects, 1 authorization, re-invocation refused");
+}
+
+#[test]
+fn the_killed_step_refuses_replacement_recovers_and_the_workflow_resumes() {
+    let state = tmp("step-crash");
+    bnrose_exec_host::keys::SupervisorKeys::init(&state, &[0x6a; 32]).unwrap();
+    {
+        let mut s = Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
+        let f = fixture(21, NOW, 600);
+        let intent0 = read_intent(&f.to_json()).unwrap();
+        let first = s.run_steps(
+            &intent0,
+            NOW,
+            &Bounds::default(),
+            &[("propose", false), ("approve", true)],
+        );
+        assert!(first.refused.is_none(), "{:?}", first.refused);
+        let out = s.run_steps(
+            &intent0,
+            NOW,
+            &Bounds::default(),
+            &[("propose", false), ("approve", true)],
+        ); // crash AFTER approve's effect
+        assert!(out.lost_response, "approve stopped at the crash point");
+    }
+    let f = fixture(21, NOW, 600);
+    let intent = read_intent(&f.to_json()).unwrap();
+    // a GENUINELY new process reconstructs from the journal and REFUSES to
+    // replace the unresolved step — with no new signed attempt (the record
+    // count is the proof)
+    let (before, _) = bnrose_exec_host::journal::ReplicatedJournal::load_state(
+        &bnrose_exec_host::opexec::replica_paths(&state),
+        &bnrose_exec_host::keys::SupervisorKeys::from_root(&[0x6a; 32]).journal_mac,
+    )
+    .unwrap();
+    let mut s2 = Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
+    let refused = s2.run_steps(
+        &intent,
+        NOW + 5,
+        &Bounds::default(),
+        &[("propose", false), ("approve", false), ("execute", false)],
+    );
+    assert!(
+        refused
+            .refused
+            .as_deref()
+            .unwrap_or("")
+            .contains("step:approve:unresolved"),
+        "{:?}",
+        refused.refused
+    );
+    let (after, _) = bnrose_exec_host::journal::ReplicatedJournal::load_state(
+        &bnrose_exec_host::opexec::replica_paths(&state),
+        &bnrose_exec_host::keys::SupervisorKeys::from_root(&[0x6a; 32]).journal_mac,
+    )
+    .unwrap();
+    assert_eq!(
+        before.len(),
+        after.len(),
+        "memory loss created no new signed attempt"
+    );
+    // the exact signed bytes were durable BEFORE dispatch: the step's
+    // admission record carries the envelope and signature byte-for-byte
+    let step_rec = after
+        .iter()
+        .find(|r| r.event == bnrose_exec_core::E_STEP_ADMITTED && r.payload[32] == 1)
+        .expect("approve's step admission");
+    {
+        let label_len = step_rec.payload[33] as usize;
+        let rest = &step_rec.payload[34 + label_len..];
+        let env_len = u16::from_le_bytes([rest[128], rest[129]]) as usize;
+        assert_eq!(
+            &rest[130..130 + env_len],
+            &f.env[..],
+            "the exact signed bytes persisted"
+        );
+        assert_eq!(&rest[32..96], &f.sig[..], "the signature persisted");
+    }
+    // recovery — not re-invocation — resolves the unresolved step
+    let report = s2.recover(NOW + 10).unwrap();
+    assert!(report["ops"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|o| o["stateAfter"] == "completed" && o["recovered"] == serde_json::json!(true)));
+    // and the workflow RESUMES: execute runs under the same authorization
+    let resumed = s2.run_steps(
+        &intent,
+        NOW + 15,
+        &Bounds::default(),
+        &[("propose", false), ("approve", false), ("execute", false)],
+    );
+    assert!(resumed.refused.is_none(), "{:?}", resumed.refused);
+    let rows =
+        bnrose_exec_host::ledger::load(&state.join("effects.bin"), &s2.keys.ledger_mac).unwrap();
+    assert_eq!(
+        rows.len(),
+        3,
+        "three legitimate effects, never a replacement"
+    );
+    // the whole-authorization replay (single-shot run) is still refused
+    let replay = s2.run(&intent, NOW + 20, false, &Bounds::default());
+    assert_eq!(
+        replay
+            .refused
+            .as_deref()
+            .map(|r| r.starts_with("admission:nonce-reuse")),
+        Some(true)
+    );
+    println!("rusteosvm/#408: unresolved step refused replacement with zero new records; recovered by evidence; workflow resumed; replay refused");
+}
+
+#[test]
+fn an_orphan_ledger_row_fails_recovery_closed() {
+    let mut s = sup("orphan");
+    let f = fixture(22, NOW, 600);
+    assert!(s
+        .run(
+            &read_intent(&f.to_json()).unwrap(),
+            NOW,
+            false,
+            &Bounds::default()
+        )
+        .refused
+        .is_none());
+    // an effect row for an entity no admission accounts for: unaccounted
+    // history, never silent evidence
+    let ghost = [0xee; 32];
+    let ghost_env = [0xef; 32];
+    let digest = bnrose_exec_core::effect_digest(&ghost, &ghost_env);
+    s.ledger.apply(&ghost, &ghost_env, &digest, NOW).unwrap();
+    drop(s);
+    let mut s2 = Supervisor::open(
+        &tmp_of_orphan(),
+        Box::new(NativeWorker::new()),
+        test_policy(),
+    )
+    .unwrap();
+    let err = s2.recover(NOW).unwrap_err();
+    assert!(err.contains("orphan-row"), "{err}");
+}
+
+#[test]
+fn a_false_duplicate_is_absorbed_and_a_landed_first_one_fails_recovery_closed() {
+    let state = tmp("false-dup");
+    bnrose_exec_host::keys::SupervisorKeys::init(&state, &[0x6b; 32]).unwrap();
+    {
+        let mut s = Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
+        let f = fixture(23, NOW, 600);
+        let out = s.run_steps(
+            &read_intent(&f.to_json()).unwrap(),
+            NOW,
+            &Bounds::default(),
+            &[("propose", true)], // crash after the first step's effect
+        );
+        assert!(out.lost_response);
+        let step_id = out.op.unwrap();
+        // a FALSE duplicate: a row for the same step id under a DIFFERENT
+        // binding — a lying "already applied" that matches nothing the
+        // journal dispatched
+        let wrong_env = [0xab; 32];
+        let wrong = bnrose_exec_core::effect_digest(&step_id, &wrong_env);
+        s.ledger
+            .apply(&step_id, &wrong_env, &wrong, NOW + 1)
+            .unwrap();
+    }
+    // the ledger ABSORBED the false duplicate: the true row (written at
+    // the effect) stands, count stays one, and recovery completes from
+    // the TRUE binding only — a lie cannot displace what happened
+    let key = bnrose_exec_host::keys::SupervisorKeys::from_root(&[0x6b; 32]);
+    let rows = bnrose_exec_host::ledger::load(&state.join("effects.bin"), &key.ledger_mac).unwrap();
+    assert_eq!(rows.len(), 1);
+    let mut s2 = Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
+    let report = s2.recover(NOW + 2).unwrap();
+    assert_eq!(report["ops"][0]["recovered"], serde_json::json!(true));
+    // the lands-first variant: a false duplicate PRE-SEEDED for a future
+    // (deterministic) operation id makes the run complete against a
+    // wrong row — and recovery then fails CLOSED on the binding
+    let state2 = tmp("false-dup-first");
+    bnrose_exec_host::keys::SupervisorKeys::init(&state2, &[0x6c; 32]).unwrap();
+    let f2 = fixture(24, NOW, 600);
+    let intent2 = read_intent(&f2.to_json()).unwrap();
+    let future = bnrose_exec_core::op_id(&intent2.authority, &intent2.env);
+    {
+        let mut l = bnrose_exec_host::ledger::EffectLedger::open(
+            &state2.join("effects.bin"),
+            &bnrose_exec_host::keys::SupervisorKeys::from_root(&[0x6c; 32]).ledger_mac,
+        )
+        .unwrap();
+        let wrong_env = [0xcd; 32];
+        let wrong = bnrose_exec_core::effect_digest(&future, &wrong_env);
+        l.apply(&future, &wrong_env, &wrong, NOW).unwrap();
+    }
+    let mut s3 = Supervisor::open(&state2, Box::new(NativeWorker::new()), test_policy()).unwrap();
+    let seeded = s3.run(&intent2, NOW, false, &Bounds::default());
+    let _ = seeded; // the run may complete (its apply was Already'd) — the
+                    // RECOVERY is where the lie must fail closed
+    let err = s3.recover(NOW + 1).unwrap_err();
+    assert!(
+        err.contains("binding-mismatch"),
+        "the pre-seeded false row survived: {err}"
+    );
+}
+
+fn tmp_of_orphan() -> std::path::PathBuf {
+    std::env::temp_dir().join(format!("bnrose-rusteosvm-orphan-{}", std::process::id()))
+}
