@@ -446,7 +446,10 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     page6c.on('pageerror', e => errs6.push('restart: ' + String(e)));
     await page6c.goto(ORIGIN + '/surfaces/bdrop.html#fast');
     await page6c.waitForSelector('body[data-reg]', { timeout: 8000 });
-    await step('restart after mid-handoff closure reconciles from the chain', () => page6c.waitForFunction(() => /bdrop-keychain-closed-midhandoff[^\n]*confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 20000 }));
+    /* widened 2026-10-13: the same invariant on a CI-calmer window — the eternal job runs ~100
+       suites under CPU contention, and 20s starved this reconcile twice on main's own runs
+       (38322545384) with no code change anywhere near the path */
+    await step('restart after mid-handoff closure reconciles from the chain', () => page6c.waitForFunction(() => /bdrop-keychain-closed-midhandoff[^\n]*confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 45000 }));
     ok('mid-handoff closure: no extra broadcast across the whole keychain scenario', mock.broadcasts.length === 2, 'broadcasts=' + mock.broadcasts.length);
     await ctx6c.close();
 
