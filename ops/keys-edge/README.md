@@ -38,7 +38,7 @@ To roll back, `cat` the backup into `"$F"` and run the same reload. Restart noth
 Cutover order:
 1. The lab is green on the commit, and the image is built with the digests it printed.
 2. R-SIGNER is ruled and the genesis pins in edge.toml are filled. The ruled envelope is in the inbox and its pack is on a rail keys-door reads. The healthcheck shows healthy at that seq.
-3. Caddy is on keys-net. Apply the block with the lab's one change, `issuer internal` under `key_type p256`. From the host, run the lab's step-e probes with `--resolve keys.skaists.dev:443:127.0.0.1` and the container's `/data/caddy/pki/authorities/local/root.crt`. Every probe is green while DNS still names Pages.
+3. Caddy is on keys-net. Apply the block with the lab's one change, `issuer internal` under `key_type p256`. From a checkout of the commit on the host, run `bash ops/keys-edge/lab/lab.sh host /opt/keys-edge/inbox/<ruled envelope>.json`. It runs every step-e probe against 127.0.0.1 (curl `--resolve keys.skaists.dev:443:127.0.0.1`), trusting only the root it exports from `buzz-prod-caddy-1:/data/caddy/pki/authorities/local/root.crt` (`KEYS_EDGE_CADDY` names another container), and expects the release that envelope names. It needs docker and node, builds the lab tools image, starts one probe container on the host network and removes it; it never touches keys-door, keys-net, Caddy or their volumes. It must end with the summary and no `LAB FAIL` while DNS still names Pages. This mode has not run on the host yet (UNVERIFIED).
 4. DNS: set an A record for keys.skaists.dev to 2.25.245.161 only. Add no AAAA until an IPv6 probe passes. Then apply the block as committed (no issuer line), validate and reload. Caddy gets its P-256 certificate once the ACME validators reach this host.
 5. Run keychain-edge-probe (workflow_dispatch) on the public name. It must be green.
 6. Detach the Pages custom domain only after that. The Pages deployment stays as the warm rollback: point DNS back and re-attach.
@@ -54,4 +54,4 @@ PQ ledger (claims stop at "sound by construction / isolated by design"):
 
 A browser's trust in the page still rests on the classical certificate. The record limits what this edge serves; it cannot limit what a forged certificate could serve.
 
-The lab: `.github/workflows/keychain-edge-lab.yml` runs `lab/lab.sh all`. `lab.sh chain` runs only its node part (step b).
+The lab: `.github/workflows/keychain-edge-lab.yml` runs `lab/lab.sh all`. `lab.sh chain` runs only its node part (step b); `lab.sh host ENVELOPE` is cutover step 3. Step f needs keys-door's chain endpoint (contract §7 A1): it fails, never skips, where keys-door lacks it. Its peer is plain http through a forwarder on keys-door #2's loopback, because keys-door trusts only the webpki roots compiled into it and no lab CA can stand behind an https peer, so the lab does not exercise a peer's TLS.

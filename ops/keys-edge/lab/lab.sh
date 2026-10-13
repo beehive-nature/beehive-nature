@@ -7,12 +7,22 @@
 #
 #   bash ops/keys-edge/lab/lab.sh all      a. image  b. release chain  c. keys-door #1 (compose.yml)
 #                                          d. caddy + Caddyfile.keys  e. TLS and HTTP probes
-#                                          f. a fresh edge from a peer  g. rollback and tamper
+#                                          f. a fresh edge from a peer (contract §7 A1)
+#                                          g. tamper, rollback with the floor kept, a fork
 #   bash ops/keys-edge/lab/lab.sh chain    b only (node, no docker): the chain, configs and mock
 #                                          door files under KEYS_EDGE_LAB_DIR
+#   bash ops/keys-edge/lab/lab.sh host ENVELOPE
+#                                          e only, on the edge host before DNS moves (README,
+#                                          cutover step 3): every probe of step e against this
+#                                          host's Caddy at 127.0.0.1 (curl --resolve), trusting
+#                                          only the root exported from that Caddy, expecting the
+#                                          release ENVELOPE names. It needs docker and node, builds
+#                                          the lab tools image, starts one probe container on the
+#                                          host network and removes it; it never touches keys-door,
+#                                          keys-net, Caddy or their volumes.
 #
-# Never run it on the edge host: it owns the names keys-door and keys-net while it runs, and it
-# refuses to start when either exists.
+# all and chain never run on the edge host: they own the names keys-door and keys-net while they
+# run, and all refuses to start when either exists.
 set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -28,7 +38,7 @@ KD2_IP=10.80.96.4
 PROBE_IP=10.80.96.5
 HOST=keys.skaists.dev
 MOCK_DOOR=http://127.0.0.1:8098
-PEER1=peer1.keys-lab.test
+PEER_FWD=http://127.0.0.1:8099
 
 CADDY_IMAGE=caddy:2.11.4
 ALPINE_IMAGE=alpine:3.22
@@ -38,14 +48,30 @@ IMAGE=keys-door:lab
 TOOLS=keys-lab-tools:local
 KD1=keys-door
 KD2=keys-lab-kd2
+KD3=keys-lab-kd3
 CADDY=keys-lab-caddy
 MOCK=keys-lab-antmock
+MOCK3=keys-lab-antmock3
+FWD=keys-lab-peerfwd
 PROBE=keys-lab-probe
+HOST_PROBE=keys-edge-hostprobe
 KD2_VOLUME=keys-lab-kd2-state
+KD3_VOLUME=keys-lab-kd3-state
 
 LAB=${KEYS_EDGE_LAB_DIR:-}
 OWNED=0
 RESULTS=()
+
+# What the probes of step e (probe_edge) run against; set by step_e or host_mode.
+PROBE_CTR=""   # the container every probe command runs in
+CONNECT=""     # the address Caddy answers on from there
+KD_DIRECT=""   # keys-door #1's own listener, no Caddy (the controls)
+OUTDIR=""      # host dir mounted at /out in PROBE_CTR
+EXP_ENV=""     # the envelope the edge must serve as current
+EXP_RECORD=""  # its record.json bytes
+EXP_SEQ=""     # its seq
+EXP_PACK=""    # the pack bytes, when the lab made them (host mode checks the pack by digest only)
+EXP_CHAIN=()   # "N:FILE": the envelope /.well-known/bnr-keychain/release/N must be (contract §7 A1)
 
 say() { printf '\n== %s\n' "$*"; }
 run() { printf '+ %s\n' "$*"; "$@"; }
@@ -67,14 +93,14 @@ cleanup() {
   if (( OWNED )); then
     if (( rc != 0 )); then
       say "failure evidence: container logs"
-      for c in "$KD1" "$KD2" "$CADDY" "$MOCK"; do
+      for c in "$KD1" "$KD2" "$KD3" "$CADDY" "$MOCK" "$MOCK3" "$FWD"; do
         docker logs --tail 120 "$c" 2>&1 | sed "s/^/[$c] /" || true
       done
     fi
     if [[ -z ${KEYS_EDGE_LAB_KEEP:-} ]]; then
-      docker rm -f "$PROBE" "$MOCK" "$CADDY" "$KD2" >/dev/null 2>&1 || true
+      docker rm -f "$PROBE" "$MOCK" "$MOCK3" "$FWD" "$CADDY" "$KD2" "$KD3" >/dev/null 2>&1 || true
       KEYS_DOOR_IMAGE=$IMAGE compose down -v >/dev/null 2>&1 || true
-      docker volume rm "$KD2_VOLUME" >/dev/null 2>&1 || true
+      docker volume rm "$KD2_VOLUME" "$KD3_VOLUME" >/dev/null 2>&1 || true
     fi
   fi
   exit "$rc"
@@ -117,7 +143,64 @@ wait_seq() {
   return 1
 }
 
+# wait_note CONTAINER NOTE SECONDS: health until its last_error is NOTE
+wait_note() {
+  local c=$1 want=$2 limit=$3 h="" i
+  for (( i = 0; i < limit; i += 3 )); do
+    h=$(health "$c")
+    if [[ $(labjs get last_error <<<"$h" 2>/dev/null || true) == "$want" ]]; then printf '%s\n' "$h"; return 0; fi
+    sleep 3
+  done
+  printf 'health of %s after %ss: %s\n' "$c" "$limit" "$h" >&2
+  return 1
+}
+
+# start_mock DOOR NAME: the mock ANT door in DOOR's network namespace ($MOCK_DOOR to that door)
+start_mock() {
+  run docker run -d --name "$2" --network "container:$1" --read-only --cap-drop ALL \
+    --security-opt no-new-privileges:true --user 65534:65534 -v "$LAB/antmock:/srv:ro" \
+    "$TOOLS" python3 -B -m http.server 8098 --bind 127.0.0.1 --directory /srv
+}
+
+# rail_up DOOR ADDRESS: the control that a refusal later is not a missing pack: the mock door
+# answers ADDRESS on DOOR's own loopback
+rail_up() {
+  local code="" i
+  for (( i = 0; i < 20; i++ )); do
+    code=$(docker run --rm --network "container:$1" "$TOOLS" curl -sS --max-time 5 -o /dev/null -w '%{http_code}' \
+      "$MOCK_DOOR/v1/data/public/$2" 2>/dev/null || true)
+    if [[ $code == 200 ]]; then echo "GET $MOCK_DOOR/v1/data/public/$2 on $1's loopback -> 200"; return 0; fi
+    sleep 1
+  done
+  die "the mock ANT door does not answer on $1's loopback (last status '$code')"
+}
+
+# run_door NAME VOLUME INBOX CONFIG DOCKER-NETWORK-ARGS...: a keys-door from the lab image with
+# compose.yml's hardening and its own state volume
+run_door() {
+  local name=$1 vol=$2 inbox=$3 cfg=$4
+  shift 4
+  run docker volume create "$vol"
+  run docker run -d --name "$name" "$@" --read-only --tmpfs /tmp:size=16m,mode=1777,noexec,nosuid,nodev \
+    --cap-drop ALL --security-opt no-new-privileges:true --pids-limit 128 --memory 256m \
+    -v "$vol:/var/lib/keys-door/state" -v "$inbox:/var/lib/keys-door/inbox:ro" \
+    -v "$cfg:/etc/keys-door/edge.toml:ro" "$IMAGE"
+}
+
 # ── a. the image ────────────────────────────────────────────────────────────
+build_tools() {
+  say "lab tools image ($ALPINE_IMAGE: openssl, curl, python3, socat)"
+  local alpine_d ver
+  alpine_d=$(digest_of "$ALPINE_IMAGE")
+  echo "tools base: $ALPINE_IMAGE@$alpine_d"
+  printf 'FROM %s@%s\nRUN apk add --no-cache bash ca-certificates curl openssl python3 socat\n' "$ALPINE_IMAGE" "$alpine_d" | run docker build -q -t "$TOOLS" -
+  ver=$(docker run --rm "$TOOLS" openssl version)
+  run docker run --rm "$TOOLS" sh -c 'openssl version; curl -V | head -n 1; python3 -V; socat -V | grep "socat version"; apk info -v 2>/dev/null | grep -E "^(openssl|curl|libcurl)-"'
+  [[ $ver =~ ^OpenSSL\ ([0-9]+)\.([0-9]+) ]] || die "openssl version is '$ver'"
+  (( BASH_REMATCH[1] > 3 || (BASH_REMATCH[1] == 3 && BASH_REMATCH[2] >= 5) )) || die "$ver is older than 3.5: it cannot offer X25519MLKEM768"
+  pass "probe OpenSSL is $ver (>= 3.5)"
+}
+
 step_a() {
   say "a. build the keys-door image (ops/keys-edge/Dockerfile)"
   RUST_VERSION=$(sed -n 's/^channel = "\([0-9.]*\)"$/\1/p' "$ROOT/rust-toolchain.toml")
@@ -149,62 +232,78 @@ step_a() {
   [[ $rc == 2 && $out == *genesis_sha3* ]] || die "the unfilled example config was not refused at genesis_sha3"
   pass "a. edge.toml.example parses and keys-door refuses it until the genesis pins are filled"
 
-  say "a. lab tools image ($ALPINE_IMAGE: openssl, curl, python3)"
-  local alpine_d
-  alpine_d=$(digest_of "$ALPINE_IMAGE")
-  echo "tools base: $ALPINE_IMAGE@$alpine_d"
-  printf 'FROM %s@%s\nRUN apk add --no-cache bash curl openssl python3\n' "$ALPINE_IMAGE" "$alpine_d" | run docker build -q -t "$TOOLS" -
-  local ver
-  ver=$(docker run --rm "$TOOLS" openssl version)
-  run docker run --rm "$TOOLS" sh -c 'openssl version; curl -V | head -n 1; python3 -V; apk info -v 2>/dev/null | grep -E "^(openssl|curl|libcurl)-"'
-  [[ $ver =~ ^OpenSSL\ ([0-9]+)\.([0-9]+) ]] || die "openssl version is '$ver'"
-  (( BASH_REMATCH[1] > 3 || (BASH_REMATCH[1] == 3 && BASH_REMATCH[2] >= 5) )) || die "$ver is older than 3.5: it cannot offer X25519MLKEM768"
-  pass "a. probe OpenSSL is $ver (>= 3.5)"
+  build_tools
 }
 
 # ── b. the release chain ────────────────────────────────────────────────────
+SEED=""
+LINK_SHA3=""
+# link DIR PREV SIGNERS: prepare DIR after PREV, sign it with the throwaway key, verify, envelope
+link() {
+  local dir=$1 prev=$2 signers=$3 p ant
+  printf '+ release.mjs prepare --out %s --prev %s --signers %s\n' "${dir#"$LAB"/}" "${prev#"$LAB"/}" "$signers"
+  p=$(node "$RELEASE" prepare --out "$dir" --prev "$prev" --signers "$signers")
+  printf '%s\n' "$p"
+  node "$RELEASE" sign-test --seed "$SEED" --record "$dir/record.json" --out "$dir/record.json.relsig.json" --i-understand-this-is-a-test-key
+  run node "$RELEASE" verify --record "$dir/record.json" --sig "$dir/record.json.relsig.json" --prev "$prev"
+  ant=$(sha256sum "$dir/pack.bin" | cut -c1-64)
+  run node "$RELEASE" envelope --record "$dir/record.json" --sig "$dir/record.json.relsig.json" --hint-ant "$ant" --out "$dir/envelope.json"
+  LINK_SHA3=$(labjs get sha3 <<<"$p")
+}
+
 step_b() {
-  say "b. a test release chain (tools/keychain-release; throwaway key made in this run)"
-  local seed p1 p2 g
-  seed="keys-edge-lab-$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')"
-  ID=$(node "$RELEASE" sign-test --seed "$seed" --i-understand-this-is-a-test-key | labjs get id)
-  echo "throwaway signer: $ID"
+  say "b. a test release chain (tools/keychain-release; throwaway keys made in this run)"
+  local p1 g id2
+  SEED="keys-edge-lab-$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')"
+  ID=$(node "$RELEASE" sign-test --seed "$SEED" --i-understand-this-is-a-test-key | labjs get id)
+  # a second throwaway id, named only in r3x's signers: it signs nothing
+  id2=$(node "$RELEASE" sign-test --seed "$SEED-second" --i-understand-this-is-a-test-key | labjs get id)
+  echo "throwaway signer: $ID; second id (named, never signing): $id2"
   printf '+ release.mjs prepare --out r1 --signers <throwaway>\n'
   p1=$(node "$RELEASE" prepare --out "$LAB/r1" --signers "$ID")
   printf '%s\n' "$p1"
   GENESIS=$(labjs get sha3 <<<"$p1")
-  node "$RELEASE" sign-test --seed "$seed" --record "$LAB/r1/record.json" --out "$LAB/r1/record.json.relsig.json" --i-understand-this-is-a-test-key
+  node "$RELEASE" sign-test --seed "$SEED" --record "$LAB/r1/record.json" --out "$LAB/r1/record.json.relsig.json" --i-understand-this-is-a-test-key
   run node "$RELEASE" verify --record "$LAB/r1/record.json" --sig "$LAB/r1/record.json.relsig.json" --signers "$ID" --genesis-sha3 "$GENESIS"
   ANT1=$(sha256sum "$LAB/r1/pack.bin" | cut -c1-64)
   run node "$RELEASE" envelope --record "$LAB/r1/record.json" --sig "$LAB/r1/record.json.relsig.json" --hint-ant "$ANT1" --out "$LAB/r1/envelope.json"
 
-  printf '+ release.mjs prepare --out r2 --prev r1/record.json --signers <throwaway>\n'
-  p2=$(node "$RELEASE" prepare --out "$LAB/r2" --prev "$LAB/r1/record.json" --signers "$ID")
-  printf '%s\n' "$p2"
-  [[ $(labjs get seq <<<"$p2") == 2 && $(labjs get prev <<<"$p2") == "$GENESIS" ]] || die "r2 is not seq 2 after r1"
-  SEQ2_SHA3=$(labjs get sha3 <<<"$p2")
-  node "$RELEASE" sign-test --seed "$seed" --record "$LAB/r2/record.json" --out "$LAB/r2/record.json.relsig.json" --i-understand-this-is-a-test-key
-  run node "$RELEASE" verify --record "$LAB/r2/record.json" --sig "$LAB/r2/record.json.relsig.json" --prev "$LAB/r1/record.json"
-  ANT2=$(sha256sum "$LAB/r2/pack.bin" | cut -c1-64)
-  run node "$RELEASE" envelope --record "$LAB/r2/record.json" --sig "$LAB/r2/record.json.relsig.json" --hint-ant "$ANT2" --out "$LAB/r2/envelope.json"
-  echo "genesis (seq 1) sha3: $GENESIS; seq 2 sha3: $SEQ2_SHA3"
-  pass "b. seq 1 and seq 2 prepared from this checkout, signed by one throwaway key, enveloped (noble verify accepts both)"
+  link "$LAB/r2" "$LAB/r1/record.json" "$ID"
+  SEQ2_SHA3=$LINK_SHA3
+  [[ $(labjs get seq "$LAB/r2/record.json") == 2 && $(labjs get prev "$LAB/r2/record.json") == "$GENESIS" ]] || die "r2 is not seq 2 after r1"
+  # r3 and r3x: two valid seq-3 records after r2, both signed by the throwaway key r2 authorizes,
+  # differing only in the signers they name (contract §4 rule 5: an equivocation). r4 follows r3,
+  # so it resolves the fork to r3's branch.
+  link "$LAB/r3" "$LAB/r2/record.json" "$ID"
+  SEQ3_SHA3=$LINK_SHA3
+  link "$LAB/r3x" "$LAB/r2/record.json" "$ID,$id2"
+  SEQ3X_SHA3=$LINK_SHA3
+  link "$LAB/r4" "$LAB/r3/record.json" "$ID"
+  SEQ4_SHA3=$LINK_SHA3
+  [[ $SEQ3_SHA3 != "$SEQ3X_SHA3" && $(labjs get seq "$LAB/r3x/record.json") == 3 && $(labjs get prev "$LAB/r3x/record.json") == "$SEQ2_SHA3" ]] \
+    || die "r3x is not a second seq 3 after r2"
+  echo "seq 1 (genesis) $GENESIS; seq 2 $SEQ2_SHA3; seq 3 $SEQ3_SHA3; seq 3 fork $SEQ3X_SHA3; seq 4 (after seq 3) $SEQ4_SHA3"
+  pass "b. seq 1-4 and a second seq 3 prepared from this checkout, signed by one throwaway key, enveloped (noble verify accepts each)"
 
   # The mock ANT door answers GET /v1/data/public/<address> as antd does. The address is a lab
   # label (the pack's sha256 in hex, the 64-hex shape keys-door takes); bytes count only by hash.
+  # Every record here is one build of this checkout, so every pack is the same bytes and one
+  # address serves them all.
   mkdir -p "$LAB/antmock/v1/data/public"
-  for a in "1 $ANT1" "2 $ANT2"; do
-    labjs ant-body "$LAB/r${a%% *}/pack.bin" "$LAB/antmock/v1/data/public/${a#* }"
+  for g in r1 r2 r3 r3x r4; do
+    labjs ant-body "$LAB/$g/pack.bin" "$LAB/antmock/v1/data/public/$(sha256sum "$LAB/$g/pack.bin" | cut -c1-64)"
   done
   ls -l "$LAB/antmock/v1/data/public"
 
-  # keys-door #1: the example with only the lab's values changed, shown as a diff
+  # keys-door #1: the example with only the lab's values changed, shown as a diff. keys-door #2
+  # has no ANT door and an empty inbox: its only source is its peer, keys-door #1, reached by a
+  # forwarder on its own loopback (step f says why).
   mkdir -p "$LAB/kd1/inbox" "$LAB/kd2/inbox" "$LAB/tamper" "$LAB/share" "$LAB/out"
   g="genesis_sha3=\"$GENESIS\""
   labjs render-toml "$EDGE/edge.toml.example" "$LAB/kd1/edge.toml" "$g" "genesis_signers=[\"$ID\"]" \
     'poll_secs=5' "ant_doors=[\"$MOCK_DOOR\"]"
   labjs render-toml "$EDGE/edge.toml.example" "$LAB/kd2/edge.toml" "$g" "genesis_signers=[\"$ID\"]" \
-    'poll_secs=5' 'ant_doors=[]' "peers=[\"https://$PEER1\"]"
+    'poll_secs=5' 'ant_doors=[]' "peers=[\"$PEER_FWD\"]"
   for k in kd1 kd2; do
     printf '+ diff edge.toml.example %s/edge.toml\n' "$k"
     diff -u "$EDGE/edge.toml.example" "$LAB/$k/edge.toml" || true
@@ -223,24 +322,42 @@ step_c() {
   export KEYS_DOOR_IMAGE=$IMAGE KEYS_EDGE_CONFIG=$LAB/kd1/edge.toml KEYS_EDGE_INBOX=$LAB/kd1/inbox
   run compose config
   run compose up -d
-  run docker inspect --format 'read_only={{.HostConfig.ReadonlyRootfs}} cap_drop={{.HostConfig.CapDrop}} security_opt={{.HostConfig.SecurityOpt}} pids={{.HostConfig.PidsLimit}} mem={{.HostConfig.Memory}} tmpfs={{json .HostConfig.Tmpfs}} ports={{json .HostConfig.PortBindings}} user={{.Config.User}}' "$KD1"
   local nets ip ports
   nets=$(docker inspect --format '{{range $k, $v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$KD1")
   ip=$(docker inspect --format '{{(index .NetworkSettings.Networks "keys-net").IPAddress}}' "$KD1")
   ports=$(docker port "$KD1" || true)
   echo "networks: $nets; keys-net address: $ip; published ports: '${ports}'"
   [[ $nets == "keys-net " && $ip == "$KD1_IP" && -z $ports ]] || die "keys-door must be on keys-net only, at $KD1_IP, with no published port"
-  pass "c. keys-door on keys-net only at $KD1_IP, no published port, read-only, caps dropped"
+  pass "c. keys-door on keys-net only at $KD1_IP, no published port"
+
+  # compose.yml's hardening, as docker holds it and as the running process has it
+  docker inspect "$KD1" > "$LAB/out/kd1-inspect.json"
+  run docker inspect --format 'read_only={{.HostConfig.ReadonlyRootfs}} cap_drop={{.HostConfig.CapDrop}} security_opt={{.HostConfig.SecurityOpt}} pids={{.HostConfig.PidsLimit}} mem={{.HostConfig.Memory}} tmpfs={{json .HostConfig.Tmpfs}} user={{.Config.User}}' "$KD1"
+  labjs check-hardening "$LAB/out/kd1-inspect.json" || die "keys-door #1 does not carry compose.yml's hardening"
+  local status mounts rootfs tmp out
+  status=$(docker exec "$KD1" grep -E '^(CapPrm|CapEff|CapBnd|NoNewPrivs):' /proc/1/status | tr -s '\t ' ' ')
+  printf '+ docker exec keys-door grep Cap*/NoNewPrivs /proc/1/status\n%s\n' "$status"
+  [[ $status == $'CapPrm: 0000000000000000\nCapEff: 0000000000000000\nCapBnd: 0000000000000000\nNoNewPrivs: 1' ]] \
+    || die "keys-door's process holds capabilities or may gain privileges"
+  mounts=$(docker exec "$KD1" cat /proc/mounts)
+  rootfs=$(awk '$2 == "/" { print $4 }' <<<"$mounts")
+  tmp=$(awk '$2 == "/tmp" { print $3 " " $4 }' <<<"$mounts")
+  echo "/ options: $rootfs; /tmp: $tmp"
+  [[ ,$rootfs, == *,ro,* ]] || die "the root filesystem is not mounted read-only"
+  [[ $tmp == "tmpfs "* && ,${tmp#tmpfs }, == *,nosuid,* && ,${tmp#tmpfs }, == *,nodev,* && ,${tmp#tmpfs }, == *,noexec,* ]] \
+    || die "/tmp is not a tmpfs with nosuid,nodev,noexec"
+  out=$(docker exec -u 0 "$KD1" touch /lab-rootfs-probe 2>&1) && die "uid 0 wrote /lab-rootfs-probe: the rootfs is writable"
+  printf '+ docker exec -u 0 keys-door touch /lab-rootfs-probe -> %s\n' "$out"
+  [[ $out == *"Read-only file system"* ]] || die "the write was refused, but not by a read-only rootfs: '$out'"
+  pass "c. compose.yml's hardening holds: rootfs read-only even to uid 0, no capabilities, no_new_privs, /tmp tmpfs noexec,nosuid,nodev, pids 128, memory 256 MiB, inbox and config read-only"
 
   # the mock door shares keys-door's network namespace, so it is http://127.0.0.1:8098 to keys-door
-  run docker run -d --name "$MOCK" --network "container:$KD1" --read-only --cap-drop ALL \
-    --security-opt no-new-privileges:true --user 65534:65534 -v "$LAB/antmock:/srv:ro" \
-    "$TOOLS" python3 -B -m http.server 8098 --bind 127.0.0.1 --directory /srv
+  start_mock "$KD1" "$MOCK"
   local h
   h=$(wait_seq "$KD1" 2 150) || die "keys-door #1 did not reach seq 2"
   printf 'health: %s\n' "$h"
   [[ $(labjs get record_sha3 <<<"$h") == "$SEQ2_SHA3" && $(labjs get state <<<"$h") == serving ]] || die "keys-door #1 serves another record"
-  [[ $(labjs get equivocation <<<"$h") == null ]] || die "keys-door #1 reports an equivocation"
+  labjs equivocation-is null <<<"$h" || die "keys-door #1 reports an equivocation"
   pass "c. keys-door #1 walked the inbox from genesis to seq 2 ($SEQ2_SHA3) and fetched the pack from the ANT rail"
   run docker logs --tail 40 "$KD1"
 
@@ -281,10 +398,9 @@ step_d() {
   {
     printf '{\n  skip_install_trust\n}\n'
     cat "$LAB/caddy/keys.lab"
-    # lab-only sites: relay.skaists.dev stands in for the Hostinger site whose SNI a misdirected
-    # request presents; peer1 fronts keys-door #1 for step f
+    # lab-only site: relay.skaists.dev stands in for the Hostinger site whose SNI a misdirected
+    # request presents
     printf 'relay.skaists.dev {\n  tls internal\n  respond "lab stand-in for relay.skaists.dev" 200\n}\n'
-    printf '%s {\n  tls internal\n  reverse_proxy %s:8096\n}\n' "$PEER1" "$KD1_IP"
   } > "$LAB/caddy/Caddyfile"
   chmod -R a+rX "$LAB/caddy"
   run cat "$LAB/caddy/Caddyfile"
@@ -297,7 +413,9 @@ step_d() {
     sleep 2
   done
   run docker cp "$CADDY:/data/caddy/pki/authorities/local/root.crt" "$LAB/share/root.crt"
-  chmod 0644 "$LAB/share/root.crt"
+  # the relay stand-in is on the same internal CA here; on the host it is the ACME site (host_mode)
+  cp "$LAB/share/root.crt" "$LAB/share/relay.crt"
+  chmod 0644 "$LAB/share/root.crt" "$LAB/share/relay.crt"
   run docker run --rm -v "$LAB/share:/lab:ro" "$TOOLS" openssl x509 -in /lab/root.crt -noout -subject -fingerprint -sha256
   pass "d. caddy $v running the block at $CADDY_IP on keys-net, its internal root exported"
 }
@@ -308,7 +426,7 @@ SC_RC=0
 sclient() {
   local label=$1
   shift
-  SC_OUT=$(docker exec "$PROBE" timeout 20 openssl s_client -connect "$CADDY_IP:443" -servername "$HOST" \
+  SC_OUT=$(docker exec "$PROBE_CTR" timeout 20 openssl s_client -connect "$CONNECT:443" -servername "$HOST" \
     -verify_hostname "$HOST" -CAfile /lab/root.crt -no-CApath -no-CAstore "$@" 2>&1 </dev/null) && SC_RC=0 || SC_RC=$?
   printf -- '--- openssl s_client %s (%s)\n%s\n--- exit %s\n' "$*" "$label" "$SC_OUT" "$SC_RC"
 }
@@ -317,28 +435,39 @@ accepted() { grep -Eq 'New, [^ ]+, Cipher is [^(]' <<<"$SC_OUT"; }
 refused() { ! accepted && grep -Eq 'SSL alert number [0-9]+' <<<"$SC_OUT"; }
 
 FETCH=""
-# fetch NAME URL [curl args...]: body and headers into the lab out dir, the -w line printed
+# fetch NAME URL [curl args...]: through Caddy over TLS 1.3 with only X25519MLKEM768 offered; body
+# and headers into OUTDIR, the -w line printed. keys.skaists.dev is trusted on the exported Caddy
+# root only; relay.skaists.dev on /lab/relay.crt.
 fetch() {
+  local name=$1 url=$2 ca=/lab/root.crt
+  shift 2
+  [[ $url == https://relay.skaists.dev/* ]] && ca=/lab/relay.crt
+  mkdir -p "$(dirname "$OUTDIR/$name")"
+  FETCH=$(docker exec "$PROBE_CTR" curl -sS --max-time 20 --tlsv1.3 --curves X25519MLKEM768 --cacert "$ca" \
+    --resolve "$HOST:443:$CONNECT" --resolve "relay.skaists.dev:443:$CONNECT" \
+    -o "/out/$name.body" -D "/out/$name.headers" -w '%{http_code} %{http_version} %{size_download}' "$@" "$url") \
+    || die "curl $url failed"
+  printf '%s %s -> %s\n' "$name" "$url" "$FETCH"
+}
+# fetch_direct NAME URL [curl args...]: keys-door #1's own listener, plain http, no Caddy
+fetch_direct() {
   local name=$1 url=$2
   shift 2
-  mkdir -p "$(dirname "$LAB/out/$name")"
-  FETCH=$(docker exec "$PROBE" curl -sS --max-time 20 --tlsv1.3 --curves X25519MLKEM768 --cacert /lab/root.crt \
-    --resolve "$HOST:443:$CADDY_IP" --resolve "relay.skaists.dev:443:$CADDY_IP" \
+  mkdir -p "$(dirname "$OUTDIR/$name")"
+  FETCH=$(docker exec "$PROBE_CTR" curl -sS --max-time 20 \
     -o "/out/$name.body" -D "/out/$name.headers" -w '%{http_code} %{http_version} %{size_download}' "$@" "$url") \
     || die "curl $url failed"
   printf '%s %s -> %s\n' "$name" "$url" "$FETCH"
 }
 
-step_e() {
-  say "e. probes from $ALPINE_IMAGE on keys-net ($PROBE_IP)"
-  run docker run -d --name "$PROBE" --network keys-net --ip "$PROBE_IP" --user "$(id -u):$(id -g)" \
-    -v "$LAB/share:/lab:ro" -v "$LAB/out:/out" "$TOOLS" sleep 3600
-  run docker exec "$PROBE" openssl version
-  run docker exec "$PROBE" sh -c 'curl -V | head -n 1'
+# probe_edge: every TLS and HTTP probe of the edge (step e, and lab.sh host)
+probe_edge() {
+  run docker exec "$PROBE_CTR" openssl version
+  run docker exec "$PROBE_CTR" sh -c 'curl -V | head -n 1'
 
   local i hs
   for (( i = 0; i < 30; i += 2 )); do
-    hs=$(docker exec "$PROBE" timeout 10 openssl s_client -connect "$CADDY_IP:443" -servername "$HOST" -tls1_3 \
+    hs=$(docker exec "$PROBE_CTR" timeout 10 openssl s_client -connect "$CONNECT:443" -servername "$HOST" -tls1_3 \
       -groups X25519MLKEM768 </dev/null 2>/dev/null || true)
     grep -Eq 'New, [^ ]+, Cipher is [^(]' <<<"$hs" && break
     sleep 2
@@ -348,11 +477,11 @@ step_e() {
   accepted || die "the control handshake (TLS 1.3, X25519MLKEM768) did not complete: a broken probe is not evidence"
   grep -q 'Negotiated TLS1.3 group: X25519MLKEM768' <<<"$SC_OUT" || die "the control did not negotiate X25519MLKEM768"
   grep -Eq '^ *Protocol *: TLSv1\.3' <<<"$SC_OUT" || die "the control is not TLS 1.3"
-  grep -q 'Verify return code: 0 (ok)' <<<"$SC_OUT" || die "the certificate did not verify for $HOST against the lab root"
+  grep -q 'Verify return code: 0 (ok)' <<<"$SC_OUT" || die "the certificate did not verify for $HOST against the exported Caddy root"
   pass "e. control: TLS 1.3, group X25519MLKEM768, certificate verifies for $HOST"
 
   local text
-  text=$(sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' <<<"$SC_OUT" | docker exec -i "$PROBE" openssl x509 -noout -text)
+  text=$(sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' <<<"$SC_OUT" | docker exec -i "$PROBE_CTR" openssl x509 -noout -text)
   grep -E 'Issuer:|Subject:|Public Key Algorithm|ASN1 OID|NIST CURVE|DNS:' <<<"$text" || true
   grep -q 'Public Key Algorithm: id-ecPublicKey' <<<"$text" && grep -q 'ASN1 OID: prime256v1' <<<"$text" \
     || die "the leaf certificate key is not ECDSA P-256"
@@ -368,72 +497,95 @@ step_e() {
   refused || die "-tls1_2 was not refused by a TLS alert"
   pass "e. -tls1_2: refused by alert"
 
-  # every file the seq-2 record names, and /, over TLS with only X25519MLKEM768 offered
+  # every file the expected record names, and /, over TLS with only X25519MLKEM768 offered
   local path
-  mapfile -t FILES < <(record_paths "$LAB/r2/record.json")
+  mapfile -t FILES < <(record_paths "$EXP_RECORD")
   for path in "${FILES[@]}"; do
     fetch "files/$path" "https://$HOST/$path"
     [[ ${FETCH%% *} == 200 ]] || die "/$path answered ${FETCH%% *}"
     printf -- '--- headers /%s\n' "$path"
-    cat "$LAB/out/files/$path.headers"
-    labjs check-headers "$LAB/out/files/$path.headers" || die "/$path headers"
+    cat "$OUTDIR/files/$path.headers"
+    labjs check-headers "$OUTDIR/files/$path.headers" || die "/$path headers"
   done
-  labjs check-files "$LAB/r2/record.json" "$LAB/out/files" || die "a served file does not match the seq-2 record"
-  pass "e. all ${#FILES[@]} files the seq-2 record names: HTTP 200, size + SHA-256 + SHA3-256 match the decoded record digests"
+  labjs check-files "$EXP_RECORD" "$OUTDIR/files" || die "a served file does not match the seq-$EXP_SEQ record"
+  pass "e. all ${#FILES[@]} files the seq-$EXP_SEQ record names: HTTP 200, size + SHA-256 + SHA3-256 match the decoded record digests"
   fetch root "https://$HOST/"
   [[ ${FETCH%% *} == 200 ]] || die "/ answered ${FETCH%% *}"
-  labjs same-bytes "$LAB/out/files/index.html.body" "$LAB/out/root.body" || die "/ is not index.html"
+  labjs same-bytes "$OUTDIR/files/index.html.body" "$OUTDIR/root.body" || die "/ is not index.html"
+
+  # the control for the header step: keys-door's own answer, no Caddy in between
+  fetch_direct direct-index "$KD_DIRECT/index.html"
+  cat "$OUTDIR/direct-index.headers"
+  labjs check-direct-headers "$OUTDIR/direct-index.headers" || die "keys-door's own headers"
+  pass "e. through Caddy: no Server, no Alt-Svc, HSTS and Referrer-Policy, which keys-door alone does not send (Caddyfile.keys header step); nosniff is sent by both"
 
   fetch release "https://$HOST/.well-known/bnr-keychain/release"
   [[ ${FETCH%% *} == 200 ]] || die "/.well-known/bnr-keychain/release answered ${FETCH%% *}"
-  labjs check-envelope "$LAB/r2/envelope.json" "$LAB/out/release.body" "$LAB/r2/record.json" || die "the served release is not the seq-2 envelope"
-  labjs check-headers "$LAB/out/release.headers" || die "release headers"
+  labjs check-envelope "$EXP_ENV" "$OUTDIR/release.body" "$EXP_RECORD" || die "the served release is not the seq-$EXP_SEQ envelope"
+  labjs check-headers "$OUTDIR/release.headers" || die "release headers"
+  local entry n
+  for entry in "${EXP_CHAIN[@]}"; do
+    n=${entry%%:*}
+    fetch "release-$n" "https://$HOST/.well-known/bnr-keychain/release/$n"
+    [[ ${FETCH%% *} == 200 ]] || die "/.well-known/bnr-keychain/release/$n answered ${FETCH%% *} (contract §7 A1)"
+    labjs same-bytes "${entry#*:}" "$OUTDIR/release-$n.body" || die "release/$n is not the seq-$n envelope"
+  done
+  n=$((EXP_SEQ + 1))
+  fetch "release-$n" "https://$HOST/.well-known/bnr-keychain/release/$n"
+  [[ ${FETCH%% *} == 404 ]] || die "/.well-known/bnr-keychain/release/$n (past the served seq) answered ${FETCH%% *}, want 404"
   fetch pack "https://$HOST/.well-known/bnr-keychain/pack"
-  labjs same-bytes "$LAB/r2/pack.bin" "$LAB/out/pack.body" || die "the served pack is not the seq-2 pack"
-  pass "e. /.well-known/bnr-keychain/release is the seq-2 envelope byte for byte; /pack is the seq-2 pack"
+  [[ ${FETCH%% *} == 200 ]] || die "/.well-known/bnr-keychain/pack answered ${FETCH%% *}"
+  labjs check-pack "$EXP_RECORD" "$OUTDIR/pack.body" || die "the served pack is not the seq-$EXP_SEQ pack"
+  if [[ -n $EXP_PACK ]]; then labjs same-bytes "$EXP_PACK" "$OUTDIR/pack.body" || die "the served pack is not $EXP_PACK"; fi
+  pass "e. /.well-known/bnr-keychain/release is the seq-$EXP_SEQ envelope byte for byte; release/N is every envelope 1..$EXP_SEQ and 404 past it (A1); /pack hashes to the record's pack"
 
   # SNI mismatch: a handshake for relay.skaists.dev carrying Host keys.skaists.dev
   fetch relay "https://relay.skaists.dev/"
-  [[ ${FETCH%% *} == 200 ]] || die "the relay stand-in answered ${FETCH%% *}: the SNI probe below would prove nothing"
+  [[ ${FETCH%% *} =~ ^[1-5][0-9][0-9]$ && ${FETCH%% *} != 421 ]] \
+    || die "relay.skaists.dev itself answered ${FETCH%% *}: the SNI probe below would prove nothing"
   local v
   for v in --http1.1 --http2; do
     fetch "misdirected$v" "https://relay.skaists.dev/" "$v" -H "Host: $HOST"
-    cat "$LAB/out/misdirected$v.headers"
+    cat "$OUTDIR/misdirected$v.headers"
     [[ ${FETCH%% *} == 421 ]] || die "SNI relay.skaists.dev + Host $HOST ($v) answered ${FETCH%% *}, want 421"
   done
   pass "e. SNI relay.skaists.dev with Host $HOST: 421 over HTTP/1.1 and HTTP/2"
 
+  # keys-door refuses a POST too, so a bare 405 cannot show Caddy's matcher works: Caddy's
+  # respond sends no Allow and no body, keys-door's sends both (the control)
+  fetch_direct direct-post "$KD_DIRECT/" -X POST --data-binary ''
+  cat "$OUTDIR/direct-post.headers"
+  labjs check-405 "$OUTDIR/direct-post.headers" "$OUTDIR/direct-post.body" keys-door || die "keys-door's own 405"
   fetch post "https://$HOST/" -X POST --data-binary ''
-  cat "$LAB/out/post.headers"
-  [[ ${FETCH%% *} == 405 ]] || die "POST / answered ${FETCH%% *}, want 405"
-  pass "e. POST /: 405"
-  echo "note: 421 and 405 are answered before the header step (the route order in Caddyfile.keys); their headers are printed above, not asserted"
+  cat "$OUTDIR/post.headers"
+  labjs check-405 "$OUTDIR/post.headers" "$OUTDIR/post.body" caddy || die "POST / was not refused by Caddyfile.keys"
+  pass "e. POST /: 405 from Caddy (no Allow, no body), never reaching keys-door (whose 405 carries Allow: GET, HEAD)"
+  echo "note: 421 and 405 are answered before the header step (the route order in Caddyfile.keys); their headers are printed above"
+}
+
+step_e() {
+  say "e. probes from $ALPINE_IMAGE on keys-net ($PROBE_IP)"
+  run docker run -d --name "$PROBE" --network keys-net --ip "$PROBE_IP" --user "$(id -u):$(id -g)" \
+    -v "$LAB/share:/lab:ro" -v "$LAB/out:/out" "$TOOLS" sleep 3600
+  PROBE_CTR=$PROBE CONNECT=$CADDY_IP KD_DIRECT=http://$KD1_IP:8096 OUTDIR=$LAB/out
+  EXP_ENV=$LAB/r2/envelope.json EXP_RECORD=$LAB/r2/record.json EXP_SEQ=2 EXP_PACK=$LAB/r2/pack.bin
+  EXP_CHAIN=("1:$LAB/r1/envelope.json" "2:$LAB/r2/envelope.json")
+  probe_edge
 }
 
 # ── f. a fresh edge from a peer ─────────────────────────────────────────────
 step_f() {
-  say "f. a fresh edge: keys-door #2, empty state, peers = [keys-door #1] only"
-  local code
-  code=$(docker exec "$PROBE" curl -sS --max-time 10 -o /out/a1-seq1.body -w '%{http_code}' "http://$KD1_IP:8096/.well-known/bnr-keychain/release/1") \
-    || die "keys-door #1 did not answer on $KD1_IP:8096"
-  echo "GET http://$KD1_IP:8096/.well-known/bnr-keychain/release/1 -> $code"
-  if [[ $code != 200 ]]; then
-    echo "GATED: this keys-door serves no /.well-known/bnr-keychain/release/<seq> (contract §7 A1, a parallel lane)."
-    echo "A peer then offers only its current envelope (seq 2), so a fresh edge with peers only cannot walk from genesis."
-    echo "Step f did not run. It runs, and must pass, once keys-door #1 answers release/1."
-    echo "::warning title=keys-edge lab step f gated::A1 (/.well-known/bnr-keychain/release/<seq>) is absent: the fresh-edge-from-peers check did not run"
-    RESULTS+=("GATED f. fresh edge from peers: A1 endpoint absent (HTTP $code), not run")
-    return 0
-  fi
-  labjs check-envelope "$LAB/r1/envelope.json" "$LAB/out/a1-seq1.body" "$LAB/r1/record.json" || die "release/1 is not the seq-1 envelope"
-  # keys-door's peers are https only and it trusts the webpki roots compiled into it; the lab CA
-  # behind $PEER1 is not one of them, so a refusal here names that and fails the lab
-  run docker volume create "$KD2_VOLUME"
-  run docker run -d --name "$KD2" --network keys-net --ip "$KD2_IP" --add-host "$PEER1:$CADDY_IP" \
-    --read-only --tmpfs /tmp:size=16m,mode=1777,noexec,nosuid,nodev --cap-drop ALL \
-    --security-opt no-new-privileges:true --pids-limit 128 --memory 256m \
-    -v "$KD2_VOLUME:/var/lib/keys-door/state" -v "$LAB/kd2/inbox:/var/lib/keys-door/inbox:ro" \
-    -v "$LAB/kd2/edge.toml:/etc/keys-door/edge.toml:ro" "$IMAGE"
+  say "f. a fresh edge: keys-door #2, empty state, empty inbox, no ANT door, peers = [keys-door #1] only (contract §7 A1)"
+  # keys-door trusts only the webpki roots compiled into it, so no lab CA can stand behind an https
+  # peer. A configured peer may be plain http to loopback (as an ANT door may): keys-door #2's peer
+  # is a socat forwarder on its own loopback ($PEER_FWD) to keys-door #1's listener on keys-net.
+  # The peer leg's TLS is therefore not exercised here; the chain endpoint through Caddyfile.keys
+  # was probed in step e.
+  [[ -z $(ls -A "$LAB/kd2/inbox") ]] || die "keys-door #2's inbox is not empty"
+  run_door "$KD2" "$KD2_VOLUME" "$LAB/kd2/inbox" "$LAB/kd2/edge.toml" --network keys-net --ip "$KD2_IP"
+  run docker run -d --name "$FWD" --network "container:$KD2" --read-only --cap-drop ALL \
+    --security-opt no-new-privileges:true --user 65534:65534 "$TOOLS" \
+    socat "TCP-LISTEN:${PEER_FWD##*:},bind=127.0.0.1,fork,reuseaddr" "TCP:$KD1_IP:8096"
   local h
   h=$(wait_seq "$KD2" 2 120) || { docker logs --tail 60 "$KD2"; die "keys-door #2 did not reach seq 2 from its peer"; }
   printf 'health: %s\n' "$h"
@@ -443,53 +595,192 @@ step_f() {
     docker exec "$PROBE" curl -sS --max-time 10 --create-dirs -o "/out/kd2/$path" "http://$KD2_IP:8096/$path" || die "keys-door #2 /$path"
     labjs same-bytes "$LAB/out/files/$path.body" "$LAB/out/kd2/$path" || die "keys-door #2 serves other bytes at /$path"
   done
-  pass "f. keys-door #2 resumed from genesis through its peer to seq 2 and serves identical bytes"
+  for n in 1 2; do
+    docker exec "$PROBE" curl -sS --max-time 10 -o "/out/kd2/release-$n" "http://$KD2_IP:8096/.well-known/bnr-keychain/release/$n" || die "keys-door #2 release/$n"
+    labjs same-bytes "$LAB/r$n/envelope.json" "$LAB/out/kd2/release-$n" || die "keys-door #2 release/$n is not the seq-$n envelope"
+  done
+  run docker logs --tail 20 "$KD2"
+  pass "f. keys-door #2, with only its peer as a source, resumed from genesis to seq 2 and serves identical bytes and envelopes 1-2"
+  run docker rm -f "$FWD" "$KD2"
 }
 
-# ── g. rollback and tamper ──────────────────────────────────────────────────
-# offline KIND FILE WANT: keys-door verify on keys-door #1 must refuse FILE with a reason starting WANT
+# ── g. tamper, rollback, fork ───────────────────────────────────────────────
+# offline LABEL FILE WANT: keys-door verify on keys-door #1 must refuse inbox FILE with a reason
+# starting WANT
 offline() {
-  local kind=$1 file=$2 want=$3 out rc
+  local label=$1 file=$2 want=$3 out rc
   out=$(docker exec "$KD1" keys-door verify --config /etc/keys-door/edge.toml --envelope "/var/lib/keys-door/inbox/$file" 2>&1) && rc=0 || rc=$?
   printf '+ keys-door verify %s -> exit %s\n%s\n' "$file" "$rc" "$out"
   [[ $rc == 1 && $(labjs get verdict <<<"$out") == refuse && $(labjs get reason <<<"$out") == "$want"* ]] \
-    || die "$kind: keys-door verify did not refuse it with '$want'"
+    || die "$label: keys-door verify did not refuse it with '$want'"
 }
 
-still_seq2() {
-  local h
+HEALTH=""
+# still_at LABEL SEQ SHA3 ENVELOPE: two polls later keys-door #1 still serves exactly that release
+still_at() {
+  local label=$1 seq=$2 sha=$3 env=$4
   sleep 12 # two polls at poll_secs = 5
-  h=$(health "$KD1")
-  printf 'health: %s\n' "$h"
-  [[ $(labjs get seq <<<"$h") == 2 && $(labjs get record_sha3 <<<"$h") == "$SEQ2_SHA3" ]] || die "$1: keys-door #1 left seq 2"
-  [[ $(labjs get equivocation <<<"$h") == null ]] || die "$1: keys-door #1 reports an equivocation"
-  fetch "release-after-$1" "https://$HOST/.well-known/bnr-keychain/release"
-  labjs same-bytes "$LAB/r2/envelope.json" "$LAB/out/release-after-$1.body" || die "$1: the served release changed"
+  HEALTH=$(health "$KD1")
+  printf 'health: %s\n' "$HEALTH"
+  [[ $(labjs get state <<<"$HEALTH") == serving && $(labjs get seq <<<"$HEALTH") == "$seq" && $(labjs get record_sha3 <<<"$HEALTH") == "$sha" ]] \
+    || die "$label: keys-door #1 is not serving seq $seq ($sha)"
+  fetch "release-after-$label" "https://$HOST/.well-known/bnr-keychain/release"
+  labjs same-bytes "$env" "$OUTDIR/release-after-$label.body" || die "$label: the served release is not $env"
+}
+
+# unverified_at LABEL NOTE: keys-door #1 serves nothing (503 through Caddy) and health says NOTE
+unverified_at() {
+  local label=$1 note=$2
+  HEALTH=$(health "$KD1")
+  printf 'health: %s\n' "$HEALTH"
+  [[ $(labjs get state <<<"$HEALTH") == unverified && $(labjs get seq <<<"$HEALTH") == null && $(labjs get last_error <<<"$HEALTH") == "$note" ]] \
+    || die "$label: keys-door #1 is not unverified with '$note'"
+  fetch "$label-index" "https://$HOST/index.html"
+  [[ ${FETCH%% *} == 503 ]] || die "$label: /index.html answered ${FETCH%% *}, want 503"
+  fetch "$label-release" "https://$HOST/.well-known/bnr-keychain/release"
+  [[ ${FETCH%% *} == 404 ]] || die "$label: /.well-known/bnr-keychain/release answered ${FETCH%% *}, want 404"
+}
+
+drop() { cp "$1" "$LAB/kd1/inbox/$2"; chmod 0644 "$LAB/kd1/inbox/$2"; }
+kd1_stop() {
+  docker rm -f "$MOCK" >/dev/null 2>&1 || true
+  run docker stop -t 15 "$KD1"
+}
+kd1_start() {
+  run docker start "$KD1"
+  start_mock "$KD1" "$MOCK"
+}
+# kd1_state SCRIPT: sh SCRIPT in keys-door #1's state dir, as its user, while it is stopped
+kd1_state() {
+  printf '+ [keys-door #1 state, stopped] %s\n' "$1" >&2
+  docker run --rm --volumes-from "$KD1" --network none --user 10096:10096 \
+    --workdir /var/lib/keys-door/state --entrypoint /bin/sh "$IMAGE" -c "$1"
 }
 
 step_g() {
-  say "g. rollback and tamper on keys-door #1"
+  say "g. tamper on keys-door #1"
   # the serve state holds the chain now; the inbox is emptied so each drop below stands alone
   rm -f "$LAB/kd1/inbox/"*.json
-  still_seq2 emptied
-  cp "$LAB/r1/envelope.json" "$LAB/kd1/inbox/rollback-seq1.json"
-  chmod 0644 "$LAB/kd1/inbox/rollback-seq1.json"
-  still_seq2 rollback
-  offline rollback rollback-seq1.json "seq 1 is below the floor 2"
-  pass "g. the seq-1 envelope dropped into the inbox: still seq 2, refused below the floor"
-
-  cp "$LAB/tamper/forged-seq2.json" "$LAB/tamper/mismatched-seq2.json" "$LAB/kd1/inbox/"
-  chmod 0644 "$LAB/kd1/inbox/"*.json
-  still_seq2 tamper
+  still_at emptied 2 "$SEQ2_SHA3" "$LAB/r2/envelope.json"
+  drop "$LAB/tamper/forged-seq2.json" forged-seq2.json
+  drop "$LAB/tamper/mismatched-seq2.json" mismatched-seq2.json
+  still_at tamper 2 "$SEQ2_SHA3" "$LAB/r2/envelope.json"
+  # a record either verifier wrongly accepted would be a second valid seq 2: a fork on health
+  labjs equivocation-is null <<<"$HEALTH" || die "tamper: an invalid seq-2 record made a fork"
   offline forged forged-seq2.json "bad_signature"
   offline mismatched mismatched-seq2.json "file_mismatch"
   run docker logs --since 40s "$KD1"
-  pass "g. tampered seq-2 envelopes: forged refused by both verifiers (bad_signature), mismatched refused (file_mismatch); still seq 2"
+  pass "g. tampered seq-2 envelopes: forged refused by both verifiers (bad_signature), mismatched refused (file_mismatch); still seq 2, no fork"
+
+  say "g. rule 4 live: the serve state lost, the floor kept, only seq 1 offered with its pack on the rail"
+  rm -f "$LAB/kd1/inbox/"*.json
+  drop "$LAB/r1/envelope.json" 001-seq1.json
+  kd1_stop
+  local floor note="seq 1 is below the floor 2 (rule 4)" t0
+  floor=$(kd1_state 'cat floor')
+  echo "floor file: '$floor'"
+  [[ $floor == 2 ]] || die "keys-door #1's floor is '$floor', want 2"
+  kd1_state 'ls -ln . && rm serve.json && ls -ln .'
+  kd1_start
+  rail_up "$KD1" "$ANT1"
+  wait_note "$KD1" "$note" 60 >/dev/null || die "keys-door #1 did not refuse seq 1 at its floor"
+  sleep 12 # two more polls with the rail up
+  unverified_at rollback "$note"
+  pass "g. serve state lost, floor 2 kept, seq 1 and its pack offered: 503, health '$note'"
+
+  say "g. control: a fresh keys-door, same config, same inbox, same rail, no floor"
+  run_door "$KD3" "$KD3_VOLUME" "$LAB/kd1/inbox" "$LAB/kd1/edge.toml" --network none
+  start_mock "$KD3" "$MOCK3"
+  HEALTH=$(wait_seq "$KD3" 1 120) || die "the control did not serve seq 1: keys-door #1's 503 above is not evidence of its floor"
+  printf 'health: %s\n' "$HEALTH"
+  [[ $(labjs get record_sha3 <<<"$HEALTH") == "$GENESIS" ]] || die "the control serves another seq 1"
+  run docker rm -f "$MOCK3" "$KD3"
+  run docker volume rm "$KD3_VOLUME"
+  pass "g. control: with no floor the same seq 1 is served ($GENESIS); the floor alone kept keys-door #1 at 503"
+
+  say "g. rule 7 live: a corrupt serve state, the floor kept, only seq 1 offered"
+  kd1_stop
+  kd1_state 'echo lab-corrupt-serve-state > serve.json && ls -ln .'
+  t0=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  kd1_start
+  rail_up "$KD1" "$ANT1"
+  wait_note "$KD1" "$note" 60 >/dev/null || die "keys-door #1 did not refuse seq 1 at its floor after a corrupt state"
+  sleep 12
+  unverified_at corrupt "$note"
+  docker logs --since "$t0" "$KD1" 2>&1 | grep -F 'serve state discarded (rule 7)' || die "keys-door #1 did not report discarding the corrupt serve state"
+  pass "g. corrupt serve state discarded (rule 7), floor 2 kept: 503 with seq 1 offered"
+  drop "$LAB/r2/envelope.json" 002-seq2.json
+  HEALTH=$(wait_seq "$KD1" 2 90) || die "keys-door #1 did not serve seq 2 (at the floor) again"
+  printf 'health: %s\n' "$HEALTH"
+  [[ $(labjs get record_sha3 <<<"$HEALTH") == "$SEQ2_SHA3" ]] || die "keys-door #1 serves another seq 2"
+  pass "g. seq 2 offered again: served (503 lasts only until a release at or above the floor verifies)"
+
+  say "g. rule 5 live: two valid seq-3 records after the served seq 2"
+  drop "$LAB/r3/envelope.json" 003-seq3.json
+  drop "$LAB/r3x/envelope.json" 003-seq3x.json
+  still_at fork 2 "$SEQ2_SHA3" "$LAB/r2/envelope.json"
+  labjs equivocation-is 3 "$SEQ3_SHA3" "$SEQ3X_SHA3" <<<"$HEALTH" || die "the fork at seq 3 is not reported"
+  offline fork 003-seq3.json "not chained: equivocation at seq 3"
+  pass "g. a fork at seq 3: keys-door #1 advances on neither, health names both, keys-door verify refuses r3"
+  rm -f "$LAB/kd1/inbox/003-"*.json
+  still_at fork-quiet 2 "$SEQ2_SHA3" "$LAB/r2/envelope.json"
+  labjs equivocation-is 3 "$SEQ3_SHA3" "$SEQ3X_SHA3" <<<"$HEALTH" || die "the fork was forgotten once its sources went quiet"
+  pass "g. the fork's envelopes gone from the inbox: still seq 2, still reported (kept evidence)"
+  drop "$LAB/r4/envelope.json" 004-seq4.json
+  HEALTH=$(wait_seq "$KD1" 4 60) || die "a seq 4 after r3 did not resolve the fork"
+  printf 'health: %s\n' "$HEALTH"
+  [[ $(labjs get record_sha3 <<<"$HEALTH") == "$SEQ4_SHA3" ]] || die "keys-door #1 serves another seq 4"
+  labjs equivocation-is null <<<"$HEALTH" || die "the resolved fork is still reported"
+  fetch release-resolved "https://$HOST/.well-known/bnr-keychain/release"
+  labjs same-bytes "$LAB/r4/envelope.json" "$OUTDIR/release-resolved.body" || die "the served release is not r4"
+  fetch release-3-resolved "https://$HOST/.well-known/bnr-keychain/release/3"
+  labjs same-bytes "$LAB/r3/envelope.json" "$OUTDIR/release-3-resolved.body" || die "release/3 is not r3, the branch r4 selects"
+  drop "$LAB/r3x/envelope.json" 003-seq3x.json
+  offline loser 003-seq3x.json "not chained"
+  offline rollback 001-seq1.json "seq 1 is below the floor 4 (rule 4)"
+  pass "g. r4 (prev = r3) resolved the fork: seq 4 served, release/3 is r3, r3x refused as not chained, seq 1 refused below the floor 4"
 }
 
 summary() {
   say "summary"
   printf '%s\n' "${RESULTS[@]}"
+}
+
+# ── host: step e on the edge host ───────────────────────────────────────────
+host_cleanup() {
+  local rc=$?
+  docker rm -f "$HOST_PROBE" >/dev/null 2>&1 || true
+  exit "$rc"
+}
+
+host_mode() {
+  local env=${1:-} caddy=${KEYS_EDGE_CADDY:-buzz-prod-caddy-1} e
+  [[ -n $env && -f $env ]] || die "usage: lab.sh host ENVELOPE (the ruled envelope keys-door serves, from /opt/keys-edge/inbox)"
+  command -v docker >/dev/null || die "host mode needs docker"
+  command -v node >/dev/null || die "host mode needs node on PATH: lab.mjs reads the envelope and checks every byte"
+  if docker container inspect "$HOST_PROBE" >/dev/null 2>&1; then die "a container named $HOST_PROBE exists: remove it first"; fi
+  setup_dir
+  trap host_cleanup EXIT
+  OUTDIR=$LAB/out
+  mkdir -p "$OUTDIR" "$LAB/share"
+  say "host: step e against this host's Caddy at 127.0.0.1, before DNS names it"
+  run docker version --format 'docker client {{.Client.Version}}, server {{.Server.Version}}'
+  run node --version
+  run docker inspect --format '{{.Name}}: {{.State.Status}}, image {{.Config.Image}}' "$KD1" "$caddy"
+  build_tools
+  run docker cp "$caddy:/data/caddy/pki/authorities/local/root.crt" "$LAB/share/root.crt"
+  docker run --rm "$TOOLS" cat /etc/ssl/certs/ca-certificates.crt > "$LAB/share/relay.crt"
+  run docker run --rm -v "$LAB/share:/lab:ro" "$TOOLS" openssl x509 -in /lab/root.crt -noout -subject -fingerprint -sha256
+  e=$(labjs envelope-record "$env" "$LAB/expected-record.json")
+  echo "expected release: $e (from $env)"
+  chmod -R a+rX "$LAB"
+  PROBE_CTR=$HOST_PROBE CONNECT=127.0.0.1 KD_DIRECT=http://$KD1_IP:8096
+  EXP_ENV=$env EXP_RECORD=$LAB/expected-record.json EXP_SEQ=$(labjs get seq <<<"$e") EXP_PACK=""
+  EXP_CHAIN=("$EXP_SEQ:$env")
+  run docker run -d --name "$HOST_PROBE" --network host --user "$(id -u):$(id -g)" \
+    -v "$LAB/share:/lab:ro" -v "$OUTDIR:/out" "$TOOLS" sleep 900
+  probe_edge
+  summary
 }
 
 case "${1:-}" in
@@ -511,8 +802,11 @@ case "${1:-}" in
     step_b
     summary
     ;;
+  host)
+    host_mode "${2:-}"
+    ;;
   *)
-    echo "usage: lab.sh all|chain" >&2
+    echo "usage: lab.sh all|chain|host ENVELOPE" >&2
     exit 2
     ;;
 esac

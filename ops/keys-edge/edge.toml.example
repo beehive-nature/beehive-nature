@@ -31,5 +31,6 @@ ant_doors = ["https://relay.skaists.dev/ant"]
 # Arweave discovery stays off while arweave_owners is empty (an unfiltered tag query is anyone's).
 arweave_gateways = []
 arweave_owners = []
-# https peer edges; none yet
+# peer edges, walked through /.well-known/bnr-keychain/release/<seq> (contract §7 A1); the ant_doors
+# rule: https, or plain http only to loopback (a forwarder beside keys-door). None yet.
 peers = []
