@@ -31,6 +31,7 @@ const rpcResult = (method, params) => {
   if (method === 'condenser_api.get_dynamic_global_properties')
     return { head_block_number: 49000000, head_block_id: '02e0dcb4c89a1a5c1e4e8a5c1e4e8a5c1e4e8a5c', last_irreversible_block_num: 48999990, time: new Date().toISOString().slice(0, 19) };
   if (method === 'condenser_api.get_transaction') {
+    if (Array.isArray(params)) params = params[0] || {}; /* positional, as mainnet expects */
     if (mock.gettx === 'fail') throw Object.assign(new Error('rpc error: transaction lookup unavailable (mock)'), { http: 200 });
     if (mock.gettx === 'missing') throw Object.assign(new Error('rpc error: Assert Exception:unknown transaction'), { http: 200 });
     return { id: params.id, block_num: 48999985, trx: { operations: [] } };
@@ -50,8 +51,11 @@ const rpcResult = (method, params) => {
   }
   if (method === 'condenser_api.get_content') {
     if (mock.junk) return { author: 123, body: { not: 'a string' }, block_num: 'weird' }; /* the untrusted-endpoint shape */
-    if (mock.contents && Object.prototype.hasOwnProperty.call(mock.contents, params.permlink))
-      return { author: params.author, permlink: params.permlink, body: mock.contents[params.permlink], block_num: 48000112, created: new Date().toISOString().slice(0, 19) };
+    if (mock.contents && Object.prototype.hasOwnProperty.call(mock.contents, params.permlink)) {
+      const cc = { author: params.author, permlink: params.permlink, body: mock.contents[params.permlink], created: new Date().toISOString().slice(0, 19) };
+      if (!mock.blockless) cc.block_num = 48000112; /* mainnet's get_content carries NO block_num — mock.blockless models that */
+      return cc;
+    }
     if (mock.content && mock.content.permlink === params.permlink)
       return { author: params.author, permlink: params.permlink, body: mock.content.body, block_num: 48000111, created: new Date().toISOString().slice(0, 19) };
     if (mock.mode === 'noland' || mock.mode === 'swallow') return { author: params.author, permlink: params.permlink, body: '' };
@@ -90,6 +94,7 @@ const server = createServer(async (q, s) => {
     if ('lastBody' in o) mock.lastBody = o.lastBody;
     if ('hive' in o) mock.hive = !!o.hive; /* model mainnet's assert-shaped not-found */
     if ('gettx' in o) mock.gettx = o.gettx; /* inclusion-lookup modes: ok | fail | missing */
+    if ('blockless' in o) mock.blockless = !!o.blockless; /* model mainnet's block_num-less get_content */
     s.writeHead(200); s.end('ok'); return;
   }
   const rel = decodeURIComponent(q.url.split('?')[0].replace(/^\//, '')) || 'index.html';
@@ -486,7 +491,7 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await step('fresh client: the outbox starts empty', () => fr.page.waitForFunction(() => /outbox is empty/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 8000 }));
     const before = mock.broadcasts.length;
     /* 7a: commitment present and equal → MATCH, but signature evidence stays NONE */
-    await setMock({ mode: 'normal', content: { permlink: 'drop-r-match', body: BODY } });
+    await setMock({ mode: 'normal', content: null, contents: { 'drop-r-match': BODY }, blockless: true }); /* mainnet shape: no block_num on content reads */
     await fr.page.fill('#author', 'loviswater');
     await fr.page.fill('#permlink', 'drop-r-match');
     await fr.page.fill('#body', BODY);
@@ -500,6 +505,8 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     ok('7a signature evidence honestly NONE — no signing provenance invented',
       rcA.receipt.signature_bound_hash === null && /NONE/.test(rcA.receipt.signing_evidence) && rcA.receipt.txid === null && /UNVERIFIED/.test(rcA.receipt.inclusion));
     ok('7a the recovered EDITION BYTES ride the record', rcA.body === BODY);
+    ok('7a a blockless chain answer renders created-time, never \'undefined\'', /created \d/.test(await fr.page.textContent('#receipt')) && !(await fr.page.textContent('#receipt')).includes('undefined'), (await fr.page.textContent('#receipt')).slice(0, 120));
+    await setMock({ mode: 'normal', content: null, contents: null, blockless: false });
     /* 7b: commitment differs → DIVERGED, both digests recorded */
     await setMock({ mode: 'normal', content: { permlink: 'drop-r-diverge', body: 'someone replaced the body' } });
     await fr.page.fill('#permlink', 'drop-r-diverge');

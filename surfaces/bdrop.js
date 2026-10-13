@@ -294,6 +294,15 @@ async function rpcCall(endpoint,method,params){
 function isNotFound(e){
   return /does not exist/i.test(String((e&&e.message)||e));
 }
+/* mainnet's get_content answer carries NO block_num (the offline mock invented one —
+   the founder saw "block undefined" live on 2026-10-13). The honest label is what
+   the chain actually said: the block number when present, else the created time. */
+function chainLabel(c){
+  if(!c)return 'the chain\u2019s word';
+  if(typeof c.block_num==='number')return 'block '+c.block_num;
+  if(c.created)return 'created '+c.created;
+  return 'the chain\u2019s word';
+}
 /* evidence states stay SEPARATE: content observed is not inclusion, inclusion is not
    finality, and an unavailable lookup is uncertainty — never silence, never proof.
    condenser_api.get_transaction answers inclusion by the desk's own txid;
@@ -302,12 +311,12 @@ async function evidenceFor(scope,txid){
   var e={tx_included:null,finality:null,inclusion_note:'not-attempted'};
   if(!txid){e.inclusion_note='no transaction id held';return e;}
   var t;
-  try{t=await rpcCall(scope.rpc,'condenser_api.get_transaction',{id:txid});}
+  try{t=await rpcCall(scope.rpc,'condenser_api.get_transaction',[txid]);}
   catch(err){e.inclusion_note='lookup unavailable: '+(isNotFound(err)?'the endpoint does not know this transaction':err.message);return e;}
   if(!(t&&typeof t==='object')||typeof t.block_num!=='number'){e.inclusion_note='the endpoint’s answer did not read as a transaction';return e;}
   e.tx_included={block_num:t.block_num,txid:txid};e.inclusion_note='answered';
   var g;
-  try{g=await rpcCall(scope.rpc,'condenser_api.get_dynamic_global_properties',{});}
+  try{g=await rpcCall(scope.rpc,'condenser_api.get_dynamic_global_properties',[]);}
   catch(err){e.finality='lookup unavailable: '+err.message;return e;}
   var lib=(g&&typeof g.last_irreversible_block_num==='number')?g.last_irreversible_block_num:null;
   if(lib===null)e.finality='no irreversible head in the answer';
@@ -384,7 +393,7 @@ async function reconcileOne(a,r,quiet){
       if(r.receipt&&r.receipt.evidence){r.receipt.evidence.tx_included=evd2.tx_included;r.receipt.evidence.finality=evd2.finality;r.receipt.evidence.inclusion_note=evd2.inclusion_note;}
       r.events.push(ev('reconciled','chain:'+c.block_num,{from:'recovery',body_byte_compare:'MATCH'}));
       r.last_error=null;
-      if(!quiet)log(r.id+' — reconciled against the chain: landed in block '+c.block_num+', byte-compare MATCH. no re-publication.','ok');
+      if(!quiet)log(r.id+' — reconciled against the chain: landed, '+chainLabel(c)+', byte-compare MATCH. no re-publication.','ok');
     }else{
       r.stage='diverged';
       r.events.push(ev('diverged','chain:'+c.block_num,{body_sha256_chain:pubHash}));
@@ -544,7 +553,7 @@ $('publish').addEventListener('click',async function(){
     var preHash=await sha256Hex(new TextEncoder().encode(pre.body));
     if(preHash===scope.body_sha256){
       var rr=upsert(a,scope,function(r){r.stage='confirmed';r.receipt=assembleReceipt(r,pre,preHash,null);r.events.push(ev('reconciled','chain:'+pre.block_num,{from:'preflight-duplicate'}));});
-      log('already published — identical bytes confirmed in block '+pre.block_num+'. no new signature, no re-publication.','ok');
+      log('already published — identical bytes confirmed, '+chainLabel(pre)+'. no new signature, no re-publication.','ok');
       renderReceipt(rr);return;
     }
     upsert(a,scope,function(r){r.stage='diverged';r.events.push(ev('diverged','chain:'+pre.block_num,{body_sha256_chain:preHash}));});
@@ -767,15 +776,15 @@ function renderReceipt(r){
   var head=document.createElement('div');
   if(rc.what==='bDroP chain-recovery record'){
     head.className=rc.body_byte_compare==='MATCH'?'ok':(rc.body_byte_compare==='DIVERGED'?'bad':'dim');
-    head.textContent='RECOVERED (chain read — proves presence, never a signature) · block '+rc.block_num+' · expected '+(rc.body_sha256_expected||'NONE in this desk')+' · chain '+rc.body_sha256_chain+' · '+rc.body_byte_compare+' · signing evidence NONE · inclusion UNVERIFIED';
+    head.textContent='RECOVERED (chain read — proves presence, never a signature) · '+chainLabel(rc.block_num!=null?rc:(rc&&rc.created?rc:null))+' · expected '+(rc.body_sha256_expected||'NONE in this desk')+' · chain '+rc.body_sha256_chain+' · '+rc.body_byte_compare+' · signing evidence NONE · inclusion UNVERIFIED';
   }else{
     head.className=(rc.body_byte_compare==='MATCH')?'ok':'bad';
-    head.textContent=(r.stage==='diverged'?'DIVERGED':'LANDED')+' · block '+rc.block_num+' · created '+rc.created+' · body sha-256 '+rc.body_sha256_published+' · byte-compare '+rc.body_byte_compare;
+    head.textContent=(r.stage==='diverged'?'DIVERGED':'LANDED')+' · '+chainLabel(rc)+' · body sha-256 '+rc.body_sha256_published+' · byte-compare '+rc.body_byte_compare;
   }
   box.appendChild(head);
   var evLine=document.createElement('div');evLine.className='dim';
   var E=rc.evidence||{};
-  evLine.textContent='evidence — content: '+(E.content_observed?(E.content_observed.compare+' @block '+E.content_observed.block):'none observed')
+  evLine.textContent='evidence — content: '+(E.content_observed?(E.content_observed.compare+(typeof E.content_observed.block==='number'?' @block '+E.content_observed.block:' @created '+(rc.created||'chain-reported'))):'none observed')
     +' · signature: '+(E.signature_verified||'UNVERIFIED')
     +' · inclusion: '+(E.tx_included?('block '+E.tx_included.block_num):(E.inclusion_note||'UNVERIFIED'))
     +' · finality: '+(E.finality&&E.finality.irreversible?('irreversible at LIB '+E.finality.lib_block):('not established'+(E.finality&&E.finality.lib_block?' (LIB '+E.finality.lib_block+' ahead)':'')))
