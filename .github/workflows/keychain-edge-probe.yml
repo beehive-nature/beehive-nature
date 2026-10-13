@@ -1,0 +1,33 @@
+# The keychain edge at keys.skaists.dev, probed from a GitHub-hosted runner: a vantage point
+# independent of the founder's laptop and of the edge itself (an edge is never its own witness).
+# tools/keychain-release/probe.mjs writes a bnr.keychain-edge-receipt/1, saved as an artifact; the
+# job summary table is derived from that receipt, and the run fails when any check in it is FAIL.
+# TLS probes run in docker alpine:3.22 (OpenSSL 3.5): the runner's own OpenSSL cannot offer
+# X25519MLKEM768. Read-only: public GETs and TLS handshakes; no secret, no key, no payment.
+# On demand only, as ant-reach: no schedule.
+name: keychain-edge-probe
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - name: verdict logic, from fixtures (no network)
+        run: node --test tools/keychain-release/test/probe.test.mjs
+      - name: probe the live edge
+        run: node tools/keychain-release/probe.mjs --vantage gh-ubuntu-latest --tls docker --out keychain-edge-receipt.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always() && hashFiles('keychain-edge-receipt.json') != ''
+        with:
+          name: keychain-edge-receipt
+          path: keychain-edge-receipt.json
+      - name: summary, derived from the receipt
+        if: always() && hashFiles('keychain-edge-receipt.json') != ''
+        run: node tools/keychain-release/probe.mjs summary keychain-edge-receipt.json >> "$GITHUB_STEP_SUMMARY"
