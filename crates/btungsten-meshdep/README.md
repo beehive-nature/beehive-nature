@@ -71,3 +71,31 @@ The public-mesh absolute idle bill (the #504/#622 capture) — that is the
 staged `scripts/x0x-622` packet's job, not this lane's. Local-rig numbers
 are mechanism evidence under a controlled workload; they are never
 extrapolated to fleet scale.
+
+## Management response bounds (PQ-NET-001)
+
+`NodeClient::request` reads at most 8 MiB of encoded HTTP response, with
+at most 16 KiB of headers and a 30-second total response-read deadline.
+Incoming bytes do not renew that deadline. The limit includes chunk
+framing; it is an observer limit, not a gossip payload or network budget.
+Buffers are bounded by these limits, but 8 MiB is not a process RSS claim:
+chunk decoding, UTF-8 conversion, and JSON parsing have additional costs.
+
+Responses must be complete: exact Content-Length, or valid chunk sizes,
+CRLFs and an empty terminating trailer section, or EOF-delimited bodies.
+Conflicting framing, unsupported transfer encodings/trailers, invalid UTF-8,
+and oversized/truncated responses return errors. Errors never authorize a
+retry or become successful JSON. HTTP error statuses such as 504 still
+reach the existing workload's UNKNOWN handling when their framing is valid.
+The read deadline starts after the request is written; it does not bound
+DNS/connect/write time or the separate SSE collector.
+
+No daemon forwarding defaults change. The SSE collector remains a separate
+unbounded queue/line-buffer follow-up; this change does not qualify the whole
+observer against hostile ingress. The new tests run in the existing
+`cargo test --workspace --locked` CI gate. Local reproduction:
+
+```sh
+cargo test -p btungsten-meshdep --locked
+cargo fmt -p btungsten-meshdep --check
+```
