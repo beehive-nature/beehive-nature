@@ -75,19 +75,27 @@ fn all_sockets_for(pid: u32) -> usize {
         }
         let fd_dir = format!("/proc/{pid}/fd");
         let mut own = std::collections::HashSet::new();
-        if let Ok(entries) = std::fs::read_dir(&fd_dir) {
-            for e in entries.flatten() {
-                if let Ok(target) = std::fs::read_link(e.path()) {
-                    let s = target.to_string_lossy().into_owned();
-                    if let Some(inode) =
-                        s.strip_prefix("socket:[").and_then(|r| r.strip_suffix(']'))
-                    {
-                        own.insert(inode.to_string());
+        match std::fs::read_dir(&fd_dir) {
+            Ok(entries) => {
+                for e in entries.flatten() {
+                    if let Ok(target) = std::fs::read_link(e.path()) {
+                        let s = target.to_string_lossy().into_owned();
+                        if let Some(inode) =
+                            s.strip_prefix("socket:[").and_then(|r| r.strip_suffix(']'))
+                        {
+                            own.insert(inode.to_string());
+                        }
                     }
                 }
             }
-        } else {
-            panic!("SKV2-RECEIPT method=/proc pid={pid} verdict=UNOBSERVABLE (fd table unreadable; a skipped observation is not a pass)");
+            // The process vanished between the liveness check and this
+            // read — an exit race, not an unobservable host. usize::MAX
+            // tells the caller to re-check liveness instead of counting
+            // a sample (the ladder's first Linux run hit exactly this).
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => return usize::MAX,
+            Err(e) => {
+                panic!("SKV2-RECEIPT method=/proc pid={pid} verdict=UNOBSERVABLE ({e}; a skipped observation is not a pass)")
+            }
         }
         socket_inodes.intersection(&own).count()
     } else {
@@ -178,6 +186,11 @@ fn run_workload(
             Some(_) => break,
             None => {
                 let n = all_sockets_for(pid);
+                if n == usize::MAX {
+                    // exit race: process vanished mid-sample — re-check
+                    // liveness rather than counting or panicking.
+                    continue;
+                }
                 max_sockets = max_sockets.max(n);
                 samples.push(n);
             }

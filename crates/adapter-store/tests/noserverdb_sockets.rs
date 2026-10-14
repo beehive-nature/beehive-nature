@@ -43,19 +43,26 @@ fn listening_sockets_for(pid: u32) -> usize {
         }
         let fd_dir = format!("/proc/{pid}/fd");
         let mut own = std::collections::HashSet::new();
-        if let Ok(entries) = std::fs::read_dir(&fd_dir) {
-            for e in entries.flatten() {
-                if let Ok(target) = std::fs::read_link(e.path()) {
-                    let s = target.to_string_lossy().into_owned();
-                    if let Some(inode) =
-                        s.strip_prefix("socket:[").and_then(|r| r.strip_suffix(']'))
-                    {
-                        own.insert(inode.to_string());
+        match std::fs::read_dir(&fd_dir) {
+            Ok(entries) => {
+                for e in entries.flatten() {
+                    if let Ok(target) = std::fs::read_link(e.path()) {
+                        let s = target.to_string_lossy().into_owned();
+                        if let Some(inode) =
+                            s.strip_prefix("socket:[").and_then(|r| r.strip_suffix(']'))
+                        {
+                            own.insert(inode.to_string());
+                        }
                     }
                 }
             }
-        } else {
-            panic!("NOSERVERDB-RECEIPT method=/proc pid={pid} verdict=UNOBSERVABLE (fd table unreadable; a skipped observation is not a pass)");
+            // Exit race (process vanished between liveness check and read):
+            // usize::MAX tells the caller to re-check liveness, not panic —
+            // the same race the SKV-2 ladder's first Linux run convicted.
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => return usize::MAX,
+            Err(e) => {
+                panic!("NOSERVERDB-RECEIPT method=/proc pid={pid} verdict=UNOBSERVABLE ({e}; a skipped observation is not a pass)")
+            }
         }
         listen_inodes.intersection(&own).count()
     } else {
@@ -99,6 +106,9 @@ fn noserverdb_no_listening_sockets_during_workload() {
             break; // finished early (fast box) — samples taken while alive
         }
         let n = listening_sockets_for(pid);
+        if n == usize::MAX {
+            continue; // exit race — re-check liveness at the next pass
+        }
         max_listening = max_listening.max(n);
         samples.push(n);
     }
