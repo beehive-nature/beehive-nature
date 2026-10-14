@@ -10,6 +10,9 @@ use std::sync::Arc;
 use std::thread::JoinHandle;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+#[path = "http_response.rs"]
+mod http_response;
+
 pub struct NodeClient {
     addr: String,
     token: String,
@@ -113,9 +116,6 @@ impl NodeClient {
         let mut stream =
             TcpStream::connect(&self.addr).map_err(|e| format!("connect {}: {e}", self.addr))?;
         stream
-            .set_read_timeout(Some(Duration::from_secs(30)))
-            .map_err(|e| e.to_string())?;
-        stream
             .set_write_timeout(Some(Duration::from_secs(10)))
             .map_err(|e| e.to_string())?;
         let mut req = format!(
@@ -138,11 +138,7 @@ impl NodeClient {
         if let Some(b) = body {
             stream.write_all(b.as_bytes()).map_err(|e| e.to_string())?;
         }
-        let mut raw = Vec::new();
-        stream
-            .read_to_end(&mut raw)
-            .map_err(|e| format!("read: {e}"))?;
-        parse_response(&raw)
+        http_response::read_response(&mut stream, Duration::from_secs(30))
     }
 
     /// An unauthenticated GET (only /health and /constitution* are public).
@@ -184,61 +180,8 @@ fn truncate(s: &str, n: usize) -> String {
     }
 }
 
-/// Parse an HTTP/1.1 response: status line, headers, body (honoring
-/// Content-Length, de-chunking Transfer-Encoding: chunked).
-fn parse_response(raw: &[u8]) -> Result<(u16, String), String> {
-    let sep = find(raw, b"\r\n\r\n").ok_or("no header terminator")?;
-    let head = String::from_utf8_lossy(&raw[..sep]).into_owned();
-    let mut lines = head.lines();
-    let status_line = lines.next().ok_or("empty response")?;
-    let status: u16 = status_line
-        .split_whitespace()
-        .nth(1)
-        .and_then(|s| s.parse().ok())
-        .ok_or_else(|| format!("bad status line: {status_line}"))?;
-    let mut content_length: Option<usize> = None;
-    let mut chunked = false;
-    for l in lines {
-        let lower = l.to_ascii_lowercase();
-        if let Some(v) = lower.strip_prefix("content-length:") {
-            content_length = v.trim().parse().ok();
-        }
-        if lower.starts_with("transfer-encoding:") && lower.contains("chunked") {
-            chunked = true;
-        }
-    }
-    let mut body = raw[sep + 4..].to_vec();
-    if chunked {
-        body = dechunk(&body)?;
-    } else if let Some(n) = content_length {
-        body.truncate(n);
-    }
-    Ok((status, String::from_utf8_lossy(&body).into_owned()))
-}
-
 fn find(hay: &[u8], needle: &[u8]) -> Option<usize> {
     hay.windows(needle.len()).position(|w| w == needle)
-}
-
-fn dechunk(body: &[u8]) -> Result<Vec<u8>, String> {
-    let mut out = Vec::new();
-    let mut i = 0usize;
-    loop {
-        let nl = find(&body[i..], b"\r\n").ok_or("bad chunk header")? + i;
-        let size_str = String::from_utf8_lossy(&body[i..nl]).into_owned();
-        let size = usize::from_str_radix(size_str.trim().split(';').next().unwrap_or("0"), 16)
-            .map_err(|e| format!("chunk size {size_str}: {e}"))?;
-        if size == 0 {
-            break;
-        }
-        let start = nl + 2;
-        if start + size > body.len() {
-            return Err("truncated chunk".into());
-        }
-        out.extend_from_slice(&body[start..start + size]);
-        i = start + size + 2;
-    }
-    Ok(out)
 }
 
 /// One SSE frame received from a node stream.
@@ -382,27 +325,5 @@ fn sse_reader(
                 }
             }
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn response_parsing_content_length_and_chunked() {
-        let raw = b"HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\nhelloEXTRA";
-        assert_eq!(parse_response(raw).unwrap(), (200, "hello".to_string()));
-        let chunked = b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nhello\r\n3;x=1\r\n fo\r\n0\r\n\r\n";
-        assert_eq!(
-            parse_response(chunked).unwrap(),
-            (200, "hello fo".to_string())
-        );
-    }
-
-    #[test]
-    fn status_errors_parse() {
-        let raw = b"HTTP/1.1 504 timeout\r\nContent-Length: 2\r\n\r\n{}";
-        assert_eq!(parse_response(raw).unwrap().0, 504);
     }
 }
