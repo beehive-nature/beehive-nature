@@ -17,13 +17,17 @@
 #     mesh slice-2 field result WITHOUT combining the datasets.
 #
 # MEASURED CONSTRAINTS (the honest boundary of this profile):
-#   - At mesh scale 9, KV state-sync convergence INSIDE the 30s gate was
-#     run-variable under shed_normal (one trial 10/20 within the gate,
-#     a rerun 20/20 within it; all records converged with a 180s window).
-#     STATE-SYNC-HEAVY LEAVES (the W@tch shape: one CRDT KV store) should
-#     NOT adopt shed_normal at stock budgets until this variance is
-#     quantified and the custom-store-topic classification is settled
-#     upstream. Precise next task in the lane dispatch.
+#   - At mesh scale 9, KV state-sync is FAILED under shed_normal at stock
+#     thresholds — QUANTIFIED by the N=10 study (2026-10-13,
+#     docs/dispatches/2026-10-13-btmd-scale9-study): 1/10 trials clean,
+#     7/10 with late recovery on the ~50s anti-entropy cycle, 2/10 not
+#     converged within 180s; baseline control 10/10 clean; the same
+#     policy with the leaf budget x10 restores 10/10 (the carve-out
+#     proxy — the failure is budget exhaustion of Normal-class transit).
+#     STATE-SYNC-HEAVY LEAVES (the W@tch shape: one CRDT KV store) must
+#     NOT adopt this profile at stock budgets; adoption requires either
+#     an upstream joined-store-topic carve-out or explicitly raised
+#     budgets re-qualified at the deployment scale.
 #   - A hostile peer flooding a topic the leaf SUBSCRIBES to inflates the
 #     leaf's INBOUND bill ~30-80x idle in the flood trial (own-inbox
 #     delivery is never shed BY DESIGN; RSS/CPU stayed flat and targeted
