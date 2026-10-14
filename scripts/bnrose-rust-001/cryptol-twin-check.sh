@@ -52,7 +52,7 @@ for s in yices z3; do command -v "$s" >/dev/null 2>&1 && say "$s: $("$s" --versi
 [ -x /usr/bin/time ] || { say "cryptol-twin: /usr/bin/time is missing; the receipt needs peak RSS"; exit 1; }
 say "caps: address space ${MEM_CAP_KIB} KiB per process, a ${BUDGET_SECS}s clock per obligation"
 
-OBLIGATIONS="gateFailsClosed gateNeedsNeverExecuted gateOpensOnlyWhenBothHold replacementNeverTouchesARow freshAttemptBelowSaturation oldRecordsStand"
+OBLIGATIONS="gateFailsClosed gateNeedsNeverExecuted gateOpensOnlyWhenBothHold replacementNeverTouchesARow freshAttemptBelowSaturation oldRecordsStand saturationCornerReusesSlot15"
 N=0
 PROVEN=""
 OPEN=""
@@ -124,7 +124,7 @@ fi
 # A composition, never a single :prove verdict: PROVEN only if every
 # obligation it rests on printed Q.E.D. in this run.
 if [ -z "$OPEN" ] && [ "$RED" = 0 ]; then
-  say "COMPOSED  the exact replacement law (fail-closed without the flag; any recorded effect closes the gate; the gate is exactly the conjunction; a replacement's entity is fresh and rowless below saturation; old records stand): PROVEN over $(echo $OBLIGATIONS | wc -w | tr -d " ") obligations + 2 controls"
+  say "COMPOSED  the exact replacement law (fail-closed without the flag; any recorded effect closes the gate; the gate is exactly the conjunction; a replacement's entity is fresh and rowless below saturation; old records stand; the saturation corner reuses slot 15): PROVEN over $(echo $OBLIGATIONS | wc -w | tr -d " ") obligations + 2 controls"
 elif [ "$RED" = 0 ]; then
   say "COMPOSED  the exact replacement law: NOT-PROVEN (open:$OPEN) — recorded, never a wedge"
 fi

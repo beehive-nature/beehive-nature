@@ -89,3 +89,13 @@ freshAttemptBelowSaturation recs rows =
 
 oldRecordsStand : [16]Bit -> Bit
 oldRecordsStand recs = and [ (recs @ a) ==> (transition recs @ a) | a <- idx16 ]
+
+// the named saturation corner, pinned as the FACT it is (founder order
+// 2026-10-14: "test the named saturation corner"): once the highest
+// journaled attempt is 15, the replacement number STAYS 15 — the
+// encoding of slot 15 is REUSED, by design (.min(15)). The safety side
+// (a replacement may never collide with a recorded row, saturation
+// included) is replacementNeverTouchesARow above; this obligation pins
+// the corner's existence so it cannot silently change shape.
+saturationCornerReusesSlot15 : [16]Bit -> Bit
+saturationCornerReusesSlot15 recs = (maxAttempt recs == 15) ==> (nextAttempt recs == 15)

@@ -489,10 +489,11 @@ impl Supervisor {
             Ok(r) => r,
             Err(_) => return true, // unreadable ledger: assume the worst
         };
-        (0u8..=15).any(|a| {
-            let id = bnrose_exec_core::step_op_id(root, step | (a << 4));
-            rows.iter().any(|r| r.op_id == id)
-        })
+        step_has_row_among(
+            &rows.iter().map(|r| r.op_id).collect::<Vec<_>>(),
+            root,
+            step,
+        )
     }
 
     /// journal one step admission and run it to its end (or its crash
@@ -1305,8 +1306,9 @@ impl Supervisor {
                         // ANY attempt of this step; a failed step WITH a
                         // row stays refused whatever the policy says.
                         let never_executed = !self.step_has_any_recorded_effect(&root, step);
-                        if never_executed && opts.replace_never_executed_failed_steps {
-                            let attempt = (step_entity_attempt(&records, &root, step) + 1).min(15);
+                        if replacement_admissible(!never_executed, &opts) {
+                            let attempt =
+                                replacement_attempt(step_entity_attempt(&records, &root, step));
                             let encoded = step | (attempt << 4);
                             let id = bnrose_exec_core::step_op_id(&root, encoded);
                             let effect =
@@ -1450,4 +1452,32 @@ pub fn step_entity_attempt(records: &[journal::Record], root: &[u8; 32], step: u
         }
     }
     max_attempt
+}
+
+/// The exact replacement law's GATE, one definition (the Cryptol twin's
+/// `gate` binds THIS function; the sampled-agreement grid compares them
+/// mechanically over a named input grid): admissible only when NO attempt
+/// of the step has a recorded effect AND the policy flag explicitly opts
+/// in (default false).
+pub fn replacement_admissible(has_any_recorded_effect: bool, opts: &StepOptions) -> bool {
+    !has_any_recorded_effect && opts.replace_never_executed_failed_steps
+}
+
+/// The replacement's attempt number: one past the highest journaled
+/// attempt, saturating at 15 (the Cryptol twin's `nextAttempt`; the
+/// saturation corner is named there and proven as a fact — at 16 journaled
+/// attempts the encoding of slot 15 is REUSED, by design).
+pub fn replacement_attempt(max_journaled_attempt: u8) -> u8 {
+    (max_journaled_attempt + 1).min(15)
+}
+
+/// Whether ANY attempt of this step has a row among `rows` — the pure
+/// core of the ledger check (the Cryptol twin's `anyRow` binds THIS).
+/// `rows` holds recorded effect op-ids; the ids are computed with the
+/// real step encoding (`step | attempt << 4`).
+pub fn step_has_row_among(rows: &[[u8; 32]], root: &[u8; 32], step: u8) -> bool {
+    (0u8..=15).any(|a| {
+        let id = bnrose_exec_core::step_op_id(root, step | (a << 4));
+        rows.iter().any(|r| *r == id)
+    })
 }
