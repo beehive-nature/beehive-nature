@@ -58,6 +58,37 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  # The mechanically checked Rust↔Cryptol SAMPLED-AGREEMENT GRID (founder
+  # order 2026-10-14). Own job on ubuntu-latest (24.04): the pinned cryptol
+  # 3.6.0 tarball is built for 24.04 and its bundled solvers die on the
+  # 22.04 lane runner ("Missing response from solver" — measured, run
+  # 38522200519). Needs both toolchains: rust to build the grid binary,
+  # cryptol to prove the generated agreement.
+  twin-grid:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
+      - name: install cryptol 3.6.0 (pinned, with bundled solvers) and GNU time
+        if: always()
+        timeout-minutes: 8
+        run: |
+          set -eu
+          cd "$HOME"
+          curl -fsSL -o cryptol.tar.gz https://github.com/GaloisInc/cryptol/releases/download/3.6.0/cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz
+          echo "cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz sha256: $(sha256sum cryptol.tar.gz | cut -d' ' -f1)"
+          mkdir -p cryptol && tar -xzf cryptol.tar.gz -C cryptol --strip-components=1
+          echo "$HOME/cryptol/bin" >> "$GITHUB_PATH"
+          [ -x /usr/bin/time ] || { sudo apt-get update -qq && sudo apt-get install -y -qq time; }
+          ./cryptol/bin/cryptol --version
+      - name: Sampled-agreement grid (Rust <-> Cryptol, mechanically checked)
+        if: always()
+        timeout-minutes: 15
+        run: |
+          cargo build --release -p bnrose-exec-host --bin bnrose-grid-agreement --locked
+          sh scripts/bnrose-rust-001/sampled-agreement-check.sh "$HOME/cryptol/bin/cryptol" target/release/bnrose-grid-agreement
+
   # The formal Cryptol TWIN of BNROSE-RUST-002's exact replacement law
   # (founder order 2026-10-13/14: "proceed to the formal Cryptol twin once
   # qualified"). Its own job, so it runs beside `lane`, not after it. The
