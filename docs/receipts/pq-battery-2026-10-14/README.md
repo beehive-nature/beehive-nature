@@ -1,7 +1,7 @@
 # Fresh PQ battery execution, 2026-10-14
 
-This directory records local execution, not a replay of older receipts and not
-a CI qualification. BNR baseline: `25258d564` (descendant of the reviewed
+This directory records fresh local and hosted execution, not a replay of older
+receipts. BNR baseline: `25258d564` (descendant of the reviewed
 `7e653693ca`). x0x: unmodified **v0.48.0 at `32bf552808`**.
 
 | executed lane | observed result |
@@ -19,6 +19,25 @@ a CI qualification. BNR baseline: `25258d564` (descendant of the reviewed
 | x0x application composition | group KEM/AEAD 12/12, upgrade signature 11/11, identity/certificate/introduction 68/68; **91/91** tests passed, zero skipped |
 | New x0x implementation lane | **752/752**: 515 KAT, 164 DIFFERENTIAL, 73 TEETH; all 37 required rows present; separate receipts in `../x0x-pq-2026-10-14/` |
 | Formatting / x0x lane lint / hook wiring | passed; clippy with `-D warnings` and the hook's positive/refusal controls executed |
+
+Hosted PQ run **38602989250** at **b7789d579** passed all seven jobs and
+printed the x0x **752/752**, all **37** required rows and both intended
+control failures, alongside the existing **2,729/2,729** and classical
+counts. `ci-pq-summary.log` and `ci-pq.json` retain them. Artifact retrieval
+returned HTTP 403; no downloaded hosted machine receipt is claimed.
+
+Hosted SAW run **38598493065** at **e246b7954** passed all three jobs,
+covering **12** lanes. ML-KEM's transform: **8** equivalence obligations and
+**2** controls; ML-DSA's: **15** obligations and **2** controls, with the
+`Elem mul` assumption retained. The two local attempts remain inconclusive
+as complete lanes; the second did complete ML-DSA's 15 equivalences before
+environment reattachment ended its control run. The hosted summaries and
+`ci-formal.json` provide the completed results.
+
+The inherited `printf` diagnostics in the hosted logs are preserved. The
+NTT checkers' full-stream log filters fix that pipe behavior; 14 acceptance/
+refusal transcript checks passed without I/O diagnostics. Proof inputs and
+assumptions are unchanged.
 
 The x0x selectors above were source-reviewed as inert: local crypto,
 serialization and temporary files only. They do not instantiate a network

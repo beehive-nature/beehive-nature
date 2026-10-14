@@ -1,0 +1,123 @@
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	﻿2026-10-14T16:31:53.8947048Z ##[group]Run sh scripts/btungsten/pq06-ntt-check.sh saw "$HOME/saw/bin/cryptol"
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:53.8947643Z [36;1msh scripts/btungsten/pq06-ntt-check.sh saw "$HOME/saw/bin/cryptol"[0m
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:53.9015744Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:53.9016105Z env:
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:53.9016376Z   MIR_JSON_REV: 8cbf9af1821075ef47cf784fef78d2650827730d
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:53.9016732Z   MIR_JSON_TOOLCHAIN: nightly-2026-03-21
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:53.9017072Z   SAW_RUST_LIBRARY_PATH: /home/runner/mir-json/rlibs
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:53.9017386Z ##[endgroup]
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:53.9123812Z == SAW PQ06 NTT: toolchain ==
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:53.9161160Z 1.6 (68eed5f release-1.6)
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:53.9280858Z Cryptol 3.6.0
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:53.9401129Z == SAW PQ06 NTT: PIN the harness lock to the workspace lock ==
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:53.9558902Z SAW-PIN PQ06: PASS (17 packages, each the workspace's version and checksum)
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:53.9559517Z == SAW PQ06 NTT: BUILD the harness to MIR JSON (cargo-saw-build) ==
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.0790863Z     Updating crates.io index
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.3425713Z  Downloading crates ...
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.4288651Z   Downloaded cmov v0.5.4
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.4426396Z   Downloaded crypto-common v0.2.2
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.4459275Z   Downloaded autocfg v1.5.1
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.4506895Z   Downloaded keccak v0.2.2
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.4527653Z   Downloaded cfg-if v1.0.4
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.4651920Z   Downloaded signature v3.0.0
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.4671292Z   Downloaded hybrid-array v0.4.14
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.4696500Z   Downloaded digest v0.11.3
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.4785693Z   Downloaded sponge-cursor v0.1.0
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.4823784Z   Downloaded ctutils v0.4.2
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.4925111Z   Downloaded module-lattice v0.2.3
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.4945127Z   Downloaded num-traits v0.2.19
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.4975100Z   Downloaded ml-dsa v0.1.1
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.5079866Z   Downloaded typenum v1.20.1
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.5147660Z   Downloaded shake v0.1.0
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.5419689Z    Compiling cmov v0.5.4
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.5420486Z    Compiling typenum v1.20.1
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.5421023Z    Compiling autocfg v1.5.1
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.5421433Z    Compiling cfg-if v1.0.4
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.5715882Z    Compiling keccak v0.2.2
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.6495890Z    Compiling sponge-cursor v0.1.0
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.7205868Z    Compiling ctutils v0.4.2
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:54.9036100Z    Compiling num-traits v0.2.19
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:55.3343730Z    Compiling hybrid-array v0.4.14
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:55.9717457Z    Compiling crypto-common v0.2.2
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:55.9718397Z    Compiling module-lattice v0.2.3
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:57.0550014Z    Compiling digest v0.11.3
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:57.1215871Z    Compiling shake v0.1.0
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:57.1865565Z    Compiling signature v3.0.0
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:57.2293586Z    Compiling ml-dsa v0.1.1
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:58.5506761Z    Compiling pq06_ntt v0.0.0 (/home/runner/work/beehive-nature/beehive-nature/scripts/btungsten/pq06-ntt)
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.2015021Z Linking 17 mir files into /home/runner/work/beehive-nature/beehive-nature/target/saw-pq06-ntt/cargo/x86_64-unknown-linux-gnu/debug/deps/pq06_ntt-d2a5a35e05b311d5.linked-mir.json
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.2778853Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 5.27s
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.2824579Z   Executable unittests src/lib.rs (/home/runner/work/beehive-nature/beehive-nature/target/saw-pq06-ntt/cargo/x86_64-unknown-linux-gnu/debug/deps/pq06_ntt-d2a5a35e05b311d5)
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7355000Z SAW-BUILD PQ06: PASS (8860681 bytes of linked MIR; names:)
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7372641Z   let elem_adt_name = "module_lattice/f91531d7::algebra::Elem::_adt71ac41deea25dd52[0]";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7373341Z   let poly_adt_name = "module_lattice/f91531d7::algebra::Polynomial::_adt71ac41deea25dd52[0]";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7374005Z   let npoly_adt_name = "module_lattice/f91531d7::algebra::NttPolynomial::_adt71ac41deea25dd52[0]";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7374574Z   let arr_adt_name = "hybrid_array/3e4a3fc7::Array::_adt3fbe35986f2cef99[0]";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7375804Z   let add_name = "module_lattice::algebra::{impl#4}::add::_inst71ac41deea25dd52";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7376340Z   let sub_name = "module_lattice::algebra::{impl#5}::sub::_inst71ac41deea25dd52";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7376842Z   let mul_name = "module_lattice::algebra::{impl#6}::mul::_inst71ac41deea25dd52";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7377326Z   let neg_name = "module_lattice::algebra::{impl#3}::neg::_inst71ac41deea25dd52";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7377741Z   let ntt_name = "ml_dsa::ntt::{impl#0}::ntt";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7378107Z   let ntt_inverse_name = "ml_dsa::ntt::{impl#2}::ntt_inverse";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7378557Z   let inv_layer_1_name = "ml_dsa::ntt::ntt_inverse_layer::_instc0748752eb2ed297";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7379024Z   let inv_layer_2_name = "ml_dsa::ntt::ntt_inverse_layer::_inst48c7fd486167401c";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7379505Z   let inv_layer_4_name = "ml_dsa::ntt::ntt_inverse_layer::_inst66b65a364dc120b6";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7379959Z   let inv_layer_8_name = "ml_dsa::ntt::ntt_inverse_layer::_inst9471875d66adb9c1";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7380426Z   let inv_layer_16_name = "ml_dsa::ntt::ntt_inverse_layer::_insta45600aa48b5ca91";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7380884Z   let inv_layer_32_name = "ml_dsa::ntt::ntt_inverse_layer::_instddc4e2b69758b719";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7381353Z   let inv_layer_64_name = "ml_dsa::ntt::ntt_inverse_layer::_instafa961b366089a1e";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7382100Z   let inv_layer_128_name = "ml_dsa::ntt::ntt_inverse_layer::_inst4c08bb177e505583";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7382929Z   let scale_name = "module_lattice::algebra::{impl#10}::mul::_inst42af5759d8428006";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7383609Z   let multiply_ntt_name = "ml_dsa::ntt::{impl#4}::multiply_ntt";
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.7384164Z == SPEC-CHECK PQ06: DsaNtt.cry closed terms ==
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:31:59.9623902Z SPEC-CHECK zetasMatchAppendixB: PASS
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:32:00.1430786Z SPEC-CHECK inverseOf256: PASS
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:32:02.6987910Z SPEC-CHECK inverseUndoesForward: PASS
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:32:09.7173236Z SPEC-CHECK nttMultipliesPolynomials: PASS
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:32:09.7173980Z == SAW PQ06 NTT: ntt.saw ==
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6689837Z PQ06-SAW PROVEN ml-dsa Elem add
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6690381Z PQ06-SAW PROVEN ml-dsa Elem sub
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6691355Z PQ06-SAW PROVEN ml-dsa Elem neg
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6691932Z PQ06-SAW ASSUMED ml-dsa Elem mul (tied by the field lane's three links)
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6692511Z PQ06-SAW PROVEN ml-dsa ntt (FIPS 204 Algorithm 41)
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6692992Z PQ06-SAW PROVEN ml-dsa inverse layer len 1
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6693406Z PQ06-SAW PROVEN ml-dsa inverse layer len 2
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6693822Z PQ06-SAW PROVEN ml-dsa inverse layer len 4
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6694238Z PQ06-SAW PROVEN ml-dsa inverse layer len 8
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6694659Z PQ06-SAW PROVEN ml-dsa inverse layer len 16
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6695319Z PQ06-SAW PROVEN ml-dsa inverse layer len 32
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6695773Z PQ06-SAW PROVEN ml-dsa inverse layer len 64
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6696234Z PQ06-SAW PROVEN ml-dsa inverse layer len 128
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6696723Z PQ06-SAW PROVEN ml-dsa Elem * Polynomial
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6697303Z PQ06-SAW PROVEN ml-dsa ntt_inverse (FIPS 204 Algorithm 42)
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6698040Z PQ06-SAW PROVEN ml-dsa multiply_ntt (FIPS 204 Algorithm 45)
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.6929037Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.7162502Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.7395268Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.7631213Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.7869153Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.8106519Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.8346034Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.8589026Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.8830749Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.9072621Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.9313923Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.9556179Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:09.9800574Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:10.0044468Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:10.0289561Z SAW ntt.saw: 15 obligations PROVEN in 1740s
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:10.0532940Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:01:10.0536362Z == SAW PQ06 NTT: TEETH ntt-teeth.saw — must FAIL with a counterexample ==
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:10:25.6101392Z PQ06-SAW-TEETH obligation bentTwiddle
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:10:25.6102069Z Subgoal failed: ml_dsa/ed780370::ntt[0]::{impl#0}[0]::ntt[0] Literal equality postcondition
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:10:25.6102620Z ----------Counterexample----------
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:10:25.6349578Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:10:25.6481305Z SAW-TEETH ntt-teeth.saw: PASS (counterexample found, as required)
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:10:25.6482477Z == SAW PQ06 NTT: TEETH ntt-teeth-sign.saw — must FAIL with a counterexample ==
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:27.7914493Z PQ06-SAW-TEETH obligation droppedSign
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:27.7915841Z Subgoal failed: ml_dsa/ed780370::ntt[0]::ntt_inverse_layer[0]::_inst4c08bb177e505583[0] Literal equality postcondition
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:27.7916796Z ----------Counterexample----------
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:27.7962569Z scripts/btungsten/pq06-ntt-check.sh: 46: printf: printf: I/O error
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:27.7985479Z SAW-TEETH ntt-teeth-sign.saw: PASS (counterexample found, as required)
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:27.7986185Z == SAW PQ06 NTT: ladder state ==
+saw-ntt-dsa	PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:27.7989062Z PIN: PASS | BUILD: PASS | SPEC-CHECK: PASS (4) | EQUIVALENCE: PROVEN (15: Elem add, sub, neg; the NTT; eight inverse layers, the product by 256^-1 and the inverse NTT composed from them; multiply_ntt) with Elem mul ASSUMED (the field lane's three links) | TEETH: PASS (2)

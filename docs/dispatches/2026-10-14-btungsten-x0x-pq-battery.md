@@ -74,14 +74,21 @@ property/teeth results and assumptions remain separate in the retained logs.
 The toolchain is SAW 1.6 (release digest checked), mir-json at `8cbf9af1`,
 and nightly-2026-03-21 with translated standard libraries.
 
-The two complete transform replays are pending in CI. The first local
-workers stopped without completion receipts; no OOM kill was recorded and
+Both complete transform replays passed in hosted SAW run **38598493065**
+at **e246b7954**. ML-KEM: **8 EQUIVALENCE obligations, 2 TEETH**;
+ML-DSA: **15 EQUIVALENCE obligations, 2 TEETH**, with its `Elem mul`
+assumption explicitly tied to the field lane's three links. Together with
+the main job, all **12** replay lanes completed successfully. Hosted
+summaries and `ci-formal.json` retain the verdicts and assumptions.
+
+The first local workers stopped without completion receipts; no OOM kill was recorded and
 the cause is UNVERIFIED. A second local replay printed all 15 ML-DSA
 equivalence obligations PROVEN, but environment reattachment coincided with
 loss of both workers and execution cell 4 before the controls completed.
 Both local attempts remain INCONCLUSIVE as complete lanes. Their transcripts
 are retained; completed equivalence results are not promoted into missing
-teeth results. The hosted SAW run is `38598493065` at `e246b7954`.
+teeth results. The successful hosted receipts supply the final lane results;
+neither local attempt is relabeled as successful.
 
 The hosted PQ workflow `38598493201` at `e246b7954` completed successfully:
 all seven jobs, including the new x0x lane. Its console prints the original
@@ -90,6 +97,23 @@ artifact download returned HTTP 403 at the storage endpoint, so its hosted
 machine receipt was not independently retrieved here. The controller now
 also prints each honest/control tally, coverage count and result-class count
 to the CI console; its fresh local replay and source/log hash checks pass.
+Hosted PQ run **38602989250** at **b7789d579** also passed all seven jobs.
+Its console reproduced the x0x **752/752**, **37/37** coverage rows, the
+expected-byte control's two failures and the empty control's 37 missing
+obligations, alongside PQ01's **2,729/2,729** and the classical counts.
+`ci-pq-summary.log` and `ci-pq.json` retain those hosted observations.
+
+The hosted transform logs also exposed `printf: I/O error` diagnostics from
+the inherited log checker's `grep -q`: its early exit closes the pipe while
+`printf` is still writing a large captured transcript. The two NTT checkers
+now consume the complete stream and discard matching output; their literal,
+whole-line and case-insensitive predicates and native-exit checks are
+unchanged. Bounded display uses `sed` without early stream termination.
+Verification on the real hosted marker sets plus large padded transcripts:
+**14/14** acceptance/refusal cases passed, including missing markers, nonzero
+prover exit despite markers, unrelated control failures and unexpectedly
+proven controls; no I/O diagnostic remained. Shell syntax and staged secret
+scanning pass. No Rust/Cryptol/SAW proof input or assumption changed.
 
 These BNR proofs are about BNR's actual pinned RustCrypto/glue functions,
 under their stated domains and assumptions. They do not silently become
