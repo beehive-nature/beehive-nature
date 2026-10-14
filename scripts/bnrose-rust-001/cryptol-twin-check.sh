@@ -73,7 +73,7 @@ variant() {
 for ob in $OBLIGATIONS; do
   N=$((N + 1))
   printf '%s\n' "$CRYPTOL" yices "$BUDGET_SECS" "$SPEC" ":prove $ob" "$MEM_CAP_KIB" > "$OUT/$N.spec"
-  "$0" --one "$OUT/$N.spec"
+  sh "$0" --one "$OUT/$N.spec"
   rc=$(cat "$OUT/$N.spec.rc"); log="$OUT/$N.spec.log"
   if   grep -q 'Q.E.D.' "$log"; then
     say "PROVEN    $ob (rc=$rc, $(cat "$OUT/$N.spec.secs")s, peak $(cat "$OUT/$N.spec.peak") KiB)"
@@ -100,7 +100,7 @@ GATE_LINE='gate optIn rows = optIn && (rows == zero)'
 
 C1=$(variant optin-dropped "$GATE_LINE" 'gate optIn rows = (rows == zero)')
 N=$((N + 1)); printf '%s\n' "$CRYPTOL" yices "$BUDGET_SECS" "$C1" ":prove gateFailsClosed" "$MEM_CAP_KIB" > "$OUT/$N.spec"
-"$0" --one "$OUT/$N.spec"
+sh "$0" --one "$OUT/$N.spec"
 if grep -qi "counterexample" "$OUT/$N.spec.log"; then
   say "CONTROL optin-dropped: counterexample (the door opens without the flag) — $(grep -A1 -i counterexample "$OUT/$N.spec.log" | tail -n 1)"
 else
@@ -111,7 +111,7 @@ fi
 
 C2=$(variant zero-slot-only "$GATE_LINE" 'gate optIn rows = optIn && (rows @ (0:[4]) == False)')
 N=$((N + 1)); printf '%s\n' "$CRYPTOL" yices "$BUDGET_SECS" "$C2" ":prove gateNeedsNeverExecuted" "$MEM_CAP_KIB" > "$OUT/$N.spec"
-"$0" --one "$OUT/$N.spec"
+sh "$0" --one "$OUT/$N.spec"
 if grep -qi "counterexample" "$OUT/$N.spec.log"; then
   say "CONTROL zero-slot-only: counterexample (a row past slot 0 is missed) — $(grep -A1 -i counterexample "$OUT/$N.spec.log" | tail -n 1)"
 else
