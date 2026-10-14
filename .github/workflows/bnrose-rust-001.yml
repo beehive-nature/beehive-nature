@@ -56,6 +56,7 @@ jobs:
           name: bnrose-rust-001-${{ github.run_id }}-${{ github.run_attempt }}
           path: docs/receipts/bnrose-rust-001/*
           if-no-files-found: error
+          retention-days: 14
 
   # The mechanically checked Rust↔Cryptol SAMPLED-AGREEMENT GRID (founder
   # order 2026-10-14). Own job on ubuntu-latest (24.04): the pinned cryptol
@@ -87,7 +88,6 @@ jobs:
         run: |
           cargo build --release -p bnrose-exec-host --bin bnrose-grid-agreement --locked
           sh scripts/bnrose-rust-001/sampled-agreement-check.sh "$HOME/cryptol/bin/cryptol" target/release/bnrose-grid-agreement
-          retention-days: 14
 
   # The formal Cryptol TWIN of BNROSE-RUST-002's exact replacement law
   # (founder order 2026-10-13/14: "proceed to the formal Cryptol twin once
