@@ -29,15 +29,24 @@ isolation. Two new legs:
 - **All-state socket observation** (`tests/skv2_network_denial.rs`):
   TCP+UDP, every state, attributable to the working child across live
   samples — zero.
-- **Outbound-network DENIAL** (same file): on Linux the entire bounded
-  workload (2000 ops) runs under `unshare -rn` — a rootless user+net
-  namespace whose only interface is a DOWN loopback. No network exists
-  to reach; the run must still complete and verify. Where unshare is
-  unavailable (this Windows box), the receipt prints
-  `denial=none-available` and carries the observation leg only — the
-  denial leg executes in Linux CI. SKV-2 receipts, both engines:
-  `exited_clean=true max_sockets_any_state=0 exact_replay=true
-  verdict=PASS`.
+- **Outbound-network DENIAL** (same file): a mechanism LADDER whose
+  receipt names what actually ran. Kernel leg: the entire bounded
+  workload (2000 ops) under `unshare -rn` (rootless user+net namespace).
+  Runner reality convicted the first implementation: GitHub's apparmor
+  userns restriction lets `unshare -rn` SPAWN but die EPERM — the
+  original fallback only caught spawn-errors, so the first Linux run
+  failed with `exited_clean=false samples=[]`. Repaired: the death is
+  caught, its captured stderr lands in the receipt as the reason, and
+  the ladder falls through to the libc leg — an LD_PRELOAD socket
+  blocker (compiled by build.rs on Linux hosts; `socket()` for
+  AF_INET/AF_INET6 fails ENETUNREACH) guarded by an ACTIVE control: a
+  bash `/dev/tcp` connect under the shim must fail "unreachable", and
+  an inert shim FAILS the leg rather than falling through. Where no
+  mechanism exists the receipt says observation-only. Named boundary:
+  raw syscalls or a statically-linked libc bypass the libc boundary;
+  the kernel netns leg remains the strongest where permitted. SKV-2
+  receipts, both engines: clean exit, zero sockets any state, exact
+  replay, PASS.
 
 ## 3. SKV-3 executable: the seam cannot acquire authority
 

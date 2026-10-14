@@ -1,22 +1,28 @@
 //! SKV-2 + NO-SERVER-DB outbound leg: local reads, writes and recovery
 //! function WITHOUT network connectivity, and the working process opens no
-//! sockets of ANY kind (listening, established or outbound) — observed, not
-//! assumed (L5).
+//! sockets of ANY kind (TCP+UDP, every state) — observed, not assumed (L5).
 //!
-//! Denial method is named per platform:
-//! - Linux: the child runs under `unshare -rn` — a rootless user+network
-//!   namespace whose only interface is a DOWN loopback. There is no network
-//!   to reach; the workload must still complete and verify.
-//! - Elsewhere (or when unshare is unavailable): the DENIAL leg is NOT RUN
-//!   and the receipt says so; the ALL-STATE socket observation leg still
-//!   runs and must observe zero sockets attributable to the child.
+//! Denial runs a mechanism LADDER, and the receipt names what actually ran:
+//! 1. `unshare -rn` — kernel-level: rootless user+network namespace, the
+//!    strongest leg. Spawns but dies with EPERM on hosts that restrict
+//!    unprivileged user namespaces (GitHub runners:
+//!    kernel.apparmor_restrict_unprivileged_userns=1) — the captured reason
+//!    lands in the receipt and the ladder falls through.
+//! 2. LD_PRELOAD socket-blocker — libc-level: `socket()` for AF_INET/AF_INET6
+//!    fails ENETUNREACH in the workload child. An ACTIVE CONTROL proves the
+//!    shim is live before the leg counts: a bash /dev/tcp connect under the
+//!    shim must fail "unreachable" (a "refused" would mean the shim is
+//!    inert and the leg FAILS, not falls through). Boundary named: raw
+//!    syscalls or a statically-linked libc bypass this boundary.
+//! 3. Observation only (non-Linux hosts): no denial mechanism claimed; the
+//!    all-state socket observation + exact replay still must pass.
 //!
-//! The recovery oracle is the exact deterministic replay of the full,
-//! bounded op sequence (the SKV-1 model: sequential, uniquely identifiable
-//! ops — the assumption is named, and holds for this child).
+//! The recovery oracle is the exact deterministic replay of the full op
+//! sequence (SKV-1 model; sequential uniquely-identifiable ops, named).
 
 use std::collections::HashMap;
-use std::process::Command;
+use std::io::Read;
+use std::process::{Command, Stdio};
 use std::time::Duration;
 
 use adapter_store::{corpus_key, corpus_value, open_named};
@@ -100,15 +106,54 @@ fn replay_all() -> HashMap<Vec<u8>, Vec<u8>> {
     state
 }
 
-fn network_denial(engine: &str) {
-    let dir = adapter_store::temp_dir(&format!("skv2-{engine}"));
+/// The active control for the LD_PRELOAD leg: bash's /dev/tcp uses the
+/// libc socket() path, so under a live shim the connect must fail
+/// "unreachable". A "refused" (or success) means the shim is inert.
+fn preload_shim_is_live() -> Result<(), String> {
+    let lib = match option_env!("SKV_PRELOAD_BLOCKER") {
+        Some(p) => p,
+        None => return Err("shim not compiled for this target".into()),
+    };
+    let out = Command::new("bash")
+        .arg("-c")
+        .arg("exec 3<>/dev/tcp/127.0.0.1/1")
+        .env("LD_PRELOAD", lib)
+        .stderr(Stdio::piped())
+        .output()
+        .map_err(|e| format!("control spawn failed: {e}"))?;
+    let mut err = String::from_utf8_lossy(&out.stderr).into_owned();
+    if err.len() > 160 {
+        err = err.split_off(err.len() - 160);
+    }
+    if out.status.success() {
+        return Err(format!("control CONNECTED (shim inert): {err}"));
+    }
+    if err.contains("unreachable") {
+        Ok(())
+    } else {
+        Err(format!(
+            "control failed without ENETUNREACH (shim inert?): {err}"
+        ))
+    }
+}
 
+struct WorkloadOutcome {
+    exited_clean: bool,
+    samples: Vec<usize>,
+    max_sockets: usize,
+    stderr_tail: String,
+}
+
+fn run_workload(
+    engine: &str,
+    dir: &std::path::Path,
+    unshare: bool,
+    preload: Option<&str>,
+) -> WorkloadOutcome {
     let child_path = child_binary();
-    let mut denial = "none-available";
-    let mut cmd = if cfg!(target_os = "linux") {
+    let mut cmd = if unshare {
         let mut c = Command::new("unshare");
         c.arg("-rn").arg(&child_path);
-        denial = "unshare -rn (rootless netns, loopback down)";
         c
     } else {
         Command::new(&child_path)
@@ -117,26 +162,12 @@ fn network_denial(engine: &str) {
         engine.to_string(),
         dir.to_string_lossy().into_owned(),
         OPS.to_string(),
-    ]);
-
-    let spawned = cmd.spawn();
-    let mut child = match spawned {
-        Ok(c) => c,
-        Err(_) if cfg!(target_os = "linux") => {
-            // unshare unavailable/denied — fall back to a plain child and
-            // say so: the denial leg is NOT RUN on this host.
-            denial = "unshare-unavailable (denial leg NOT RUN; observation only)";
-            Command::new(&child_path)
-                .args([
-                    engine.to_string(),
-                    dir.to_string_lossy().into_owned(),
-                    OPS.to_string(),
-                ])
-                .spawn()
-                .expect("plain spawn")
-        }
-        Err(e) => panic!("spawn failed: {e}"),
-    };
+    ])
+    .stderr(Stdio::piped());
+    if let Some(lib) = preload {
+        cmd.env("LD_PRELOAD", lib);
+    }
+    let mut child = cmd.spawn().expect("spawn workload child");
     let pid = child.id();
 
     let mut samples = Vec::new();
@@ -152,9 +183,23 @@ fn network_denial(engine: &str) {
             }
         }
     }
+    let mut stderr_buf = String::new();
+    if let Some(mut s) = child.stderr.take() {
+        let _ = s.read_to_string(&mut stderr_buf);
+    }
     let status = child.wait().expect("wait");
-    let exited_clean = status.success();
+    if stderr_buf.len() > 200 {
+        stderr_buf = stderr_buf.split_off(stderr_buf.len() - 200);
+    }
+    WorkloadOutcome {
+        exited_clean: status.success(),
+        samples,
+        max_sockets,
+        stderr_tail: stderr_buf,
+    }
+}
 
+fn verify(engine: &str, dir: &std::path::Path) -> bool {
     let store = open_named(engine, &dir.join("store")).expect("reopen");
     store.integrity_check().expect("integrity");
     let scanned: HashMap<Vec<u8>, Vec<u8>> = store
@@ -162,29 +207,114 @@ fn network_denial(engine: &str) {
         .expect("scan")
         .into_iter()
         .collect();
-    let expected = replay_all();
-    let exact = scanned == expected;
+    scanned == replay_all()
+}
 
-    println!(
-        "SKV2-RECEIPT engine={engine} denial={denial} ops={OPS} exited_clean={exited_clean} samples={:?} max_sockets_any_state={max_sockets} exact_replay={exact} integrity=ok verdict={}",
-        samples,
-        if exact && exited_clean && max_sockets == 0 && !samples.is_empty() {
-            "PASS"
-        } else {
-            "FAIL"
+fn network_denial(engine: &str) {
+    let mut attempts: Vec<String> = Vec::new();
+    let blocker = option_env!("SKV_PRELOAD_BLOCKER");
+
+    #[derive(Clone, Copy, Debug)]
+    enum Leg {
+        KernelNetns,
+        LibcPreload,
+    }
+
+    let legs: &[Leg] = if cfg!(target_os = "linux") {
+        &[Leg::KernelNetns, Leg::LibcPreload]
+    } else {
+        &[]
+    };
+
+    for leg in legs {
+        let dir = adapter_store::temp_dir(&format!("skv2-{engine}-{leg:?}"));
+        match leg {
+            Leg::KernelNetns => {
+                let out = run_workload(engine, &dir, true, None);
+                if out.exited_clean {
+                    finish(engine, &dir, "unshare -rn (kernel netns)", &attempts, out);
+                    return;
+                }
+                attempts.push(format!(
+                    "unshare-rn unavailable: {}",
+                    out.stderr_tail.trim()
+                ));
+                let _ = std::fs::remove_dir_all(&dir);
+            }
+            Leg::LibcPreload => {
+                if let Some(lib) = blocker {
+                    if let Err(reason) = preload_shim_is_live() {
+                        // An inert shim is a harness defect, not a
+                        // fall-through: the mechanism was claimed.
+                        panic!("SKV2-RECEIPT engine={engine} mechanism=LD_PRELOAD control=INERT ({reason}) verdict=FAIL");
+                    }
+                    let out = run_workload(engine, &dir, false, Some(lib));
+                    if out.exited_clean {
+                        finish(
+                            engine,
+                            &dir,
+                            "LD_PRELOAD socket-blocker (libc, AF_INET/AF_INET6 denied; control=active)",
+                            &attempts,
+                            out,
+                        );
+                        return;
+                    }
+                    attempts.push(format!("preload workload died: {}", out.stderr_tail.trim()));
+                    let _ = std::fs::remove_dir_all(&dir);
+                } else {
+                    attempts.push("preload shim not compiled".into());
+                }
+            }
         }
+    }
+
+    // No denial mechanism available (or all unavailable): the observation
+    // leg still runs, and the receipt names every failed attempt.
+    let dir = adapter_store::temp_dir(&format!("skv2-{engine}-obs"));
+    let out = run_workload(engine, &dir, false, None);
+    let label = if attempts.is_empty() {
+        "none-available (observation only)".to_string()
+    } else {
+        format!(
+            "denial leg NOT RUN [{}]; observation only",
+            attempts.join("; ")
+        )
+    };
+    finish(engine, &dir, &label, &attempts, out);
+}
+
+fn finish(
+    engine: &str,
+    dir: &std::path::Path,
+    denial: &str,
+    attempts: &[String],
+    out: WorkloadOutcome,
+) {
+    let exact = verify(engine, dir);
+    let verdict = out.exited_clean && out.max_sockets == 0 && !out.samples.is_empty() && exact;
+    println!(
+        "SKV2-RECEIPT engine={engine} denial={denial} ops={OPS} exited_clean={} samples={:?} max_sockets_any_state={} exact_replay={} attempts={:?} verdict={}",
+        out.exited_clean,
+        out.samples,
+        out.max_sockets,
+        exact,
+        attempts,
+        if verdict { "PASS" } else { "FAIL" }
     );
-    assert!(exited_clean, "workload must complete under network denial");
-    assert_eq!(max_sockets, 0, "sockets opened by the working child");
     assert!(
-        !samples.is_empty(),
+        out.exited_clean,
+        "workload must complete under network denial"
+    );
+    assert_eq!(out.max_sockets, 0, "sockets opened by the working child");
+    assert!(
+        !out.samples.is_empty(),
         "child never observed alive — observation vacuous"
     );
     assert!(
         exact,
         "recovered state differs from the full deterministic replay"
     );
-    let _ = std::fs::remove_dir_all(&dir);
+    let _ = std::fs::remove_dir_all(dir);
 }
 
 #[test]

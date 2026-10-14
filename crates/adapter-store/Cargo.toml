@@ -13,6 +13,10 @@ surrealkv = { version = "1", optional = true }
 # already transitive through surrealkv itself.
 tokio = { version = "1", features = ["rt"], optional = true }
 
+[target.'cfg(target_os = "linux")'.build-dependencies]
+# compiles the SKV-2 network-denial shim (socket_block.c) for LD_PRELOAD
+cc = "1"
+
 [features]
 # The SurrealKV candidate rides a feature so a stripped build can carry the
 # reference implementation alone; CI runs the default set (both engines),
