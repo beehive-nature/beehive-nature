@@ -57,6 +57,7 @@ dependencies = [
 name = "adapter-store"
 version = "0.1.0"
 dependencies = [
+ "cc",
  "rusqlite",
  "surrealkv",
  "tokio",
