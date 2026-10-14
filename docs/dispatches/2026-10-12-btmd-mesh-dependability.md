@@ -274,3 +274,37 @@ host is a founder gesture (ops/ stays verbatim-only).
 5. The daily upstream watch continues untouched; nothing was posted
    upstream from this lane (no unsolicited posts; the watch carries
    outward communication).
+
+## Merge receipt — milestone 1 archived (2026-10-13)
+
+- **Merged:** PR #412 at **`f4bd4202248d10b3c27efa5c86ce369c18762740`**
+  (merge of qualifying head `1e8520c9e`).
+- **Qualification:** pull_request run `38489614256` on `1e8520c9e` —
+  tests.yml all-green (static, test, eternal, node, wallet, formal,
+  formal-cryptol-leg, meter), plus secret-scan, WB001/WB002 SAW,
+  bTunGsTeN PQ/RB, WASM corpus, BNROSE-RUST-001 workflows all success
+  on the same head. The `fail` rows on the checks board are the lane's
+  own cancelled push-event duplicates (`384896089xx`) — cancellations,
+  not failures (founder ruling).
+- **Hold history (dependency-owned, per ruling):** the first two
+  qualification attempts on earlier heads inherited main's red — the
+  bdrop.js v9 surface-rider debt (static; first red located on MAIN,
+  rider carried by this lane's merge commit `50ebce656` and then healed
+  on main by PR #418) and the bdrop responsive overflow (eternal;
+  footer-audit WIDE 0→1, 417 px vs 390 px — routed to the owning lane
+  as issue **#416**, repaired by PR **#419**, healed main
+  `05ff464a0` verified green before integration). No ratchet was
+  weakened and no unrelated fix absorbed into #412.
+- **Standing evidence boundaries (unchanged by merge):** release
+  provenance stays three separate facts — artifact checksum equality
+  (verified), `.asc` signature packet/key-ID observation (expected key
+  observed), authenticated signer-key verification (**NOT FRESHLY
+  VERIFIED** this round; the OCI key source was unreachable). The
+  scale-9 KV state-sync result stays **FAIL / unreliable-within-gate**
+  (10/20 and 20/20 trials recorded separately, never averaged).
+- **Next bounded experiment:** the N≥10 independent-trial scale-9
+  quantification plus the upstream custom-store-topic classification
+  question — the deliverable that decides whether LEAF-SHED-NORMAL-1
+  is adoptable for state-sync-heavy (W@tch-shaped) leaves.
+
+[skip ci]
