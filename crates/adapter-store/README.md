@@ -28,9 +28,17 @@ portability test keeps that claim executable instead of rhetorical.
 
 | gate | receipt | result |
 | --- | --- | --- |
-| SKV-1 autonomous recovery | `tests/skv1_crash_recovery.rs` — child hard-killed mid-write at 150/400/800 ms, × both engines | 6/6 PASS: zero torn values, zero lost acknowledged commits, engine structural check ok on reopen |
+| SKV-1 autonomous recovery | `tests/skv1_crash_recovery.rs` — child hard-killed mid-write at 150/400/800 ms, × both engines | 6/6 PASS: recovered state EXACTLY equals the deterministic replay of the committed prefix; zero torn values; engine structural check ok on reopen |
 | SKV-4 portability | `tests/skv4_portability.rs` — 1000 puts + 100 deletes, export/reconstruct, both directions | 2/2 PASS: 900 entries byte-identical, checksums equal both ways |
 | NO-SERVER-DB run condition | `tests/noserverdb_sockets.rs` — child's listening sockets enumerated from the OS's own tables while it works | PASS: 10/10 live samples, zero listening sockets (netstat on Windows, /proc on Linux) |
+
+The crash model was itself convicted red-first, on the first Linux CI
+run: an unacked trailing batch (legal commit-before-ack) carries a
+tombstone that deletes a key the acked-only replay expects live —
+misread as "acknowledged commit lost". Every op puts its own key, so
+the largest present-or-acked index reveals the committed prefix; the
+expectation replays ops `0..=committed` and compares EXACTLY, which
+subsumes torn-value, lost-commit and phantom-key detection.
 
 Receipts are verdicts from observations only: the crash test reads what
 actually survived the kill, the portability test compares actual scan
