@@ -98,6 +98,14 @@ def main():
             receipt = out / f"{name}.json"
             run(name, [binary, "--cache", str(cache), "--receipt", str(receipt), *flags], expected)
             evidence = json.loads(receipt.read_text())
+            tally = evidence["report"]
+            classes = {}
+            for row in tally["rows"]:
+                classes[row["result_class"]] = classes.get(row["result_class"], 0) + row["executed"]
+            print(f"X0X-PQ RESULT {name}: {evidence['result']}; {tally['executed']} executed, "
+                  f"{tally['passed']} passed, {len(tally['failures'])} failed; "
+                  f"{evidence['required_rows']} required rows, {len(evidence['missing'])} missing; "
+                  f"classes {json.dumps(classes, sort_keys=True)}", flush=True)
             if evidence["errors"]:
                 raise RuntimeError(f"{name}: an infrastructure failure cannot convict a control")
             if name == "expected-byte-teeth" and (not evidence["controls"]["sabotage_applied"]

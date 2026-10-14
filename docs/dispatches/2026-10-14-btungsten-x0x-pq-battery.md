@@ -74,10 +74,22 @@ property/teeth results and assumptions remain separate in the retained logs.
 The toolchain is SAW 1.6 (release digest checked), mir-json at `8cbf9af1`,
 and nightly-2026-03-21 with translated standard libraries.
 
-The two transform replays are still pending. Their first workers stopped
-without completion receipts; no OOM kill was recorded and the cause is
-UNVERIFIED. That attempt is INCONCLUSIVE, not a proof result. They are being
-rerun with continuously maintained execution sessions.
+The two complete transform replays are pending in CI. The first local
+workers stopped without completion receipts; no OOM kill was recorded and
+the cause is UNVERIFIED. A second local replay printed all 15 ML-DSA
+equivalence obligations PROVEN, but environment reattachment coincided with
+loss of both workers and execution cell 4 before the controls completed.
+Both local attempts remain INCONCLUSIVE as complete lanes. Their transcripts
+are retained; completed equivalence results are not promoted into missing
+teeth results. The hosted SAW run is `38598493065` at `e246b7954`.
+
+The hosted PQ workflow `38598493201` at `e246b7954` completed successfully:
+all seven jobs, including the new x0x lane. Its console prints the original
+PQ01 **2,729/2,729** and classical **1,485/1,485 + 27/27** counts. The x0x
+artifact download returned HTTP 403 at the storage endpoint, so its hosted
+machine receipt was not independently retrieved here. The controller now
+also prints each honest/control tally, coverage count and result-class count
+to the CI console; its fresh local replay and source/log hash checks pass.
 
 These BNR proofs are about BNR's actual pinned RustCrypto/glue functions,
 under their stated domains and assumptions. They do not silently become

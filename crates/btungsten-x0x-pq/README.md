@@ -19,8 +19,10 @@ checks pass: **515 KAT, 164 DIFFERENTIAL, 73 TEETH**, with **37/37** required
 coverage rows present. The expected-byte control produced two real failures;
 the empty-run control refused all 37 missing obligations. Audit gate 1 passed.
 Gate 2 scanned 222 locked dependencies: no vulnerabilities, two unmaintained
-dependency warnings (atomic-polyfill and proc-macro-error2). This is a local
-execution receipt; CI has not reproduced it yet. Retained evidence:
+dependency warnings (atomic-polyfill and proc-macro-error2). The original
+lane's CI job also passed in run `38598493201` at `e246b7954`; downloading its
+hosted artifact returned HTTP 403. The controller now prints the actual
+tallies and result classes in CI logs as well as writing artifacts. Retained evidence:
 [`docs/receipts/x0x-pq-2026-10-14`](../../docs/receipts/x0x-pq-2026-10-14).
 
 `inventory.json` binds x0x **v0.48.0 at 32bf552808**, source snapshots,

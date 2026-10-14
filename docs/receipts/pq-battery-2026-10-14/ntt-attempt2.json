@@ -1,0 +1,13 @@
+{
+  "result": "INCONCLUSIVE",
+  "cause": "environment reattachment coincided with worker/session disappearance",
+  "observations": [
+    "ML-DSA: 15 equivalence obligations printed PROVEN; no completed teeth verdict",
+    "ML-KEM: no completed equivalence verdict",
+    "execution cell 4 became unavailable"
+  ],
+  "not_claimed": [
+    "complete transform-lane pass",
+    "failure of an algorithm"
+  ]
+}

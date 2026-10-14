@@ -1,4 +1,4 @@
-    Finished `release` profile [optimized] target(s) in 0.36s
+    Finished `release` profile [optimized] target(s) in 0.17s
      Running unittests src/main.rs (crates/btungsten-x0x-pq/target/release/deps/btungsten_x0x_pq-5682d968abe6dbbb)
 
 running 1 test

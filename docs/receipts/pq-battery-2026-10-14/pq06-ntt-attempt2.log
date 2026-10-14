@@ -1,0 +1,73 @@
+== SAW PQ06 NTT: toolchain ==
+1.6 (68eed5f release-1.6)
+Cryptol 3.6.0
+== SAW PQ06 NTT: PIN the harness lock to the workspace lock ==
+SAW-PIN PQ06: PASS (17 packages, each the workspace's version and checksum)
+== SAW PQ06 NTT: BUILD the harness to MIR JSON (cargo-saw-build) ==
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling cmov v0.5.4
+   Compiling typenum v1.20.1
+   Compiling autocfg v1.5.1
+   Compiling cfg-if v1.0.4
+   Compiling keccak v0.2.2
+   Compiling sponge-cursor v0.1.0
+   Compiling ctutils v0.4.2
+   Compiling num-traits v0.2.19
+   Compiling hybrid-array v0.4.14
+   Compiling crypto-common v0.2.2
+   Compiling module-lattice v0.2.3
+   Compiling digest v0.11.3
+   Compiling shake v0.1.0
+   Compiling signature v3.0.0
+   Compiling ml-dsa v0.1.1
+   Compiling pq06_ntt v0.0.0 (/workspace/wt-pq-battery/scripts/btungsten/pq06-ntt)
+Linking 17 mir files into /workspace/wt-pq-battery/target/saw-pq06-ntt/cargo/x86_64-unknown-linux-gnu/debug/deps/pq06_ntt-d2a5a35e05b311d5.linked-mir.json
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.59s
+  Executable unittests src/lib.rs (/workspace/wt-pq-battery/target/saw-pq06-ntt/cargo/x86_64-unknown-linux-gnu/debug/deps/pq06_ntt-d2a5a35e05b311d5)
+SAW-BUILD PQ06: PASS (8853921 bytes of linked MIR; names:)
+  let elem_adt_name = "module_lattice/c7b61fc3::algebra::Elem::_adt71ac41deea25dd52[0]";
+  let poly_adt_name = "module_lattice/c7b61fc3::algebra::Polynomial::_adt71ac41deea25dd52[0]";
+  let npoly_adt_name = "module_lattice/c7b61fc3::algebra::NttPolynomial::_adt71ac41deea25dd52[0]";
+  let arr_adt_name = "hybrid_array/5acdac59::Array::_adt3fbe35986f2cef99[0]";
+  let add_name = "module_lattice::algebra::{impl#4}::add::_inst71ac41deea25dd52";
+  let sub_name = "module_lattice::algebra::{impl#5}::sub::_inst71ac41deea25dd52";
+  let mul_name = "module_lattice::algebra::{impl#6}::mul::_inst71ac41deea25dd52";
+  let neg_name = "module_lattice::algebra::{impl#3}::neg::_inst71ac41deea25dd52";
+  let ntt_name = "ml_dsa::ntt::{impl#0}::ntt";
+  let ntt_inverse_name = "ml_dsa::ntt::{impl#2}::ntt_inverse";
+  let inv_layer_1_name = "ml_dsa::ntt::ntt_inverse_layer::_instc0748752eb2ed297";
+  let inv_layer_2_name = "ml_dsa::ntt::ntt_inverse_layer::_inst48c7fd486167401c";
+  let inv_layer_4_name = "ml_dsa::ntt::ntt_inverse_layer::_inst66b65a364dc120b6";
+  let inv_layer_8_name = "ml_dsa::ntt::ntt_inverse_layer::_inst9471875d66adb9c1";
+  let inv_layer_16_name = "ml_dsa::ntt::ntt_inverse_layer::_insta45600aa48b5ca91";
+  let inv_layer_32_name = "ml_dsa::ntt::ntt_inverse_layer::_instddc4e2b69758b719";
+  let inv_layer_64_name = "ml_dsa::ntt::ntt_inverse_layer::_instafa961b366089a1e";
+  let inv_layer_128_name = "ml_dsa::ntt::ntt_inverse_layer::_inst4c08bb177e505583";
+  let scale_name = "module_lattice::algebra::{impl#10}::mul::_inst42af5759d8428006";
+  let multiply_ntt_name = "ml_dsa::ntt::{impl#4}::multiply_ntt";
+== SPEC-CHECK PQ06: DsaNtt.cry closed terms ==
+SPEC-CHECK zetasMatchAppendixB: PASS
+SPEC-CHECK inverseOf256: PASS
+SPEC-CHECK inverseUndoesForward: PASS
+SPEC-CHECK nttMultipliesPolynomials: PASS
+== SAW PQ06 NTT: ntt.saw ==
+PQ06-SAW PROVEN ml-dsa Elem add
+PQ06-SAW PROVEN ml-dsa Elem sub
+PQ06-SAW PROVEN ml-dsa Elem neg
+PQ06-SAW ASSUMED ml-dsa Elem mul (tied by the field lane's three links)
+PQ06-SAW PROVEN ml-dsa ntt (FIPS 204 Algorithm 41)
+PQ06-SAW PROVEN ml-dsa inverse layer len 1
+PQ06-SAW PROVEN ml-dsa inverse layer len 2
+PQ06-SAW PROVEN ml-dsa inverse layer len 4
+PQ06-SAW PROVEN ml-dsa inverse layer len 8
+PQ06-SAW PROVEN ml-dsa inverse layer len 16
+PQ06-SAW PROVEN ml-dsa inverse layer len 32
+PQ06-SAW PROVEN ml-dsa inverse layer len 64
+PQ06-SAW PROVEN ml-dsa inverse layer len 128
+PQ06-SAW PROVEN ml-dsa Elem * Polynomial
+PQ06-SAW PROVEN ml-dsa ntt_inverse (FIPS 204 Algorithm 42)
+PQ06-SAW PROVEN ml-dsa multiply_ntt (FIPS 204 Algorithm 45)
+SAW ntt.saw: 15 obligations PROVEN in 2014s
+== SAW PQ06 NTT: TEETH ntt-teeth.saw — must FAIL with a counterexample ==
