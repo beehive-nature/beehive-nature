@@ -1,0 +1,124 @@
+[
+  {
+    "lane": "pq03-saw",
+    "exit_code": 0,
+    "seconds": 21.216,
+    "command": [
+      "sh",
+      "/workspace/wt-pq-battery/scripts/btungsten/pq03-saw-check.sh",
+      "saw",
+      "saw-rustc"
+    ],
+    "log": "pq03-saw.log"
+  },
+  {
+    "lane": "pq04-saw",
+    "exit_code": 0,
+    "seconds": 50.037,
+    "command": [
+      "sh",
+      "/workspace/wt-pq-battery/scripts/btungsten/pq04-saw-check.sh",
+      "saw",
+      "saw-rustc"
+    ],
+    "log": "pq04-saw.log"
+  },
+  {
+    "lane": "pq11-saw",
+    "exit_code": 0,
+    "seconds": 6.815,
+    "command": [
+      "sh",
+      "/workspace/wt-pq-battery/scripts/btungsten/pq11-saw-check.sh",
+      "saw",
+      "saw-rustc"
+    ],
+    "log": "pq11-saw.log"
+  },
+  {
+    "lane": "pq05-saw",
+    "exit_code": 0,
+    "seconds": 2.483,
+    "command": [
+      "sh",
+      "/workspace/wt-pq-battery/scripts/btungsten/pq05-saw-check.sh",
+      "saw",
+      "saw-rustc"
+    ],
+    "log": "pq05-saw.log"
+  },
+  {
+    "lane": "pq03-sha256",
+    "exit_code": 0,
+    "seconds": 12.315,
+    "command": [
+      "sh",
+      "/workspace/wt-pq-battery/scripts/btungsten/pq03-sha256-check.sh",
+      "saw",
+      "saw-rustc",
+      "/workspace/pq-artifacts/tools/saw-1.6-ubuntu-24.04-X64-with-solvers/bin/cryptol"
+    ],
+    "log": "pq03-sha256.log"
+  },
+  {
+    "lane": "pq03-hkdf",
+    "exit_code": 0,
+    "seconds": 118.207,
+    "command": [
+      "sh",
+      "/workspace/wt-pq-battery/scripts/btungsten/pq03-hkdf-check.sh",
+      "saw",
+      "/workspace/pq-artifacts/tools/saw-1.6-ubuntu-24.04-X64-with-solvers/bin/cryptol"
+    ],
+    "log": "pq03-hkdf.log"
+  },
+  {
+    "lane": "pq05-field",
+    "exit_code": 0,
+    "seconds": 148.421,
+    "command": [
+      "sh",
+      "/workspace/wt-pq-battery/scripts/btungsten/pq05-field-check.sh",
+      "saw",
+      "/workspace/pq-artifacts/tools/saw-1.6-ubuntu-24.04-X64-with-solvers/bin/cryptol"
+    ],
+    "log": "pq05-field.log"
+  },
+  {
+    "lane": "pq02-saw",
+    "exit_code": 0,
+    "seconds": 526.379,
+    "command": [
+      "sh",
+      "/workspace/wt-pq-battery/scripts/btungsten/pq02-saw-check.sh",
+      "saw",
+      "saw-rustc",
+      "/workspace/pq-artifacts/tools/saw-1.6-ubuntu-24.04-X64-with-solvers/bin/cryptol"
+    ],
+    "log": "pq02-saw.log"
+  },
+  {
+    "lane": "pq02-sponge",
+    "exit_code": 0,
+    "seconds": 59.368,
+    "command": [
+      "sh",
+      "/workspace/wt-pq-battery/scripts/btungsten/pq02-sponge-check.sh",
+      "saw",
+      "/workspace/pq-artifacts/tools/saw-1.6-ubuntu-24.04-X64-with-solvers/bin/cryptol"
+    ],
+    "log": "pq02-sponge.log"
+  },
+  {
+    "lane": "pq02-sponge022",
+    "exit_code": 0,
+    "seconds": 149.537,
+    "command": [
+      "sh",
+      "/workspace/wt-pq-battery/scripts/btungsten/pq02-sponge022-check.sh",
+      "saw",
+      "/workspace/pq-artifacts/tools/saw-1.6-ubuntu-24.04-X64-with-solvers/bin/cryptol"
+    ],
+    "log": "pq02-sponge022.log"
+  }
+]

@@ -110,6 +110,26 @@ inherited, tested; the teeth each gate must catch; lanes PQ00-PQ15). CI:
 | PQ12 FROST lane, steps 1 to 5 (authorization, PSBT, sighash, gate, FROST) | `crates/bsigner/src/taproot.rs` + `psbt.rs` + `intent.rs` + `frost.rs` (feature `frost`, chilldkg-rs `=0.5.0`, unaudited) (`bsigner taproot-sighash`, `taproot-address`, `psbt-inspect`, `btc-intent`, `bpq-attest-intent`, `btc-verify-intent`) + `scripts/btungsten/pq12-bip341.json` (BIP-341 `wallet-test-vectors.json`, BIP-174 and BIP-371 texts, all at bitcoin/bips `200f9b26`, fetched, never committed); CI job `pq12-taproot` | Local receipt 2026-10-09 (WSL): BIP-341 7 of 7 script-tree cases (leaf hashes, root, tweak, output key, scriptPubKey, address, control blocks) and 7 of 7 key-path inputs (five shared hashes, SigMsg, sighash, tweak; the expected witness verifies and is reproduced byte for byte), 20 teeth refused; BIP-174 19 of 19 invalid PSBTs refused (each for its own defect), 10 valid + 10 walkthrough + 4 signer-check PSBTs parsed; BIP-371 11 of 11 invalid refused, 6 of 6 valid parsed; the reference signer's key-path signature verifies over bsigner's sighash. Authorization + gate (SPEC-BPQ-1 §5c, `crates/bsigner/src/intent.rs`): the honest spend verifies; refused: 418 of 418 unsigned envelope-byte edits, 15 signed fields the PSBT contradicts, 6 PSBT changes, another authority, kind, version, a clock past expiry. Browser twin: bpq.js WB001 codec 19 of 19 pinned rows, each side verifies the other's authorization; bsigner 81 of 81, bpq e2e 23 of 23. FROST (feature on): a 2-of-3 ChillDKG key signs both inputs of an ML-DSA-authorized PSBT, each a valid key-path witness; 7 refusals (one signer, replayed session id, missing input, another group's share and coordinator, a partial over another input, fewer partials than the threshold); bsigner 82 of 82 with the feature. Audit gate 1 (CI run 37931727642): chilldkg-rs absent from bsigner's default build; chilldkg's own 64 vector tests pass. Audit gate 2 (cargo audit 0.22.2, same run, lock-wide, 529 crates): 2 vulnerabilities and 3 warnings, none in bsigner's graph with or without `frost` (`cargo tree -p bsigner -e normal -i <crate>`, both ways): rsa 0.9.10 RUSTSEC-2023-0071 (wallet-relay, royalreview, atmirror, adapter-arweave; no fixed version; clears when those crates drop RSA or rsa ships a constant-time release), rustls 0.23.42 RUSTSEC-2026-0285 (composition, wallet-relay, royalreview, zano-watcher, atmirror, banchor, bindexer; clears at rustls >= 0.23.45), bincode 1.3.3 RUSTSEC-2025-0141 unmaintained (settle-solana, through the Solana crates; clears when they migrate), proc-macro-error2 2.0.1 RUSTSEC-2026-0173 unmaintained and chacha20 0.10.1 yanked (in Cargo.lock, in no normal or build graph of the workspace on x86_64 Linux; clear at the next lock refresh). Not yet: key ceremony + sealed shares + CLI rounds, sighash differential, the wallet press |
 | PQ13 Nostr attestation | SPEC-BPQ-1 §5b; bpq.js `attestNostr`/`verifyNostr`; bsigner `attest_nostr`/`verify_nostr`, `bpq-attest-nostr`; `surfaces/bpq-nostr-vector.json` | Local: bsigner 71 of 71 (the attestation test: honest verifies, another event / uppercase hex / short id / kind / version / id / empty signature / another key's signature refused, the browser-made vector verifies; and the bsigner-made `surfaces/bpq-nostr-rust.json` reproduced byte for byte), e2e/bpq 22 of 22 (the browser verifies the bsigner-made one). `bpq1/nostr-event` is the 13th label, inside `domainsDisjoint`. How a relay carries it is the upstream ask to block/buzz |
 
+### x0x's pinned PQ implementations (2026-10-14)
+
+`crates/btungsten-x0x-pq` is an isolated test workspace for x0x v0.48.0 at
+`32bf552808`, saorsa-pqc 0.5.1, fips203 0.4.3 and fips204 0.4.6. It reuses
+PQ01's checksum-pinned ACVP files and vector gates, then drives Saorsa's real
+API and legacy signing wrappers through RustCrypto/libcrux comparisons and
+tampering controls. `python3 scripts/btungsten/x0x-pq-check.py` builds with
+`--locked`, checks the upstream source/dependency pins, executes both harness
+sabotage controls and both audit gates, and writes logs and JSON receipts.
+The PQ workflow runs it as a separate job.
+
+Fresh local receipt: **752/752** checks (**515 KAT, 164 DIFFERENTIAL,
+73 TEETH**), **37/37** required rows present. An altered expected byte causes
+two failures; an empty run refuses all 37 obligations. Audit: no
+vulnerabilities, two maintenance warnings in the isolated lock. Evidence:
+[`docs/receipts/x0x-pq-2026-10-14`](../../docs/receipts/x0x-pq-2026-10-14/).
+These results do not inherit BNR's RustCrypto proofs, establish the complete
+L0-L5 ladder, qualify every x0x algorithm or establish full-system properties.
+See the crate's inventory and README for the exact executed paths and gaps.
+
 ### PQ10 — one Plonky3 proof of the receipt count statement (2026-10-08)
 
 `crates/btungsten-p3count` (its own workspace; Plonky3 git pin

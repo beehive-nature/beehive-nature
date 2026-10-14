@@ -1,0 +1,34 @@
+== SAW PQ03: toolchain ==
+1.6 (68eed5f release-1.6)
+== SAW PQ03: BUILD bpq-core to MIR JSON ==
+Linking 3 mir files into /workspace/wt-pq-battery/target/saw-pq03/bpq_core.linked-mir.json
+SAW-BUILD PQ03: PASS (3299507 bytes of linked MIR)
+== SAW PQ03: derive.saw ==
+PQ03-SAW PROVEN context_ok
+PQ03-SAW PROVEN args_ok
+PQ03-SAW PROVEN info_len
+PQ03-SAW PROVEN info_byte
+PQ03-SAW PROVEN info
+SAW derive.saw: 5 obligations PROVEN in 10s
+== SAW PQ03: TEETH derive-teeth.saw — must FAIL with a counterexample ==
+PQ03-SAW-TEETH obligation context_ok admits DEL
+Subgoal failed: bpq_core/19b3946e::context_ok[0] Literal equality postcondition
+----------Counterexample----------
+SAW-TEETH derive-teeth.saw: PASS (counterexample found, as required)
+== SAW PQ03: injective.saw ==
+PQ03-SAW PROVEN labelsPrefixFree
+PQ03-SAW PROVEN infoFits
+PQ03-SAW PROVEN infoPadded
+PQ03-SAW PROVEN rootIsolated
+PQ03-SAW PROVEN deriveInjective
+SAW injective.saw: 5 obligations PROVEN in 4s
+== SAW PQ03: TEETH injective-teeth.saw — every row must be REFUTED ==
+PQ03-SAW-TEETH obligation prefixLabel
+PQ03-SAW-TEETH REFUTED prefixLabel
+PQ03-SAW-TEETH obligation looseRule
+PQ03-SAW-TEETH REFUTED looseRule
+PQ03-SAW-TEETH obligation counterCap
+PQ03-SAW-TEETH REFUTED counterCap
+SAW-TEETH injective-teeth.saw: PASS (3 rows refuted with counterexamples)
+== SAW PQ03: ladder state ==
+BUILD: PASS | EQUIVALENCE: PROVEN (5, bpq-core == BpqDerive.cry) | PROVE-UNIVERSAL: PROVEN (5, incl. deriveInjective) | TEETH: PASS (4)

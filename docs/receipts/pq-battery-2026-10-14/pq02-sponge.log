@@ -1,0 +1,45 @@
+== SAW PQ02 sponge: toolchain ==
+1.6 (68eed5f release-1.6)
+Cryptol 3.6.0
+== SAW PQ02 sponge: PIN the harness lock to the workspace lock ==
+SAW-PIN PQ02 sponge: PASS (10 packages, each the workspace's version and checksum)
+== SAW PQ02 sponge: BUILD the harness to MIR JSON (cargo-saw-build) ==
+   Compiling version_check v0.9.5
+   Compiling typenum v1.20.1
+   Compiling keccak v0.1.6
+   Compiling generic-array v0.14.7
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling digest v0.10.7
+   Compiling sha3 v0.10.9
+   Compiling pq02_sponge v0.0.0 (/workspace/wt-pq-battery/scripts/btungsten/pq02-sponge)
+Linking 10 mir files into /workspace/wt-pq-battery/target/saw-pq02-sponge/cargo/x86_64-unknown-linux-gnu/debug/deps/pq02_sponge-a270cc82ffcbf9f1.linked-mir.json
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.84s
+  Executable unittests src/lib.rs (/workspace/wt-pq-battery/target/saw-pq02-sponge/cargo/x86_64-unknown-linux-gnu/debug/deps/pq02_sponge-a270cc82ffcbf9f1)
+SAW-BUILD PQ02 sponge: PASS (5014964 bytes of linked MIR)
+== SPEC-CHECK PQ02 sponge: KeccakF1600.cry closed terms ==
+SPEC-CHECK sha3EmptyDigest: PASS
+SPEC-CHECK sha3AbcDigest: PASS
+SPEC-CHECK sha3MultiBlockDigest: PASS
+SPEC-CHECK sha3PadSharedByte: PASS
+SPEC-CHECK sha3PadFullBlock: PASS
+SPEC-CHECK shake256Seed96: PASS
+== SAW PQ02 sponge: sponge.saw ==
+PQ02-SAW ASSUMED keccak::p1600(s, 24) = keccakF (tied by shipped.saw and agree.saw)
+PQ02-SAW PROVEN sha3 0.10.9 SHA3-256, 32 bytes (one block)
+PQ02-SAW PROVEN sha3 0.10.9 SHA3-256, 200 bytes (two blocks)
+PQ02-SAW PROVEN sha3 0.10.9 SHA3-256, 8 then 192 bytes in two updates
+PQ02-SAW PROVEN sha3 0.10.9 SHAKE256, 32 bytes in, 96 out
+SAW sponge.saw: 4 obligations PROVEN in 8s
+== SAW PQ02 sponge: TEETH sponge-teeth-domain.saw — must FAIL with a counterexample ==
+PQ02-SAW-TEETH obligation sha3_256_32 against domain byte 0x01
+Subgoal failed: pq02_sponge/974fcc42::sha3_256_32[0] Literal equality postcondition
+----------Counterexample----------
+SAW-TEETH sponge-teeth-domain.saw: PASS (counterexample found, as required)
+== SAW PQ02 sponge: TEETH sponge-teeth-order.saw — must FAIL with a counterexample ==
+PQ02-SAW-TEETH obligation sha3_256_parts against the parts swapped
+Subgoal failed: pq02_sponge/974fcc42::sha3_256_parts[0] Literal equality postcondition
+----------Counterexample----------
+SAW-TEETH sponge-teeth-order.saw: PASS (counterexample found, as required)
+== SAW PQ02 sponge: ladder state ==
+PIN: PASS | BUILD: PASS | SPEC-CHECK: PASS (6) | EQUIVALENCE: PROVEN (4: SHA3-256 one block, two blocks, two updates; SHAKE256 32 to 96) with keccak::p1600(s, 24) ASSUMED = keccakF (tied by the loop lane) | TEETH: PASS (2)

@@ -1,0 +1,144 @@
+    Finished `release` profile [optimized] target(s) in 0.57s
+     Running unittests src/lib.rs (target/release/deps/x0x-2854d0aacfc48165)
+
+running 68 tests
+
+Your shareable identity card:
+
+  x0x-card:abc
+
+Share this link with anyone — they can import it with:
+  x0x agent import <link>
+
+{
+  "ok": true
+}
+{
+  "link": "x0x-card:abc",
+  "ok": true
+}
+{
+  "announced": true
+}
+{
+  "agent_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", # PUBLIC-CONSTANT: upstream synthetic identifier fixture
+  "identity_words": "perspective perspective perspective perspective",
+  "user_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", # PUBLIC-CONSTANT: upstream synthetic identifier fixture
+  "user_words": "regular regular regular regular"
+}
+test cli::commands::identity::tests::card_url_encodes_display_name ... ok
+test cli::commands::identity::tests::agent_fetches_identity_and_injects_words ... ok
+test cli::commands::identity::tests::announce_posts_mock_response ... ok
+test cli::commands::identity::tests::identity_words_encodes_known_hex ... ok
+test cli::commands::identity::tests::identity_words_rejects_invalid_hex ... ok
+test cli::commands::identity::tests::identity_words_rejects_short_hex ... ok
+test cli::commands::identity::tests::inject_identity_words_adds_user_words ... ok
+test cli::commands::identity::tests::card_handles_shareable_link_response ... ok
+test cli::commands::identity::tests::inject_identity_words_adds_words_to_object ... ok
+test cli::commands::identity::tests::inject_identity_words_handles_non_object ... ok
+test cli::commands::identity::tests::inject_identity_words_skips_missing_agent_id ... ok
+{
+  "ok": true
+}
+test cli::commands::identity::tests::identity_revoke_serializes_move_epoch ... ok
+{
+  "imported": true
+}
+test cli::commands::identity::tests::import_card_posts_mock_response ... ok
+{
+  "introduction": "hello"
+}
+test cli::commands::identity::tests::introduction_returns_mock_response ... ok
+{
+  "ok": true
+}
+test cli::commands::identity::tests::owner_agents_issue_serializes_not_after ... ok
+{
+  "ok": true
+}
+test cli::commands::identity::tests::owner_agents_revoke_sends_reason_in_delete_body ... ok
+{
+  "ok": true
+}
+test cli::commands::identity::tests::rider_issue_serializes_the_delegation_capability ... ok
+{
+  "signature_b64": "c2ln"
+}
+test cli::commands::identity::tests::sign_posts_payload_b64_response ... ok
+{
+  "signature_b64": "c2ln"
+}
+test cli::commands::identity::tests::sign_reads_file_payload ... ok
+test cli::commands::identity::tests::verify_arg_errors_win_over_unreachable_daemon ... ok
+{
+  "user_id": "user-1"
+}
+{
+  "ok": true,
+  "valid": true
+}
+test cli::commands::identity::tests::sign_rejects_ambiguous_or_missing_payload ... ok
+test cli::commands::identity::tests::user_id_returns_mock_response ... ok
+test cli::commands::identity::tests::verify_always_sends_context ... ok
+{
+  "algorithm": "x0x.agent-sign.v1.ml-dsa-65",
+  "ok": true,
+  "valid": false
+}
+test cli::commands::identity::tests::verify_fails_when_daemon_reports_invalid ... ok
+test identity::tests::agent_certificate_corrupted_signature_fails_with_structured_error ... ok
+test identity::tests::agent_certificate_wrong_length_signature_fails_with_structured_error ... ok
+test identity::tests::agent_id_display_hex_format ... ok
+test identity::tests::agent_id_to_vec_returns_copy ... ok
+test identity::tests::agent_id_verify_mismatch_returns_error ... ok
+test identity::tests::agent_keypair_debug_redacts_secret ... ok
+test identity::tests::cert_not_after_tamper_fails_verification ... ok
+test identity::tests::cert_v1_disk_bytes_load_unchanged ... ok
+test identity::tests::cert_v1_without_not_after_still_verifies ... ok
+test identity::tests::cert_v2_disk_bytes_roundtrip ... ok
+test identity::tests::cert_with_not_after_signs_and_verifies ... ok
+test identity::tests::expiry_allows_within_skew ... ok
+test identity::tests::expiry_rejects_beyond_skew ... ok
+test identity::tests::machine_id_as_bytes_returns_inner ... ok
+test identity::tests::machine_id_debug_contains_bytes ... ok
+test identity::tests::machine_id_display_hex_format ... ok
+test identity::tests::machine_id_to_vec_returns_copy ... ok
+test identity::tests::machine_id_verify_mismatch_returns_error ... ok
+test identity::tests::machine_keypair_debug_redacts_secret ... ok
+test identity::tests::test_agent_certificate_issue_and_verify ... ok
+test identity::tests::test_agent_certificate_tampered_agent_key_fails ... ok
+test identity::tests::test_agent_certificate_wrong_key_fails ... ok
+test identity::tests::test_agent_id_from_public_key ... ok
+test identity::tests::test_identity_generation ... ok
+test identity::tests::test_identity_with_user ... ok
+test identity::tests::test_introduction_card_foreign_signature_fails ... ok
+test identity::tests::test_introduction_card_mismatched_machine_id_fails ... ok
+{
+  "ok": true,
+  "valid": true
+}
+{
+  "algorithm": "x0x.agent-sign.v1.ml-dsa-65",
+  "ok": true,
+  "valid": true
+}
+test cli::commands::identity::tests::verify_rejects_ambiguous_or_missing_payload ... ok
+test cli::commands::identity::tests::verify_serializes_algorithm ... ok
+test cli::commands::identity::tests::verify_posts_full_body_to_verify_endpoint ... ok
+test identity::tests::test_introduction_card_signature_round_trip ... ok
+test identity::tests::test_introduction_card_tampered_agent_id_fails ... ok
+test identity::tests::test_introduction_card_tampered_display_name_fails ... ok
+test identity::tests::test_machine_id_from_public_key ... ok
+test identity::tests::test_machine_id_verification ... ok
+test identity::tests::test_user_id_from_public_key ... ok
+test identity::tests::test_user_id_display ... ok
+test identity::tests::test_user_id_verification ... ok
+test identity::tests::test_user_keypair_serialization_roundtrip ... ok
+test identity::tests::test_user_id_verification_fails_with_wrong_key ... ok
+test identity::tests::user_id_to_vec_returns_copy ... ok
+test identity::tests::test_user_keypair_generation ... ok
+test identity::tests::user_keypair_from_seed_is_deterministic_and_functional ... ok
+test identity::tests::test_introduction_card_with_user_verifies ... ok
+
+test result: ok. 68 passed; 0 failed; 0 ignored; 0 measured; 4479 filtered out; finished in 0.31s
+

@@ -1,0 +1,112 @@
+== SAW PQ02: toolchain ==
+1.6 (68eed5f release-1.6)
+Cryptol 3.6.0
+== SAW PQ02: PIN keccak 0.1.6 to Cargo.lock ==
+SAW-PIN PQ02: PASS (keccak 0.1.6, sha256 matches Cargo.lock)
+== SAW PQ02: PIN keccak 0.2.2 to Cargo.lock ==
+SAW-PIN PQ02: PASS (keccak 0.2.2, sha256 matches Cargo.lock)
+== SAW PQ02: BUILD the crates and the harnesses to MIR JSON ==
+Linking 3 mir files into /workspace/wt-pq-battery/target/saw-pq02/keccak.linked-mir.json
+Linking 4 mir files into /workspace/wt-pq-battery/target/saw-pq02/pq02_harness.linked-mir.json
+warning: struct `Backend` is never constructed
+   --> /workspace/wt-pq-battery/scripts/btungsten/pq02-harness/../../../target/saw-pq02/keccak-0.2.2/src/backends/soft.rs:113:19
+    |
+113 | pub(crate) struct Backend;
+    |                   ^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: 1 warning emitted
+
+Linking 3 mir files into /workspace/wt-pq-battery/target/saw-pq02/pq02_harness022.linked-mir.json
+SAW-BUILD PQ02: PASS (42240079 + 9527908 bytes of linked MIR)
+== SPEC-CHECK PQ02: KeccakF1600.cry closed terms ==
+SPEC-CHECK zeroStateFirstLane: PASS
+SPEC-CHECK zeroStateLastLane: PASS
+SPEC-CHECK sha3EmptyDigest: PASS
+SPEC-CHECK sha3AbcDigest: PASS
+SPEC-CHECK rhoWalkCoversEveryLaneOnce: PASS
+== SAW PQ02: shipped.saw ==
+PQ02-SAW PROVEN shipped_round_0
+PQ02-SAW PROVEN shipped_round_1
+PQ02-SAW PROVEN shipped_round_2
+PQ02-SAW PROVEN shipped_round_3
+PQ02-SAW PROVEN shipped_round_4
+PQ02-SAW PROVEN shipped_round_5
+PQ02-SAW PROVEN shipped_round_6
+PQ02-SAW PROVEN shipped_round_7
+PQ02-SAW PROVEN shipped_round_8
+PQ02-SAW PROVEN shipped_round_9
+PQ02-SAW PROVEN shipped_round_10
+PQ02-SAW PROVEN shipped_round_11
+PQ02-SAW PROVEN shipped_round_12
+PQ02-SAW PROVEN shipped_round_13
+PQ02-SAW PROVEN shipped_round_14
+PQ02-SAW PROVEN shipped_round_15
+PQ02-SAW PROVEN shipped_round_16
+PQ02-SAW PROVEN shipped_round_17
+PQ02-SAW PROVEN shipped_round_18
+PQ02-SAW PROVEN shipped_round_19
+PQ02-SAW PROVEN shipped_round_20
+PQ02-SAW PROVEN shipped_round_21
+PQ02-SAW PROVEN shipped_round_22
+PQ02-SAW PROVEN shipped_round_23
+PQ02-SAW PROVEN composed
+SAW shipped.saw: 25 obligations PROVEN in 138s
+== SAW PQ02: agree.saw ==
+PQ02-SAW PROVEN agree
+SAW agree.saw: 1 obligations PROVEN in 112s
+== SAW PQ02: TEETH shipped-teeth.saw — must FAIL with a counterexample ==
+PQ02-SAW-TEETH obligation shipped_round_0 against one rho offset off by one
+Subgoal failed: pq02_harness/6160aa42::shipped_round_0[0] Literal equality postcondition
+----------Counterexample----------
+SAW-TEETH shipped-teeth.saw: PASS (counterexample found, as required)
+== SAW PQ02: TEETH loop-teeth.saw — must FAIL with a counterexample ==
+PQ02-SAW-TEETH obligation pq02_harness::agree_swapped returns true on the zero state
+Subgoal failed: pq02_harness/6160aa42::agree_swapped[0] Literal equality postcondition
+----------Counterexample----------
+<<All settings of the symbolic variables constitute a counterexample>>
+SAW-TEETH loop-teeth.saw: PASS (counterexample found, as required)
+== SAW PQ02: shipped022.saw ==
+PQ02-SAW PROVEN keccak022.shipped_round_0
+PQ02-SAW PROVEN keccak022.shipped_round_1
+PQ02-SAW PROVEN keccak022.shipped_round_2
+PQ02-SAW PROVEN keccak022.shipped_round_3
+PQ02-SAW PROVEN keccak022.shipped_round_4
+PQ02-SAW PROVEN keccak022.shipped_round_5
+PQ02-SAW PROVEN keccak022.shipped_round_6
+PQ02-SAW PROVEN keccak022.shipped_round_7
+PQ02-SAW PROVEN keccak022.shipped_round_8
+PQ02-SAW PROVEN keccak022.shipped_round_9
+PQ02-SAW PROVEN keccak022.shipped_round_10
+PQ02-SAW PROVEN keccak022.shipped_round_11
+PQ02-SAW PROVEN keccak022.shipped_round_12
+PQ02-SAW PROVEN keccak022.shipped_round_13
+PQ02-SAW PROVEN keccak022.shipped_round_14
+PQ02-SAW PROVEN keccak022.shipped_round_15
+PQ02-SAW PROVEN keccak022.shipped_round_16
+PQ02-SAW PROVEN keccak022.shipped_round_17
+PQ02-SAW PROVEN keccak022.shipped_round_18
+PQ02-SAW PROVEN keccak022.shipped_round_19
+PQ02-SAW PROVEN keccak022.shipped_round_20
+PQ02-SAW PROVEN keccak022.shipped_round_21
+PQ02-SAW PROVEN keccak022.shipped_round_22
+PQ02-SAW PROVEN keccak022.shipped_round_23
+PQ02-SAW PROVEN keccak022.composed
+SAW shipped022.saw: 25 obligations PROVEN in 26s
+== SAW PQ02: agree022.saw ==
+PQ02-SAW PROVEN keccak022.agree
+SAW agree022.saw: 1 obligations PROVEN in 11s
+== SAW PQ02: TEETH loop-teeth022.saw — must FAIL with a counterexample ==
+PQ02-SAW-TEETH obligation pq02_harness022::agree_swapped returns true on the zero state
+Subgoal failed: pq02_harness022/05943357::agree_swapped[0] Literal equality postcondition
+----------Counterexample----------
+<<All settings of the symbolic variables constitute a counterexample>>
+SAW-TEETH loop-teeth022.saw: PASS (counterexample found, as required)
+== SAW PQ02: TEETH order-teeth.saw — must FAIL with a counterexample ==
+PQ02-SAW-TEETH obligation composed against FIPS 202 with rounds 5 and 6 swapped
+Subgoal failed: pq02_harness022/05943357::composed[0] Literal equality postcondition
+----------Counterexample----------
+SAW-TEETH order-teeth.saw: PASS (counterexample found, as required)
+== SAW PQ02: ladder state ==
+PIN: PASS (2 crates) | BUILD: PASS | SPEC-CHECK: PASS (5) | EQUIVALENCE: PROVEN (keccak 0.1.6 and 0.2.2: round bodies == FIPS 202 keccakRound, all 24 constants each; the 24 in order == keccakF; the shipped 24-round permutation == those 24, every state) | TEETH: PASS (4)

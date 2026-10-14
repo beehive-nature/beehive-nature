@@ -1,0 +1,140 @@
+{
+  "schema": "btungsten.x0x-pq-run/1",
+  "started_utc": "2026-10-14T16:18:11.632054+00:00",
+  "completed_utc": "2026-10-14T16:18:28.407551+00:00",
+  "result": "PASS",
+  "error": null,
+  "runs": [
+    {
+      "name": "unit",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--release",
+        "--manifest-path",
+        "/workspace/wt-pq-battery/crates/btungsten-x0x-pq/Cargo.toml"
+      ],
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.418,
+      "log": "unit.log",
+      "sha256": "sha256:CFxS74ZVgQWcokh_CwpPF5KanvMnX4tUArDrraGCbx4"
+    },
+    {
+      "name": "build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--release",
+        "--manifest-path",
+        "/workspace/wt-pq-battery/crates/btungsten-x0x-pq/Cargo.toml"
+      ],
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.164,
+      "log": "build.log",
+      "sha256": "sha256:C1_iJ3_SspzBEbdmBMSC-OxRYEfbwJVGVyA8VhT05Ns"
+    },
+    {
+      "name": "honest",
+      "command": [
+        "/workspace/wt-pq-battery/crates/btungsten-x0x-pq/target/release/btungsten-x0x-pq",
+        "--cache",
+        "/workspace/pq-artifacts/vectors",
+        "--receipt",
+        "/workspace/pq-artifacts/x0x-pq-final/honest.json"
+      ],
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.524,
+      "log": "honest.log",
+      "sha256": "sha256:-OJVbrI0e5AApYkZNTG-HinX_ZSYsAIft-_QYjUuAXs"
+    },
+    {
+      "name": "expected-byte-teeth",
+      "command": [
+        "/workspace/wt-pq-battery/crates/btungsten-x0x-pq/target/release/btungsten-x0x-pq",
+        "--cache",
+        "/workspace/pq-artifacts/vectors",
+        "--receipt",
+        "/workspace/pq-artifacts/x0x-pq-final/expected-byte-teeth.json",
+        "--sabotage-expected"
+      ],
+      "exit_code": 1,
+      "expected_exit": 1,
+      "seconds": 0.516,
+      "log": "expected-byte-teeth.log",
+      "sha256": "sha256:6KuNy60UZIrhdzo2VmOghl0C6MQUL8mbmjPMcyvd84U"
+    },
+    {
+      "name": "empty-vectors-teeth",
+      "command": [
+        "/workspace/wt-pq-battery/crates/btungsten-x0x-pq/target/release/btungsten-x0x-pq",
+        "--cache",
+        "/workspace/pq-artifacts/vectors",
+        "--receipt",
+        "/workspace/pq-artifacts/x0x-pq-final/empty-vectors-teeth.json",
+        "--empty-vectors"
+      ],
+      "exit_code": 1,
+      "expected_exit": 1,
+      "seconds": 0.004,
+      "log": "empty-vectors-teeth.log",
+      "sha256": "sha256:kLVF-HEDNGUNGG5SSGQ4I9KyfDQrEtFvsvUffMXzFcs"
+    },
+    {
+      "name": "audit-gate1",
+      "command": [
+        "cargo",
+        "tree",
+        "--locked",
+        "--workspace",
+        "-e",
+        "normal",
+        "-i",
+        "saorsa-pqc"
+      ],
+      "exit_code": 101,
+      "result": "PASS",
+      "log": "audit-gate1.log",
+      "sha256": "sha256:FeeMUuNoFvsNhSyAfbm31taHyeC3CG5abS_xw5Kc03A"
+    },
+    {
+      "name": "audit-gate2",
+      "command": [
+        "cargo",
+        "audit",
+        "--file",
+        "/workspace/wt-pq-battery/crates/btungsten-x0x-pq/Cargo.lock"
+      ],
+      "exit_code": 0,
+      "result": "RECORDED",
+      "log": "audit-gate2.log",
+      "sha256": "sha256:DtBYxSEwndfLuUyLNuMDjdYicLoJXOI89ZasaeXn9x0"
+    }
+  ],
+  "host": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "battery_commit": "25258d564cdfb0ef0b5d460a0c8abb4c76f9b673",
+  "battery_worktree_diff": "sha256:47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU",
+  "lock_sha256": "sha256:Z__dvZLG9X0w5Cbu1_QdJ-aH9mQYBK6-Ir_voK2vJxg",
+  "source_sha256": {
+    "crates/btungsten-x0x-pq/Cargo.toml": "sha256:G75NTDLUyvslddpc3wJcy4S-vR3lCgIOk_4axEEKwJU",
+    "crates/btungsten-x0x-pq/inventory.json": "sha256:cvWXYtWEXkT3OH4NmGGA4xdokVwS-OVYm9492DN-nhM",
+    "crates/btungsten-x0x-pq/src/backends.rs": "sha256:7dyIBfj2MqafTjVDRYzXH10pavzKFDJS8-DFVaQw58s",
+    "crates/btungsten-x0x-pq/src/main.rs": "sha256:cONdo8aPZBAruV8rZvHndKcM7WAIBum-bfnJSiPbiFc",
+    "crates/btungsten-x0x-pq/src/wrappers.rs": "sha256:OyPaf5f97-6t_67oRwzEgdQK3Joi56TEVUKE3Vs4GJ0",
+    "crates/btungsten-pq/kat-manifest.json": "sha256:y7Ke9cN1pNBVtyzsqeBppKD7CxtwFDI4ncX4TxskR3c",
+    "crates/btungsten-pq/src/acvp.rs": "sha256:lGSv27-9yhCeU-KqeRBllUFccnupko0G0XgVnQUCg78",
+    "crates/btungsten-pq/src/classic.rs": "sha256:SID_7ZAGl_5x2wqTTCdqhAstVBoW60IFeIKBYdPgm84",
+    "crates/btungsten-pq/src/lib.rs": "sha256:hVdN98w3RgiDitn6Ll2PpXuXH0AwwiNPFro66JvDx_w",
+    "crates/btungsten-pq/src/mldsa.rs": "sha256:Rv3ZYkXFp3UBweKkU6zQw5VOZCLtFMV_ge7yxomJ3lQ",
+    "crates/btungsten-pq/src/mlkem.rs": "sha256:s3rggqp3EwjnZ7GwO-badqtEICXAotoFZAaSeLczlKM",
+    "crates/btungsten-pq/src/report.rs": "sha256:jeAu_O6flkOi0QIbikq2V6H1IOoBAZ45c8B-vOcqPa4",
+    "crates/btungsten-pq/src/slhdsa.rs": "sha256:Af_trcRVmBq-GTggA7lOz_JBXGWZIHu_tiMte_gneBk",
+    "scripts/btungsten/x0x-pq-check.py": "sha256:34alerKKJ57pxOo4iLFw7zufsQt1wZ6saYbnGRETqFg"
+  },
+  "scope": "local KAT, DIFFERENTIAL and TEETH; no Cryptol equivalence or full-system qualification"
+}
