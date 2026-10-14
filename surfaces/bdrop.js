@@ -278,13 +278,28 @@ function expired(signedTx){
 }
 
 /* ─── rpc ─── */
-async function rpcCall(endpoint,method,params){
+async function rpcCall(endpoint,method,params,signal){
   var r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({jsonrpc:'2.0',id:1,method:method,params:params})});
+    body:JSON.stringify({jsonrpc:'2.0',id:1,method:method,params:params}),signal:signal||undefined});
   if(!r.ok)throw new Error('rpc http '+r.status);
   var j=await r.json();
   if(j.error)throw new Error('rpc error: '+(j.error.message||JSON.stringify(j.error)));
   return j.result;
+}
+/* a chain read that never answers must not wedge the desk silent. The desk's own
+   patience for one reconcile read is ten seconds — then the read is aborted and
+   named as unanswered (reads carry no broadcast, so aborting one risks nothing).
+   Issue #413/#415: a stalled read left the boot reconcile with no outcome at all;
+   now the outcome is always a rendered fact. */
+var READ_DEADLINE_MS=10000;
+function rpcRead(endpoint,method,params){
+  if(typeof AbortController!=='function')return rpcCall(endpoint,method,params);
+  var ctl=new AbortController();
+  var t=setTimeout(function(){ctl.abort();},READ_DEADLINE_MS);
+  return rpcCall(endpoint,method,params,ctl.signal).catch(function(e){
+    if(e&&e.name==='AbortError')throw new Error('the endpoint did not answer in '+(READ_DEADLINE_MS/1000)+'s — read aborted');
+    throw e;
+  }).finally(function(){clearTimeout(t);});
 }
 /* Hive's condenser_api.get_content ASSERTS for a post that does not exist —
    "Assert Exception:Post author/permlink does not exist" — that assert IS the
@@ -407,7 +422,7 @@ async function loadEditions(){
 async function reconcileOne(a,r,quiet){
   var s=r.scope;
   var c;
-  try{c=await rpcCall(s.rpc,'condenser_api.get_content',{author:s.author,permlink:s.permlink});}
+  try{c=await rpcRead(s.rpc,'condenser_api.get_content',{author:s.author,permlink:s.permlink});}
   catch(e){
     if(!isNotFound(e)){r.last_error='reconcile lookup failed: '+e.message;if(!quiet)log(r.id+' — reconcile lookup failed: '+e.message,'bad');saveOutbox(a);return r;}
     /* the assert IS the not-found answer: fall through as not landed */
@@ -446,14 +461,23 @@ async function reconcileAll(quiet){
   }
   for(var i=0;i<a.length;i++){
     var r=a[i];
+    var acted=false;
     if(r.stage==='signed'||r.stage==='submitted'||(r.stage==='confirmed'&&!r.receipt)){
-      await reconcileOne(a,r,quiet);
+      await reconcileOne(a,r,quiet);acted=true;
     }else if(r.stage==='handoff'){
       /* a handoff whose answer never arrived: the outcome is unknown — the chain decides */
-      var h=await reconcileOne(a,r,true);
+      var h=await reconcileOne(a,r,true);acted=true;
       if(!quiet)log(r.id+' — a handoff whose answer never arrived: '+(h.stage==='confirmed'?'the chain shows it LANDED — confirmed, never re-asked.':h.stage==='diverged'?'the permlink exists with different bytes — diverged.':'the chain does not show it yet. it may still land; reconcile again later. a re-attempt is a new explicit press, never a blind retry.'),(h.stage==='confirmed'?'ok':(h.stage==='diverged'?'bad':'dim')));
     }else if(r.stage==='diverged'){
       if(!quiet)log(r.id+' — diverged. the desk will not edit an existing edition; fork a new permlink for corrections.','dim');
+    }
+    /* the autonomous boot pass gives a stalled read ONE retry on the desk's own clock —
+       a slow answer is not a verdict; only a read that answers may settle a record.
+       Reads only: nothing here can broadcast. */
+    if(quiet&&acted&&/^reconcile lookup failed/.test(String(r.last_error||''))){
+      await new Promise(function(res){setTimeout(res,1500);});
+      r.last_error=null;r.updated_at=new Date().toISOString();
+      await reconcileOne(a,r,true);
     }
   }
   return a;
@@ -1206,10 +1230,21 @@ renderOutbox();
 loadEditions();
 rehash();
 reconcileAll(true).then(async function(a){
-  var pend=a.filter(function(r){return r.stage==='signed'||r.stage==='submitted';});
-  if(pend.length)log('recovered state: '+pend.length+' drop(s) in flight — reconciled against the chain on load; nothing was re-signed or re-published blind.','dim');
-  if(CORRUPT)log('the recoverable journal is damaged — bytes preserved verbatim; every readable operation reconciles on its own (press "recover a drop from the chain alone"); submissions stay refused while any operation or residue is unresolved.','bad');
-  await reconcileQuar(true); /* quarantined operations reconcile on their own too — expiry never resolves them */
-  renderOutbox(a);
+  try{
+    var pend=a.filter(function(r){return r.stage==='signed'||r.stage==='submitted';});
+    if(pend.length)log('recovered state: '+pend.length+' drop(s) in flight — reconciled against the chain on load; nothing was re-signed or re-published blind.','dim');
+    if(CORRUPT)log('the recoverable journal is damaged — bytes preserved verbatim; every readable operation reconciles on its own (press "recover a drop from the chain alone"); submissions stay refused while any operation or residue is unresolved.','bad');
+    await reconcileQuar(true); /* quarantined operations reconcile on their own too — expiry never resolves them */
+    renderOutbox(a);
+  }finally{
+    /* the boot reconcile's SETTLE EVENT: the pass has run and whatever the outbox shows
+       now is this session's answer. Issue #413/#415: the restart step used to wait on a
+       tuned wall while the page's own work measures ~0.3s — the wall was eaten by runner
+       starvation, not by the desk. Completion is this event, never a window. */
+    var ob=$('outbox');if(ob)ob.setAttribute('data-boot-settled','1');
+  }
+},function(e){
+  log('the boot reconcile pass failed outright: '+(e&&e.message?e.message:String(e))+' — the outbox below is unreconciled state; "reconcile now" re-reads the chain.','bad');
+  var ob=$('outbox');if(ob)ob.setAttribute('data-boot-settled','1');
 });
 })();

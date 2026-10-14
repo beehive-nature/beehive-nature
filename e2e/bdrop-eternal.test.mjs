@@ -25,7 +25,7 @@ const PORT = 9171, ORIGIN = `http://127.0.0.1:${PORT}`;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.woff2': 'font/woff2', '.svg': 'image/svg+xml' };
 
 /* ── the mock chain: modes, content overrides, per-account posting authorities, a broadcast ledger ── */
-const mock = { mode: 'normal', content: null, accounts: {}, broadcasts: [], lastBody: null };
+const mock = { mode: 'normal', content: null, accounts: {}, broadcasts: [], lastBody: null, stallMs: 0 };
 const rpcResult = (method, params) => {
   if (mock.mode === 'down') throw Object.assign(new Error('mock chain unreachable'), { http: 503 });
   if (method === 'condenser_api.get_dynamic_global_properties') {
@@ -92,6 +92,7 @@ const rpcResult = (method, params) => {
 const server = createServer(async (q, s) => {
   if (q.method === 'POST' && q.url === '/rpc') {
     let b = ''; for await (const c of q) b += c;
+    if (mock.stallMs) await new Promise(r => setTimeout(r, mock.stallMs)); /* the stalled-read control (scenario 6d): answers arrive past the desk's read deadline */
     let code = 200, body;
     try {
       const { method, params } = JSON.parse(b);
@@ -115,6 +116,7 @@ const server = createServer(async (q, s) => {
     if ('blockless' in o) mock.blockless = !!o.blockless; /* model mainnet's block_num-less get_content */
     if ('txshape' in o) mock.txshape = o.txshape; /* inclusion-answer faulty shapes: minimal|wrongid|noops|wrongop|wrongbody|ok */
     if ('getblock' in o) mock.getblock = o.getblock; /* block-membership control: ok|empty */
+    if ('stallMs' in o) mock.stallMs = o.stallMs; /* stall every rpc answer by N ms (the stalled-read regression) */
     if ('badlib' in o) { mock.badlib = !!o.badlib; mock.libcalls = 0; } /* malformed irreversible height, first call spared (the page's own tx build) */
     s.writeHead(200); s.end('ok'); return;
   }
@@ -488,22 +490,100 @@ test('the drop desk lifecycle: editions, happy path, duplicates, restart, ambigu
     await page6b.fill('#body', BODY);
     await page6b.fill('#rpc', `http://127.0.0.1:${PORT}/rpc`);
     await page6b.click('#publish');
-    await step('handoff state persisted before the browser dies', () => page6b.waitForFunction(() => /handoff/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 15000 }));
-    await ctx6b.close(); /* the browser closes mid-handoff */
+    /* the gate waits for the STORAGE record at stage handoff — never a text match on
+       the outbox: the permlink itself contains "…closed-midhandoff", so the original
+       /handoff/ predicate passed the instant the record was created at `prepared`,
+       the browser was then closed mid-PRE-FLIGHT, and the journal persisted
+       `prepared · 1 events` — a pre-gesture record the boot reconcile SKIPS by
+       design. That vacuous gate is the whole mechanism behind every recorded
+       starvation (runs 38322545384, 38351639383, 38360498738) and both of today's
+       `prepared · 1` failures (local rerun + PR #419 run 38460056289): no wall could
+       ever turn it green, and the "preceding step passed" evidence in #415 passed
+       vacuously the same way. */
+    await step('handoff state persisted before the browser dies', () => page6b.waitForFunction(pl => {
+      const rs = JSON.parse(localStorage.getItem('bnr.bdrop.outbox.v1') || '[]');
+      return rs.some(r => r && r.scope && r.scope.permlink === pl && r.stage === 'handoff');
+    }, 'bdrop-keychain-closed-midhandoff', { timeout: 15000 }));
+    /* capture the REAL handoff record through the desk's own journal API before the
+       browser dies: the restart half below seeds these exact bytes into a fresh
+       profile. The seeded journal (instead of relaunching the same profile) keeps
+       the restart half about the desk's reconcile, not about Chromium's storage
+       flush timing at process death — the write→close window above is milliseconds,
+       and localStorage commits lazily, so a same-profile relaunch would re-expose
+       the exact boundary this scenario no longer needs to prove: persistence before
+       death is asserted above; the restart reconcile is what the seeded 6c proves. */
+    const rec6b = (await outboxOf(page6b)).find(r => r.scope && r.scope.permlink === 'bdrop-keychain-closed-midhandoff');
+    ok('mid-handoff closure: the journal holds the operation at handoff, no signed bytes, before the browser dies',
+      !!(rec6b && rec6b.stage === 'handoff' && rec6b.signed_tx === null && rec6b.body === BODY),
+      rec6b ? rec6b.id + ' · ' + rec6b.stage + ' · signed_tx ' + (rec6b.signed_tx === null ? 'null' : 'held') : 'no record');
+    await ctx6b.close(); /* the browser closes mid-handoff — the signer's answer never arrives */
     await setMock({ mode: 'normal', content: { permlink: 'bdrop-keychain-closed-midhandoff', body: BODY } });
-    const ctx6c = await chromium.launchPersistentContext(dir6, { headless: true });
-    await ctx6c.route('https://keys.skaists.dev/**', serveKeysInert); /* hermetic: an inert keychain origin — the probe answers, no keychain loads */
+    /* the restart: a fresh browser whose journal IS the mid-handoff closure state —
+       the exact bytes the dying browser's desk held, seeded before any page script
+       runs, so what is under test is the desk's restart reconcile, not whether the
+       killed process managed to flush its last localStorage commit */
+    const dir6c = profile('midhandoff-restart'); dirs.push(dir6c);
+    const ctx6c = await chromium.launchPersistentContext(dir6c, { headless: true });
+    await ctx6c.route('https://keys.skaists.dev/**', serveKeysInert); /* hermetic: an inert keychain origin — the probe answers, no keychain loads (see serveKeysInert) */
     ctxs.push(ctx6c);
+    await ctx6c.addInitScript(r => { try { localStorage.setItem('bnr.bdrop.outbox.v1', JSON.stringify([r])); } catch {} }, rec6b);
     const page6c = await ctx6c.newPage();
     page6c.on('pageerror', e => errs6.push('restart: ' + String(e)));
     await page6c.goto(ORIGIN + '/surfaces/bdrop.html#fast');
     await page6c.waitForSelector('body[data-reg]', { timeout: 8000 });
-    /* widened 2026-10-13: the same invariant on a CI-calmer window — the eternal job runs ~100
-       suites under CPU contention, and 20s starved this reconcile twice on main's own runs
-       (38322545384) with no code change anywhere near the path */
-    await step('restart after mid-handoff closure reconciles from the chain', () => page6c.waitForFunction(() => /bdrop-keychain-closed-midhandoff[^\n]*confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 75000 }) /* 45s starved under the grown suite's contention — same invariant, more headroom */);
+    /* EVENT-DRIVEN SETTLE (issues #413/#415, repaired 2026-10-13): the wall-clock
+       windows here (20s → 45s → 75s) could never measure this step — the old 6b gate
+       matched the PERMLINK ("…closed-midhandoff") at stage `prepared`, the browser
+       died mid-pre-flight, and the persisted pre-gesture record is SKIPPED by the
+       boot reconcile, so no wall could ever turn green (runs 38322545384,
+       38351639383, 38360498738; both 2026-10-13 reruns proved it by printing the
+       record itself). On intact storage the desk's work is sub-second —
+       instrumented locally the reconcile RPC answers at page-t+180ms and the
+       confirmed render lands at t+292ms, before the data-reg gate resolves. The
+       gate above now waits for the storage record's stage; this wait stays
+       event-driven: the boot reconcile stamps data-boot-settled when its pass
+       completes (bounded read deadline + one retry), with NO tuned timeout — a
+       broken reconcile settles and the assertion names the page's answer; the
+       eternal step's 12-min job cap is the outer backstop. */
+    await step('restart after mid-handoff closure reconciles from the chain', () => page6c.waitForFunction(() => {
+      const box = document.getElementById('outbox');
+      return !!box && (box.getAttribute('data-boot-settled') === '1'
+        || /bdrop-keychain-closed-midhandoff[^\n]*confirmed/.test(box.textContent || ''));
+    }, null, { timeout: 0 }));
+    const out6c = await page6c.textContent('#outbox'); /* renderOutbox emits divs: textContent carries no newlines */
+    ok('mid-handoff closure: the chain reconciles the record to confirmed (the boot pass settled)', /bdrop-keychain-closed-midhandoff · confirmed/.test(out6c), (out6c.match(/@loviswater\/bdrop-keychain-closed-midhandoff[^@]*/) || [''])[0].slice(0, 120));
     ok('mid-handoff closure: no extra broadcast across the whole keychain scenario', mock.broadcasts.length === 2, 'broadcasts=' + mock.broadcasts.length);
     await ctx6c.close();
+
+    /* ── scenario 6d (the #413 repair's own regression): a restart whose chain read
+       STALLS past the desk's read deadline must settle with a NAMED unanswered read —
+       the boot pass is never wedged silent — and once the endpoint answers again the
+       manual reconcile confirms from the chain. Reads only: a stalled read aborts,
+       nothing is broadcast at any point. The waits here carry walls because the page's
+       own work is bounded by its OWN deadlines (10s read + 1.5s backoff + 10s retry),
+       not by a tuned sleep masking the desk. ── */
+    await setMock({ mode: 'normal', content: { permlink: 'bdrop-stalled-read', body: BODY }, stallMs: 12000 });
+    mock.broadcasts.length = 0;
+    const dir6d = profile('stall'); dirs.push(dir6d);
+    const st6d = await open(dir6d);
+    const REC6D = { v: 1, id: '@loviswater/bdrop-stalled-read', created_at: '2026-10-13T00:00:00', stage: 'handoff',
+      scope: { author: 'loviswater', permlink: 'bdrop-stalled-read', body_sha256: BODY_SHA, body_bytes: 0, disclosure_version: 'x', rpc: `http://127.0.0.1:${PORT}/rpc` },
+      body: null, signed_tx: null, events: [], receipt: null, attempts: 0, last_error: null };
+    await st6d.page.evaluate(r => localStorage.setItem('bnr.bdrop.outbox.v1', r), JSON.stringify([REC6D]));
+    await st6d.page.reload();
+    await st6d.page.waitForSelector('body[data-reg]', { timeout: 8000 });
+    await step('6d the stalled boot read settles (deadline + one retry, then named)', () => st6d.page.waitForFunction(() => document.getElementById('outbox') && document.getElementById('outbox').getAttribute('data-boot-settled') === '1', null, { timeout: 35000 }));
+    const out6d = await st6d.page.textContent('#outbox'); /* divs concatenate: assert the record's own segment */
+    const seg6d = (out6d.match(/@loviswater\/bdrop-stalled-read[^@]*/) || [''])[0];
+    ok('6d the stalled read is NAMED as an unanswered endpoint — the desk is never wedged silent',
+      /bdrop-stalled-read · handoff/.test(seg6d) && /reconcile lookup failed: the endpoint did not answer in 10s — read aborted/.test(seg6d), seg6d.slice(0, 150));
+    ok('6d a stalled read broadcast nothing (reads abort, they never re-sign)', mock.broadcasts.length === 0, 'broadcasts=' + mock.broadcasts.length);
+    await setMock({ stallMs: 0 }); /* the endpoint answers again */
+    await st6d.page.click('#reconcile');
+    await step('6d the manual reconcile confirms once the endpoint answers', () => st6d.page.waitForFunction(() => /bdrop-stalled-read[^\n]*confirmed/.test(document.getElementById('outbox').textContent || ''), null, { timeout: 15000 }));
+    ok('6d recovery broadcast nothing either — the chain was only read', mock.broadcasts.length === 0, 'broadcasts=' + mock.broadcasts.length);
+    ok('6d no page errors', st6d.errs.length === 0, st6d.errs[0] || '');
+    await st6d.ctx.close();
 
     /* ── scenario 7: recovery evidence — expected / chain / signature-bound kept SEPARATE ── */
     rmSync(dir1, { recursive: true, force: true }); /* the original browser profile is destroyed, not just closed */

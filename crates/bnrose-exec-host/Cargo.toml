@@ -1,0 +1,22 @@
+[package]
+name = "bnrose-exec-host"
+version = "0.1.0"
+edition.workspace = true
+license = "Apache-2.0"
+description = "BNRoSe L2 supervisor: the authenticated journal, the idempotent effect ledger, the bounded workers (native + pinned Wasmtime), recovery from durable records, receipts, and the CLI that runs the whole vertical slice."
+publish = false
+
+[dependencies]
+bnrose-exec-core = { path = "../bnrose-exec-core" }
+bnrose-exec-wasm = { path = "../bnrose-exec-wasm" }
+btungsten-wb001 = { path = "../btungsten-wb001" }
+libcrux-ed25519 = "=0.0.9"
+hmac = { workspace = true }
+sha2 = { workspace = true }
+serde_json = "1"
+wasmtime = "=49.0.2"
+
+[dev-dependencies]
+# differential: the receipt's Ed25519 verdict re-checked by a second
+# implementation, the same way btungsten-wb001's battery does it
+ed25519-dalek = "2.2.0"
