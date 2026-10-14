@@ -37,7 +37,9 @@ fn tmp(name: &str) -> PathBuf {
 /// Returns (outcome_a, pk_a, outcome_b, pk_b) with both completions
 /// asserted (the finding itself: cross-node dual acceptance is REAL —
 /// the journals that dedup (authority, nonce) are local to each node).
-fn two_sovereigns_one_intent(dirs: (&PathBuf, &PathBuf)) -> (
+fn two_sovereigns_one_intent(
+    dirs: (&PathBuf, &PathBuf),
+) -> (
     bnrose_exec_host::receipt::Receipt,
     [u8; 32],
     bnrose_exec_host::receipt::Receipt,
@@ -52,7 +54,11 @@ fn two_sovereigns_one_intent(dirs: (&PathBuf, &PathBuf)) -> (
     let keys_a = bnrose_exec_host::keys::SupervisorKeys::init(dirs.0, &[0x11; 32]).unwrap();
     let mut a = Supervisor::open(dirs.0, Box::new(NativeWorker::new()), policy.clone()).unwrap();
     let out_a = a.run(&intent, now, false, &bounds);
-    assert!(out_a.refused.is_none(), "node A refused: {:?}", out_a.refused);
+    assert!(
+        out_a.refused.is_none(),
+        "node A refused: {:?}",
+        out_a.refused
+    );
     let ra = out_a.receipt.expect("node A receipt");
 
     let keys_b = bnrose_exec_host::keys::SupervisorKeys::init(dirs.1, &[0x22; 32]).unwrap();
@@ -79,7 +85,10 @@ fn the_same_intent_yields_identical_op_and_effect_across_sovereigns() {
     let a = tmp("determinism-a");
     let b = tmp("determinism-b");
     let (ra, _, rb, _) = two_sovereigns_one_intent((&a, &b));
-    assert_eq!(ra.op, rb.op, "op ids diverge: the destination could not dedup by op");
+    assert_eq!(
+        ra.op, rb.op,
+        "op ids diverge: the destination could not dedup by op"
+    );
     assert_eq!(
         ra.effect, rb.effect,
         "effect digests diverge: the two sovereigns did not execute the same thing"
@@ -139,8 +148,12 @@ fn partition_then_reconcile_converges_without_double_effect_in_either_arrival_or
     for (first, second, tag) in [(&ra, &rb, "A-first"), (&rb, &ra, "B-first")] {
         let dest = tmp(&format!("partition-dest-{tag}"));
         let mut destination = EffectLedger::open(&dest.join("effects.bin"), &[0x44; 32]).unwrap();
-        destination.apply(&first.op, &first.env_sha, &first.effect, 1).unwrap();
-        destination.apply(&second.op, &second.env_sha, &second.effect, 2).unwrap();
+        destination
+            .apply(&first.op, &first.env_sha, &first.effect, 1)
+            .unwrap();
+        destination
+            .apply(&second.op, &second.env_sha, &second.effect, 2)
+            .unwrap();
         assert_eq!(destination.len(), 1, "{tag}: double effect after reconcile");
         let row = destination.row_for(&ra.op).expect("{tag}: the row");
         assert_eq!(row.op_id, ra.op);
