@@ -1,0 +1,11 @@
+# Genealogy consent: return to the operation after opening the wallet
+
+The founder reported a successful wallet connection followed by a storage-page detour. Live inspection found the same tab connected, the consent panel still carrying its earlier disconnected message, and the URL at `#bpay-sec`. Pressing the existing review-key control restored the acknowledgment without reloading, reconnecting, signing, checking the acknowledgment, or spending.
+
+The keychain previously remembered only a storage return. Consent now supplies its own allowlisted destination. Opening the keychain offers `Continue to preservation consent`; returning to an already mounted panel focuses key review instead of silently exiting the handler. Readiness updates replace the stale disconnected hint without replacing a reviewed public key or granting consent. All signing guards remain in `tools/genealogy/consent.mjs::signConsent` and `verifyConsent`.
+
+The existing network-denied wallet source fixture now serves the genealogy module and archive JSON. The guided regression exercises a prior storage return, consent connection, reconnect, return focus, an unchecked acknowledgment, disabled signing and absence of a signature across bee/raver/cypherpunk at 320, 390 and 1280 pixels. Existing invoice file and fee-limit retention checks stay in the same regression. No localhost listener or live funds are used.
+
+Validation and exact CI/deployment receipts are recorded in the pull request. A first edit attempt could not run because `python` resolved to the Windows Store shim; no files were changed by it. The patch was applied with the file tool. Other seats' work is preserved on current main. Generated source-fixture screenshots are excluded from the commit. No backend, storage-network integration, payment, or archive upload is changed by this repair.
+
+Final local validation: guided source-fixture flow passed all nine register/viewport combinations (320/390/1280 × bee/raver/cypherpunk), including consent return and no signature. Consent unit tests passed 4/4; estate-check and git diff --check passed. The connected live wallet was returned to `#genealogy-consent` by same-document navigation and remained connected; no acknowledgment or signing action was taken.

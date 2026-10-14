@@ -1,0 +1,45 @@
+# grid.list — the sampled-agreement GRID (founder order 2026-10-14:
+# "the mechanically checked Rust/Cryptol sampled-agreement grid").
+# Canonical, deterministic, structured — not random. One line per cell
+# base: "<recs> <rows>" hex bit-masks over one step's 16 attempt slots;
+# the harness runs each line under BOTH policy flags (optIn false, true).
+#   recs bit a = attempt a JOURNALED as admitted (E_STEP_ADMITTED)
+#   rows bit a = attempt a has an EFFECT ROW in the ledger
+# recs patterns cover: empty, single slots, contiguous admission prefixes
+# (the shapes the run path itself generates), saturation (0xFFFF), the
+# only-slot-15 and 0-and-15 corners, holes, and alternating masks.
+# rows patterns cover: empty, each single low slot, slot 15 alone,
+# contiguous prefixes, all-rows, mixed corners, alternating masks.
+# SAMPLED AGREEMENT IS AN INTERMEDIATE GATE: it binds the twin's
+# definitions to the Rust definitions over this grid — it is NOT SAW
+# implementation correspondence and claims no exhaustiveness over the
+# 2^33 input space.
+0x0000 0x0000
+0x0000 0x0001
+0x0000 0x8000
+0x0000 0xFFFF
+0x0001 0x0000
+0x0001 0x0001
+0x0001 0x0002
+0x0002 0x0000
+0x0002 0x0004
+0x0003 0x0000
+0x0003 0x0003
+0x0007 0x0001
+0x000F 0x0008
+0x00FF 0x00FF
+0x00FF 0x0100
+0x1000 0x0000
+0x5555 0x0000
+0x5555 0x5555
+0x5555 0xAAAA
+0xAAAA 0x0000
+0x7FFF 0x0000
+0x7FFF 0x8000
+0x8000 0x0000
+0x8000 0x8000
+0x8001 0x0000
+0x8001 0x0001
+0xFFFF 0x0000
+0xFFFF 0x8000
+0xFFFF 0xFFFF

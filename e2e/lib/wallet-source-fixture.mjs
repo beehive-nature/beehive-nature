@@ -25,12 +25,12 @@ export async function routeWalletSource(context,root,html){
     if(url.origin!==WALLET_ORIGIN)return route.abort();
     let path=decodeURIComponent(url.pathname);
     // /vendor/ is served from the site root, as on skaists.dev (the Autonomi browser kit).
-    if(!/^\/(surfaces|docs|wasm|forge|vendor)\//.test(path))path='/surfaces'+path;
+    if(!/^\/(surfaces|docs|wasm|forge|vendor|tools|assets)\//.test(path))path='/surfaces'+path;
     const file=resolve(root,'.'+path);
     if(!file.startsWith(root+sep))return route.abort();
     try{
       if(!cache.has(file))cache.set(file,path==='/surfaces/wallet.html'?html:await readFile(file));
-      return route.fulfill({body:cache.get(file),contentType:({'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.wasm':'application/wasm','.svg':'image/svg+xml','.png':'image/png'})[extname(file)]||'application/octet-stream'});
+      return route.fulfill({body:cache.get(file),contentType:({'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.json':'application/json','.wasm':'application/wasm','.svg':'image/svg+xml','.png':'image/png'})[extname(file)]||'application/octet-stream'});
     }catch{return route.fulfill({status:404,body:'source fixture not found'});}
   });
 }

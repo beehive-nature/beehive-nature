@@ -195,3 +195,60 @@ NEXT OWNER (updated): the founder's QG8Q-V3C5 ruling; optionally fold Ane
 Sophie LZDH-WB1 (10-03/10-07 attaches) into a follow-on sync run — the tool
 takes any walked set; then the standing veins (L1N9-S2L parked, KWJ4-XBD
 lock, tasks/tasks-queue recheck on a future authed wake); codex owns ANT.
+
+---
+
+## ADDENDUM 2 (same wake, founder ratified "all looks good; I want all the data" — the FULL post-freeze universe executed)
+
+- **Full walk**: 37 persons (every person the lane attached records to after
+  the freeze, per all dispatches 10-03 → 10-10) — 102 fetches / 102 ok /
+  0 errors / 94.3s / 414 source records. Private tier:
+  `sources-sync-2026-10-12/raw-dump-full.json` (1,036,514 B) + the probe
+  receipts below. Rollin Eugene Lawton **KWCL-VJS** (1894–1974, read from
+  Donna KWCL-VNB's own parents this wake) joined as a **fifth cohort-tier
+  person** — his WWI-draft attach is frozen-layer sync debt.
+- **Artifact v2**: `sources-sync-2026-10-13.json` (the 10-12 artifact stands
+  as v1 — versioned, never erased) — **64 attached rows transcribed, 0
+  not-found, 0 null citations, redactedLiving 0 hits; 6 privacy stubs by
+  design** (Jim Briggs living-flagged creation; David Briggs, Theodora
+  Lawton, Muriel Whitney, Maree + Claire Schneider — marginal/living
+  households ride the private tier, the Don/Marilyn obit precedent).
+  Cohort debt total 6: LJDG-CYG/LN5V-3N2/GWXR-H2K/KWCL-VJS +1 each,
+  GWXR-3TD +2.
+- **Ledger corrected against the wire** (the stray-ark law class, caught in
+  my own ledger): the 10-03 baptism arks were memory-mistranscribed — the
+  wire says **H29J-NL3Z** (Johanne Marie, 1835) and **H2S7-W1MM** (Mette
+  Kirstine, **1843** — her birth year per the record, correcting the
+  allowlist's 1840). QG8Q-V3CN verified genuine and retitled (Church
+  Records, not Baptisms). Citations are the authority, memory never.
+- **The stub guard caught my own allowlist typo** (`L1N9-S2L` vs the real
+  `L1N9-SL2` — transposed): the census-cluster Christen rendered as a
+  redacted stub until the key was fixed; the privacy law protected the
+  corpus from its author. He is now properly named + transcribed
+  (QG8Q-GRKK), attach work still parked behind the founder merge call.
+- **QG8Q-V3C5 ruling evidence deepened**: QG8Q-V3CN (the 10-03 Ane Sophie
+  attach) reads *"Christen Olsen in entry for Ane Sophie Christensen, 1841"*
+  — the SAME event class as V3C5's *"Maren Nielsdr in entry for Ane Sophie
+  Christensen, 1841"*: adjacent arks, mother-view + father-view of one 1841
+  christening. The 10-10 "Maren's own birth 1811" description is now doubly
+  contradicted on the wire.
+- **Image frontier measured precisely** (from the public records layer,
+  zero requests): 13,249 records carry **7,037 distinct 1:1 record arks**
+  (4-4/4-3 forms — the das binding FORM-REJECTS these, live-proven with
+  "Invalid ARK") and only **59 distinct 3:1 long-form image arks** inside
+  citations — 49 already resolved in the manifest, **10 never probed →
+  probed read-only this wake: ALL TEN = 200 with real apids** (TH-909/TH-19x
+  films; receipt private tier `binding-probe-10.json`). Those 10 are
+  queue-extension candidates — downloads require the writer lock + queue
+  membership per the guard law; named, not executed. The remaining frontier
+  (~7,000 record arks → unknown images) needs the rendered-DOM walk or a
+  new wire; the binding speaks only long-form image arks.
+- **Zero FamilySearch mutations** — walks, binding probes, and the lock
+  recheck are reads.
+
+NEXT OWNER (final): founder rulings parked with him (QG8Q-V3C5 class
+description; Christen Olsen cluster merge; Daniel Briggs duplicate; the
+KWJ4-XBD lock); a queue-extension decision for the 10 newly-bound arks; the
+image frontier stays a measured, named vein; codex owns ANT (#346/#347).
+The corpus-scope data ("all the data" for every record the lane attached)
+is now transcribed and public.

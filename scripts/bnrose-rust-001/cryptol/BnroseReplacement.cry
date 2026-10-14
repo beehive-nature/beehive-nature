@@ -1,0 +1,101 @@
+// BNROSE-RUST-002 — the formal Cryptol TWIN of the exact replacement law
+// (crates/bnrose-exec-host/src/opexec.rs, the founder's 2026-10-13 law,
+// merged at 1692c2629). This is a READING of the Rust into Cryptol
+// definition by definition, so the law's gate can be proven exactly —
+// it is NOT a proof about the compiled Rust (that equivalence is a SAW
+// result class, a separate leg), and it does not verify the wire, the
+// digest, or the claim: this module holds the replacement gate alone.
+//
+// What is abstracted, named honestly:
+//   * the law is enforced per (root, step); root is symbolically fixed
+//     and the whole model is one step's slice — the Rust quantifies over
+//     both by construction (each step id carries its own nibble).
+//   * op_id (the digest of root||encoded) is read as an INJECTIVE key per
+//     encoded attempt byte: the Rust's ledger check compares computed
+//     op_ids, and two attempts are distinguished by the attempt nibble.
+//     Collision-freedom of the underlying digest is NOT claimed here.
+//   * recs[a] — attempt a was JOURNALED as admitted (E_STEP_ADMITTED);
+//     rows[a] — attempt a has an EFFECT ROW in the ledger. A failed
+//     attempt is journaled but may or may not have a row; "never
+//     executed" = no row for ANY attempt (the Rust's
+//     step_has_any_recorded_effect).
+//   * the attempt nibble saturates at 15 (the Rust's .min(15)): the
+//     16th-and-later replacement of one step reuses slot 15's encoding.
+//     The freshness obligation is stated BELOW saturation and the corner
+//     is named, not hidden.
+//
+// Obligations (each its own :prove under the leg's caps):
+//   gateFailsClosed          no opt-in, no replacement — whatever the ledger
+//   gateNeedsNeverExecuted   any recorded effect row closes the gate
+//   gateOpensOnlyWhenBothHold the gate is exactly the conjunction
+//   replacementNeverTouchesARow a replacement's fresh entity has no row
+//   freshAttemptBelowSaturation below saturation the entity is new to journal and ledger
+//   oldRecordsStand          the transition only ever adds a record
+// Negative controls (one textual substitution each, must COUNTEREXAMPLE):
+//   optin-dropped            gateFailsClosed dies — the door opens without the flag
+//   zero-slot-only           gateNeedsNeverExecuted dies — a row past slot 0 is missed
+
+module BnroseReplacement where
+
+// attempt indexes 0..15; the encoded step byte is step | (attempt << 4)
+type Attempt = [4]
+
+idx16 : [16]Attempt
+idx16 = ([0 .. 15] : [16][4])
+
+// ---- the Rust, definition by definition ----------------------------------
+//
+// let never_executed = !self.step_has_any_recorded_effect(&root, step);   // any row, any attempt
+// if never_executed && opts.replace_never_executed_failed_steps { ... }   // the gate
+
+anyRow : [16]Bit -> Bit
+anyRow rows = rows != zero
+
+gate : Bit -> [16]Bit -> Bit
+gate optIn rows = optIn && (rows == zero)
+
+// step_entity_attempt: max over journaled admissions (0 when none)
+maxAttempt : [16]Bit -> Attempt
+maxAttempt recs = foldl max 0 [ if recs @ a then a else 0 | a <- idx16 ]
+
+// attempt = (step_entity_attempt(...) + 1).min(15)
+nextAttempt : [16]Bit -> Attempt
+nextAttempt recs = if maxAttempt recs == 15 then 15 else maxAttempt recs + 1
+
+// the replacement journals its admission; records are never erased
+transition : [16]Bit -> [16]Bit
+transition recs = [ if a == nextAttempt recs then True else recs @ a | a <- idx16 ]
+
+// ---- the obligations ------------------------------------------------------
+
+gateFailsClosed : Bit -> [16]Bit -> Bit
+gateFailsClosed optIn rows = (optIn == False) ==> (gate optIn rows == False)
+
+gateNeedsNeverExecuted : Bit -> [16]Bit -> Bit
+gateNeedsNeverExecuted optIn rows = (anyRow rows == True) ==> (gate optIn rows == False)
+
+gateOpensOnlyWhenBothHold : Bit -> [16]Bit -> Bit
+gateOpensOnlyWhenBothHold optIn rows =
+  (gate optIn rows == True) ==> ((optIn == True) && (anyRow rows == False))
+
+replacementNeverTouchesARow : [16]Bit -> [16]Bit -> Bit
+replacementNeverTouchesARow recs rows =
+  (gate True rows == True) ==> (rows @ nextAttempt recs == False)
+
+freshAttemptBelowSaturation : [16]Bit -> [16]Bit -> Bit
+freshAttemptBelowSaturation recs rows =
+  ((maxAttempt recs != 15) && (gate True rows == True))
+    ==> ((recs @ nextAttempt recs == False) && (rows @ nextAttempt recs == False))
+
+oldRecordsStand : [16]Bit -> Bit
+oldRecordsStand recs = and [ (recs @ a) ==> (transition recs @ a) | a <- idx16 ]
+
+// the named saturation corner, pinned as the FACT it is (founder order
+// 2026-10-14: "test the named saturation corner"): once the highest
+// journaled attempt is 15, the replacement number STAYS 15 — the
+// encoding of slot 15 is REUSED, by design (.min(15)). The safety side
+// (a replacement may never collide with a recorded row, saturation
+// included) is replacementNeverTouchesARow above; this obligation pins
+// the corner's existence so it cannot silently change shape.
+saturationCornerReusesSlot15 : [16]Bit -> Bit
+saturationCornerReusesSlot15 recs = (maxAttempt recs == 15) ==> (nextAttempt recs == 15)

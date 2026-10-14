@@ -40,8 +40,11 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { publicSourceRecord, parseSourceDescriptions } from "./fs-adapter.mjs";
 
-// dispatch-proven deceased extramural persons on this pass's walked set
-// (name + basis required — same law as hint-census DECEASED_EXTRAMURAL)
+// dispatch-proven deceased extramural persons (name + basis required — same
+// law as hint-census DECEASED_EXTRAMURAL). Marginal cases (1920-census
+// children, living-flagged creations, unknown-death spouses) are deliberately
+// NOT listed — buildSync redacts them to count stubs; the provider living
+// flag overrides this list in either direction.
 export const DECEASED_EXTRAMURAL_SYNC = {
   "MHRT-169": { name: "Christen Olsen", lifespan: "1806–1875", basis: "authed-wake dispatch 2026-10-06 (linker-canonical cluster husband)" },
   "LZDH-WYF": { name: "Maren Nielsdatter", lifespan: "1811–1877", basis: "authed-wake dispatch 2026-10-06; death sourced 2026-10-07 (QG83-1487, d. 4 Oct 1877 Bakkendrup)" },
@@ -50,14 +53,47 @@ export const DECEASED_EXTRAMURAL_SYNC = {
   "MLCS-M2Q": { name: "Oline Christensen", lifespan: "1850–", basis: "hint-census dispatch 2026-10-07 + authed-wake dispatch 2026-10-10 (christening vein)" },
   "MLCS-MVB": { name: "Karen Christensen", lifespan: "1845–", basis: "hint-census dispatch 2026-10-07 + authed-wake dispatch 2026-10-10 (christening vein)" },
   "MLCS-MKV": { name: "Dorthe Catherine Christensen", lifespan: "1847–", basis: "hint-census dispatch 2026-10-07 + authed-wake dispatch 2026-10-10 (christening vein)" },
+  "LZDH-WB1": { name: "Ane Sophie Christensen", lifespan: "1841–", basis: "assistant dispatch 2026-10-03 (baptism attach); hint-census 2026-10-07 (christening attach)" },
+  "L1NW-6M1": { name: "Mette Kirstine Christensen", lifespan: "1843–", basis: "assistant dispatch 2026-10-03 (baptism attach); birth year per the record citation (H2S7-W1MM, 1843)" },
+  "LBYC-QZ8": { name: "Martin Olaf Martinsen", lifespan: "1875–1952", basis: "NUMIDENT-anchored person (hint-census allowlist precedent; assistant dispatch 2026-10-03)" },
+  "PNC6-GJQ": { name: "Nels Martinsen", lifespan: "–", basis: "assistant dispatch 2026-10-03g (father of the b.1875 son; 19th-century, deceased-by-age)" },
+  "PNCX-S8Q": { name: "unnamed mother of Martin Olaf Martinsen", lifespan: "–", basis: "assistant dispatch 2026-10-03g (created Deceased)" },
+  "L1N9-SL2": { name: "Christen Olsen (census cluster)", lifespan: "1806–Deceased", basis: "authed-wake dispatch 2026-10-06; transcription-only — attach work stays parked behind the founder merge call" },
+  "LW9Z-S11": { name: "Christen Olsen (1780 contested cluster)", lifespan: "1780–", basis: "assistant dispatch 2026-10-03g attach target; transcription-only, contested cluster" },
+  "KWCT-391": { name: "Mary Ann Hadlock", lifespan: "1885–1927", basis: "tasks-harvest dispatch 2026-10-04" },
+  "LCZ5-8QV": { name: "Dwight Dow", lifespan: "–", basis: "tasks-harvest dispatch 2026-10-04 (father in the 1910 baptism record of his b.1902 son; deceased-by-age)" },
+  "KWJZ-YG2": { name: "Walter John Dow", lifespan: "1902–", basis: "tasks-harvest dispatch 2026-10-04 (baptized 1910 age 8; deceased-by-age >110y)" },
+  "LJDF-JY4": { name: "Irving Albert Cook", lifespan: "–1959", basis: "tasks-harvest dispatch 2026-10-04 (Ohio Death Index attach)" },
+  "L49V-3DJ": { name: "Beulah Cook", lifespan: "–", basis: "tasks-harvest dispatch 2026-10-04 (1920-census adult; deceased-by-age)" },
+  "PNC5-R9G": { name: "Daniel L Briggs", lifespan: "1937–2025", basis: "hint-harvest dispatch 2026-10-06 (obit exact-vitals)" },
+  "L21W-9ZT": { name: "Chester Briggs", lifespan: "1911–2014", basis: "hint-harvest dispatch 2026-10-06 (obituary attach)" },
+  "KWCL-VJS": { name: "Rollin Eugene Lawton", lifespan: "1894–1974", basis: "v8 provider-deceased, read this wake 2026-10-13 (Donna Ruth Lawton's father); tasks-harvest 2026-10-04 attach" },
+  "KWZ7-YMT": { name: "Lee Atkin", lifespan: "–", basis: "tasks-harvest dispatch 2026-10-04 (BillionGraves gravestone record)" },
+  "GC86-D18": { name: "Clara Schneider", lifespan: "–", basis: "tasks-harvest dispatch 2026-10-04 (1920-census adult; deceased-by-age)" },
+  "GC86-FL9": { name: "Oscar Schneider", lifespan: "–", basis: "tasks-harvest dispatch 2026-10-04 (1920-census adult husband; deceased-by-age)" },
+  "LCJS-38R": { name: "Marion Draper", lifespan: "–", basis: "tasks-harvest dispatch 2026-10-04 (1930-census adult; deceased-by-age)" },
+  "LVXM-WHK": { name: "Rubey P Johnson", lifespan: "–", basis: "tasks-harvest dispatch 2026-10-04 (1930-census adult spouse; deceased-by-age)" },
 };
 
-// The walked set: persons touched by the post-freeze attaches this pass
-// transcribes (10-06d + 10-07 + 10-10 dispatch sets). Ane Sophie LZDH-WB1
-// (10-03/10-07 attaches) is a named follow-on pid, not in this run.
+// Deliberate stubs (never allowlisted — obit/census households of possibly-
+// living persons ride private tier only, the Don/Marilyn obit precedent):
+// PNCP-RDN (Jim Briggs, living-flagged creation), LL4G-322 (David Briggs),
+// KCN3-1P6 (Theodora Bell Lawton), KWZR-P2Y (Muriel Whitney),
+// GC86-D1K (Maree Schneider, 1920-census child), GBKX-TGP (Claire, same).
+
+// The walked set: EVERY person the lane attached records to after the
+// 2026-09-18 freeze (dispatches 10-03 assistant + 10-03g holes + 10-04 tasks +
+// 10-04b seed-attaches + 10-06 hint-harvest + 10-06d authed + 10-07 census +
+// 10-10 labor). Cleo Remington's pid is unresolved (her BillionGraves attach
+// VRX7-KLP is dispatch-named, not ledger'd) — named, never guessed.
 export const WALKED_PIDS = [
   "LJDG-CYG", "LN5V-3N2", "GWXR-H2K", "GWXR-3TD",
   "LZDH-WYF", "MHRT-169", "MLCS-MN5", "MLCS-M2L", "MLCS-M2Q", "MLCS-MVB", "MLCS-MKV",
+  "LZDH-WB1", "L1NW-6M1", "LBYC-QZ8", "PNC6-GJQ", "PNCX-S8Q", "L1N9-SL2", "LW9Z-S11",
+  "KWCT-391", "LCZ5-8QV", "KWJZ-YG2", "LJDF-JY4", "L49V-3DJ",
+  "PNC5-R9G", "PNCP-RDN", "L21W-9ZT", "LL4G-322", "KCN3-1P6",
+  "KWCL-VJS", "KWZ7-YMT", "KWZR-P2Y",
+  "GC86-D18", "GC86-FL9", "GC86-D1K", "GBKX-TGP", "LCJS-38R", "LVXM-WHK",
 ];
 
 export function buildPayload(index) {

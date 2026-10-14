@@ -5909,10 +5909,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      also the signature. A check that ends without a yes rewrites its lines,
      unless another check has taken its place. */
   var KC_ASK=null;
-  var KC_RETURN_STORAGE=false;
+  var KC_RETURN_TARGET=null;
+  var KC_RETURN_PATHS={storage:{id:'bpay-sec',label:'Continue to storage invoice'},consent:{id:'genealogy-consent',label:'Continue to preservation consent'}};
   document.addEventListener('click',function(e){
-    if(e.target.closest&&e.target.closest('[data-kc-return="storage"]')){
-      KC_RETURN_STORAGE=true; kcProgress(MPRK?'ready':'passkey');
+    var link=e.target.closest&&e.target.closest('[data-kc-return]');
+    if(link&&KC_RETURN_PATHS[link.dataset.kcReturn]){
+      KC_RETURN_TARGET=KC_RETURN_PATHS[link.dataset.kcReturn]; kcProgress(MPRK?'ready':'passkey');
+      if(MPRK)kcLive();
     }
   });
   function kcProgress(step){
@@ -5921,7 +5924,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       if(item.dataset.kcStep===step)item.setAttribute('aria-current','step');else item.removeAttribute('aria-current');
     });
     $('kc-phase-title').textContent=step==='confirm'?'One last check: is this your identity?':step==='ready'?'Your wallet is open':'Sign in with your existing passkey';
-    $('kc-return').hidden=!(step==='ready'&&KC_RETURN_STORAGE);
+    $('kc-return').hidden=!(step==='ready'&&KC_RETURN_TARGET);
+    if(KC_RETURN_TARGET){
+      var back=$('kc-return').querySelector('a');
+      back.href='#'+KC_RETURN_TARGET.id; back.textContent=KC_RETURN_TARGET.label+' →';
+    }
     $('kc-pass').hidden=step==='ready'||step==='confirm';
   }
   /* Keep diagnostics inspectable without burying the identity decision in them. */
@@ -6115,7 +6122,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       $('qr-sec').style.display='block'; qrGrantUI(rq); }
   }
   /* the keychain's resting lines: one calm sentence and the way on */
-  function kcLive(){ kcProgress('ready');wlSay($('kc-stat'),['your keychain is open on this page and closes when you leave. ',{to:KC_RETURN_STORAGE?'bpay-sec':'bal-sec',t:KC_RETURN_STORAGE?'Continue to storage invoice':'see your accounts'},{cy:'keychain live · keys in tab memory only, never stored in the clear (a permanent device keeps the soul sealed under its own passkey, bnr_seal)'}]) }
+  function kcLive(){ kcProgress('ready');window.dispatchEvent(new Event('bnr-keychain-ready'));wlSay($('kc-stat'),['your keychain is open on this page and closes when you leave. ',{to:KC_RETURN_TARGET?KC_RETURN_TARGET.id:'bal-sec',t:KC_RETURN_TARGET?KC_RETURN_TARGET.label:'see your accounts'},{cy:'keychain live · keys in tab memory only, never stored in the clear (a permanent device keeps the soul sealed under its own passkey, bnr_seal)'}]) }
   function kcNot(){ kcProgress('passkey');wlSay($('kc-stat'),['your keychain opens with one touch of your passkey. ',{btn:'connect keychain',on:kcConnect},{cy:'keychain not connected · masterPRK not in tab memory'}]) }
   function kcIdle(){ if(MPRK)kcLive(); else kcNot() }
   function kcQrLabel(){ var q=$('kc-qr'); if(q)q.textContent=MPRK?'📷 let a desktop sign in':'📷 sign in with your phone' }
@@ -10181,7 +10188,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   // Genealogy consent uses the existing record key, with an explicit review
   // and signing press. No payment method or general signing global is exposed.
   async function openGenealogyConsent() {
-    if (location.hash !== '#genealogy-consent' || document.getElementById('genealogyConsent')) return;
+    if (location.hash !== '#genealogy-consent') return;
+    var existing = document.getElementById('genealogyConsent');
+    if (existing) {
+      existing.scrollIntoView({ block: 'start' });
+      existing.querySelector('[data-consent-review-key]')?.focus();
+      return;
+    }
     var host = document.createElement('section'); host.id = 'genealogyConsent';
     host.setAttribute('aria-label', 'preservation consent');
     document.getElementById('kc-sec').before(host);

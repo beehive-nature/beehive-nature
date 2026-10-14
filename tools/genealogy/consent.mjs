@@ -88,9 +88,12 @@ export async function mountConsent(host, { getRecord } = {}) {
     link.style.cssText = 'display:inline-flex;align-items:center;min-height:44px;padding:8px 16px';
   } else {
     let reviewedKey = null;
-    const reviewKey = add('button', 'review signing key'); reviewKey.type = 'button';
+    const reviewKey = add('button', 'review signing key'); reviewKey.type = 'button'; reviewKey.dataset.consentReviewKey = '';
     const keyLabel = add('p', 'Connect your keychain, then review the key before signing.');
-    const connect = add('a', 'connect your keychain'); connect.href = '#kc-sec';
+    const connect = add('a', 'connect your keychain'); connect.href = '#kc-sec'; connect.dataset.kcReturn = 'consent';
+    window.addEventListener('bnr-keychain-ready', () => {
+      if (!reviewedKey) keyLabel.textContent = 'Wallet connected. Review the signing key to continue with preservation consent.';
+    });
     connect.style.cssText = 'display:inline-flex;align-items:center;min-height:44px;padding:8px 16px';
     const label = add('label', ''); label.style.cssText = 'display:flex;gap:12px;align-items:center;min-height:44px;margin:16px 0';
     const check = document.createElement('input'); check.type = 'checkbox'; check.disabled = true; check.style.cssText = 'width:24px;height:24px;flex-shrink:0';
