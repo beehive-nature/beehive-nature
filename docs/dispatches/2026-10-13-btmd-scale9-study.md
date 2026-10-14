@@ -81,3 +81,45 @@ a 180 s window.
 HUMAN INTERACTION: NONE · NEXT OWNER: authorized merger (this PR), then
 the upstream Track E conversation via the standing watch (no unsolicited
 posts from this seat).
+
+## Founder disposition (2026-10-13, recorded verbatim in force)
+
+**Profile qualification: FAIL. Evidence quality: PASS.** The study
+establishes a reproducible dependability failure rather than an
+unexplained performance regression. The interleaved control is
+particularly valuable; the 48.8–63.9 s cluster supports the
+anti-entropy explanation; the two never-recovered trials establish a
+separate observed starvation tail.
+
+**Two precision distinctions (corrections to this seat's wording):**
+1. Budget exhaustion is strongly supported, but budget ×10 is a
+   **proxy, not proof that an unconditional exemption is safe**.
+2. Zero observed control failures is **not zero underlying failure
+   probability** — ten trials establish a meaningful contrast, not
+   civilization-scale reliability.
+
+**Track E engineering disposition (three priorities for upstream
+design):**
+1. **Bounded state-sync protection** — a separate allowance or reserved
+   service capacity for joined-store synchronization, preserving
+   revocation priority without creating unlimited forwarding authority.
+2. **Per-kind accounting (#1170)** — which Normal topics consume
+   transit budgets, who gets shed, and how fairness changes under
+   constrained peers.
+3. **Deadline-based dependability** — a 53 s eventual recovery is
+   useful for network healing but does not satisfy a shorter delivery
+   deadline; eventual convergence is reported separately from
+   within-gate success (the study's WITHIN-GATE / LATE-RECOVERED /
+   NEVER categories already preserve this separation and must keep it).
+
+**The fundamental law this lane now carries:** *autonomous healing
+cannot be used to conceal unacceptable service interruption. Recovery
+and dependable delivery are two different guarantees.*
+
+**Disposition:** LEAF-SHED-NORMAL-1 remains **unqualified** for
+W@tch-shaped leaves at scale 9 with stock budgets; the enlarged-budget
+result stands as a **promising experimental comparator, not a
+production ratification**. The next engineering problem is designing
+**bounded fairness without reintroducing starvation**.
+
+[skip ci]
