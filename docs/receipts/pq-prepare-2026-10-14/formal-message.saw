@@ -1,0 +1,4 @@
+include "common.saw";
+print "PREPARE CONTROL message obligation";
+check_ignored_message;
+print "PREPARE UNEXPECTED-PROVEN";

@@ -84,10 +84,16 @@ Authorization, revocation and identity binding still run for every operation.
 Reusing a prepared key cannot make a revoked identity authorized. Do not put an
 unbounded map of remotely supplied keys on ingress.
 
-Cryptol/SAW equivalence of FIPS/Saorsa, entropy quality, constant-time behavior,
-production integration and full-system qualification remain UNESTABLISHED.
-BNR's RustCrypto proofs do not transfer. Dependency audit findings and recorded
-mesh failures remain separate.
+The separate [Rust wrapper-equivalence lane](proof/README.md) checks the actual
+candidate and Saorsa wrappers with SAW over their compiled Rust, under explicit
+shared-FIPS contracts. Its compiled claims quantify over all bytes at enumerated
+slice lengths; its source-level general argument and native regressions remain
+separate. It covers acceptance decisions, not equality of API error values.
+
+Unbounded compiled FIPS/Saorsa equivalence, ML-DSA arithmetic qualification,
+entropy quality, constant-time behavior, production integration and full-system
+qualification remain UNESTABLISHED. BNR's RustCrypto proofs do not transfer.
+Dependency audit findings and recorded mesh failures remain separate.
 
 Fresh measurements:
 [`2026-10-14-btungsten-pq-speed.md`](../../docs/dispatches/2026-10-14-btungsten-pq-speed.md).

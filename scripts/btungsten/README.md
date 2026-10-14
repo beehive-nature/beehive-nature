@@ -121,7 +121,12 @@ tampering controls. The separate experimental
 comparator against both actual Saorsa APIs, with official vectors, independent
 checks and three sabotage controls before reporting timings. Its
 [performance notes](../../crates/btungsten-x0x-pq/PERFORMANCE.md) specify the
-memory tradeoff and scope. `python3 scripts/btungsten/x0x-pq-check.py` builds with
+memory tradeoff and scope. The separate
+[Rust prepared-key proof lane](../../crates/btungsten-x0x-pq/proof/README.md)
+binds compiled wrapper proofs to these actual FIPS/Saorsa versions, with explicit
+contracts, enumerated symbolic input lengths, native boundary regressions and
+proof sabotage. Its claims do not establish ML-DSA arithmetic or unbounded
+compiled equivalence. `python3 scripts/btungsten/x0x-pq-check.py` builds with
 `--locked`, checks the upstream source/dependency pins, executes both harness
 sabotage controls and both audit gates, and writes logs and JSON receipts.
 The PQ workflow runs it as a separate job.

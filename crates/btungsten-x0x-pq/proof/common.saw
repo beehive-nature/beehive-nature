@@ -1,0 +1,145 @@
+// Only expand_public and verify_internal are assumed. Actual wrapper MIR runs.
+enable_experimental;
+import "Boundary.cry";
+include "names.saw";
+m <- mir_load_module "proof.linked-mir.json";
+let pk_adt = mir_find_mangled_adt m public_key_adt_name;
+let t_adt = mir_find_mangled_adt m polynomial_adt_name;
+let result_adt = mir_find_mangled_adt m expanded_result_adt_name;
+let uninterpreted = w4_unint_z3 ["expandRho", "expandTr", "expandT", "decision"];
+
+let key_value rho tr ts = do {
+  polys <- for (eval_list {{ [0..5] : [6][8] }}) (\i ->
+    return (mir_struct_value t_adt [mir_term {{ ts @ i }}]));
+  return (mir_struct_value pk_adt [mir_term rho, mir_term tr, mir_array_value (mir_adt t_adt) polys]);
+};
+let bytes_ref bytes = do {
+  p <- mir_ref_of (mir_term bytes);
+  return p;
+};
+let byte_slice bytes = do {
+  p <- bytes_ref bytes;
+  return (mir_slice_value p);
+};
+
+expand <- mir_unsafe_assume_spec m expand_name (do {
+  pk <- mir_fresh_var "pk" (mir_array 1952 mir_u8);
+  p <- bytes_ref pk;
+  mir_execute_func [p];
+  v <- key_value {{ expandRho pk }} {{ expandTr pk }} {{ expandT pk }};
+  mir_return (mir_enum_value result_adt "Ok" [v]);
+});
+print "PREPARE ASSUMED deterministic successful expand_public for the supplied public key";
+
+// zeroize 1.9.0's x86_64 asm is only "# {}", with readonly/nostack flags.
+// SAW cannot translate inline asm. Model just this no-op compiler barrier;
+// the volatile writes and destructor bodies are still symbolically executed.
+let barrier_spec ty = do {
+  x <- mir_fresh_var "barrier_value" ty;
+  p <- mir_ref_of (mir_term x);
+  mir_execute_func [p];
+  mir_return (mir_tuple_value []);
+};
+barrier_u8 <- mir_unsafe_assume_spec m barrier_u8_name (barrier_spec mir_u8);
+barrier_i32 <- mir_unsafe_assume_spec m barrier_i32_name (barrier_spec mir_i32);
+print "PREPARE ASSUMED zeroize x86_64 comment-only optimization barriers have no runtime effect";
+
+let internal_spec mn cn = do {
+  rho <- mir_fresh_var "rho" (mir_array 32 mir_u8);
+  tr <- mir_fresh_var "tr" (mir_array 64 mir_u8);
+  coeffs <- for (eval_list {{ [0..5] : [6][8] }}) (\i ->
+    mir_fresh_var (str_concat "t" (show (eval_int i))) (mir_array 256 mir_i32));
+  let ts = list_term coeffs;
+  polys <- for coeffs (\t -> return (mir_struct_value t_adt [mir_term t]));
+  let v = mir_struct_value pk_adt [mir_term rho, mir_term tr, mir_array_value (mir_adt t_adt) polys];
+  p <- mir_ref_of v;
+  msg <- mir_fresh_var "message" (mir_array mn mir_u8);
+  sig <- mir_fresh_var "signature" (mir_array 3309 mir_u8);
+  ctx <- mir_fresh_var "context" (mir_array cn mir_u8);
+  mp <- byte_slice msg;
+  sp <- bytes_ref sig;
+  cp <- byte_slice ctx;
+  empty <- byte_slice {{ [] : [0][8] }};
+  mir_execute_func [mir_term {{196:[32]}}, mir_term {{524288:[32]}}, mir_term {{261888:[32]}},
+    mir_term {{55:[32]}}, mir_term {{49:[32]}}, p, mp, sp, cp, empty, empty, mir_term {{False}}];
+  mir_return (mir_term {{ decision rho tr ts msg sig ctx }});
+};
+print "PREPARE ASSUMED deterministic pure verify_internal, all key/message/signature/context bytes retained";
+
+let wrapper_spec mn sn cn refused = do {
+  pk <- mir_fresh_var "pk" (mir_array 1952 mir_u8);
+  msg <- mir_fresh_var "message" (mir_array mn mir_u8);
+  sig <- mir_fresh_var "signature" (mir_array sn mir_u8);
+  ctx <- mir_fresh_var "context" (mir_array cn mir_u8);
+  pp <- byte_slice pk;
+  mp <- byte_slice msg;
+  sp <- byte_slice sig;
+  cp <- byte_slice ctx;
+  mir_execute_func [pp, mp, sp, cp];
+  if refused then mir_return (mir_term {{False}}) else
+    mir_return (mir_term {{ decision (expandRho pk) (expandTr pk) (expandT pk) msg sig ctx }});
+};
+
+let check name mn sn cn refused = do {
+  internal <- mir_unsafe_assume_spec m internal_name (internal_spec mn cn);
+  mir_verify m name [expand, internal, barrier_u8, barrier_i32] false (wrapper_spec mn sn cn refused) uninterpreted;
+};
+
+let check_key_length name pn = mir_verify m name [barrier_u8, barrier_i32] false (do {
+  pk <- mir_fresh_var "pk" (mir_array pn mir_u8);
+  pp <- byte_slice pk;
+  empty <- byte_slice {{ [] : [0][8] }};
+  mir_execute_func [pp, empty, empty, empty];
+  mir_return (mir_term {{False}});
+}) uninterpreted;
+
+let check_legacy mn sn refused = do {
+  internal <- mir_unsafe_assume_spec m internal_name (internal_spec mn 0);
+  mir_verify m "pq_prepare_proof::legacy" [expand, internal, barrier_u8, barrier_i32] false (do {
+    pk <- mir_fresh_var "pk" (mir_array 1952 mir_u8);
+    msg <- mir_fresh_var "message" (mir_array mn mir_u8);
+    sig <- mir_fresh_var "signature" (mir_array sn mir_u8);
+    pp <- byte_slice pk;
+    mp <- byte_slice msg;
+    sp <- byte_slice sig;
+    mir_execute_func [pp, mp, sp];
+    if refused then mir_return (mir_term {{False}}) else
+      mir_return (mir_term {{ decision (expandRho pk) (expandTr pk) (expandT pk) msg sig ([]:[0][8]) }});
+  }) uninterpreted;
+};
+
+let check_reuse name = do {
+  internal1 <- mir_unsafe_assume_spec m internal_name (internal_spec 1 1);
+  internal2 <- mir_unsafe_assume_spec m internal_name (internal_spec 257 255);
+  mir_verify m name [expand, internal1, internal2, barrier_u8, barrier_i32] false (do {
+    pk <- mir_fresh_var "pk" (mir_array 1952 mir_u8);
+    m1 <- mir_fresh_var "m1" (mir_array 1 mir_u8);
+    s1 <- mir_fresh_var "s1" (mir_array 3309 mir_u8);
+    c1 <- mir_fresh_var "c1" (mir_array 1 mir_u8);
+    m2 <- mir_fresh_var "m2" (mir_array 257 mir_u8);
+    s2 <- mir_fresh_var "s2" (mir_array 3309 mir_u8);
+    c2 <- mir_fresh_var "c2" (mir_array 255 mir_u8);
+    pp <- byte_slice pk;
+    mp1 <- byte_slice m1; sp1 <- byte_slice s1; cp1 <- byte_slice c1;
+    mp2 <- byte_slice m2; sp2 <- byte_slice s2; cp2 <- byte_slice c2;
+    mir_execute_func [pp, mp1, sp1, cp1, mp2, sp2, cp2];
+    mir_return (mir_tuple_value [
+      mir_term {{decision (expandRho pk) (expandTr pk) (expandT pk) m1 s1 c1}},
+      mir_term {{decision (expandRho pk) (expandTr pk) (expandT pk) m2 s2 c2}}]);
+  }) uninterpreted;
+};
+
+// Supply contracts at both the full and mutated lengths. A control must fail
+// the RETURN-VALUE equation, not fail because its leaf call has no override.
+let check_ignored_message = do {
+  full <- mir_unsafe_assume_spec m internal_name (internal_spec 257 1);
+  prefix <- mir_unsafe_assume_spec m internal_name (internal_spec 256 1);
+  mir_verify m "pq_prepare_proof::truncate_message" [expand, full, prefix, barrier_u8, barrier_i32]
+    false (wrapper_spec 257 3309 1 false) uninterpreted;
+};
+let check_ignored_context = do {
+  full <- mir_unsafe_assume_spec m internal_name (internal_spec 1 1);
+  empty <- mir_unsafe_assume_spec m internal_name (internal_spec 1 0);
+  mir_verify m "pq_prepare_proof::drop_context" [expand, full, empty, barrier_u8, barrier_i32]
+    false (wrapper_spec 1 3309 1 false) uninterpreted;
+};
