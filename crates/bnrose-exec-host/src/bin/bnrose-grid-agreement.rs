@@ -57,7 +57,10 @@ fn main() {
         }
     };
 
-    for line in text.lines().filter(|l| !l.trim_start().starts_with('#') && !l.trim().is_empty()) {
+    for line in text
+        .lines()
+        .filter(|l| !l.trim_start().starts_with('#') && !l.trim().is_empty())
+    {
         let mut it = line.split_whitespace();
         let recs = u16::from_str_radix(it.next().unwrap().trim_start_matches("0x"), 16).unwrap();
         let rows = u16::from_str_radix(it.next().unwrap().trim_start_matches("0x"), 16).unwrap();
@@ -66,13 +69,37 @@ fn main() {
         // real admissions for the journaled attempts…
         for a in 0u8..16 {
             if recs & (1 << a) != 0 {
-                records.push(admit(&mut seq, bnrose_exec_core::E_STEP_ADMITTED, &root, step | (a << 4), "grid"));
+                records.push(admit(
+                    &mut seq,
+                    bnrose_exec_core::E_STEP_ADMITTED,
+                    &root,
+                    step | (a << 4),
+                    "grid",
+                ));
             }
         }
         // …and discrimination noise the scan must ignore
-        records.push(admit(&mut seq, bnrose_exec_core::E_ADMITTED, &root, step, "grid"));
-        records.push(admit(&mut seq, bnrose_exec_core::E_STEP_ADMITTED, &other_root, step, "grid"));
-        records.push(admit(&mut seq, bnrose_exec_core::E_STEP_ADMITTED, &root, step + 1, "grid"));
+        records.push(admit(
+            &mut seq,
+            bnrose_exec_core::E_ADMITTED,
+            &root,
+            step,
+            "grid",
+        ));
+        records.push(admit(
+            &mut seq,
+            bnrose_exec_core::E_STEP_ADMITTED,
+            &other_root,
+            step,
+            "grid",
+        ));
+        records.push(admit(
+            &mut seq,
+            bnrose_exec_core::E_STEP_ADMITTED,
+            &root,
+            step + 1,
+            "grid",
+        ));
 
         // ledger rows for the recorded attempts (real op-id keys)…
         let mut row_ids: Vec<[u8; 32]> = Vec::new();
