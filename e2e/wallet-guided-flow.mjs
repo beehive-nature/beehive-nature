@@ -67,10 +67,31 @@ try {
     await page.locator('#kc-pass').click();
     await page.waitForFunction(()=>BNRPAY.antStorageState().connected);
     assert.equal(await page.evaluate(()=>window.__passkeyGets),2);
+    // Consent replaces an earlier storage return, without a new document or signature.
+    await page.evaluate(()=>{location.hash='genealogy-consent';});
+    const consent=page.locator('#genealogyConsent');
+    await consent.getByRole('button',{name:'review signing key',exact:true}).waitFor();
+    await consent.getByRole('link',{name:'connect your keychain',exact:true}).click();
+    await page.locator('#kc-out').click();
+    await page.locator('#kc-pass').click();
+    await page.waitForFunction(()=>BNRPAY.antStorageState().connected);
+    assert.equal(await page.locator('#kc-return a').getAttribute('href'),'#genealogy-consent');
+    assert.match(await consent.textContent(),/Wallet connected. Review the signing key/);
+    await page.locator('#kc-return a').click();
+    await page.waitForFunction(()=>document.activeElement?.hasAttribute('data-consent-review-key'));
+    assert.equal(new URL(page.url()).hash,'#genealogy-consent');
+    await consent.getByRole('button',{name:'review signing key',exact:true}).click();
+    await page.evaluate(()=>window.dispatchEvent(new Event('bnr-keychain-ready')));
+    assert.match(await consent.textContent(),/Signing key · Ed25519/,'readiness refresh must retain the reviewed key');
+    assert.equal(await consent.getByRole('checkbox').isEnabled(),true);
+    assert.equal(await consent.getByRole('checkbox').isChecked(),false);
+    assert.equal(await consent.getByRole('button',{name:'sign preservation consent',exact:true}).isEnabled(),false);
+    assert.equal(await page.evaluate(()=>localStorage.getItem('skaists.genealogy-consent/1')),null);
+    assert.equal(await page.evaluate(()=>window.__passkeyGets),3);
     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1);
     assert.equal(overflow,false,`${reg}/${width} must fit the viewport`);
     assert.deepEqual(errors,[]);
-    results.push({reg,width,pass:true});console.log(`PASS ${reg} ${width}: explicit identity, return path, name readiness, retained file/ceiling, no overflow`);
+    results.push({reg,width,pass:true});console.log(`PASS ${reg} ${width}: explicit identity, storage and consent return paths, retained file/ceiling, no signature, no overflow`);
     await context.close();
   }
 } finally {await browser.close();}
