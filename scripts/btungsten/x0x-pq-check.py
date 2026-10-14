@@ -96,6 +96,7 @@ def main():
         for name, flags, expected in [("honest", [], 0), ("expected-byte-teeth", ["--sabotage-expected"], 1),
                                       ("empty-vectors-teeth", ["--empty-vectors"], 1)]:
             receipt = out / f"{name}.json"
+            receipt.unlink(missing_ok=True)
             run(name, [binary, "--cache", str(cache), "--receipt", str(receipt), *flags], expected)
             evidence = json.loads(receipt.read_text())
             tally = evidence["report"]
@@ -139,7 +140,7 @@ def main():
         error = str(e)
         print(f"X0X-PQ FAIL: {error}", file=sys.stderr)
     finally:
-        sources = [CRATE / "Cargo.toml", CRATE / "inventory.json", *sorted((CRATE / "src").glob("*.rs")),
+        sources = [CRATE / "Cargo.toml", CRATE / "inventory.json", *sorted((CRATE / "src").rglob("*.rs")),
             ROOT / "crates/btungsten-pq/kat-manifest.json", *sorted((ROOT / "crates/btungsten-pq/src").glob("*.rs")), Path(__file__).resolve()]
         evidence = {"schema": "btungsten.x0x-pq-run/1", "started_utc": started,
             "completed_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),

@@ -116,7 +116,12 @@ inherited, tested; the teeth each gate must catch; lanes PQ00-PQ15). CI:
 `32bf552808`, saorsa-pqc 0.5.1, fips203 0.4.3 and fips204 0.4.6. It reuses
 PQ01's checksum-pinned ACVP files and vector gates, then drives Saorsa's real
 API and legacy signing wrappers through RustCrypto/libcrux comparisons and
-tampering controls. `python3 scripts/btungsten/x0x-pq-check.py` builds with
+tampering controls. The separate experimental
+[`pq-speed-check.py`](pq-speed-check.py) runs the prepared ML-DSA-65 public-key
+comparator against both actual Saorsa APIs, with official vectors, independent
+checks and three sabotage controls before reporting timings. Its
+[performance notes](../../crates/btungsten-x0x-pq/PERFORMANCE.md) specify the
+memory tradeoff and scope. `python3 scripts/btungsten/x0x-pq-check.py` builds with
 `--locked`, checks the upstream source/dependency pins, executes both harness
 sabotage controls and both audit gates, and writes logs and JSON receipts.
 The PQ workflow runs it as a separate job.

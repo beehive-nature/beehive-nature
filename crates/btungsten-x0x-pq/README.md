@@ -1,5 +1,10 @@
 # x0x implementation-specific PQ battery
 
+The experimental [prepared public-key performance lane](PERFORMANCE.md) measures
+the same pinned ML-DSA implementation against the actual Saorsa/ANT wrapper APIs.
+Run it with `python3 scripts/btungsten/pq-speed-check.py`. Its receipts and
+qualification boundaries are separate from the battery below.
+
 Run from the BNR repository root:
 
 ```sh

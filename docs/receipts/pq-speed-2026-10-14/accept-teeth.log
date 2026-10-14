@@ -1,0 +1,317 @@
+PQ-SPEED TEETH empty signature [prepared-fips204-0.4.6]: executed 36 of 36, passed 0
+PQ-SPEED TEETH last context byte [prepared-fips204-0.4.6]: executed 36 of 36, passed 0
+PQ-SPEED TEETH last message byte [prepared-fips204-0.4.6]: executed 36 of 36, passed 0
+PQ-SPEED TEETH last signature byte [prepared-fips204-0.4.6]: executed 36 of 36, passed 0
+PQ-SPEED TEETH malformed public-key length [prepared-fips204-0.4.6]: executed 3 of 3, passed 3
+PQ-SPEED TEETH overlong context [prepared-fips204-0.4.6]: executed 36 of 36, passed 0
+PQ-SPEED TEETH overlong signature [prepared-fips204-0.4.6]: executed 36 of 36, passed 0
+PQ-SPEED TEETH replaced identity key [prepared-fips204-0.4.6]: executed 36 of 36, passed 0
+PQ-SPEED TEETH truncated signature [prepared-fips204-0.4.6]: executed 36 of 36, passed 0
+PQ-SPEED boundary DIFFERENTIAL [libcrux]: executed 36 of 36, passed 36
+PQ-SPEED boundary DIFFERENTIAL [prepared-fips204-0.4.6]: executed 36 of 36, passed 36
+PQ-SPEED boundary DIFFERENTIAL [rustcrypto]: executed 36 of 36, passed 36
+PQ-SPEED official invalid KAT [prepared-fips204-0.4.6]: executed 12 of 12, passed 0
+PQ-SPEED official valid KAT [prepared-fips204-0.4.6]: executed 3 of 3, passed 3
+PQ-SPEED NOT RUN L2-L5 prepared/FIPS equivalence and protocol properties: executed KAT/DIFFERENTIAL/TEETH only; BNR RustCrypto proofs do not transfer
+PQ-SPEED NOT RUN other PQ algorithms, ANT/Autonomi storage, transport and full-system qualification: public-key verification comparator; no network, storage or population-scale run
+PQ-SPEED FAIL official invalid KAT [prepared-fips204-0.4.6] tcId 31
+PQ-SPEED FAIL official invalid KAT [prepared-fips204-0.4.6] tcId 32
+PQ-SPEED FAIL official invalid KAT [prepared-fips204-0.4.6] tcId 34
+PQ-SPEED FAIL official invalid KAT [prepared-fips204-0.4.6] tcId 35
+PQ-SPEED FAIL official invalid KAT [prepared-fips204-0.4.6] tcId 36
+PQ-SPEED FAIL official invalid KAT [prepared-fips204-0.4.6] tcId 37
+PQ-SPEED FAIL official invalid KAT [prepared-fips204-0.4.6] tcId 38
+PQ-SPEED FAIL official invalid KAT [prepared-fips204-0.4.6] tcId 39
+PQ-SPEED FAIL official invalid KAT [prepared-fips204-0.4.6] tcId 40
+PQ-SPEED FAIL official invalid KAT [prepared-fips204-0.4.6] tcId 41
+PQ-SPEED FAIL official invalid KAT [prepared-fips204-0.4.6] tcId 42
+PQ-SPEED FAIL official invalid KAT [prepared-fips204-0.4.6] tcId 45
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 0
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 0
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 0
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 0
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 0
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 0
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 0
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 0
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 1
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 1
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 1
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 1
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 1
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 1
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 1
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 1
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 2
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 2
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 2
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 2
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 2
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 2
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 2
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 2
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 3
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 3
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 3
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 3
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 3
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 3
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 3
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 3
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 4
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 4
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 4
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 4
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 4
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 4
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 4
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 4
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 5
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 5
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 5
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 5
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 5
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 5
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 5
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 5
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 6
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 6
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 6
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 6
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 6
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 6
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 6
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 6
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 7
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 7
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 7
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 7
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 7
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 7
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 7
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 7
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 8
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 8
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 8
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 8
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 8
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 8
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 8
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 8
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 9
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 9
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 9
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 9
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 9
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 9
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 9
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 9
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 10
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 10
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 10
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 10
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 10
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 10
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 10
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 10
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 11
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 11
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 11
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 11
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 11
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 11
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 11
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 11
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 12
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 12
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 12
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 12
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 12
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 12
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 12
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 12
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 13
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 13
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 13
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 13
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 13
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 13
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 13
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 13
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 14
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 14
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 14
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 14
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 14
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 14
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 14
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 14
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 15
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 15
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 15
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 15
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 15
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 15
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 15
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 15
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 16
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 16
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 16
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 16
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 16
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 16
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 16
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 16
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 17
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 17
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 17
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 17
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 17
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 17
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 17
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 17
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 18
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 18
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 18
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 18
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 18
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 18
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 18
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 18
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 19
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 19
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 19
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 19
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 19
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 19
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 19
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 19
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 20
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 20
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 20
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 20
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 20
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 20
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 20
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 20
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 21
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 21
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 21
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 21
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 21
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 21
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 21
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 21
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 22
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 22
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 22
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 22
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 22
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 22
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 22
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 22
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 23
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 23
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 23
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 23
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 23
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 23
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 23
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 23
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 24
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 24
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 24
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 24
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 24
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 24
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 24
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 24
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 25
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 25
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 25
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 25
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 25
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 25
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 25
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 25
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 26
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 26
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 26
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 26
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 26
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 26
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 26
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 26
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 27
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 27
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 27
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 27
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 27
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 27
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 27
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 27
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 28
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 28
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 28
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 28
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 28
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 28
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 28
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 28
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 29
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 29
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 29
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 29
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 29
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 29
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 29
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 29
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 30
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 30
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 30
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 30
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 30
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 30
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 30
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 30
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 31
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 31
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 31
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 31
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 31
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 31
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 31
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 31
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 32
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 32
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 32
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 32
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 32
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 32
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 32
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 32
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 33
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 33
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 33
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 33
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 33
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 33
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 33
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 33
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 34
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 34
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 34
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 34
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 34
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 34
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 34
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 34
+PQ-SPEED FAIL TEETH last message byte [prepared-fips204-0.4.6] tcId 35
+PQ-SPEED FAIL TEETH last signature byte [prepared-fips204-0.4.6] tcId 35
+PQ-SPEED FAIL TEETH last context byte [prepared-fips204-0.4.6] tcId 35
+PQ-SPEED FAIL TEETH replaced identity key [prepared-fips204-0.4.6] tcId 35
+PQ-SPEED FAIL TEETH empty signature [prepared-fips204-0.4.6] tcId 35
+PQ-SPEED FAIL TEETH truncated signature [prepared-fips204-0.4.6] tcId 35
+PQ-SPEED FAIL TEETH overlong signature [prepared-fips204-0.4.6] tcId 35
+PQ-SPEED FAIL TEETH overlong context [prepared-fips204-0.4.6] tcId 35
+PQ-SPEED assurance: 114/414; coverage complete=true; sabotage=true

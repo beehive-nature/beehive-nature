@@ -23,6 +23,8 @@ jobs:
         run: cargo install cargo-audit --locked --version 0.22.2
       - name: x0x pinned implementations — official vectors, differential checks, sabotage and audits
         run: python3 scripts/btungsten/x0x-pq-check.py
+      - name: Prepared public-key comparator — assurance, sabotage, and measured speed
+        run: python3 scripts/btungsten/pq-speed-check.py --out target/x0x-pq/speed
       - name: Retain x0x evidence, including failures
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
