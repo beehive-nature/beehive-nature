@@ -222,8 +222,12 @@ fn main() {
     );
 
     // ---- recovery cost over the 100-op journal built above
-    let state2 = tmp("recover-none");
-    drop(state2);
+    // The recovery phase models a RESTART: the first supervisor is dropped
+    // cleanly BEFORE the second opens — Drop releases the inter-process
+    // claim, so the state directory is unclaimed when recovery reads it.
+    // (Opening while the first still lives must refuse: exclusivity is the
+    // law; adopt_stale models a CRASHED holder, which this phase is not.)
+    drop(sup);
     let t = Instant::now();
     let mut sup2 = Supervisor::open(&state, Box::new(NativeWorker::new()), policy).unwrap();
     let report = sup2.recover(now).expect("recovery");
