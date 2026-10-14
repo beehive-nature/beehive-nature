@@ -274,6 +274,16 @@ fn trial_body(
     // The workload phase (identical shape for every matched trial).
     let t0 = crate::client::now_ms();
     let s_phase_start = rig.sample_all();
+    // t0 diagnostics for per-kind attribution deltas (instrument first).
+    for l in &node_labels {
+        if let Ok(d) = rig.diagnostics(l, "gossip") {
+            let row = serde_json::json!({
+                "node": l, "level": "application", "at_ms": t0,
+                "gossip": serde_json::from_str::<serde_json::Value>(&d).unwrap_or(serde_json::Value::Null)
+            });
+            let _ = receipts.append_jsonl("diagnostics-t0.jsonl", &row);
+        }
+    }
     let mut dm_ops: Vec<String> = Vec::new();
     {
         let mut w = WorkloadCtx::new(rig, 1, 10_000);
@@ -418,6 +428,11 @@ fn trial_body(
     let idle_min = profile.idle_secs as f64 / 60.0;
 
     // Diagnostics snapshots — APPLICATION-LEVEL, never verdict sources.
+    // t0 snapshot (workload start) rides diagnostics-t0.jsonl; the t1
+    // snapshot rides diagnostics.jsonl. Per-kind attribution (forwarded
+    // vs shed bytes, budget exhaustion, per-topic counters) computes as
+    // DELTAS between the two in the analyzer — the instrument-before-
+    // policy law of the E1 experiment.
     for l in &node_labels {
         if let Ok(d) = rig.diagnostics(l, "gossip") {
             let row = serde_json::json!({

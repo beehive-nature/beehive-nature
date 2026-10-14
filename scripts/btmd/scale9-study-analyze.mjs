@@ -32,8 +32,79 @@ if (!runsDir || !outFile) {
 const sanitize = (s) => String(s).replace(/[0-9a-fA-F]{48,}/g, (m) => `«hex${m.length}…${m.slice(0, 6)}»`);
 
 const trials = [];
+
+// Per-kind attribution (E1 Phase 0: instrument before changing policy).
+// Deltas between the t0 and t1 gossip diagnostics snapshots per node,
+// bucketed by topic family. APPLICATION-LEVEL counters — recorded for
+// attribution, never verdict sources (kernel veth counters judge cost).
+function family(topic) {
+  if (topic.startsWith('x0x/caps') || topic.startsWith('caps/')) return 'caps';
+  if (topic.startsWith('x0x/announce') || topic.startsWith('announce/')) return 'announce-blob';
+  if (topic.startsWith('x0x.machine.announce') || topic.startsWith('machine.announce')) return 'machine-announce';
+  if (topic.includes('dm/v1/bus')) return 'dm-bus';
+  if (topic.startsWith('x0x.identity')) return 'identity';
+  if (topic.startsWith('x0x.groups')) return 'groups';
+  if (topic.startsWith('btmd/store') || topic.startsWith('btmd/cont') || topic.startsWith('x0x.group.')) return 'store-sync';
+  if (topic.startsWith('btmd/')) return 'btmd-probe';
+  return 'other';
+}
+function readSnap(path) {
+  const m = new Map();
+  if (!existsSync(path)) return m;
+  for (const line of readFileSync(path, 'utf8').split('\n')) {
+    if (!line.trim()) continue;
+    try { const j = JSON.parse(line); m.set(j.node, j.gossip); } catch { /* partial */ }
+  }
+  return m;
+}
+function num(x) { return typeof x === 'number' ? x : 0; }
+function attribution(rd) {
+  const t0 = readSnap(join(rd, 'receipts', 'diagnostics-t0.jsonl'));
+  const t1 = readSnap(join(rd, 'receipts', 'diagnostics.jsonl'));
+  const perNode = {};
+  for (const [node, g1] of t1) {
+    const g0 = t0.get(node) ?? {};
+    const eb1 = g1?.egress_budget ?? {};
+    const eb0 = g0?.egress_budget ?? {};
+    const leaf1 = eb1.leaf_egress ?? {};
+    const leaf0 = eb0.leaf_egress ?? {};
+    // name <-> topic-hash bridge (subscribed_topics carries hex8 ids)
+    const hex8ToFam = {};
+    for (const s of g1?.subscribed_topics ?? []) {
+      hex8ToFam[s.topic_id_hex8] = family(s.name);
+    }
+    const famOfTopicBytes = (arr) => {
+      if (!Array.isArray(arr)) return 'other';
+      const hex8 = arr.slice(0, 8).map((b) => b.toString(16).padStart(2, '0')).join('');
+      return hex8ToFam[hex8] ?? 'unsubscribed-or-unknown';
+    };
+    const fams = {};
+    const bump = (f, k, n) => { fams[f] ??= {}; fams[f][k] = (fams[f][k] ?? 0) + Math.max(0, n); };
+    // per-topic-per-purpose rows: charged vs demanded attributes the
+    // shed bytes (demanded - charged) to a family AND a purpose.
+    for (const row of leaf1.by_topic_and_purpose ?? []) {
+      const f = famOfTopicBytes(row.topic);
+      const p = String(row.purpose ?? '?').toLowerCase();
+      bump(f, `${p}_charged_bytes`, num(row.charged_bytes));
+      bump(f, `${p}_demanded_bytes`, num(row.demanded_bytes));
+      bump(f, `${p}_shed_bytes`, num(row.demanded_bytes) - num(row.charged_bytes));
+      bump(f, `${p}_deferred`, num(row.deferred));
+      bump(f, `${p}_send_failures`, num(row.send_failures));
+    }
+    perNode[node] = {
+      byte_policy: eb1.byte_policy ?? null,
+      shed_suppressed_delta: num(leaf1.shed_suppressed) - num(leaf0.shed_suppressed),
+      budget_timeouts_delta: num(leaf1.budget_timeouts) - num(leaf0.budget_timeouts),
+      hard_exceeded_delta: num(eb1.egress_budget_hard_exceeded) - num(eb0.egress_budget_hard_exceeded),
+      soft_exceeded_delta: num(eb1.egress_budget_soft_exceeded) - num(eb0.egress_budget_soft_exceeded),
+      families: fams,
+    };
+  }
+  return perNode;
+}
+
 for (const run of readdirSync(runsDir).sort()) {
-  if (!run.startsWith('s9study-')) continue;
+  if (!run.startsWith('s9study-') && !run.startsWith('e1-')) continue;
   const rd = join(runsDir, run);
   const vPath = join(rd, 'receipts', 'verdict.json');
   const lPath = join(rd, 'receipts', 'ledger.json');
@@ -85,6 +156,7 @@ for (const run of readdirSync(runsDir).sort()) {
     sync_outcome_counts: { within: within, late: late.length, never: never.length },
     failures: [...late, ...never],
     per_op: perOp,
+    attribution: attribution(rd),
     verdicts_pass: v.verdicts_pass,
     unsafe_retries: v.unsafe_retries,
   });
