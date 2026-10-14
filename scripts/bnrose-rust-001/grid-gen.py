@@ -61,7 +61,7 @@ def main() -> None:
     cells = [json.loads(l) for l in open(rust_json, encoding="utf-8") if l.strip()]
     if flip == "1":
         cells[0]["gate"] = not cells[0]["gate"]  # the perturbation control
-    rows = [f"({cry(c['optIn'])}, {rev16(c["recs"])}, {rev16(c["rows"])}, {c['maxA']}, {c['nextA']}, {cry(c['anyRow'])}, {cry(c['gate'])})" for c in cells]
+    rows = [f"({cry(c['optIn'])}, {rev16(c['recs'])}, {rev16(c['rows'])}, {c['maxA']}, {c['nextA']}, {cry(c['anyRow'])}, {cry(c['gate'])})" for c in cells]
     rows += ["(True, 0x0000, 0x0000, 0, 1, False, True)"] * (512 - len(rows))  # the agreeing pad
     grid = ", ".join(rows)
     mod = "GridRun" if flip == "0" else "GridBad"
