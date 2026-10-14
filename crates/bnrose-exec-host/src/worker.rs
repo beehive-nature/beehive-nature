@@ -81,7 +81,7 @@ impl std::fmt::Display for WorkerError {
     }
 }
 
-pub trait Worker {
+pub trait Worker: Send {
     fn name(&self) -> &'static str;
     /// Fuel consumed by the last call (a diagnostic, never a verdict).
     fn last_fuel(&self) -> u64;

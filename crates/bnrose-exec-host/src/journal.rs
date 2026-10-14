@@ -33,7 +33,7 @@ use hmac::{Hmac, Mac};
 use sha2::Sha256;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 type HmacSha256 = Hmac<Sha256>;
 
@@ -255,6 +255,170 @@ pub fn load(path: &Path, key: &[u8; 32]) -> Result<Vec<Record>, JournalError> {
         i = end;
     }
     Ok(out)
+}
+
+// ---- the replicated journal (SPEC-RUSTEOSVM-1 §2.4) ------------------------
+//
+// DURABLY ACKNOWLEDGED, made structural: an append is acknowledged only
+// after EVERY replica's fsync completes, and the effect door stands behind
+// that acknowledgement. Two files stand for two failure domains here; the
+// definition and the rules are the hosts'.
+//
+// Load rules (recovery reads the set, not a file):
+//   - every replica loads and all agree      → Healthy
+//   - some replicas are absent/unreadable,
+//     the survivors agree                    → Degraded (recover from the
+//                                              survivors; the loss is named)
+//   - any replica fails its own chain        → fail closed (tamper is not
+//                                              host loss)
+//   - surviving replicas disagree            → fail closed (divergence)
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum ReplicationState {
+    Healthy {
+        replicas: usize,
+    },
+    Degraded {
+        alive: Vec<PathBuf>,
+        lost: Vec<PathBuf>,
+    },
+}
+
+pub struct ReplicatedJournal {
+    replicas: Vec<Journal>,
+    paths: Vec<PathBuf>,
+    /// What the load rules observed when this process opened the set —
+    /// the recovery report names it even after healing.
+    pub observed_at_open: ReplicationState,
+}
+
+impl ReplicatedJournal {
+    pub fn open(paths: &[PathBuf], key: &[u8; 32]) -> Result<ReplicatedJournal, JournalError> {
+        if paths.is_empty() {
+            return Err(JournalError::Io("no replicas given".into()));
+        }
+        let (records, observed) = Self::load_state(paths, key)?;
+        // AUTONOMOUS HEALING (axis 3, made small and true): a replica lost
+        // to an outage is rebuilt from the surviving records — the chain
+        // is deterministic under the key, so the rebuilt replica is
+        // byte-identical. Tamper never reaches here (it fails closed in
+        // load_state); divergence never reaches here either.
+        if let ReplicationState::Degraded { lost, .. } = &observed {
+            for p in lost {
+                let _ = std::fs::remove_file(p);
+                if let Some(parent) = p.parent() {
+                    std::fs::create_dir_all(parent).map_err(|e| JournalError::Io(e.to_string()))?;
+                }
+                let mut j = Journal::open(p, key)?;
+                for r in &records {
+                    j.append(&r.op_id, r.event, &r.payload)?;
+                }
+            }
+        }
+        let mut replicas = Vec::with_capacity(paths.len());
+        for p in paths {
+            replicas.push(Journal::open(p, key)?);
+        }
+        Ok(ReplicatedJournal {
+            replicas,
+            paths: paths.to_vec(),
+            observed_at_open: observed,
+        })
+    }
+
+    pub fn head(&self) -> [u8; 32] {
+        self.replicas[0].head()
+    }
+
+    pub fn next_seq(&self) -> u64 {
+        self.replicas[0].next_seq()
+    }
+
+    /// The acknowledgement: every replica appends and fsyncs, or the
+    /// append is not acknowledged. A mid-life replica write failure
+    /// poisons further appends (the supervisor must halt; recovery then
+    /// follows the load rules on whatever landed).
+    pub fn append(
+        &mut self,
+        op_id: &[u8; 32],
+        event: u8,
+        payload: &[u8],
+    ) -> Result<Record, JournalError> {
+        let mut first: Option<Record> = None;
+        for r in self.replicas.iter_mut() {
+            let rec = r.append(op_id, event, payload)?;
+            if first.is_none() {
+                first = Some(rec);
+            }
+        }
+        Ok(first.expect("at least one replica by construction"))
+    }
+
+    /// Load the replicated state under the §load rules. Returns the
+    /// surviving records and how they were obtained.
+    pub fn load_state(
+        paths: &[PathBuf],
+        key: &[u8; 32],
+    ) -> Result<(Vec<Record>, ReplicationState), JournalError> {
+        let mut alive: Vec<(PathBuf, Vec<Record>)> = Vec::new();
+        let mut lost: Vec<PathBuf> = Vec::new();
+        for p in paths {
+            if !p.exists() {
+                // a missing replica is an outage (a fresh state is the
+                // case where EVERY replica is missing — handled below)
+                lost.push(p.clone());
+                continue;
+            }
+            match load(p, key) {
+                Ok(v) => alive.push((p.clone(), v)),
+                Err(JournalError::Io(_)) => lost.push(p.clone()),
+                Err(e) => return Err(e), // tamper/malformed: fail closed
+            }
+        }
+        if alive.is_empty() {
+            if lost.len() == paths.len() {
+                // every replica missing = a fresh state: empty and healthy
+                return Ok((Vec::new(), ReplicationState::Healthy { replicas: 0 }));
+            }
+            return Err(JournalError::Io("every journal replica is lost".into()));
+        }
+        // survivors must agree record-for-record
+        let reference = &alive[0].1;
+        for (p, records) in &alive[1..] {
+            if records.len() != reference.len()
+                || records.iter().zip(reference.iter()).any(|(a, b)| {
+                    a.seq != b.seq
+                        || a.op_id != b.op_id
+                        || a.event != b.event
+                        || a.payload != b.payload
+                })
+            {
+                return Err(JournalError::Tampered {
+                    record: reference.len().min(records.len()),
+                    why: format!(
+                        "replica divergence: {} disagrees with {}",
+                        p.display(),
+                        alive[0].0.display()
+                    ),
+                });
+            }
+        }
+        let state = if lost.is_empty() {
+            ReplicationState::Healthy {
+                replicas: alive.len(),
+            }
+        } else {
+            ReplicationState::Degraded {
+                alive: alive.iter().map(|(p, _)| p.clone()).collect(),
+                lost,
+            }
+        };
+        Ok((reference.clone(), state))
+    }
+
+    pub fn paths(&self) -> &[PathBuf] {
+        &self.paths
+    }
 }
 
 #[cfg(test)]

@@ -35,9 +35,12 @@ fn crash_after_effect_recovers_the_same_operation_from_ledger_evidence() {
             .unwrap();
     assert_eq!(rows_before.len(), 1);
     // a clean replacement supervisor (new process would be the same thing:
-    // nothing in memory survives) recovers from the records alone
-    let mut s2 =
-        Supervisor::open(&s.state_dir, Box::new(NativeWorker::new()), test_policy()).unwrap();
+    // nothing in memory survives) recovers from the records alone — under
+    // the claim law the crashed holder's authority releases first
+    let dir = s.state_dir.clone();
+    let ledger_mac = s.keys.ledger_mac;
+    drop(s);
+    let mut s2 = Supervisor::open(&dir, Box::new(NativeWorker::new()), test_policy()).unwrap();
     let report = s2.recover(NOW + 10).unwrap();
     assert_eq!(report["ops"].as_array().unwrap().len(), 1);
     let rop = &report["ops"][0];
@@ -47,15 +50,12 @@ fn crash_after_effect_recovers_the_same_operation_from_ledger_evidence() {
     assert_eq!(rop["invariantReverified"], serde_json::json!(true));
     assert!(report["unknownsPreserved"].as_array().unwrap().is_empty());
     // still exactly one effect row, and the same operation
-    let rows_after =
-        bnrose_exec_host::ledger::load(&s.state_dir.join("effects.bin"), &s.keys.ledger_mac)
-            .unwrap();
+    let rows_after = bnrose_exec_host::ledger::load(&dir.join("effects.bin"), &ledger_mac).unwrap();
     assert_eq!(rows_after.len(), 1);
     assert_eq!(rows_after[0].op_id, op);
     // the recovered receipt verifies and says recovered
     let receipt = std::fs::read_to_string(
-        s.state_dir
-            .join("receipts")
+        dir.join("receipts")
             .join(format!("op-{}.json", bnrose_exec_host::hex(&op))),
     )
     .unwrap();
@@ -80,12 +80,13 @@ fn lost_durable_evidence_preserves_unknown_and_never_replaces() {
     let out = s.run(&intent, NOW, true, &Bounds::default());
     assert!(out.lost_response);
     let op = out.op.unwrap();
+    let dir = s.state_dir.clone();
+    drop(s);
     // "the ledger lost the row" — outside the system's own operations, the
     // honest name for this run
-    std::fs::remove_file(s.state_dir.join("effects.bin")).unwrap();
+    std::fs::remove_file(dir.join("effects.bin")).unwrap();
     for round in 0..3 {
-        let mut s2 =
-            Supervisor::open(&s.state_dir, Box::new(NativeWorker::new()), test_policy()).unwrap();
+        let mut s2 = Supervisor::open(&dir, Box::new(NativeWorker::new()), test_policy()).unwrap();
         let report = s2.recover(NOW + 10).unwrap();
         let unknowns = report["unknownsPreserved"].as_array().unwrap();
         assert_eq!(unknowns.len(), 1, "round {round}: the unknown must survive");
@@ -164,12 +165,16 @@ fn crash_before_dispatch_is_reported_stale_and_invents_nothing() {
     }
     let mut s2 = Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
     let report = s2.recover(NOW).unwrap();
-    let stale = report["stale"].as_array().unwrap();
-    assert_eq!(stale.len(), 1);
+    // the worker's death at dispatch is now JOURNALED as a bounded failure:
+    // the operation reconstructs conclusively FAILED (never executed)
+    // instead of lingering stale
+    assert_eq!(report["ops"][0]["stateAfter"], "failed");
+    assert!(report["stale"].as_array().unwrap().is_empty());
     assert!(report["unknownsPreserved"].as_array().unwrap().is_empty());
     // no effect row exists, and nothing completed
-    let rows =
-        bnrose_exec_host::ledger::load(&state.join("effects.bin"), &s2.keys.ledger_mac).unwrap();
+    let ledger_mac = s2.keys.ledger_mac;
+    drop(s2);
+    let rows = bnrose_exec_host::ledger::load(&state.join("effects.bin"), &ledger_mac).unwrap();
     assert!(rows.is_empty());
     // a FRESH intent (new nonce) through a healthy worker completes —
     // recovery of the stale one is a human/epoch decision, not forced
@@ -259,27 +264,33 @@ fn a_duplicate_admission_in_the_journal_is_an_alarm_not_a_fact() {
     bnrose_exec_host::keys::SupervisorKeys::init(&state, &[0x35; 32]).unwrap();
     let f = fixture(6, NOW, 600);
     {
-        let mut j = bnrose_exec_host::journal::Journal::open(
-            &state.join("journal.bin"),
-            &bnrose_exec_host::keys::SupervisorKeys::from_root(&[0x35; 32]).journal_mac,
-        )
-        .unwrap();
-        // the same admitted record twice, chain-valid (written by the
-        // journal itself): the REPLAY layer must still refuse the world
-        // where one authorization lives in two operations
-        let payload = {
-            let mut p = Vec::new();
-            p.extend_from_slice(&f.authority);
-            let sig = f.sig;
-            p.extend_from_slice(&sig);
-            let pd = bnrose_exec_core::policy_digest(&test_policy().wire());
-            p.extend_from_slice(&pd);
-            p.extend_from_slice(&(f.env.len() as u16).to_le_bytes());
-            p.extend_from_slice(&f.env);
-            p
-        };
-        j.append(&[1; 32], E_ADMITTED, &payload).unwrap();
-        j.append(&[2; 32], E_ADMITTED, &payload).unwrap();
+        // write the duplicate records to BOTH replicas (a single-replica
+        // write would be divergence, a different and also-fatal alarm)
+        let paths = bnrose_exec_host::opexec::replica_paths(&state);
+        std::fs::create_dir_all(paths[1].parent().unwrap()).unwrap();
+        for p in &paths {
+            let mut j = bnrose_exec_host::journal::Journal::open(
+                p,
+                &bnrose_exec_host::keys::SupervisorKeys::from_root(&[0x35; 32]).journal_mac,
+            )
+            .unwrap();
+            // the same admitted record twice, chain-valid (written by the
+            // journal itself): the REPLAY layer must still refuse the world
+            // where one authorization lives in two operations
+            let payload = {
+                let mut p = Vec::new();
+                p.extend_from_slice(&f.authority);
+                let sig = f.sig;
+                p.extend_from_slice(&sig);
+                let pd = bnrose_exec_core::policy_digest(&test_policy().wire());
+                p.extend_from_slice(&pd);
+                p.extend_from_slice(&(f.env.len() as u16).to_le_bytes());
+                p.extend_from_slice(&f.env);
+                p
+            };
+            j.append(&[1; 32], E_ADMITTED, &payload).unwrap();
+            j.append(&[2; 32], E_ADMITTED, &payload).unwrap();
+        }
     }
     let mut s = Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
     let err = s.recover(NOW).unwrap_err();
