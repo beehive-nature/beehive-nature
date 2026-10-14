@@ -29,8 +29,11 @@ portability test keeps that claim executable instead of rhetorical.
 | gate | receipt | result |
 | --- | --- | --- |
 | SKV-1 autonomous recovery | `tests/skv1_crash_recovery.rs` — child hard-killed mid-write at 150/400/800 ms, × both engines | 6/6 PASS: recovered state EXACTLY equals the deterministic replay of the committed prefix; zero torn values; engine structural check ok on reopen |
+| SKV-2 network denial | `tests/skv2_network_denial.rs` — bounded 2000-op run + recovery, child's sockets (ANY state, TCP+UDP) enumerated from OS tables | PASS both engines: workload completes, zero sockets ever, exact full replay. Denial leg runs under `unshare -rn` (rootless netns) on Linux; where unavailable the receipt names `denial=none-available` and carries the all-state observation leg only |
+| SKV-3 authority-negative | `tests/skv3_authority_negative.rs` — the seam cannot acquire identity/signing/settlement authority | PASS: declared deps exactly {rusqlite, surrealkv, tokio}; zero network/key tokens in source. Transitive engine capability (tokio IO) named — runtime behavior covered by SKV-2; authority itself is architectural law: storage retains bytes, BNROSE governs authority |
 | SKV-4 portability | `tests/skv4_portability.rs` — 1000 puts + 100 deletes, export/reconstruct, both directions | 2/2 PASS: 900 entries byte-identical, checksums equal both ways |
-| NO-SERVER-DB run condition | `tests/noserverdb_sockets.rs` — child's listening sockets enumerated from the OS's own tables while it works | PASS: 10/10 live samples, zero listening sockets (netstat on Windows, /proc on Linux) |
+| NO-SERVER-DB run condition | `tests/noserverdb_sockets.rs` — listening sockets enumerated from the OS's own tables while the child works | PASS: 10/10 live samples, zero listening sockets |
+| runtime lifecycle | `tests/skv_life_runtime.rs` — 4 concurrent writers × 1500 deterministic ops + 2 concurrent readers, 2 s idle, post-idle commit, orderly close, fresh reopen | PASS both engines: zero torn values under concurrency, post-idle commit lands (no starvation), close orderly, reopen clean, state EXACTLY equals the full per-thread replay |
 
 The crash model was itself convicted red-first, on the first Linux CI
 run: an unacked trailing batch (legal commit-before-ack) carries a
@@ -52,20 +55,29 @@ failure, never a skip).
   durability is a different slice — NOT RUN, not claimed. On a healthy
   machine an unfsynced write also survives process death, so these
   receipts prove recovery consistency and atomicity, not fsync physics.
-- The socket observation asserts what it can see: no LISTENING sockets
-  attributable to the working process. It cannot assert the absence of
-  sockets opened and closed between samples.
+- The socket observation asserts what it can see: sockets attributable to
+  the working process across live samples (listening-only in the
+  NO-SERVER-DB receipt; ALL states in the SKV-2 receipt). It cannot
+  assert the absence of sockets opened and closed between samples; the
+  Linux `unshare -rn` denial leg closes that gap where it runs — the
+  receipt names its leg honestly on every platform.
 - SurrealKV 1.0 exposes no durability getter; the pin is per-transaction
   in the only write path (L5: the behavioral crash evidence carries the
   claim, configuration intent alone never does).
 
 ## Not built, not run (later beats)
 
-SKV-2 network partition, SKV-3 sovereignty (key custody), SKV-5
-scale/longevity (bounded growth, pruning, migration, replay; aarch64 and
-post-Linux runtimes). The versioned-query surface (`get_at`/`history`)
-is deliberately NOT in the trait yet — receipts stay the estate's own
-canon (BEELOG), and engine version history is not tamper-evidence.
+SKV-5 scale/longevity (bounded resource growth, pruning, version
+migration, rollback, interruption during migration), the six
+sovereign-service independence tests, aarch64 and post-Linux runtimes,
+and power-loss durability (process-kill receipts are valid within the
+process-death model; they do NOT establish persistence through power
+interruption, filesystem corruption or device write-cache failure).
+The versioned-query surface (`get_at`/`history`) is deliberately NOT in
+the trait yet — receipts stay the estate's own canon (BEELOG), and
+engine version history is not tamper-evidence. The exact-replay oracles
+assume sequential, uniquely identifiable operations — true for this
+harness; named so the assumption cannot silently broaden.
 
 ## Provenance
 

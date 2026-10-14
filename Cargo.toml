@@ -78,7 +78,7 @@ members = [
     "crates/btungsten-bench",
     "crates/bpq-core",
     "crates/bheraldry",
-    "crates/bpq-device-xcheck", "crates/adapter-store",
+    "crates/bpq-device-xcheck",
 ]
 
 [workspace.metadata]
