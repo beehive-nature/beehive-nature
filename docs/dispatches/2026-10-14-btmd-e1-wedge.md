@@ -207,3 +207,61 @@ the suspect; if the recovery lane is the within-gate carrier, the
 reservation must extend there under the same bounded-fairness rules.
 
 [skip ci]
+
+## E1-PATH-ATTRIBUTION-001 — DECIDED: the recovery lane is the bottleneck (2026-10-15)
+
+Founder order 2026-10-15 (+ two independent-review harness findings,
+both cured here). Tools: `scripts/btmd/e1/e1-attribution.mjs`
+(per-purpose charged/demanded/shed on store topics per node, bridged
+by the daemon's own topic-hex8 map, correlated with per-op delivery
+latencies from the ledger).
+
+### Evidence (e1fix-on, the repaired candidate, share 250)
+
+- Every late delivery clusters at **61–64 s** — the anti-entropy
+  cycle, not the eager/lazy fast path.
+- The SEED (observe_only, never sheds): store-topic EAGER/IHAVE/IWANT/
+  ANTI_ENTROPY all **0 shed** — the publisher is not the bottleneck.
+- The recipient leaves (n1/n2, shed_normal): store-topic
+  **EAGER fully charged (0 shed)** — the record relay itself flows.
+  The shed sits almost entirely in **IHAVE** — the lazy ANNOUNCEMENT
+  lane that tells remote replicas "I hold this record, pull it":
+  n1 `btmd/store/one IHAVE demanded 9,642,276 B / charged 146,412 B /
+  shed 9,495,864 B / deferred 2,724`; IWANT likewise ~78% shed. Remote
+  replicas never hear the announcement, so the record arrives only via
+  the ~60 s anti-entropy sweep.
+- Source confirms the mechanism: under `shed_normal`, relayed Normal
+  traffic reserves through `try_reserve_recovery*` (escrow/rotation),
+  NOT `try_reserve_data` — the lane where the E1 reservation lives.
+  reserved_msgs 18/46 vs 44–51 MB total leaf demand quantifies the
+  mismatch.
+- All three study legs corroborate: baseline (nothing sheds IHAVE)
+  10/10 within gate; stock shed 1/10; budget×10 (IHAVE never
+  exhausted) 10/10; E1-data-lane 1/20. One mechanism explains every
+  leg.
+
+### Determination (the order's two options)
+
+**Recovery lane is the bottleneck.** The next implementation beat
+extends the reservation into `try_reserve_recovery*` for verified
+store scopes under the SAME combined hard budget, per-peer caps,
+borrowing floors, and negative controls — no new authority, no second
+budget. (If that extension still fails within-gate, THEN queueing/
+peer-admission/downstream delays get investigated.)
+
+### Harness repairs (independent review findings 1 and 2 — cured)
+
+1. Reproducer boundedness: on wedge it now dumps stacks and
+   `exit(1)` — no `join()` on deadlocked workers; the process exit
+   code is the externally-bounded failure signal. Passes on the
+   repair, wedges+exits-nonzero on the original.
+2. `screen-run.sh` v2: fail-fast (any trial error or missing verdict
+   aborts the campaign nonzero with a FAILED ledger — no `|| echo`
+   swallowing) and the **e1off leg** — the EXACT candidate binary with
+   the reservation OFF — isolating the scheduler effect (e1 vs e1off)
+   from the build difference (e1off vs stock shed). 5 interleaved
+   legs: baseline / shed / shedhi (release) + e1off / e1 (candidate).
+   The comparison campaign runs AFTER the recovery-lane extension —
+   per the order's sequencing, attribution first.
+
+[skip ci]

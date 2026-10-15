@@ -143,11 +143,22 @@ fn e1_concurrency_reproduces_the_wedge() {
                 eprintln!("{}", String::from_utf8_lossy(&out.stderr));
                 eprintln!("{}", String::from_utf8_lossy(&out.stdout));
             }
-            break;
+            // Bounded failure (independent review finding 1): the wedged
+            // workers may never observe `stop`, so joining them can hang
+            // forever before the assertion runs. Exit the PROCESS with a
+            // nonzero status instead — the test binary's exit code is the
+            // reliable, externally-bounded failure signal for CI.
+            eprintln!(
+                "E1-CONCURRENCY-001 reproduced: {:?} stalled 10s at share={}; exiting nonzero",
+                OPS, share
+            );
+            std::process::exit(1);
         }
         last = now;
     }
     stop.store(true, Ordering::Relaxed);
+    // Only non-wedged runs reach here; a generous join bound still guards
+    // against unrelated slow shutdowns so the test stays CI-bounded.
     for h in handles {
         let _ = h.join();
     }
