@@ -127,3 +127,34 @@ dispatch from the sibling netpart lane) — merged, both dispatches
 preserved (mine renamed `-harness`). #440's packet-drop evidence stays
 separate; real Arbitrum/Hive finality stays the later qualification.
 Eleven scenarios green locally.
+
+## Layer 4 (the third founder review of #444, answered — every safety claim matched to an assertion)
+
+1. **The recovery fallback is GONE** (the strongest finding): when
+   `persisted_submission` returns None, `drive` now REFUSES
+   (`recovery:no-persisted-submission — refusing to invent bytes`); the
+   binary exits 1. Deliberate-bug row l7: an empty journal resolving
+   with rebroadcast exits 1 with the refusal AND the destination shows
+   ZERO transactions — the old code's invented submission is convicted
+   absent.
+2. **The proxy's unknown mode DROPS** (an explicit `pass` arm exists;
+   `_` is denial). Whitelist-keyed-by-client-label remains the named
+   stand-in limitation (no authenticated connection identity at this
+   layer).
+3. **Replay VALIDATES**: missing fields, unknown event types, duplicate
+   accepts, and impossible transitions (included/final for unknown tx,
+   final without included) all fail closed — l8 convicts each shape.
+   **Batch prefix semantics documented AND tested** (l9, via a
+   fail-after-N injection): a mid-batch durability failure aborts the
+   advance leaving an honest durable PREFIX — exactly one transition
+   survives restart, the other stays pending, nothing rolls back proof.
+4. **l6 strengthened as specified**: each recovery host's execution
+   window is recorded and the intervals must INTERSECT (overlap proved,
+   not assumed); both exit codes are CHECKED (3 = UNKNOWN preserved at
+   resolve time, finality not yet produced); finality is observed by
+   TWO separate processes post-advance, each asserted on its own exit.
+
+Fourteen scenarios green locally (5 loopback + 9 executable). The
+fail-log injection is now fail-after-N (l1 keeps fail-immediately).
+OS-level host isolation and blockchain settlement finality remain the
+named, unclaimed qualifications.

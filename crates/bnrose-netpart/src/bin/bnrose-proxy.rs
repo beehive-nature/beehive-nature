@@ -91,7 +91,10 @@ fn pump(mut client: TcpStream, upstream: &mut TcpStream, rules: &Value) -> bool 
             std::thread::sleep(std::time::Duration::from_millis(ms));
             relay(&mut client, upstream, &line)
         }
-        _ => relay(&mut client, upstream, &line),
+        "pass" => relay(&mut client, upstream, &line),
+        // an UNKNOWN mode is not a pass — it is a drop: the proxy never
+        // forwards on a rule it cannot interpret
+        _ => false,
     }
 }
 

@@ -115,6 +115,10 @@ fn run() -> i32 {
                 let r = host.resolve(&intent, now, rebroadcast);
                 let obs = r.final_observation;
                 report(&r, obs);
+                if r.submission_outcome.starts_with("recovery:") {
+                    eprintln!("refused: {}", r.submission_outcome);
+                    return 1;
+                }
                 if matches!(obs, Some("included") | Some("final")) {
                     0
                 } else {

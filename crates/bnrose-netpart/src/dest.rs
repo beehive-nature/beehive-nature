@@ -47,7 +47,8 @@ struct Fault {
 pub struct Destination {
     log_path: PathBuf,
     /// test injection: fail the next durable append (checked-durability row)
-    fail_next_append: bool,
+    /// test injection: fail the durable append AFTER this many successes
+    fail_after: u32,
     txs: BTreeMap<String, Tx>,
     faults: BTreeMap<String, Fault>,
 }
@@ -58,7 +59,7 @@ impl Destination {
             log_path,
             txs: BTreeMap::new(),
             faults: BTreeMap::new(),
-            fail_next_append: false,
+            fail_after: 0,
         };
         d.replay()?;
         Ok(d)
@@ -81,28 +82,49 @@ impl Destination {
             // noise — a corrupted log refuses to serve, loudly
             let v = serde_json::from_str::<Value>(line)
                 .map_err(|e| format!("corrupt acceptance log: {e}"))?;
-            let tx = v["txId"].as_str().unwrap_or("");
+            // VALIDATED replay (founder review): every line must be a
+            // well-formed event for a state that can exist — missing
+            // fields, unknown event types, duplicate accepts, and
+            // impossible transitions are DAMAGE, fail closed
+            let tx = v["txId"]
+                .as_str()
+                .ok_or("log entry missing txId")?
+                .to_string();
             match v["ev"].as_str() {
                 Some("accept") => {
+                    let payload = v["payload"].as_str().ok_or("accept missing payload")?;
+                    if self.txs.contains_key(&tx) {
+                        return Err(format!("duplicate accept for {tx}"));
+                    }
                     self.txs.insert(
-                        tx.to_string(),
+                        tx,
                         Tx {
-                            payload_hex: v["payload"].as_str().unwrap_or("").into(),
+                            payload_hex: payload.to_string(),
                             state: TxState::Pending,
                         },
                     );
                 }
                 Some("included") => {
-                    if let Some(t) = self.txs.get_mut(tx) {
-                        t.state = TxState::Included;
+                    let t = self
+                        .txs
+                        .get_mut(&tx)
+                        .ok_or_else(|| format!("included for unknown tx {tx}"))?;
+                    if t.state != TxState::Pending {
+                        return Err(format!("impossible transition: {tx} not pending"));
                     }
+                    t.state = TxState::Included;
                 }
                 Some("final") => {
-                    if let Some(t) = self.txs.get_mut(tx) {
-                        t.state = TxState::Final;
+                    let t = self
+                        .txs
+                        .get_mut(&tx)
+                        .ok_or_else(|| format!("final for unknown tx {tx}"))?;
+                    if t.state != TxState::Included {
+                        return Err(format!("impossible transition: {tx} not included"));
                     }
+                    t.state = TxState::Final;
                 }
-                _ => {}
+                other => return Err(format!("unknown event type {other:?}")),
             }
         }
         Ok(())
@@ -111,9 +133,13 @@ impl Destination {
     /// CHECKED durability (founder review of #444): a write or fsync
     /// failure is an ERROR the caller must surface — the destination
     /// never acknowledges acceptance its durable log cannot prove.
-    fn append_log(&self, v: &Value) -> Result<(), String> {
-        if self.fail_next_append {
-            return Err("forced log failure (test injection)".into());
+    fn append_log(&mut self, v: &Value) -> Result<(), String> {
+        if self.fail_after > 0 {
+            if self.fail_after == 1 {
+                self.fail_after = 0;
+                return Err("forced log failure (test injection)".into());
+            }
+            self.fail_after -= 1;
         }
         let mut line = serde_json::to_string(v).unwrap();
         line.push('\n');
@@ -142,8 +168,11 @@ impl Destination {
                 }
             }
             // CHECKED transitions (founder review): memory moves ONLY
-            // after the durable write proves it — a failed write aborts
-            // the advance with nothing half-moved
+            // after the durable write proves it. BATCH PREFIX SEMANTICS:
+            // a failure midway leaves the ALREADY-DURABLE transitions
+            // standing (they are proven), the rest unmoved — prefix
+            // recovery is exercised by test l9; the abort is honest,
+            // never a rollback of proven facts
             for id in to_include {
                 self.append_log(&json!({"ev": "included", "txId": id}))?;
                 self.txs.get_mut(&id).unwrap().state = TxState::Included;
@@ -227,7 +256,8 @@ impl Destination {
                 json!({"result": "ok"})
             }
             "fail-log" => {
-                self.fail_next_append = true;
+                // after: fail the durable append AFTER this many successes
+                self.fail_after = v["after"].as_u64().unwrap_or(1) as u32;
                 json!({"result": "ok"})
             }
             "dump" => {

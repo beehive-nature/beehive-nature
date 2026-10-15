@@ -358,10 +358,15 @@ impl Host {
         // recovery the bytes are SOURCED FROM THE AUTHENTICATED JOURNAL
         // (founder review: recovery must not recompute from a supplied
         // intent) — the journal's own admission is the authority.
+        // NO FALLBACK (founder review): rebroadcast requires persisted,
+        // authenticated evidence — a missing record REFUSES, never
+        // invents a derived transaction id from caller input
         let (submit_tx_id, submit_env_hex) = if rebroadcast {
             match self.persisted_submission(&op) {
                 Some((env, _sig, tx)) => (tx, bnrose_exec_host::hex(&env)),
-                None => (tx_id.clone(), bnrose_exec_host::hex(&intent.env)),
+                None => {
+                    return bnrose_netpart_none(op);
+                }
             }
         } else {
             (tx_id.clone(), bnrose_exec_host::hex(&intent.env))
@@ -417,5 +422,19 @@ impl Host {
                 .count(),
             records_before,
         }
+    }
+}
+
+/// The refusal outcome for a recovery without persisted evidence.
+fn bnrose_netpart_none(op: [u8; 32]) -> HostReport {
+    HostReport {
+        op,
+        tx_id: String::new(),
+        submitted: false,
+        submission_outcome: "recovery:no-persisted-submission — refusing to invent bytes",
+        final_observation: None,
+        journal_records: 0,
+        signatures_journaled: 0,
+        records_before: 0,
     }
 }

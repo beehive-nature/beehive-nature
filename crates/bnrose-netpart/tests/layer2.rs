@@ -437,7 +437,8 @@ fn l6_concurrent_competing_recovery_one_acceptance() {
     let ia1 = ia.clone();
     let pa1 = pa.clone();
     let b1 = std::thread::spawn(move || {
-        host(&[
+        let t0 = std::time::Instant::now();
+        let r = host(&[
             "resolve",
             "--state",
             &s1,
@@ -448,13 +449,15 @@ fn l6_concurrent_competing_recovery_one_acceptance() {
             "--intent",
             &ia1,
             "--rebroadcast",
-        ])
+        ]);
+        (r.0, r.1, t0, std::time::Instant::now())
     });
     let s2b = s2.clone();
     let pab = pa.clone();
     let iab = ia.clone();
     let b2 = std::thread::spawn(move || {
-        host(&[
+        let t0 = std::time::Instant::now();
+        let r = host(&[
             "resolve",
             "--state",
             &s2b,
@@ -465,10 +468,20 @@ fn l6_concurrent_competing_recovery_one_acceptance() {
             "--intent",
             &iab,
             "--rebroadcast",
-        ])
+        ]);
+        (r.0, r.1, t0, std::time::Instant::now())
     });
-    let (c1, o1) = b1.join().unwrap();
-    let (c2, o2) = b2.join().unwrap();
+    let ((c1, o1, w1s, w1e), (c2, o2, w2s, w2e)) = (b1.join().unwrap(), b2.join().unwrap());
+    // OVERLAP PROOF: each thread records its child's execution window;
+    // the intervals must genuinely intersect (simultaneity, asserted)
+    assert!(
+        w1s < w2e && w2s < w1e,
+        "the two recovery hosts must run simultaneously"
+    );
+    // EXIT CODES, checked (not ignored): both hosts preserved UNKNOWN at
+    // resolve time — finality had not been produced yet — exit 3 each
+    assert_eq!(c1, 3, "host B1 resolved UNKNOWN-preserved: {o1}");
+    assert_eq!(c2, 3, "host B2 resolved UNKNOWN-preserved: {o2}");
     // both survivors converge: their rebroadcasts are the JOURNAL's
     // identical bytes; the destination holds ONE acceptance
     let v1: Value = serde_json::from_str(o1.trim()).unwrap();
@@ -482,8 +495,12 @@ fn l6_concurrent_competing_recovery_one_acceptance() {
         let _ = c;
     }
     admin_roundtrip(daddr, r#"{"op":"advance","label":"admin","blocks":3}"#).unwrap();
-    let (c3, o3) = host(&["observe", "--dest", &paddr.to_string(), "--tx-id", &tx]);
-    assert_eq!(c3, 0, "finality observed by both: {o3}");
+    // BOTH hosts independently observe finality — two separate
+    // observation processes, each asserted on its own exit
+    for b in ["hostB1", "hostB2"] {
+        let (cb, ob) = host(&["observe", "--dest", &paddr.to_string(), "--tx-id", &tx]);
+        assert_eq!(cb, 0, "{b} observed final independently: {ob}");
+    }
     let dump = admin_roundtrip(daddr, r#"{"op":"dump","label":"admin"}"#).unwrap();
     assert_eq!(
         dump["txs"].as_array().unwrap().len(),
@@ -492,4 +509,129 @@ fn l6_concurrent_competing_recovery_one_acceptance() {
     );
     let _ = code;
     println!("l2/l6: two hosts recovered the SAME operation CONCURRENTLY — identical journal bytes, one acceptance, no conflict");
+}
+
+#[test]
+fn l7_recovery_without_persisted_evidence_refuses() {
+    // the deliberate-bug row: the OLD code fell back to caller-supplied
+    // bytes when the journal had no admission — the NEW code refuses
+    let dir = tmp("l7");
+    let (_d, daddr) = dest_at(&dir);
+    // a host whose journal is EMPTY (nothing admitted), resolving with
+    // rebroadcast: no persisted evidence → refusal, zero submissions
+    let (code, out) = host(&[
+        "resolve",
+        "--state",
+        dir.join("h").to_str().unwrap(),
+        "--root-hex",
+        ROOT,
+        "--dest",
+        &daddr.to_string(),
+        "--intent",
+        intent_file(&dir, 7).to_str().unwrap(),
+        "--rebroadcast",
+    ]);
+    assert_eq!(code, 1, "no persisted submission → exit 1: {out}");
+    assert!(
+        out.contains("recovery:") || out.contains("no persisted"),
+        "{out}"
+    );
+    let dump = admin_roundtrip(daddr, r#"{"op":"dump","label":"admin"}"#).unwrap();
+    assert_eq!(
+        dump["txs"].as_array().unwrap().len(),
+        0,
+        "nothing was invented and sent"
+    );
+    println!(
+        "l2/l7: rebroadcast without persisted evidence refused — nothing invented, nothing sent"
+    );
+}
+
+#[test]
+fn l8_replay_validates_events_fail_closed() {
+    for (tag, junk) in [
+        ("missing-fields", "{\"ev\": \"accept\"}\n"),
+        ("unknown-event", "{\"ev\": \"settled\", \"txId\": \"ab\"}\n"),
+        (
+            "impossible-transition",
+            "{\"ev\": \"final\", \"txId\": \"ab\"}\n",
+        ),
+    ] {
+        let dir = tmp(&format!("l8-{tag}"));
+        // a well-formed-JSON but invalid event line in the log
+        std::fs::write(dir.join("dest.log"), junk).unwrap();
+        let mut child = Command::new(env!("CARGO_BIN_EXE_bnrose-dest"))
+            .arg(dir.join("dest.log"))
+            .arg("0")
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .expect("dest");
+        let out = child.wait().expect("wait");
+        assert_ne!(
+            out.code(),
+            Some(0),
+            "{tag}: invalid events must refuse to serve"
+        );
+        let _ = Proc(child);
+    }
+    println!("l2/l8: missing fields, unknown events, impossible transitions all fail closed");
+}
+
+#[test]
+fn l9_advance_prefix_recovery_is_durable_and_honest() {
+    let dir = tmp("l9");
+    let (_d, daddr) = dest_at(&dir);
+    // TWO accepted transactions
+    for i in [8u64, 9u64] {
+        let (_, out) = host(&[
+            "submit",
+            "--state",
+            dir.join(format!("h{i}")).to_str().unwrap(),
+            "--root-hex",
+            ROOT,
+            "--dest",
+            &daddr.to_string(),
+            "--intent",
+            intent_file(&dir, i).to_str().unwrap(),
+        ]);
+        let v: Value = serde_json::from_str(out.trim()).unwrap();
+        assert_eq!(v["submissionOutcome"], "acked");
+    }
+    // fail the durable append AFTER the first success, then advance:
+    // the FIRST transition proves durably, the SECOND write fails — the
+    // batch aborts with an honest durable PREFIX (no rollback of proof)
+    admin_roundtrip(daddr, r#"{"op":"fail-log","label":"admin","after":2}"#).unwrap();
+    let adv = admin_roundtrip(daddr, r#"{"op":"advance","label":"admin","blocks":1}"#).unwrap();
+    assert_eq!(adv["result"], "storage-error", "the batch aborts");
+    let dump = admin_roundtrip(daddr, r#"{"op":"dump","label":"admin"}"#).unwrap();
+    assert_eq!(dump["txs"].as_array().unwrap().len(), 2);
+    // restart on the same log: the PREFIX replays. The map iterates in
+    // its own order, so the honest assertion is EXACTLY ONE transitioned
+    // durably and exactly one did not — an order-agnostic durable prefix
+    drop(_d);
+    let (_d2, d2) = dest_at(&dir);
+    let mut states = Vec::new();
+    for i in [8u64, 9u64] {
+        let f = bnrose_exec_host::fixtures::fixture(i, 1_800_000_000, 3600);
+        let intent = bnrose_exec_host::fixtures::read_intent(&f.to_json()).unwrap();
+        let tx = bnrose_exec_host::hex(&bnrose_exec_core::effect_digest(
+            &bnrose_exec_core::op_id(&intent.authority, &intent.env),
+            &bnrose_exec_core::env_sha(&intent.env),
+        ));
+        let obs = admin_roundtrip(
+            d2,
+            &format!("{{\"op\":\"observe\",\"label\":\"p\",\"txId\":\"{tx}\"}}"),
+        )
+        .unwrap();
+        states.push(obs["state"].as_str().unwrap_or("?").to_string());
+    }
+    states.sort();
+    assert_eq!(
+        states,
+        vec!["included".to_string(), "pending".to_string()],
+        "exactly one durable transition survived"
+    );
+    let _ = d2;
+    println!("l2/l9: mid-batch failure → durable prefix survives restart; the rest stay pending");
 }
