@@ -1,0 +1,877 @@
+--- a/./src/egress.rs
++++ b/./src/egress.rs
+@@ -3,9 +3,9 @@
+ //! Disabled configuration preserves the historical send path. Enabled callers
+ //! reserve the final serialized frame before acquiring transport admission.
+ 
+-use std::collections::{HashMap, VecDeque};
++use std::collections::{BTreeSet, HashMap, VecDeque};
+ use std::sync::atomic::{AtomicU64, AtomicU8, Ordering};
+-use std::sync::{Arc, Mutex};
++use std::sync::{Arc, Mutex, RwLock};
+ use std::time::{Duration, Instant};
+ 
+ use tokio::sync::{OwnedSemaphorePermit, Semaphore};
+@@ -41,6 +41,10 @@
+ /// is empty the newcomer is refused with `IntentLimit` exactly as before.
+ const DISPLACEMENT_TOKEN_CAPACITY: u64 = 8;
+ const DISPLACEMENT_REFILL_NANOS_PER_TOKEN: u64 = 2_000_000_000;
++/// E1: bound on the per-peer admission map. Peers beyond this bound are
++/// simply not tracked (their traffic reads as capped and takes the
++/// ordinary path), so the map can never grow with the mesh.
++const E1_MAX_PEER_ROWS: usize = 512;
+ 
+ /// What the Leaf serialized-byte budget is allowed to *do* once it is exceeded.
+ ///
+@@ -82,6 +86,19 @@
+     /// Whether an exhausted budget may actually deny a send. Defaults to
+     /// [`BytePolicy::ObserveOnly`].
+     pub policy: BytePolicy,
++    /// E1 — BTMD Track E experiment (NOT an upstream feature): permille of
++    /// the hard rate held as a bounded reservation for VERIFIED joined-store
++    /// sync topics (the live scope-set on the limiter, host-attested —
++    /// never topic labels). 0 disables the split and preserves the exact
++    /// single-bucket legacy behavior; the maximum is 500. The reservation
++    /// is a *share of the same hard rate*, not additional bytes: total
++    /// egress is never above what the legacy budget would allow.
++    pub reserved_share_permille: u16,
++    /// E1: per-peer admission into the reservation. Each peer may consume
++    /// at most this permille of the reserved rate per second, so no single
++    /// peer can monopolize it; a capped peer.s traffic still gets ordinary
++    /// service. Default 250 (a quarter of the reserved rate per peer).
++    pub reserved_peer_permille: u16,
+ }
+ 
+ impl Default for LeafEgressConfig {
+@@ -97,6 +114,8 @@
+             burst_bytes: 0,
+             max_serialized_frame_bytes: 0,
+             policy: BytePolicy::ObserveOnly,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 500,
+         }
+     }
+ }
+@@ -109,10 +128,29 @@
+         let maximum = u64::try_from(self.max_serialized_frame_bytes).ok()?;
+         (maximum > 0
+             && self.burst_bytes >= maximum
++            && self.reserved_share_permille <= 500
+             && (self.soft_bytes_per_second == 0
+                 || self.soft_bytes_per_second <= self.hard_bytes_per_second))
+             .then_some(self)
+     }
++
++    /// E1: the reserved refill rate (bytes/sec) for this config. Zero when
++    /// the split is off.
++    fn reserved_rate(&self) -> u64 {
++        u64::from(self.reserved_share_permille) * self.hard_bytes_per_second / 1000
++    }
++
++    /// E1: the general (non-reserved) refill rate. Equal to the full hard
++    /// rate when the split is off, which is what keeps the legacy path
++    /// byte-identical.
++    fn general_rate(&self) -> u64 {
++        self.hard_bytes_per_second - self.reserved_rate()
++    }
++
++    /// E1: the burst cap of the reserved bucket.
++    fn reserved_burst(&self) -> u64 {
++        u64::from(self.reserved_share_permille) * self.burst_bytes / 1000
++    }
+ }
+ 
+ /// Stable identity of one peer/frame recovery operation. It contains no payload.
+@@ -186,6 +224,18 @@
+     soft_tokens: u64,
+     soft_remainder: u128,
+     last_refill: Instant,
++    /// E1: the reserved sub-bucket. Refills at `reserved_rate()`; charged
++    /// only by reserved-scope sends admitted past their per-peer cap;
++    /// ordinary traffic may borrow from it only above one second of the
++    /// reserved rate (the floor), and reserved sends may borrow general
++    /// tokens only above one second of the general rate. Zero and unused
++    /// when the split is off.
++    reserved_tokens: u64,
++    reserved_remainder: u128,
++    /// E1: lazily refilled per-peer allowance into the reservation,
++    /// capped at one second of the peer's share. Bounded: the map is
++    /// pruned to `E1_MAX_PEER_ROWS` on insert.
++    reserved_peer_allowance: HashMap<[u8; 32], (u64, Instant)>,
+     intents: HashMap<RecoveryIntentKey, Intent>,
+     waiters_by_peer: HashMap<[u8; 32], (usize, usize)>,
+     next_order: u64,
+@@ -231,6 +281,12 @@
+     displacement_rate_limited: AtomicU64,
+     invariant_violations: AtomicU64,
+     shed_suppressed: AtomicU64,
++    /// E1 counters (all zero when the split is off).
++    reserved_charged_bytes: AtomicU64,
++    reserved_borrowed_bytes: AtomicU64,
++    reserved_deferred: AtomicU64,
++    reserved_peer_capped: AtomicU64,
++    reserved_msgs: AtomicU64,
+ }
+ 
+ #[derive(Debug, Clone, Copy, Default)]
+@@ -314,6 +370,22 @@
+     pub pending_recovery_intents: usize,
+     /// Bounded per-topic and per-wire-purpose accounting rows.
+     pub by_topic_and_purpose: Vec<LeafEgressPurposeSnapshot>,
++    /// E1: bytes charged from the reserved sub-bucket (split off).
++    pub reserved_charged_bytes: u64,
++    /// E1: reserved-scope bytes that had to borrow general tokens (the
++    /// reservation was momentarily empty but general had surplus above its
++    /// floor — controlled borrowing, never above the combined hard rate).
++    pub reserved_borrowed_bytes: u64,
++    /// E1: reserved-scope attempts deferred (backpressure) because neither
++    /// bucket could serve them above the floors.
++    pub reserved_deferred: u64,
++    /// E1: reserved-scope attempts whose per-peer admission cap was
++    /// reached; they received ordinary treatment instead (no monopoly).
++    pub reserved_peer_capped: u64,
++    /// E1: messages charged from the reservation.
++    pub reserved_msgs: u64,
++    /// E1: current reserved sub-bucket tokens (gauge).
++    pub reserved_tokens: u64,
+ }
+ 
+ /// Unforgeable ownership of one charged peer/frame reservation.
+@@ -346,6 +418,12 @@
+     critical_waiters: Arc<Semaphore>,
+     counters: EgressCounters,
+     purpose_counters: Mutex<HashMap<([u8; 32], &'static str), PurposeCounters>>,
++    /// E1: the host-attested reserved scope-set (topic hashes of VERIFIED
++    /// joined stores, written by the host application — never by topic
++    /// labels or wire claims). A separate RwLock (not `State`) so the host
++    /// can update it live without a reconfigure; read on the data path
++    /// only when the config's split is on.
++    reserved_scopes: RwLock<BTreeSet<[u8; 32]>>,
+     /// cfg(test), PER INSTANCE (r4): acquisitions of `state` via
+     /// `lock_state()`. The previous process-global static also counted
+     /// every other concurrently running test's limiter under `cargo
+@@ -399,6 +477,9 @@
+                 soft_tokens: 0,
+                 soft_remainder: 0,
+                 last_refill: Instant::now(),
++                reserved_tokens: 0,
++                reserved_remainder: 0,
++                reserved_peer_allowance: HashMap::new(),
+                 intents: HashMap::new(),
+                 waiters_by_peer: HashMap::new(),
+                 next_order: 0,
+@@ -420,6 +501,7 @@
+             critical_waiters: Arc::new(Semaphore::new(CRITICAL_MAX_WAITERS)),
+             counters: EgressCounters::default(),
+             purpose_counters: Mutex::new(HashMap::new()),
++            reserved_scopes: RwLock::new(BTreeSet::new()),
+             #[cfg(test)]
+             state_mutex_acquisitions: AtomicU64::new(0),
+         }
+@@ -569,10 +651,13 @@
+         let was_enabled = state.config.is_some();
+         state.config = validated;
+         state.generation = state.generation.wrapping_add(1);
+-        state.tokens = validated.map_or(0, |config| config.burst_bytes);
+-        state.soft_tokens = state.tokens;
++        state.tokens = validated.map_or(0, |config| config.burst_bytes - config.reserved_burst());
++        state.soft_tokens = validated.map_or(0, |config| config.burst_bytes);
+         state.remainder = 0;
+         state.soft_remainder = 0;
++        state.reserved_tokens = validated.map_or(0, |config| config.reserved_burst());
++        state.reserved_remainder = 0;
++        state.reserved_peer_allowance.clear();
+         // Anchor both refill clocks to the limiter's clock (the injected
+         // one when a test set it), so a reconfigure does not smuggle real
+         // elapsed time into a virtual timeline.
+@@ -653,6 +738,18 @@
+             shed_suppressed: self.counters.shed_suppressed.load(Ordering::Relaxed),
+             pending_recovery_intents: self.lock_state().intents.len(),
+             by_topic_and_purpose,
++            reserved_charged_bytes: self
++                .counters
++                .reserved_charged_bytes
++                .load(Ordering::Relaxed),
++            reserved_borrowed_bytes: self
++                .counters
++                .reserved_borrowed_bytes
++                .load(Ordering::Relaxed),
++            reserved_deferred: self.counters.reserved_deferred.load(Ordering::Relaxed),
++            reserved_peer_capped: self.counters.reserved_peer_capped.load(Ordering::Relaxed),
++            reserved_msgs: self.counters.reserved_msgs.load(Ordering::Relaxed),
++            reserved_tokens: self.lock_state().reserved_tokens,
+         }
+     }
+ 
+@@ -687,15 +784,28 @@
+     fn refill(&self, state: &mut State, now: Instant) {
+         let Some(config) = state.config else { return };
+         let elapsed = now.saturating_duration_since(state.last_refill);
++        // E1: with the split off, `general_rate()` IS the hard rate and the
++        // arithmetic below is unchanged; the reserved bucket stays at zero.
+         let scaled = elapsed
+             .as_nanos()
+-            .saturating_mul(u128::from(config.hard_bytes_per_second))
++            .saturating_mul(u128::from(config.general_rate()))
+             .saturating_add(state.remainder);
+         state.tokens = state
+             .tokens
+             .saturating_add(u64::try_from(scaled / 1_000_000_000).unwrap_or(u64::MAX))
+-            .min(config.burst_bytes);
++            .min(config.burst_bytes - config.reserved_burst());
+         state.remainder = scaled % 1_000_000_000;
++        if config.reserved_share_permille > 0 {
++            let scaled = elapsed
++                .as_nanos()
++                .saturating_mul(u128::from(config.reserved_rate()))
++                .saturating_add(state.reserved_remainder);
++            state.reserved_tokens = state
++                .reserved_tokens
++                .saturating_add(u64::try_from(scaled / 1_000_000_000).unwrap_or(u64::MAX))
++                .min(config.reserved_burst());
++            state.reserved_remainder = scaled % 1_000_000_000;
++        }
+         if config.soft_bytes_per_second > 0 {
+             let scaled = elapsed
+                 .as_nanos()
+@@ -1146,6 +1256,10 @@
+         self.counters
+             .demanded_bytes
+             .fetch_add(bytes, Ordering::Relaxed);
++        if config.reserved_share_permille > 0 {
++            return self.e1_reserve(key, bytes, relayed, state, config);
++        }
++        // Legacy path (split off): byte-identical to the pre-E1 code.
+         let hard_denied = Self::data_hard_denied(&state, &config, bytes);
+         let soft_denied = relayed && config.soft_bytes_per_second > 0 && state.soft_tokens < bytes;
+         if hard_denied || soft_denied {
+@@ -1165,6 +1279,162 @@
+         })
+     }
+ 
++    /// E1 admission: bounded reserved capacity for verified joined-store
++    /// sync scopes, per-peer admission caps, controlled cross-bucket
++    /// borrowing above one-second floors, and deferral (the crate's
++    /// existing backpressure machinery) when neither bucket can serve a
++    /// send above the floors. The split shares ONE hard rate — total
++    /// egress never exceeds the legacy budget.
++    fn e1_reserve(
++        &self,
++        key: RecoveryIntentKey,
++        bytes: u64,
++        relayed: bool,
++        mut state: std::sync::MutexGuard<'_, State>,
++        config: LeafEgressConfig,
++    ) -> Result<ByteReservation, ReserveError> {
++        let generation = state.generation;
++        let scope_reserved = self
++            .reserved_scopes
++            .read()
++            .unwrap_or_else(std::sync::PoisonError::into_inner)
++            .contains(&key.scope);
++        let soft_charge = |state: &mut State| {
++            if relayed && config.soft_bytes_per_second > 0 {
++                state.soft_tokens = state.soft_tokens.saturating_sub(bytes);
++            }
++        };
++        if scope_reserved && self.e1_peer_admitted(&mut state, &config, key.peer, bytes) {
++            if state.reserved_tokens >= bytes {
++                state.reserved_tokens -= bytes;
++                soft_charge(&mut state);
++                self.counters
++                    .reserved_charged_bytes
++                    .fetch_add(bytes, Ordering::Relaxed);
++                self.counters.reserved_msgs.fetch_add(1, Ordering::Relaxed);
++                self.counters
++                    .charged_bytes
++                    .fetch_add(bytes, Ordering::Relaxed);
++                return Ok(ByteReservation { key, generation });
++            }
++            // Controlled borrowing: general surplus above one second of
++            // the general rate. Never touches the recovery escrow logic —
++            // the reservation's whole point is that sync does not compete
++            // with that escrow for first service.
++            let general_floor = config.general_rate();
++            if state.tokens >= bytes.saturating_add(general_floor) {
++                state.tokens -= bytes;
++                soft_charge(&mut state);
++                self.counters
++                    .reserved_borrowed_bytes
++                    .fetch_add(bytes, Ordering::Relaxed);
++                self.counters.reserved_msgs.fetch_add(1, Ordering::Relaxed);
++                self.counters
++                    .charged_bytes
++                    .fetch_add(bytes, Ordering::Relaxed);
++                return Ok(ByteReservation { key, generation });
++            }
++            self.counters.reserved_deferred.fetch_add(1, Ordering::Relaxed);
++            self.counters.data_deferred.fetch_add(1, Ordering::Relaxed);
++            return Err(ReserveError::Deferred);
++        }
++        if scope_reserved {
++            // Per-peer cap reached: ordinary treatment (no monopoly).
++            self.counters.reserved_peer_capped.fetch_add(1, Ordering::Relaxed);
++        }
++        // Ordinary treatment under the split: the general bucket with its
++        // recovery escrow, then borrowing from the reservation above its
++        // floor, then deferral.
++        let hard_denied = Self::data_hard_denied(&state, &config, bytes);
++        let soft_denied = relayed && config.soft_bytes_per_second > 0 && state.soft_tokens < bytes;
++        if hard_denied || soft_denied {
++            let reserved_floor = config.reserved_rate();
++            if !soft_denied {
++                let above_floor = state.reserved_tokens.saturating_sub(reserved_floor);
++                if above_floor >= bytes {
++                    state.reserved_tokens -= bytes;
++                    soft_charge(&mut state);
++                    self.counters
++                        .charged_bytes
++                        .fetch_add(bytes, Ordering::Relaxed);
++                    return Ok(ByteReservation { key, generation });
++                }
++            }
++            self.counters.data_deferred.fetch_add(1, Ordering::Relaxed);
++            return Err(ReserveError::Deferred);
++        }
++        state.tokens -= bytes;
++        soft_charge(&mut state);
++        self.counters
++            .charged_bytes
++            .fetch_add(bytes, Ordering::Relaxed);
++        Ok(ByteReservation { key, generation })
++    }
++
++    /// E1 per-peer admission: lazily refilled allowance into the
++    /// reservation, capped at one second of this peer's share of the
++    /// reserved rate. Returns whether `bytes` may enter the reservation
++    /// from this peer right now, and consumes the allowance when true.
++    fn e1_peer_admitted(
++        &self,
++        state: &mut State,
++        config: &LeafEgressConfig,
++        peer: [u8; 32],
++        bytes: u64,
++    ) -> bool {
++        if config.reserved_peer_permille == 0 {
++            return true;
++        }
++        let now = Self::now_of(state);
++        let peer_rate =
++            u64::from(config.reserved_peer_permille) * config.reserved_rate() / 1000;
++        // Bound the map BEFORE borrowing an entry: over the cap, drop the
++        // map (other peers re-accrue from zero — conservative) and start
++        // this peer fresh at a full one-second share.
++        if state.reserved_peer_allowance.len() > E1_MAX_PEER_ROWS {
++            state.reserved_peer_allowance.clear();
++            state.reserved_peer_allowance.insert(peer, (peer_rate, now));
++            return peer_rate >= bytes;
++        }
++        let entry = state
++            .reserved_peer_allowance
++            .entry(peer)
++            .or_insert((peer_rate, now));
++        let elapsed = now.saturating_duration_since(entry.1);
++        if elapsed > Duration::ZERO {
++            entry.0 = (entry.0.saturating_add(
++                u64::try_from(elapsed.as_nanos() * u128::from(peer_rate) / 1_000_000_000)
++                    .unwrap_or(u64::MAX),
++            ))
++            .min(peer_rate);
++            entry.1 = now;
++        }
++        let admitted = entry.0 >= bytes;
++        if admitted {
++            entry.0 -= bytes;
++        }
++        admitted
++    }
++
++    /// E1: replace the host-attested reserved scope-set (topic hashes of
++    /// VERIFIED joined stores). The host owns verification; this crate
++    /// never derives the set from topic labels or wire claims.
++    pub fn set_reserved_scopes(&self, scopes: BTreeSet<[u8; 32]>) {
++        *self
++            .reserved_scopes
++            .write()
++            .unwrap_or_else(std::sync::PoisonError::into_inner) = scopes;
++    }
++
++    /// E1: merge scopes into the reserved set (add-only across the process
++    /// lifetime — the host rebuilds it at startup from its store registry).
++    pub fn add_reserved_scopes(&self, scopes: BTreeSet<[u8; 32]>) {
++        self.reserved_scopes
++            .write()
++            .unwrap_or_else(std::sync::PoisonError::into_inner)
++            .extend(scopes);
++    }
++
+     fn waiter_permit(
+         self: &Arc<Self>,
+         peer: [u8; 32],
+@@ -1854,6 +2124,8 @@
+             burst_bytes: 4096,
+             max_serialized_frame_bytes: 4096,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 500,
+         })));
+         limiter
+     }
+@@ -2127,6 +2399,8 @@
+             burst_bytes: 4096,
+             max_serialized_frame_bytes: 4096,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 500,
+         })));
+         assert!(limiter.enabled());
+     }
+@@ -2140,6 +2414,8 @@
+             burst_bytes: 0,
+             max_serialized_frame_bytes: 0,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 500,
+         })));
+         assert!(!limiter.enabled());
+         assert_eq!(
+--- a/./src/egress_fairness_tests.rs
++++ b/./src/egress_fairness_tests.rs
+@@ -22,6 +22,8 @@
+         burst_bytes: burst,
+         max_serialized_frame_bytes: usize::try_from(burst).unwrap_or(usize::MAX),
+         policy: BytePolicy::ShedNormal,
++        reserved_share_permille: 0,
++        reserved_peer_permille: 500,
+     })));
+     limiter
+ }
+@@ -253,6 +255,8 @@
+         burst_bytes: 4096,
+         max_serialized_frame_bytes: 4096,
+         policy: BytePolicy::ShedNormal,
++        reserved_share_permille: 0,
++        reserved_peer_permille: 500,
+     })));
+     assert!(matches!(
+         limiter.try_reserve_recovery_at(stale, 1024, 1, start + Duration::from_secs(2)),
+@@ -1362,3 +1366,181 @@
+         "the map stays pinned: inheritance and displacement are slot-neutral"
+     );
+ }
++
++// ---------------------------------------------------------------------------
++// E1 — BTMD Track E experiment: bounded reserved capacity for VERIFIED
++// joined-store sync scopes (BT-MESH-DEPENDABILITY-001, founder order
++// 2026-10-13). Invariants under test, each one an order constraint:
++//   * split OFF is byte-identical legacy behavior (reserved counters zero);
++//   * reserved scopes charge the reservation, with controlled borrowing
++//     above one-second floors in BOTH directions;
++//   * per-peer admission caps stop any single peer monopolizing the
++//     reservation (capped peers get ordinary treatment, not silence);
++//   * backpressure defers reserved sends when neither bucket can serve
++//     them above the floors — never an unlimited bypass;
++//   * total admission never exceeds the single-bucket hard budget.
++// ---------------------------------------------------------------------------
++
++fn e1_limiter(hard: u64, burst: u64, share: u16) -> Arc<LeafEgressLimiter> {
++    let limiter = Arc::new(LeafEgressLimiter::disabled());
++    assert!(limiter.configure(Some(LeafEgressConfig {
++        soft_bytes_per_second: 0,
++        hard_bytes_per_second: hard,
++        burst_bytes: burst,
++        max_serialized_frame_bytes: usize::try_from(burst).unwrap_or(usize::MAX),
++        policy: BytePolicy::ShedNormal,
++        reserved_share_permille: share,
++        reserved_peer_permille: 500,
++    })));
++    limiter
++}
++
++fn data_key(peer: u64, scope: [u8; 32]) -> RecoveryIntentKey {
++    let mut identity = [0_u8; 32];
++    identity[..8].copy_from_slice(&peer.to_le_bytes());
++    RecoveryIntentKey {
++        peer: identity,
++        scope,
++        family: identity,
++        operation: identity,
++    }
++}
++
++#[test]
++fn e1_split_off_keeps_reserved_counters_zero() {
++    let limiter = e1_limiter(1024, 4096, 0);
++    limiter.set_reserved_scopes(BTreeSet::from([[7_u8; 32]]));
++    let now = Instant::now();
++    assert!(limiter
++        .try_reserve_data_at(data_key(1, [7_u8; 32]), 256, true, now)
++        .is_ok());
++    let snapshot = limiter.snapshot();
++    assert_eq!(snapshot.reserved_charged_bytes, 0);
++    assert_eq!(snapshot.reserved_msgs, 0);
++    assert_eq!(snapshot.reserved_deferred, 0);
++    assert_eq!(snapshot.reserved_tokens, 0);
++}
++
++#[test]
++fn e1_reserved_scope_charges_the_reservation() {
++    let limiter = e1_limiter(4000, 4000, 250);
++    let scope = [7_u8; 32];
++    limiter.set_reserved_scopes(BTreeSet::from([scope]));
++    let now = Instant::now();
++    assert!(limiter
++        .try_reserve_data_at(data_key(1, scope), 500, true, now)
++        .is_ok());
++    let snapshot = limiter.snapshot();
++    assert_eq!(snapshot.reserved_charged_bytes, 500);
++    assert_eq!(snapshot.reserved_msgs, 1);
++    assert_eq!(snapshot.reserved_tokens, 1000 - 500);
++}
++
++#[test]
++fn e1_reserved_send_defers_when_both_buckets_are_floored() {
++    let limiter = e1_limiter(4000, 4000, 250);
++    let scope = [7_u8; 32];
++    limiter.set_reserved_scopes(BTreeSet::from([scope]));
++    let now = Instant::now();
++    // Reserved burst = 1000 bytes; the general bucket holds 3000 but its
++    // one-second floor is 3000 — no borrow, and the reservation empties
++    // after two 500-byte sends. The third send defers: backpressure, not
++    // an unlimited bypass.
++    assert!(limiter
++        .try_reserve_data_at(data_key(1, scope), 500, true, now)
++        .is_ok());
++    assert!(limiter
++        .try_reserve_data_at(data_key(2, scope), 500, true, now)
++        .is_ok());
++    assert!(matches!(
++        limiter.try_reserve_data_at(data_key(3, scope), 500, true, now),
++        Err(ReserveError::Deferred)
++    ));
++    assert_eq!(limiter.snapshot().reserved_deferred, 1);
++    // After one second the reservation refills 1000 bytes and serves it.
++    assert!(limiter
++        .try_reserve_data_at(data_key(3, scope), 500, true, now + Duration::from_secs(1))
++        .is_ok());
++}
++
++#[test]
++fn e1_peer_cap_gives_ordinary_treatment_not_silence() {
++    let limiter = e1_limiter(4000, 4000, 250);
++    let scope = [7_u8; 32];
++    limiter.set_reserved_scopes(BTreeSet::from([scope]));
++    let now = Instant::now();
++    // Peer 1's per-second share of the reservation is 500 bytes (peer
++    // permille 500 of the 1000-byte reserved rate). A 600-byte reserved
++    // demand exceeds the peer's allowance — capped, and served from the
++    // general bucket instead (ordinary treatment succeeds: the general
++    // bucket is full). No silence, no monopoly.
++    assert!(limiter
++        .try_reserve_data_at(data_key(1, scope), 600, true, now)
++        .is_ok());
++    let snapshot = limiter.snapshot();
++    assert_eq!(snapshot.reserved_peer_capped, 1);
++    assert_eq!(snapshot.reserved_charged_bytes, 0);
++    assert_eq!(snapshot.charged_bytes, 600);
++}
++
++#[test]
++fn e1_ordinary_borrow_respects_the_reserved_floor() {
++    let limiter = e1_limiter(4000, 4000, 250);
++    let scope = [7_u8; 32];
++    limiter.set_reserved_scopes(BTreeSet::from([scope]));
++    let now = Instant::now();
++    // The general bucket starts at 3000 with the legacy recovery escrow
++    // (25% of burst = 1000) still enforced for ordinary traffic: the
++    // first four 500-byte ordinary sends fit (2000 consumed, 1000 left =
++    // exactly the escrow floor).
++    for index in 0..4 {
++        assert!(limiter
++            .try_reserve_data_at(data_key(100 + index, [9_u8; 32]), 500, false, now)
++            .is_ok());
++    }
++    // The next ordinary send hits the escrow floor and tries to borrow
++    // from the reservation — whose entire balance is its floor (1000
++    // reserved, floor 1000 -> zero above floor): deferred. The floor is
++    // exactly the protection the reservation exists to give.
++    assert!(matches!(
++        limiter.try_reserve_data_at(data_key(200, [9_u8; 32]), 500, false, now),
++        Err(ReserveError::Deferred)
++    ));
++    // A RESERVED send still serves from its floored bucket.
++    assert!(limiter
++        .try_reserve_data_at(data_key(1, scope), 500, true, now)
++        .is_ok());
++}
++
++#[test]
++fn e1_total_admission_never_exceeds_the_single_bucket_budget() {
++    let limiter = e1_limiter(4000, 4000, 250);
++    let scope = [7_u8; 32];
++    limiter.set_reserved_scopes(BTreeSet::from([scope]));
++    let start = Instant::now();
++    let mut admitted = 0_u64;
++    let mut deferred = 0_u64;
++    let mut peer = 0_u64;
++    for second in 0..4_u64 {
++        for _ in 0..40 {
++            peer += 1;
++            let key = if peer % 2 == 0 {
++                data_key(peer, scope)
++            } else {
++                data_key(peer, [9_u8; 32])
++            };
++            match limiter.try_reserve_data_at(key, 500, false, start + Duration::from_secs(second)) {
++                Ok(_) => admitted += 500,
++                Err(ReserveError::Deferred) => deferred += 1,
++                Err(other) => panic!("unexpected {other:?}"),
++            }
++        }
++    }
++    // Hard budget: 4000 burst + 4 seconds x 4000/s = 20000. The split
++    // must never admit more than that.
++    assert!(
++        admitted <= 20_000,
++        "admitted {admitted} exceeds the single-bucket budget"
++    );
++    assert!(deferred > 0, "the workload must actually saturate");
++}
+--- a/./src/lib.rs
++++ b/./src/lib.rs
+@@ -8015,6 +8015,19 @@
+         self.egress_limiter.configure(config)
+     }
+ 
++    /// E1 (BTMD Track E experiment): replace the host-attested reserved
++    /// scope-set for the Leaf egress split — topic hashes of VERIFIED
++    /// joined stores, written only by the host application.
++    pub fn set_leaf_reserved_scopes(&self, scopes: std::collections::BTreeSet<[u8; 32]>) {
++        self.egress_limiter.set_reserved_scopes(scopes);
++    }
++
++    /// E1: merge scopes into the reserved set (add-only across the process
++    /// lifetime — the host rebuilds it at startup from its store registry).
++    pub fn add_leaf_reserved_scopes(&self, scopes: std::collections::BTreeSet<[u8; 32]>) {
++        self.egress_limiter.add_reserved_scopes(scopes);
++    }
++
+     /// Snapshot Leaf serialized-byte limiter demand, admission and deferral.
+     pub fn leaf_egress_snapshot(&self) -> LeafEgressSnapshot {
+         self.egress_limiter.snapshot()
+@@ -14013,6 +14026,8 @@
+             burst_bytes: 8192,
+             max_serialized_frame_bytes: 8192,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         let topic = TopicId::new([0x76; 32]);
+         let mut received = b.subscribe_ready(topic).await;
+@@ -14385,6 +14400,8 @@
+             burst_bytes: 128 * 1024,
+             max_serialized_frame_bytes: 128 * 1024,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+ 
+         // Fill the receiver's resolved-key LRU to capacity with the
+@@ -16154,6 +16171,8 @@
+             burst_bytes: 8192,
+             max_serialized_frame_bytes: 8192,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         let _drain = pubsub
+             .egress_limiter
+@@ -16239,6 +16258,8 @@
+             burst_bytes: 4 * 1024 * 1024,
+             max_serialized_frame_bytes: 4 * 1024 * 1024,
+             policy,
++reserved_share_permille: 0,
++reserved_peer_permille: 250,
+         })));
+         // Spend the data allowance down to the recovery reserve, so any
+         // further data frame is over the hard threshold.
+@@ -16485,6 +16506,8 @@
+                     // Far below the frame published next.
+                     max_serialized_frame_bytes: 1024,
+                     policy,
++reserved_share_permille: 0,
++reserved_peer_permille: 250,
+                 })));
+             }
+             let published = pubsub
+@@ -16638,6 +16661,8 @@
+             burst_bytes: 4 * 1024 * 1024,
+             max_serialized_frame_bytes: 4 * 1024 * 1024,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         let _drain = pubsub
+             .egress_limiter
+@@ -16732,6 +16757,8 @@
+             burst_bytes: 4 * 1024 * 1024,
+             max_serialized_frame_bytes: 4 * 1024 * 1024,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         let mut held = pubsub
+             .outbound_budgets
+@@ -16805,6 +16832,8 @@
+             burst_bytes: 8192,
+             max_serialized_frame_bytes: 8192,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         let publish = {
+             let pubsub = Arc::clone(&pubsub);
+@@ -16864,6 +16893,8 @@
+             burst_bytes: 8192,
+             max_serialized_frame_bytes: 8192,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         let _drain = pubsub
+             .egress_limiter
+@@ -18307,6 +18338,8 @@
+             burst_bytes: u64::try_from(BUDGET).expect("budget size"),
+             max_serialized_frame_bytes: BUDGET,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         let drain = PlumtreePubSub::<RecordingTransport>::recovery_intent_key(
+             topic,
+@@ -18783,6 +18816,8 @@
+             burst_bytes: 8192,
+             max_serialized_frame_bytes: 8192,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         {
+             let mut topics = pubsub.topics.write_topic(&topic).await;
+@@ -18839,6 +18874,8 @@
+             burst_bytes: 8192,
+             max_serialized_frame_bytes: 8192,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         {
+             let mut topics = pubsub.topics.write_topic(&topic).await;
+@@ -18996,6 +19033,8 @@
+             burst_bytes: 8192,
+             max_serialized_frame_bytes: 8192,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         let _drain = pubsub
+             .egress_limiter
+@@ -19071,6 +19110,8 @@
+             burst_bytes: 16_384,
+             max_serialized_frame_bytes: 16_384,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         let _drain = pubsub
+             .egress_limiter
+@@ -19639,6 +19680,8 @@
+             burst_bytes: u64::try_from(frame_len).expect("frame size"),
+             max_serialized_frame_bytes: frame_len,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+ 
+         let mut late_rotation = LateOfferRotation::default();
+@@ -19749,6 +19792,8 @@
+             burst_bytes: burst,
+             max_serialized_frame_bytes: background_frame,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         // Anchor the virtual clock at the configured state; from here on
+         // the limiter never reads the real clock.
+@@ -19973,6 +20018,8 @@
+             burst_bytes: 8192,
+             max_serialized_frame_bytes: 8192,
+             policy: BytePolicy::ObserveOnly,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+ 
+         for round in 0..4_u8 {
+@@ -24876,6 +24923,8 @@
+             burst_bytes: u64::try_from(iwant_frame_len).expect("frame size"),
+             max_serialized_frame_bytes: iwant_frame_len,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         let drain = PlumtreePubSub::<RecordingTransport>::recovery_intent_key(
+             topic,
+@@ -25510,6 +25559,8 @@
+             burst_bytes: u64::try_from(eager_len).expect("frame size"),
+             max_serialized_frame_bytes: eager_len,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         let drain = PlumtreePubSub::<RecordingTransport>::recovery_intent_key(
+             topic,
+@@ -26235,6 +26286,8 @@
+             burst_bytes: 4 * 1024 * 1024,
+             max_serialized_frame_bytes: 4 * 1024 * 1024,
+             policy: BytePolicy::ObserveOnly,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         {
+             let mut topics = pubsub.topics.write_topic(&topic).await;
+@@ -26907,6 +26960,8 @@
+             burst_bytes: 4 * 1024 * 1024,
+             max_serialized_frame_bytes: 4 * 1024 * 1024,
+             policy: BytePolicy::ObserveOnly,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         let now = Instant::now();
+         {
+@@ -27011,6 +27066,8 @@
+             burst_bytes: 4 * 1024 * 1024,
+             max_serialized_frame_bytes: 4 * 1024 * 1024,
+             policy: BytePolicy::ObserveOnly,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         let payload = Bytes::from_static(b"stranded-pull-reply");
+         let msg_id = pubsub.calculate_msg_id(&topic, &payload);
+@@ -27111,6 +27168,8 @@
+             burst_bytes: u64::try_from(frame_len).expect("frame size"),
+             max_serialized_frame_bytes: frame_len,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         let drain = PlumtreePubSub::<RecordingTransport>::recovery_intent_key(
+             topic,
+@@ -27341,6 +27400,8 @@
+             burst_bytes: 4096,
+             max_serialized_frame_bytes: 4096,
+             policy: BytePolicy::ShedNormal,
++            reserved_share_permille: 0,
++            reserved_peer_permille: 250,
+         })));
+         let drain_key = PlumtreePubSub::<RecordingTransport>::recovery_intent_key(
+             topic, remote, "EAGER", b"drain",

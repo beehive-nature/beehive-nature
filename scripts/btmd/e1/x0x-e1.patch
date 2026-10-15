@@ -1,0 +1,109 @@
+--- a/src/gossip/config.rs
++++ b/src/gossip/config.rs
+@@ -103,6 +103,21 @@
+     #[serde(default)]
+     pub byte_policy: LeafBytePolicy,
+ 
++    /// E1 (BTMD Track E experiment, NOT an upstream feature): permille of
++    /// `leaf_egress_hard_bytes_per_sec` reserved for VERIFIED joined-store
++    /// sync — the topics of KV stores this daemon itself opened or joined
++    /// (never topic labels; the set is host-attested at store-open time).
++    /// 0 (the default) keeps the exact single-bucket behavior; max 500.
++    /// Needs `byte_policy = "shed_normal"` to matter.
++    #[serde(default)]
++    pub leaf_reserved_share_permille: u16,
++
++    /// E1: per-peer admission into the reservation — each peer may consume
++    /// at most this permille of the reserved rate per second (a capped peer
++    /// gets ordinary treatment, never silence). 0 disables the per-peer cap.
++    #[serde(default = "default_leaf_reserved_peer_permille")]
++    pub leaf_reserved_peer_permille: u16,
++
+     /// #674 C3: per-topic budget for *eager* re-forwarding of relayed
+     /// messages on topics this node subscribes to. Within budget, verdicts
+     /// stay `ForwardAndDeliver` (today's behaviour); beyond it the topic
+@@ -159,6 +174,9 @@
+ const fn default_leaf_egress_burst() -> u64 {
+     4 * 1024 * 1024
+ }
++const fn default_leaf_reserved_peer_permille() -> u16 {
++    500
++}
+ pub(crate) const fn default_relay_fanout_budget() -> u64 {
+     default_relay_fanout_budget_msgs_per_sec()
+ }
+@@ -179,6 +197,8 @@
+             leaf_egress_hard_bytes_per_sec: default_leaf_egress_hard(),
+             leaf_egress_burst_bytes: default_leaf_egress_burst(),
+             byte_policy: LeafBytePolicy::ObserveOnly,
++            leaf_reserved_share_permille: 0,
++            leaf_reserved_peer_permille: default_leaf_reserved_peer_permille(),
+             relay_fanout_budget_msgs_per_sec: default_relay_fanout_budget_msgs_per_sec(),
+             relay: false,
+             participation: ParticipationMode::Leaf,
+@@ -238,6 +258,9 @@
+                 super::pubsub::MAX_LEAF_GOSSIP_FRAME_BYTES
+             ));
+         }
++        if self.leaf_reserved_share_permille > 500 {
++            return Err("leaf_reserved_share_permille must be 0..=500".into());
++        }
+         Ok(())
+     }
+ 
+--- a/src/gossip/pubsub.rs
++++ b/src/gossip/pubsub.rs
+@@ -71,6 +71,11 @@
+                 LeafBytePolicy::ObserveOnly => BytePolicy::ObserveOnly,
+                 LeafBytePolicy::ShedNormal => BytePolicy::ShedNormal,
+             },
++            // E1 (BTMD Track E experiment): bounded reserved capacity for
++            // VERIFIED joined-store sync. The scope-set itself is live and
++            // host-attested — see `PubSubManager::add_reserved_store_topic`.
++            reserved_share_permille: config.leaf_reserved_share_permille,
++            reserved_peer_permille: config.leaf_reserved_peer_permille,
+         })
+ }
+ 
+@@ -1445,6 +1450,23 @@
+     /// budget this node just normalized. That is an x0x/sg contract
+     /// disagreement, not operator error, so it must fail loudly rather than
+     /// leave the daemon running with silently absent accounting.
++    /// E1 (BTMD Track E experiment): add a VERIFIED store's topics to the
++    /// Leaf egress reserved scope-set. Called ONLY from the KV store
++    /// open/join funnel — the daemon's own verified registry, never a
++    /// topic label and never a wire claim. Both the store's base topic
++    /// and its `/state-sync` side channel are reserved.
++    pub fn add_reserved_store_topic(&self, topic: &str) {
++        use saorsa_gossip_types::TopicId;
++        let mut scopes = std::collections::BTreeSet::new();
++        scopes.insert(*TopicId::from_entity(topic.as_bytes()).as_bytes());
++        scopes.insert(
++            *TopicId::from_entity(format!("{topic}/state-sync").as_bytes()).as_bytes(),
++        );
++        // Merge into any existing set (add-only for the process lifetime;
++        // the set resets on restart, which the store-open funnel rebuilds).
++        self.plumtree.add_leaf_reserved_scopes(scopes);
++    }
++
+     pub async fn configure_egress(&mut self, config: &GossipConfig) -> NetworkResult<()> {
+         self.egress_config = config.clone();
+         self.egress_config.participation = self.participation;
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -20963,6 +20963,15 @@
+         sync.start_with_spawner(|fut| self.spawn_tracked(fut))
+             .await
+             .map_err(|e| kv_storage_err(format!("kv store sync start failed: {e}")))?;
++        // E1 (BTMD Track E experiment): the store is now ACTIVE and
++        // verified locally (created here, or joined with an owner-anchored
++        // id checked against the snapshot) — reserve its sync topics in the
++        // Leaf egress split. Host-attested by construction: only this
++        // funnel can add, never a topic label or a wire claim. No-op when
++        // the split is off (leaf_reserved_share_permille = 0).
++        if let Some(pubsub) = self.pubsub() {
++            pubsub.add_reserved_store_topic(topic);
++        }
+         Ok((sync, peer_id))
+     }
+ 
