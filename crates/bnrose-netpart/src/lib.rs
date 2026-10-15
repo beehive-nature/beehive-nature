@@ -47,6 +47,10 @@ pub enum SubmitOutcome {
     /// the destination already holds this transaction id — a
     /// reconciliation OBSERVATION, not a success claim
     Duplicate,
+    /// same transaction id, DIFFERENT bytes: refused loudly
+    Conflict,
+    /// the destination could NOT prove durability: no acknowledgement
+    StorageError,
     /// no conclusive outcome within the client window: UNKNOWN
     Timeout,
 }
@@ -116,6 +120,8 @@ impl DestClient {
             Some(v) => match v["result"].as_str() {
                 Some("acked") => SubmitOutcome::Acked,
                 Some("duplicate") => SubmitOutcome::Duplicate,
+                Some("conflict") => SubmitOutcome::Conflict,
+                Some("storage-error") => SubmitOutcome::StorageError,
                 _ => SubmitOutcome::Timeout,
             },
         }
@@ -176,9 +182,52 @@ pub struct HostReport {
 }
 
 impl Host {
+    /// The env of the journal's FIRST admitted operation (the persisted
+    /// authority of this directory).
+    pub fn first_persisted_submission(&self) -> Option<Vec<u8>> {
+        let records = self.records();
+        let r = records
+            .iter()
+            .find(|r| r.event == bnrose_exec_core::E_ADMITTED)?;
+        if r.payload.len() < 130 {
+            return None;
+        }
+        let env_len = u16::from_le_bytes([r.payload[128], r.payload[129]]) as usize;
+        Some(r.payload[130..130 + env_len].to_vec())
+    }
+
+    /// The EXACT persisted submission for this operation, loaded from the
+    /// journal (founder review of #444: recovery must rebroadcast the
+    /// ORIGINAL persisted bytes, not bytes reconstructed from a supplied
+    /// intent — and a mismatching intent is refused).
+    pub fn persisted_submission(&self, op: &[u8; 32]) -> Option<(Vec<u8>, [u8; 64], String)> {
+        let records = self.records();
+        let r = records
+            .iter()
+            .find(|r| r.event == bnrose_exec_core::E_ADMITTED && r.op_id == *op)?;
+        // payload: authority 32 | sig 64 | policy 32 | env_len 2 | env | tx_id ascii
+        if r.payload.len() < 130 {
+            return None;
+        }
+        let sig: [u8; 64] = r.payload[32..96].try_into().ok()?;
+        let env_len = u16::from_le_bytes([r.payload[128], r.payload[129]]) as usize;
+        if r.payload.len() < 130 + env_len {
+            return None;
+        }
+        let env = r.payload[130..130 + env_len].to_vec();
+        let tx_id = String::from_utf8_lossy(&r.payload[130 + env_len..]).into_owned();
+        Some((env, sig, tx_id))
+    }
+
     pub fn open(state_dir: &Path, root: &[u8; 32], dest: DestClient) -> Result<Host, String> {
         std::fs::create_dir_all(state_dir.join("replica")).map_err(|e| e.to_string())?;
-        let keys = bnrose_exec_host::keys::SupervisorKeys::init(state_dir, root)?;
+        // an initialized directory LOADS its root (never re-initializes);
+        // a fresh one initializes it
+        let keys = if state_dir.join(bnrose_exec_host::keys::KEY_FILE).exists() {
+            bnrose_exec_host::keys::SupervisorKeys::load(state_dir)?
+        } else {
+            bnrose_exec_host::keys::SupervisorKeys::init(state_dir, root)?
+        };
         let claim = Claim::acquire(state_dir)?;
         Ok(Host {
             state_dir: state_dir.to_path_buf(),
@@ -315,6 +364,8 @@ impl Host {
         let outcome_word = match outcome {
             SubmitOutcome::Acked => "acked",
             SubmitOutcome::Duplicate => "duplicate",
+            SubmitOutcome::Conflict => "conflict",
+            SubmitOutcome::StorageError => "storage-error",
             SubmitOutcome::Timeout => "timeout",
         };
         if fresh {
@@ -324,6 +375,8 @@ impl Host {
                 SubmitOutcome::Acked => 1,
                 SubmitOutcome::Duplicate => 2,
                 SubmitOutcome::Timeout => 3,
+                SubmitOutcome::Conflict => 4,
+                SubmitOutcome::StorageError => 5,
             });
             p.extend_from_slice(tx_id.as_bytes());
             journal

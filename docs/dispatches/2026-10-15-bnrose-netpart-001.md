@@ -70,3 +70,28 @@ labels it "the destination's own state, observed").
   fresh-process check.
 
 HUMAN INTERACTION: NONE · NEXT OWNER: authorized merger.
+
+## Layer 2 (the founder's source review of #444, answered same lane)
+
+The review's verdict stood: layer 1 is a loopback fault-injection
+integration test — hosts lived inside the test process. Layer 2 is now
+FOUR independent executables per scenario: `bnrose-host` (a sovereign
+host as its own binary — claim, journal, merged core, destination
+client), `bnrose-proxy` (the THIRD process: a network middlebox whose
+rules file drops, delays, or severs — `drop-ack` delivers the request
+and loses only the acknowledgement), and `bnrose-dest`. Every demanded
+correction is convicted:
+
+| row | the correction | the conviction |
+|---|---|---|
+| l1 | CHECKED durable writes | a forced log append failure answers `storage-error`; the acceptance is neither recorded nor acknowledged; one signed attempt stands |
+| l2 | CONFLICTING REPLAY refused | same tx id + different bytes = `conflict`, never `duplicate`; the same exact bytes still reconcile as `duplicate` |
+| l3 | SAME-LOG RESTART | the destination is killed and restarted on the SAME durable log: states replay (final stays final), idempotency replays (duplicate) |
+| l4 | INDEPENDENT HOSTS + REAL ISOLATION + PERSISTED-BYTES RECOVERY | two host EXECUTABLES through the proxy; a `drop-ack` partition lands the acceptance while the sender times out; host B (its own directory, the journal copied, its own claim) rebroadcasts the JOURNAL's bytes → `duplicate`; a mismatching intent file is REFUSED (the journal's submission is authoritative); one acceptance across everything |
+
+Also fixed en route, named: the host binary ended via `process::exit`,
+which skips `Drop` — claims leaked and the next invocation on the same
+directory panicked; the binary now returns through `run()` so claims
+release. `Host::open` loads an existing root instead of refusing to
+re-initialize. Nine scenarios green (5 + 4); the model-finality label
+stands (`advance` is block-production theatre, honestly named).

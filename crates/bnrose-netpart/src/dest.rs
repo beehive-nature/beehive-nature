@@ -46,6 +46,8 @@ struct Fault {
 
 pub struct Destination {
     log_path: PathBuf,
+    /// test injection: fail the next durable append (checked-durability row)
+    fail_next_append: bool,
     txs: BTreeMap<String, Tx>,
     faults: BTreeMap<String, Fault>,
 }
@@ -56,6 +58,7 @@ impl Destination {
             log_path,
             txs: BTreeMap::new(),
             faults: BTreeMap::new(),
+            fail_next_append: false,
         };
         d.replay();
         d
@@ -95,16 +98,24 @@ impl Destination {
         }
     }
 
-    fn append_log(&self, v: &Value) {
+    /// CHECKED durability (founder review of #444): a write or fsync
+    /// failure is an ERROR the caller must surface — the destination
+    /// never acknowledges acceptance its durable log cannot prove.
+    fn append_log(&self, v: &Value) -> Result<(), String> {
+        if self.fail_next_append {
+            return Err("forced log failure (test injection)".into());
+        }
         let mut line = serde_json::to_string(v).unwrap();
         line.push('\n');
-        if let Ok(mut f) = std::fs::OpenOptions::new()
+        let mut f = std::fs::OpenOptions::new()
             .create(true)
             .append(true)
             .open(&self.log_path)
-        {
-            let _ = f.write_all(line.as_bytes()).and_then(|_| f.sync_data());
-        }
+            .map_err(|e| format!("open: {e}"))?;
+        f.write_all(line.as_bytes())
+            .map_err(|e| format!("write: {e}"))?;
+        f.sync_data().map_err(|e| format!("fsync: {e}"))?;
+        Ok(())
     }
 
     fn advance_blocks(&mut self, blocks: u64) {
@@ -145,18 +156,31 @@ impl Destination {
             "submit" => {
                 let tx_id = v["txId"].as_str().unwrap_or("").to_string();
                 let payload = v["payload"].as_str().unwrap_or("").to_string();
-                if self.txs.contains_key(&tx_id) {
-                    json!({"result": "duplicate"})
+                if let Some(existing) = self.txs.get(&tx_id) {
+                    if existing.payload_hex != payload {
+                        // CONFLICTING REPLAY: same transaction id, DIFFERENT
+                        // bytes — refused loudly; a duplicate is only ever
+                        // the SAME exact bytes
+                        json!({"result": "conflict"})
+                    } else {
+                        json!({"result": "duplicate"})
+                    }
                 } else {
-                    self.append_log(&json!({"ev": "accept", "txId": tx_id, "payload": payload}));
-                    self.txs.insert(
-                        tx_id,
-                        Tx {
-                            payload_hex: payload,
-                            state: TxState::Pending,
-                        },
-                    );
-                    json!({"result": "acked"})
+                    match self
+                        .append_log(&json!({"ev": "accept", "txId": tx_id, "payload": payload}))
+                    {
+                        Err(e) => json!({"result": "storage-error", "why": e}),
+                        Ok(()) => {
+                            self.txs.insert(
+                                tx_id,
+                                Tx {
+                                    payload_hex: payload,
+                                    state: TxState::Pending,
+                                },
+                            );
+                            json!({"result": "acked"})
+                        }
+                    }
                 }
             }
             "observe" => {
@@ -184,6 +208,10 @@ impl Destination {
                 };
                 let arg = v["argMs"].as_u64().unwrap_or(0);
                 self.faults.insert(for_label, Fault { mode, arg_ms: arg });
+                json!({"result": "ok"})
+            }
+            "fail-log" => {
+                self.fail_next_append = true;
                 json!({"result": "ok"})
             }
             "dump" => {
