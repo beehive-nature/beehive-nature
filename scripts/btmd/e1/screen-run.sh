@@ -38,10 +38,21 @@ run_trial() {
     FAILED=1
     return 1
   fi
-  # A missing verdict is a failed trial, not a skipped one.
-  if [ ! -f "$WORK/$run_id/receipts/verdict.json" ]; then
+  # A missing verdict is a failed trial, not a skipped one — and an
+  # EXISTING one is validated (review correction 2): it must carry this
+  # trial's own run_id and label and a well-formed verdicts array, so a
+  # stale or malformed file cannot pass as a completed trial.
+  v="$WORK/$run_id/receipts/verdict.json"
+  if [ ! -f "$v" ]; then
     echo "TRIAL-FAILED-NO-VERDICT $run_id"
     echo "$run_id (no verdict)" >> "$WORK/e1-campaign-FAILED.txt"
+    FAILED=1
+    return 1
+  fi
+  if ! grep -q "\"run_id\": \"$run_id\"" "$v" || ! grep -q "\"trial\": \"$label\"" "$v" \
+     || ! grep -q '"verdicts"' "$v" || ! grep -q '"verdicts_pass"' "$v"; then
+    echo "TRIAL-FAILED-BAD-VERDICT $run_id (identity/shape mismatch)"
+    echo "$run_id (bad verdict)" >> "$WORK/e1-campaign-FAILED.txt"
     FAILED=1
     return 1
   fi

@@ -21,6 +21,24 @@ for (const [file, map] of [['diagnostics-t0.jsonl', t0], ['diagnostics.jsonl', t
     try { const j = JSON.parse(line); map.set(j.node, j.gossip); } catch { /* partial */ }
   }
 }
+// Per-purpose rows are CUMULATIVE since boot: the trial-window number is
+// the t0→t1 DELTA (review correction 1). Rows absent at t0 count from
+// zero. Original snapshots remain on disk untouched.
+function purposeDelta(node) {
+  const g1 = t1.get(node), g0 = t0.get(node) ?? {};
+  const le1 = g1?.egress_budget?.leaf_egress?.by_topic_and_purpose ?? [];
+  const le0 = g0?.egress_budget?.leaf_egress?.by_topic_and_purpose ?? [];
+  const key = (r) => r.topic.join(',') + '|' + r.purpose;
+  const base = new Map(le0.map((r) => [key(r), r]));
+  return le1.map((r1) => {
+    const b = base.get(key(r1)) ?? { demanded_bytes: 0, charged_bytes: 0, deferred: 0, send_failures: 0 };
+    return { topic: r1.topic, purpose: r1.purpose,
+      demanded: Math.max(0, r1.demanded_bytes - b.demanded_bytes),
+      charged: Math.max(0, r1.charged_bytes - b.charged_bytes),
+      deferred: Math.max(0, r1.deferred - b.deferred),
+      fails: Math.max(0, r1.send_failures - b.send_failures) };
+  });
+}
 console.log(`# E1 path attribution — ${runDir}`);
 for (const [node, g1] of t1) {
   const g0 = t0.get(node) ?? {};
@@ -28,18 +46,15 @@ for (const [node, g1] of t1) {
   const le1 = eb1.leaf_egress ?? {}, le0 = eb0.leaf_egress ?? {};
   const hex8 = {};
   for (const s of (g1?.subscribed_topics ?? [])) hex8[s.topic_id_hex8] = s.name;
-  const rows = [];
-  for (const r of (le1.by_topic_and_purpose ?? [])) {
-    const h = r.topic.slice(0, 8).map((b) => b.toString(16).padStart(2, '0')).join('');
-    const name = hex8[h] ?? h;
-    rows.push({ name, purpose: r.purpose, demanded: r.demanded_bytes, charged: r.charged_bytes, deferred: r.deferred, fails: r.send_failures });
-  }
+  const rows = purposeDelta(node).map((r) => ({
+    ...r, name: (() => { const h = r.topic.slice(0, 8).map((b) => b.toString(16).padStart(2, '0')).join(''); return hex8[h] ?? h; })(),
+  }));
   const store = rows.filter((r) => r.name.includes('store'));
   const tot = rows.reduce((a, r) => ({ d: a.d + r.demanded, c: a.c + r.charged, def: a.def + r.deferred }), { d: 0, c: 0, def: 0 });
-  console.log(`\n## node ${node} — policy=${eb1.byte_policy} shedΔ=${(le1.shed_suppressed ?? 0) - (le0.shed_suppressed ?? 0)} reservedCharged=${le1.reserved_charged_bytes ?? '-'} reservedMsgs=${le1.reserved_msgs ?? '-'} reservedDeferred=${le1.reserved_deferred ?? '-'}`);
-  console.log(`   all-topics: demanded=${tot.d} charged=${tot.c} shed=${tot.d - tot.c} deferred=${tot.def}`);
+  console.log(`\n## node ${node} — policy=${eb1.byte_policy} shedΔ=${(le1.shed_suppressed ?? 0) - (le0.shed_suppressed ?? 0)} reservedChargedΔ=${(le1.reserved_charged_bytes ?? 0) - (le0.reserved_charged_bytes ?? 0)} reservedMsgsΔ=${(le1.reserved_msgs ?? 0) - (le0.reserved_msgs ?? 0)} reservedDeferredΔ=${(le1.reserved_deferred ?? 0) - (le0.reserved_deferred ?? 0)} [trial-window deltas]`);
+  console.log(`   all-topics: demandedΔ=${tot.d} chargedΔ=${tot.c} shedΔ=${tot.d - tot.c} deferredΔ=${tot.def}`);
   for (const r of store) {
-    console.log(`   store ${r.name} ${r.purpose}: demanded=${r.demanded} charged=${r.charged} shed=${r.demanded - r.charged} deferred=${r.deferred} fails=${r.fails}`);
+    console.log(`   store ${r.name} ${r.purpose}: demandedΔ=${r.demanded} chargedΔ=${r.charged} shedΔ=${r.demanded - r.charged} deferredΔ=${r.deferred} failsΔ=${r.fails}`);
   }
 }
 const ledgerPath = join(runDir, 'receipts', 'ledger.json');

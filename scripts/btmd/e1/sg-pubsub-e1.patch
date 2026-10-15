@@ -428,7 +428,72 @@
      fn waiter_permit(
          self: &Arc<Self>,
          peer: [u8; 32],
-@@ -1707,6 +1987,14 @@
+@@ -1358,6 +1638,64 @@
+             return Err(ReserveError::Oversized);
+         }
+         let bytes = u64::try_from(frame_bytes).map_err(|_| ReserveError::Oversized)?;
++        // E1-RECOVERY-RESERVATION-001: verified joined-store scopes in
++        // the RECOVERY lane (IHAVE announcements, IWANT pulls — the lane
++        // the attribution study convicted) get the same bounded
++        // reservation as the data lane, charged from the SAME shared
++        // buckets: one combined budget, per-peer admission, borrowing
++        // floors. Critical-class recovery NEVER passes through here
++        // (callers route Critical to reserve_protected / the critical
++        // lane above), and a capped or unfunded reservation simply falls
++        // through to the ordinary escrow/rotation path — never worse
++        // than the pre-E1 behavior, never a second budget.
++        if config.reserved_share_permille > 0 && class == RecoveryClass::Ordinary {
++            let scope_reserved = self
++                .reserved_scopes
++                .read()
++                .unwrap_or_else(std::sync::PoisonError::into_inner)
++                .contains(&key.scope);
++            let peer_admitted =
++                scope_reserved && self.e1_peer_admitted(&mut state, &config, key.peer, bytes);
++            if scope_reserved && !peer_admitted {
++                // Per-peer cap reached: ordinary escrow/rotation treatment
++                // (no monopoly), same as the data lane — counted.
++                self.counters.reserved_peer_capped.fetch_add(1, Ordering::Relaxed);
++            }
++            if peer_admitted {
++            if state.reserved_tokens >= bytes {
++                state.reserved_tokens -= bytes;
++                self.counters
++                    .reserved_charged_bytes
++                    .fetch_add(bytes, Ordering::Relaxed);
++                self.counters.reserved_msgs.fetch_add(1, Ordering::Relaxed);
++                self.counters
++                    .demanded_bytes
++                    .fetch_add(bytes, Ordering::Relaxed);
++                self.counters
++                    .charged_bytes
++                    .fetch_add(bytes, Ordering::Relaxed);
++                return Ok(ByteReservation { key, generation });
++            }
++            let general_floor = config.general_rate();
++            if state.tokens >= bytes.saturating_add(general_floor) {
++                state.tokens -= bytes;
++                self.counters
++                    .reserved_borrowed_bytes
++                    .fetch_add(bytes, Ordering::Relaxed);
++                self.counters.reserved_msgs.fetch_add(1, Ordering::Relaxed);
++                self.counters
++                    .demanded_bytes
++                    .fetch_add(bytes, Ordering::Relaxed);
++                self.counters
++                    .charged_bytes
++                    .fetch_add(bytes, Ordering::Relaxed);
++                return Ok(ByteReservation { key, generation });
++            }
++            // Neither bucket can serve above the floors: fall through to
++            // the ordinary recovery path (counted, visible backpressure).
++            self.counters.reserved_deferred.fetch_add(1, Ordering::Relaxed);
++            }
++        }
+         if state.intents.contains_key(&key) {
+             if class == RecoveryClass::CriticalEager {
+                 let critical_count = state
+@@ -1707,6 +2045,14 @@
  #[path = "egress_fairness_tests.rs"]
  mod egress_fairness_tests;
  
@@ -443,7 +508,7 @@
  #[cfg(test)]
  mod tests {
      use super::*;
-@@ -1854,6 +2142,8 @@
+@@ -1854,6 +2200,8 @@
              burst_bytes: 4096,
              max_serialized_frame_bytes: 4096,
              policy: BytePolicy::ShedNormal,
@@ -452,7 +517,7 @@
          })));
          limiter
      }
-@@ -2127,6 +2417,8 @@
+@@ -2127,6 +2475,8 @@
              burst_bytes: 4096,
              max_serialized_frame_bytes: 4096,
              policy: BytePolicy::ShedNormal,
@@ -461,7 +526,7 @@
          })));
          assert!(limiter.enabled());
      }
-@@ -2140,6 +2432,8 @@
+@@ -2140,6 +2490,8 @@
              burst_bytes: 0,
              max_serialized_frame_bytes: 0,
              policy: BytePolicy::ShedNormal,
@@ -490,7 +555,7 @@
      })));
      assert!(matches!(
          limiter.try_reserve_recovery_at(stale, 1024, 1, start + Duration::from_secs(2)),
-@@ -1362,3 +1366,181 @@
+@@ -1362,3 +1366,331 @@
          "the map stays pinned: inheritance and displacement are slot-neutral"
      );
  }
@@ -669,6 +734,156 @@
 +    assert!(
 +        admitted <= 20_000,
 +        "admitted {admitted} exceeds the single-bucket budget"
++    );
++    assert!(deferred > 0, "the workload must actually saturate");
++}
++
++// ---------------------------------------------------------------------------
++// E1-RECOVERY-RESERVATION-001 — the recovery-lane extension (IHAVE/IWANT
++// for VERIFIED joined-store scopes). Invariants under test, each an order
++// constraint from E1-RECOVERY-RESERVATION-001:
++//   * reserved recovery scopes charge the SHARED reservation (not the
++//     escrow/rotation), with the same controlled borrowing;
++//   * Critical-class recovery NEVER uses the reservation path;
++//   * share=0 leaves the recovery lane byte-identical;
++//   * per-peer admission caps apply in the recovery lane too;
++//   * no double-charge: data + recovery lanes together never admit more
++//     than the single-bucket budget (both subtract from the same two
++//     token pools — the invariant is structural, tested anyway).
++// ---------------------------------------------------------------------------
++
++#[test]
++fn e1_recovery_lane_reserves_for_verified_store_scopes() {
++    let limiter = e1_limiter(4000, 4000, 250);
++    let scope = [7_u8; 32];
++    limiter.set_reserved_scopes(BTreeSet::from([scope]));
++    let now = Instant::now();
++    let generation = limiter.lock_state().generation;
++    let result = limiter.try_reserve_recovery_at_class(
++        data_key(1, scope),
++        500,
++        generation,
++        now,
++        RecoveryClass::Ordinary,
++    );
++    assert!(result.is_ok());
++    let snapshot = limiter.snapshot();
++    assert_eq!(snapshot.reserved_charged_bytes, 500);
++    assert_eq!(snapshot.reserved_msgs, 1);
++    // Charged straight from the reservation: 1000 - 500 = 500 left.
++    assert_eq!(snapshot.reserved_tokens, 500);
++}
++
++#[test]
++fn e1_recovery_lane_critical_class_never_uses_the_reservation() {
++    let limiter = e1_limiter(4000, 4000, 250);
++    let scope = [7_u8; 32];
++    limiter.set_reserved_scopes(BTreeSet::from([scope]));
++    let now = Instant::now();
++    let generation = limiter.lock_state().generation;
++    let result = limiter.try_reserve_recovery_at_class(
++        data_key(1, scope),
++        500,
++        generation,
++        now,
++        RecoveryClass::CriticalEager,
++    );
++    // Critical recovery is admitted (its own protected lane) but the
++    // reservation counters stay untouched.
++    assert!(result.is_ok());
++    let snapshot = limiter.snapshot();
++    assert_eq!(snapshot.reserved_charged_bytes, 0);
++    assert_eq!(snapshot.reserved_msgs, 0);
++}
++
++#[test]
++fn e1_recovery_lane_split_off_keeps_reservation_counters_zero() {
++    let limiter = e1_limiter(4000, 4000, 0);
++    let scope = [7_u8; 32];
++    limiter.set_reserved_scopes(BTreeSet::from([scope]));
++    let now = Instant::now();
++    let generation = limiter.lock_state().generation;
++    let result = limiter.try_reserve_recovery_at_class(
++        data_key(1, scope),
++        500,
++        generation,
++        now,
++        RecoveryClass::Ordinary,
++    );
++    assert!(result.is_ok());
++    let snapshot = limiter.snapshot();
++    assert_eq!(snapshot.reserved_charged_bytes, 0);
++    assert_eq!(snapshot.reserved_msgs, 0);
++}
++
++#[test]
++fn e1_recovery_lane_per_peer_cap_falls_through_not_silence() {
++    let limiter = e1_limiter(4000, 4000, 250);
++    let scope = [7_u8; 32];
++    limiter.set_reserved_scopes(BTreeSet::from([scope]));
++    let now = Instant::now();
++    let generation = limiter.lock_state().generation;
++    // Peer share = 500 permille of the 1000 B/s reservation = 500 B.
++    // A 600-byte recovery demand exceeds the peer's allowance: it falls
++    // through to the ordinary escrow/rotation path — Ok (escrow admits)
++    // or Deferred (backpressure), NEVER a silent drop, and the
++    // reservation is not touched.
++    let result = limiter.try_reserve_recovery_at_class(
++        data_key(1, scope),
++        600,
++        generation,
++        now,
++        RecoveryClass::Ordinary,
++    );
++    assert!(result.is_ok() || matches!(result, Err(ReserveError::Deferred)));
++    let snapshot = limiter.snapshot();
++    assert_eq!(snapshot.reserved_charged_bytes, 0);
++    assert_eq!(snapshot.reserved_peer_capped, 1);
++}
++
++#[test]
++fn e1_both_lanes_share_one_budget_no_double_charge() {
++    let limiter = e1_limiter(4000, 4000, 250);
++    let scope = [7_u8; 32];
++    limiter.set_reserved_scopes(BTreeSet::from([scope]));
++    let start = Instant::now();
++    let mut admitted = 0_u64;
++    let mut deferred = 0_u64;
++    let mut peer = 0_u64;
++    for second in 0..4_u64 {
++        let now = start + Duration::from_secs(second);
++        for _ in 0..30 {
++            peer += 1;
++            let key = data_key(peer, scope);
++            // Hoisted: an inline `limiter.lock_state().generation`
++            // argument would hold its temporary guard into the callee's
++            // own lock_state() — the self-deadlock class the repair fixed.
++            let generation = limiter.lock_state().generation;
++            let outcome = if peer % 2 == 0 {
++                limiter.try_reserve_data_at(key, 500, true, now).is_ok()
++            } else {
++                limiter
++                    .try_reserve_recovery_at_class(
++                        key,
++                        500,
++                        generation,
++                        now,
++                        RecoveryClass::Ordinary,
++                    )
++                    .is_ok()
++            };
++            if outcome {
++                admitted += 500;
++            } else {
++                deferred += 1;
++            }
++        }
++    }
++    // Hard budget: 4000 burst + 4 s x 4000 B/s = 20000. Both lanes draw
++    // from the same pools; their combined admission can never exceed it.
++    assert!(
++        admitted <= 20_000,
++        "combined lanes admitted {admitted} > single-bucket budget"
 +    );
 +    assert!(deferred > 0, "the workload must actually saturate");
 +}

@@ -133,10 +133,14 @@ fn e1_concurrency_reproduces_the_wedge() {
                 last, now
             );
             // Dump every thread's userspace stack via gdb attach: the
-            // stuck threads identify the holder and the waiters.
+            // stuck threads identify the holder and the waiters. The
+            // debugger itself runs under an external `timeout` (review
+            // correction 3) — a wedged gdb must not stall the failure
+            // exit that follows it.
             let pid = std::process::id().to_string();
-            let out = std::process::Command::new("gdb")
-                .args(["-p", &pid, "-batch", "-ex", "set pagination off",
+            let out = std::process::Command::new("timeout")
+                .args(["10", "gdb", "-p", &pid, "-batch",
+                       "-ex", "set pagination off",
                        "-ex", "thread apply all bt 8"])
                 .output();
             if let Ok(out) = out {
