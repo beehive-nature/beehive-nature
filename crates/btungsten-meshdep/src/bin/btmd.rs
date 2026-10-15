@@ -835,7 +835,13 @@ fn flood_body(
         }
         thread::sleep(Duration::from_secs(2));
     }
-    collectors.stop();
+    let observation = collectors.finish(&mut ledger);
+    receipts.write_json("observation.json", &observation)?;
+    receipts.write_json(
+        "ledger.json",
+        &serde_json::json!({"ops": ledger.ops, "events": ledger.events, "retries": ledger.retries}),
+    )?;
+    observation.require_valid()?;
     let flood_end = rig.sample_all();
 
     let m_dm = ledger.matrix_for_class(OpClass::TargetedDm);
