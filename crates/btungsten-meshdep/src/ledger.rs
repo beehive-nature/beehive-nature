@@ -47,6 +47,27 @@ impl OperationRecord {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "kind")]
 pub enum Event {
+    /// Completed management response, or no complete HTTP response. A put
+    /// attempt is not publication or recipient delivery evidence.
+    StorePutResult {
+        op_id: String,
+        at_ms: u64,
+        status: Option<u16>,
+        response: Option<String>,
+        response_truncated: bool,
+        response_digest: Option<String>,
+        error: Option<String>,
+    },
+    /// Read evidence includes HTTP refusals and errors instead of collapsing
+    /// every unsuccessful observation to a missing replicated value.
+    StoreReadResult {
+        op_id: String,
+        node: String,
+        at_ms: u64,
+        status: Option<u16>,
+        matches: bool,
+        error: Option<String>,
+    },
     /// The operation left the sender (API accepted it).
     Published { op_id: String, at_ms: u64 },
     /// Durable application ACK observed (e.g. DM 200 with durable receipt).

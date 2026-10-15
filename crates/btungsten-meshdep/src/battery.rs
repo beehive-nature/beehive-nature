@@ -339,6 +339,8 @@ fn trial_body(
             }
             for i in 0..profile.store_puts {
                 let intended: Vec<&str> = intended_sync.iter().map(|s| s.as_str()).collect();
+                // Every result (including refusal/no response) is journaled by
+                // store_put; continue the fixed workload without retrying it.
                 let _ = w.store_put(
                     &mut ledger,
                     "seed",
@@ -398,7 +400,7 @@ fn trial_body(
                     }
                 }
                 for (op_id, l, key) in &pending_sync {
-                    if w.store_observe(l, &store_id, key, op_id).unwrap_or(false) {
+                    if w.store_observe_recorded(&mut ledger, l, &store_id, key, op_id) {
                         ledger.record(Event::Delivered {
                             op_id: op_id.clone(),
                             node: l.clone(),
@@ -409,8 +411,7 @@ fn trial_body(
                 collectors.drain_into(&mut ledger);
                 let m_grp = ledger.matrix_for_class(OpClass::GroupOp);
                 let m_sync = ledger.matrix_for_class(OpClass::StateSync);
-                let pending = (m_grp.total - m_grp.delivered)
-                    + (m_sync.total - m_sync.delivered - m_sync.unknown);
+                let pending = (m_grp.total - m_grp.delivered) + (m_sync.total - m_sync.delivered);
                 if pending == 0 || crate::client::now_ms() > sweep_deadline {
                     break;
                 }
@@ -432,6 +433,19 @@ fn trial_body(
         }
         let s_idle_end = rig.sample_all();
         let idle_min = profile.idle_secs as f64 / 60.0;
+
+        // Sender readback is diagnostic, after the measured cost windows.
+        // It never counts as delivery to an intended recipient.
+        let store_ops: Vec<_> = ledger
+            .ops
+            .iter()
+            .filter(|op| op.class == OpClass::StateSync)
+            .map(|op| (op.op_id.clone(), op.destination_key(), op.sender.clone()))
+            .collect();
+        let w = WorkloadCtx::new(rig, 1, 10_000);
+        for (op_id, key, sender) in store_ops {
+            w.store_observe_recorded(&mut ledger, &sender, &store_id, &key, &op_id);
+        }
 
         // Diagnostics snapshots — APPLICATION-LEVEL, never verdict sources.
         for l in &node_labels {
