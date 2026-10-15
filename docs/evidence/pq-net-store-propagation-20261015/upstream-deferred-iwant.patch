@@ -1,0 +1,62 @@
+diff --git a/crates/pubsub/src/lib.rs b/crates/pubsub/src/lib.rs
+index 70807ec..f16b307 100644
+--- a/crates/pubsub/src/lib.rs
++++ b/crates/pubsub/src/lib.rs
+@@ -10909,6 +10909,12 @@ impl<T: GossipTransport + 'static> PlumtreePubSub<T> {
+             let mut prior_failures = 0_u8;
+             if let Some(entry) = state.outstanding_iwants.get(&msg_id) {
+                 if entry.peer == from {
++                    // The bounded flush queue already owns this request.
++                    // Re-admission can duplicate its serialized intent and
++                    // renew requested_at indefinitely under repeated IHAVE.
++                    if entry.retry_pending {
++                        continue;
++                    }
+                     if entry
+                         .retry_not_before
+                         .is_some_and(|not_before| Instant::now() < not_before)
+@@ -24907,6 +24913,44 @@ mod tests {
+         assert_eq!(deferred.sent_bytes, 0);
+         assert!(deferred.deferred >= 1, "first pull is byte-deferred");
+
++        // A byte-deferred request already belongs to the bounded retry queue.
++        // Re-advertising the same id must not replace its claim or re-admit
++        // another serialized request while that queue owns it.
++        let before = receiver.leaf_egress_snapshot();
++        let requested_at = {
++            let topics = receiver.topics.read_topic(&topic).await;
++            topics.get(&topic).unwrap().outstanding_iwants[&msg_id].requested_at
++        };
++        for _ in 0..8 {
++            receiver
++                .handle_ihave(publisher_id, topic, ids.clone())
++                .await
++                .expect("repeat advertiser");
++        }
++        let after = receiver.leaf_egress_snapshot();
++        let demand = |snapshot: &egress::LeafEgressSnapshot| {
++            snapshot
++                .by_topic_and_purpose
++                .iter()
++                .find(|row| row.topic == topic.to_bytes() && row.purpose == "IWANT")
++                .unwrap()
++                .demanded_bytes
++        };
++        assert_eq!(
++            demand(&after),
++            demand(&before),
++            "deferred claim must coalesce repeated IHAVE"
++        );
++        {
++            let topics = receiver.topics.read_topic(&topic).await;
++            let state = topics.get(&topic).unwrap();
++            assert_eq!(
++                state.outstanding_iwants[&msg_id].requested_at, requested_at,
++                "repeated advertisements must not renew the retained request age"
++            );
++            assert_eq!(state.deferred_iwants.len(), 1);
++        }
++
+         receiver
+             .egress_limiter
+             .refill_after_for_test(Duration::from_secs(
