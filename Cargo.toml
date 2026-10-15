@@ -79,6 +79,7 @@ members = [
     "crates/bpq-core",
     "crates/bheraldry",
     "crates/bpq-device-xcheck",
+    "crates/antelope-authority",
 ]
 
 [workspace.metadata]

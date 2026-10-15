@@ -150,6 +150,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "antelope-authority"
+version = "0.1.0"
+
+[[package]]
 name = "anyhow"
 version = "1.0.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
