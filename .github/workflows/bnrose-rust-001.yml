@@ -44,6 +44,23 @@ jobs:
         env:
           BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm
         run: sh scripts/bnrose-rust-001/crossnode-demo.sh target/release/bnrose-exec-host docs/receipts/bnrose-rust-001/crossnode-demo-ci.txt
+      - name: Network-partition gate (rootless netns; REAL iptables drops or a loud failure — simulated faults are never a substitute)
+        run: |
+          command -v unshare >/dev/null 2>&1 || { echo "FAIL CLOSED: unshare is missing; the netpart gate requires real namespaces"; exit 1; }
+          command -v iptables >/dev/null 2>&1 || { echo "FAIL CLOSED: iptables is missing; the netpart gate requires real packet drops"; exit 1; }
+          unshare -Urn sh -c '
+            ip link set lo up || { echo "FAIL CLOSED: cannot bring up loopback (no NET_ADMIN)"; exit 1; }
+            python3 -m http.server 7099 --bind 127.0.0.1 >/dev/null 2>&1 &
+            P=$!; sleep 1
+            kill -0 $P || { echo "FAIL CLOSED: control server did not start"; exit 1; }
+            iptables -A OUTPUT -p tcp --dport 7099 -j DROP || { echo "FAIL CLOSED: cannot insert the DROP rule"; exit 1; }
+            if python3 -c "import socket; socket.create_connection((\"127.0.0.1\",7099),timeout=3)" 2>/dev/null; then
+              echo "FAIL CLOSED: the DROP rule did not drop - packets are flowing; refusing unproven partitions"; kill $P; exit 1
+            fi
+            echo "control: a real iptables DROP dropped a real connection"
+            kill $P
+          ' || exit 1
+          unshare -Urn sh scripts/bnrose-rust-001/netpart-demo.sh target/release/bnrose-exec-host docs/receipts/bnrose-rust-001/netpart-demo-ci.txt docs/receipts/bnrose-rust-001/netpart-metrics-ci.json
       - name: "Benchmarks (labeled workload + this runner)"
         env:
           BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm

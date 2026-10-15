@@ -205,7 +205,10 @@ s = socket.create_connection(("127.0.0.1", int(sys.argv[1])), timeout=10)
 s.sendall(b"STATS\n")
 open(sys.argv[2], "wb").write(s.makefile("rb").readline())
 PYEOF
-printf '%s\n%s\n%s\n' "$latencies" "$(cat "$W/rss-b1" 2>/dev/null)" "$(cat "$W/rss-c3" 2>/dev/null)" > "$W/raw-metrics"
+# RSS collectors: GNU time writes its exit-status diagnostic into the
+# same stream — keep only the numeric measurement line.
+rss_num() { grep -E '^[0-9]+$' "$1" 2>/dev/null | tail -1 || echo "?"; }
+printf '%s\n%s\n%s\n' "$latencies" "$(rss_num "$W/rss-b1")" "$(rss_num "$W/rss-c3")" > "$W/raw-metrics"
 python3 - "$W" "$JSON_OUT" <<'PYEOF'
 import json, sys
 w, out = sys.argv[1], sys.argv[2]
@@ -225,6 +228,7 @@ receipt = {
     "faults": ["cut-before-dispatch", "cut-after-dispatch", "cut-during-recovery",
                "duplicate GET delivery", "wrong-key receipt delivery"],
     "leg2Dispatches": len(lat),
+    "latencyNote": "10 dual dispatches on one host, fsyncs included — a baseline, not a statistically strong scale result",
     "dispatchLatencyMs": {"p50": pct(50), "p95": pct(95), "p99": pct(99), "max": lat[-1]},
     "courier": stats,
     "nodePeakRssKiB": {"nodeB-dispatch": lines[1].strip(), "nodeC-lose-response": lines[2].strip()},
