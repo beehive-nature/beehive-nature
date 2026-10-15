@@ -128,3 +128,25 @@ v0.47.1, `src/server/sse.rs::events_sse` logs broadcast lag but does not send
 a gap marker to the client. Check node logs for that warning in measured
 runs, and keep this limitation explicit. No stable authenticated transport
 message ID or upstream per-kind counters are invented by this observer.
+
+## Store submission and read evidence
+
+Each put writes a `store_put_result` event before returning: completed HTTP
+status, a response excerpt of at most 512 Unicode characters, explicit
+truncation flag, full-response digest, or an error with no fabricated status.
+A framing/read error means no *complete* HTTP response, even if partial
+headers arrived. The journal does not retain authorization headers.
+
+For pinned v0.47.1 `put_kv_value`, only a valid 200 acceptance body records
+`Published`. A 202 reports local persistence with publication unconfirmed;
+its direct-delivery fallback can still succeed. Other statuses and absent
+responses preserve UNKNOWN delivery until recipient evidence arrives. They
+are never silently scored as propagation loss. Attempts remain in the
+service denominator; the separate HTTP receipts expose accepted/refused
+counts. A 5xx alone does not prove that no local mutation occurred.
+
+The battery journals each existing recipient store read's status, byte-match
+result and error. Unresolved puts retain the full bounded observation sweep.
+Sender readback runs after workload/idle cost sampling and never counts as
+recipient delivery. Compare refusal, accepted-but-unobserved, late delivery
+and read errors separately; a missing value does not locate a transport bug.
