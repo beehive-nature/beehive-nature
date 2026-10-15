@@ -35,20 +35,21 @@ fn main() {
     let listener = TcpListener::bind(("127.0.0.1", port)).expect("bind");
     println!("{}", listener.local_addr().expect("addr").port());
     std::io::Write::flush(&mut std::io::stdout()).ok();
+    // one thread per connection: concurrent hosts are not serialized
+    // behind a single accept loop (a real middlebox serves concurrently)
     for stream in listener.incoming() {
         let Ok(stream) = stream else { continue };
-        // unreadable or malformed rules: sever EVERY connection — the
-        // proxy never passes traffic it cannot account for
-        let Some(rules) = rules_of(&rules_file) else {
-            continue;
-        };
-        let Ok(mut upstream) = TcpStream::connect(dest) else {
-            continue;
-        };
-        let _ = upstream.set_nodelay(true);
-        if !pump(stream, &mut upstream, &rules) {
-            continue;
-        }
+        let rf = rules_file.clone();
+        std::thread::spawn(move || {
+            // unreadable or malformed rules: sever EVERY connection — the
+            // proxy never passes traffic it cannot account for
+            let Some(rules) = rules_of(&rf) else { return };
+            let Ok(mut upstream) = TcpStream::connect(dest) else {
+                return;
+            };
+            let _ = upstream.set_nodelay(true);
+            let _ = pump(stream, &mut upstream, &rules);
+        });
     }
 }
 

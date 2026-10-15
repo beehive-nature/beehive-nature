@@ -42,7 +42,10 @@ fn run() -> i32 {
     match cmd.as_str() {
         "observe" => {
             let dest: std::net::SocketAddr = need("--dest").parse().expect("addr");
-            let c = DestClient::new(dest, "probe", Duration::from_secs(5));
+            // the observer's identity is the caller's to name (default
+            // probe); l6 observes under each host's own label
+            let label = flag(&args, "--label").unwrap_or_else(|| "probe".into());
+            let c = DestClient::new(dest, &label, Duration::from_secs(5));
             match c.observe(&need("--tx-id")) {
                 Some(st) => {
                     println!("{{\"observed\": \"{}\"}}", st.word());

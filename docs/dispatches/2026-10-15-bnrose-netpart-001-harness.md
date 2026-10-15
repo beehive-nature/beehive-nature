@@ -158,3 +158,29 @@ Fourteen scenarios green locally (5 loopback + 9 executable). The
 fail-log injection is now fail-after-N (l1 keeps fail-immediately).
 OS-level host isolation and blockchain settlement finality remain the
 named, unclaimed qualifications.
+
+## Layer 5 (the fourth founder review of #444, answered — the regression controls)
+
+1. **l7lib — the DIRECT library row** (the review's principal gap): the
+   CLI gate short-circuits before `Host::drive`, so the l7 CLI row could
+   not convict a reintroduced library fallback. l7lib calls
+   `Host::resolve()` itself on a fresh host with a live destination:
+   refusal asserted ON THE OUTCOME (`recovery:…`), zero signatures, and
+   the destination's dump shows zero transactions. If the old fallback
+   returned, the outcome would be `acked` and this row goes RED.
+2. **l8every — every invalid replay shape individually**: eight rows
+   (missing txId, accept missing payload, unknown event, duplicate
+   accept, included-for-unknown, final-for-unknown, included-twice,
+   final-without-included), each its own directory and restart refusal.
+3. **l10 — the proxy negative**: an unknown mode severs the connection
+   (no answer ever arrives); an explicit `pass` forwards — both asserted.
+4. **l6 — conclusive overlap + distinct identities**: the destination
+   now serves one thread per connection and CARRIES ITS OWN CONCURRENCY
+   GAUGE; a hold/release barrier parks both rebroadcasts in flight and
+   the test asserts the DESTINATION'S OWN `maxConcurrentSubmits ≥ 2`
+   (process-level fact witnessed by the endpoint, not window arithmetic;
+   the window check remains as secondary evidence). Both final-state
+   observations now run under each host's OWN label (`observe --label`),
+   whitelisted separately.
+
+Seventeen scenarios green locally (5 loopback + 12 executable).

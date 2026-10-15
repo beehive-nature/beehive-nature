@@ -436,6 +436,12 @@ fn l6_concurrent_competing_recovery_one_acceptance() {
     let ia = intent.display().to_string();
     let ia1 = ia.clone();
     let pa1 = pa.clone();
+    // DETERMINISTIC, WITNESSED OVERLAP: the destination HOLDS both
+    // rebroadcasts in flight (they block inside its submit handler,
+    // counted by its own gauge) until released — then asserts its own
+    // observed peak concurrency >= 2. This is the destination's record,
+    // not window arithmetic in the test.
+    admin_roundtrip(daddr, r#"{"op":"hold-submits","label":"admin"}"#).unwrap();
     let b1 = std::thread::spawn(move || {
         let t0 = std::time::Instant::now();
         let r = host(&[
@@ -471,35 +477,53 @@ fn l6_concurrent_competing_recovery_one_acceptance() {
         ]);
         (r.0, r.1, t0, std::time::Instant::now())
     });
+    // poll the destination's gauge until BOTH submits are in flight
+    let mut peak = 0usize;
+    for _ in 0..100 {
+        let stats = admin_roundtrip(daddr, r#"{"op":"stats","label":"admin"}"#).unwrap();
+        peak = stats["maxConcurrentSubmits"].as_u64().unwrap_or(0) as usize;
+        let inflight = stats["inFlight"].as_u64().unwrap_or(0) as usize;
+        if inflight >= 2 {
+            break;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(20));
+    }
+    admin_roundtrip(daddr, r#"{"op":"release-submits","label":"admin"}"#).unwrap();
     let ((c1, o1, w1s, w1e), (c2, o2, w2s, w2e)) = (b1.join().unwrap(), b2.join().unwrap());
-    // OVERLAP PROOF: each thread records its child's execution window;
-    // the intervals must genuinely intersect (simultaneity, asserted)
     assert!(
-        w1s < w2e && w2s < w1e,
-        "the two recovery hosts must run simultaneously"
+        peak >= 2,
+        "destination must witness 2 concurrent submits (saw {peak}); B1=[{o1}] B2=[{o2}]"
     );
-    // EXIT CODES, checked (not ignored): both hosts preserved UNKNOWN at
-    // resolve time — finality had not been produced yet — exit 3 each
+    // SECONDARY window evidence (the destination's gauge is primary)
+    assert!(w1s < w2e && w2s < w1e, "windows intersect");
+    // EXIT CODES, checked: both preserved UNKNOWN at resolve time
     assert_eq!(c1, 3, "host B1 resolved UNKNOWN-preserved: {o1}");
     assert_eq!(c2, 3, "host B2 resolved UNKNOWN-preserved: {o2}");
-    // both survivors converge: their rebroadcasts are the JOURNAL's
-    // identical bytes; the destination holds ONE acceptance
+    // both survivors converge: JOURNAL-identical bytes, ONE acceptance
     let v1: Value = serde_json::from_str(o1.trim()).unwrap();
     let v2: Value = serde_json::from_str(o2.trim()).unwrap();
-    for (v, c) in [(&v1, c1), (&v2, c2)] {
+    for v in [&v1, &v2] {
         assert_eq!(
             v["submissionOutcome"], "duplicate",
             "identical bytes reconcile"
         );
         assert_eq!(v["oneSignedAttempt"], Value::Bool(true));
-        let _ = c;
     }
     admin_roundtrip(daddr, r#"{"op":"advance","label":"admin","blocks":3}"#).unwrap();
-    // BOTH hosts independently observe finality — two separate
-    // observation processes, each asserted on its own exit
-    for b in ["hostB1", "hostB2"] {
-        let (cb, ob) = host(&["observe", "--dest", &paddr.to_string(), "--tx-id", &tx]);
-        assert_eq!(cb, 0, "{b} observed final independently: {ob}");
+    // BOTH hosts independently observe finality — two separate processes,
+    // each under its OWN label, each asserted on its own exit
+    for (b, lbl) in [("hostB1", "hostB1"), ("hostB2", "hostB2")] {
+        let _ = b;
+        let (cb, ob) = host(&[
+            "observe",
+            "--dest",
+            &paddr.to_string(),
+            "--tx-id",
+            &tx,
+            "--label",
+            lbl,
+        ]);
+        assert_eq!(cb, 0, "{lbl} observed final independently: {ob}");
     }
     let dump = admin_roundtrip(daddr, r#"{"op":"dump","label":"admin"}"#).unwrap();
     assert_eq!(
@@ -634,4 +658,90 @@ fn l9_advance_prefix_recovery_is_durable_and_honest() {
     );
     let _ = d2;
     println!("l2/l9: mid-batch failure → durable prefix survives restart; the rest stay pending");
+}
+
+#[test]
+fn l7lib_recovery_refusal_exercised_at_the_library_boundary() {
+    // THE DIRECT LIBRARY TEST (founder review round 4): the CLI gate
+    // short-circuits before Host::drive, so l7 alone could not convict a
+    // reintroduced fallback. This row calls Host::resolve() itself.
+    // If the old unsafe fallback were restored, the outcome would be
+    // "acked" (the destination accepts the invented bytes) and THIS
+    // ASSERTION GOES RED — the control is the outcome itself.
+    let dir = tmp("l7lib");
+    let (_d, daddr) = dest_at(&dir);
+    let client =
+        bnrose_netpart::DestClient::new(daddr, "hostX", std::time::Duration::from_millis(400));
+    let mut host = bnrose_netpart::Host::open(&dir.join("h"), &[0xb7; 32], client).unwrap();
+    let f = bnrose_exec_host::fixtures::fixture(10, 1_800_000_000, 3600);
+    let intent = bnrose_exec_host::fixtures::read_intent(&f.to_json()).unwrap();
+    let r = host.resolve(&intent, 1_800_000_000, true);
+    assert!(
+        r.submission_outcome.starts_with("recovery:"),
+        "the library must refuse without persisted evidence, got: {}",
+        r.submission_outcome
+    );
+    assert_eq!(r.signatures_journaled, 0);
+    // and nothing reached the destination
+    let dump = admin_roundtrip(daddr, r#"{"op":"dump","label":"admin"}"#).unwrap();
+    assert_eq!(dump["txs"].as_array().unwrap().len(), 0);
+    println!("l2/l7lib: Host::resolve without evidence refuses AT THE LIBRARY — no submission, destination empty");
+}
+
+#[test]
+fn l8every_every_invalid_replay_shape_refuses_individually() {
+    // one row per validated shape (founder review: test every transition)
+    let shapes: &[(&str, &str)] = &[
+        ("missing-txid", r#"{"ev": "accept", "payload": "aa"}"#),
+        ("accept-missing-payload", r#"{"ev": "accept", "txId": "a"}"#),
+        ("unknown-event", r#"{"ev": "settled", "txId": "ab"}"#),
+        (
+            "duplicate-accept",
+            "{\"ev\": \"accept\", \"txId\": \"ab\", \"payload\": \"aa\"}\n{\"ev\": \"accept\", \"txId\": \"ab\", \"payload\": \"aa\"}",
+        ),
+        ("included-unknown-tx", r#"{"ev": "included", "txId": "ab"}"#),
+        ("final-unknown-tx", r#"{"ev": "final", "txId": "ab"}"#),
+        (
+            "included-twice",
+            "{\"ev\": \"accept\", \"txId\": \"ab\", \"payload\": \"aa\"}\n{\"ev\": \"included\", \"txId\": \"ab\"}\n{\"ev\": \"included\", \"txId\": \"ab\"}",
+        ),
+        (
+            "final-without-included",
+            "{\"ev\": \"accept\", \"txId\": \"ab\", \"payload\": \"aa\"}\n{\"ev\": \"final\", \"txId\": \"ab\"}",
+        ),
+    ];
+    for (tag, log) in shapes {
+        let dir = tmp(&format!("l8e-{tag}"));
+        std::fs::write(dir.join("dest.log"), log).unwrap();
+        let mut child = Command::new(env!("CARGO_BIN_EXE_bnrose-dest"))
+            .arg(dir.join("dest.log"))
+            .arg("0")
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .expect("dest");
+        let out = child.wait().expect("wait");
+        assert_ne!(out.code(), Some(0), "{tag}: must refuse to serve");
+        let _ = Proc(child);
+    }
+    println!("l2/l8every: all eight invalid replay shapes refuse individually");
+}
+
+#[test]
+fn l10_proxy_unknown_mode_denied_pass_allowed() {
+    let dir = tmp("l10");
+    let (_d, daddr) = dest_at(&dir);
+    // bogus mode → the connection is severed, no answer ever arrives
+    let rules = dir.join("rules.json");
+    write_rules(&rules, serde_json::json!({"probe": {"mode": "bogus-mode"}}));
+    let (_p, paddr) = proxy_at(&rules, daddr);
+    assert!(
+        admin_roundtrip(paddr, r#"{"op":"dump","label":"probe"}"#).is_none(),
+        "an unknown mode must deny, not forward"
+    );
+    // explicit pass → forward and answer
+    write_rules(&rules, serde_json::json!({"probe": {"mode": "pass"}}));
+    let ok = admin_roundtrip(paddr, r#"{"op":"dump","label":"probe"}"#);
+    assert!(ok.is_some(), "an explicit pass must forward");
+    println!("l2/l10: unknown proxy mode denied (severed); explicit pass forwards");
 }

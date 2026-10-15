@@ -24,6 +24,8 @@ use std::collections::BTreeMap;
 use std::io::{BufRead, BufReader, Write};
 use std::net::{TcpListener, TcpStream};
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Condvar, Mutex};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum TxState {
@@ -42,6 +44,30 @@ struct Tx {
 struct Fault {
     mode: u8, // 0 none, 1 drop, 2 delay
     arg_ms: u64,
+}
+
+/// Concurrency witness: the DESTINATION'S OWN count of submit handlers
+/// in flight and the peak — overlap asserted from it is process-level
+/// fact, not window arithmetic in a test.
+pub struct Gauge {
+    in_flight: AtomicUsize,
+    max: AtomicUsize,
+}
+
+impl Gauge {
+    fn new() -> Gauge {
+        Gauge {
+            in_flight: AtomicUsize::new(0),
+            max: AtomicUsize::new(0),
+        }
+    }
+    fn enter(&self) {
+        let n = self.in_flight.fetch_add(1, Ordering::SeqCst) + 1;
+        self.max.fetch_max(n, Ordering::SeqCst);
+    }
+    fn exit(&self) {
+        self.in_flight.fetch_sub(1, Ordering::SeqCst);
+    }
 }
 
 pub struct Destination {
@@ -185,17 +211,19 @@ impl Destination {
         Ok(())
     }
 
-    fn handle(&mut self, v: Value, w: &mut TcpStream) -> bool {
+    /// The state work for one request: (answer, fault mode).
+    fn handle_inner(&mut self, v: Value) -> (Value, u8) {
         let label = v["label"].as_str().unwrap_or("?").to_string();
-        let op = v["op"].as_str().unwrap_or("");
+        let op = v["op"].as_str().unwrap_or("").to_string();
         let fault = *self.faults.get(&label).unwrap_or(&Fault::default());
         if fault.mode == 3 {
-            return true; // blackhole: the request never arrives (lost request)
+            // blackhole: the request never arrives (lost request)
+            return (json!({"result": "blackholed"}), fault.mode);
         }
         if fault.mode == 2 {
             std::thread::sleep(std::time::Duration::from_millis(fault.arg_ms));
         }
-        let answer = match op {
+        let answer = match op.as_str() {
             "submit" => {
                 let tx_id = v["txId"].as_str().unwrap_or("").to_string();
                 let payload = v["payload"].as_str().unwrap_or("").to_string();
@@ -266,37 +294,93 @@ impl Destination {
             }
             _ => json!({"result": "unrecognized"}),
         };
-        if fault.mode == 1 {
-            // LOST ACKNOWLEDGEMENT: the request was handled durably and
-            // only the answer is lost — the sender times out on a fact
-            return true;
-        }
+        (answer, fault.mode)
+    }
+
+    /// Entry for one request: gauge, barrier, then the state work.
+    fn handle(
+        dest: &Arc<Mutex<Destination>>,
+        gauge: &Gauge,
+        barrier: &Arc<(Mutex<bool>, Condvar)>,
+        v: Value,
+        w: &mut TcpStream,
+    ) -> bool {
+        let op = v["op"].as_str().unwrap_or("").to_string();
+        // control-plane ops never touch destination state
+        let answer = match op.as_str() {
+            "hold-submits" => {
+                let (lock, _) = &**barrier;
+                *lock.lock().unwrap() = true;
+                json!({"result": "ok"})
+            }
+            "release-submits" => {
+                let (lock, cv) = &**barrier;
+                *lock.lock().unwrap() = false;
+                cv.notify_all();
+                json!({"result": "ok"})
+            }
+            "stats" => json!({
+                "maxConcurrentSubmits": gauge.max.load(Ordering::SeqCst),
+                "inFlight": gauge.in_flight.load(Ordering::SeqCst),
+            }),
+            _ => {
+                let is_submit = op == "submit";
+                if is_submit {
+                    gauge.enter();
+                }
+                // a HELD submit waits here — in flight, counted, witnessed
+                if is_submit {
+                    let (lock, cv) = &**barrier;
+                    let mut held = lock.lock().unwrap();
+                    while *held {
+                        held = cv.wait(held).unwrap();
+                    }
+                }
+                let (answer, fault) = dest.lock().unwrap().handle_inner(v);
+                if is_submit {
+                    gauge.exit();
+                }
+                if fault == 1 {
+                    // LOST ACKNOWLEDGEMENT: handled durably, the answer is
+                    // swallowed — the sender times out on a fact
+                    return true;
+                }
+                answer
+            }
+        };
         let mut line = serde_json::to_string(&answer).unwrap();
         line.push('\n');
         let _ = w.write_all(line.as_bytes());
         true
     }
 
-    /// Serve forever on the given listener.
+    /// Serve forever on the given listener. — one thread per
+    /// connection (concurrent hosts are witnessed by the gauge).
     pub fn serve(self, listener: TcpListener) -> ! {
-        let mut dest = self;
+        let dest = Arc::new(Mutex::new(self));
+        let gauge = Arc::new(Gauge::new());
+        let barrier: Arc<(Mutex<bool>, Condvar)> = Arc::new((Mutex::new(false), Condvar::new()));
         for stream in listener.incoming() {
             let Ok(stream) = stream else { continue };
-            let _ = stream.set_nodelay(true);
-            let mut writer = match stream.try_clone() {
-                Ok(w) => w,
-                Err(_) => continue,
-            };
-            let reader = BufReader::new(stream);
-            for line in reader.lines() {
-                let Ok(line) = line else { break };
-                let Ok(v) = serde_json::from_str::<Value>(&line) else {
-                    continue;
+            let dest = dest.clone();
+            let gauge = gauge.clone();
+            let barrier = barrier.clone();
+            std::thread::spawn(move || {
+                let _ = stream.set_nodelay(true);
+                let Ok(mut writer) = stream.try_clone() else {
+                    return;
                 };
-                if !dest.handle(v, &mut writer) {
-                    break;
+                let reader = BufReader::new(stream);
+                for line in reader.lines() {
+                    let Ok(line) = line else { break };
+                    let Ok(v) = serde_json::from_str::<Value>(&line) else {
+                        continue;
+                    };
+                    if !Self::handle(&dest, &gauge, &barrier, v, &mut writer) {
+                        break;
+                    }
                 }
-            }
+            });
         }
         unreachable!("the destination serves until killed")
     }
