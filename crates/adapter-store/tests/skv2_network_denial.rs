@@ -27,7 +27,7 @@ use std::time::Duration;
 
 use adapter_store::{corpus_key, corpus_value, open_named};
 
-const OPS: u64 = 2000;
+const OPS: u64 = 20000;
 
 fn child_binary() -> std::path::PathBuf {
     let mut p = std::env::current_exe().expect("cwd");
@@ -181,7 +181,7 @@ fn run_workload(
     let mut samples = Vec::new();
     let mut max_sockets = 0usize;
     loop {
-        std::thread::sleep(Duration::from_millis(120));
+        std::thread::sleep(Duration::from_millis(60));
         match child.try_wait().expect("try_wait") {
             Some(_) => break,
             None => {
