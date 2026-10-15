@@ -144,10 +144,16 @@ test('cypherpunk: copy says "copied" only when the browser copied, and the clipb
   const refused = await p.textContent('#etDkCopied');
   assert.doesNotMatch(refused, /^copied/, 'no permission, no "copied"'); assert.match(refused, /refused|no clipboard/);
   const g = await open('cypherpunk', { clip: true });
+  // the Windows clipboard is the real system one and outlives the run: seed it, so a copy that never
+  // happened cannot pass on a previous run's text
+  await g.p.evaluate(() => navigator.clipboard.writeText('not copied by the page'));
   await g.p.click('#etDkCopy'); await g.p.waitForTimeout(250);
   assert.match(await g.p.textContent('#etDkCopied'), /^copied · 3 lines/);
   const clip = await g.p.evaluate(() => navigator.clipboard.readText());
-  assert.equal(clip, (await g.p.evaluate(() => window.__eternal.data.proof.commands)).join('\n'));
+  // the page writes '\n'; Chromium on Windows stores every line break on the system clipboard as CRLF
+  // (writeText 'a\nb', 'a\r\nb' and 'a\rb' all read back 'a\r\nb'), so the exact bytes differ per OS
+  const eol = process.platform === 'win32' ? '\r\n' : '\n';
+  assert.equal(clip, (await g.p.evaluate(() => window.__eternal.data.proof.commands)).join(eol));
   assert.equal(await g.p.$eval('#eternal .et-c-row a[target="_blank"]', a => a.rel), 'noopener noreferrer');
   await g.ctx.close();
 });
