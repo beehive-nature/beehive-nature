@@ -126,3 +126,84 @@ stack samples `/tmp/stall-samples/` (to be preserved under
 
 HUMAN INTERACTION: NONE · NEXT OWNER: this seat continues on the next
 wake; independent review judges E1 when a screening actually runs.
+
+## E1-CONCURRENCY-001 — ROOT CAUSE FOUND, REPAIRED, VERIFIED (2026-10-15)
+
+Founder order 2026-10-15 (same seat, no approval gate). Mission
+accomplished on the concurrency defect; E1 remains unqualified on
+delivery grounds (below).
+
+### Root cause (convicted by the minimal reproducer)
+
+`LeafEgressLimiter::snapshot()` — the E1 patch added a SECOND
+`self.lock_state()` inside the SAME struct literal
+(`reserved_tokens: self.lock_state().reserved_tokens` after the
+upstream `pending_recovery_intents: self.lock_state().intents.len()`).
+Struct-literal temporaries live to the end of the statement, so the
+first guard was STILL HELD when the second acquisition ran: a
+self-deadlock on the non-reentrant state mutex.
+
+This explains every observation:
+- fires at ANY share value (snapshot runs whatever the config) — the
+  share=0 rig wedge;
+- the "no holder" stacks — the holder was the snapshot thread itself,
+  parked re-acquiring its own guard (reproducer stacks show two
+  threads inside `snapshot` at the two lock sites, egress.rs:739/752);
+- executor starvation: the diagnostics route blocks inside the lock
+  forever; every reservation caller piles onto the futex; the
+  runtime heartbeat goes stale; the daemon self-restarts (its
+  unsupervised-handoff) — the restart cycles the rig saw;
+- all controls clean (upstream, pristine, comment-only, x0x-only):
+  exactly one lock acquisition per expression in each.
+
+### The minimal reproducer (committed as the regression)
+
+`scripts/btmd/e1/e1_concurrency_repro.rs` — in-crate, limiter-only,
+16 threads across the four real caller shapes (protected/data/
+recovery/snapshot), watchdog asserting no 10s op-class stall, gdb
+stack dump on failure. **Wedges the original implementation at
+share=0 and share=250; passes against the repair** (30s: 18k
+protected + 18k data + 6k recovery ops, 718 snapshots, zero stalls).
+Bound: default 20s, env-tunable — CI-safe.
+
+### The repair (the order's preferred shape)
+
+ONE hoisted short critical section before the struct literal reads
+both gauges and drops the guard — `snapshot()` now acquires the state
+mutex exactly once, counters stay outside the hot-path lock. No mutex
+replacement, no lock-free structures, no watchdog or timeout changes.
+
+### Post-repair verification
+
+- Crate: 7/7 E1 tests (6 scheduler invariants + reproducer), plus the
+  crate's own egress suite green.
+- Rebuilt candidate (build-e1.sh, toolchain pin 1.95.0; sha256
+  ff71bcac06ae8cf9c516758720a0a54f141a5a2e5bd1187407f1436de22fade2 PUBLIC-CONSTANT
+  PUBLIC-CONSTANT):
+  - **Null config, scale 9: CLEAN** (full verdict, no restarts).
+  - **E1-enabled (share 250, peer 500), scale 9: NO WEDGE** — full
+    trial, zero daemon restarts; the reservation ENGAGES (leaves show
+    reserved_tokens at the 1 MiB reserved burst cap; reserved_msgs
+    18/18/46/46 charged on the sync-active leaves; reserved counters
+    present in all 9 nodes' diagnostics).
+- Upstream control: clean 40+ prior trials (unchanged).
+
+### Honest delivery result of the first E1-enabled trial (single trial, not a distribution)
+
+sync 1/20 WITHIN-GATE, 19/20 LATE (all recovered within the 180s
+window), **0 lost, 0 unknown**. No starvation, no wedge — but
+within-gate delivery did not improve over stock shed in this one
+trial. E1 remains **unqualified**; the original performance-comparison
+campaign (bandwidth/delivery/memory/CPU/recovery under the same
+workload) resumes from here.
+
+### Next precise question for the comparison phase
+
+Which lane carries the within-gate eager forwarding of store records —
+the data lane (where the reservation lives) or the recovery lane
+(`try_reserve_recovery*`, where no reservation applies yet)? The
+recovery-lane IHAVE/ANTI_ENTROPY rows in the attribution deltas name
+the suspect; if the recovery lane is the within-gate carrier, the
+reservation must extend there under the same bounded-fairness rules.
+
+[skip ci]
