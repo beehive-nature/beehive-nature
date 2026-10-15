@@ -1,0 +1,31 @@
+$ cargo test -p adapter-store --locked --test skv1_crash_recovery -- --nocapture   # repaired oracle, receipts visible · 2026-10-15T12:40:29Z · Linux 6.18.33.2-microsoft-standard-WSL2 x86_64 · 8 cpu · WSL2, shared box
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /mnt/c/Users/travi/wt-skv1-repair/crates/bnr-keys/Cargo.toml
+workspace: /mnt/c/Users/travi/wt-skv1-repair/Cargo.toml
+   Compiling adapter-store v0.1.0 (/mnt/c/Users/travi/wt-skv1-repair/crates/adapter-store)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.07s
+     Running tests/skv1_crash_recovery.rs (/home/travi/tgt/skv1/debug/deps/skv1_crash_recovery-f970e24738cb66ee)
+
+running 8 tests
+test oracle_empty_history_expects_an_empty_store ... ok
+test oracle_corrupted_value_fails ... ok
+test oracle_op0_acknowledged_but_missing_fails ... ok
+test oracle_missing_interior_key_fails ... ok
+test oracle_op0_recovered_without_ack_is_accepted ... ok
+test oracle_unacked_committed_tail_with_tombstone_replays_exactly ... ok
+SKV1-RECEIPT engine=sqlite kill=BeforeFirstCommit child_exit=signal: 9 (SIGKILL) acked=0 committed_prefix=none recovery=empty-startup (no commit observed; NOT evidence that committed data survived) present=0 expected=0 torn=0 missing=0 exact=true integrity=ok verdict=PASS
+SKV1-RECEIPT engine=surrealkv kill=BeforeFirstCommit child_exit=signal: 9 (SIGKILL) acked=0 committed_prefix=none recovery=empty-startup (no commit observed; NOT evidence that committed data survived) present=0 expected=0 torn=0 missing=0 exact=true integrity=ok verdict=PASS
+SKV1-RECEIPT engine=surrealkv kill=Timed(150) child_exit=signal: 9 (SIGKILL) acked=1347 committed_prefix=1347 recovery=post-commit present=1187 expected=1187 torn=0 missing=0 exact=true integrity=ok verdict=PASS
+SKV1-RECEIPT engine=sqlite kill=Timed(150) child_exit=signal: 9 (SIGKILL) acked=2810 committed_prefix=2809 recovery=post-commit present=2466 expected=2466 torn=0 missing=0 exact=true integrity=ok verdict=PASS
+SKV1-RECEIPT engine=sqlite kill=Timed(400) child_exit=signal: 9 (SIGKILL) acked=6260 committed_prefix=6259 recovery=post-commit present=5485 expected=5485 torn=0 missing=0 exact=true integrity=ok verdict=PASS
+SKV1-RECEIPT engine=surrealkv kill=Timed(400) child_exit=signal: 9 (SIGKILL) acked=2987 committed_prefix=2987 recovery=post-commit present=2622 expected=2622 torn=0 missing=0 exact=true integrity=ok verdict=PASS
+SKV1-RECEIPT engine=sqlite kill=Timed(800) child_exit=signal: 9 (SIGKILL) acked=14203 committed_prefix=14202 recovery=post-commit present=12435 expected=12435 torn=0 missing=0 exact=true integrity=ok verdict=PASS
+SKV1-RECEIPT engine=surrealkv kill=Timed(800) child_exit=signal: 9 (SIGKILL) acked=7192 committed_prefix=7191 recovery=post-commit present=6301 expected=6301 torn=0 missing=0 exact=true integrity=ok verdict=PASS
+SKV1-RECEIPT engine=sqlite kill=AfterAcks(96) child_exit=signal: 9 (SIGKILL) acked=131 committed_prefix=130 recovery=post-commit present=122 expected=122 torn=0 missing=0 exact=true integrity=ok verdict=PASS
+test skv1_sqlite_crash_recovery ... ok
+SKV1-RECEIPT engine=surrealkv kill=AfterAcks(96) child_exit=signal: 9 (SIGKILL) acked=97 committed_prefix=96 recovery=post-commit present=92 expected=92 torn=0 missing=0 exact=true integrity=ok verdict=PASS
+test skv1_surrealkv_crash_recovery ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.74s
+
+exit=0

@@ -3,7 +3,12 @@
 //! hard-kills this process mid-run, then proves: every acknowledged commit
 //! survived, and no value is torn.
 //!
-//! argv: <engine sqlite|surrealkv> <dir> <count>
+//! argv: <engine sqlite|surrealkv> <dir> <count> [hold-before-first-commit]
+//!
+//! With the fourth argument the child opens the store and its ack log,
+//! writes `dir/ready`, and then holds without committing anything until it
+//! is killed: the deterministic pre-first-commit crash boundary (no timing
+//! guess about whether the kill lands before op 0).
 
 use std::fs::OpenOptions;
 use std::io::Write;
@@ -16,6 +21,11 @@ fn main() {
     let engine = args.next().expect("engine name");
     let dir = args.next().expect("dir");
     let count: u64 = args.next().expect("count").parse().expect("count as u64");
+    let hold = match args.next().as_deref() {
+        None => false,
+        Some("hold-before-first-commit") => true,
+        Some(other) => panic!("unknown mode {other:?}"),
+    };
 
     let store = open_named(&engine, &Path::new(&dir).join("store")).expect("open store");
 
@@ -25,6 +35,14 @@ fn main() {
         .truncate(true)
         .open(Path::new(&dir).join("acks.log"))
         .expect("acks.log");
+
+    if hold {
+        std::fs::write(Path::new(&dir).join("ready"), b"open, nothing committed")
+            .expect("ready marker");
+        loop {
+            std::thread::park();
+        }
+    }
 
     for i in 0..count {
         // Every 8th batch from i>=64 also deletes a key written 64 steps
