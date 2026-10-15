@@ -1,0 +1,54 @@
+# BNROSE-NETPART-001 — genuine iptables partitions, real TCP delivery
+# run: 2026-10-15T17:48:54Z ns=net:[4026532494]
+
+## leg 1 — cut BEFORE dispatch (link-A dropped)
+isolated node A: intent fetch timed out (real DROP); journalRecords=0 — no dispatch, no state
+leg 1 PASS — reachable node's effect landed once (rows=1); the isolated node never dispatched
+
+## leg 2 — cut AFTER dispatch (one receipt stranded), then re-delivery + duplicate GET
+leg 2 PASS — stranded receipt re-delivered: outcome=already; duplicate GET: still one row set; leg wall 18426ms
+
+## leg 3 — cut DURING recovery; UNKNOWN-era destination blind; wrong-key refused over the wire
+during the cut the destination serves only what it already holds (rows=2); the recovered receipt cannot arrive
+wrong-key delivery over the wire: refused (exit 1), no mutation
+leg 3 PASS — recovered receipt outcome=applied rows=3: one effect, applied after the partition healed
+{
+ "format": "bnrose-exec/netpart/1",
+ "topology": "one isolated rootless netns; sovereigns + destination as independent processes; real TCP via courier (links 7001/7002/7003); partitions = iptables OUTPUT DROP per link",
+ "faults": [
+  "cut-before-dispatch",
+  "cut-after-dispatch",
+  "cut-during-recovery",
+  "duplicate GET delivery",
+  "wrong-key receipt delivery"
+ ],
+ "leg2Dispatches": 10,
+ "dispatchLatencyMs": {
+  "p50": 38,
+  "p95": 142,
+  "p99": 142,
+  "max": 142
+ },
+ "courier": {
+  "bytes_in": 17405,
+  "bytes_out": 17630,
+  "puts": 25,
+  "gets": 25,
+  "hits": 25,
+  "misses": 0
+ },
+ "nodePeakRssKiB": {
+  "nodeB-dispatch": "4076",
+  "nodeC-lose-response": "Command exited with non-zero status 3"
+ },
+ "claims": [
+  "safety under genuine network failure demonstrated",
+  "NO global exactly-once claim",
+  "NO consensus claim"
+ ]
+}
+## verdict
+netpart-demo: PASS — genuine iptables partitions on real TCP links; the isolated
+node never dispatched; the stranded and recovered receipts re-delivered to 'already';
+the duplicate GET and the wrong-key delivery changed nothing. Safety held without
+any claim of global exactly-once execution or consensus.
