@@ -1,4 +1,4 @@
-$ sh scripts/bnrose-evolve/teeth.sh   # 2026-10-15T11:27:54Z · Linux 6.18.33.2-microsoft-standard-WSL2 x86_64 · 8 cpu · WSL2 on the founder's Windows box, shared with other seats' builds
+$ sh scripts/bnrose-evolve/teeth.sh   # 2026-10-15T12:47:40Z · Linux 6.18.33.2-microsoft-standard-WSL2 x86_64 · 8 cpu · WSL2 on the founder's Windows box, shared with other seats' builds
 control: the unmutated copy runs the whole battery
 control: GREEN
 TEETH missing-evidence-is-pass: CONVICTED by adversarial::forged_success_report_is_only_a_claim
