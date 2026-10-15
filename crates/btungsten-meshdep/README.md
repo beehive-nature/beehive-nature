@@ -90,12 +90,41 @@ reach the existing workload's UNKNOWN handling when their framing is valid.
 The read deadline starts after the request is written; it does not bound
 DNS/connect/write time or the separate SSE collector.
 
-No daemon forwarding defaults change. The SSE collector remains a separate
-unbounded queue/line-buffer follow-up; this change does not qualify the whole
-observer against hostile ingress. The new tests run in the existing
+No daemon forwarding defaults change. The new tests run in the existing
 `cargo test --workspace --locked` CI gate. Local reproduction:
 
 ```sh
 cargo test -p btungsten-meshdep --locked
 cargo fmt -p btungsten-meshdep --check
 ```
+
+## Bounded SSE evidence (PQ-NET-001 follow-up)
+
+Each `/events` collector admits 128 queued frames, with a 64 KiB limit on
+event/line state, 16 KiB of HTTP headers, and a 128-byte chunk-size line.
+Chunk lengths never allocate buffers. These are observer limits, not daemon
+payload budgets or a process RSS promise. Connect and request-write timeouts
+are five seconds each; headers have a ten-second total read deadline. Idle
+streams remain open, with cancellation checked every 200 ms. Startup waits
+for a valid HTTP 200 event-stream response from every leaf.
+
+The parser handles fragmented headers, chunk framing, UTF-8 split across
+reads, and multiline `data` events dispatched at blank lines. It accepts
+chunked or close-delimited HTTP/1.1 streams; finite Content-Length, chunk
+extensions, and unsupported encodings fail closed. Queues never block their
+reader: overflow, malformed evidence, disconnect, or reader panic leaves a
+sticky failure outside the queue. There is no reconnect pretending to prove
+continuity. Drains have a fixed work bound and run during the workload too.
+
+`CollectorSet::finish` stops and joins producers before draining accepted
+frames. The trial writes `ledger.json` and `observation.json`, including on
+workload errors. An observation failure prevents `verdict.json` and produces
+`invalid-trial.json`; missing observation is not scored as network loss.
+Drop also joins producers on early exits. The flood command uses the same
+final drain and observation validity check.
+
+This bounds the driver, not the upstream event broadcast. In pinned x0x
+v0.47.1, `src/server/sse.rs::events_sse` logs broadcast lag but does not send
+a gap marker to the client. Check node logs for that warning in measured
+runs, and keep this limitation explicit. No stable authenticated transport
+message ID or upstream per-kind counters are invented by this observer.

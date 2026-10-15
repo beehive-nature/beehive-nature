@@ -155,6 +155,9 @@ pub fn run_trial(
     let out_dir = std::path::Path::new(work_root)
         .join(run_id)
         .join("receipts");
+    if out_dir.exists() {
+        return Err("refusing existing trial receipts; use a fresh run_id".into());
+    }
     let receipts = Receipts::open(&out_dir)?;
     let spec = rig_spec(
         run_id,
@@ -167,9 +170,16 @@ pub fn run_trial(
         subnet_third,
     );
     receipts.write_json("spec.json", &spec)?;
+    receipts.write_json("workload.json", profile)?;
     let mut rig = Rig::build(spec)?;
     let result = trial_body(phase, label, run_id, &mut rig, profile, budgets, &receipts);
     rig.teardown();
+    if let Err(ref error) = result {
+        receipts.write_json(
+            "invalid-trial.json",
+            &serde_json::json!({"valid": false, "error": error}),
+        )?;
+    }
     result
 }
 
@@ -212,24 +222,25 @@ fn trial_body(
 
     let collectors = CollectorSet::spawn(rig, &leaf_labels)?;
 
-    // Calibration probe: a known-size publish must grow the sender's
-    // root-side mesh veth RX (the egress=rx direction mapping).
-    let cal_pre = rig.sample(&leaf_labels[0])?;
-    let cal_op = {
-        let mut w = WorkloadCtx::new(rig, 1, 10_000);
-        w.publish(
-            &mut ledger,
-            &leaf_labels[0],
-            PROBE_TOPIC,
-            OpClass::ClassProbe,
-            4096,
-            &[],
-        )?
-    };
-    thread::sleep(Duration::from_secs(6));
-    let cal_post = rig.sample(&leaf_labels[0])?;
-    collectors.drain_into(&mut ledger);
-    receipts.append_jsonl(
+    let measured = (|| -> Result<_, String> {
+        // Calibration probe: a known-size publish must grow the sender's
+        // root-side mesh veth RX (the egress=rx direction mapping).
+        let cal_pre = rig.sample(&leaf_labels[0])?;
+        let cal_op = {
+            let mut w = WorkloadCtx::new(rig, 1, 10_000);
+            w.publish(
+                &mut ledger,
+                &leaf_labels[0],
+                PROBE_TOPIC,
+                OpClass::ClassProbe,
+                4096,
+                &[],
+            )?
+        };
+        thread::sleep(Duration::from_secs(6));
+        let cal_post = rig.sample(&leaf_labels[0])?;
+        collectors.drain_into(&mut ledger);
+        receipts.append_jsonl(
         "calibration.jsonl",
         &serde_json::json!({
             "op": sanitize(&cal_op),
@@ -239,199 +250,216 @@ fn trial_body(
         }),
     )?;
 
-    // Group + store setup.
-    let (group_id, store_id, owner_hex) = {
-        let mut w = WorkloadCtx::new(rig, 1, 10_000);
-        let group_id = w.group_create("seed", "btmd-group")?;
-        let i1 = w.group_invite("seed", &group_id)?;
-        let i2 = w.group_invite("seed", &group_id)?;
-        w.group_join(&leaf_labels[0], &i1)?;
-        w.group_join(&leaf_labels[1], &i2)?;
-        let store_topic = "btmd/store/one";
-        let store_id = w.store_create("seed", "btmd-store", store_topic)?;
-        let owner_hex = w.agent_id("seed")?;
-        for l in leaf_labels.iter().take(2) {
-            let mut ok = false;
-            for _ in 0..30 {
-                if w.store_join(l, &store_id, &owner_hex).is_ok() {
-                    ok = true;
+        // Group + store setup.
+        let (group_id, store_id, owner_hex) = {
+            let mut w = WorkloadCtx::new(rig, 1, 10_000);
+            let group_id = w.group_create("seed", "btmd-group")?;
+            let i1 = w.group_invite("seed", &group_id)?;
+            let i2 = w.group_invite("seed", &group_id)?;
+            w.group_join(&leaf_labels[0], &i1)?;
+            w.group_join(&leaf_labels[1], &i2)?;
+            let store_topic = "btmd/store/one";
+            let store_id = w.store_create("seed", "btmd-store", store_topic)?;
+            let owner_hex = w.agent_id("seed")?;
+            for l in leaf_labels.iter().take(2) {
+                let mut ok = false;
+                for _ in 0..30 {
+                    if w.store_join(l, &store_id, &owner_hex).is_ok() {
+                        ok = true;
+                        break;
+                    }
+                    thread::sleep(Duration::from_secs(2));
+                }
+                if !ok {
+                    receipts
+                        .append_jsonl("notes.jsonl", &format!("store join still pending at {l}"))?;
+                }
+            }
+            (group_id, store_id, owner_hex)
+        };
+        let _ = owner_hex;
+
+        let intended_all: Vec<String> = leaf_labels.clone();
+        let intended_sync: Vec<String> = leaf_labels.iter().take(2).cloned().collect();
+
+        // The workload phase (identical shape for every matched trial).
+        let t0 = crate::client::now_ms();
+        let s_phase_start = rig.sample_all();
+        let mut dm_ops: Vec<String> = Vec::new();
+        {
+            let mut w = WorkloadCtx::new(rig, 1, 10_000);
+            let mut agent_ids = BTreeMap::new();
+            for l in &node_labels {
+                agent_ids.insert(l.clone(), w.agent_id(l)?);
+            }
+            for i in 0..profile.dm_count {
+                let from = &leaf_labels[i % leaf_labels.len()];
+                let to_l = &leaf_labels[(i + 1) % leaf_labels.len()];
+                let to_agent = agent_ids.get(to_l).cloned().unwrap_or_default();
+                if let Ok(op) = w.dm(&mut ledger, from, &to_agent, to_l, profile.dm_size) {
+                    dm_ops.push(op);
+                }
+                collectors.drain_into(&mut ledger);
+                thread::sleep(Duration::from_millis(300));
+            }
+            for _ in 0..profile.probe_bulk_msgs {
+                let intended: Vec<&str> = intended_all.iter().map(|s| s.as_str()).collect();
+                w.publish(
+                    &mut ledger,
+                    "seed",
+                    BULK_TOPIC,
+                    OpClass::ClassProbe,
+                    profile.probe_bulk_size,
+                    &intended,
+                )?;
+                collectors.drain_into(&mut ledger);
+                thread::sleep(Duration::from_millis(150));
+            }
+            for _ in 0..profile.probe_normal_msgs {
+                let intended: Vec<&str> = intended_all.iter().map(|s| s.as_str()).collect();
+                w.publish(
+                    &mut ledger,
+                    "seed",
+                    NORMAL_TOPIC,
+                    OpClass::ClassProbe,
+                    profile.probe_normal_size,
+                    &intended,
+                )?;
+                collectors.drain_into(&mut ledger);
+                thread::sleep(Duration::from_millis(150));
+            }
+            for _ in 0..profile.group_msgs {
+                // Group delivery is judged at the MEMBER roster (the two
+                // joiners) — a non-member leaf cannot observe group messages
+                // and must never be counted as an intended recipient.
+                let intended: Vec<&str> = intended_sync.iter().map(|s| s.as_str()).collect();
+                let _ = w.group_send(&mut ledger, &leaf_labels[0], &group_id, &intended)?;
+                collectors.drain_into(&mut ledger);
+                thread::sleep(Duration::from_millis(400));
+            }
+            for i in 0..profile.store_puts {
+                let intended: Vec<&str> = intended_sync.iter().map(|s| s.as_str()).collect();
+                let _ = w.store_put(
+                    &mut ledger,
+                    "seed",
+                    &store_id,
+                    &format!("k{i}"),
+                    &vec![b'v'; profile.store_value_size],
+                    &intended,
+                );
+                collectors.drain_into(&mut ledger);
+                thread::sleep(Duration::from_millis(300));
+            }
+            let intended: Vec<&str> = intended_all.iter().map(|s| s.as_str()).collect();
+            let _ = w.discovery_browse(&mut ledger, &leaf_labels[1], &intended);
+        }
+        // Observation sweep: recipient-side evidence until settled or bounded.
+        {
+            let w = WorkloadCtx::new(rig, 1, 10_000);
+            // The observation window bounds how long recipient-side evidence
+            // is waited for. Extending it (BTMD_SWEEP_MS) tests lazy recovery
+            // without changing the DELIVERY GATE (convergence_secs_max stays
+            // in the frozen budgets — late convergence still counts against
+            // the gate as DelayedDelivered, never as on-time).
+            let sweep_ms: u64 = std::env::var("BTMD_SWEEP_MS")
+                .ok()
+                .and_then(|v| v.parse().ok())
+                .unwrap_or(45_000);
+            let sweep_deadline = crate::client::now_ms() + sweep_ms;
+            loop {
+                // Snapshot pending (op, node) pairs first: the ledger is
+                // mutated inside the loop.
+                let mut pending_group: Vec<(String, String)> = Vec::new();
+                let mut pending_sync: Vec<(String, String, String)> = Vec::new();
+                for op in &ledger.ops {
+                    for l in &op.intended {
+                        if ledger.has_delivery(&op.op_id, l) {
+                            continue;
+                        }
+                        match op.class {
+                            OpClass::GroupOp => pending_group.push((op.op_id.clone(), l.clone())),
+                            OpClass::StateSync => {
+                                // The store key rides the op's destination
+                                // ("store:<key>") — never an index.
+                                let key = op.destination_key();
+                                pending_sync.push((op.op_id.clone(), l.clone(), key))
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                for (op_id, l) in &pending_group {
+                    if w.group_observe(l, &group_id, op_id).unwrap_or(false) {
+                        ledger.record(Event::Delivered {
+                            op_id: op_id.clone(),
+                            node: l.clone(),
+                            at_ms: crate::client::now_ms(),
+                        });
+                    }
+                }
+                for (op_id, l, key) in &pending_sync {
+                    if w.store_observe(l, &store_id, key, op_id).unwrap_or(false) {
+                        ledger.record(Event::Delivered {
+                            op_id: op_id.clone(),
+                            node: l.clone(),
+                            at_ms: crate::client::now_ms(),
+                        });
+                    }
+                }
+                collectors.drain_into(&mut ledger);
+                let m_grp = ledger.matrix_for_class(OpClass::GroupOp);
+                let m_sync = ledger.matrix_for_class(OpClass::StateSync);
+                let pending = (m_grp.total - m_grp.delivered)
+                    + (m_sync.total - m_sync.delivered - m_sync.unknown);
+                if pending == 0 || crate::client::now_ms() > sweep_deadline {
                     break;
                 }
-                thread::sleep(Duration::from_secs(2));
-            }
-            if !ok {
-                receipts
-                    .append_jsonl("notes.jsonl", &format!("store join still pending at {l}"))?;
+                thread::sleep(Duration::from_secs(3));
             }
         }
-        (group_id, store_id, owner_hex)
-    };
-    let _ = owner_hex;
+        let s_phase_end = rig.sample_all();
+        let phase_secs = (crate::client::now_ms() - t0) as f64 / 1000.0;
 
-    let intended_all: Vec<String> = leaf_labels.clone();
-    let intended_sync: Vec<String> = leaf_labels.iter().take(2).cloned().collect();
-
-    // The workload phase (identical shape for every matched trial).
-    let t0 = crate::client::now_ms();
-    let s_phase_start = rig.sample_all();
-    let mut dm_ops: Vec<String> = Vec::new();
-    {
-        let mut w = WorkloadCtx::new(rig, 1, 10_000);
-        let mut agent_ids = BTreeMap::new();
-        for l in &node_labels {
-            agent_ids.insert(l.clone(), w.agent_id(l)?);
-        }
-        for i in 0..profile.dm_count {
-            let from = &leaf_labels[i % leaf_labels.len()];
-            let to_l = &leaf_labels[(i + 1) % leaf_labels.len()];
-            let to_agent = agent_ids.get(to_l).cloned().unwrap_or_default();
-            if let Ok(op) = w.dm(&mut ledger, from, &to_agent, to_l, profile.dm_size) {
-                dm_ops.push(op);
-            }
-            thread::sleep(Duration::from_millis(300));
-        }
-        for _ in 0..profile.probe_bulk_msgs {
-            let intended: Vec<&str> = intended_all.iter().map(|s| s.as_str()).collect();
-            w.publish(
-                &mut ledger,
-                "seed",
-                BULK_TOPIC,
-                OpClass::ClassProbe,
-                profile.probe_bulk_size,
-                &intended,
-            )?;
-            thread::sleep(Duration::from_millis(150));
-        }
-        for _ in 0..profile.probe_normal_msgs {
-            let intended: Vec<&str> = intended_all.iter().map(|s| s.as_str()).collect();
-            w.publish(
-                &mut ledger,
-                "seed",
-                NORMAL_TOPIC,
-                OpClass::ClassProbe,
-                profile.probe_normal_size,
-                &intended,
-            )?;
-            thread::sleep(Duration::from_millis(150));
-        }
-        for _ in 0..profile.group_msgs {
-            // Group delivery is judged at the MEMBER roster (the two
-            // joiners) — a non-member leaf cannot observe group messages
-            // and must never be counted as an intended recipient.
-            let intended: Vec<&str> = intended_sync.iter().map(|s| s.as_str()).collect();
-            let _ = w.group_send(&mut ledger, &leaf_labels[0], &group_id, &intended)?;
-            thread::sleep(Duration::from_millis(400));
-        }
-        for i in 0..profile.store_puts {
-            let intended: Vec<&str> = intended_sync.iter().map(|s| s.as_str()).collect();
-            let _ = w.store_put(
-                &mut ledger,
-                "seed",
-                &store_id,
-                &format!("k{i}"),
-                &vec![b'v'; profile.store_value_size],
-                &intended,
-            );
-            thread::sleep(Duration::from_millis(300));
-        }
-        let intended: Vec<&str> = intended_all.iter().map(|s| s.as_str()).collect();
-        let _ = w.discovery_browse(&mut ledger, &leaf_labels[1], &intended);
-    }
-    // Observation sweep: recipient-side evidence until settled or bounded.
-    {
-        let w = WorkloadCtx::new(rig, 1, 10_000);
-        // The observation window bounds how long recipient-side evidence
-        // is waited for. Extending it (BTMD_SWEEP_MS) tests lazy recovery
-        // without changing the DELIVERY GATE (convergence_secs_max stays
-        // in the frozen budgets — late convergence still counts against
-        // the gate as DelayedDelivered, never as on-time).
-        let sweep_ms: u64 = std::env::var("BTMD_SWEEP_MS")
-            .ok()
-            .and_then(|v| v.parse().ok())
-            .unwrap_or(45_000);
-        let sweep_deadline = crate::client::now_ms() + sweep_ms;
-        loop {
-            // Snapshot pending (op, node) pairs first: the ledger is
-            // mutated inside the loop.
-            let mut pending_group: Vec<(String, String)> = Vec::new();
-            let mut pending_sync: Vec<(String, String, String)> = Vec::new();
-            for op in &ledger.ops {
-                for l in &op.intended {
-                    if ledger.has_delivery(&op.op_id, l) {
-                        continue;
-                    }
-                    match op.class {
-                        OpClass::GroupOp => pending_group.push((op.op_id.clone(), l.clone())),
-                        OpClass::StateSync => {
-                            // The store key rides the op's destination
-                            // ("store:<key>") — never an index.
-                            let key = op.destination_key();
-                            pending_sync.push((op.op_id.clone(), l.clone(), key))
-                        }
-                        _ => {}
-                    }
-                }
-            }
-            for (op_id, l) in &pending_group {
-                if w.group_observe(l, &group_id, op_id).unwrap_or(false) {
-                    ledger.record(Event::Delivered {
-                        op_id: op_id.clone(),
-                        node: l.clone(),
-                        at_ms: crate::client::now_ms(),
-                    });
-                }
-            }
-            for (op_id, l, key) in &pending_sync {
-                if w.store_observe(l, &store_id, key, op_id).unwrap_or(false) {
-                    ledger.record(Event::Delivered {
-                        op_id: op_id.clone(),
-                        node: l.clone(),
-                        at_ms: crate::client::now_ms(),
-                    });
-                }
+        // Idle window with per-second kernel accounting.
+        let s_idle_start = rig.sample_all();
+        let idle_start_ms = crate::client::now_ms();
+        while crate::client::now_ms() - idle_start_ms < profile.idle_secs * 1000 {
+            for s in rig.sample_all() {
+                let _ = receipts.append_jsonl("samples.jsonl", &s);
             }
             collectors.drain_into(&mut ledger);
-            let m_grp = ledger.matrix_for_class(OpClass::GroupOp);
-            let m_sync = ledger.matrix_for_class(OpClass::StateSync);
-            let pending = (m_grp.total - m_grp.delivered)
-                + (m_sync.total - m_sync.delivered - m_sync.unknown);
-            if pending == 0 || crate::client::now_ms() > sweep_deadline {
-                break;
+            thread::sleep(Duration::from_secs(1));
+        }
+        let s_idle_end = rig.sample_all();
+        let idle_min = profile.idle_secs as f64 / 60.0;
+
+        // Diagnostics snapshots — APPLICATION-LEVEL, never verdict sources.
+        for l in &node_labels {
+            if let Ok(d) = rig.diagnostics(l, "gossip") {
+                let row = serde_json::json!({
+                    "node": l, "level": "application", "at_ms": crate::client::now_ms(),
+                    "gossip": serde_json::from_str::<serde_json::Value>(&d).unwrap_or(serde_json::Value::Null)
+                });
+                let _ = receipts.append_jsonl("diagnostics.jsonl", &row);
             }
-            thread::sleep(Duration::from_secs(3));
         }
-    }
-    let s_phase_end = rig.sample_all();
-    let phase_secs = (crate::client::now_ms() - t0) as f64 / 1000.0;
 
-    // Idle window with per-second kernel accounting.
-    let s_idle_start = rig.sample_all();
-    let idle_start_ms = crate::client::now_ms();
-    while crate::client::now_ms() - idle_start_ms < profile.idle_secs * 1000 {
-        for s in rig.sample_all() {
-            let _ = receipts.append_jsonl("samples.jsonl", &s);
-        }
-        collectors.drain_into(&mut ledger);
-        thread::sleep(Duration::from_secs(1));
-    }
-    let s_idle_end = rig.sample_all();
-    let idle_min = profile.idle_secs as f64 / 60.0;
-
-    // Diagnostics snapshots — APPLICATION-LEVEL, never verdict sources.
-    for l in &node_labels {
-        if let Ok(d) = rig.diagnostics(l, "gossip") {
-            let row = serde_json::json!({
-                "node": l, "level": "application", "at_ms": crate::client::now_ms(),
-                "gossip": serde_json::from_str::<serde_json::Value>(&d).unwrap_or(serde_json::Value::Null)
-            });
-            let _ = receipts.append_jsonl("diagnostics.jsonl", &row);
-        }
-    }
-
-    collectors.stop();
+        Ok((
+            s_phase_start,
+            s_phase_end,
+            phase_secs,
+            s_idle_start,
+            s_idle_end,
+            idle_min,
+        ))
+    })();
+    let observation = collectors.finish(&mut ledger);
     let journal =
         serde_json::json!({"ops": ledger.ops, "events": ledger.events, "retries": ledger.retries});
     receipts.write_json("ledger.json", &journal)?;
+    receipts.write_json("observation.json", &observation)?;
+    observation.require_valid()?;
+    let (s_phase_start, s_phase_end, phase_secs, s_idle_start, s_idle_end, idle_min) = measured?;
 
     // Cost rows + verdicts.
     let ticks_per_sec = 100.0f64;
