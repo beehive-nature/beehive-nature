@@ -730,6 +730,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "btungsten-meshdep"
+version = "0.1.0"
+dependencies = [
+ "btungsten-wb001-core",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+]
+
+[[package]]
 name = "btungsten-pq"
 version = "0.1.0"
 dependencies = [

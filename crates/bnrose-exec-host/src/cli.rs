@@ -54,7 +54,7 @@ pub fn run_cli(argv: Vec<String>) -> i32 {
         Some((c, rest)) => (c.as_str(), rest.to_vec()),
         None => {
             eprintln!(
-                "usage: bnrose-exec <init|make-fixture|run-op|recover|verify-receipt|status> ..."
+                "usage: bnrose-exec <init|make-fixture|run-op|recover|verify-receipt|status|dest-init|dest-apply> ..."
             );
             return 1;
         }
@@ -84,6 +84,20 @@ pub fn run_cli(argv: Vec<String>) -> i32 {
             }
         },
         "status" => match cmd_status(&args) {
+            Ok(code) => code,
+            Err(e) => {
+                eprintln!("refused: {e}");
+                1
+            }
+        },
+        "dest-init" => match cmd_dest_init(&args) {
+            Ok(()) => 0,
+            Err(e) => {
+                eprintln!("refused: {e}");
+                1
+            }
+        },
+        "dest-apply" => match cmd_dest_apply(&args) {
             Ok(code) => code,
             Err(e) => {
                 eprintln!("refused: {e}");
@@ -253,6 +267,86 @@ fn cmd_verify(args: &[String]) -> Result<i32, String> {
         .and_then(|s| serde_json::from_str(&s).map_err(|e| e.to_string()))?;
     let r = Receipt::from_json(&v)?;
     Ok(if r.verify(&pk) { 0 } else { 1 })
+}
+
+/// The cross-node harness destination: a durable ledger owner that
+/// accepts only VERIFIED receipts and applies effects idempotently by
+/// op id. This is the single-owner test-harness destination (one ledger
+/// key, local claim semantics of its own state directory) — NOT an
+/// adversarial model and NOT a consensus mechanism. Exactly one row per
+/// op here does not establish globally exactly-once execution across
+/// arbitrary destinations; that requires destination-specific atomicity,
+/// durable deduplication, and finality assumptions (the review's
+/// 2026-10-14 boundary, held verbatim).
+fn cmd_dest_init(args: &[String]) -> Result<(), String> {
+    let state = PathBuf::from(need(args, "--state")?);
+    let root_hex = need(args, "--root-hex")?;
+    if root_hex.len() != 64 {
+        return Err("--root-hex is 64 hex characters (32 bytes)".into());
+    }
+    let root: [u8; 32] = unhex(&root_hex)?.try_into().map_err(|_| "root")?;
+    std::fs::create_dir_all(&state).map_err(|e| e.to_string())?;
+    let p = state.join("destination.root");
+    if p.exists() {
+        return Err(format!(
+            "{} already exists: a destination root is never silently replaced",
+            p.display()
+        ));
+    }
+    std::fs::write(&p, root).map_err(|e| e.to_string())?;
+    let keys = crate::keys::SupervisorKeys::from_root(&root);
+    println!(
+        "{}",
+        serde_json::json!({
+            "state": state.display().to_string(),
+            "destinationFingerprint": keys.fingerprint(),
+            "note": "harness destination: one ledger owner, not an adversarial or consensus model",
+        })
+    );
+    Ok(())
+}
+
+fn cmd_dest_apply(args: &[String]) -> Result<i32, String> {
+    let state = PathBuf::from(need(args, "--state")?);
+    let path = need(args, "--receipt")?;
+    let pk_hex = need(args, "--pk")?;
+    let wall: u64 = flag(args, "--wall")
+        .unwrap_or_else(|| "0".into())
+        .parse()
+        .map_err(|_| "wall")?;
+    let pk: [u8; 32] = unhex(&pk_hex)?
+        .try_into()
+        .map_err(|_| "pk must be 32 bytes")?;
+    let rb = std::fs::read(state.join("destination.root"))
+        .map_err(|e| format!("destination.root: {e}"))?;
+    if rb.len() != 32 {
+        return Err("destination root must be exactly 32 bytes".into());
+    }
+    let keys = crate::keys::SupervisorKeys::from_root(&rb.try_into().unwrap());
+    let v: Value = std::fs::read_to_string(&path)
+        .map_err(|e| e.to_string())
+        .and_then(|s| serde_json::from_str(&s).map_err(|e| e.to_string()))?;
+    let r = Receipt::from_json(&v)?;
+    if !r.verify(&pk) {
+        // The destination rejects unverified evidence before any effect.
+        return Ok(1);
+    }
+    let mut dest = crate::ledger::EffectLedger::open(&state.join("effects.bin"), &keys.ledger_mac)
+        .map_err(|e| e.to_string())?;
+    let (outcome, op) = match dest.apply(&r.op, &r.env_sha, &r.effect, wall) {
+        Ok(crate::ledger::ApplyOutcome::Applied(row)) => ("applied", row.op_id),
+        Ok(crate::ledger::ApplyOutcome::Already(row)) => ("already", row.op_id),
+        Err(e) => return Err(e.to_string()),
+    };
+    println!(
+        "{}",
+        serde_json::json!({
+            "outcome": outcome,
+            "op": hex(&op),
+            "rows": dest.len(),
+        })
+    );
+    Ok(0)
 }
 
 fn cmd_status(args: &[String]) -> Result<i32, String> {
