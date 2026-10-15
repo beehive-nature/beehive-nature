@@ -80,6 +80,7 @@ members = [
     "crates/bheraldry",
     "crates/bpq-device-xcheck",
     "crates/antelope-authority",
+    "crates/bindex-bnrose",
 ]
 
 [workspace.metadata]
