@@ -265,3 +265,39 @@ peer-admission/downstream delays get investigated.)
    per the order's sequencing, attribution first.
 
 [skip ci]
+
+## E1-RECOVERY-RESERVATION-001 — implemented, first verification 16/20 within gate (2026-10-15)
+
+Corrections (review, PR #429 issuecomment-6202373075) — all cured and
+committed @c668c5088: (1) attribution now computes true t0→t1 DELTAS for
+per-purpose rows (finding unchanged: n1 window IHAVE shed dominates);
+(2) screen-run.sh validates each verdict's run_id+label+shape — stale or
+malformed files fail; (3) the reproducer's gdb dump runs under
+`timeout 10`.
+
+The extension: verified joined-store scopes in the RECOVERY lane
+(IHAVE/IWANT) get the same bounded reservation as the data lane,
+charged from the SAME shared buckets — one combined budget, per-peer
+caps, borrowing floors, counted fall-through to the ordinary
+escrow/rotation path when unfunded. Critical-class recovery never
+passes through; share=0 is byte-identical. 5 new invariants (12/12 E1
+tests green); the peer-cap test caught a missing counter increment
+(fixed), and the no-double-charge test caught the SAME self-deadlock
+class in its own harness (inline `lock_state().generation` as a call
+argument — hoisted, the trap documented in place).
+
+Rebuilt candidate (build receipt updated). **Verification trial
+(scale 9, share 250/peer 500): sync 16/20 WITHIN-GATE (was 1/20 with
+the data-lane-only reservation), 4/20 late-recovered, 0 lost, 0
+unknown, no wedge, no restarts.** The recovery-lane reservation is the
+mechanism the attribution predicted.
+
+The 5-leg × 10-trial interleaved campaign (baseline / shed / shedhi on
+the release binary + e1off / e1 on the candidate — fail-fast, verdict
+identity validated) is RUNNING; its distribution decides whether the
+remaining 4/20 gap is reservation tuning or the capacity ceiling the
+founder flagged (if unique IHAVE demand exceeds the hard budget's 10s
+deliverable, announcement coalescing/dedup is the next mechanism, not
+more priority).
+
+[skip ci]
