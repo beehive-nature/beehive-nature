@@ -64,7 +64,6 @@ members = [
     "crates/settle-solana",
     "crates/bnr-seal",
     "crates/bnrose-exec-core",
-    "crates/bnrose-replacement-law",
     "crates/bnrose-exec-wasm",
     "crates/bnrose-exec-host",
     "crates/bnrose-netpart",
