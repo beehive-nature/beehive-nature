@@ -2832,7 +2832,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
 </main>
 <footer>
-  skaists heART WALLet · <a href="museum.html">Art &amp; collections</a> · <a href="index.html">the hub</a>
+  skaists heART WALLet · <a href="museum.html" data-i18n="wl.foot.art">Art &amp; collections</a> · <a href="index.html" data-i18n="deck.crumb.hub">the hub</a>
   <details class="wl-foot" data-reg-disclose><summary data-i18n="wl.foot.how">how this page is built</summary>
   <span id="core-badge">core: checking…</span> · action translation: vendored eosjs (ABI serializer)<br>
   static · derived keys live in tab memory only · vault secrets sealed with PBKDF2+AES-GCM · Rust core: crates/bnr-keys · AGPL-3.0-only · this page: surfaces/wallet.html
@@ -6226,6 +6226,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         {cy:raw+' · a phone QR offered by the browser works only when the phone\'s passkey provider carries PRF (Bitwarden there intercepts; set the phone\'s default provider to Google or iCloud, or open the wallet on the phone) · creating a passkey here makes a NEW soul, never this one'}];
     return ['the passkey did not answer. ',tryB,' in a moment, or bring your soul back with ',rec,'.',{cy:'passkey lane: '+raw}];
   }
+  /* wallet translation shim: lang.js exposes BNRLanguage.text once the corpus
+     is loaded; before that (or offline) the English fallback stands. */
+  var WTX=function(k,f){return (window.BNRLanguage&&BNRLanguage.text)?BNRLanguage.text(k,f):f;};
   /* ORIGIN GUARD: a wallet opened on an IP (a local build server) can never run
      a passkey lane — WebAuthn requires a registrable domain. Say it up front,
      with the door out, instead of letting the ceremonies fail one by one. */
@@ -11232,10 +11235,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       CORE=c;
       var b=$('core-badge');
       if(c){
-        b.innerHTML='<span style="color:var(--leaf)">⚙ first-party Rust core armed</span> (bnr-keys.wasm, self-test passed)';
+        b.innerHTML='<span style="color:var(--leaf)">'+(WTX('wl.core.armed','⚙ first-party Rust core armed'))+'</span> ('+(WTX('wl.core.selftest','bnr-keys.wasm, self-test passed'))+')';
         if(MPRK){deriveK1();renderForge();checkBridge()}
       } else {
-        b.innerHTML='<span style="color:var(--dim)">core: vendored eosjs lane (Rust core unavailable here)</span>';
+        b.innerHTML='<span style="color:var(--dim)">'+(WTX('wl.core.vendored','core: vendored eosjs lane (Rust core unavailable here)'))+'</span>';
       }
     });
   } else { var cb=$('core-badge'); if(cb)cb.textContent='core: vendored eosjs lane (the Rust core script did not load)'; }
