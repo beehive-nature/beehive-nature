@@ -9,5 +9,11 @@ fn main() {
     let bound = listener.local_addr().expect("addr").port();
     println!("{bound}");
     std::io::Write::flush(&mut std::io::stdout()).ok();
-    bnrose_netpart::dest::Destination::new(log).serve(listener);
+    match bnrose_netpart::dest::Destination::new(log) {
+        Ok(d) => d.serve(listener),
+        Err(e) => {
+            eprintln!("destination refused to start: {e}");
+            std::process::exit(2);
+        }
+    }
 }

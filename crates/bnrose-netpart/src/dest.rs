@@ -53,49 +53,59 @@ pub struct Destination {
 }
 
 impl Destination {
-    pub fn new(log_path: PathBuf) -> Destination {
+    pub fn new(log_path: PathBuf) -> Result<Destination, String> {
         let mut d = Destination {
             log_path,
             txs: BTreeMap::new(),
             faults: BTreeMap::new(),
             fail_next_append: false,
         };
-        d.replay();
-        d
+        d.replay()?;
+        Ok(d)
     }
 
     /// Restart-safe: replay the durable acceptance log.
-    fn replay(&mut self) {
-        if let Ok(lines) = std::fs::read_to_string(&self.log_path) {
-            for line in lines.lines() {
-                let Ok(v) = serde_json::from_str::<Value>(line) else {
-                    continue;
-                };
-                let tx = v["txId"].as_str().unwrap_or("");
-                match v["ev"].as_str() {
-                    Some("accept") => {
-                        self.txs.insert(
-                            tx.to_string(),
-                            Tx {
-                                payload_hex: v["payload"].as_str().unwrap_or("").into(),
-                                state: TxState::Pending,
-                            },
-                        );
-                    }
-                    Some("included") => {
-                        if let Some(t) = self.txs.get_mut(tx) {
-                            t.state = TxState::Included;
-                        }
-                    }
-                    Some("final") => {
-                        if let Some(t) = self.txs.get_mut(tx) {
-                            t.state = TxState::Final;
-                        }
-                    }
-                    _ => {}
+    fn replay(&mut self) -> Result<(), String> {
+        let text = match std::fs::read_to_string(&self.log_path) {
+            Ok(t) => t,
+            // a MISSING log is a fresh destination — empty and honest;
+            // anything else (unreadable) is damage
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+            Err(e) => return Err(format!("log unreadable: {e}")),
+        };
+        for line in text.lines() {
+            if line.trim().is_empty() {
+                continue;
+            }
+            // FAIL CLOSED: a malformed line is damage, never skippable
+            // noise — a corrupted log refuses to serve, loudly
+            let v = serde_json::from_str::<Value>(line)
+                .map_err(|e| format!("corrupt acceptance log: {e}"))?;
+            let tx = v["txId"].as_str().unwrap_or("");
+            match v["ev"].as_str() {
+                Some("accept") => {
+                    self.txs.insert(
+                        tx.to_string(),
+                        Tx {
+                            payload_hex: v["payload"].as_str().unwrap_or("").into(),
+                            state: TxState::Pending,
+                        },
+                    );
                 }
+                Some("included") => {
+                    if let Some(t) = self.txs.get_mut(tx) {
+                        t.state = TxState::Included;
+                    }
+                }
+                Some("final") => {
+                    if let Some(t) = self.txs.get_mut(tx) {
+                        t.state = TxState::Final;
+                    }
+                }
+                _ => {}
             }
         }
+        Ok(())
     }
 
     /// CHECKED durability (founder review of #444): a write or fsync
@@ -118,7 +128,7 @@ impl Destination {
         Ok(())
     }
 
-    fn advance_blocks(&mut self, blocks: u64) {
+    fn advance_blocks(&mut self, blocks: u64) -> Result<(), String> {
         // block production: pending→included after 1 block, included→final
         // after 2 more — a stand-in ladder with REAL state separateness
         for _ in 0..blocks {
@@ -131,15 +141,19 @@ impl Destination {
                     TxState::Final => {}
                 }
             }
+            // CHECKED transitions (founder review): memory moves ONLY
+            // after the durable write proves it — a failed write aborts
+            // the advance with nothing half-moved
             for id in to_include {
-                self.append_log(&json!({"ev": "included", "txId": id}));
+                self.append_log(&json!({"ev": "included", "txId": id}))?;
                 self.txs.get_mut(&id).unwrap().state = TxState::Included;
             }
             for id in to_finalize {
-                self.append_log(&json!({"ev": "final", "txId": id}));
+                self.append_log(&json!({"ev": "final", "txId": id}))?;
                 self.txs.get_mut(&id).unwrap().state = TxState::Final;
             }
         }
+        Ok(())
     }
 
     fn handle(&mut self, v: Value, w: &mut TcpStream) -> bool {
@@ -195,8 +209,10 @@ impl Destination {
             }
             "advance" => {
                 let blocks = v["blocks"].as_u64().unwrap_or(1);
-                self.advance_blocks(blocks);
-                json!({"result": "ok"})
+                match self.advance_blocks(blocks) {
+                    Ok(()) => json!({"result": "ok"}),
+                    Err(e) => json!({"result": "storage-error", "why": e}),
+                }
             }
             "fault" => {
                 let for_label = v["for"].as_str().unwrap_or("").to_string();

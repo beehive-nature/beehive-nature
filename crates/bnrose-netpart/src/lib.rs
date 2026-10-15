@@ -354,10 +354,20 @@ impl Host {
                 }
             }
         }
-        // the effect boundary: submit the EXACT recorded bytes
+        // the effect boundary: submit the EXACT recorded bytes. On
+        // recovery the bytes are SOURCED FROM THE AUTHENTICATED JOURNAL
+        // (founder review: recovery must not recompute from a supplied
+        // intent) — the journal's own admission is the authority.
+        let (submit_tx_id, submit_env_hex) = if rebroadcast {
+            match self.persisted_submission(&op) {
+                Some((env, _sig, tx)) => (tx, bnrose_exec_host::hex(&env)),
+                None => (tx_id.clone(), bnrose_exec_host::hex(&intent.env)),
+            }
+        } else {
+            (tx_id.clone(), bnrose_exec_host::hex(&intent.env))
+        };
         let outcome = if fresh || rebroadcast {
-            let env_hex = bnrose_exec_host::hex(&intent.env);
-            self.dest.submit(&tx_id, &env_hex)
+            self.dest.submit(&submit_tx_id, &submit_env_hex)
         } else {
             SubmitOutcome::Duplicate // no submission; observation only below
         };

@@ -95,3 +95,35 @@ directory panicked; the binary now returns through `run()` so claims
 release. `Host::open` loads an existing root instead of refusing to
 re-initialize. Nine scenarios green (5 + 4); the model-finality label
 stands (`advance` is block-production theatre, honestly named).
+
+## Layer 3 (the second founder review of #444, answered)
+
+All four named gaps closed, each convicted:
+
+1. **Destination durability, everywhere** — `advance_blocks` is CHECKED:
+   an inclusion/finality event that fails its durable write aborts the
+   advance with nothing half-moved (memory follows proof). `replay` FAILS
+   CLOSED: a corrupted or truncated acceptance log refuses to serve (the
+   restart exits nonzero — l5); a MISSING log is a fresh destination,
+   honestly empty.
+2. **Recovery sourced from the journal** — the rebroadcast now SUBMITS
+   the journal's own persisted bytes under the journal's own transaction
+   id (`persisted_submission` is the source, not a cross-check); the
+   supplied intent remains a refusal gate only.
+3. **Proxy fail-closed** — the rules file is a WHITELIST: a label not
+   listed is dropped (a client cannot rename itself past a rule); an
+   unreadable or malformed rules file severs EVERY connection. The
+   topology stays an application-layer proxy over loopback TCP — OS-level
+   network isolation remains named, not claimed.
+4. **Concurrent competing recovery** — l6: two replacement hosts,
+   prepared before either runs, recover the SAME unresolved operation
+   SIMULTANEOUSLY (both processes racing); their rebroadcasts are the
+   journal's identical bytes; the destination holds ONE acceptance; no
+   conflict; both observe final. Sequential handoff (l4) and the
+   simultaneous race (l6) are now separate rows.
+
+Also this pass: the branch was DIRTY against advanced main (same-named
+dispatch from the sibling netpart lane) — merged, both dispatches
+preserved (mine renamed `-harness`). #440's packet-drop evidence stays
+separate; real Arbitrum/Hive finality stays the later qualification.
+Eleven scenarios green locally.

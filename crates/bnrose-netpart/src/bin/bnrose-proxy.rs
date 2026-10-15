@@ -18,11 +18,13 @@ use serde_json::Value;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::{TcpListener, TcpStream};
 
-fn rules_of(path: &str) -> Value {
-    std::fs::read_to_string(path)
-        .ok()
-        .and_then(|s| serde_json::from_str(&s).ok())
-        .unwrap_or(Value::Null)
+/// FAIL-CLOSED rules (founder review): a rule entry is one of
+/// {"mode": "pass" | "drop" | "drop-ack" | "delay", "ms": n}. A label
+/// NOT LISTED is dropped; an unreadable or malformed rules file drops
+/// EVERYTHING — the proxy never passes traffic it cannot account for.
+fn rules_of(path: &str) -> Option<Value> {
+    let text = std::fs::read_to_string(path).ok()?;
+    serde_json::from_str(&text).ok()?
 }
 
 fn main() {
@@ -35,7 +37,11 @@ fn main() {
     std::io::Write::flush(&mut std::io::stdout()).ok();
     for stream in listener.incoming() {
         let Ok(stream) = stream else { continue };
-        let rules = rules_of(&rules_file);
+        // unreadable or malformed rules: sever EVERY connection — the
+        // proxy never passes traffic it cannot account for
+        let Some(rules) = rules_of(&rules_file) else {
+            continue;
+        };
         let Ok(mut upstream) = TcpStream::connect(dest) else {
             continue;
         };
@@ -58,7 +64,12 @@ fn pump(mut client: TcpStream, upstream: &mut TcpStream, rules: &Value) -> bool 
         .ok()
         .and_then(|v| v["label"].as_str().map(|s| s.to_string()))
         .unwrap_or_default();
-    let mode = rules[&label]["mode"].as_str().unwrap_or("pass").to_string();
+    // whitelist: an unlisted label defaults to DROP, never pass
+    let listed = rules
+        .get(&label)
+        .cloned()
+        .unwrap_or(serde_json::json!({"mode": "drop"}));
+    let mode = listed["mode"].as_str().unwrap_or("drop").to_string();
     match mode.as_str() {
         "drop" => {
             // SEVERED: the request is swallowed and the connection closed
@@ -76,7 +87,7 @@ fn pump(mut client: TcpStream, upstream: &mut TcpStream, rules: &Value) -> bool 
             true
         }
         "delay" => {
-            let ms = rules[&label]["ms"].as_u64().unwrap_or(1000);
+            let ms = listed["ms"].as_u64().unwrap_or(1000);
             std::thread::sleep(std::time::Duration::from_millis(ms));
             relay(&mut client, upstream, &line)
         }

@@ -236,7 +236,10 @@ fn l4_two_host_executables_through_the_proxy_partition() {
     let dir = tmp("l4");
     let (_d, daddr) = dest_at(&dir);
     let rules = dir.join("rules.json");
-    write_rules(&rules, serde_json::json!({"hostA": {"mode": "drop-ack"}}));
+    write_rules(
+        &rules,
+        serde_json::json!({"hostA": {"mode": "drop-ack"}, "hostB": {"mode": "pass"}}),
+    );
     let (_p, paddr) = proxy_at(&rules, daddr);
     let intent = intent_file(&dir, 4);
     // host A (its own EXECUTABLE, its own state dir) submits through the
@@ -260,7 +263,10 @@ fn l4_two_host_executables_through_the_proxy_partition() {
     assert_eq!(v["oneSignedAttempt"], Value::Bool(true));
     let tx = v["txId"].as_str().unwrap().to_string();
     // heal the network (rules only — neither endpoint restarted)
-    write_rules(&rules, serde_json::json!({}));
+    write_rules(
+        &rules,
+        serde_json::json!({"hostA": {"mode": "pass"}, "hostB": {"mode": "pass"}, "probe": {"mode": "pass"}}),
+    );
     // host B — a DIFFERENT executable run, its own sovereign directory,
     // carrying A's durable state (the journal travels; the claim does not)
     let b_dir = dir.join("hostB");
@@ -331,4 +337,159 @@ fn l4_two_host_executables_through_the_proxy_partition() {
         "one acceptance across the partition"
     );
     println!("l2/l4: two host executables, a real middlebox partition, journal-borne rebroadcast, mismatched intent refused, one effect");
+}
+
+#[test]
+fn l5_corrupted_destination_log_fails_closed_on_restart() {
+    let dir = tmp("l5");
+    {
+        let (_d, daddr) = dest_at(&dir);
+        let (_, out) = host(&[
+            "submit",
+            "--state",
+            dir.join("h").to_str().unwrap(),
+            "--root-hex",
+            ROOT,
+            "--dest",
+            &daddr.to_string(),
+            "--intent",
+            intent_file(&dir, 5).to_str().unwrap(),
+        ]);
+        let v: Value = serde_json::from_str(out.trim()).unwrap();
+        assert_eq!(v["submissionOutcome"], "acked");
+    }
+    // CORRUPT the durable log: a truncated/garbage line
+    let log = dir.join("dest.log");
+    let mut text = std::fs::read_to_string(&log).unwrap();
+    text.push_str("{\"ev\": \"accept\", \"txId\": \"zz"); // truncated JSON
+    std::fs::write(&log, text).unwrap();
+    // restart on the SAME directory: the destination REFUSES to serve —
+    // a corrupted acceptance log is damage, never skippable noise
+    let mut child = Command::new(env!("CARGO_BIN_EXE_bnrose-dest"))
+        .arg(&log)
+        .arg("0")
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("dest restart");
+    let out = child.wait().expect("wait");
+    assert_ne!(
+        out.code(),
+        Some(0),
+        "the corrupted log must refuse to serve"
+    );
+    let _ = Proc(child);
+    println!("l2/l5: corrupted acceptance log → restart exits nonzero (fail closed)");
+}
+
+#[test]
+fn l6_concurrent_competing_recovery_one_acceptance() {
+    let dir = tmp("l6");
+    let (_d, daddr) = dest_at(&dir);
+    // host A submits; the ack is lost to a partition at the proxy
+    let rules = dir.join("rules.json");
+    write_rules(
+        &rules,
+        serde_json::json!({"hostA": {"mode": "drop-ack"}, "hostB1": {"mode": "pass"}, "hostB2": {"mode": "pass"}, "probe": {"mode": "pass"}}),
+    );
+    let (_p, paddr) = proxy_at(&rules, daddr);
+    let intent = intent_file(&dir, 6);
+    let (code, out) = host(&[
+        "submit",
+        "--state",
+        dir.join("hostA").to_str().unwrap(),
+        "--root-hex",
+        ROOT,
+        "--dest",
+        &paddr.to_string(),
+        "--intent",
+        intent.to_str().unwrap(),
+    ]);
+    let v: Value = serde_json::from_str(out.trim()).unwrap();
+    assert_eq!(v["submissionOutcome"], "timeout");
+    let tx = v["txId"].as_str().unwrap().to_string();
+    // TWO replacement hosts, prepared BEFORE either runs — the durable
+    // state travels to both; each takes its own claim on its own dir
+    for b in ["hostB1", "hostB2"] {
+        let bd = dir.join(b);
+        std::fs::create_dir_all(bd.join("replica")).unwrap();
+        std::fs::copy(
+            dir.join("hostA").join("journal.bin"),
+            bd.join("journal.bin"),
+        )
+        .unwrap();
+        std::fs::copy(
+            dir.join("hostA").join("replica").join("journal.bin"),
+            bd.join("replica").join("journal.bin"),
+        )
+        .unwrap();
+    }
+    // heal, then run BOTH recovery hosts SIMULTANEOUSLY (genuinely
+    // concurrent processes racing the same unresolved operation)
+    write_rules(
+        &rules,
+        serde_json::json!({"hostA": {"mode": "pass"}, "hostB1": {"mode": "pass"}, "hostB2": {"mode": "pass"}, "probe": {"mode": "pass"}}),
+    );
+    let s1 = dir.join("hostB1").display().to_string();
+    let s2 = dir.join("hostB2").display().to_string();
+    let pa = paddr.to_string();
+    let ia = intent.display().to_string();
+    let ia1 = ia.clone();
+    let pa1 = pa.clone();
+    let b1 = std::thread::spawn(move || {
+        host(&[
+            "resolve",
+            "--state",
+            &s1,
+            "--root-hex",
+            ROOT,
+            "--dest",
+            &pa1,
+            "--intent",
+            &ia1,
+            "--rebroadcast",
+        ])
+    });
+    let s2b = s2.clone();
+    let pab = pa.clone();
+    let iab = ia.clone();
+    let b2 = std::thread::spawn(move || {
+        host(&[
+            "resolve",
+            "--state",
+            &s2b,
+            "--root-hex",
+            ROOT,
+            "--dest",
+            &pab,
+            "--intent",
+            &iab,
+            "--rebroadcast",
+        ])
+    });
+    let (c1, o1) = b1.join().unwrap();
+    let (c2, o2) = b2.join().unwrap();
+    // both survivors converge: their rebroadcasts are the JOURNAL's
+    // identical bytes; the destination holds ONE acceptance
+    let v1: Value = serde_json::from_str(o1.trim()).unwrap();
+    let v2: Value = serde_json::from_str(o2.trim()).unwrap();
+    for (v, c) in [(&v1, c1), (&v2, c2)] {
+        assert_eq!(
+            v["submissionOutcome"], "duplicate",
+            "identical bytes reconcile"
+        );
+        assert_eq!(v["oneSignedAttempt"], Value::Bool(true));
+        let _ = c;
+    }
+    admin_roundtrip(daddr, r#"{"op":"advance","label":"admin","blocks":3}"#).unwrap();
+    let (c3, o3) = host(&["observe", "--dest", &paddr.to_string(), "--tx-id", &tx]);
+    assert_eq!(c3, 0, "finality observed by both: {o3}");
+    let dump = admin_roundtrip(daddr, r#"{"op":"dump","label":"admin"}"#).unwrap();
+    assert_eq!(
+        dump["txs"].as_array().unwrap().len(),
+        1,
+        "ONE acceptance across the race"
+    );
+    let _ = code;
+    println!("l2/l6: two hosts recovered the SAME operation CONCURRENTLY — identical journal bytes, one acceptance, no conflict");
 }
