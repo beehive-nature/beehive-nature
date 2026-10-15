@@ -129,6 +129,18 @@ impl EmbeddedStore for SqliteStore {
         }
         Ok(())
     }
+
+    fn compact(&self) -> Result<()> {
+        let conn = self.conn.lock().expect("sqlite conn poisoned");
+        // TRUNCATE the WAL back into the main file, then rebuild the file
+        // itself: VACUUM rewrites with only live pages.
+        let _checkpoint: (i64, i64, i64) =
+            conn.query_row("PRAGMA wal_checkpoint(TRUNCATE)", [], |r| {
+                Ok((r.get(0)?, r.get(1)?, r.get(2)?))
+            })?;
+        conn.execute_batch("VACUUM;")?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]

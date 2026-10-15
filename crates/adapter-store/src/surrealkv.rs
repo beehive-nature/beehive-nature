@@ -128,6 +128,15 @@ impl EmbeddedStore for SurrealKvStore {
         ::surrealkv::inspect::inspect_db(&self.path).map_err(StoreError::from)?;
         Ok(())
     }
+
+    fn compact(&self) -> Result<()> {
+        let _enter = self.rt.enter();
+        // 1.0 exposes no manual leveled-compaction trigger (background
+        // policy only); flushing the WAL is the reclaim we can command.
+        // Receipts must label this as flush-only, never "compacted".
+        self.tree.flush_wal(true).map_err(StoreError::from)?;
+        Ok(())
+    }
 }
 
 impl Drop for SurrealKvStore {
