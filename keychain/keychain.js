@@ -28,9 +28,7 @@
 (function () {
   'use strict';
   var ORIGIN = 'https://keys.skaists.dev', PARENTS = ['https://skaists.dev']; /* KC-ORIGINS — scripts/build-keychain.mjs --origin/--parent rewrites THIS line only in the built copy for a replacement origin; the source line is the production truth */
-  var CHAIN = 42161, CHAIN_NAME = 'Arbitrum One';
-  var TOKEN = '0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684'; // PUBLIC-CONSTANT: ANT (Autonomi) on Arbitrum One
-  var VAULT = '0x9a3ecac693b699fc0b2b6a50b5549e50c2320a26'; // PUBLIC-CONSTANT: Autonomi PaymentVaultV2 (e2e/ant-pay-vector.json)
+  var CHAIN = 42161, CHAIN_NAME = 'Arbitrum One', TOKEN = '0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684', VAULT = '0x9a3ecac693b699fc0b2b6a50b5549e50c2320a26', TEST_BUILD = false; /* KC-PIN — PUBLIC-CONSTANT: ANT (Autonomi) on Arbitrum One and Autonomi PaymentVaultV2 (e2e/ant-pay-vector.json). scripts/build-keychain.mjs --testnet rewrites THIS line only in a built copy that lives at a TEST origin (the local test chain 31337 with the devnet's own token and vault, nothing of value); the source line is the production truth and no runtime override exists */
   var MAX_GAS = 3000000n, PRESS_DELAY_MS = 700, VALID_UNTIL = 4102444800; // 2100-01-01T00:00:00Z
   var main = document.getElementById('kc');
   var HIVE_CHAIN = 'beeab0de00000000000000000000000000000000000000000000000000000000'; // PUBLIC-CONSTANT: Hive mainnet chain id (public network parameter)
@@ -154,7 +152,8 @@
   }
 
   /* ── the narrow interface: public state out, sign requests in ── */
-  function stateMsg() { return me ? { t: 'kc.state', v: 1, state: 'unlocked', did: me.did, evm: me.evm, genesis: me.genesis } : { t: 'kc.state', v: 1, state: 'locked', known: mem.get('kc.did') || null }; }
+  function pin() { return { chain: CHAIN, token: TOKEN, vault: VAULT, test: TEST_BUILD }; }
+  function stateMsg() { return me ? { t: 'kc.state', v: 1, state: 'unlocked', did: me.did, evm: me.evm, genesis: me.genesis, pin: pin() } : { t: 'kc.state', v: 1, state: 'locked', known: mem.get('kc.did') || null, pin: pin() }; }
   function post(m) { if (framed && parentOrigin) window.parent.postMessage(m, parentOrigin); }
   function publish() { post(stateMsg()); post({ t: 'kc.size', v: 1, h: Math.ceil(main.getBoundingClientRect().height) }); }
   window.addEventListener('message', function (ev) {
@@ -350,14 +349,16 @@
       btn('Copy the record', trusted(function () { try { navigator.clipboard && navigator.clipboard.writeText(txt); } catch (e) {} })),
       btn('Back', function () { render(); publish(); }));
   }
+  var HOME = ORIGIN.slice('https://'.length);
+  function testNote() { return TEST_BUILD ? el('p', { class: 'dim', text: 'TEST BUILD at ' + HOME + ': this keychain signs only on the local test chain (31337) with test tokens that have no value. It is not the production keychain and cannot pay on Arbitrum One.' }) : ''; }
   function render() {
     if (watcher) { watcher.disconnect(); watcher = null; }
     if (!greeted) { show(el('p', { class: 'dim', text: 'Waiting for the heART WALLet…' })); return; }
     if (pending && me) { var c = confirmCard(); if (c) show(c); return; }
     if (me) {
       var code = el('p', { class: 'mono', hidden: '' });
-      show(el('h1', { text: 'Your isolated keychain is open' }),
-        el('dl', {}, [el('dt', { text: 'Identity' }), el('dd', { class: 'mono', text: me.did }), el('dt', { text: 'Arbitrum account' }), el('dd', { class: 'mono', text: me.evm })]),
+      show(el('h1', { text: 'Your isolated keychain is open' }), testNote(),
+        el('dl', {}, [el('dt', { text: 'Identity' }), el('dd', { class: 'mono', text: me.did }), el('dt', { text: TEST_BUILD ? 'Test-chain account' : 'Arbitrum account' }), el('dd', { class: 'mono', text: me.evm }), el('dt', { text: 'Signs on' }), el('dd', { text: CHAIN_NAME + ' (chain ' + CHAIN + ')' })]),
         el('p', { class: 'dim', text: 'The wallet page can ask this keychain to sign. It cannot sign by itself, and it never sees this key.' + (pending ? '' : ' Requests appear here for you to confirm.') }),
         btn('Show my recovery code', trusted(function () { code.hidden = !code.hidden; code.textContent = code.hidden ? '' : K.encodeRecoveryCode(root); })), btn('Lock', trusted(function () { lock(); })),
         el('details', {}, [el('summary', { text: 'New origin, or lost passkey? Re-enroll here' }),
@@ -367,8 +368,8 @@
       return;
     }
     var known = mem.get('kc.enrolled') === '1', input = el('input', { 'aria-label': 'Recovery code', autocomplete: 'off', spellcheck: 'false', placeholder: 'bdidrec1…' });
-    show(el('h1', { text: known ? 'Unlock your isolated keychain' : 'Your isolated keychain' }),
-      el('p', { text: known ? 'Your passkey for keys.skaists.dev opens it.' : 'It lives at keys.skaists.dev, apart from the wallet page. A new passkey makes a new key that the wallet page never sees.' }),
+    show(el('h1', { text: known ? 'Unlock your isolated keychain' : 'Your isolated keychain' }), testNote(),
+      el('p', { text: known ? 'Your passkey for ' + HOME + ' opens it.' : 'It lives at ' + HOME + ', apart from the wallet page. A new passkey makes a new key that the wallet page never sees.' }),
       pending ? el('p', { text: 'A payment is waiting. Unlock to review it.' }) : '',
       known ? btn('Unlock with my passkey', trusted(unlock), 'go') : btn('Make my keychain', trusted(make), 'go'),
       known ? btn('Make a new keychain', trusted(make)) : btn('I already have one', trusted(unlock)),
