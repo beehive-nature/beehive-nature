@@ -187,7 +187,7 @@ fn the_carrier_reads_and_never_signs() {
 /// Jungle4's chain id. Reads only. Prints what each lookup was; asserts only
 /// that a wrong chain is never read as an answer.
 #[test]
-#[ignore]
+#[ignore = "live read of Jungle4; waits on the evanchor contract being deployed and anchored by the signer lane"]
 fn live_jungle4_read() {
     let jungle = [
         "https://jungle4.greymass.com",
