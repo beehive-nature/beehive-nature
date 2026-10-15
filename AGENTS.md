@@ -8,6 +8,15 @@ breaking each one has cost real hours; they are the minimum bar.
 - **Worktree law (FOUNDER ORDER):** stage/commit/push ONLY from your own
   `../wt-<seat>` worktree. NEVER `git add` from the shared checkout at
   `C:\Users\travi\beehive-nature` — other seats' WIP lives there.
+- **Branch and HEAD verification (REVIEW RULE, 2026-10-14):** in a lane
+  where sibling seats share one worktree, run `git branch --show-current`
+  (and confirm it is the branch you intend) immediately BEFORE every
+  `git commit` and every `git push` — a sibling's branch switch lands
+  your commit on the wrong line silently. Two convictions: the stale
+  bench binary that was "passing" (provenance unproven) and the
+  empty-branch push recovered at PR #427. Preferred posture: one
+  worktree per active agent (`git worktree add ../wt-<seat>-<lane>`),
+  which makes the check trivial and the collision impossible.
 - Add by explicit pathspec; never `git add -A`.
 - **Check origin first:** `git fetch origin` before healing anything; red CI
   is often another seat's inherited state — locate the first red commit
