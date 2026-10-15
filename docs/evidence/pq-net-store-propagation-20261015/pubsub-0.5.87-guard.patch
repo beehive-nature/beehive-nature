@@ -1,0 +1,15 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -10909,6 +10909,12 @@
+             let mut prior_failures = 0_u8;
+             if let Some(entry) = state.outstanding_iwants.get(&msg_id) {
+                 if entry.peer == from {
++                    // The bounded flush queue already owns this request.
++                    // Re-admission can duplicate its serialized intent and
++                    // renew requested_at indefinitely under repeated IHAVE.
++                    if entry.retry_pending {
++                        continue;
++                    }
+                     if entry
+                         .retry_not_before
+                         .is_some_and(|not_before| Instant::now() < not_before)
