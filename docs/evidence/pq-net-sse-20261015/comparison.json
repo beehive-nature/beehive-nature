@@ -1,0 +1,2265 @@
+{
+  "schema": "pq-net-sse-comparison-1",
+  "setup_failures": [
+    {
+      "run_id": "pqnet-final-20261014-p2-s9-r0-baseline",
+      "valid": false,
+      "stage": "rig build before workload",
+      "error": "ip link add bm83-seed: RTNETLINK answers: File exists",
+      "source": "captured btmd stderr, exit 1",
+      "followup": "Owned empty btmd-pqn-seed namespace removed after verifying no processes and only loopback; complete s9 pair rerun with fresh qnb/qnc namespaces on unused subnet 84."
+    }
+  ],
+  "trials": [
+    {
+      "phase": "p2",
+      "trial": "baseline",
+      "run_id": "pqnet-sse-20261014-p2-s3-r0-baseline",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "skip_legacy_dm_bus": false,
+      "scale": 3,
+      "cost": [
+        {
+          "node": "seed",
+          "role": "Seed",
+          "idle_egress_bytes_per_min": 622214.0,
+          "idle_ingress_bytes_per_min": 1078248.6666666667,
+          "phase_egress_bytes": 3686907,
+          "phase_ingress_bytes": 3245983,
+          "cpu_percent_sustained": 3.913579585053342,
+          "vmhwm_kib": 72460
+        },
+        {
+          "node": "n1",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 766627.3333333334,
+          "idle_ingress_bytes_per_min": 443878.6666666667,
+          "phase_egress_bytes": 4004896,
+          "phase_ingress_bytes": 3223699,
+          "cpu_percent_sustained": 3.8689040190139212,
+          "vmhwm_kib": 74764
+        },
+        {
+          "node": "n2",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 724581.3333333334,
+          "idle_ingress_bytes_per_min": 591762.0,
+          "phase_egress_bytes": 2848450,
+          "phase_ingress_bytes": 4092422,
+          "cpu_percent_sustained": 3.118354509551636,
+          "vmhwm_kib": 74624
+        }
+      ],
+      "matrix_targeted_dm": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_group": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_sync": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_probe": {
+        "total": 160,
+        "delivered": 160,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "unsafe_retries": 0,
+      "verdicts": [
+        {
+          "gate": "idle_combined_bytes_per_min",
+          "role": "desktop-leaf",
+          "measured": 1210506.0,
+          "budget": 8388608.0,
+          "unit": "bytes/min",
+          "pass": true
+        },
+        {
+          "gate": "cpu_percent_sustained",
+          "role": "desktop-leaf",
+          "measured": 3.8689040190139212,
+          "budget": 25.0,
+          "unit": "percent",
+          "pass": true
+        },
+        {
+          "gate": "rss_mib_peak",
+          "role": "desktop-leaf",
+          "measured": 73.01171875,
+          "budget": 256.0,
+          "unit": "MiB",
+          "pass": true
+        },
+        {
+          "gate": "targeted_dm_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "group_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "sync_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        }
+      ],
+      "verdicts_pass": true,
+      "notes": [],
+      "budget_sha256_prefix": "d2e47e2d76ca5c2a",
+      "stage": "preliminary",
+      "observation": {
+        "failures": []
+      },
+      "sse_lag_log_warnings": {
+        "n1": 0,
+        "n2": 0,
+        "seed": 0
+      },
+      "class_probe_topics": {
+        "x0x/announce/v3/blob": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 80,
+          "observed_pairs": 80
+        },
+        "x0x.machine.announce.v3": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 80,
+          "observed_pairs": 80
+        }
+      },
+      "workload": null,
+      "subnet_third": 83
+    },
+    {
+      "phase": "p2",
+      "trial": "shed_normal",
+      "run_id": "pqnet-sse-20261014-p2-s3-r0-shed_normal",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "skip_legacy_dm_bus": false,
+      "scale": 3,
+      "cost": [
+        {
+          "node": "seed",
+          "role": "Seed",
+          "idle_egress_bytes_per_min": 549633.3333333334,
+          "idle_ingress_bytes_per_min": 973626.6666666666,
+          "phase_egress_bytes": 3543217,
+          "phase_ingress_bytes": 3325600,
+          "cpu_percent_sustained": 2.0948970456580125,
+          "vmhwm_kib": 72308
+        },
+        {
+          "node": "n1",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 717537.3333333334,
+          "idle_ingress_bytes_per_min": 520904.6666666667,
+          "phase_egress_bytes": 3949352,
+          "phase_ingress_bytes": 3228006,
+          "cpu_percent_sustained": 2.0590868397493285,
+          "vmhwm_kib": 74520
+        },
+        {
+          "node": "n2",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 686811.3333333334,
+          "idle_ingress_bytes_per_min": 460057.3333333333,
+          "phase_egress_bytes": 2993884,
+          "phase_ingress_bytes": 3933897,
+          "cpu_percent_sustained": 1.9606087735004476,
+          "vmhwm_kib": 73272
+        }
+      ],
+      "matrix_targeted_dm": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_group": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_sync": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_probe": {
+        "total": 160,
+        "delivered": 160,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "unsafe_retries": 0,
+      "verdicts": [
+        {
+          "gate": "idle_combined_bytes_per_min",
+          "role": "desktop-leaf",
+          "measured": 1238442.0,
+          "budget": 8388608.0,
+          "unit": "bytes/min",
+          "pass": true
+        },
+        {
+          "gate": "cpu_percent_sustained",
+          "role": "desktop-leaf",
+          "measured": 2.0590868397493285,
+          "budget": 25.0,
+          "unit": "percent",
+          "pass": true
+        },
+        {
+          "gate": "rss_mib_peak",
+          "role": "desktop-leaf",
+          "measured": 72.7734375,
+          "budget": 256.0,
+          "unit": "MiB",
+          "pass": true
+        },
+        {
+          "gate": "targeted_dm_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "group_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "sync_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        }
+      ],
+      "verdicts_pass": true,
+      "notes": [],
+      "budget_sha256_prefix": "d2e47e2d76ca5c2a",
+      "stage": "preliminary",
+      "observation": {
+        "failures": []
+      },
+      "sse_lag_log_warnings": {
+        "n1": 0,
+        "n2": 0,
+        "seed": 0
+      },
+      "class_probe_topics": {
+        "x0x/announce/v3/blob": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 80,
+          "observed_pairs": 80
+        },
+        "x0x.machine.announce.v3": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 80,
+          "observed_pairs": 80
+        }
+      },
+      "workload": null,
+      "subnet_third": 83
+    },
+    {
+      "phase": "p2",
+      "trial": "baseline",
+      "run_id": "pqnet-sse-20261014-p2-s6-r0-baseline",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "skip_legacy_dm_bus": false,
+      "scale": 6,
+      "cost": [
+        {
+          "node": "seed",
+          "role": "Seed",
+          "idle_egress_bytes_per_min": 720283.3333333334,
+          "idle_ingress_bytes_per_min": 666599.3333333334,
+          "phase_egress_bytes": 8717900,
+          "phase_ingress_bytes": 6375992,
+          "cpu_percent_sustained": 3.0016020280618982,
+          "vmhwm_kib": 73336
+        },
+        {
+          "node": "relay",
+          "role": "RelayFull",
+          "idle_egress_bytes_per_min": 713406.0,
+          "idle_ingress_bytes_per_min": 613966.6666666666,
+          "phase_egress_bytes": 8603347,
+          "phase_ingress_bytes": 6415343,
+          "cpu_percent_sustained": 2.4030420928472087,
+          "vmhwm_kib": 66408
+        },
+        {
+          "node": "n1",
+          "role": "ConstrainedLeaf",
+          "idle_egress_bytes_per_min": 644166.6666666666,
+          "idle_ingress_bytes_per_min": 697692.0,
+          "phase_egress_bytes": 8160005,
+          "phase_ingress_bytes": 7502697,
+          "cpu_percent_sustained": 2.799147932327518,
+          "vmhwm_kib": 77044
+        },
+        {
+          "node": "n2",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 919536.6666666666,
+          "idle_ingress_bytes_per_min": 655549.3333333334,
+          "phase_egress_bytes": 7584020,
+          "phase_ingress_bytes": 6977150,
+          "cpu_percent_sustained": 2.596693836593138,
+          "vmhwm_kib": 75564
+        },
+        {
+          "node": "n3",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 475042.0,
+          "idle_ingress_bytes_per_min": 682874.6666666666,
+          "phase_egress_bytes": 4920318,
+          "phase_ingress_bytes": 8033523,
+          "cpu_percent_sustained": 2.262204461031988,
+          "vmhwm_kib": 66664
+        },
+        {
+          "node": "n4",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 437596.6666666667,
+          "idle_ingress_bytes_per_min": 595776.0,
+          "phase_egress_bytes": 5115537,
+          "phase_ingress_bytes": 7801387,
+          "cpu_percent_sustained": 2.3150185729626958,
+          "vmhwm_kib": 67364
+        }
+      ],
+      "matrix_targeted_dm": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_group": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_sync": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_probe": {
+        "total": 320,
+        "delivered": 320,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "unsafe_retries": 0,
+      "verdicts": [
+        {
+          "gate": "idle_combined_bytes_per_min",
+          "role": "constrained-leaf",
+          "measured": 1341858.6666666665,
+          "budget": 2097152.0,
+          "unit": "bytes/min",
+          "pass": true
+        },
+        {
+          "gate": "cpu_percent_sustained",
+          "role": "constrained-leaf",
+          "measured": 2.799147932327518,
+          "budget": 15.0,
+          "unit": "percent",
+          "pass": true
+        },
+        {
+          "gate": "rss_mib_peak",
+          "role": "constrained-leaf",
+          "measured": 75.23828125,
+          "budget": 128.0,
+          "unit": "MiB",
+          "pass": true
+        },
+        {
+          "gate": "targeted_dm_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "group_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "sync_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        }
+      ],
+      "verdicts_pass": true,
+      "notes": [],
+      "budget_sha256_prefix": "d2e47e2d76ca5c2a",
+      "stage": "preliminary",
+      "observation": {
+        "failures": []
+      },
+      "sse_lag_log_warnings": {
+        "n1": 0,
+        "n2": 0,
+        "n3": 0,
+        "n4": 0,
+        "relay": 0,
+        "seed": 0
+      },
+      "class_probe_topics": {
+        "x0x/announce/v3/blob": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 160,
+          "observed_pairs": 160
+        },
+        "x0x.machine.announce.v3": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 160,
+          "observed_pairs": 160
+        }
+      },
+      "workload": null,
+      "subnet_third": 83
+    },
+    {
+      "phase": "p2",
+      "trial": "shed_normal",
+      "run_id": "pqnet-sse-20261014-p2-s6-r0-shed_normal",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "skip_legacy_dm_bus": false,
+      "scale": 6,
+      "cost": [
+        {
+          "node": "seed",
+          "role": "Seed",
+          "idle_egress_bytes_per_min": 694392.0,
+          "idle_ingress_bytes_per_min": 545242.0,
+          "phase_egress_bytes": 8540452,
+          "phase_ingress_bytes": 7446214,
+          "cpu_percent_sustained": 2.778940957021584,
+          "vmhwm_kib": 73700
+        },
+        {
+          "node": "relay",
+          "role": "RelayFull",
+          "idle_egress_bytes_per_min": 353442.0,
+          "idle_ingress_bytes_per_min": 379730.0,
+          "phase_egress_bytes": 8678075,
+          "phase_ingress_bytes": 6456086,
+          "cpu_percent_sustained": 2.2586826043371784,
+          "vmhwm_kib": 66748
+        },
+        {
+          "node": "n1",
+          "role": "ConstrainedLeaf",
+          "idle_egress_bytes_per_min": 824875.3333333334,
+          "idle_ingress_bytes_per_min": 584101.3333333334,
+          "phase_egress_bytes": 7972358,
+          "phase_ingress_bytes": 6435709,
+          "cpu_percent_sustained": 4.79652822718794,
+          "vmhwm_kib": 75552
+        },
+        {
+          "node": "n2",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 618660.6666666666,
+          "idle_ingress_bytes_per_min": 390967.3333333333,
+          "phase_egress_bytes": 7635128,
+          "phase_ingress_bytes": 8108375,
+          "cpu_percent_sustained": 2.556879465022143,
+          "vmhwm_kib": 75932
+        },
+        {
+          "node": "n3",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 249084.0,
+          "idle_ingress_bytes_per_min": 485704.0,
+          "phase_egress_bytes": 5623365,
+          "phase_ingress_bytes": 6951324,
+          "cpu_percent_sustained": 2.061999568566244,
+          "vmhwm_kib": 66712
+        },
+        {
+          "node": "n4",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 243550.66666666666,
+          "idle_ingress_bytes_per_min": 599940.0,
+          "phase_egress_bytes": 5035217,
+          "phase_ingress_bytes": 8094447,
+          "cpu_percent_sustained": 2.1064118669661323,
+          "vmhwm_kib": 66140
+        }
+      ],
+      "matrix_targeted_dm": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_group": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_sync": {
+        "total": 20,
+        "delivered": 17,
+        "delayed": 3,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_probe": {
+        "total": 320,
+        "delivered": 320,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "unsafe_retries": 0,
+      "verdicts": [
+        {
+          "gate": "idle_combined_bytes_per_min",
+          "role": "constrained-leaf",
+          "measured": 1408976.6666666667,
+          "budget": 2097152.0,
+          "unit": "bytes/min",
+          "pass": true
+        },
+        {
+          "gate": "cpu_percent_sustained",
+          "role": "constrained-leaf",
+          "measured": 4.79652822718794,
+          "budget": 15.0,
+          "unit": "percent",
+          "pass": true
+        },
+        {
+          "gate": "rss_mib_peak",
+          "role": "constrained-leaf",
+          "measured": 73.78125,
+          "budget": 128.0,
+          "unit": "MiB",
+          "pass": true
+        },
+        {
+          "gate": "targeted_dm_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "group_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "sync_delivered_frac",
+          "role": "leaf",
+          "measured": 0.85,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": false
+        }
+      ],
+      "verdicts_pass": false,
+      "notes": [],
+      "budget_sha256_prefix": "d2e47e2d76ca5c2a",
+      "stage": "preliminary",
+      "observation": {
+        "failures": []
+      },
+      "sse_lag_log_warnings": {
+        "n1": 0,
+        "n2": 0,
+        "n3": 0,
+        "n4": 0,
+        "relay": 0,
+        "seed": 0
+      },
+      "class_probe_topics": {
+        "x0x/announce/v3/blob": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 160,
+          "observed_pairs": 160
+        },
+        "x0x.machine.announce.v3": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 160,
+          "observed_pairs": 160
+        }
+      },
+      "workload": null,
+      "subnet_third": 83
+    },
+    {
+      "phase": "p2",
+      "trial": "baseline",
+      "run_id": "pqnet-sse-20261014-p2-s9-r0-baseline",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "skip_legacy_dm_bus": false,
+      "scale": 9,
+      "cost": [
+        {
+          "node": "seed",
+          "role": "Seed",
+          "idle_egress_bytes_per_min": 748534.0,
+          "idle_ingress_bytes_per_min": 607108.0,
+          "phase_egress_bytes": 10926503,
+          "phase_ingress_bytes": 7863754,
+          "cpu_percent_sustained": 3.959733905881525,
+          "vmhwm_kib": 75220
+        },
+        {
+          "node": "relay",
+          "role": "RelayFull",
+          "idle_egress_bytes_per_min": 597019.3333333334,
+          "idle_ingress_bytes_per_min": 585988.6666666666,
+          "phase_egress_bytes": 12819654,
+          "phase_ingress_bytes": 8622750,
+          "cpu_percent_sustained": 3.528562880574425,
+          "vmhwm_kib": 67476
+        },
+        {
+          "node": "n1",
+          "role": "ConstrainedLeaf",
+          "idle_egress_bytes_per_min": 791780.0,
+          "idle_ingress_bytes_per_min": 538952.6666666666,
+          "phase_egress_bytes": 11107690,
+          "phase_ingress_bytes": 8740650,
+          "cpu_percent_sustained": 3.854141001724684,
+          "vmhwm_kib": 76876
+        },
+        {
+          "node": "n2",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 789173.3333333334,
+          "idle_ingress_bytes_per_min": 492034.6666666667,
+          "phase_egress_bytes": 9419922,
+          "phase_ingress_bytes": 9346152,
+          "cpu_percent_sustained": 3.6781528281299494,
+          "vmhwm_kib": 75676
+        },
+        {
+          "node": "n3",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 410250.6666666667,
+          "idle_ingress_bytes_per_min": 475571.3333333333,
+          "phase_egress_bytes": 7408922,
+          "phase_ingress_bytes": 7945380,
+          "cpu_percent_sustained": 2.991798951110485,
+          "vmhwm_kib": 67400
+        },
+        {
+          "node": "n4",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 377901.3333333333,
+          "idle_ingress_bytes_per_min": 530732.6666666666,
+          "phase_egress_bytes": 7332613,
+          "phase_ingress_bytes": 9902713,
+          "cpu_percent_sustained": 3.185385942064693,
+          "vmhwm_kib": 67884
+        },
+        {
+          "node": "n5",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 293771.3333333333,
+          "idle_ingress_bytes_per_min": 397438.6666666667,
+          "phase_egress_bytes": 6616529,
+          "phase_ingress_bytes": 10569582,
+          "cpu_percent_sustained": 3.2733800288620607,
+          "vmhwm_kib": 67728
+        },
+        {
+          "node": "n6",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 295417.3333333333,
+          "idle_ingress_bytes_per_min": 377436.6666666667,
+          "phase_egress_bytes": 8249110,
+          "phase_ingress_bytes": 8511625,
+          "cpu_percent_sustained": 3.062194220548379,
+          "vmhwm_kib": 67984
+        },
+        {
+          "node": "n7",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 299637.3333333333,
+          "idle_ingress_bytes_per_min": 604054.6666666666,
+          "phase_egress_bytes": 6812948,
+          "phase_ingress_bytes": 9191401,
+          "cpu_percent_sustained": 2.9654007250712753,
+          "vmhwm_kib": 67520
+        }
+      ],
+      "matrix_targeted_dm": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_group": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_sync": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_probe": {
+        "total": 560,
+        "delivered": 560,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "unsafe_retries": 0,
+      "verdicts": [
+        {
+          "gate": "idle_combined_bytes_per_min",
+          "role": "constrained-leaf",
+          "measured": 1330732.6666666665,
+          "budget": 2097152.0,
+          "unit": "bytes/min",
+          "pass": true
+        },
+        {
+          "gate": "cpu_percent_sustained",
+          "role": "constrained-leaf",
+          "measured": 3.854141001724684,
+          "budget": 15.0,
+          "unit": "percent",
+          "pass": true
+        },
+        {
+          "gate": "rss_mib_peak",
+          "role": "constrained-leaf",
+          "measured": 75.07421875,
+          "budget": 128.0,
+          "unit": "MiB",
+          "pass": true
+        },
+        {
+          "gate": "targeted_dm_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "group_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "sync_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        }
+      ],
+      "verdicts_pass": true,
+      "notes": [],
+      "budget_sha256_prefix": "d2e47e2d76ca5c2a",
+      "stage": "preliminary",
+      "observation": {
+        "failures": []
+      },
+      "sse_lag_log_warnings": {
+        "n1": 0,
+        "n2": 0,
+        "n3": 0,
+        "n4": 0,
+        "n5": 0,
+        "n6": 0,
+        "n7": 0,
+        "relay": 0,
+        "seed": 0
+      },
+      "class_probe_topics": {
+        "x0x/announce/v3/blob": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 280,
+          "observed_pairs": 280
+        },
+        "x0x.machine.announce.v3": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 280,
+          "observed_pairs": 280
+        }
+      },
+      "workload": null,
+      "subnet_third": 83
+    },
+    {
+      "phase": "p2",
+      "trial": "shed_normal",
+      "run_id": "pqnet-sse-20261014-p2-s9-r0-shed_normal",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "skip_legacy_dm_bus": false,
+      "scale": 9,
+      "cost": [
+        {
+          "node": "seed",
+          "role": "Seed",
+          "idle_egress_bytes_per_min": 661481.3333333334,
+          "idle_ingress_bytes_per_min": 603096.6666666666,
+          "phase_egress_bytes": 11705019,
+          "phase_ingress_bytes": 10546319,
+          "cpu_percent_sustained": 3.118781928529993,
+          "vmhwm_kib": 73812
+        },
+        {
+          "node": "relay",
+          "role": "RelayFull",
+          "idle_egress_bytes_per_min": 642377.3333333334,
+          "idle_ingress_bytes_per_min": 578920.0,
+          "phase_egress_bytes": 13783180,
+          "phase_ingress_bytes": 8215620,
+          "cpu_percent_sustained": 2.732052969392274,
+          "vmhwm_kib": 68540
+        },
+        {
+          "node": "n1",
+          "role": "ConstrainedLeaf",
+          "idle_egress_bytes_per_min": 804018.0,
+          "idle_ingress_bytes_per_min": 551776.0,
+          "phase_egress_bytes": 9788811,
+          "phase_ingress_bytes": 8412650,
+          "cpu_percent_sustained": 4.3662946999419905,
+          "vmhwm_kib": 77256
+        },
+        {
+          "node": "n2",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 864448.0,
+          "idle_ingress_bytes_per_min": 578876.6666666666,
+          "phase_egress_bytes": 8724298,
+          "phase_ingress_bytes": 9038282,
+          "cpu_percent_sustained": 4.3912449553702295,
+          "vmhwm_kib": 76536
+        },
+        {
+          "node": "n3",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 299824.6666666667,
+          "idle_ingress_bytes_per_min": 416080.0,
+          "phase_egress_bytes": 6947885,
+          "phase_ingress_bytes": 8341783,
+          "cpu_percent_sustained": 2.4576001596816344,
+          "vmhwm_kib": 68648
+        },
+        {
+          "node": "n4",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 300539.3333333333,
+          "idle_ingress_bytes_per_min": 640494.0,
+          "phase_egress_bytes": 6766080,
+          "phase_ingress_bytes": 8487370,
+          "cpu_percent_sustained": 2.5761138729657738,
+          "vmhwm_kib": 67596
+        },
+        {
+          "node": "n5",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 295047.3333333333,
+          "idle_ingress_bytes_per_min": 377736.6666666667,
+          "phase_egress_bytes": 6823041,
+          "phase_ingress_bytes": 9371770,
+          "cpu_percent_sustained": 2.4763128512528145,
+          "vmhwm_kib": 68120
+        },
+        {
+          "node": "n6",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 299083.3333333333,
+          "idle_ingress_bytes_per_min": 383593.3333333333,
+          "phase_egress_bytes": 6696826,
+          "phase_ingress_bytes": 8338598,
+          "cpu_percent_sustained": 2.5137382343951744,
+          "vmhwm_kib": 67992
+        },
+        {
+          "node": "n7",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 290526.0,
+          "idle_ingress_bytes_per_min": 330552.0,
+          "phase_egress_bytes": 7089064,
+          "phase_ingress_bytes": 7548286,
+          "cpu_percent_sustained": 2.5012631066810544,
+          "vmhwm_kib": 67296
+        }
+      ],
+      "matrix_targeted_dm": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_group": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_sync": {
+        "total": 20,
+        "delivered": 18,
+        "delayed": 0,
+        "lost": 2,
+        "unknown": 0
+      },
+      "matrix_probe": {
+        "total": 560,
+        "delivered": 560,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "unsafe_retries": 0,
+      "verdicts": [
+        {
+          "gate": "idle_combined_bytes_per_min",
+          "role": "constrained-leaf",
+          "measured": 1355794.0,
+          "budget": 2097152.0,
+          "unit": "bytes/min",
+          "pass": true
+        },
+        {
+          "gate": "cpu_percent_sustained",
+          "role": "constrained-leaf",
+          "measured": 4.3662946999419905,
+          "budget": 15.0,
+          "unit": "percent",
+          "pass": true
+        },
+        {
+          "gate": "rss_mib_peak",
+          "role": "constrained-leaf",
+          "measured": 75.4453125,
+          "budget": 128.0,
+          "unit": "MiB",
+          "pass": true
+        },
+        {
+          "gate": "targeted_dm_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "group_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "sync_delivered_frac",
+          "role": "leaf",
+          "measured": 0.9,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": false
+        }
+      ],
+      "verdicts_pass": false,
+      "notes": [],
+      "budget_sha256_prefix": "d2e47e2d76ca5c2a",
+      "stage": "preliminary",
+      "observation": {
+        "failures": []
+      },
+      "sse_lag_log_warnings": {
+        "n1": 0,
+        "n2": 0,
+        "n3": 0,
+        "n4": 0,
+        "n5": 0,
+        "n6": 0,
+        "n7": 0,
+        "relay": 0,
+        "seed": 0
+      },
+      "class_probe_topics": {
+        "x0x/announce/v3/blob": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 280,
+          "observed_pairs": 280
+        },
+        "x0x.machine.announce.v3": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 280,
+          "observed_pairs": 280
+        }
+      },
+      "workload": null,
+      "subnet_third": 83
+    },
+    {
+      "phase": "p2",
+      "trial": "baseline",
+      "run_id": "pqnet-final-20261014-p2-s3-r0-baseline",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "skip_legacy_dm_bus": false,
+      "scale": 3,
+      "cost": [
+        {
+          "node": "seed",
+          "role": "Seed",
+          "idle_egress_bytes_per_min": 634238.6666666666,
+          "idle_ingress_bytes_per_min": 751821.3333333334,
+          "phase_egress_bytes": 3498499,
+          "phase_ingress_bytes": 3682529,
+          "cpu_percent_sustained": 2.1127643193496985,
+          "vmhwm_kib": 72084
+        },
+        {
+          "node": "n1",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 480428.6666666667,
+          "idle_ingress_bytes_per_min": 549301.3333333334,
+          "phase_egress_bytes": 4195607,
+          "phase_ingress_bytes": 3144332,
+          "cpu_percent_sustained": 1.9605736692270508,
+          "vmhwm_kib": 74092
+        },
+        {
+          "node": "n2",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 800778.0,
+          "idle_ingress_bytes_per_min": 614882.6666666666,
+          "phase_egress_bytes": 3115251,
+          "phase_ingress_bytes": 3983546,
+          "cpu_percent_sustained": 1.9426688868596802,
+          "vmhwm_kib": 73784
+        }
+      ],
+      "matrix_targeted_dm": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_group": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_sync": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_probe": {
+        "total": 160,
+        "delivered": 160,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "unsafe_retries": 0,
+      "verdicts": [
+        {
+          "gate": "idle_combined_bytes_per_min",
+          "role": "desktop-leaf",
+          "measured": 1029730.0,
+          "budget": 8388608.0,
+          "unit": "bytes/min",
+          "pass": true
+        },
+        {
+          "gate": "cpu_percent_sustained",
+          "role": "desktop-leaf",
+          "measured": 1.9605736692270508,
+          "budget": 25.0,
+          "unit": "percent",
+          "pass": true
+        },
+        {
+          "gate": "rss_mib_peak",
+          "role": "desktop-leaf",
+          "measured": 72.35546875,
+          "budget": 256.0,
+          "unit": "MiB",
+          "pass": true
+        },
+        {
+          "gate": "targeted_dm_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "group_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "sync_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        }
+      ],
+      "verdicts_pass": true,
+      "notes": [],
+      "budget_sha256_prefix": "d2e47e2d76ca5c2a",
+      "stage": "final",
+      "observation": {
+        "failures": []
+      },
+      "sse_lag_log_warnings": {
+        "n1": 0,
+        "n2": 0,
+        "seed": 0
+      },
+      "class_probe_topics": {
+        "x0x/announce/v3/blob": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 80,
+          "observed_pairs": 80
+        },
+        "x0x.machine.announce.v3": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 80,
+          "observed_pairs": 80
+        }
+      },
+      "workload": {
+        "dm_count": 12,
+        "dm_size": 256,
+        "group_msgs": 6,
+        "store_puts": 10,
+        "store_value_size": 512,
+        "probe_bulk_msgs": 40,
+        "probe_bulk_size": 1024,
+        "probe_normal_msgs": 40,
+        "probe_normal_size": 256,
+        "idle_secs": 90
+      },
+      "subnet_third": 83
+    },
+    {
+      "phase": "p2",
+      "trial": "shed_normal",
+      "run_id": "pqnet-final-20261014-p2-s3-r0-shed_normal",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "skip_legacy_dm_bus": false,
+      "scale": 3,
+      "cost": [
+        {
+          "node": "seed",
+          "role": "Seed",
+          "idle_egress_bytes_per_min": 575492.6666666666,
+          "idle_ingress_bytes_per_min": 1107816.0,
+          "phase_egress_bytes": 3635919,
+          "phase_ingress_bytes": 3218750,
+          "cpu_percent_sustained": 2.3884495652485063,
+          "vmhwm_kib": 71976
+        },
+        {
+          "node": "n1",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 731728.6666666666,
+          "idle_ingress_bytes_per_min": 462641.3333333333,
+          "phase_egress_bytes": 4036962,
+          "phase_ingress_bytes": 3169800,
+          "cpu_percent_sustained": 2.2989945253515582,
+          "vmhwm_kib": 74496
+        },
+        {
+          "node": "n2",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 744152.6666666666,
+          "idle_ingress_bytes_per_min": 481663.3333333333,
+          "phase_egress_bytes": 2909201,
+          "phase_ingress_bytes": 4194582,
+          "cpu_percent_sustained": 2.325831037320643,
+          "vmhwm_kib": 73092
+        }
+      ],
+      "matrix_targeted_dm": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_group": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_sync": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_probe": {
+        "total": 160,
+        "delivered": 160,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "unsafe_retries": 0,
+      "verdicts": [
+        {
+          "gate": "idle_combined_bytes_per_min",
+          "role": "desktop-leaf",
+          "measured": 1194370.0,
+          "budget": 8388608.0,
+          "unit": "bytes/min",
+          "pass": true
+        },
+        {
+          "gate": "cpu_percent_sustained",
+          "role": "desktop-leaf",
+          "measured": 2.2989945253515582,
+          "budget": 25.0,
+          "unit": "percent",
+          "pass": true
+        },
+        {
+          "gate": "rss_mib_peak",
+          "role": "desktop-leaf",
+          "measured": 72.75,
+          "budget": 256.0,
+          "unit": "MiB",
+          "pass": true
+        },
+        {
+          "gate": "targeted_dm_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "group_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "sync_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        }
+      ],
+      "verdicts_pass": true,
+      "notes": [],
+      "budget_sha256_prefix": "d2e47e2d76ca5c2a",
+      "stage": "final",
+      "observation": {
+        "failures": []
+      },
+      "sse_lag_log_warnings": {
+        "n1": 0,
+        "n2": 0,
+        "seed": 0
+      },
+      "class_probe_topics": {
+        "x0x/announce/v3/blob": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 80,
+          "observed_pairs": 80
+        },
+        "x0x.machine.announce.v3": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 80,
+          "observed_pairs": 80
+        }
+      },
+      "workload": {
+        "dm_count": 12,
+        "dm_size": 256,
+        "group_msgs": 6,
+        "store_puts": 10,
+        "store_value_size": 512,
+        "probe_bulk_msgs": 40,
+        "probe_bulk_size": 1024,
+        "probe_normal_msgs": 40,
+        "probe_normal_size": 256,
+        "idle_secs": 90
+      },
+      "subnet_third": 83
+    },
+    {
+      "phase": "p2",
+      "trial": "baseline",
+      "run_id": "pqnet-final-20261014-p2-s6-r0-baseline",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "skip_legacy_dm_bus": false,
+      "scale": 6,
+      "cost": [
+        {
+          "node": "seed",
+          "role": "Seed",
+          "idle_egress_bytes_per_min": 788129.3333333334,
+          "idle_ingress_bytes_per_min": 745617.3333333334,
+          "phase_egress_bytes": 7581226,
+          "phase_ingress_bytes": 7412857,
+          "cpu_percent_sustained": 4.411920109901722,
+          "vmhwm_kib": 73544
+        },
+        {
+          "node": "relay",
+          "role": "RelayFull",
+          "idle_egress_bytes_per_min": 821268.0,
+          "idle_ingress_bytes_per_min": 681708.6666666666,
+          "phase_egress_bytes": 8035038,
+          "phase_ingress_bytes": 6702897,
+          "cpu_percent_sustained": 3.1614357673746873,
+          "vmhwm_kib": 66812
+        },
+        {
+          "node": "n1",
+          "role": "ConstrainedLeaf",
+          "idle_egress_bytes_per_min": 844812.6666666666,
+          "idle_ingress_bytes_per_min": 662704.0,
+          "phase_egress_bytes": 7629860,
+          "phase_ingress_bytes": 5819842,
+          "cpu_percent_sustained": 3.936383810630878,
+          "vmhwm_kib": 75872
+        },
+        {
+          "node": "n2",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 1075046.6666666667,
+          "idle_ingress_bytes_per_min": 680436.0,
+          "phase_egress_bytes": 7740118,
+          "phase_ingress_bytes": 6720882,
+          "cpu_percent_sustained": 3.909965127338054,
+          "vmhwm_kib": 75196
+        },
+        {
+          "node": "n3",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 267766.6666666667,
+          "idle_ingress_bytes_per_min": 639608.0,
+          "phase_egress_bytes": 4981408,
+          "phase_ingress_bytes": 7856679,
+          "cpu_percent_sustained": 2.9765049843249147,
+          "vmhwm_kib": 66192
+        },
+        {
+          "node": "n4",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 260628.0,
+          "idle_ingress_bytes_per_min": 649677.3333333334,
+          "phase_egress_bytes": 5518832,
+          "phase_ingress_bytes": 6978440,
+          "cpu_percent_sustained": 3.4872661946528583,
+          "vmhwm_kib": 67264
+        }
+      ],
+      "matrix_targeted_dm": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_group": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_sync": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_probe": {
+        "total": 320,
+        "delivered": 320,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "unsafe_retries": 0,
+      "verdicts": [
+        {
+          "gate": "idle_combined_bytes_per_min",
+          "role": "constrained-leaf",
+          "measured": 1507516.6666666665,
+          "budget": 2097152.0,
+          "unit": "bytes/min",
+          "pass": true
+        },
+        {
+          "gate": "cpu_percent_sustained",
+          "role": "constrained-leaf",
+          "measured": 3.936383810630878,
+          "budget": 15.0,
+          "unit": "percent",
+          "pass": true
+        },
+        {
+          "gate": "rss_mib_peak",
+          "role": "constrained-leaf",
+          "measured": 74.09375,
+          "budget": 128.0,
+          "unit": "MiB",
+          "pass": true
+        },
+        {
+          "gate": "targeted_dm_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "group_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "sync_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        }
+      ],
+      "verdicts_pass": true,
+      "notes": [],
+      "budget_sha256_prefix": "d2e47e2d76ca5c2a",
+      "stage": "final",
+      "observation": {
+        "failures": []
+      },
+      "sse_lag_log_warnings": {
+        "n1": 0,
+        "n2": 0,
+        "n3": 0,
+        "n4": 0,
+        "relay": 0,
+        "seed": 0
+      },
+      "class_probe_topics": {
+        "x0x/announce/v3/blob": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 160,
+          "observed_pairs": 160
+        },
+        "x0x.machine.announce.v3": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 160,
+          "observed_pairs": 160
+        }
+      },
+      "workload": {
+        "dm_count": 12,
+        "dm_size": 256,
+        "group_msgs": 6,
+        "store_puts": 10,
+        "store_value_size": 512,
+        "probe_bulk_msgs": 40,
+        "probe_bulk_size": 1024,
+        "probe_normal_msgs": 40,
+        "probe_normal_size": 256,
+        "idle_secs": 90
+      },
+      "subnet_third": 83
+    },
+    {
+      "phase": "p2",
+      "trial": "shed_normal",
+      "run_id": "pqnet-final-20261014-p2-s6-r0-shed_normal",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "skip_legacy_dm_bus": false,
+      "scale": 6,
+      "cost": [
+        {
+          "node": "seed",
+          "role": "Seed",
+          "idle_egress_bytes_per_min": 669424.0,
+          "idle_ingress_bytes_per_min": 676366.6666666666,
+          "phase_egress_bytes": 8326553,
+          "phase_ingress_bytes": 7308382,
+          "cpu_percent_sustained": 2.9824669766785195,
+          "vmhwm_kib": 72760
+        },
+        {
+          "node": "relay",
+          "role": "RelayFull",
+          "idle_egress_bytes_per_min": 534822.0,
+          "idle_ingress_bytes_per_min": 482248.0,
+          "phase_egress_bytes": 8865933,
+          "phase_ingress_bytes": 6457228,
+          "cpu_percent_sustained": 2.6118645712924318,
+          "vmhwm_kib": 66760
+        },
+        {
+          "node": "n1",
+          "role": "ConstrainedLeaf",
+          "idle_egress_bytes_per_min": 676144.6666666666,
+          "idle_ingress_bytes_per_min": 543169.3333333334,
+          "phase_egress_bytes": 7567883,
+          "phase_ingress_bytes": 6250462,
+          "cpu_percent_sustained": 4.094274192836784,
+          "vmhwm_kib": 75212
+        },
+        {
+          "node": "n2",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 562875.3333333334,
+          "idle_ingress_bytes_per_min": 381362.6666666667,
+          "phase_egress_bytes": 6851927,
+          "phase_ingress_bytes": 7401225,
+          "cpu_percent_sustained": 2.664807772061873,
+          "vmhwm_kib": 74440
+        },
+        {
+          "node": "n3",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 397264.6666666667,
+          "idle_ingress_bytes_per_min": 536471.3333333334,
+          "phase_egress_bytes": 5613630,
+          "phase_ingress_bytes": 7507935,
+          "cpu_percent_sustained": 2.329500833855412,
+          "vmhwm_kib": 66264
+        },
+        {
+          "node": "n4",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 306756.0,
+          "idle_ingress_bytes_per_min": 530282.0,
+          "phase_egress_bytes": 4791751,
+          "phase_ingress_bytes": 7097485,
+          "cpu_percent_sustained": 2.4618588357790148,
+          "vmhwm_kib": 65944
+        }
+      ],
+      "matrix_targeted_dm": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_group": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_sync": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_probe": {
+        "total": 320,
+        "delivered": 320,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "unsafe_retries": 0,
+      "verdicts": [
+        {
+          "gate": "idle_combined_bytes_per_min",
+          "role": "constrained-leaf",
+          "measured": 1219314.0,
+          "budget": 2097152.0,
+          "unit": "bytes/min",
+          "pass": true
+        },
+        {
+          "gate": "cpu_percent_sustained",
+          "role": "constrained-leaf",
+          "measured": 4.094274192836784,
+          "budget": 15.0,
+          "unit": "percent",
+          "pass": true
+        },
+        {
+          "gate": "rss_mib_peak",
+          "role": "constrained-leaf",
+          "measured": 73.44921875,
+          "budget": 128.0,
+          "unit": "MiB",
+          "pass": true
+        },
+        {
+          "gate": "targeted_dm_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "group_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "sync_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        }
+      ],
+      "verdicts_pass": true,
+      "notes": [],
+      "budget_sha256_prefix": "d2e47e2d76ca5c2a",
+      "stage": "final",
+      "observation": {
+        "failures": []
+      },
+      "sse_lag_log_warnings": {
+        "n1": 0,
+        "n2": 0,
+        "n3": 0,
+        "n4": 0,
+        "relay": 0,
+        "seed": 0
+      },
+      "class_probe_topics": {
+        "x0x/announce/v3/blob": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 160,
+          "observed_pairs": 160
+        },
+        "x0x.machine.announce.v3": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 160,
+          "observed_pairs": 160
+        }
+      },
+      "workload": {
+        "dm_count": 12,
+        "dm_size": 256,
+        "group_msgs": 6,
+        "store_puts": 10,
+        "store_value_size": 512,
+        "probe_bulk_msgs": 40,
+        "probe_bulk_size": 1024,
+        "probe_normal_msgs": 40,
+        "probe_normal_size": 256,
+        "idle_secs": 90
+      },
+      "subnet_third": 83
+    },
+    {
+      "phase": "trial",
+      "trial": "baseline",
+      "run_id": "qnb-s9-20261015",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "skip_legacy_dm_bus": false,
+      "scale": 9,
+      "cost": [
+        {
+          "node": "seed",
+          "role": "Seed",
+          "idle_egress_bytes_per_min": 951304.0,
+          "idle_ingress_bytes_per_min": 638459.3333333334,
+          "phase_egress_bytes": 10689493,
+          "phase_ingress_bytes": 9729355,
+          "cpu_percent_sustained": 3.4277419749739857,
+          "vmhwm_kib": 75140
+        },
+        {
+          "node": "relay",
+          "role": "RelayFull",
+          "idle_egress_bytes_per_min": 843674.0,
+          "idle_ingress_bytes_per_min": 682768.0,
+          "phase_egress_bytes": 12015508,
+          "phase_ingress_bytes": 7515734,
+          "cpu_percent_sustained": 2.771923995068249,
+          "vmhwm_kib": 67900
+        },
+        {
+          "node": "n1",
+          "role": "ConstrainedLeaf",
+          "idle_egress_bytes_per_min": 991600.6666666666,
+          "idle_ingress_bytes_per_min": 623929.3333333334,
+          "phase_egress_bytes": 9331077,
+          "phase_ingress_bytes": 7248243,
+          "cpu_percent_sustained": 3.270345659796609,
+          "vmhwm_kib": 75996
+        },
+        {
+          "node": "n2",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 1098864.0,
+          "idle_ingress_bytes_per_min": 682941.3333333334,
+          "phase_egress_bytes": 10064675,
+          "phase_ingress_bytes": 8194251,
+          "cpu_percent_sustained": 3.0954608651550792,
+          "vmhwm_kib": 76336
+        },
+        {
+          "node": "n3",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 373970.6666666667,
+          "idle_ingress_bytes_per_min": 595714.0,
+          "phase_egress_bytes": 6786732,
+          "phase_ingress_bytes": 10458017,
+          "cpu_percent_sustained": 2.6495046388191774,
+          "vmhwm_kib": 68644
+        },
+        {
+          "node": "n4",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 338625.3333333333,
+          "idle_ingress_bytes_per_min": 677264.6666666666,
+          "phase_egress_bytes": 7242169,
+          "phase_ingress_bytes": 9549735,
+          "cpu_percent_sustained": 2.7981567142644783,
+          "vmhwm_kib": 68288
+        },
+        {
+          "node": "n5",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 328454.0,
+          "idle_ingress_bytes_per_min": 642408.0,
+          "phase_egress_bytes": 6532570,
+          "phase_ingress_bytes": 7452152,
+          "cpu_percent_sustained": 2.5183410428380304,
+          "vmhwm_kib": 68168
+        },
+        {
+          "node": "n6",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 293893.3333333333,
+          "idle_ingress_bytes_per_min": 494940.6666666667,
+          "phase_egress_bytes": 6563224,
+          "phase_ingress_bytes": 8100336,
+          "cpu_percent_sustained": 2.754435515604096,
+          "vmhwm_kib": 68508
+        },
+        {
+          "node": "n7",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 307845.3333333333,
+          "idle_ingress_bytes_per_min": 495219.3333333333,
+          "phase_egress_bytes": 6271823,
+          "phase_ingress_bytes": 7271684,
+          "cpu_percent_sustained": 2.54457376203426,
+          "vmhwm_kib": 67272
+        }
+      ],
+      "matrix_targeted_dm": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_group": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_sync": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_probe": {
+        "total": 560,
+        "delivered": 560,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "unsafe_retries": 0,
+      "verdicts": [
+        {
+          "gate": "idle_combined_bytes_per_min",
+          "role": "constrained-leaf",
+          "measured": 1615530.0,
+          "budget": 2097152.0,
+          "unit": "bytes/min",
+          "pass": true
+        },
+        {
+          "gate": "cpu_percent_sustained",
+          "role": "constrained-leaf",
+          "measured": 3.270345659796609,
+          "budget": 15.0,
+          "unit": "percent",
+          "pass": true
+        },
+        {
+          "gate": "rss_mib_peak",
+          "role": "constrained-leaf",
+          "measured": 74.21484375,
+          "budget": 128.0,
+          "unit": "MiB",
+          "pass": true
+        },
+        {
+          "gate": "targeted_dm_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "group_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "sync_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        }
+      ],
+      "verdicts_pass": true,
+      "notes": [],
+      "budget_sha256_prefix": "d2e47e2d76ca5c2a",
+      "stage": "final",
+      "observation": {
+        "failures": []
+      },
+      "sse_lag_log_warnings": {
+        "n1": 0,
+        "n2": 0,
+        "n3": 0,
+        "n4": 0,
+        "n5": 0,
+        "n6": 0,
+        "n7": 0,
+        "relay": 0,
+        "seed": 0
+      },
+      "class_probe_topics": {
+        "x0x/announce/v3/blob": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 280,
+          "observed_pairs": 280
+        },
+        "x0x.machine.announce.v3": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 280,
+          "observed_pairs": 280
+        }
+      },
+      "workload": {
+        "dm_count": 12,
+        "dm_size": 256,
+        "group_msgs": 6,
+        "store_puts": 10,
+        "store_value_size": 512,
+        "probe_bulk_msgs": 40,
+        "probe_bulk_size": 1024,
+        "probe_normal_msgs": 40,
+        "probe_normal_size": 256,
+        "idle_secs": 90
+      },
+      "subnet_third": 84
+    },
+    {
+      "phase": "trial",
+      "trial": "shed_normal",
+      "run_id": "qnc-s9-20261015",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "skip_legacy_dm_bus": false,
+      "scale": 9,
+      "cost": [
+        {
+          "node": "seed",
+          "role": "Seed",
+          "idle_egress_bytes_per_min": 1116572.6666666667,
+          "idle_ingress_bytes_per_min": 830480.6666666666,
+          "phase_egress_bytes": 12774145,
+          "phase_ingress_bytes": 9167081,
+          "cpu_percent_sustained": 3.1070491176857495,
+          "vmhwm_kib": 74084
+        },
+        {
+          "node": "relay",
+          "role": "RelayFull",
+          "idle_egress_bytes_per_min": 590712.0,
+          "idle_ingress_bytes_per_min": 490558.6666666667,
+          "phase_egress_bytes": 14583980,
+          "phase_ingress_bytes": 8064464,
+          "cpu_percent_sustained": 2.5495342558429437,
+          "vmhwm_kib": 69652
+        },
+        {
+          "node": "n1",
+          "role": "ConstrainedLeaf",
+          "idle_egress_bytes_per_min": 1071852.6666666667,
+          "idle_ingress_bytes_per_min": 754801.3333333334,
+          "phase_egress_bytes": 9225468,
+          "phase_ingress_bytes": 8603538,
+          "cpu_percent_sustained": 6.5022519841891295,
+          "vmhwm_kib": 78588
+        },
+        {
+          "node": "n2",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 1814164.0,
+          "idle_ingress_bytes_per_min": 1001550.6666666666,
+          "phase_egress_bytes": 8892381,
+          "phase_ingress_bytes": 9652522,
+          "cpu_percent_sustained": 8.569441921359083,
+          "vmhwm_kib": 76856
+        },
+        {
+          "node": "n3",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 296044.6666666667,
+          "idle_ingress_bytes_per_min": 686235.3333333334,
+          "phase_egress_bytes": 7465960,
+          "phase_ingress_bytes": 9554141,
+          "cpu_percent_sustained": 2.411721593364947,
+          "vmhwm_kib": 69264
+        },
+        {
+          "node": "n4",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 402884.0,
+          "idle_ingress_bytes_per_min": 627114.0,
+          "phase_egress_bytes": 7388893,
+          "phase_ingress_bytes": 8413536,
+          "cpu_percent_sustained": 2.3365510501951303,
+          "vmhwm_kib": 69076
+        },
+        {
+          "node": "n5",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 313012.6666666667,
+          "idle_ingress_bytes_per_min": 640428.0,
+          "phase_egress_bytes": 6939870,
+          "phase_ingress_bytes": 8751540,
+          "cpu_percent_sustained": 2.3365510501951303,
+          "vmhwm_kib": 68876
+        },
+        {
+          "node": "n6",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 298446.0,
+          "idle_ingress_bytes_per_min": 610685.3333333334,
+          "phase_egress_bytes": 6967967,
+          "phase_ingress_bytes": 9069551,
+          "cpu_percent_sustained": 2.3929289575724924,
+          "vmhwm_kib": 68676
+        },
+        {
+          "node": "n7",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 299374.6666666667,
+          "idle_ingress_bytes_per_min": 564989.3333333334,
+          "phase_egress_bytes": 7065202,
+          "phase_ingress_bytes": 10044578,
+          "cpu_percent_sustained": 2.286437354748586,
+          "vmhwm_kib": 67556
+        }
+      ],
+      "matrix_targeted_dm": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_group": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_sync": {
+        "total": 20,
+        "delivered": 6,
+        "delayed": 0,
+        "lost": 14,
+        "unknown": 0
+      },
+      "matrix_probe": {
+        "total": 560,
+        "delivered": 560,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "unsafe_retries": 0,
+      "verdicts": [
+        {
+          "gate": "idle_combined_bytes_per_min",
+          "role": "constrained-leaf",
+          "measured": 1826654.0,
+          "budget": 2097152.0,
+          "unit": "bytes/min",
+          "pass": true
+        },
+        {
+          "gate": "cpu_percent_sustained",
+          "role": "constrained-leaf",
+          "measured": 6.5022519841891295,
+          "budget": 15.0,
+          "unit": "percent",
+          "pass": true
+        },
+        {
+          "gate": "rss_mib_peak",
+          "role": "constrained-leaf",
+          "measured": 76.74609375,
+          "budget": 128.0,
+          "unit": "MiB",
+          "pass": true
+        },
+        {
+          "gate": "targeted_dm_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "group_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "sync_delivered_frac",
+          "role": "leaf",
+          "measured": 0.3,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": false
+        }
+      ],
+      "verdicts_pass": false,
+      "notes": [],
+      "budget_sha256_prefix": "d2e47e2d76ca5c2a",
+      "stage": "final",
+      "observation": {
+        "failures": []
+      },
+      "sse_lag_log_warnings": {
+        "n1": 0,
+        "n2": 0,
+        "n3": 0,
+        "n4": 0,
+        "n5": 0,
+        "n6": 0,
+        "n7": 0,
+        "relay": 0,
+        "seed": 0
+      },
+      "class_probe_topics": {
+        "x0x/announce/v3/blob": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 280,
+          "observed_pairs": 280
+        },
+        "x0x.machine.announce.v3": {
+          "operations": 40,
+          "published_events": 40,
+          "intended_pairs": 280,
+          "observed_pairs": 280
+        }
+      },
+      "workload": {
+        "dm_count": 12,
+        "dm_size": 256,
+        "group_msgs": 6,
+        "store_puts": 10,
+        "store_value_size": 512,
+        "probe_bulk_msgs": 40,
+        "probe_bulk_size": 1024,
+        "probe_normal_msgs": 40,
+        "probe_normal_size": 256,
+        "idle_secs": 90
+      },
+      "subnet_third": 84
+    }
+  ]
+}
