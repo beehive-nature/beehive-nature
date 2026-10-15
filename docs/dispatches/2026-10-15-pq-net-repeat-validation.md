@@ -112,4 +112,3 @@ the harness and Cargo.lock remain byte-unchanged. An hourly follow-up named
 is a meaningful change. The latest upstream read still has #115 open,
 upstream main `4d41f88` and latest release v0.5.88 (2026-10-12). Maintainer
 CI approval, merge, release and x0x adoption remain outstanding. This replication does not establish upstream release or production adoption.
-

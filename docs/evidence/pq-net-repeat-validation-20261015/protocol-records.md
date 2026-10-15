@@ -44,3 +44,10 @@ Recorded at: `2026-10-15T19:11:25.723100+00:00`.
 - `/home/travi/btmd/pq-net-repeat-runs/qva-s9-20261015/receipts/calibration.jsonl` SHA-256 `00d7fad2481ee6cd9118d2e6ac9bcddff53d2a855f163ced33c3d0e6d814c53b` PUBLIC-CONSTANT
 - `/home/travi/btmd/pq-net-repeat-runs/qva-s9-20261015/receipts/diagnostics.jsonl` SHA-256 `bad1a7c86c49e429148cd8e064bf896f09f4574cb015cd5c88bd6b12d077732e` PUBLIC-CONSTANT
 - `/home/travi/btmd/pq-net-repeat-runs/qva-s9-20261015/receipts/samples.jsonl` SHA-256 `037970822053a382d879cab9723cb2b054a40444482e89065d0426c0ca40eac5` PUBLIC-CONSTANT
+
+## Publication formatting
+
+The published protocol removes only its trailing blank line. The exact
+pre-measurement bytes still match the recorded digest in this retained copy:
+
+- `/home/travi/btmd/pq-net-repeat-runs/protocol-before-publication-formatting.md` SHA-256 `3880f9575bd50ba06e9cbfcff5ce5b4fd66581a9279343456c292cbc60f1f8f4` PUBLIC-CONSTANT

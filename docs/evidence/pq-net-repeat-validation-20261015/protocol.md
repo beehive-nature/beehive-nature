@@ -37,4 +37,3 @@ public-mesh or fleet-wide saving, nor justify promoting shedding defaults.
 
 
 An old idle Cargo parent is not itself an active compiler. The guard samples rustc, rustdoc, cc1, cc1plus, ld.lld, ld and collect2; no unrelated process is stopped.
-
