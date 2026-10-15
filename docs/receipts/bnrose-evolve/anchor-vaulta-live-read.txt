@@ -1,0 +1,16 @@
+$ cargo test -p bnrose-anchor-vaulta --test carrier -- --ignored --nocapture live_jungle4_read
+# reads only (get_info, get_table_rows); no key, no push; 2026-10-15T11:59:16Z
+   Compiling bnrose-anchor-vaulta v0.1.0 (/mnt/c/Users/travi/wt-bevanchor/crates/bnrose-anchor-vaulta)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.67s
+     Running tests/carrier.rs (/home/travi/tgt-bevanchor2/debug/deps/carrier-4caaaff69351a76f)
+
+running 1 test
+jungle4 x2, bnrevanchor1/evolve.ctr1: Unreachable("endpoint 0: get_table_rows: https://jungle4.greymass.com/v1/chain/get_table_rows: status code 400")
+mainnet endpoint, jungle4 chain id pinned: Unreachable("endpoint 0: endpoint serves chain aca376f206b8fc25…, not 73e4385a2708e6d7…")
+test live_jungle4_read ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.87s
+
+exit=0
+$ curl -s -X POST https://jungle4.greymass.com/v1/chain/get_account -d {"account_name":"bnrevanchor1"}
+{"code":400,"message":"Account lookup","error":{"code":3060002,"name":"account_query_exception","what":"Account Query Exception","details":[{"message":"unable to retrieve account info (unknown key (boost::tuples::tuple<bool, eosio::chain::name, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type,

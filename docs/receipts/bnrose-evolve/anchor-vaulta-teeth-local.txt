@@ -1,0 +1,10 @@
+$ sh scripts/bnrose-evolve/anchor-vaulta-teeth.sh
+# 2026-10-15T12:02:24Z
+control: the unmutated copy runs the carrier suite
+control: GREEN
+TEETH wrong-chain-read: CONVICTED by only_a_wrong_chain_is_refused_by_the_chain_check
+TEETH split-answers-merge: CONVICTED by endpoints_must_all_answer_and_all_agree
+TEETH row-trusted-over-statement: CONVICTED by a_row_that_does_not_carry_its_statement_is_refused
+TEETH failed-endpoint-skipped: CONVICTED by endpoints_must_all_answer_and_all_agree
+TEETH: 4 convicted, 0 escaped
+exit=0

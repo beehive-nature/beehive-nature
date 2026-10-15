@@ -163,5 +163,35 @@ tooth unbounded-worker src/executor.rs \
     'if false && started.elapsed() >= timeout {' \
     adversarial::hung_scribbling_and_flooding_workers_are_degraded_never_pass
 
+# the external anchor (crate::anchor): each guard owns one row. Not toothed,
+# named: Journal::append extending `links` is unreachable through the anchored
+# open (open recomputes every link), and the gate running before recovery
+# writes is held by construction in open_claimed, not by a row that could
+# tell the two orders apart.
+tooth anchor-truncation-ignored src/anchor.rs \
+    'None => return Err(truncated(local, a.count)),' \
+    'None => return Ok(AnchorCheck::Unanchored),' \
+    anchor::a_truncated_journal_is_refused_against_the_anchor
+
+tooth anchor-prefix-unchecked src/anchor.rs \
+    'if anchored_prefix != a.head {' \
+    'if false && anchored_prefix != a.head {' \
+    anchor::a_rewritten_and_rechained_journal_is_refused_against_the_anchor
+
+tooth anchor-statement-unchecked src/anchor.rs \
+    'if local == a.count && (view.promote != a.promote' \
+    'if false && local == a.count && (view.promote != a.promote' \
+    anchor::an_anchor_that_does_not_describe_its_journal_is_refused
+
+tooth anchor-down-read-as-never src/anchor.rs \
+    'AnchorLookup::NeverAnchored => return Ok(AnchorCheck::Unanchored),' \
+    'AnchorLookup::NeverAnchored | AnchorLookup::Unreachable(_) => return Ok(AnchorCheck::Unanchored),' \
+    anchor::an_unreachable_carrier_fails_closed
+
+tooth anchor-prefix-off-by-one src/journal.rs \
+    '_ => self.links.get((n - 1) as usize).map(|l| (n, *l)),' \
+    '_ => self.links.get(n as usize).map(|l| (n, *l)),' \
+    anchor::an_honest_journal_is_accepted_against_its_anchor
+
 echo "TEETH: $CONVICTED convicted, $ESCAPED escaped"
 [ "$ESCAPED" -eq 0 ]

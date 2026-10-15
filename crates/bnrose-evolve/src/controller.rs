@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
+use crate::anchor::{AnchorCheck, AnchorLookup, LocalView};
 use crate::attest::{Role, TrustRoot};
 use crate::canon::{Dec, Enc};
 use crate::digest::{hash, Digest32};
@@ -339,6 +340,32 @@ impl Controller {
         engine: &str,
         trust: TrustRoot,
     ) -> Result<(Controller, RecoveryReport), Refusal> {
+        Self::open_gated(dir, engine, trust, |_| Ok(())).map(|(c, rep, ())| (c, rep))
+    }
+
+    /// [`Controller::open`], with the journal compared against the latest
+    /// external anchor after it is verified and replayed and BEFORE recovery
+    /// writes anything: a journal shorter than the anchor, or whose anchored
+    /// prefix is not the anchored one, is refused as `Tampered` and nothing
+    /// is appended to it. See [`crate::anchor`].
+    pub fn open_anchored(
+        dir: &Path,
+        engine: &str,
+        trust: TrustRoot,
+        subject: &str,
+        latest: &AnchorLookup,
+    ) -> Result<(Controller, RecoveryReport, AnchorCheck), Refusal> {
+        Self::open_gated(dir, engine, trust, |c| {
+            crate::anchor::check(&c.local_view(), subject, latest)
+        })
+    }
+
+    fn open_gated<T>(
+        dir: &Path,
+        engine: &str,
+        trust: TrustRoot,
+        gate: impl FnOnce(&Controller) -> Result<T, Refusal>,
+    ) -> Result<(Controller, RecoveryReport, T), Refusal> {
         std::fs::create_dir_all(dir).map_err(|e| Refusal::Store(e.to_string()))?;
         match std::fs::OpenOptions::new()
             .write(true)
@@ -351,7 +378,7 @@ impl Controller {
             }
             Err(e) => return Err(Refusal::Store(e.to_string())),
         }
-        match Self::open_claimed(dir, engine, trust) {
+        match Self::open_claimed(dir, engine, trust, gate) {
             Ok(v) => Ok(v),
             Err(e) => {
                 let _ = std::fs::remove_file(dir.join(CLAIM));
@@ -372,11 +399,12 @@ impl Controller {
         Self::open(dir, engine, trust)
     }
 
-    fn open_claimed(
+    fn open_claimed<T>(
         dir: &Path,
         engine: &str,
         trust: TrustRoot,
-    ) -> Result<(Controller, RecoveryReport), Refusal> {
+        gate: impl FnOnce(&Controller) -> Result<T, Refusal>,
+    ) -> Result<(Controller, RecoveryReport, T), Refusal> {
         let store =
             adapter_store::open_named(engine, &dir.join("store")).map_err(Refusal::store)?;
         let (journal, records) = Journal::open(store)?;
@@ -395,8 +423,10 @@ impl Controller {
             journal,
             state,
         };
+        // the gate reads the replayed journal before recovery appends to it
+        let gated = gate(&c)?;
         let report = c.recover()?;
-        Ok((c, report))
+        Ok((c, report, gated))
     }
 
     fn recover(&mut self) -> Result<RecoveryReport, Refusal> {
@@ -482,6 +512,23 @@ impl Controller {
 
     pub fn head(&self) -> (u64, Digest32) {
         self.journal.head()
+    }
+    /// The digest of the latest PROMOTE decision, if any.
+    pub fn latest_promote(&self) -> Option<Digest32> {
+        self.state
+            .decisions
+            .iter()
+            .rev()
+            .find(|d| d.kind == DecisionKind::Promote)
+            .map(|d| d.digest())
+    }
+    /// What an anchor statement is built from and compared against.
+    pub fn local_view(&self) -> LocalView<'_> {
+        LocalView {
+            journal: &self.journal,
+            promote: self.latest_promote(),
+            policy: self.policy_digest(),
+        }
     }
     pub fn policy(&self) -> Option<&Policy> {
         self.state.policy.as_ref().map(|(_, p)| p)

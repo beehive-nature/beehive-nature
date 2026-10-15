@@ -18,9 +18,9 @@
 //! chain, so it convicts a changed, removed, reordered or truncated record
 //! that was not re-chained, and torn or foreign bytes. Someone with write
 //! access to the store CAN rewrite the whole chain consistently. Detecting
-//! that needs the head held somewhere they cannot write: `Journal::head()`
-//! is exported for exactly that anchor (Vaulta, Autonomi, a peer), which is
-//! a later beat and is not claimed here.
+//! that needs the head held somewhere they cannot write: `head()` and
+//! `head_at()` feed `crate::anchor`, whose check at open refuses a journal
+//! whose anchored prefix is shorter or other than the anchored one.
 
 use adapter_store::{Edit, EmbeddedStore};
 
@@ -344,6 +344,9 @@ pub struct Journal {
     store: Box<dyn EmbeddedStore>,
     next: u64,
     head: Digest32,
+    /// The link after every record, recomputed at open and extended by
+    /// append: what an external anchor's prefix is compared against.
+    links: Vec<Digest32>,
 }
 
 impl Journal {
@@ -352,6 +355,7 @@ impl Journal {
         let rows = store.scan_prefix(J).map_err(Refusal::store)?;
         let mut head = Digest32::ZERO;
         let mut records = Vec::with_capacity(rows.len());
+        let mut links = Vec::with_capacity(rows.len());
         for (i, (k, v)) in rows.iter().enumerate() {
             let seq = i as u64;
             if k != &key(seq) {
@@ -371,6 +375,7 @@ impl Journal {
                 Refusal::Tampered(format!("record {seq} links but does not decode: {e}"))
             })?);
             head = want;
+            links.push(want);
         }
         let stored = store.get(HEAD).map_err(Refusal::store)?;
         let n = records.len() as u64;
@@ -397,6 +402,7 @@ impl Journal {
                 store,
                 next: n,
                 head,
+                links,
             },
             records,
         ))
@@ -416,6 +422,7 @@ impl Journal {
             .map_err(Refusal::store)?;
         self.next = seq + 1;
         self.head = l;
+        self.links.push(l);
         Ok(seq)
     }
 
@@ -423,6 +430,16 @@ impl Journal {
     /// anchor would hold.
     pub fn head(&self) -> (u64, Digest32) {
         (self.next, self.head)
+    }
+
+    /// The head this journal had after its first `n` records, or `None` when
+    /// it holds fewer than `n`. An anchor taken at `n` matches only a journal
+    /// whose first `n` records are the anchored ones (crate::anchor).
+    pub fn head_at(&self, n: u64) -> Option<(u64, Digest32)> {
+        match n {
+            0 => Some((0, Digest32::ZERO)),
+            _ => self.links.get((n - 1) as usize).map(|l| (n, *l)),
+        }
     }
 
     /// Keep raw evidence bytes (a worker's stdout, a fault's capture) under
