@@ -19,3 +19,8 @@ bnrose-replacement-law = { path = "../../../crates/bnrose-replacement-law" }
 overflow-checks = false
 [profile.test]
 overflow-checks = false
+
+# standalone by declaration (the estate pq02-sponge shape): a crate under
+# the workspace tree must not be auto-adopted — cargo saw-build builds it
+# alone, with the leaf as its only dependency
+[workspace]

@@ -40,7 +40,8 @@ if [ ! -s "$MIR" ]; then
   ( cd scripts/bnrose-rust-001/saw-harness \
       && RUSTUP_TOOLCHAIN=nightly-2026-03-21 CARGO_TARGET_DIR=../../../target/saw-bnrose cargo saw-build ) \
     || { say "SAW-BNROSE: FAIL — cargo saw-build"; exit 1; }
-  _found=$(ls -t ../../../target/saw-bnrose/*/deps/bnrose_saw_harness-*.linked-mir.json 2>/dev/null | head -1)
+  _found=$(find target/saw-bnrose -name "bnrose_saw_harness-*.linked-mir.json" -newer scripts/bnrose-rust-001/saw-harness/Cargo.toml 2>/dev/null | head -1)
+  [ -n "$_found" ] || _found=$(ls -t $(find target/saw-bnrose -name "bnrose_saw_harness-*.linked-mir.json" 2>/dev/null) 2>/dev/null | head -1)
   [ -n "$_found" ] && [ -s "$_found" ] || { say "SAW-BNROSE: FAIL — no linked MIR produced"; exit 1; }
   cp "$_found" "$MIR"
 fi
