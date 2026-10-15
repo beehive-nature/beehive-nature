@@ -136,6 +136,16 @@ holds its command line and the raw output.
   chain id pinned → `Unreachable("… serves chain aca376f206b8fc25…, not
   73e4385a2708e6d7…")`. Both fail closed, as built.
 
+**Requalified on the new base (2026-10-15).** #435 moved to `16e3a6b59`
+(SKV-1 zero-commit oracle repair #438 + main `8e7a16f9d`). Merged into this
+branch at `3ff396919` with no conflicts (`surfaces/stack.html` regenerated,
+both `--check` scripts green, lint-ci-shape 136/136). Every receipt above
+was rerun on that tree and overwritten (earlier greens are not carried):
+`cargo metadata --locked` ok; `cargo fmt --all -- --check` exit 0; battery
+10 unit + 28 rows ok; carrier 5 + 1 unit ok; `TEETH: 17 convicted, 0
+escaped`; carrier `TEETH: 4 convicted, 0 escaped`. The SKV-2 network-denial
+flake is the SKV seat's on #422 and is not worked around here.
+
 CI (`bnrose-evolve.yml`, `tests.yml`) on the pushed head is the receipt that
 counts. Its verdict is recorded in the PR, not predicted here.
 

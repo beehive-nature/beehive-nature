@@ -1,5 +1,5 @@
 $ sh scripts/bnrose-evolve/anchor-vaulta-teeth.sh
-# 2026-10-15T12:02:24Z
+# tree: merge 3ff396919 (anchor 70f216ca8 + base 16e3a6b59); Linux 6.18.33.2-microsoft-standard-WSL2 x86_64; 8 cpu; 2026-10-15T13:03:14Z
 control: the unmutated copy runs the carrier suite
 control: GREEN
 TEETH wrong-chain-read: CONVICTED by only_a_wrong_chain_is_refused_by_the_chain_check
