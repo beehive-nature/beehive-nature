@@ -1,0 +1,53 @@
+name: BNROSE-EVOLVE
+
+# The bounded evolution controller (crates/bnrose-evolve): the battery on
+# both embedded engines (lifecycle, adversarial, recovery, authority), the
+# cross-check against the REAL bsigner binary, and the mutation controls
+# (teeth) — every push. Every suite step fires every run (the estate's
+# lint-ci-shape law: a sibling red never skips a suite); receipts are
+# preserved as artifacts whatever the outcome.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lane:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Build the controller, its fixture and bsigner
+        run: |
+          mkdir -p docs/receipts/bnrose-evolve
+          cargo build -p bnrose-evolve -p bsigner --locked
+      - name: Battery (both engines, real processes)
+        if: always()
+        run: |
+          set -o pipefail
+          cargo test -p bnrose-evolve --locked 2>&1 | tee docs/receipts/bnrose-evolve/battery-ci.txt
+      - name: Cross-check against the real bsigner binary
+        if: always()
+        run: |
+          set -o pipefail
+          sh scripts/bnrose-evolve/bsigner-xcheck.sh target/debug/bsigner target/debug/bnrose-evolve \
+            2>&1 | tee docs/receipts/bnrose-evolve/bsigner-xcheck-ci.txt
+      - name: Mutation controls (teeth)
+        if: always()
+        run: |
+          set -o pipefail
+          sh scripts/bnrose-evolve/teeth.sh 2>&1 | tee docs/receipts/bnrose-evolve/teeth-ci.txt
+      - name: Preserve receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: bnrose-evolve-${{ github.run_id }}-${{ github.run_attempt }}
+          path: docs/receipts/bnrose-evolve/*-ci.txt
+          if-no-files-found: error
+          retention-days: 14

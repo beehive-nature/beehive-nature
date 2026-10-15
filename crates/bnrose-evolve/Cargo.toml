@@ -1,0 +1,19 @@
+[package]
+name = "bnrose-evolve"
+version = "0.1.0"
+edition.workspace = true
+license = "Apache-2.0"
+description = "BNRoSe L2 bounded evolution controller: observe, reproduce, propose, verify, canary, promote or roll back. Four separate authorities (proposal, execution, verification, promotion) over one tamper-evident journal on the embedded adapter-store seam; attempts reserved before they run and never settled at a false zero; durable cancellation and recovery; a failure-class register that closes only on verifier-held evidence. It holds no signing key: sovereign policy and agent proposals arrive as bsigner bheart.signature/1 envelopes and are only verified here."
+publish = false
+
+[dependencies]
+# NO-SERVER-DB (founder ruling 2026-10-13): the journal lives in an embedded
+# engine behind the path-only seam. SQLite is the reference, SurrealKV the
+# candidate; the battery runs both.
+adapter-store = { path = "../adapter-store" }
+# the same pin bsigner verifies with (crates/bsigner/src/pq.rs dsa_verify):
+# an envelope bsigner writes verifies here byte for byte. Verify only — this
+# crate exposes no signing function.
+ml-dsa = "0.1"
+sha3 = { workspace = true }
+serde_json = "1"
