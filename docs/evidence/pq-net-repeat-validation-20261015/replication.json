@@ -1,0 +1,328 @@
+{
+  "aggregate": {
+    "pair_count": 4,
+    "new_unique_identity_prefixes": 72,
+    "prior_unique_identity_prefixes": 54,
+    "excluded_unique_identity_prefixes": 9,
+    "puts_http_200": 80,
+    "puts_total": 80,
+    "sender_matched_puts": 80,
+    "store_delivered": 160,
+    "store_expected": 160,
+    "all_gates_pass": false,
+    "all_pairs_save_bandwidth": false,
+    "mean_paired_saving_percent": 19.37952470102003,
+    "median_paired_saving_percent": 27.669289598202653,
+    "min_paired_saving_percent": -24.822406664859336,
+    "max_paired_saving_percent": 47.00192627253415,
+    "ratio_of_means_saving_percent": 23.97087933554346,
+    "recipient_queue_overflows": {
+      "qvi-s9-20261015": {
+        "n1": 0,
+        "n2": 0
+      },
+      "qvj-s9-20261015": {
+        "n1": 0,
+        "n2": 0
+      },
+      "qvc-s9-20261015": {
+        "n1": 0,
+        "n2": 0
+      },
+      "qvd-s9-20261015": {
+        "n1": 0,
+        "n2": 0
+      },
+      "qve-s9-20261015": {
+        "n1": 0,
+        "n2": 0
+      },
+      "qvf-s9-20261015": {
+        "n1": 0,
+        "n2": 0
+      },
+      "qvg-s9-20261015": {
+        "n1": 0,
+        "n2": 0
+      },
+      "qvh-s9-20261015": {
+        "n1": 0,
+        "n2": 0
+      }
+    }
+  },
+  "pairs": [
+    {
+      "pair": 1,
+      "order": [
+        "baseline",
+        "shed_normal"
+      ],
+      "baseline_run": "qvi-s9-20261015",
+      "shedding_run": "qvj-s9-20261015",
+      "baseline_idle_B_per_min": 1319793.238095238,
+      "shedding_idle_B_per_min": 929853.619047619,
+      "saving_percent": 29.54550817447668,
+      "baseline_store": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "shedding_store": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "both_gates_pass": true
+    },
+    {
+      "pair": 2,
+      "order": [
+        "shed_normal",
+        "baseline"
+      ],
+      "baseline_run": "qvd-s9-20261015",
+      "shedding_run": "qvc-s9-20261015",
+      "baseline_idle_B_per_min": 1133907.3333333333,
+      "shedding_idle_B_per_min": 841437.8095238096,
+      "saving_percent": 25.79307102192863,
+      "baseline_store": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "shedding_store": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "both_gates_pass": true
+    },
+    {
+      "pair": 3,
+      "order": [
+        "shed_normal",
+        "baseline"
+      ],
+      "baseline_run": "qvf-s9-20261015",
+      "shedding_run": "qve-s9-20261015",
+      "baseline_idle_B_per_min": 1024049.0476190477,
+      "shedding_idle_B_per_min": 1278242.6666666667,
+      "saving_percent": -24.822406664859336,
+      "baseline_store": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "shedding_store": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "both_gates_pass": true
+    },
+    {
+      "pair": 4,
+      "order": [
+        "baseline",
+        "shed_normal"
+      ],
+      "baseline_run": "qvg-s9-20261015",
+      "shedding_run": "qvh-s9-20261015",
+      "baseline_idle_B_per_min": 1760370.0,
+      "shedding_idle_B_per_min": 932962.1904761905,
+      "saving_percent": 47.00192627253415,
+      "baseline_store": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "shedding_store": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "both_gates_pass": false
+    }
+  ],
+  "identities": {
+    "qvi-s9-20261015": {
+      "n1": "719d34de2b9dd88e",
+      "n2": "827d3834a069ec54",
+      "n3": "aa1e12ce7ca4fb84",
+      "n4": "b41b72d1ef74c21c",
+      "n5": "f9869628fe7dfad4",
+      "n6": "5e23f4034ed0cc9e",
+      "n7": "c3de855ff56f6c55",
+      "relay": "0ab01de0bb560c44",
+      "seed": "db2bce2960036e4f"
+    },
+    "qvj-s9-20261015": {
+      "n1": "729dfafae95e1e19",
+      "n2": "a121919d5451c1b2",
+      "n3": "d0011d436d0daa64",
+      "n4": "2fda3bab6d690abb",
+      "n5": "ca7f2f9c0e34600f",
+      "n6": "e57ff83bcb3a0dce",
+      "n7": "db1b08de8b9e2a53",
+      "relay": "6098d819217b3020",
+      "seed": "0795b7bafe54f778"
+    },
+    "qvc-s9-20261015": {
+      "n1": "c328cc90df93acb6",
+      "n2": "e797ecac5b7cd8d9",
+      "n3": "f86714dbb1423272",
+      "n4": "05dc150aa1c314b8",
+      "n5": "9a3bdbb1b1cc7e52",
+      "n6": "287b3b0d24f5a618",
+      "n7": "140b12d2551b8d2b",
+      "relay": "12a527f46de5a508",
+      "seed": "5c6d6596cef76be1"
+    },
+    "qvd-s9-20261015": {
+      "n1": "8ee9f566624cb18c",
+      "n2": "7b890fb453e8c2fc",
+      "n3": "d7d0397f625e14b1",
+      "n4": "b50164ed2a9bc4f9",
+      "n5": "e15701d4587df128",
+      "n6": "4eef4dc5617c0bb1",
+      "n7": "d8bd2107de37ccf2",
+      "relay": "a4255e4e91bb2640",
+      "seed": "cf7c1bf2bba47dd6"
+    },
+    "qve-s9-20261015": {
+      "n1": "ff5ec7f385a6a20c",
+      "n2": "65c048f434db5201",
+      "n3": "8f0a060f8084a051",
+      "n4": "17cd20f7003b2bd2",
+      "n5": "89e95917d0152b61",
+      "n6": "0df5f53716f77474",
+      "n7": "3c1e119e77c40d4e",
+      "relay": "db2a6b54a9f30554",
+      "seed": "6508d6450349fe7e"
+    },
+    "qvf-s9-20261015": {
+      "n1": "ccd31f0c0ddfd18b",
+      "n2": "0c9735d10c47fb5c",
+      "n3": "0b2197cb91b8cf4c",
+      "n4": "7a849918a8bcc5b1",
+      "n5": "14326062158ca67a",
+      "n6": "d557319e4d1a44dc",
+      "n7": "0cd0e04763eff373",
+      "relay": "b373698ce96d2150",
+      "seed": "0edfe43685679b62"
+    },
+    "qvg-s9-20261015": {
+      "n1": "8044eeebfdaea2bb",
+      "n2": "aef8697c7aa2d602",
+      "n3": "8de3ece3cdc5a5ad",
+      "n4": "ab824ab78857ef99",
+      "n5": "f1f49967ca022d21",
+      "n6": "14a3a54d6549d420",
+      "n7": "4c8bc4821ba49b30",
+      "relay": "9fad9128cd2ded9f",
+      "seed": "2b7862007bd0bb2c"
+    },
+    "qvh-s9-20261015": {
+      "n1": "09298d9c813b1817",
+      "n2": "d298a33c4ef51233",
+      "n3": "531bf9b66136b18d",
+      "n4": "f8c51a6530028854",
+      "n5": "71d6282398e216c8",
+      "n6": "c287502dd609c8d6",
+      "n7": "da6e14e890c57d2f",
+      "relay": "22ca59c8af25af43",
+      "seed": "3ef36b5060880e28"
+    }
+  },
+  "host": {
+    "qvi-s9-20261015": {
+      "pair": 1,
+      "policy": "baseline",
+      "build_overlap": false,
+      "samples": 26,
+      "load1_mean": 1.6755934495192308,
+      "load1_max": 3.04833984375,
+      "driver_exit": 0
+    },
+    "qvj-s9-20261015": {
+      "pair": 1,
+      "policy": "shed_normal",
+      "build_overlap": false,
+      "samples": 26,
+      "load1_mean": 1.7090031550480769,
+      "load1_max": 3.3203125,
+      "driver_exit": 0
+    },
+    "qvc-s9-20261015": {
+      "pair": 2,
+      "policy": "shed_normal",
+      "build_overlap": false,
+      "samples": 26,
+      "load1_mean": 1.4943472055288463,
+      "load1_max": 2.7802734375,
+      "driver_exit": 0
+    },
+    "qvd-s9-20261015": {
+      "pair": 2,
+      "policy": "baseline",
+      "build_overlap": false,
+      "samples": 26,
+      "load1_mean": 2.1878943810096154,
+      "load1_max": 4.35107421875,
+      "driver_exit": 0
+    },
+    "qve-s9-20261015": {
+      "pair": 3,
+      "policy": "shed_normal",
+      "build_overlap": false,
+      "samples": 27,
+      "load1_mean": 1.7765480324074074,
+      "load1_max": 2.94140625,
+      "driver_exit": 0
+    },
+    "qvf-s9-20261015": {
+      "pair": 3,
+      "policy": "baseline",
+      "build_overlap": false,
+      "samples": 27,
+      "load1_mean": 1.7610134548611112,
+      "load1_max": 3.32763671875,
+      "driver_exit": 0
+    },
+    "qvg-s9-20261015": {
+      "pair": 4,
+      "policy": "baseline",
+      "build_overlap": false,
+      "samples": 27,
+      "load1_mean": 1.8415798611111112,
+      "load1_max": 3.123046875,
+      "driver_exit": 0
+    },
+    "qvh-s9-20261015": {
+      "pair": 4,
+      "policy": "shed_normal",
+      "build_overlap": false,
+      "samples": 26,
+      "load1_mean": 0.569580078125,
+      "load1_max": 1.029296875,
+      "driver_exit": 0
+    }
+  }
+}

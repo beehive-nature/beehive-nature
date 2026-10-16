@@ -294,13 +294,13 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
     <div class="et-b">
       <div class="et-b-mark">b<b>Data</b></div>
       <h2 class="et-b-h" id="etBeeTitle">your files</h2>
-      <p class="et-b-lede" data-etk="et.bdata.b.lede">what you have, who can get it and where it is kept.</p>
-      <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.bdata.b.guard">nothing on this page can spend your money.</span></div>
+      <p class="et-b-lede" data-etk="et.bdata.b.lede" data-i18n="et.bdata.b.lede">what you have, who can get it and where it is kept.</p>
+      <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.bdata.b.guard" data-i18n="et.bdata.b.guard">nothing on this page can spend your money.</span></div>
       <div class="et-b-rows" id="etBeeRows"><div class="et-b-wait">reading your files…</div></div>
       <div class="et-b-act">
         <a class="et-b-primary" id="etBeeGo" href="#aud-h" data-handoff="who">choose who can get it</a>
-        <a class="et-b-link" href="#etArchive" data-etk="et.bdata.b.more">see every detail below</a>
-        <p class="et-b-foot" data-etk="et.bdata.b.foot">forever means it cannot be taken down.</p>
+        <a class="et-b-link" href="#etArchive" data-etk="et.bdata.b.more" data-i18n="et.bdata.b.more">see every detail below</a>
+        <p class="et-b-foot" data-etk="et.bdata.b.foot" data-i18n="et.bdata.b.foot">forever means it cannot be taken down.</p>
       </div>
     </div>
 
@@ -308,12 +308,12 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
     <div class="et-r">
       <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">pieces</h2><span class="et-r-hint" id="etRaverHint">tap a petal</span></div>
       <svg class="et-r-bloom" id="etBloom" viewBox="-200 -200 400 400" role="img" aria-label="the video as petals, one per stored piece; a petal's length is its quoted price"></svg>
-      <div class="et-r-step"><button type="button" data-step="-1" aria-label="previous piece">‹ <span data-etk="et.bdata.r.piece1">piece</span></button><button type="button" data-step="1" aria-label="next piece"><span data-etk="et.bdata.r.piece2">piece</span> ›</button></div>
+      <div class="et-r-step"><button type="button" data-step="-1" aria-label="previous piece">‹ <span data-etk="et.bdata.r.piece1" data-i18n="et.bdata.r.piece1">piece</span></button><button type="button" data-step="1" aria-label="next piece"><span data-etk="et.bdata.r.piece2" data-i18n="et.bdata.r.piece2">piece</span> ›</button></div>
       <div class="et-r-legend" id="etLegend" aria-label="ANT per piece"></div>
       <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
       <p class="et-r-note" id="etRaverNote"></p>
       <a class="et-r-pill" id="etRaverGo" href="#aud-h" data-handoff="who">who can get it</a>
-      <a class="et-r-ghost" href="#etArchive" data-etk="et.bdata.r.more">the whole of my data</a>
+      <a class="et-r-ghost" href="#etArchive" data-etk="et.bdata.r.more" data-i18n="et.bdata.r.more">the whole of my data</a>
     </div>
 
     <!-- CYPHERPUNK — the instrument: object, pipeline, receipt, a check you run here -->
@@ -321,31 +321,31 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
       <div class="et-c-path" id="etCyPath">bdata://… reading bpay-invoice.json</div>
       <div class="et-c-chips" id="etChips"></div>
       <div class="et-c-guard" id="etCyGuard"></div>
-      <h3 class="et-c-h" data-etk="et.bdata.c.object">object · bpay-invoice.json</h3>
+      <h3 class="et-c-h" data-etk="et.bdata.c.object" data-i18n="et.bdata.c.object">object · bpay-invoice.json</h3>
       <table class="et-c-kv" id="etObject"></table>
-      <h3 class="et-c-h" data-etk="et.bdata.c.pipe">store pipeline · public path</h3>
+      <h3 class="et-c-h" data-etk="et.bdata.c.pipe" data-i18n="et.bdata.c.pipe">store pipeline · public path</h3>
       <ol class="et-c-pipe" id="etPipe"></ol>
       <div class="et-c-verify">
-        <div class="et-c-verify-h" data-etk="et.bdata.c.sources">sources · the receipt cites</div>
+        <div class="et-c-verify-h" data-etk="et.bdata.c.sources" data-i18n="et.bdata.c.sources">sources · the receipt cites</div>
         <ol id="etSources"></ol>
       </div>
       <div class="et-c-verify">
-        <div class="et-c-verify-h" data-etk="et.bdata.c.vHere">verify · receipt ↔ invoice, field by field, in this page</div>
+        <div class="et-c-verify-h" data-etk="et.bdata.c.vHere" data-i18n="et.bdata.c.vHere">verify · receipt ↔ invoice, field by field, in this page</div>
         <ol id="etVerify"></ol>
-        <button type="button" class="et-c-primary" id="etCyVerify" data-etk="et.bdata.c.run">run verify here</button>
+        <button type="button" class="et-c-primary" id="etCyVerify" data-etk="et.bdata.c.run" data-i18n="et.bdata.c.run">run verify here</button>
       </div>
       <div class="et-c-verify">
-        <div class="et-c-verify-h" data-etk="et.bdata.c.vHand">verify · no trust in this page needed</div>
+        <div class="et-c-verify-h" data-etk="et.bdata.c.vHand" data-i18n="et.bdata.c.vHand">verify · no trust in this page needed</div>
         <ol id="etByHand"></ol>
       </div>
       <div class="et-c-row">
-        <a class="et-c-ghost" href="bdata-stored-bux-try-autonomi.json" download data-etk="et.bdata.c.export">export receipt</a>
-        <a class="et-c-ghost" id="etCyWatch" href="#aud-h" hidden data-etk="et.bdata.c.watch">watch · bview</a>
-        <a class="et-c-ghost wide" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/bdata.js" target="_blank" rel="noopener noreferrer"><span data-etk="et.bdata.c.fork">fork the template ↗</span> <span class="et-sr" data-etk="et.newtab">(opens in a new tab)</span></a>
+        <a class="et-c-ghost" href="bdata-stored-bux-try-autonomi.json" download data-etk="et.bdata.c.export" data-i18n="et.bdata.c.export">export receipt</a>
+        <a class="et-c-ghost" id="etCyWatch" href="#aud-h" hidden data-etk="et.bdata.c.watch" data-i18n="et.bdata.c.watch">watch · bview</a>
+        <a class="et-c-ghost wide" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/bdata.js" target="_blank" rel="noopener noreferrer"><span data-etk="et.bdata.c.fork" data-i18n="et.bdata.c.fork">fork the template ↗</span> <span class="et-sr" data-etk="et.newtab" data-i18n="et.newtab">(opens in a new tab)</span></a>
       </div>
     </div>
   </section>
-  <h2 class="et-archive-h" id="etArchive" data-etk="et.bdata.archive">the whole of my data</h2>
+  <h2 class="et-archive-h" id="etArchive" data-etk="et.bdata.archive" data-i18n="et.bdata.archive">the whole of my data</h2>
   <div class="kicker" data-i18n="bd.kicker">bData — the organism-level data surface</div>
   <h1 data-i18n="bd.h1">My Data</h1>
   <p data-i18n="bd.lead">Your files — who can get them, and what it costs to keep them.</p>

@@ -131,7 +131,7 @@ test('one file and the delete sheet, in every register: the laws hold, nothing l
     });
     assert.equal(card.name, 'note.txt');
     assert.equal(card.chip, 'PRIVATE', reg + ': the chip names the purpose');
-    assert.deepEqual(card.ids, ['open', 'move', 'del'], reg + ': open, move and delete on a private row (no link to copy)');
+    assert.deepEqual(card.ids, ['open', 'look', 'move', 'del'], reg + ': open, look, move and delete on a private row (no link to copy)');
     assert.ok(card.modes && !card.drop, reg + ': the choice cards stay for the next file; the empty well goes');
     law(reg, 'one file', await p.evaluate(probe));
     await p.click('#list button[id^="del-"]');

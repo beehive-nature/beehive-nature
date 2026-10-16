@@ -11,6 +11,19 @@ on:
   pull_request:
   workflow_dispatch:
 
+# SUPERSEDED RUNS (2026-10-15): a newer push to the same branch, or a newer
+# head on the same pull request, cancels this workflow's run for the older
+# commit, whose result could never gate a merge again (measured that day: 89
+# of 192 queued runs repo-wide were for commits no longer any branch's head).
+# Main and manual dispatches each get a group of their own, so they are never
+# cancelled or folded into another run; the exact head always gets a full run.
+# tests.yml and secret-scan.yml are deliberately left out: the §7 identity
+# check reads only the commits a push added, so a cancelled push run there
+# would let those commits skip detection.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && github.run_id || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -44,6 +57,12 @@ jobs:
         env:
           BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm
         run: sh scripts/bnrose-rust-001/crossnode-demo.sh target/release/bnrose-exec-host docs/receipts/bnrose-rust-001/crossnode-demo-ci.txt
+      - name: Network-partition gate (rootless netns; REAL iptables drops or a loud failure — simulated faults are never a substitute)
+        run: |
+          command -v unshare >/dev/null 2>&1 || { echo "FAIL CLOSED: unshare is missing; the netpart gate requires real namespaces"; exit 1; }
+          command -v iptables >/dev/null 2>&1 || { echo "FAIL CLOSED: iptables is missing; the netpart gate requires real packet drops"; exit 1; }
+          unshare -Urn sh scripts/bnrose-rust-001/netpart-control.sh || exit 1
+          unshare -Urn sh scripts/bnrose-rust-001/netpart-demo.sh target/release/bnrose-exec-host docs/receipts/bnrose-rust-001/netpart-demo-ci.txt docs/receipts/bnrose-rust-001/netpart-metrics-ci.json
       - name: "Benchmarks (labeled workload + this runner)"
         env:
           BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm

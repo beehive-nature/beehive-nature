@@ -1,0 +1,15 @@
+[package]
+name = "bnr-explorer-wasm"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "The preview face of bnr-explorer as a wasm module with no imports: surfaces/bnr-explorer.wasm is built from this (scripts/bnr-explorer/build-wasm.sh, reproducible, checked in CI). Marshals bytes only; every verdict is the kernel's."
+publish = false
+
+# cdylib: the module the page runs in its preview worker.
+# rlib: so `cargo test` exercises the same handler natively.
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+bnr-explorer = { path = "../bnr-explorer" }
