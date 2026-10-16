@@ -61,6 +61,10 @@ PASS stack-inventory: the generator's own --check is unchanged for CI
 - The rows first ran against the detached worktree's HEAD, which held `origin/main`'s hook, not the uncommitted one, so the inventory step did not exist there and the skip receipt never appeared. The rig now copies this checkout's hook and scripts in; in CI that is a no-op.
 - The first commit's message claimed a live skip receipt from the hook on this box. The hook that ran was the main checkout's, through the absolute `core.hooksPath` this box carries (see §2). The claim is withdrawn above rather than left prettier than the truth.
 
+## 3a · The review of `758d74c8a` and the fix (third commit)
+
+The independent review found one fail-open edge: the detection used `--diff-filter=ACMR`, which excludes staged deletions, so `surfaces/stack.html` staged for deletion read as "not staged" and was skipped; and the blob extraction fell back to `HEAD:<path>`, so a missing index blob could be replaced by an older copy. Both are closed: detection now lists every status, and a required blob missing from the index is refused by name (`stack-inventory: BLOCKED - <path> is missing from the index (staged for deletion?)`) with the remedy, never replaced. The row `a page staged for deletion is refused by name, not replaced from HEAD` runs the case through the real hook (`git rm --cached surfaces/stack.html`, commit refused, index restored). Eleven rows green locally after the change; CI on the new head governs. The review's boundary is kept: this hook proves inventory coherence only; `Cargo.lock` coherence stays CI's `--locked` obligation and is not represented as proven here.
+
 ## 4 · Boundaries not crossed, and what is not claimed
 
 - CI's `--check` is unchanged; nothing was weakened. The hook is detection, `--no-verify`-able by construction, and CI remains the enforcer on push.

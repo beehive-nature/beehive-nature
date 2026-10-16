@@ -29,7 +29,9 @@ root=$(git rev-parse --show-toplevel 2>/dev/null) || {
 }
 cd "$root" || exit 2
 
-staged=$(git diff --cached --name-only --diff-filter=ACMR -- Cargo.toml surfaces/stack.html)
+# every status, deletions included: a staged deletion of either file is a
+# commit CI would refuse and must not slip past as "not staged"
+staged=$(git diff --cached --name-only -- Cargo.toml surfaces/stack.html)
 if [ -z "$staged" ]; then
   echo "stack-inventory: not staged (Cargo.toml and surfaces/stack.html untouched) - skipped"
   exit 0
@@ -52,8 +54,14 @@ trap 'rm -rf -- "$tmp"' EXIT
 
 # the index, not the working tree: a page regenerated but left unstaged is
 # exactly the commit CI would refuse
-git show :Cargo.toml > "$tmp/Cargo.toml" 2>/dev/null || git show HEAD:Cargo.toml > "$tmp/Cargo.toml"
-git show :surfaces/stack.html > "$tmp/stack.html" 2>/dev/null || git show HEAD:surfaces/stack.html > "$tmp/stack.html"
+for need in Cargo.toml surfaces/stack.html; do
+  if ! git show ":$need" > "$tmp/$(basename "$need")" 2>/dev/null; then
+    echo "stack-inventory: BLOCKED - $need is missing from the index (staged for deletion?); the inventory cannot be checked for this commit" >&2
+    echo "  remedy: git reset -- $need   (or regenerate: node scripts/build-stack-inventory.mjs && git add surfaces/stack.html)" >&2
+    echo "  --no-verify is not a bypass: CI runs the same --check on push." >&2
+    exit 1
+  fi
+done
 members=$(grep -c '"crates/' "$tmp/Cargo.toml" 2>/dev/null || echo 0)
 
 if STACK_INVENTORY_CARGO="$tmp/Cargo.toml" STACK_INVENTORY_PAGE="$tmp/stack.html" \

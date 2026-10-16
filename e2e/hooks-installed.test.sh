@@ -173,6 +173,17 @@ fi
 echo "$out" | grep -q 'stack-inventory: ok' || { echo "FAIL known-GOOD receipt missing: $out" >&2; exit 1; }
 echo "PASS stack-inventory known-GOOD: a regenerated, staged page commits with a receipt"
 
+# known-BAD, third shape: the page staged for DELETION is refused by name,
+# never replaced by the HEAD copy (the #457 review edge case)
+git rm -q --cached -- surfaces/stack.html
+if out=$(commit_with_hooks 'deleted page probe'); then
+  echo "FAIL stack-inventory known-BAD (deleted page): committed: $out" >&2
+  exit 1
+fi
+echo "$out" | grep -q 'stack-inventory: BLOCKED - surfaces/stack.html is missing from the index' || { echo "FAIL deleted-page refusal missing: $out" >&2; exit 1; }
+git reset -q -- surfaces/stack.html
+echo "PASS stack-inventory known-BAD: a page staged for deletion is refused by name, not replaced from HEAD"
+
 # the check itself, outside a commit: the generator's own --check still reads
 # the tree when the env overrides are unset (CI's step, untouched)
 node scripts/build-stack-inventory.mjs --check >/dev/null
