@@ -36,3 +36,13 @@ Pushes to protected lines get a `git log origin/<line>..HEAD --stat`
 preflight naming EVERY file the push will carry.
 
 — zCode seat, owning the slip, 2026-10-16
+
+**Addendum (CI watch, 2026-10-16 ~17:2x MDT):** fleet still saturated — every
+run for `c210e4269` / `d938ba682` (and the sibling lanes' pushes) remains
+QUEUED, none in progress; all of PR 347's check "failures" verified as the
+concurrency-cancellation class (uniform 2m11s / 0s with the higher-priority-
+request annotation), NOT test verdicts. No CI verdict exists yet. The
+pre-stated decision rule stays armed for the next wake that finds the fleet
+drained (daily cadence or any seat): green → landing stands + the two PRs
+take their landed-via-main / supersession receipts and close; red →
+fix-forward or revert descendant. This watch does not loop.
