@@ -49,13 +49,27 @@ run_trial() {
     FAILED=1
     return 1
   fi
-  if ! grep -q "\"run_id\": \"$run_id\"" "$v" || ! grep -q "\"trial\": \"$label\"" "$v" \
-     || ! grep -q '"verdicts"' "$v" || ! grep -q '"verdicts_pass"' "$v"; then
-    echo "TRIAL-FAILED-BAD-VERDICT $run_id (identity/shape mismatch)"
+  # Structural validation (review correction 4): PARSE the JSON — grep on
+  # text is not validation. Identity (run_id, trial), shape (verdicts
+  # array, verdicts_pass bool, budget hash, version), and per-node CPU/RSS
+  # measurements must all be present in every accepted verdict.
+  if ! node -e '
+    const v = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+    if (v.run_id !== process.argv[2] || v.trial !== process.argv[3]) process.exit(1);
+    if (!Array.isArray(v.verdicts) || typeof v.verdicts_pass !== "boolean") process.exit(1);
+    if (!v.budget_sha256 || !v.x0x_version || !Array.isArray(v.cost)) process.exit(1);
+    for (const c of v.cost) {
+      if (typeof c.cpu_percent_sustained !== "number") process.exit(1);
+      if (typeof c.vmhwm_kib !== "number") process.exit(1);
+    }
+  ' "$v" "$run_id" "$label"; then
+    echo "TRIAL-FAILED-BAD-VERDICT $run_id (structural validation)"
     echo "$run_id (bad verdict)" >> "$WORK/e1-campaign-FAILED.txt"
     FAILED=1
     return 1
   fi
+  # Binary digests accompany the campaign record (review correction 4).
+  sha256sum "$PINS/$version/x0x-linux-x64-gnu/x0xd" >> "$WORK/e1-campaign-binaries.sha256" 2>/dev/null || true
 }
 
 r=1

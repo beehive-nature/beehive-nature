@@ -59,6 +59,10 @@ function readSnap(path) {
 }
 function num(x) { return typeof x === 'number' ? x : 0; }
 function attribution(rd) {
+  // Per-purpose rows are CUMULATIVE counters: the trial-window number is
+  // the t0->t1 DELTA (aligned with the standalone e1-attribution tool;
+  // review correction — the earlier version read t1 cumulatives).
+
   const t0 = readSnap(join(rd, 'receipts', 'diagnostics-t0.jsonl'));
   const t1 = readSnap(join(rd, 'receipts', 'diagnostics.jsonl'));
   const perNode = {};
@@ -80,16 +84,26 @@ function attribution(rd) {
     };
     const fams = {};
     const bump = (f, k, n) => { fams[f] ??= {}; fams[f][k] = (fams[f][k] ?? 0) + Math.max(0, n); };
-    // per-topic-per-purpose rows: charged vs demanded attributes the
-    // shed bytes (demanded - charged) to a family AND a purpose.
+    // per-topic-per-purpose rows are CUMULATIVE: charge the t0->t1
+    // WINDOW DELTA per (topic, purpose) row — the shed attribution
+    // (demandedΔ - chargedΔ) is a trial-window number.
+    const purposeBase = new Map(
+      (leaf0.by_topic_and_purpose ?? []).map((r) => [
+        r.topic.join(',') + '|' + r.purpose,
+        r,
+      ]),
+    );
     for (const row of leaf1.by_topic_and_purpose ?? []) {
       const f = famOfTopicBytes(row.topic);
       const p = String(row.purpose ?? '?').toLowerCase();
-      bump(f, `${p}_charged_bytes`, num(row.charged_bytes));
-      bump(f, `${p}_demanded_bytes`, num(row.demanded_bytes));
-      bump(f, `${p}_shed_bytes`, num(row.demanded_bytes) - num(row.charged_bytes));
-      bump(f, `${p}_deferred`, num(row.deferred));
-      bump(f, `${p}_send_failures`, num(row.send_failures));
+      const b = purposeBase.get(row.topic.join(',') + '|' + row.purpose) ?? {
+        demanded_bytes: 0, charged_bytes: 0, deferred: 0, send_failures: 0,
+      };
+      bump(f, `${p}_charged_bytes`, num(row.charged_bytes) - num(b.charged_bytes));
+      bump(f, `${p}_demanded_bytes`, num(row.demanded_bytes) - num(b.demanded_bytes));
+      bump(f, `${p}_shed_bytes`, (num(row.demanded_bytes) - num(b.demanded_bytes)) - (num(row.charged_bytes) - num(b.charged_bytes)));
+      bump(f, `${p}_deferred`, num(row.deferred) - num(b.deferred));
+      bump(f, `${p}_send_failures`, num(row.send_failures) - num(b.send_failures));
     }
     perNode[node] = {
       byte_policy: eb1.byte_policy ?? null,

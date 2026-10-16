@@ -1,0 +1,195 @@
+{
+  "schema": "btmd-e1-campaign-cohort-1",
+  "generated": "2026-10-16T02:02:53.654Z",
+  "note": "The 50-trial e1camp- cohort ONLY (the prior file mixed in 30 s9study trials). Never-delivered PAIRS counted separately from trials containing >=1 missing pair. verdicts_pass recorded: a completed trial is not a passing verdict.",
+  "legs": {
+    "baseline": {
+      "trials": 10,
+      "total_pairs": 200,
+      "within_pairs": 200,
+      "late_pairs": 0,
+      "never_pairs": 0,
+      "trials_containing_never": 0,
+      "completed_but_failing_verdicts": 10,
+      "passing_verdicts": 0,
+      "within_gate_per_trial": [
+        "20/20",
+        "20/20",
+        "20/20",
+        "20/20",
+        "20/20",
+        "20/20",
+        "20/20",
+        "20/20",
+        "20/20",
+        "20/20"
+      ]
+    },
+    "shed": {
+      "trials": 10,
+      "total_pairs": 200,
+      "within_pairs": 85,
+      "late_pairs": 95,
+      "never_pairs": 20,
+      "trials_containing_never": 1,
+      "completed_but_failing_verdicts": 10,
+      "passing_verdicts": 0,
+      "within_gate_per_trial": [
+        "0/20",
+        "15/20",
+        "4/20",
+        "12/20",
+        "18/20",
+        "0/20",
+        "10/20",
+        "12/20",
+        "2/20",
+        "12/20"
+      ]
+    },
+    "shedhi": {
+      "trials": 10,
+      "total_pairs": 200,
+      "within_pairs": 200,
+      "late_pairs": 0,
+      "never_pairs": 0,
+      "trials_containing_never": 0,
+      "completed_but_failing_verdicts": 8,
+      "passing_verdicts": 2,
+      "within_gate_per_trial": [
+        "20/20",
+        "20/20",
+        "20/20",
+        "20/20",
+        "20/20",
+        "20/20",
+        "20/20",
+        "20/20",
+        "20/20",
+        "20/20"
+      ]
+    },
+    "e1off": {
+      "trials": 10,
+      "total_pairs": 200,
+      "within_pairs": 110,
+      "late_pairs": 90,
+      "never_pairs": 0,
+      "trials_containing_never": 0,
+      "completed_but_failing_verdicts": 10,
+      "passing_verdicts": 0,
+      "within_gate_per_trial": [
+        "3/20",
+        "12/20",
+        "10/20",
+        "12/20",
+        "11/20",
+        "5/20",
+        "20/20",
+        "13/20",
+        "12/20",
+        "12/20"
+      ]
+    },
+    "e1": {
+      "trials": 10,
+      "total_pairs": 200,
+      "within_pairs": 152,
+      "late_pairs": 48,
+      "never_pairs": 0,
+      "trials_containing_never": 0,
+      "completed_but_failing_verdicts": 10,
+      "passing_verdicts": 0,
+      "within_gate_per_trial": [
+        "16/20",
+        "14/20",
+        "11/20",
+        "15/20",
+        "14/20",
+        "19/20",
+        "20/20",
+        "18/20",
+        "10/20",
+        "15/20"
+      ]
+    }
+  },
+  "paired_rounds": [
+    {
+      "round": 1,
+      "e1_within": 16,
+      "e1off_within": 3,
+      "e1_better": true,
+      "tie": false
+    },
+    {
+      "round": 2,
+      "e1_within": 11,
+      "e1off_within": 10,
+      "e1_better": true,
+      "tie": false
+    },
+    {
+      "round": 3,
+      "e1_within": 15,
+      "e1off_within": 12,
+      "e1_better": true,
+      "tie": false
+    },
+    {
+      "round": 4,
+      "e1_within": 14,
+      "e1off_within": 11,
+      "e1_better": true,
+      "tie": false
+    },
+    {
+      "round": 5,
+      "e1_within": 19,
+      "e1off_within": 5,
+      "e1_better": true,
+      "tie": false
+    },
+    {
+      "round": 6,
+      "e1_within": 20,
+      "e1off_within": 20,
+      "e1_better": false,
+      "tie": true
+    },
+    {
+      "round": 7,
+      "e1_within": 18,
+      "e1off_within": 13,
+      "e1_better": true,
+      "tie": false
+    },
+    {
+      "round": 8,
+      "e1_within": 10,
+      "e1off_within": 12,
+      "e1_better": false,
+      "tie": false
+    },
+    {
+      "round": 9,
+      "e1_within": 15,
+      "e1off_within": 12,
+      "e1_better": true,
+      "tie": false
+    },
+    {
+      "round": 10,
+      "e1_within": 14,
+      "e1off_within": 12,
+      "e1_better": true,
+      "tie": false
+    }
+  ],
+  "paired_summary": {
+    "e1_better": 8,
+    "ties": 1,
+    "e1_worse": 1,
+    "note": "paired by interleaved round — the correlation-honoring comparison"
+  }
+}
