@@ -139,9 +139,12 @@ fi
 
 run_saw() { # <script> <log> <rcfile> — one process, its own clock; the
   # exit status is RETAINED (review round 2): the classifier needs it to
-  # reject success verdicts from crashed processes.
-  ( cd "$DIR" && timeout 600 "$SAW" "$(basename "$1")" ) > "$2" 2>&1
-  printf '%s\n' "$?" > "$3"
+  # reject success verdicts from crashed processes. The rc capture is
+  # `set -e`-safe: an expected non-zero exit (a refuted tooth) reaches
+  # the rc file instead of killing the runner.
+  _rc=0
+  ( cd "$DIR" && timeout 600 "$SAW" "$(basename "$1")" ) > "$2" 2>&1 || _rc=$?
+  printf '%s\n' "$_rc" > "$3"
 }
 
 OUT="${RUNNER_TEMP:-/tmp}/bnrose-saw"
