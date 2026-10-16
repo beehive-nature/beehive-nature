@@ -1,0 +1,70 @@
+{
+  "sample_interval_seconds": 5,
+  "limitation": "Runtime namespace watch covers the final five legs only. The first three had preflight checks, not a continuous namespace trace. No retrospective absence claim is made.",
+  "trials": [
+    {
+      "run_id": "qvi-s9-20261015",
+      "first_host_sample_utc": "2026-10-15T18:09:00.198802+00:00",
+      "last_host_sample_utc": "2026-10-15T18:11:05.269556+00:00",
+      "namespace_watch_covers_interval": false,
+      "namespace_samples": 0,
+      "foreign_rig_samples": []
+    },
+    {
+      "run_id": "qvj-s9-20261015",
+      "first_host_sample_utc": "2026-10-15T19:03:13.002864+00:00",
+      "last_host_sample_utc": "2026-10-15T19:05:18.064606+00:00",
+      "namespace_watch_covers_interval": false,
+      "namespace_samples": 0,
+      "foreign_rig_samples": []
+    },
+    {
+      "run_id": "qvc-s9-20261015",
+      "first_host_sample_utc": "2026-10-15T19:06:53.102596+00:00",
+      "last_host_sample_utc": "2026-10-15T19:08:58.164483+00:00",
+      "namespace_watch_covers_interval": false,
+      "namespace_samples": 0,
+      "foreign_rig_samples": []
+    },
+    {
+      "run_id": "qvd-s9-20261015",
+      "first_host_sample_utc": "2026-10-15T19:15:57.556715+00:00",
+      "last_host_sample_utc": "2026-10-15T19:18:02.662716+00:00",
+      "namespace_watch_covers_interval": true,
+      "namespace_samples": 25,
+      "foreign_rig_samples": []
+    },
+    {
+      "run_id": "qve-s9-20261015",
+      "first_host_sample_utc": "2026-10-15T19:19:37.708628+00:00",
+      "last_host_sample_utc": "2026-10-15T19:21:47.804013+00:00",
+      "namespace_watch_covers_interval": true,
+      "namespace_samples": 26,
+      "foreign_rig_samples": []
+    },
+    {
+      "run_id": "qvf-s9-20261015",
+      "first_host_sample_utc": "2026-10-15T19:23:22.839067+00:00",
+      "last_host_sample_utc": "2026-10-15T19:25:32.916522+00:00",
+      "namespace_watch_covers_interval": true,
+      "namespace_samples": 26,
+      "foreign_rig_samples": []
+    },
+    {
+      "run_id": "qvg-s9-20261015",
+      "first_host_sample_utc": "2026-10-15T19:27:07.957264+00:00",
+      "last_host_sample_utc": "2026-10-15T19:29:18.048060+00:00",
+      "namespace_watch_covers_interval": true,
+      "namespace_samples": 26,
+      "foreign_rig_samples": []
+    },
+    {
+      "run_id": "qvh-s9-20261015",
+      "first_host_sample_utc": "2026-10-15T19:32:23.103668+00:00",
+      "last_host_sample_utc": "2026-10-15T19:34:28.216789+00:00",
+      "namespace_watch_covers_interval": true,
+      "namespace_samples": 25,
+      "foreign_rig_samples": []
+    }
+  ]
+}
