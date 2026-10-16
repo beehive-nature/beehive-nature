@@ -4,6 +4,25 @@
      only; Pointer/Scratchpad existed in maidsafe/autonomi 0.10.2, archived
      2026-05-22. Mutability comes from x0x (saorsa-labs), a separate network. -->
 
+> **CORRECTED 2026-10-16** (upstream watch; receipts in
+> `docs/dispatches/2026-10-16-ant-protocol-v5-compat-watch.md`): the
+> "immutable chunks only" note above stood when written — upstream
+> *capability* has since moved. `ant-protocol` **v4.0.0** (2026-10-08) put
+> mutable Pointers on the node wire (`ChunkMessageBody::PointerPut/Get…`,
+> discriminants appended so older peers reject them cleanly as unknown)
+> together with a settlement-version range on quote requests; **v5.0.0**
+> (2026-10-16) made a pointer state at `counter == u64::MAX` final — replaced
+> by nothing, not even an equal counter with smaller target bytes — enabling
+> ownership transfer by final redirection (ant-node ADR-0018, status
+> *Proposed*). The pointer format version is still 1, so the wire does not
+> distinguish BNR's pinned pre-v5 rule (`=3.1.0`: a final-counter state could
+> still be displaced toward smaller target bytes) from v5's. Whether the
+> **live** public network serves pointers today is UNVERIFIED here; this is an
+> upstream-capability correction, not a measured live-network claim. BNR
+> behavior is unchanged: `ops/ant-extsig` uses no pointer APIs (its `gate.rs`
+> `v.pointer(ptr)` is serde_json's JSON-pointer lookup), and its exact
+> `=0.21.0`/`=3.1.0` pins stay a coherent self-contained pair.
+
 # BNR Storage Substrate Split — Decision
 
 **Measurement date: 2026-08-04.** ANT = $0.031231, AR = $1.84. Three facts below were re-verified live during this write-up because two of the input measurements contradicted each other on the single most load-bearing point. See §2.
