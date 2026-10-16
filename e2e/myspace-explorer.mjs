@@ -505,8 +505,8 @@ async function privacy() {
   ok('10a CONTROL — the scanner sees the canary while the request is still in memory', now.before > 1000, JSON.stringify(now));
   ok('10a after a text preview the canary is nowhere in the module\'s memory (request, excerpt and verdict arena zeroed)',
     now.kind === 1 && now.after === 0, JSON.stringify(now));
-  let old = null;
-  try { old = await residue(await oldModule(), text); } catch (e) { old = null; }
+  // a missing or wrong fixture throws its own error here, never a quiet red-control fail
+  const old = await residue(await oldModule(), text);
   ok('10a RED CONTROL — the module before this lane (pinned fixture of 9d8ba900c) still holds the canary after free, so the check can fail',
     !!old && old.after > 0, JSON.stringify(old));
 
@@ -532,7 +532,7 @@ async function privacy() {
       return Math.round(ms.slice(1).sort((a, b) => a - b)[1]);
     };
     const tNew = await timeIt(bytes);
-    let tOld = null; try { tOld = await timeIt(await oldModule()); } catch (e) { tOld = null; }
+    const tOld = await timeIt(await oldModule());
     console.log(`  cost of zeroing, one 32 MiB preview (hash + parse + wipe + free), median of 3 in Node: ${tNew} ms now, ${tOld} ms before`);
   }
 
