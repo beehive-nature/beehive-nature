@@ -69,7 +69,7 @@ jobs:
           BNROSE_BENCH_HW: github-actions ubuntu-22.04 runner (2 vCPU)
         run: target/release/bnrose-bench docs/receipts/bnrose-rust-001/bench-ci.json
       - name: Preserve receipts
-        if: always()
+        if: always()  # preservation: runs on cancel and on a timeout, so the evidence survives
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: bnrose-rust-001-${{ github.run_id }}-${{ github.run_attempt }}
@@ -90,7 +90,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
       - name: install cryptol 3.6.0 (pinned, with bundled solvers) and GNU time
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         timeout-minutes: 8
         run: |
           set -eu
@@ -102,7 +102,7 @@ jobs:
           [ -x /usr/bin/time ] || { sudo apt-get update -qq && sudo apt-get install -y -qq time; }
           ./cryptol/bin/cryptol --version
       - name: Sampled-agreement grid (Rust <-> Cryptol, mechanically checked)
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         timeout-minutes: 15
         run: |
           cargo build --release -p bnrose-exec-host --bin bnrose-grid-agreement --locked
@@ -121,7 +121,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: install cryptol 3.6.0 (pinned, with bundled solvers) and GNU time
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         timeout-minutes: 8
         run: |
           set -eu
@@ -133,6 +133,6 @@ jobs:
           [ -x /usr/bin/time ] || { sudo apt-get update -qq && sudo apt-get install -y -qq time; }
           ./cryptol/bin/cryptol --version
       - name: BNROSE Cryptol twin — 6 :prove obligations + 2 negative controls
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         timeout-minutes: 15
         run: sh scripts/bnrose-rust-001/cryptol-twin-check.sh "$HOME/cryptol/bin/cryptol"
