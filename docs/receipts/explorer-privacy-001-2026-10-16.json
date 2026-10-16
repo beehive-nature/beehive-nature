@@ -11,7 +11,12 @@
   "unchanged": "the module still has no imports; the TEMP rail file keeps its this-visit lifetime (closing a preview does not delete the file the visitor chose to keep)",
   "residual_named": "a few bytes of hash state or parser locals on the module stack are not zeroed; the worker's termination on close releases them"
  },
- "module": {"previous_sha256": "7739e3990ddc999ce15c6accf89e6b9073a4919854ae6413fd2db1cfeccf079f", "scan": "PUBLIC-CONSTANT", "this_lane_sha256": "ed106c550547b42877a5ec7f13322fa716bc0b417c28366e0eac3449d392cc73", "scan2": "PUBLIC-CONSTANT", "bytes": 41610},
+ "module": {
+  "previous_sha256": "7739e3990ddc999ce15c6accf89e6b9073a4919854ae6413fd2db1cfeccf079f", "scan": "PUBLIC-CONSTANT",
+  "this_lane_sha256": "ed106c550547b42877a5ec7f13322fa716bc0b417c28366e0eac3449d392cc73", "scan2": "PUBLIC-CONSTANT",
+  "bytes": 41610,
+  "intermediate_not_committed": "fa5c1395 (41,104 bytes) was the first build of this lane; the residue check found 181 copies left in it, so it was rebuilt as ed106c55 after the excerpt fix and only ed106c55 was ever committed or pinned"
+ },
  "results_this_branch": {
   "10a_residue": "canary text (~190 KB, 4,096 copies) previewed through the module ABI in Node: 0 copies left in module memory after the call; control: 4,096 seen while in memory",
   "10a_finding_during_work": "the first fix left 181 copies: a growing String freed outgrown buffers; fixed by preallocating the excerpt",
@@ -28,6 +33,12 @@
   "10e": "20 allocations deliberately never freed grow memory by >= 160 MiB (control asserted in the gate)",
   "run_against_main": "10 passed, 2 failed (10a residue, 10b worker) with EXPLORER_ROOT = git archive of main 968eafc06"
  },
- "other_gates_this_branch": {"myspace-explorer.mjs": "66 passed, 0 failed", "myspace-seam.mjs": "136 passed, 0 failed", "myspace-eternal.test.mjs": "4 passed", "cargo test bnr-explorer + bnr-explorer-wasm": "48 passed"},
- "one_machine": "Windows 11 box, Chromium 151 via Playwright, Node 24; not a fleet or mobile measurement"
+ "other_gates_this_branch": {
+  "myspace-explorer.mjs": "66 passed, 0 failed",
+  "myspace-seam.mjs": "136 passed, 0 failed",
+  "myspace-eternal.test.mjs": "4 passed",
+  "cargo test bnr-explorer + bnr-explorer-wasm": "48 passed"
+ },
+ "one_machine": "Windows 11 box, Chromium 151 via Playwright, Node 24; not a fleet or mobile measurement",
+ "red_control_fixture": "e2e/fixtures/bnr-explorer-7739e399.wasm = the pre-privacy module from 9d8ba900c, sha256-checked before use, so the control needs no git history in CI"
 }

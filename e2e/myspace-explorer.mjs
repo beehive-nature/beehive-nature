@@ -27,7 +27,6 @@ import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { readFile } from 'node:fs/promises';
-import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { deflateSync } from 'node:zlib';
 import { serveTree, offBox } from './lib/serve.mjs';
@@ -487,6 +486,16 @@ async function residue(bytes, text) {
   return { before, after: count(mem(), needle), kind: verdict[5], wipe: typeof X.bx_wipe === 'function' };
 }
 
+// The module this lane replaces, kept as a committed fixture (not a git-history read, so the
+// red control cannot fail for an infrastructure reason). Its digest is checked before use:
+// a wrong fixture is a fixture failure, named as such.
+const OLD_MODULE = '7739e3990ddc999ce15c6accf89e6b9073a4919854ae6413fd2db1cfeccf079f'; // PUBLIC-CONSTANT sha256 of the pre-privacy module (9d8ba900c)
+async function oldModule() {
+  const b = await readFile(join(ROOT, 'e2e/fixtures/bnr-explorer-7739e399.wasm'));
+  if (sha(b) !== OLD_MODULE) throw new Error('fixture e2e/fixtures/bnr-explorer-7739e399.wasm is not the pinned pre-privacy module');
+  return b;
+}
+
 async function privacy() {
   console.log('\n10 · EXPLORER-PRIVACY-001 — what a preview leaves behind');
   const text = (CANARY + '\n').repeat(4096);  // ~190 KB: the excerpt (64 KB) and the full request both carry it
@@ -497,8 +506,8 @@ async function privacy() {
   ok('10a after a text preview the canary is nowhere in the module\'s memory (request, excerpt and verdict arena zeroed)',
     now.kind === 1 && now.after === 0, JSON.stringify(now));
   let old = null;
-  try { old = await residue(execFileSync('git', ['-C', ROOT, 'show', '9d8ba900c:surfaces/bnr-explorer.wasm'], { maxBuffer: 1 << 24 }), text); } catch (e) { old = null; }
-  ok('10a RED CONTROL — the module before this lane (9d8ba900c) still holds the canary after free, so the check can fail',
+  try { old = await residue(await oldModule(), text); } catch (e) { old = null; }
+  ok('10a RED CONTROL — the module before this lane (pinned fixture of 9d8ba900c) still holds the canary after free, so the check can fail',
     !!old && old.after > 0, JSON.stringify(old));
 
   // 10e RED CONTROL and the cost of zeroing, in Node against the module itself
@@ -523,7 +532,7 @@ async function privacy() {
       return Math.round(ms.slice(1).sort((a, b) => a - b)[1]);
     };
     const tNew = await timeIt(bytes);
-    let tOld = null; try { tOld = await timeIt(execFileSync('git', ['-C', ROOT, 'show', '9d8ba900c:surfaces/bnr-explorer.wasm'], { maxBuffer: 1 << 24 })); } catch (e) { tOld = null; }
+    let tOld = null; try { tOld = await timeIt(await oldModule()); } catch (e) { tOld = null; }
     console.log(`  cost of zeroing, one 32 MiB preview (hash + parse + wipe + free), median of 3 in Node: ${tNew} ms now, ${tOld} ms before`);
   }
 
