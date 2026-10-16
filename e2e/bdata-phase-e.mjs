@@ -165,7 +165,7 @@ const tooLargeOk = await page.evaluate(async (max) => {
   input.dispatchEvent(new Event('change', { bubbles: true }));
   await new Promise(r => setTimeout(r, 200));
   return !!document.querySelector('[data-bdata-intake-large]');
-}, 63 * 4190208);
+}, 59 * 4190208);
 check('files over the wave limit render as prose (never a dead button, nothing sent)', tooLargeOk && hits.intake === 0);
 
 // reset intake by reload for clean small-file path

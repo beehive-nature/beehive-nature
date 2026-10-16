@@ -21,7 +21,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { pinRegister } from './wallet-register-pin.mjs';
+import { pinRegister, REG } from './wallet-register-pin.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
@@ -61,7 +61,9 @@ const mockOther = ctx => ctx.route(OTHER_RE, async route => {
   const J = v => route.fulfill({ status: 200, headers: { ...CORS, 'content-type': 'application/json' }, body: JSON.stringify(v) });
   // PUBLIC-CONSTANT: Vaulta mainnet chain id (public network identifier, mirrored from the vaulta adapter)
   if (/get_info/.test(u)) return J({ chain_id: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906', head_block_num: 100, head_block_id: '00'.repeat(32) }); // PUBLIC-CONSTANT
-  if (/get_account/.test(u)) return J({ account_name: 'gatesoul', core_liquid_balance: '0.0000 A', ram_usage: 100, ram_quota: 8192, permissions: [] });
+  if (/get_table_rows/.test(u)) return J({ rows: [], more: false, next_key: '' });
+  if (/get_currency_balance/.test(u)) return J(['0.0000 A']);
+  if (/get_account/.test(u)) return J({ account_name: 'gatesoul', core_liquid_balance: '0.0000 EOS', ram_usage: 100, ram_quota: 8192, permissions: [] });
   if (/hive/.test(u)) return J({ jsonrpc: '2.0', id: 1, result: [] });
   return J({});
 });
@@ -196,10 +198,13 @@ try {
   {
     const ctx = await browser.newContext(); const seen = []; await mockRail(ctx, seen); await mockOther(ctx);
     const page = await connectedPage(ctx);
+    await page.waitForFunction(() => /has no active key/.test(document.getElementById('sum-bridge').textContent), null, { timeout: 15000 }).catch(() => {});
     const cards = await page.evaluate(() => window.BNRPAY.railAddresses(
-      new Uint8Array(32).fill(0x2a), 'gatesoul').map(c => ({ t: c.t, ctx: c.ctx, v: c.v, err: c.err })));
+      new Uint8Array(32).fill(0x2a), 'gatesoul').map(c => ({ t: c.t, ctx: c.ctx, v: c.v, err: c.err, why: c.why })));
     const byCtx = k => cards.find(c => c.ctx === k) || {};
-    ok('the Vaulta rail carries the account name', byCtx('vaulta:gatesoul').v === 'gatesoul');
+    // gatesoul is a plain account with no key this wallet holds: a receive address is where people send money, so none is offered as yours
+    ok('the Vaulta rail offers no address for an account this wallet cannot show is yours, and says why',
+      byCtx('vaulta:gatesoul').v === null && byCtx('vaulta:gatesoul').why === 'vacct-unbridged' && /may be a stranger/.test(byCtx('vaulta:gatesoul').err || ''), JSON.stringify(byCtx('vaulta:gatesoul')));
     ok('the EVM rail derives one 0x address for BOTH chains',
       /^0x[0-9a-fA-F]{40}$/.test(byCtx('evm:gatesoul').v || ''), byCtx('evm:gatesoul').v || byCtx('evm:gatesoul').err);
     ok('the Solana rail derives a base58 address',
@@ -348,14 +353,14 @@ try {
   console.log('D2 · MUTATION — the button forgets the cap; the signer must not:');
   {
     const ctx = await browser.newContext(); const seen = []; await mockRail(ctx, seen); await mockOther(ctx);
-    const anchor = `if(!capGate('A',amt))return;`;
+    const anchor = `if(!capGate('A',amt,st))return;`;
     const page = await connectedPage(ctx, src => {
       if (!src.includes(anchor)) return null;
       // strip EVERY call-site cap check in the page — the buttons now "forget"
       return src.split(anchor).join('/* cap check DELETED by the gate */')
                 .replace(/capAssert\(asset\.symbol,Number\(amount\)\);/, 'capAssert(asset.symbol,Number(amount));');
     });
-    const mutatedOk = await page.evaluate(() => !/if\(!capGate\('A',amt\)\)return;/.test(document.documentElement.innerHTML));
+    const mutatedOk = await page.evaluate(() => !/if\(!capGate\('A',amt,st\)\)return;/.test(document.documentElement.innerHTML));
     ok('the mutation landed (the Vaulta call-site check is gone from the served page)', mutatedOk);
     const r = await page.evaluate(async () => {
       const P = window.BNRPAY;
@@ -424,6 +429,24 @@ try {
     ok('a bitcoin address is not accepted as a Lightning request', r.notLn === 'refused', r.notLn);
     ok('reading a Lightning request touched NO network at all',
       seen.filter(s => /invoice|bolt/i.test(JSON.stringify(s))).length === 0);
+    // the payee writes the description: an offer whose text is markup must show as text, never run
+    const x = await page.evaluate(async () => {
+      const CH = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+      const enc = bytes => { let acc = 0, bits = 0, w = '';
+        for (const b of bytes) { acc = (acc << 8) | b; bits += 8; while (bits >= 5) { bits -= 5; w += CH[(acc >> bits) & 31] } }
+        if (bits) w += CH[(acc << (5 - bits)) & 31]; return 'lno1' + w };
+      const s2b = s => [...new TextEncoder().encode(s)];
+      const tlv = (t, v) => [t, v.length, ...v];
+      const evil = '<img src=x onerror="window.__lnx=1">';
+      document.getElementById('pay-tx').click(); document.getElementById('tx-tab-l').click();
+      document.getElementById('ln-req').value = enc([...tlv(8, [150]), ...tlv(10, s2b(evil)), ...tlv(18, s2b('<b id="lnx-b">x</b>'))]);
+      document.getElementById('ln-read').click();
+      await new Promise(r => setTimeout(r, 400));
+      const card = document.getElementById('ln-card');
+      return { ran: window.__lnx === 1, img: !!card.querySelector('img'), bold: !!document.getElementById('lnx-b'), text: card.textContent.includes(evil) };
+    });
+    ok('a Lightning description or issuer that is markup is shown as text and never runs (stored XSS closed)',
+      !x.ran && !x.img && !x.bold && x.text, JSON.stringify(x));
     await ctx.close();
   }
 
@@ -502,11 +525,256 @@ try {
     const sol = cards.find(c => c.ctx === 'sol:gatesoul');
     ok('a broken derivation yields NO address and a stated reason', sol && sol.v === null && /deliberately broken/.test(sol.err || ''), JSON.stringify(sol));
     ok('the other rails are unaffected — one broken rail does not blank the set',
-      cards.filter(c => c.v).length === cards.length - 1, JSON.stringify(cards.map(c => [c.ctx, !!c.v])));
+      cards.filter(c => c.v).length === cards.filter(c => !/^vaulta:/.test(c.ctx)).length - 1, JSON.stringify(cards.map(c => [c.ctx, !!c.v])));
     await page.evaluate(() => { document.getElementById('pay-rx').click() });
     const html = await page.locator('#rx-cards').innerHTML();
-    ok('the receive panel prints the reason instead of an address',
-      /no address shown/.test(html) && !/undefined|null|NaN/.test(html.replace(/nullable/g, '')), html.slice(0, 160));
+    ok('the receive panel says calmly that no address is shown, with try again, and keeps the reason for cypherpunk',
+      /could not be made here, so none is shown/.test(html) && /deliberately broken/.test(html) && !/undefined|null|NaN/.test(html.replace(/nullable/g, '')), html.slice(0, 160));
+    // an npub is a key, not a way to be paid: the Lightning card offers no address to hand out
+    const rx = await page.evaluate(() => {
+      const box = document.getElementById('rx-cards');
+      const ln = [...box.children].find(c => /Lightning/.test(c.textContent));
+      return { said: ln && /cannot take Lightning payments yet/.test(ln.textContent), qr: !!(ln && ln.querySelector('svg')), copy: !!(ln && ln.querySelector('.rxc')),
+        seen: box.innerText, link: !!(ln && ln.querySelector('a[href="#matrix-sec"]')) };
+    });
+    ok('the Lightning card says it cannot take payments yet, with no QR and no copy button',
+      rx.said && !rx.qr && !rx.copy && rx.link, JSON.stringify(rx).slice(0, 200));
+    ok(REG === 'cypherpunk' ? 'cypherpunk still reads the Lightning key, marked not a payment address' : REG + ' never sees an npub as something to hand out',
+      REG === 'cypherpunk' ? /not a payment address · npub1/.test(rx.seen) : !/npub1/.test(rx.seen), rx.seen.slice(0, 200));
+    // "copied" is said only when the clipboard took it
+    const cp = await page.evaluate(async () => {
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: () => Promise.reject(new DOMException('denied', 'NotAllowedError')) } });
+      const b = document.querySelector('#rx-cards .rxc'); b.click();
+      await new Promise(r => setTimeout(r, 100));
+      const refused = { btn: b.textContent, stat: document.getElementById('pay-stat').textContent, sel: String(window.getSelection()) };
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: () => Promise.resolve() } });
+      await new Promise(r => setTimeout(r, 1700));
+      b.click(); await new Promise(r => setTimeout(r, 100));
+      return { refused, okBtn: b.textContent, addr: b.parentNode.querySelector('.rx-addr').textContent };
+    });
+    ok('a refused clipboard never says copied: the button says not copied, the address is selected, the line says why',
+      cp.refused.btn === 'not copied' && /did not let us copy it/.test(cp.refused.stat) && cp.refused.sel === cp.addr, JSON.stringify(cp.refused));
+    ok('a clipboard that takes it says copied', cp.okBtn === '✓ copied', cp.okBtn);
+    await ctx.close();
+  }
+
+  /* ══ J · THE EVM LANE KEEPS ITS SIGNED BYTES — a lost or "already known" answer
+     never signs a second nonce; the cap counts it once signed and gives it back
+     only on a refusal that proves it never ran ══ */
+  console.log('J · the EVM lane follows the outbox law:');
+  {
+    const ctx = await browser.newContext(); await mockOther(ctx);
+    const S = { raws: [], mode: 'known', receipt: null, receipts: {}, latest: '0x7', receiptAsks: [] };
+    await ctx.route(RAIL_RE, async route => {
+      const req = route.request();
+      if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: CORS, body: '' });
+      let body = {}; try { body = JSON.parse(req.postData() || '{}') } catch {}
+      const send = o => route.fulfill({ status: 200, headers: { ...CORS, 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: body.id ?? 1, ...o }) });
+      switch (body.method) {
+        case 'eth_sendRawTransaction':
+          S.raws.push(body.params[0]);
+          if (S.mode === 'lost') return route.abort('timedout');
+          if (S.mode === 'lostThenPoor') { S.mode = 'poor'; return route.abort('timedout'); }   // the first answer is lost, every later node says no
+          if (S.mode === 'known') return send({ error: { code: -32000, message: 'already known' } });
+          if (S.mode === 'poor') return send({ error: { code: -32000, message: 'insufficient funds for gas * price + value' } });
+          return send({ result: '0x' + 'cd'.repeat(32) });
+        case 'eth_getTransactionReceipt': {
+          S.receiptAsks.push(body.params[0]);
+          const host = new URL(req.url()).host;
+          if (S.silentReceipt === host) return route.abort('timedout');               // a host that never answers
+          if (S.lagHosts && S.lagHosts.includes(host)) return send({ result: null });   // a backend a block or two behind
+          return send({ result: S.receipts[body.params[0]] || S.receipt });
+        }
+        case 'eth_getTransactionCount': S.countTags = (S.countTags || []).concat(body.params[1]); return send({ result: body.params[1] === 'latest' ? S.latest : (S.pendingNonce || MOCK.nonce) });
+        case 'eth_gasPrice':
+          /* another name is connected while THIS press reads its fee (never a background read) */
+          if (S.switchOnGas && /^reading the fee and signing/.test(await page.evaluate(() => document.getElementById('se-stat').textContent))) {
+            const n = S.switchOnGas; S.switchOnGas = null;
+            await page.evaluate(v => { document.getElementById('wq').value = v; document.getElementById('wgo').click(); }, n);
+          }
+          return send({ result: MOCK.gasPrice });
+        case 'eth_getTransactionByHash': {
+          S.byHash = (S.byHash || 0) + 1;
+          const host = new URL(req.url()).host;
+          if (S.silent === host) return route.abort('timedout');   // the host whose answer is lost
+          if (S.rate === host) return route.fulfill({ status: 429, headers: { ...CORS, 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: body.id ?? 1, error: { code: -32005, message: 'rate limited' } }) });
+          return send({ result: S.known ? { hash: body.params[0], blockNumber: null } : null });
+        }
+        case 'eth_estimateGas': return send({ result: MOCK.estimate });
+        case 'eth_getBalance': return send({ result: '0x16345785d8a0000' });
+        case 'eth_call': return send({ result: '0x' + (1000000n).toString(16).padStart(64, '0') });
+        default: return send({ result: null });
+      }
+    });
+    let page = null;
+    page = await connectedPage(ctx);
+    const TO = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed';   // EIP-55's own published vector: the lane checks the checksum
+    await page.evaluate(() => { localStorage.removeItem('bnr-cap-ledger'); localStorage.removeItem('bnr-spend-cap');
+      document.getElementById('pay-tx').click(); document.getElementById('tx-tab-e').click(); });
+    const press = async (to, amt, twice) => {
+      await page.evaluate(([t, a, two]) => { if (t !== null) { document.getElementById('se-to').value = t; document.getElementById('se-amt').value = a; }
+        const b = document.getElementById('se-go'); b.click(); if (two) b.click(); }, [to, amt, !!twice]);
+      await page.waitForFunction(() => !document.getElementById('se-go').disabled, null, { timeout: 40000 });
+      return page.evaluate(() => ({ say: document.getElementById('se-stat').innerText.trim(), all: document.getElementById('se-stat').textContent,
+        pend: JSON.parse(localStorage.getItem('bnr_evm_pending:gatesoul') || 'null'), to: document.getElementById('se-to').value,
+        eth: JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').filter(e => e.u === 'ETH').reduce((s, e) => s + e.a, 0) }));
+    };
+    const r1 = await press(TO, '0.01', true);
+    ok('"already known" is not a refusal: it is sent, kept, and nothing new is signed until a block shows it',
+      /in a block yet, so nothing new is signed/.test(r1.say) && !/refused/i.test(r1.say) && r1.pend && /^0x[0-9a-f]{64}$/.test(r1.pend.hash) && new Set(S.raws).size === 1, r1.say + ' · ' + new Set(S.raws).size);
+    ok('the cap counts it once it is signed, and the form is cleared so a press cannot sign it twice', Math.abs(r1.eth - 0.01) < 1e-9 && r1.to === '', JSON.stringify({ eth: r1.eth, to: r1.to }));
+    ok('the chain is asked by the kept hash', S.receiptAsks.length > 0 && S.receiptAsks.every(h => h === r1.pend.hash), JSON.stringify(S.receiptAsks.slice(0, 2)));
+    const r2 = await press(TO, '0.02', true);
+    ok('a second press (twice, quickly) checks the kept send and resends its identical bytes; no second nonce is signed',
+      /^your last send \(0\.01 ETH to 0x5aae…eaed\) is with Base/i.test(r2.say) && new Set(S.raws).size === 1 && r2.pend && r2.pend.hash === r1.pend.hash, r2.say + ' · ' + new Set(S.raws).size);
+    S.receipt = { blockNumber: '0x10', status: '0x1', transactionHash: r1.pend.hash };
+    const r3 = await press(null, null);
+    ok('once a block shows it, the next press says the last send went through and frees the lane',
+      /^your last send went through: 0\.01 ETH to 0x5aae…eaed on Base/i.test(r3.say) && !r3.pend && new Set(S.raws).size === 1, r3.say);
+    S.receipt = null; S.mode = 'lost';
+    const r4 = await press(TO, '0.03');
+    ok('a lost answer says it cannot tell yet, keeps the bytes, and offers check again (never send again)',
+      /did not answer, so this wallet cannot tell yet/.test(r4.say) && r4.pend && r4.pend.amount === '0.03' && /check again/.test(r4.say), r4.say);
+    const r5 = await press(null, null);
+    ok('check again resends the SAME bytes: two sends, two raw transactions, never a third', new Set(S.raws).size === 2 && r5.pend && r5.pend.hash === r4.pend.hash, String(new Set(S.raws).size));
+    S.receipt = { blockNumber: '0x11', status: '0x1' }; await press(null, null); S.receipt = null;
+    S.mode = 'poor';
+    const r6 = await press(TO, '0.04');
+    ok('a sure refusal of a first broadcast (not enough ETH) says so, frees the lane and gives the typing back',
+      /does not hold enough on Base for this and its fee, so nothing was sent/.test(r6.say) && !r6.pend && r6.to === TO, r6.say);
+    ok('…and only then is the cap given back: 0.01 + 0.03 counted, 0.04 returned on the day it was counted',
+      Math.abs(r6.eth - 0.04) < 1e-9, String(r6.eth));
+    const ck = await page.evaluate(() => ['0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed', '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAeD', '0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed'].map(a => window.BNRPAY.evmChecksumOk(a)));
+    ok('EIP-55: the published vector passes, a one-letter case typo fails, an all-lowercase address carries no checksum', ck[0] === true && ck[1] === false && ck[2] === true, JSON.stringify(ck));
+    const n0 = S.raws.length, typo = await press('0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAeD', '0.01');
+    ok('a mixed-case address with a typo is refused before anything is signed', /has a typo in it, so nothing was sent/.test(typo.say) && S.raws.length === n0 && !typo.pend, typo.say);
+    ok('no raw RPC text reaches the reader\'s sentence (it stays in the cypherpunk detail)',
+      [r1, r2, r4, r6].every(r => !/already known|insufficient funds|0x[0-9a-f]{64}/.test(r.say)) || REG === 'cypherpunk', [r1, r4, r6].map(r => r.say).join(' | ').slice(0, 200));
+    /* a kept send every node turns away (the first answer was lost, so that refusal was not sure):
+       read by hash on every host before the refusal is believed, said plainly, and cleared only
+       on purpose, without giving the cap back */
+    S.mode = 'lostThenPoor'; S.known = false;
+    const d0 = new Set(S.raws).size;
+    const h1 = await press(TO, '0.05');
+    ok('a send turned away after a lost answer is not called refused: it is kept, counted, and said plainly with one way out',
+      /^Base turns down this send \(0\.05 ETH to 0x5aae…eaed\) because your address does not hold enough for it and its fee/i.test(h1.say) && /clear it/.test(h1.say) && h1.pend && h1.pend.amount === '0.05' && Math.abs(h1.eth - typo.eth - 0.05) < 1e-9 && S.byHash > 0,
+      h1.say + ' · ' + (h1.eth - typo.eth));
+    ok('that sentence carries no raw RPC text (it stays in the cypherpunk detail)', !/insufficient funds|0x[0-9a-f]{64}/.test(h1.say) || REG === 'cypherpunk', h1.say);
+    S.known = true;
+    const h2 = await press(null, null);
+    ok('while any host still holds those bytes, the refusal is not believed: it is with Base, kept, and nothing new is signed',
+      /^your last send \(0\.05 ETH to 0x5aae…eaed\) is with Base/i.test(h2.say) && !/clear it/.test(h2.say) && h2.pend && h2.pend.hash === h1.pend.hash && new Set(S.raws).size === d0 + 1, h2.say);
+    S.known = false; S.silent = 'base.drpc.org';
+    const hq = await press(null, null);
+    ok('one host that does not answer is never read as "it does not hold them": the send stays kept, no clear is offered, and check again is',
+      /^Base did not answer, so this wallet cannot tell yet whether your last send went out/i.test(hq.say) && /check again/.test(hq.say) && !/clear it/.test(hq.say) && hq.pend && hq.pend.hash === h1.pend.hash && new Set(S.raws).size === d0 + 1, hq.say);
+    S.silent = null;
+    const h3 = await press(null, null);
+    ok('once no host holds them, the next press says the one way out again (never "did not say yet") and signs nothing new',
+      /^Base turns down your last send \(0\.05 ETH/.test(h3.say) && !/did not say yet/.test(h3.say) && h3.pend && h3.pend.hash === h1.pend.hash && new Set(S.raws).size === d0 + 1, h3.say);
+    const tap = async (label, until) => { const c = await page.evaluate(l => { const b = [...document.querySelectorAll('#se-stat button.wl-act')].find(x => x.textContent === l); if (b) b.click(); return !!b; }, label);
+      if (c) await page.waitForFunction(re => new RegExp(re).test(document.getElementById('se-stat').innerText.trim()), until.source, { timeout: 40000 }).catch(() => {}); return c; };
+    S.rate = 'base.drpc.org';
+    await tap('clear it', /kept for now|^cleared/);
+    const hr = await page.evaluate(() => ({ say: document.getElementById('se-stat').innerText.trim(), pend: localStorage.getItem('bnr_evm_pending:gatesoul') }));
+    ok('clear it while one host is rate limited: nothing is cleared, the send stays kept, and try again is offered',
+      /^Base did not answer, so your last send is kept for now/i.test(hr.say) && /try again/.test(hr.say) && hr.pend !== null, JSON.stringify(hr));
+    S.rate = null;
+    await tap('try again', /^cleared|kept for now/);
+    const h4 = await page.evaluate(() => ({ say: document.getElementById('se-stat').innerText.trim(), pend: localStorage.getItem('bnr_evm_pending:gatesoul'),
+      eth: JSON.parse(localStorage.getItem('bnr-cap-ledger') || '[]').filter(e => e.u === 'ETH').reduce((s, e) => s + e.a, 0) }));
+    ok('clear it, pressed on purpose: the lane is free, and the cap is not given back (nothing proves it never ran)',
+      /^cleared\. you can fill in a new send now/.test(h4.say) && h4.pend === null && Math.abs(h4.eth - typo.eth - 0.05) < 1e-9 && new Set(S.raws).size === d0 + 1, JSON.stringify(h4));
+    /* after a clear, the next send FROM THIS ADDRESS on that rail reads its nonce as 'latest' and is
+       priced over every cleared one: a cleared send still in some pool is REPLACED at its own nonce,
+       never joined by nonce + 1 (two payments) */
+    const lastRaw = () => rlpDecode(Buffer.from(S.raws[S.raws.length - 1].slice(2), 'hex'));
+    const mark = () => page.evaluate(() => JSON.parse(localStorage.getItem('bnr_evm_dropped:gatesoul') || 'null'));
+    const mine = 'base:' + h1.pend.from.toLowerCase();
+    const m0 = (await mark() || {})[mine];
+    ok('the clear writes a mark keyed by rail and this address, holding the cleared hash',
+      !!m0 && m0.from.toLowerCase() === h1.pend.from.toLowerCase() && m0.nonce === 7 && m0.sends.map(x => x.hash).join() === h1.pend.hash, JSON.stringify(await mark()));
+    S.mode = 'lostThenPoor'; S.pendingNonce = '0x8'; S.countTags = [];   // a pool still holds the cleared send at nonce 7
+    const n1 = await press(TO, '0.07'); const t1 = lastRaw();
+    ok('the send after a clear reads its nonce as latest (not the pool\'s pending 8), is signed at the cleared nonce 7, and priced at least 10% over it',
+      S.countTags.includes('latest') && !S.countTags.includes('pending') && big(t1[0]) === 7n && big(t1[1]) >= 1100000001n && n1.pend && n1.pend.nonce === 7 && /turns down this send/i.test(n1.say),
+      'tags ' + S.countTags.join(',') + ' · nonce ' + big(t1[0]) + ' · gas price ' + big(t1[1]) + ' · ' + n1.say);
+    await tap('clear it', /^cleared|kept for now/);
+    const m1 = (await mark() || {})[mine];
+    ok('a second clear at the same nonce keeps both cleared hashes (the first is never overwritten) and the higher price',
+      !!m1 && m1.nonce === 7 && m1.sends.map(x => x.hash).join() === [h1.pend.hash, n1.pend.hash].join() && BigInt(m1.gp) >= 1100000001n, JSON.stringify(m1));
+    /* the FIRST cleared send goes in after all, and only one host has its block yet */
+    S.receipts[h1.pend.hash] = { blockNumber: '0x12', status: '0x1' }; S.latest = '0x8'; S.mode = 'ok';
+    S.lagHosts = ['mainnet.base.org', 'base.publicnode.com', '1rpc.io'];   // only base.drpc.org has the block yet
+    const rb = S.raws.length;
+    const nb = await press(TO, '0.08');
+    ok('a cleared send went in after all and only one host has its block yet: that one receipt wins, nothing new is sent or counted, the typing comes back',
+      /^the send you cleared \(0\.05 ETH to 0x5aae…eaed\) went in after all, so nothing new was sent/i.test(nb.say) && S.raws.length === rb && !nb.pend && Math.abs(nb.eth - n1.eth) < 1e-9 && nb.to === TO && (await mark()) === null,
+      nb.say + ' · ' + (S.raws.length - rb) + ' · ' + (nb.eth - n1.eth));
+    S.lagHosts = null;
+    /* our own replacement at the cleared nonce goes into a block: that ends the mark */
+    S.mode = 'lostThenPoor'; S.pendingNonce = '0x8';
+    await press(TO, '0.11');
+    await tap('clear it', /^cleared|kept for now/);
+    S.mode = 'ok'; S.pendingNonce = '0x9';
+    const n4 = await press(TO, '0.12'); const t4 = lastRaw();
+    S.receipts[n4.pend.hash] = { blockNumber: '0x13', status: '0x1' }; await press(null, null); S.latest = '0x9';
+    ok('our own replacement at the cleared nonce 8 goes into a block: the mark ends, since no cleared send can land now',
+      big(t4[0]) === 8n && n4.pend && n4.pend.mark === mine && (await mark()) === null, 'nonce ' + big(t4[0]) + ' · ' + JSON.stringify(await mark()));
+    /* a host that NEVER answers: silence is never a no, but after three checks across two minutes in
+       which the other hosts all said no, they decide, and the silent host is named */
+    S.silent = 'base.drpc.org'; S.mode = 'lostThenPoor'; S.pendingNonce = '0x9';
+    const qp = () => page.evaluate(() => JSON.parse(localStorage.getItem('bnr_evm_pending:gatesoul') || 'null'));
+    const q1 = await press(TO, '0.13'); const qs1 = ((await qp()) || {}).quiet;
+    ok('a host that never answers: the first check keeps the send, says check again in a minute, offers no clear, and counts the silent host',
+      /^Base did not answer, so this wallet cannot tell yet whether it went out/i.test(q1.say) && /check again in a minute/.test(q1.say) && !/clear it/.test(q1.say) && !!qs1 && qs1.tries === 1 && qs1.silent.join() === 'base.drpc.org',
+      q1.say + ' · ' + JSON.stringify(qs1));
+    await page.evaluate(() => { const k = 'bnr_evm_pending:gatesoul', p = JSON.parse(localStorage.getItem(k)); if (p && p.quiet) { p.quiet.first -= 200000; p.quiet.tries = 2; localStorage.setItem(k, JSON.stringify(p)); } });
+    const q2 = await press(null, null);
+    ok('the third check, two minutes on, with the other hosts all saying no: they decide, the send is turned down plainly with clear it, and the silent host is named in the detail',
+      /^Base turns down your last send \(0\.13 ETH/i.test(q2.say) && /clear it/.test(q2.say) && /base\.drpc\.org did not answer/.test(q2.all), q2.say);
+    await tap('clear it', /^cleared|kept for now/);
+    const q3 = await page.evaluate(() => ({ say: document.getElementById('se-stat').innerText.trim(), all: document.getElementById('se-stat').textContent, pend: localStorage.getItem('bnr_evm_pending:gatesoul') }));
+    ok('clear it goes through on the same quorum, and its detail names the host that never answered',
+      /^cleared\./.test(q3.say) && q3.pend === null && /base\.drpc\.org did not answer/.test(q3.all), JSON.stringify(q3).slice(0, 300));
+    S.silent = null;
+    /* the cleared nonce 9 is used by another send, and one host never answers for the cleared
+       send's receipt: nothing goes out until every host answers, or the named quorum decides */
+    S.latest = '0xa'; S.pendingNonce = '0xa'; S.silentReceipt = 'base.drpc.org'; S.mode = 'ok';
+    const re0 = S.raws.length;
+    const e1 = await press(TO, '0.14'); const me1 = (await mark() || {})[mine];
+    ok('nonce 9 is used but one host never answers for the cleared send\'s receipt: nothing is sent or counted, try again is offered, the mark stays',
+      /^Base did not answer just now, so nothing was sent/i.test(e1.say) && /try again/.test(e1.say) && S.raws.length === re0 && !e1.pend && Math.abs(e1.eth - q1.eth) < 1e-9 && !!me1 && !!me1.quiet && me1.quiet.tries === 1,
+      e1.say + ' · ' + JSON.stringify(me1));
+    await page.evaluate(m => { const k = 'bnr_evm_dropped:gatesoul', d = JSON.parse(localStorage.getItem(k)); if (d && d[m] && d[m].quiet) { d[m].quiet.first -= 200000; d[m].quiet.tries = 2; localStorage.setItem(k, JSON.stringify(d)); } }, mine);
+    const e2 = await press(null, null);
+    ok('three checks across two minutes later the hosts that answered decide: the mark goes and the send goes out at nonce 10',
+      /^sent\./.test(e2.say) && e2.pend && e2.pend.nonce === 10 && (await mark()) === null, e2.say + ' · ' + JSON.stringify(await mark()));
+    S.receipts[e2.pend.hash] = { blockNumber: '0x14', status: '0x1' }; await press(null, null); S.silentReceipt = null;
+    /* a mark written for ANOTHER address (another soul opened under this name) is never applied */
+    S.latest = '0xb'; S.pendingNonce = '0xb'; S.countTags = [];
+    const FOREIGN = '0x' + '22'.repeat(20);
+    await page.evaluate(f => localStorage.setItem('bnr_evm_dropped:gatesoul', JSON.stringify({
+      base: { nonce: 20, gp: '0x12a05f200', hash: '0x' + 'cd'.repeat(32), what: '1 ETH to someone', from: f },
+      ['base:' + f]: { from: f, nonce: 20, gp: '0x12a05f200', sends: [{ hash: '0x' + 'cd'.repeat(32), what: '1 ETH to someone' }] } })), FOREIGN);
+    const f1 = await press(TO, '0.15'); const tf = lastRaw();
+    ok('a mark for another address (another soul under this name) is never applied: this address signs at its own pending nonce 11, priced as usual',
+      S.countTags.includes('pending') && !S.countTags.includes('latest') && big(tf[0]) === 11n && big(tf[1]) === 1000000000n && f1.pend && f1.pend.nonce === 11 && !f1.pend.mark,
+      'tags ' + S.countTags.join(',') + ' · nonce ' + big(tf[0]) + ' · ' + big(tf[1]) + ' · ' + f1.say);
+    S.receipts[f1.pend.hash] = { blockNumber: '0x15', status: '0x1' }; const fz = await press(null, null);
+    await page.evaluate(() => localStorage.removeItem('bnr_evm_dropped:gatesoul'));
+    S.pendingNonce = null; S.latest = '0x7';
+    /* another name connected while a send is signing: dropped before any broadcast, kept nowhere,
+       never counted, and that name's own kept send is untouched */
+    const OTHER = JSON.stringify({ rail: 'base', label: 'Base', raw: '0x00', hash: '0x' + 'ef'.repeat(32), nonce: 3, from: '0x' + '11'.repeat(20), to: TO, amount: '9', sym: 'ETH', explorer: '', at: 1 });
+    await page.evaluate(o => localStorage.setItem('bnr_evm_pending:othersoul', o), OTHER);
+    S.mode = 'ok'; S.switchOnGas = 'othersoul';
+    const d1 = new Set(S.raws).size;
+    const mv = await press(TO, '0.06');
+    const mvo = await page.evaluate(() => localStorage.getItem('bnr_evm_pending:othersoul'));
+    ok('another name connected while a send signs: nothing is broadcast, kept or counted, that name\'s kept send is untouched, and the line says so',
+      /^you connected another name while this was signing, so nothing was sent/.test(mv.say) && S.switchOnGas === null && new Set(S.raws).size === d1 && !mv.pend && mvo === OTHER && Math.abs(mv.eth - fz.eth) < 1e-9,
+      mv.say + ' · ' + mvo);
     await ctx.close();
   }
 

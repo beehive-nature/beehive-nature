@@ -1,0 +1,145 @@
+// RB05 — PROVE-UNIVERSAL: the RB04 grammar, read in WB001Grammar.cry, is
+// the WB001 decoder spec (WB001Decode.cry) on every input. The statements
+// are in RB05.cry; every "RB05-SAW PROVEN <name>" line prints only after
+// its prove_print returned a Theorem, and rb05-saw-check.sh requires each.
+//
+// run from this directory: saw grammar.saw
+
+enable_experimental;
+cryptol_add_path "../wb001-cryptol";
+import "../wb001-cryptol/BTungstenWB001.cry";
+import "../wb001-cryptol/WB001Decode.cry";
+import "WB001Grammar.cry";
+import "RB05.cry";
+
+let proven name = print (str_concat "RB05-SAW PROVEN " name);
+let bw = w4_unint_bitwuzla [];
+
+// ---- UTF-8: the simulation ladder, per text-field capacity --------------
+// The chain inserts u8Step at every position with `rel` and `pairStep`
+// opaque: propositional chaining over the scan's own prefix states.
+
+init64 <- prove_print bw {{ u8Init`{64} }}; proven "u8Init 64";
+step64 <- prove_print bw {{ u8Step`{64} }}; proven "u8Step 64";
+fin64 <- prove_print bw {{ u8Fin`{64} }}; proven "u8Fin 64";
+chain64 <- prove_print (do {
+    v <- goal_intro "v";
+    len <- goal_intro "len";
+    goal_insert_and_specialize init64 [v, len];
+    for (eval_list {{ take`{64} [0 ...] : [64][32] }})
+      (\p -> goal_insert_and_specialize step64 [v, len, p, {{ (pairs`{64} v len) @ p }}]);
+    w4_unint_bitwuzla ["rel", "pairStep"];
+  }) {{ u8Chain`{64} }};
+proven "u8Chain 64";
+projD64 <- prove_print bw {{ u8ProjD`{64} }}; proven "u8ProjD 64";
+projG64 <- prove_print bw {{ u8ProjG`{64} }}; proven "u8ProjG 64";
+equiv64 <- prove_print (do {
+    v <- goal_intro "v";
+    len <- goal_intro "len";
+    goal_insert_and_specialize chain64 [v, len];
+    goal_insert_and_specialize fin64 [v, len, {{ pairs`{64} v len ! 0 }}];
+    goal_insert_and_specialize projD64 [v, len];
+    goal_insert_and_specialize projG64 [v, len];
+    w4_unint_bitwuzla ["rel", "onlyManyUtf8", "wellFormedUtf8", "canonicalPad"];
+  }) {{ utf8Equiv`{64} }};
+proven "utf8Equiv 64";
+
+init128 <- prove_print bw {{ u8Init`{128} }}; proven "u8Init 128";
+step128 <- prove_print bw {{ u8Step`{128} }}; proven "u8Step 128";
+fin128 <- prove_print bw {{ u8Fin`{128} }}; proven "u8Fin 128";
+chain128 <- prove_print (do {
+    v <- goal_intro "v";
+    len <- goal_intro "len";
+    goal_insert_and_specialize init128 [v, len];
+    for (eval_list {{ take`{128} [0 ...] : [128][32] }})
+      (\p -> goal_insert_and_specialize step128 [v, len, p, {{ (pairs`{128} v len) @ p }}]);
+    w4_unint_bitwuzla ["rel", "pairStep"];
+  }) {{ u8Chain`{128} }};
+proven "u8Chain 128";
+projD128 <- prove_print bw {{ u8ProjD`{128} }}; proven "u8ProjD 128";
+projG128 <- prove_print bw {{ u8ProjG`{128} }}; proven "u8ProjG 128";
+equiv128 <- prove_print (do {
+    v <- goal_intro "v";
+    len <- goal_intro "len";
+    goal_insert_and_specialize chain128 [v, len];
+    goal_insert_and_specialize fin128 [v, len, {{ pairs`{128} v len ! 0 }}];
+    goal_insert_and_specialize projD128 [v, len];
+    goal_insert_and_specialize projG128 [v, len];
+    w4_unint_bitwuzla ["rel", "onlyManyUtf8", "wellFormedUtf8", "canonicalPad"];
+  }) {{ utf8Equiv`{128} }};
+proven "utf8Equiv 128";
+
+// ---- the UTF-8 law on a value read from the stream ----------------------
+pad64 <- prove_print bw {{ bytesFromPadded`{64} }}; proven "bytesFromPadded 64";
+pad128 <- prove_print bw {{ bytesFromPadded`{128} }}; proven "bytesFromPadded 128";
+from64 <- prove_print (do {
+    s <- goal_intro "s";
+    q <- goal_intro "q";
+    len <- goal_intro "len";
+    goal_insert_and_specialize pad64 [s, q, len];
+    goal_insert_and_specialize equiv64 [{{ bytesFrom`{64} s q len }}, len];
+    w4_unint_bitwuzla ["bytesFrom", "onlyManyUtf8", "wellFormedUtf8", "canonicalPad"];
+  }) {{ utf8From`{64} }};
+proven "utf8From 64";
+from128 <- prove_print (do {
+    s <- goal_intro "s";
+    q <- goal_intro "q";
+    len <- goal_intro "len";
+    goal_insert_and_specialize pad128 [s, q, len];
+    goal_insert_and_specialize equiv128 [{{ bytesFrom`{128} s q len }}, len];
+    w4_unint_bitwuzla ["bytesFrom", "onlyManyUtf8", "wellFormedUtf8", "canonicalPad"];
+  }) {{ utf8From`{128} }};
+proven "utf8From 128";
+
+// ---- the envelope ---------------------------------------------------------
+// The UTF-8 lemma at the four text fields, at the positions both sides
+// read (starts: index 0 domain, 4 destination, 5 capability, 8 payer).
+// Values stay opaque (byteAtPos, bytesFrom, be32From, be64From
+// uninterpreted): the composition compares positions, tags, bounds and
+// lengths, never 4 KB of bytes.
+let text_fields s = do {
+    goal_insert_and_specialize from64 [s, {{ (starts s @ 0) + 5 }}, {{ be32From s ((starts s @ 0) + 1) }}];
+    goal_insert_and_specialize from128 [s, {{ (starts s @ 4) + 5 }}, {{ be32From s ((starts s @ 4) + 1) }}];
+    goal_insert_and_specialize from64 [s, {{ (starts s @ 5) + 5 }}, {{ be32From s ((starts s @ 5) + 1) }}];
+    goal_insert_and_specialize from128 [s, {{ (starts s @ 8) + 5 }}, {{ be32From s ((starts s @ 8) + 1) }}];
+  };
+let opaque = ["byteAtPos", "bytesFrom", "be32From", "be64From", "onlyManyUtf8", "wellFormedUtf8"];
+
+exact <- prove_print (do {
+    s <- goal_intro "s";
+    n <- goal_intro "n";
+    text_fields s;
+    w4_unint_bitwuzla opaque;
+  }) {{ exactEquiv }};
+proven "exactEquiv";
+
+envOk <- prove_print (do {
+    s <- goal_intro "s";
+    n <- goal_intro "n";
+    text_fields s;
+    w4_unint_bitwuzla opaque;
+  }) {{ envelopeOk }};
+proven "envelopeOk";
+
+envTrail <- prove_print (do {
+    s <- goal_intro "s";
+    n <- goal_intro "n";
+    text_fields s;
+    w4_unint_bitwuzla opaque;
+  }) {{ envelopeTrailing }};
+proven "envelopeTrailing";
+
+envRef <- prove_print (do {
+    s <- goal_intro "s";
+    n <- goal_intro "n";
+    text_fields s;
+    w4_unint_bitwuzla opaque;
+  }) {{ envelopeRefuses }};
+proven "envelopeRefuses";
+
+// ---- non-vacuity on closed terms ------------------------------------------
+prove_print bw {{ acceptsBridgeTerms }}; proven "acceptsBridgeTerms";
+prove_print bw {{ refusesTrailingByte }}; proven "refusesTrailingByte";
+prove_print bw {{ refusesEncodedSurrogate }}; proven "refusesEncodedSurrogate";
+
+print "RB05-SAW GRAMMAR ALL-PROVEN";

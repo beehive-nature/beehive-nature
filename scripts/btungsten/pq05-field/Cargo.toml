@@ -1,0 +1,18 @@
+# SPEC-BTUNGSTEN-PQ-1 PQ05/PQ06 — the proof harness for the ML-KEM and ML-DSA
+# base fields. It links module-lattice 0.2.3 itself: the .crate cargo ships,
+# fetched by ../pq05-field-check.sh, checked against the workspace
+# Cargo.lock, and extracted under target/saw-pq05-field/. Built by
+# cargo-saw-build (mir-json), never by the workspace.
+[package]
+name = "pq05_field"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+module-lattice = { path = "../../../target/saw-pq05-field/module-lattice-0.2.3", default-features = false }
+
+[workspace]

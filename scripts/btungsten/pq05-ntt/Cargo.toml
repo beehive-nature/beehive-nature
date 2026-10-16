@@ -1,0 +1,17 @@
+# SPEC-BTUNGSTEN-PQ-1 PQ05 — the proof harness for ML-KEM's NTT. It links
+# ml-kem 0.3.2 itself, from crates.io under the committed Cargo.lock, whose
+# checksums ../pq05-ntt-check.sh holds equal to the workspace Cargo.lock's.
+# Built by cargo-saw-build (mir-json), never by the workspace.
+[package]
+name = "pq05_ntt"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+ml-kem = { version = "=0.3.2", default-features = false }
+
+[workspace]

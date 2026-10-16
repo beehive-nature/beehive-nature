@@ -43,6 +43,7 @@ const LEDGER = {
   'e2e/blight-gallery-eternal.test.mjs': [2, 'enables to read the computed colour and restores in the same task; never clicked'],
   'e2e/blight-market-eternal.test.mjs': [2, 'enables to read the computed colour and restores in the same task; never clicked'],
   'e2e/vending-machine.test.mjs': [2, 'regex source matched against page HTML; nothing is written'],
+  'e2e/wallet-vault.mjs': [2, 'models a held paste ending by enabling the paste field and its button; neither is clicked, the vault places a key in the field'],
 };
 
 // A write is any assignment to `.disabled`, or removeAttribute/toggleAttribute

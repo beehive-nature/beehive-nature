@@ -23,10 +23,13 @@ let browser;
 before(async () => { await new Promise(r => srv.listen(PORT, '127.0.0.1', r)); browser = await chromium.launch(); });
 after(async () => { if (browser) await browser.close(); srv.close(); });
 
-async function open(reg) {
+async function open(reg, economics = null) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await ctx.addInitScript(r => { try { localStorage.setItem('bregister', r); } catch {} }, reg);
   await ctx.route('**/*', r => r.request().url().startsWith(ORIGIN) ? r.continue() : r.abort('blockedbyclient'));
+  if (economics) await ctx.route('**/zblood-storage-economics.json', r => r.fulfill({
+    contentType: 'application/json', body: JSON.stringify(economics),
+  }));
   const p = await ctx.newPage(); const errs = [];
   p.on('pageerror', e => errs.push(String(e)));
   await p.goto(`${ORIGIN}/surfaces/blood.html`, { waitUntil: 'load' });
@@ -37,10 +40,13 @@ async function open(reg) {
 const shown = p => p.evaluate(() => ['.et-b', '.et-r', '.et-c'].filter(s => getComputedStyle(document.querySelector('#eternal>' + s)).display !== 'none'));
 const RECEIPT = JSON.parse(await readFile(join(ROOT, 'assets/profile-archive/lineage/zblood-storage-economics.json'), 'utf8'));
 
+// the founder's chosen UI (2026-10-05): new bee is paper with bold system sans titles and a forest
+// green action; raver is night purple (the sovereign tint) with plain bold sans titles and its
+// magenta pill; cypherpunk is unchanged. Each value is asserted exactly.
 test('one front per register, each in its own dress', async () => {
   const want = {
-    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, action: 'rgb(168, 35, 140)' },
-    raver: { front: '.et-r', bg: 'rgb(6, 17, 12)', title: /Unbounded/, action: 'rgb(214, 85, 187)' },
+    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /^ui-sans-serif, system-ui/, action: 'rgb(38, 77, 54)' },
+    raver: { front: '.et-r', bg: 'rgb(18, 14, 30)', title: /^ui-sans-serif, system-ui/, action: 'rgb(214, 85, 187)' },
     cypherpunk: { front: '.et-c', bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, action: 'rgb(69, 194, 220)' },
   };
   for (const [reg, w] of Object.entries(want)) {
@@ -138,12 +144,60 @@ test('cypherpunk: the instrument is complete at first paint and verifiable', asy
   }));
   assert.equal(d.rows, 7); assert.equal(d.steps, 6); assert.equal(d.receipt, 7);
   assert.match(d.now, /consent/, 'the pipeline points at the first step not yet done');
-  assert.match(d.pipeline, /quote exceeds ceiling/, 'settlement reports the over-ceiling quote');
+  const quote = RECEIPT.quotes.autonomi;
+  assert.equal(/quote exceeds ceiling/.test(d.pipeline),
+    Number(quote.computed.storageANT) > quote.ceilings.storageMaxANT ||
+    Number(quote.computed.gasETH) > quote.ceilings.gasMaxETH,
+    'settlement reflects the current receipt and both separate ceilings');
   assert.match(d.pipeline, /payment client cannot enforce both ceilings/, 'settlement reports the client capability stop');
   assert.equal(d.path, 'bData://genealogy/unsealed', 'no storage address is claimed before a paid upload');
   await p.click('.et-c-tab tr.pick[data-g="4"]');
   assert.equal(await p.$eval('.et-c-tab tr.names[data-g="4"]', e => e.hidden), false, 'a generation opens to its people');
   assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
+});
+
+test('cypherpunk offers exact-edition consent review separately from payment', async () => {
+  const { ctx, p, errs } = await open('cypherpunk');
+  await p.click('#etCyConsent');
+  const host = p.locator('#genealogyConsent');
+  await host.getByRole('link', { name: 'review and sign with your keychain' }).waitFor();
+  assert.match(await host.textContent(), new RegExp(RECEIPT.artifact.manifestSha256));
+  assert.match(await host.textContent(), new RegExp(RECEIPT.artifact.uploadObject.sha256));
+  assert.match(await host.textContent(), /authorizes no payment/);
+  assert.equal(await host.getByRole('link').getAttribute('href'), 'wallet.html#genealogy-consent');
+  assert.equal(await host.getByRole('button', { name: 'download signed consent' }).isVisible(), false);
+  assert.match(await p.textContent('#etReceipt'), /paid\s*not yet/);
+  await ctx.addInitScript(() => {
+    localStorage.setItem('bnr_soul', 'gatesoul');
+    window.__consentCredentialPrompts = 0;
+    Object.defineProperty(navigator.credentials, 'get', { configurable: true, value: async () => {
+      window.__consentCredentialPrompts++;
+      throw new Error('test refuses any automatic credential prompt');
+    }});
+  });
+  await host.getByRole('link').click();
+  const walletConsent = p.locator('#genealogyConsent');
+  await walletConsent.getByRole('button', { name: 'review signing key' }).waitFor();
+  assert.equal(await walletConsent.getByRole('button', { name: 'sign preservation consent', exact: true }).isEnabled(), false);
+  await walletConsent.getByRole('button', { name: 'review signing key' }).click();
+  assert.match(await walletConsent.textContent(), /Connect your existing keychain/);
+  assert.equal(await walletConsent.getByRole('checkbox').isEnabled(), false, 'no key means no consent press');
+  assert.equal(await p.evaluate(() => window.__consentCredentialPrompts), 0, 'reviewing consent must not automatically open a passkey prompt');
+  assert.equal(errs.length, 0, errs.join(' | '));
+  await ctx.close();
+});
+
+test('settlement separates changing quote limits from the payment capability stop', async () => {
+  for (const [storage, gas, over] of [['1', '0.0001', false], ['3', '0.0001', true], ['1', '0.0003', true]]) {
+    const receipt = structuredClone(RECEIPT);
+    receipt.quotes.autonomi.computed = { storageANT: storage, gasETH: gas };
+    receipt.quotes.autonomi.ceilings = { storageMaxANT: 2, gasMaxETH: 0.0002, enforceableByClient: false };
+    const { ctx, p } = await open('cypherpunk', receipt);
+    const pipeline = await p.textContent('#etPipe');
+    assert.equal(/quote exceeds ceiling/.test(pipeline), over);
+    assert.match(pipeline, /payment client cannot enforce both ceilings/);
+    await ctx.close();
+  }
 });
 
 test('the laws hold on the front: no dash for a value, no forced capitals, 44 px actions', async () => {

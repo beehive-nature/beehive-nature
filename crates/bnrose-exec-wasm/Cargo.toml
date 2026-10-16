@@ -1,0 +1,13 @@
+[package]
+name = "bnrose-exec-wasm"
+version = "0.1.0"
+edition.workspace = true
+license = "Apache-2.0"
+description = "The wasm worker face of bnrose-exec-core: a flat C-ABI shim whose verdicts are the core crate's, unchanged. cdylib for wasm32-unknown-unknown, rlib so native tests exercise the identical ABI."
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+bnrose-exec-core = { path = "../bnrose-exec-core" }

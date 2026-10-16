@@ -1,0 +1,20 @@
+✔ one front per register, each in its own dress, and the one real action inside it (3552.7264ms)
+✔ the same facts in all three: the door, the state, what has arrived — from the one data layer (5152.6252ms)
+✔ honest gestures: rows, ring and tiles read the data; they never fetch, play or claim (3331.7357ms)
+✔ the laws hold on the front: no dash for a value, no forced capitals, 44 px actions (2377.5945ms)
+{"startupMs":636,"stallMs":1608.8000001907349,"srcChanges":1,"fragments":62,"warmReads":0}
+✔ direct MSE starts from the first chunk, retains one source through gaps, and caches a genuine warm replay (15934.7535ms)
+{"startupMs":614.2999999523163,"stallMs":1827.8000001907349,"srcChanges":1,"fragments":62,"warmReads":0}
+✔ a dry MSE player reads the next chunk even when estimated forward bytes exceed its target (14763.5233ms)
+✔ MSE append failure recovers at the same playhead from retained bytes without another read (15719.2237ms)
+✔ MSE quota pressure retries the same bytes once after freeing history (13322.3455ms)
+✔ unsupported MSE codec keeps the file player and performs one set of reads (18264.1534ms)
+✔ native waiting releases pressure even with HAVE_FUTURE_DATA and three seconds buffered (1237.9477ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 96706.6094

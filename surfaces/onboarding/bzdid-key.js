@@ -4921,8 +4921,18 @@ zoo`.split("\n"));
     if (typeof context !== "string" || context.length === 0) {
       throw new BzdidKeyError("context must be a non-empty string", "context_empty");
     }
+    // SPEC-BTUNGSTEN-PQ-1 PQ03: 1 to 64 printable ASCII characters and a retry
+    // counter of at most 31, so a counter byte is never the last byte of
+    // another context (context "a" at counter 1 would otherwise give the same
+    // HKDF info as context "a\x01" at counter 0).
+    // crates/bpq-core holds the same rule; SAW proves every info string under
+    // it distinct. No context the wallet builds is refused.
+    if (!/^[\x20-\x7e]{1,64}$/.test(context)) {
+      throw new BzdidKeyError("context must be 1 to 64 printable ASCII characters", "context_rule");
+    }
     let counter = 0;
     for (; ; ) {
+      if (counter > 31) throw new BzdidKeyError("no secp256k1 scalar in 32 tries", "k1_counter");
       const info = counter === 0 ? concat(ascii(LABEL_K1_KEY), ascii(context)) : concat(ascii(LABEL_K1_KEY), ascii(context), Uint8Array.of(counter));
       const seed = expand(sha256, masterPrk, info, 32);
       let s = 0n;

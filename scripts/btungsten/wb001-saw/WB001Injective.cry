@@ -1,0 +1,148 @@
+// bTunGsTeN WB001 — the lemma ladder for the UNIVERSAL injectivity of the
+// Cryptol wire (wireInjective), proven by SAW in injective.saw.
+//
+// Why a ladder: `wire` is 4,626 positions, each a dispatch over ten
+// variable-offset blocks; unfolding it twice and asking a solver for
+// injectivity directly runs out of memory or time (the formal job's
+// NOT-PROVEN rows). The ladder never builds two wires at once:
+//
+//   kStar a b       a CONSTRUCTED witness: the first envelope position at
+//                   which two distinct bounded, canonically padded intents
+//                   differ (first differing field; its length word if the
+//                   lengths differ, else its first differing byte).
+//   fd01 .. fd10    one case per field: if every earlier field is equal and
+//                   this one differs, kStar is in range and byteAt differs
+//                   there. One symbolic position, one dispatch per intent.
+//   validImplies*   validIntent gives the bounds and the padding.
+//   wireIndexDef'   (wire a) @ p == byteAt a p, byteAt left uninterpreted.
+//   wireInjective   composed from the above by explicit instantiation
+//                   (goal_insert_and_specialize), every name above opaque.
+//
+// Imports the spec by module name (../wb001-cryptol/BTungstenWB001.cry; the
+// SAW scripts add that directory to the Cryptol path).
+
+module WB001Injective where
+
+import BTungstenWB001
+
+firstDiff : {n} (fin n) => [n][8] -> [n][8] -> [32]
+firstDiff xs ys = foldr (\(i, x, y) r -> if x != y then i else r) 0
+                    [ (i, x, y) | i <- [0 ...] | x <- xs | y <- ys ]
+
+fieldK : {cap} (fin cap) => [32] -> { len : [32], bytes : [cap][8] } -> { len : [32], bytes : [cap][8] } -> [32]
+fieldK off f g =
+  if f.len != g.len
+  then off + 1 + firstDiff (split f.len : [4][8]) (split g.len)
+  else off + 5 + firstDiff f.bytes g.bytes
+
+u64K : [32] -> [64] -> [64] -> [32]
+u64K off x y = off + 5 + firstDiff (split x : [8][8]) (split y)
+
+kStar : Intent -> Intent -> [32]
+kStar a b =
+  if a.domain != b.domain then fieldK (bDom a) a.domain b.domain
+  else if a.nonce != b.nonce then fieldK (bNon a) a.nonce b.nonce
+  else if a.epoch != b.epoch then u64K (bEpo a) a.epoch b.epoch
+  else if a.action != b.action then fieldK (bAct a) a.action b.action
+  else if a.destination != b.destination then fieldK (bDst a) a.destination b.destination
+  else if a.capability != b.capability then fieldK (bCap a) a.capability b.capability
+  else if a.amount != b.amount then u64K (bAmt a) a.amount b.amount
+  else if a.expiry != b.expiry then u64K (bExp a) a.expiry b.expiry
+  else if a.payer != b.payer then fieldK (bPay a) a.payer b.payer
+  else fieldK (bPld a) a.payload b.payload
+
+padded : Intent -> Bit
+padded a =
+     (canonicalPad a.domain.len a.domain.bytes == a.domain.bytes)
+  && (canonicalPad a.nonce.len a.nonce.bytes == a.nonce.bytes)
+  && (canonicalPad a.action.len a.action.bytes == a.action.bytes)
+  && (canonicalPad a.destination.len a.destination.bytes == a.destination.bytes)
+  && (canonicalPad a.capability.len a.capability.bytes == a.capability.bytes)
+  && (canonicalPad a.payer.len a.payer.bytes == a.payer.bytes)
+  && (canonicalPad a.payload.len a.payload.bytes == a.payload.bytes)
+
+validImpliesPadded : Intent -> Bit
+property validImpliesPadded a = validIntent a ==> padded a
+
+// Field equality, NAMED: the composition steps treat these as opaque
+// propositions, so combining the ten cases never re-expands two 4 KB
+// records (that expansion cost a z3 composition 25+ CPU minutes, local).
+eqDom, eqNon, eqEpo, eqAct, eqDst, eqCap, eqAmt, eqExp, eqPay, eqPld : Intent -> Intent -> Bit
+eqDom a b = a.domain == b.domain
+eqNon a b = a.nonce == b.nonce
+eqEpo a b = a.epoch == b.epoch
+eqAct a b = a.action == b.action
+eqDst a b = a.destination == b.destination
+eqCap a b = a.capability == b.capability
+eqAmt a b = a.amount == b.amount
+eqExp a b = a.expiry == b.expiry
+eqPay a b = a.payer == b.payer
+eqPld a b = a.payload == b.payload
+
+earlierEq : Intent -> Intent -> Bit
+earlierEq a b = eqDom a b && eqNon a b && eqEpo a b && eqAct a b && eqDst a b && eqCap a b && eqAmt a b && eqExp a b && eqPay a b
+
+allEq : Intent -> Intent -> Bit
+allEq a b = earlierEq a b && eqPld a b
+
+// record extensionality: the one place the record comparison is expanded
+recordExt : Intent -> Intent -> Bit
+property recordExt a b = allEq a b == (a == b)
+
+pre : Intent -> Intent -> Bit
+pre a b = lensBounded a && padded a && lensBounded b && padded b
+
+concl : Intent -> Intent -> Bit
+concl a b = (kStar a b < 4626) && (byteAt a (kStar a b) != byteAt b (kStar a b))
+
+// THE first-difference theorem (composed in injective.saw):
+firstDifference : Intent -> Intent -> Bit
+property firstDifference a b = (pre a b && (a != b)) ==> concl a b
+
+// the ten cases, by the first differing field
+fd01 : Intent -> Intent -> Bit
+property fd01 a b = (pre a b && ~(eqDom a b)) ==> concl a b
+fd02 : Intent -> Intent -> Bit
+property fd02 a b = (pre a b && eqDom a b && ~(eqNon a b)) ==> concl a b
+fd03 : Intent -> Intent -> Bit
+property fd03 a b = (pre a b && eqDom a b && eqNon a b && ~(eqEpo a b)) ==> concl a b
+fd04 : Intent -> Intent -> Bit
+property fd04 a b = (pre a b && eqDom a b && eqNon a b && eqEpo a b && ~(eqAct a b)) ==> concl a b
+fd05 : Intent -> Intent -> Bit
+property fd05 a b = (pre a b && eqDom a b && eqNon a b && eqEpo a b && eqAct a b && ~(eqDst a b)) ==> concl a b
+fd06 : Intent -> Intent -> Bit
+property fd06 a b = (pre a b && eqDom a b && eqNon a b && eqEpo a b && eqAct a b && eqDst a b && ~(eqCap a b)) ==> concl a b
+fd07 : Intent -> Intent -> Bit
+property fd07 a b = (pre a b && eqDom a b && eqNon a b && eqEpo a b && eqAct a b && eqDst a b && eqCap a b && ~(eqAmt a b)) ==> concl a b
+fd08 : Intent -> Intent -> Bit
+property fd08 a b = (pre a b && eqDom a b && eqNon a b && eqEpo a b && eqAct a b && eqDst a b && eqCap a b && eqAmt a b && ~(eqExp a b)) ==> concl a b
+fd09 : Intent -> Intent -> Bit
+property fd09 a b = (pre a b && eqDom a b && eqNon a b && eqEpo a b && eqAct a b && eqDst a b && eqCap a b && eqAmt a b && eqExp a b && ~(eqPay a b)) ==> concl a b
+fd10 : Intent -> Intent -> Bit
+property fd10 a b = (pre a b && eqDom a b && eqNon a b && eqEpo a b && eqAct a b && eqDst a b && eqCap a b && eqAmt a b && eqExp a b && eqPay a b && ~(eqPld a b)) ==> concl a b
+
+// the case split covers every distinct pair (composed from fd01..fd10 with
+// the eq* names opaque: pure propositional logic)
+casesCover : Intent -> Intent -> Bit
+property casesCover a b = (pre a b && ~(allEq a b)) ==> concl a b
+
+// fd10 (payload, 4096 bytes) is the one case a solver finds slow whole
+// (1,301 s, bitwuzla, local); it is composed in injective.saw from four
+// small pieces instead: the length-word sub-case, the first-difference
+// index lemma, the in-length lemma (canonical padding), and the byte case
+// at an ARBITRARY differing index j (one symbolic position).
+
+fd10len : Intent -> Intent -> Bit
+property fd10len a b = (pre a b && earlierEq a b && (a.payload.len != b.payload.len)) ==> concl a b
+
+fdIdx : [4096][8] -> [4096][8] -> Bit
+property fdIdx xs ys = (xs != ys) ==> ((xs @ firstDiff xs ys) != (ys @ firstDiff xs ys))
+
+fdInLen : [32] -> [4096][8] -> [4096][8] -> Bit
+property fdInLen n xs ys = ((canonicalPad n xs == xs) && (canonicalPad n ys == ys) && (xs != ys)) ==> (firstDiff xs ys < n)
+
+fd10at : Intent -> Intent -> [32] -> Bit
+property fd10at a b j =
+  (pre a b && earlierEq a b && (a.payload.len == b.payload.len) && (j < a.payload.len)
+     && ((a.payload.bytes @ j) != (b.payload.bytes @ j)))
+  ==> ((bPld a + 5 + j < 4626) && (byteAt a (bPld a + 5 + j) != byteAt b (bPld a + 5 + j)))

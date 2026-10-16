@@ -54,6 +54,38 @@ pub fn gas_limit_with_buffer(estimated_gas: u64) -> u128 {
     (estimated_gas as u128).saturating_mul(120) / 100
 }
 
+/// Why `fee_cap` refused.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FeeCapRefusal {
+    ZeroGasLimit,
+    /// Even the current network fee does not fit; `need_wei` is
+    /// `gas_limit × network fee`, saturating.
+    Unaffordable { need_wei: u128 },
+}
+
+/// The arithmetic of `plan_fee_cap`, without its refusal message.
+///
+/// Separate so that bTunGsTeN RB03 (`scripts/btungsten/rb03-budget`) can
+/// check it symbolically for every input: formatting a symbolic `u128` into
+/// the message produces solver goals that do not close.
+pub fn fee_cap(
+    remaining_wei: u128,
+    gas_limit: u128,
+    network_fee_per_gas: u128,
+    headroom_num: u128,
+    headroom_den: u128,
+) -> Result<u128, FeeCapRefusal> {
+    if gas_limit == 0 {
+        return Err(FeeCapRefusal::ZeroGasLimit);
+    }
+    let budget_cap = remaining_wei / gas_limit;
+    if budget_cap < network_fee_per_gas {
+        return Err(FeeCapRefusal::Unaffordable { need_wei: gas_limit.saturating_mul(network_fee_per_gas) });
+    }
+    let with_headroom = network_fee_per_gas.saturating_mul(headroom_num) / headroom_den.max(1);
+    Ok(with_headroom.min(budget_cap).max(network_fee_per_gas))
+}
+
 /// Choose the per-gas fee cap for one send.
 ///
 /// The cap is the network's current estimate times `headroom_num/headroom_den`
@@ -68,20 +100,15 @@ pub fn plan_fee_cap(
     headroom_den: u128,
     stage: &str,
 ) -> Res<u128> {
-    if gas_limit == 0 {
-        return Err(format!("REFUSE: zero gas limit for {stage}").into());
-    }
-    let budget_cap = remaining_wei / gas_limit;
-    if budget_cap < network_fee_per_gas {
-        let need = gas_limit.saturating_mul(network_fee_per_gas);
-        return Err(format!(
+    match fee_cap(remaining_wei, gas_limit, network_fee_per_gas, headroom_num, headroom_den) {
+        Ok(cap) => Ok(cap),
+        Err(FeeCapRefusal::ZeroGasLimit) => Err(format!("REFUSE: zero gas limit for {stage}").into()),
+        Err(FeeCapRefusal::Unaffordable { need_wei: need }) => Err(format!(
             "REFUSE: gas budget cannot cover {stage}: gas_limit {gas_limit} × network fee {network_fee_per_gas} wei = {need} wei exceeds remaining budget {remaining_wei} wei by {} wei",
             need.saturating_sub(remaining_wei)
         )
-        .into());
+        .into()),
     }
-    let with_headroom = network_fee_per_gas.saturating_mul(headroom_num) / headroom_den.max(1);
-    Ok(with_headroom.min(budget_cap).max(network_fee_per_gas))
 }
 
 /// A lower bound for the gas limit of a payment that has not been approved yet.
@@ -300,6 +327,35 @@ mod tests {
         assert!(err.starts_with("REFUSE: gas budget cannot cover wave"), "{err}");
         assert!(err.contains("by 1600000000000000 wei"), "{err}");
         assert!(plan_fee_cap(CEILING, 0, 1, 2, 1, "t").is_err());
+    }
+
+    #[test]
+    fn plan_fee_cap_is_fee_cap_with_a_message() {
+        // RB03 checks fee_cap symbolically; this holds plan_fee_cap to it.
+        let m = u128::MAX;
+        let vals = [0, 1, 2, 3, 7, 10, 99, 100, 101, 1_000, 226_213, 157_379_521, m / 2, m / 2 + 1, m - 1, m];
+        for &r in &vals {
+            for &g in &vals {
+                for &f in &vals {
+                    for (n, d) in [(2, 1), (0, 1), (3, 0), (1, m), (m, 1)] {
+                        let plan = plan_fee_cap(r, g, f, n, d, "s");
+                        match fee_cap(r, g, f, n, d) {
+                            Ok(cap) => assert_eq!(plan.unwrap(), cap),
+                            Err(FeeCapRefusal::ZeroGasLimit) => {
+                                assert_eq!(plan.unwrap_err().to_string(), "REFUSE: zero gas limit for s")
+                            }
+                            Err(FeeCapRefusal::Unaffordable { need_wei }) => assert_eq!(
+                                plan.unwrap_err().to_string(),
+                                format!(
+                                    "REFUSE: gas budget cannot cover s: gas_limit {g} × network fee {f} wei = {need_wei} wei exceeds remaining budget {r} wei by {} wei",
+                                    need_wei.saturating_sub(r)
+                                )
+                            ),
+                        }
+                    }
+                }
+            }
+        }
     }
 
     #[test]

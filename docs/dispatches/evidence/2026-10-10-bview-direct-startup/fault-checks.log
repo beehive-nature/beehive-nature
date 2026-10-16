@@ -1,0 +1,11 @@
+✔ cancelling during backoff launches no retry and late reads cannot change its receipt (4717.6688ms)
+✔ MSE append failure recovers at the same playhead from retained bytes without another read (18046.1603ms)
+✔ MSE quota pressure retries the same bytes once after freeing history (13803.8618ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 34368.1899

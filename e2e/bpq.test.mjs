@@ -5,7 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
-import { createHash, createCipheriv, hkdfSync } from 'node:crypto';
+import { createHash, createHmac, createCipheriv, hkdfSync } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -310,4 +310,142 @@ test('wiped keys refuse to sign or decapsulate', () => {
   k.wipe();
   assert.throws(() => k.dsa.sign(new Uint8Array(1)), e => e.code === 'wiped');
   assert.throws(() => k.kem.decapsulate(new Uint8Array(1120)), e => e.code === 'wiped');
+});
+
+// Founder ruling 2026-10-04 (SPEC-BPQ-1 §1, §2): "only me" opens from the phrase alone.
+const hkdfExpand32 = (prk, info) => new Uint8Array(createHmac('sha256', prk).update(Buffer.concat([Buffer.from(info, 'utf8'), Buffer.from([1])])).digest());
+
+test('the phrase-only vault key is the vault label under context root (an independent HKDF-Expand agrees), and is no persona vault', () => {
+  assert.equal(V.rootVault.context, 'root');
+  assert.equal(V.rootVault.label, 'BDID-v1/vault-key');
+  for (const row of V.rootVault.keys) {
+    const prk = rootOf(row.rootFrom), rv = B.rootVault(prk);
+    assert.equal(rv.length, 32);
+    assert.deepEqual(rv, hkdfExpand32(prk, 'BDID-v1/vault-keyroot'));
+    assert.equal(B.b64u(createHash('sha3-256').update(rv).digest()), row.rootVaultKeySha3);
+    assert.notDeepEqual(rv, B.keys(prk, 'pq:vector').vault.key);
+  }
+  assert.throws(() => B.rootVault(new Uint8Array(31)), e => e.code === 'length');
+});
+
+test('root vault vector objects open for their readers and refuse everyone else', async () => {
+  const cred = (n, how) => {
+    const r = V.keys.find(k => k.name === n);
+    return how === 'root' ? { self: B.rootVault(rootOf(r.rootFrom)) } : how === 'self' ? { self: keysOf(n) } : { kem: keysOf(n) };
+  };
+  for (const o of V.rootVault.objects) {
+    const obj = B.unb64u(o.object);
+    for (const who of o.opens) {
+      const r = await B.open(obj, cred(...who.split(':')));
+      assert.equal(B.b64u(createHash('sha3-256').update(r.bytes).digest()), o.plaintextSha3, `${o.name} ${who}`);
+      assert.deepEqual(r.meta, o.meta);
+      if (o.sealedBy) { assert.equal(r.sealedBy.ok, true); assert.equal(r.sealedBy.id, o.sealedBy); }
+      else assert.equal(r.sealedBy, null);
+    }
+    for (const who of o.refuses) {
+      await assert.rejects(B.open(obj, cred(...who.split(':'))), e => e.code === 'no_key', `${o.name} must refuse ${who}`);
+    }
+  }
+});
+
+test('a self slot under the root vault looks like one under a persona vault, and two root seals share no slot bytes', async () => {
+  const prk = rootOf(V.keys[0].rootFrom), plain = new TextEncoder().encode('same shape');
+  // every field: its name, its JSON type, its length (and `to`, the only fixed value)
+  const shape = slots => slots.map(s => Object.keys(s).sort().map(k => `${k}:${typeof s[k]}:${String(s[k]).length}${k === 'to' ? '=' + s[k] : ''}`).join(','));
+  const root1 = B.inspect(await B.seal(plain, { self: B.rootVault(prk) }));
+  const root2 = B.inspect(await B.seal(plain, { self: B.rootVault(prk) }));
+  const persona = B.inspect(await B.seal(plain, { self: B.keys(prk, 'pq:vector') }));
+  assert.deepEqual(shape(root1.slots), ['to:string:4=self,w:string:64']);
+  assert.deepEqual(shape(root1.slots), shape(persona.slots));
+  assert.deepEqual(Object.keys(root1.core).sort(), Object.keys(persona.core).sort());
+  // the same key and the same plaintext still give unrelated slots: fresh oid and file key each time
+  const w1 = B.unb64u(root1.slots[0].w), w2 = B.unb64u(root2.slots[0].w);
+  assert.equal(w1.length, 48);
+  assert.notEqual(root1.core.oid, root2.core.oid);
+  assert.equal(includes(root2.keysBytes, root1.slots[0].w), false);
+  for (let i = 0; i + 8 <= w1.length; i++) assert.equal(includes(w2, w1.subarray(i, i + 8)), false, 'an 8-byte run of one slot appears in the other');
+});
+
+test('the context "root" is reserved: keys() and successionKeys() refuse it, rootVault is the only way in', () => {
+  const prk = rootOf(V.keys[0].rootFrom);
+  assert.throws(() => B.keys(prk, 'root'), e => e.code === 'context_reserved');
+  assert.throws(() => B.successionKeys(prk, 'root'), e => e.code === 'context_reserved');
+  assert.equal(B.keys(prk, 'pq:root').context, 'pq:root');   // a persona named root is still a pq: context
+});
+
+test('contexts outside the bpq-core rule (1 to 64 printable ASCII) derive nothing, here and in the K1 derivation', () => {
+  const prk = rootOf(V.keys[0].rootFrom);
+  const vm = require('node:vm');
+  vm.runInThisContext(readFileSync(join(ROOT, 'surfaces', 'onboarding', 'bzdid-key.js'), 'utf8') + '\n;globalThis.BZDIDKEY = BZDIDKEY;');
+  const K = globalThis.BZDIDKEY;
+  for (const bad of ['pq:\x01', 'pq:\x7f', 'pq:pé', 'x'.repeat(65)]) {
+    assert.throws(() => B.keys(prk, bad), e => e.code === 'context_rule', JSON.stringify(bad));
+    assert.throws(() => B.successionKeys(prk, bad), e => e.code === 'context_rule', JSON.stringify(bad));
+    assert.throws(() => K.deriveK1Key(prk, bad), e => e.code === 'context_rule', JSON.stringify(bad));
+  }
+  // the pair the rule closes: context "a" at counter 1 would be context "a\x01" at counter 0
+  assert.throws(() => K.deriveK1Key(prk, 'a\x01'), e => e.code === 'context_rule');
+  assert.equal(B.keys(prk, 'x'.repeat(64)).context.length, 64);
+  assert.equal(K.deriveK1Key(prk, 'nostr:bnr-devices').seed.length, 32);
+});
+
+test('an object sealed by the Rust sealer (crates/bsigner bpq::seal_self) opens in bpq.js and only for its vault', async () => {
+  const R = JSON.parse(readFileSync(join(ROOT, 'surfaces', 'bpq-rust-sealed.json'), 'utf8'));
+  const obj = new Uint8Array(Buffer.from(R.object_b64u, 'base64url'));
+  const o = await B.open(obj, { self: rootOf(R.vaultFrom) });
+  assert.equal(B.b64u(o.bytes), R.plain_b64u);
+  assert.equal(o.meta, null);
+  await assert.rejects(B.open(obj, { self: rootOf('another vault') }));
+});
+
+test('Nostr event attestations (SPEC-BPQ-1 section 5b): one verifies, every forgery is refused, the committed vector verifies', () => {
+  const k = keysOf('A');
+  const event = 'ab'.repeat(32);
+  const a = JSON.parse(JSON.stringify(B.attestNostr(k, event)));
+  assert.deepEqual(B.verifyNostr(a), { ok: true, id: k.id, event });
+  const bent = edit => { const x = JSON.parse(JSON.stringify(a)); edit(x); return B.verifyNostr(x).ok; };
+  assert.equal(bent(x => { x.event = 'ac'.repeat(32); }), false, 'another event');
+  assert.equal(bent(x => { x.event = 'AB'.repeat(32); }), false, 'uppercase hex');
+  assert.equal(bent(x => { x.kind = 'binding'; }), false, 'another kind');
+  assert.equal(bent(x => { x.id = keysOf('B').id; }), false, 'another id');
+  const other = B.attestNostr(keysOf('B'), event);
+  assert.equal(bent(x => { x.sig = other.sig; }), false, "another key's signature");
+  assert.throws(() => B.attestNostr(k, 'zz'), e => e.code === 'event');
+  const v = JSON.parse(readFileSync(join(ROOT, 'surfaces', 'bpq-nostr-vector.json'), 'utf8'));
+  const r = B.verifyNostr(v.attestation);
+  assert.equal(r.ok, true);
+  assert.equal(r.event, createHash('sha256').update(v.eventFrom, 'utf8').digest('hex'));
+});
+
+test('intent authorizations (SPEC-BPQ-1 section 5c): one verifies, every forgery is refused, both committed vectors verify', () => {
+  const k = keysOf('A');
+  const wb = JSON.parse(readFileSync(join(ROOT, 'scripts', 'btungsten', 'wb001-vectors.json'), 'utf8'));
+  const env = Uint8Array.from(Buffer.from(wb.positives.find(p => p.name === 'base').envelope, 'hex'));
+  const a = JSON.parse(JSON.stringify(B.attestIntent(k, env)));
+  const r = B.verifyIntent(a);
+  assert.equal(r.ok, true);
+  assert.equal(r.id, k.id);
+  assert.equal(r.intent.destination, 'vault:0xBEEF');
+  const bent = edit => { const x = JSON.parse(JSON.stringify(a)); edit(x); return B.verifyIntent(x).ok; };
+  const other = Uint8Array.from(env); other[20] ^= 1;
+  assert.equal(bent(x => { x.envelope = B.b64u(other); }), false, 'another envelope');
+  assert.equal(bent(x => { x.envelope = B.b64u(Uint8Array.of(...env, 0)); }), false, 'a trailing byte');
+  assert.equal(bent(x => { x.kind = 'nostr-event'; }), false, 'another kind');
+  assert.equal(bent(x => { x.id = keysOf('B').id; }), false, 'another id');
+  assert.equal(bent(x => { x.sig = B.attestIntent(keysOf('B'), env).sig; }), false, "another key's signature");
+  assert.throws(() => B.attestIntent(k, Uint8Array.of(...env, 0)), e => e.code === 'bt-wb01:trailing');
+  for (const f of ['bpq-intent-vector.json', 'bpq-intent-rust.json']) {
+    const v = JSON.parse(readFileSync(join(ROOT, 'surfaces', f), 'utf8'));
+    const w = B.verifyIntent(v.authorization);
+    assert.equal(w.ok, true, f);
+    assert.equal(w.id, k.id, f);
+  }
+});
+
+test('a Nostr event attestation made by crates/bsigner verifies in bpq.js', () => {
+  const v = JSON.parse(readFileSync(join(ROOT, 'surfaces', 'bpq-nostr-rust.json'), 'utf8'));
+  const r = B.verifyNostr(v.attestation);
+  assert.equal(r.ok, true);
+  assert.equal(r.id, keysOf('A').id);
+  assert.equal(r.event, createHash('sha256').update(v.eventFrom, 'utf8').digest('hex'));
 });

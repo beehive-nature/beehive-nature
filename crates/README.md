@@ -76,20 +76,27 @@ replay, not from this README — the README rots, the replay is the receipt.
 ## bsigner — commands
 
 ```
-bsigner keygen --alg ml-dsa-65            # on-device keygen; prints key_id + PUBLIC key only
-bsigner keygen --alg ml-kem-768
-bsigner sign --key-id ID --file PATH      # → bheart.signature/1 envelope
-bsigner verify --key-id ID --file PATH --envelope PATH
-bsigner kemtest --key-id ID               # encapsulate/decapsulate roundtrip receipt
+bsigner keygen --alg ml-dsa-65 --rec-env VAR   # on-device keygen; prints key_id + PUBLIC key only
+bsigner keygen --alg ml-kem-768 --rec-env VAR
+bsigner sign --key-id ID --file PATH --rec-env VAR   # → bheart.signature/1 envelope
+bsigner verify --key-id ID --file PATH --envelope PATH   # public half, no unlock
+bsigner kemtest --key-id ID --rec-env VAR      # encapsulate/decapsulate roundtrip receipt
+bsigner keys-seal --key-id ID --rec-env VAR    # reseal a plaintext keyset/1 file
 bsigner list
 bsigner selftest
 ```
 
+`--rec-env VAR` names an environment variable holding the owner's
+`bdidrec1` recovery code; it is never read from argv and never printed.
+
 Keysets live under `$BHEARTWALLET_HOME` or `~/.bheartwallet/bsigner/keys`
 — outside the repo, never committed (and `*.key`/secrets are already
-gitignored tree-wide). Seeds serialize as the crates' preferred forms
-(ML-DSA: 32-byte seed; ML-KEM: 64-byte seed), base64url bodies, never bare
-hex (beehive pre-commit hex law).
+gitignored tree-wide). Seeds take the crates' preferred forms (ML-DSA:
+32-byte seed; ML-KEM: 64-byte seed) and reach disk only inside a SPEC-BPQ-1
+sealed object under the root vault of the owner's recovery words
+(`bheart.keyset/2`, SPEC-BTUNGSTEN-PQ-1 §PQ09); a plaintext
+`bheart.keyset/1` file is refused until `keys-seal` reseals it. Bodies are
+base64url, never bare hex (beehive pre-commit hex law).
 
 ### Crypto claims, cited at source
 

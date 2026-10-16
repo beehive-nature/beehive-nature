@@ -1,0 +1,21 @@
+{
+  "fullLifecycleOpsPerSec": 56.0,
+  "hardware": "Windows 11 dev box / x86_64 / local release-build run (zCode seat)",
+  "journalRecordsRecovered": 400,
+  "measuredAtUnixNs": 1791870751222322700,
+  "nativeAdmitUs": 8.4,
+  "paranoidAdmitUs": 26.9,
+  "recoveryMs": 45,
+  "recoveryOps": 100,
+  "wasmAdmitTailMaxUs": 308.8,
+  "wasmAdmitTailP50Us": 30.8,
+  "wasmAdmitTailP99Us": 87.2,
+  "wasmColdMs": 32,
+  "wasmConcurrentAdmitsPerSec": 4280.0,
+  "wasmFuelPerAdmit": 260974,
+  "wasmPeakLinearMemoryBytes": 1114112,
+  "wasmWarmAdmitUs": 30.8,
+  "wasmWarmStepUs": 0.6,
+  "wasmtime": "=49.0.2",
+  "workload": "WB001-shaped slice operations: 238-byte canonical envelopes, paranoid admission, journal+ledger fsyncs, Ed25519 receipts"
+}

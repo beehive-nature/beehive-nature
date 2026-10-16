@@ -42,7 +42,7 @@ const srv = createServer(async (q, s) => {
   try {
     const rel = decodeURIComponent(q.url.split('?')[0]).replace(/^\/surfaces(?=\/|$)/, '').replace(/^\//, '');
     const ct = rel.endsWith('.html') ? 'text/html' : rel.endsWith('.js') ? 'text/javascript' : rel.endsWith('.json') ? 'application/json' : rel.endsWith('.css') ? 'text/css' : rel.endsWith('.woff2') ? 'font/woff2' : 'application/octet-stream';
-    const body = await readFile(join(SURF, rel));
+    const body = await readFile(rel === 'bview.html' && process.env.BVIEW_HTML ? process.env.BVIEW_HTML : join(SURF, rel));
     s.writeHead(200, { 'content-type': ct }); s.end(body);
   } catch { s.writeHead(404); s.end(); }
 });
@@ -520,7 +520,7 @@ assert.ok(PLAN.dur > 9 && PLAN.m1 > PLAN.m0 && PLAN.m0 < 16 << 10, 'fixture is m
 // A door delivering the fixture at `share` x its bitrate (dropping to `drop.share` once `drop.at`
 // bytes are out); the page's play() calls, the bytes the door had sent by then, and every
 // decodingInfo() question are recorded (the answer can be forced).
-async function paced(share, { smooth, drop, reg } = {}) {
+async function paced(share, { smooth, drop, reg, previewBlockMs = 0 } = {}) {
   const bps = (PLAN.m1 - PLAN.m0) / PLAN.dur, rate = share * bps;
   // (init-script args travel as JSON: no Infinity — "never drops" is a byte count past the file)
   const gaps = [Math.round(PIECE / rate * 1000), drop ? drop.at : FIX.length + 1, drop ? Math.round(PIECE / (drop.share * bps) * 1000) : 0];
@@ -529,8 +529,19 @@ async function paced(share, { smooth, drop, reg } = {}) {
     json: () => 'abort',
   });
   if (reg) await o.ctx.addInitScript(r => { try { localStorage.setItem('bregister', r); } catch {} }, reg);
-  await o.ctx.addInitScript(([door, piece, [gap, dropAt, slowGap], smooth, size]) => {
+  await o.ctx.addInitScript(([door, piece, [gap, dropAt, slowGap], smooth, size, previewBlockMs]) => {
     window.__fed = 0; window.__size = size; window.__plays = []; window.__dec = []; window.__decOut = [];
+    if (previewBlockMs) {
+      const src = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'src');
+      let first = true;
+      Object.defineProperty(HTMLMediaElement.prototype,'src',{
+        get(){return src.get.call(this);},
+        set(value){
+          if(first){first=false;const until=performance.now()+previewBlockMs;while(performance.now()<until){}}
+          src.set.call(this,value);
+        }
+      });
+    }
     const play = HTMLMediaElement.prototype.play;
     HTMLMediaElement.prototype.play = function () {
       window.__plays.push({ fed: window.__fed, bar: !document.getElementById('pg').hidden });
@@ -554,7 +565,7 @@ async function paced(share, { smooth, drop, reg } = {}) {
       } }));
       return new Response(slow, { status: r.status, headers: new Headers(r.headers) });
     };
-  }, [DOOR, PIECE, gaps, smooth, FIX.length]);
+  }, [DOOR, PIECE, gaps, smooth, FIX.length, previewBlockMs]);
   await o.p.goto(`${ORIGIN}/surfaces/bview.html`, { waitUntil: 'domcontentloaded' });
   const vp9 = await o.p.evaluate(() => document.createElement('video').canPlayType('video/mp4; codecs="vp09.00.10.08"') !== '');
   if (!vp9) console.log('# note: VP9-in-MP4 unavailable in this Chromium — skipping the time-based playback asserts');
@@ -566,8 +577,8 @@ const probe = p => p.evaluate(() => {
     bar: !document.getElementById('pg').hidden, wait: w && !w.hidden ? w.textContent : '', waitS: w && !w.hidden ? +(w.dataset.s || 0) : 0, rough: !!r && !r.hidden };
 });
 
-test('slow door (0.5x bitrate): an honest countdown, no play before the computed threshold, then no freeze', async () => {
-  const { ctx, p, errs, hits, rate, vp9 } = await paced(0.5);
+for (const previewBlockMs of [0,1000]) test('slow door (0.5x bitrate): an honest countdown, no play before the computed threshold, then no freeze' + (previewBlockMs ? ' with one-second preview work' : ''), async () => {
+  const { ctx, p, errs, hits, rate, vp9 } = await paced(0.5,{previewBlockMs});
   if (!vp9) { await ctx.close(); return; }
   const need = PLAN.m1 - rate * (PLAN.dur - MARGIN) / SAFETY;   // bytes local when the rule allows play
   await watch(p, A1);
@@ -612,8 +623,13 @@ test('fast door (2x bitrate): plays early, long before the file is in; decodingI
   await p.evaluate(() => {
     window.__handoffs = [];
     const v = document.getElementById('v'); let previousHeight = 0;
-    const sample = () => { if (v.readyState >= 2) previousHeight = v.getBoundingClientRect().height; requestAnimationFrame(sample); };
-    requestAnimationFrame(sample);
+    // Capture geometry synchronously before a source reset. A RAF can miss the
+    // first decoded preview entirely and leave a false zero-height baseline.
+    const src = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'src');
+    Object.defineProperty(v,'src',{
+      get(){return src.get.call(this);},
+      set(value){previousHeight=this.getBoundingClientRect().height;src.set.call(this,value);}
+    });
     new MutationObserver(() => {
       if ((window.__bviewSrcAssigns || 0) < 2) return;
       const held = document.getElementById('frame-hold');
@@ -694,6 +710,8 @@ test('door slows mid-play (2x then 0.4x): the Blob runs dry, the countdown retur
   assert.ok(told.ms <= 1000, `never a silent freeze: the row came up ${told.ms} ms after the clock stopped`);
   assert.ok(told.bar, 'still downloading while it waits');
   assert.ok(told.n >= 1 && told.text.length > 20, 'a number of seconds and a plain sentence');
+  const held = await p.evaluate(() => window.__bviewEngine());
+  assert.ok(held.playStartMs > 0 && held.holds > 0 && held.stalls > 0, 'an application hold is counted after actual playback');
   // It resumes on its own (no tap), from where it stopped, and finishes without a failure row.
   await p.waitForFunction(t => document.getElementById('v').currentTime > t + 0.05, told.t, { timeout: 40000, polling: 100 });
   const waited = (Date.now() - told.at) / 1000, n = told.n;
@@ -701,6 +719,9 @@ test('door slows mid-play (2x then 0.4x): the Blob runs dry, the countdown retur
   assert.ok(Math.abs(waited - n) <= Math.max(2, 0.35 * n), `the countdown was honest: said ~${n} s, it took ${waited.toFixed(1)} s`);
   await p.waitForFunction(t => document.getElementById('v').currentTime > t + 0.5, told.t, { timeout: 10000, polling: 100 });
   const back = await probe(p);
+  const resumed = await p.evaluate(() => window.__bviewEngine());
+  assert.ok(resumed.holdMs >= Math.max(0, waited * 1000 - 1000), 'hold time survives application pause and source swap');
+  assert.ok(resumed.stallMs >= Math.max(0, waited * 1000 - 1000), 'total rebuffer time includes the application hold');
   assert.ok(back.t > told.t, `resumed by itself from ${told.t.toFixed(2)} s`);
   assert.ok(back.t < told.t + 3, `resumed from the same place, not the start or the end (${back.t.toFixed(2)} s)`);
   await p.waitForFunction(d => { const v = document.getElementById('v'); return v.ended || v.currentTime >= d - 0.3; }, PLAN.dur, { timeout: 40000, polling: 200 });
@@ -760,16 +781,15 @@ test('three registers are three authored experiences at 390 px, and none repeats
     await ctx.close();
   }
   const { bee, raver, cypherpunk: cy } = seen;
-  // NEW BEE — a calm room: paper, serif title, one magenta "watch", the video framed, no instrument, no art.
-  // ETERNAL (2026-09-26): the dress is the skaists design system now (docs/design/skaists/tokens.json),
-  // not hand-picked values: the bee title is Instrument Serif (bee-display), the primary button's corner is
-  // radius-lg 16px ("the primary button in new bee"), cypherpunk's is radius-sm 6px ("cypherpunk: rows,
-  // tables, buttons"). The old 12px / 4px corners were the pre-token dress of PR #232.
-  assert.equal(bee.land.bg, 'rgb(251, 247, 240)'); assert.match(bee.land.title, /Instrument Serif/);
-  assert.equal(bee.land.btnText, 'watch'); assert.equal(bee.land.btnBg, 'rgb(168, 35, 140)'); assert.equal(bee.land.btnRadius, '16px');
+  // NEW BEE — a calm room: paper, bold sans title, one forest "watch", the video framed, no instrument, no art.
+  // The dress comes from skaists tokens (docs/design/skaists/tokens.json); cypherpunk's corner is radius-sm 6px.
+  // The founder's chosen UI (2026-10-05): the bee title is bold system sans (font-ui) and "watch" is the forest
+  // green pill (radius-pill) with a white label; raver's ground is the night purple sovereign tint.
+  assert.equal(bee.land.bg, 'rgb(251, 247, 240)'); assert.match(bee.land.title, /^ui-sans-serif, system-ui/);
+  assert.equal(bee.land.btnText, 'watch'); assert.equal(bee.land.btnBg, 'rgb(38, 77, 54)'); assert.equal(bee.land.btnRadius, '999px');
   assert.equal(bee.land.art, false); assert.equal(bee.land.inst, false); assert.equal(bee.land.sheetOpen, false);
-  // RAVER — the drop: black, pills, original art that can be paused, a full-bleed stage, the countdown on the picture.
-  assert.equal(raver.land.bg, 'rgb(6, 17, 12)'); assert.equal(raver.land.btnRadius, '999px'); assert.equal(raver.land.btnBg, 'rgb(214, 85, 187)');
+  // RAVER — the drop: night purple, pills, original art that can be paused, a full-bleed stage, the countdown on the picture.
+  assert.equal(raver.land.bg, 'rgb(18, 14, 30)'); assert.equal(raver.land.btnRadius, '999px'); assert.equal(raver.land.btnBg, 'rgb(214, 85, 187)');
   assert.equal(raver.land.art, true, 'raver arrives on its own art'); assert.equal(raver.land.inst, false);
   // CYPHERPUNK — the instrument, complete before any address: mono, teal "fetch", 6px (radius-sm), panes up, the sheet open.
   assert.match(cy.land.body, /mono|Menlo|Consolas/i); assert.equal(cy.land.btnText, 'fetch'); assert.equal(cy.land.btnBg, 'rgb(69, 194, 220)'); assert.equal(cy.land.btnRadius, '6px');

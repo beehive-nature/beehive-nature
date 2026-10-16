@@ -1,0 +1,91 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ03 — EQUIVALENCE: crates/bpq-core (the Rust model
+// bsigner builds every derivation input through) against the Cryptol spec
+// ../pq03-cryptol/BpqDerive.cry, by SAW over MIR. Bottom-up; each proven
+// spec is the override above it:
+//
+//   context_ok == contextOk                 (ALL contexts)
+//   args_ok    == argsOk                    (ALL labels, contexts, counters)
+//   info_len   == infoLen                   (known labels)
+//   info_byte  == infoBytes @ pos           (admitted arguments, pos < 105)
+//   info       == infoOut: the padded info string and its length when
+//                 argsOk holds, zeros and 0 when it does not (ALL inputs)
+//
+// Context::new and info_for copy a &str of any length into the padded
+// value and are covered by the crate's unit tests, not by this script.
+//
+// usage (from this directory): saw derive.saw   with MIR at ../../../target/saw-pq03/
+
+enable_experimental;
+import "../pq03-cryptol/BpqDerive.cry";
+
+m <- mir_load_module "../../../target/saw-pq03/bpq_core.linked-mir.json";
+
+let fn n = str_concat "bpq_core::" n;
+ctx_adt <- return (mir_find_adt m "bpq_core::Context" []);
+
+let proven name = print (str_concat "PQ03-SAW PROVEN " name);
+let bw = w4_unint_bitwuzla [];
+
+// a fresh &Context; returns (reference, Cryptol Context)
+let ctx_ref = do {
+  len <- mir_fresh_var "c_len" mir_u32;
+  bs <- mir_fresh_var "c_bytes" (mir_array 64 mir_u8);
+  r <- mir_alloc (mir_adt ctx_adt);
+  mir_points_to r (mir_struct_value ctx_adt [mir_term len, mir_term bs]);
+  return (r, {{ { len = len, bytes = bs } : Context }});
+};
+
+let context_ok_spec = do {
+  (r, c) <- ctx_ref;
+  mir_execute_func [r];
+  mir_return (mir_term {{ contextOk c }});
+};
+context_ok_ov <- mir_verify m (fn "context_ok") [] false context_ok_spec bw;
+proven "context_ok";
+
+let args_ok_spec = do {
+  l <- mir_fresh_var "l" mir_u8;
+  (r, c) <- ctx_ref;
+  k <- mir_fresh_var "k" mir_u8;
+  mir_execute_func [mir_term l, r, mir_term k];
+  mir_return (mir_term {{ argsOk l c k }});
+};
+args_ok_ov <- mir_verify m (fn "args_ok") [context_ok_ov] false args_ok_spec bw;
+proven "args_ok";
+
+let info_len_spec = do {
+  l <- mir_fresh_var "l" mir_u8;
+  (r, c) <- ctx_ref;
+  k <- mir_fresh_var "k" mir_u8;
+  mir_precond {{ l < 7 }};
+  mir_execute_func [mir_term l, r, mir_term k];
+  mir_return (mir_term {{ infoLen l c k }});
+};
+info_len_ov <- mir_verify m (fn "info_len") [] false info_len_spec bw;
+proven "info_len";
+
+let info_byte_spec = do {
+  l <- mir_fresh_var "l" mir_u8;
+  (r, c) <- ctx_ref;
+  k <- mir_fresh_var "k" mir_u8;
+  pos <- mir_fresh_var "pos" mir_u32;
+  mir_precond {{ argsOk l c k /\ pos < 105 }};
+  mir_execute_func [mir_term l, r, mir_term k, mir_term pos];
+  mir_return (mir_term {{ infoBytes l c k @ pos }});
+};
+info_byte_ov <- mir_verify m (fn "info_byte") [] false info_byte_spec bw;
+proven "info_byte";
+
+let info_spec = do {
+  l <- mir_fresh_var "l" mir_u8;
+  (r, c) <- ctx_ref;
+  k <- mir_fresh_var "k" mir_u8;
+  junk <- mir_fresh_var "junk" (mir_array 105 mir_u8);
+  out <- mir_alloc_mut (mir_array 105 mir_u8);
+  mir_points_to out (mir_term junk);
+  mir_execute_func [mir_term l, r, mir_term k, out];
+  mir_points_to out (mir_term {{ (infoOut l c k).0 }});
+  mir_return (mir_term {{ (infoOut l c k).1 }});
+};
+mir_verify m (fn "info") [args_ok_ov, info_len_ov, info_byte_ov] false info_spec bw;
+proven "info";

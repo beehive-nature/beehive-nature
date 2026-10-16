@@ -14,7 +14,7 @@ test('documented status evidence produces a confirmation and exact block receipt
  assert.equal(result.tx,'confirmed');assert.equal(result.confirmations,12);assert.equal(result.block_height,641606);assert.equal(result.block_indep_hash,valid.block_indep_hash);assert.ok(f.calls[0].url.endsWith('/tx/'+txid+'/status'));
 });
 for(const body of [{status:'confirmed',confirmations:20},{...valid,number_of_confirmations:0},{...valid,number_of_confirmations:'12'},{...valid,block_height:-1},{...valid,block_indep_hash:'wrong'},null]){
- test('HTTP 200 cannot invent confirmation from '+JSON.stringify(body),async()=>{const f=fixture(()=>({status:200,body}));assert.equal((await f.api.txStatus(txid)).tx,'unreachable');assert.equal(f.calls.length,3);});
+ test('HTTP 200 cannot invent confirmation from '+JSON.stringify(body),async()=>{const f=fixture(()=>({status:200,body}));assert.equal((await f.api.txStatus(txid)).tx,'unreachable');assert.equal(f.calls.length,f.api.GATEWAYS.length);});
 }
 test('pending and not-found remain nonterminal',async()=>{for(const status of [202,404,410]){const f=fixture(()=>({status,body:'pending'}));const result=await f.api.txStatus(txid);assert.notEqual(result.tx,'confirmed');assert.equal(result.confirmations,0);}});
 test('rate-limited gateway rotates to a valid status reader',async()=>{const f=fixture(n=>n===1?{status:429,body:'rate limit'}:{status:200,body:valid});assert.equal((await f.api.txStatus(txid)).tx,'confirmed');assert.equal(f.calls.length,2);});

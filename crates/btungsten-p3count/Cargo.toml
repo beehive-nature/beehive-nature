@@ -1,0 +1,38 @@
+# bTunGsTeN PQ10 (SPEC-BTUNGSTEN-PQ-1): one Plonky3 STARK proof of the
+# existing receipt count statement (contracts/zkreceipts/count.circom), with
+# the hiding commitment, measured against the PLONK/BN254 baseline.
+#
+# Its own workspace: Plonky3 is a git dependency at a pinned commit and must
+# not ride into the kernel workspace's default build (audit law gate 1).
+# CI: .github/workflows/btungsten-pq.yml, job pq10-plonky3.
+[package]
+name = "btungsten-p3count"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+
+[workspace]
+
+[dependencies]
+p3-air = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
+p3-challenger = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
+p3-commit = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
+p3-dft = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
+p3-field = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
+p3-fri = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
+p3-keccak = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
+p3-koala-bear = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
+p3-matrix = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
+p3-merkle-tree = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
+p3-poseidon2 = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
+p3-poseidon2-air = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
+p3-symmetric = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
+p3-uni-stark = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
+postcard = { version = "1", default-features = false, features = ["alloc"] }
+rand = "0.10.1"
+serde_json = "1"
+statrs = "0.19.1"
+
+[profile.release]
+debug = false

@@ -37,7 +37,7 @@
   var LS = 'bdata-v1', SHARED = 'bpay-policy-v1';
   var DEFAULT_BRIDGE = 'http://127.0.0.1:8807';
   var WAVE_CHUNK = 4190208;
-  var WAVE_MAX_CHUNKS = 63;
+  var WAVE_MAX_CHUNKS = 59;        // + 3 DataMap chunks + 1 public map record = 63; 64 records is merkle, which the bridge cannot finalize
   var WAVE_MAX_BYTES = WAVE_CHUNK * WAVE_MAX_CHUNKS;
   var FRESH_MS = 15 * 60 * 1000;   // past this a cached price is "earlier", never "current"
   var DEADLINE_MS = 150000;        // measured asks: 42-69 s; a hung one ends here
@@ -1249,9 +1249,9 @@
       if (sel) fill = tok('sovereign-strong');
       h += '<path class="pt" data-i="' + i + '" d="' + petal(66, r1, a0, a1) + '" fill="' + fill + '" opacity="' + (sel || lit ? 1 : (D.stored ? .78 : .9)) + '"' + (D.stored ? '' : ' stroke="' + tok('sovereign') + '" stroke-width="1"') + '/>';
     }
-    h += '<circle r="58" fill="' + tok('bg-card') + '"/><circle r="50" fill="none" stroke="' + tok('sovereign') + '" stroke-dasharray="3 4"/>';
-    h += '<text y="-4" text-anchor="middle" fill="' + tok('ink') + '" style="font:700 15px/1.2 var(--sk-font-raver-display)">' + D.mb + ' MB</text>';
-    h += '<text y="18" text-anchor="middle" fill="' + tok('ink-soft') + '" style="font:400 14px/1.4 var(--sk-font-raver-body)">' + esc(T('et.bdata.r.one', '1 video')) + '</text>';
+    h += '<circle r="58" fill="' + tok('sovereign-wash') + '"/><circle r="50" fill="none" stroke="' + tok('sovereign') + '" stroke-dasharray="3 4"/>';
+    h += '<text y="-4" text-anchor="middle" fill="' + tok('ink') + '" style="font:700 15px/1.2 var(--sk-font-ui)">' + D.mb + ' MB</text>';
+    h += '<text y="18" text-anchor="middle" fill="' + tok('ink-soft') + '" style="font:400 14px/1.4 var(--sk-font-ui)">' + esc(T('et.bdata.r.one', '1 video')) + '</text>';
     if (D.stored) h += '<circle r="196" fill="none" stroke="' + RN[0] + '" stroke-width="2" stroke-dasharray="2 6"/>';
     svg.innerHTML = h;
     var litN = Object.keys(ES.lit).length;

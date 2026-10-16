@@ -1,0 +1,44 @@
+# NOTE: trailing "# PUBLIC-CONSTANT" markers added post-capture for the estate hex scanner (tx/block ids are public chain data); content otherwise verbatim.
+spec: duplicate seq 1 — each claim is asserted once
+identity (EXACT equality — pinned release wasm; THE GATE) ==
+PASS: on-chain code hash == pinned wasm sha256 (7a86ac34ddf15489…, this exact build)
+== [1] negative legs against standing anchors (discovered, parent-owned) ==
+  [forged] prerequisite: seq 1
+FAIL: forged proof (eval_zw+1) @seq 1 — wrong/absent reason (expected: count proof REJECTED — plonk pairing false; rc=19)
+----- output (first 4 lines) -----
+
+--------------------------------
+failed transaction: fa2e9b64a1dd7539c3dc43eebf70a9121581aca7c4591c466f0d55970ab64853  <unknown> bytes  <unknown> us  # PUBLIC-CONSTANT: public jungle4 chain data (scanner marker)
+error 2026-10-08T06:37:48.134 cleos     main.cpp:712                  print_result         ] soft_except->to_detail_string(): 3050003 eosio_assert_message_exception: eosio_assert_message assertion failure
+assertion failure with message: anchor already verified (one proof per anchor)
+  [count21] prerequisite: seq 4
+PASS: real dead proof vs count=21 @seq 4 — refused (rc=19): count proof REJECTED — plonk pairing false
+  [rootflip] prerequisite: seq 5
+PASS: real dead proof vs mutated root @seq 5 — refused (rc=19): count proof REJECTED — plonk pairing false
+  [kind1] prerequisite: seq 6
+PASS: real DEAD proof vs kind=1 @seq 6 — refused (rc=19): count proof REJECTED — plonk pairing false
+  [reverify] prerequisite: seq 1
+PASS: re-verify @seq 1 (already verified) — refused (rc=19): anchor already verified (one proof per anchor)
+== [2] asym REVERSED claims (the selector law, on-chain) ==
+  [asym019] prerequisite: seq 203
+PASS: valid asym-dead proof vs REVERSED (0,19) @seq 203 — refused (rc=19): count proof REJECTED — plonk pairing false
+  [asym120] prerequisite: seq 204
+PASS: valid asym-live proof vs REVERSED (1,20) @seq 204 — refused (rc=19): count proof REJECTED — plonk pairing false
+== [3] exhaustion — the bounded budget refuses in the open ==
+PASS: anchor beyond cap (table full) — refused (rc=19): anchor table FULL (bounded resource budget)
+== [4] final state (ASSERTED — mandatory coverage, run-local spec) ==
+  coverage: 7 claims — exactly what discovery recorded this run
+== LEDGER ==
+  identity: PASS
+  forged: FAIL
+  count21: PASS
+  rootflip: PASS
+  kind1: PASS
+  reverify: PASS
+  asym019: PASS
+  asym120: PASS
+  exhaust: PASS
+  final: FAIL
+== RESULT: 8 passed, 3 failed (incl. 0 never-ran) ==
+run dir kept for diagnosis: /tmp/zkr-final.b0PbdiYu
+FINALIZER-EXIT:1

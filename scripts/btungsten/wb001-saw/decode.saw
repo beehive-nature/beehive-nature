@@ -1,0 +1,209 @@
+// bTunGsTeN WB001 — EQUIVALENCE of the DECODER (RB05): the decoder core in
+// the Rust model (crates/btungsten-wb001-core) against the Cryptol spec
+// ../wb001-cryptol/WB001Decode.cry, by SAW over MIR. Compositional,
+// bottom-up; each proven spec is used as an override above it:
+//   utf8_step, well_formed_utf8_N   == step, wellFormedUtf8 (as in rust.saw)
+//   byte_at_pos                    == byteAtPos   (every input: the one symbolic read)
+//   byte_from                      == byteFrom    (every input)
+//   bytes_from_N, chunk_64         == bytesFrom, chunk64 (N = 32, 64, 128, 4096; every input)
+//   be32_from, be64_from           == be32From, be64From (every input)
+//   block_code                     == blockCode   (every input)
+//   decode_core                    == decodeSpec  (EVERY buffer, EVERY length; out
+//                                                  written exactly on dOk)
+// Every line "WB001-SAW PROVEN <name>" is printed only after its mir_verify
+// returned; wb001-saw-check.sh requires each one.
+//
+// usage (from this directory): saw decode.saw   with MIR at ../../../target/saw-wb001/
+
+enable_experimental;
+cryptol_add_path "../wb001-cryptol";
+import "../wb001-cryptol/BTungstenWB001.cry";
+import "../wb001-cryptol/WB001Decode.cry";
+
+m <- mir_load_module "../../../target/saw-wb001/btungsten_wb001_core.linked-mir.json";
+
+let fn n = str_concat "btungsten_wb001_core::" n;
+intent_adt <- return (mir_find_adt m "btungsten_wb001_core::Intent" []);
+
+let proven name = print (str_concat "WB001-SAW PROVEN " name);
+let bw = w4_unint_bitwuzla [];
+
+// the input buffer, by reference
+let fresh_buf = do {
+  s <- mir_fresh_var "s" (mir_array 4626 mir_u8);
+  rs <- mir_alloc (mir_array 4626 mir_u8);
+  mir_points_to rs (mir_term s);
+  return (s, rs);
+};
+
+// fresh Rust Intent, field by field; returns (MIR value, Cryptol Intent)
+let fresh_intent = do {
+  dl <- mir_fresh_var "dl" mir_u32;  db <- mir_fresh_var "db" (mir_array 64 mir_u8);
+  nl <- mir_fresh_var "nl" mir_u32;  nb <- mir_fresh_var "nb" (mir_array 32 mir_u8);
+  ep <- mir_fresh_var "ep" mir_u64;
+  al <- mir_fresh_var "al" mir_u32;  ab <- mir_fresh_var "ab" (mir_array 32 mir_u8);
+  tl <- mir_fresh_var "tl" mir_u32;  tb <- mir_fresh_var "tb" (mir_array 128 mir_u8);
+  cl <- mir_fresh_var "cl" mir_u32;  cb <- mir_fresh_var "cb" (mir_array 64 mir_u8);
+  am <- mir_fresh_var "am" mir_u64;
+  ex <- mir_fresh_var "ex" mir_u64;
+  pl <- mir_fresh_var "pl" mir_u32;  pb <- mir_fresh_var "pb" (mir_array 128 mir_u8);
+  yl <- mir_fresh_var "yl" mir_u32;  yb <- mir_fresh_var "yb" (mir_array 4096 mir_u8);
+  let v = mir_struct_value intent_adt
+    [ mir_term dl, mir_term db, mir_term nl, mir_term nb, mir_term ep
+    , mir_term al, mir_term ab, mir_term tl, mir_term tb, mir_term cl, mir_term cb
+    , mir_term am, mir_term ex, mir_term pl, mir_term pb, mir_term yl, mir_term yb ];
+  let I = {{ { domain = { len = dl, bytes = db }, nonce = { len = nl, bytes = nb }, epoch = ep
+             , action = { len = al, bytes = ab }, destination = { len = tl, bytes = tb }
+             , capability = { len = cl, bytes = cb }, amount = am, expiry = ex
+             , payer = { len = pl, bytes = pb }, payload = { len = yl, bytes = yb } } : Intent }};
+  return (v, I);
+};
+
+// a Cryptol Intent as a Rust Intent value
+let intent_value I = mir_struct_value intent_adt
+  [ mir_term {{ I.domain.len }}, mir_term {{ I.domain.bytes }}
+  , mir_term {{ I.nonce.len }}, mir_term {{ I.nonce.bytes }}, mir_term {{ I.epoch }}
+  , mir_term {{ I.action.len }}, mir_term {{ I.action.bytes }}
+  , mir_term {{ I.destination.len }}, mir_term {{ I.destination.bytes }}
+  , mir_term {{ I.capability.len }}, mir_term {{ I.capability.bytes }}
+  , mir_term {{ I.amount }}, mir_term {{ I.expiry }}
+  , mir_term {{ I.payer.len }}, mir_term {{ I.payer.bytes }}
+  , mir_term {{ I.payload.len }}, mir_term {{ I.payload.bytes }} ];
+
+// ---- the UTF-8 DFA, as rust.saw proves it (re-proven: no assumed spec) ----
+let step_spec = do {
+  st <- mir_fresh_var "st" mir_u8;
+  b <- mir_fresh_var "b" mir_u8;
+  mir_precond {{ st < 16 }};
+  mir_execute_func [mir_term st, mir_term b];
+  mir_return (mir_term {{ zext (step (drop`{4} st) b) : [8] }});
+};
+step_ov <- mir_verify m (fn "utf8_step") [] false step_spec bw;
+proven "utf8_step";
+
+let wf_spec n = do {
+  bs <- mir_fresh_var "bs" (mir_array n mir_u8);
+  r <- mir_alloc (mir_array n mir_u8);
+  mir_points_to r (mir_term bs);
+  mir_execute_func [r];
+  mir_return (mir_term {{ wellFormedUtf8 { len = 0 : [32], bytes = bs } }});
+};
+wf64_ov <- mir_verify m (fn "well_formed_utf8_64") [step_ov] false (wf_spec 64) bw;
+proven "well_formed_utf8_64";
+wf128_ov <- mir_verify m (fn "well_formed_utf8_128") [step_ov] false (wf_spec 128) bw;
+proven "well_formed_utf8_128";
+
+// ---- byte_at_pos == byteAtPos: the one symbolic read, proven once ---------
+// Every other function reads through this override with byteAtPos opaque:
+// two different 4,626-way selections compared in one goal cost the solver
+// minutes per read (be32_from inlined took about 20), one costs it once.
+let byte_at_pos_spec = do {
+  (s, rs) <- fresh_buf;
+  p <- mir_fresh_var "p" mir_u32;
+  mir_execute_func [rs, mir_term p];
+  mir_return (mir_term {{ byteAtPos s p }});
+};
+pos_ov <- time (mir_verify m (fn "byte_at_pos") [] false byte_at_pos_spec bw);
+proven "byte_at_pos";
+
+// ---- byte_from == byteFrom (every input) -----------------------------------
+let byte_from_spec = do {
+  (s, rs) <- fresh_buf;
+  q <- mir_fresh_var "q" mir_u32;
+  len <- mir_fresh_var "len" mir_u32;
+  j <- mir_fresh_var "j" mir_u32;
+  mir_execute_func [rs, mir_term q, mir_term len, mir_term j];
+  mir_return (mir_term {{ byteFrom s q len j }});
+};
+byte_from_ov <- time (mir_verify m (fn "byte_from") [pos_ov] false byte_from_spec (w4_unint_bitwuzla ["byteAtPos"]));
+proven "byte_from";
+
+// ---- bytes_from_N == bytesFrom (every input) --------------------------------
+let bytes_from_spec f = do {
+  (s, rs) <- fresh_buf;
+  q <- mir_fresh_var "q" mir_u32;
+  len <- mir_fresh_var "len" mir_u32;
+  mir_execute_func [rs, mir_term q, mir_term len];
+  mir_return (mir_term {{ f s q len }});
+};
+bytes32_ov <- mir_verify m (fn "bytes_from_32") [byte_from_ov] false
+  (bytes_from_spec {{ bytesFrom`{32} }}) (w4_unint_bitwuzla ["byteFrom"]);
+proven "bytes_from_32";
+bytes64_ov <- mir_verify m (fn "bytes_from_64") [byte_from_ov] false
+  (bytes_from_spec {{ bytesFrom`{64} }}) (w4_unint_bitwuzla ["byteFrom"]);
+proven "bytes_from_64";
+bytes128_ov <- mir_verify m (fn "bytes_from_128") [byte_from_ov] false
+  (bytes_from_spec {{ bytesFrom`{128} }}) (w4_unint_bitwuzla ["byteFrom"]);
+proven "bytes_from_128";
+// the payload in 64 chunks: chunk_64 once, then 64 chunk overrides (each
+// override application re-reads the 4,626-byte buffer to bind its argument,
+// so 4,096 byte overrides cost minutes where 128 cost seconds)
+let chunk_spec = do {
+  (s, rs) <- fresh_buf;
+  q <- mir_fresh_var "q" mir_u32;
+  len <- mir_fresh_var "len" mir_u32;
+  base <- mir_fresh_var "base" mir_u32;
+  mir_execute_func [rs, mir_term q, mir_term len, mir_term base];
+  mir_return (mir_term {{ chunk64 s q len base }});
+};
+chunk_ov <- mir_verify m (fn "chunk_64") [byte_from_ov] false chunk_spec (w4_unint_bitwuzla ["byteFrom"]);
+proven "chunk_64";
+bytes4096_ov <- mir_verify m (fn "bytes_from_4096") [chunk_ov] false
+  (bytes_from_spec {{ bytesFrom`{4096} }}) (w4_unint_bitwuzla ["byteFrom"]);
+proven "bytes_from_4096";
+
+// ---- be32_from, be64_from ----------------------------------------------------
+let be32_spec = do {
+  (s, rs) <- fresh_buf;
+  q <- mir_fresh_var "q" mir_u32;
+  mir_execute_func [rs, mir_term q];
+  mir_return (mir_term {{ be32From s q }});
+};
+be32_ov <- time (mir_verify m (fn "be32_from") [pos_ov] false be32_spec (w4_unint_bitwuzla ["byteAtPos"]));
+proven "be32_from";
+let be64_spec = do {
+  (s, rs) <- fresh_buf;
+  q <- mir_fresh_var "q" mir_u32;
+  mir_execute_func [rs, mir_term q];
+  mir_return (mir_term {{ be64From s q }});
+};
+be64_ov <- time (mir_verify m (fn "be64_from") [pos_ov] false be64_spec (w4_unint_bitwuzla ["byteAtPos"]));
+proven "be64_from";
+
+// ---- block_code == blockCode -------------------------------------------------
+// The postcondition is the header's guarantee decode_core relies on (bounds
+// and fit); it is proven here with the spec, then assumed at each call.
+let block_code_spec = do {
+  (s, rs) <- fresh_buf;
+  n <- mir_fresh_var "n" mir_u64;
+  at <- mir_fresh_var "at" mir_u32;
+  tag <- mir_fresh_var "tag" mir_u8;
+  lo <- mir_fresh_var "lo" mir_u32;
+  hi <- mir_fresh_var "hi" mir_u32;
+  mir_execute_func [rs, mir_term n, mir_term at, mir_term tag, mir_term lo, mir_term hi];
+  mir_postcond {{ (blockCode s n at tag lo hi == dOk) ==>
+                    ((lo <= be32From s (at + 1)) && (be32From s (at + 1) <= hi)
+                     && ((zext at : [64]) + 5 + zext (be32From s (at + 1)) <= n)) }};
+  mir_return (mir_term {{ blockCode s n at tag lo hi }});
+};
+block_ov <- time (mir_verify m (fn "block_code") [pos_ov, be32_ov] false block_code_spec (w4_unint_bitwuzla ["byteAtPos", "be32From"]));
+proven "block_code";
+
+// ---- decode_core == decodeSpec (every buffer, every length) -----------------
+let decode_spec = do {
+  (s, rs) <- fresh_buf;
+  n <- mir_fresh_var "n" mir_u64;
+  (v0, I0) <- fresh_intent;
+  ro <- mir_alloc_mut (mir_adt intent_adt);
+  mir_points_to ro v0;
+  mir_execute_func [rs, mir_term n, ro];
+  mir_points_to ro (intent_value {{ if decodeCode s n == dOk then decodeVal s n else I0 }});
+  mir_return (mir_term {{ decodeCode s n }});
+};
+decode_ov <- mir_verify m (fn "decode_core")
+  [block_ov, be32_ov, be64_ov, bytes32_ov, bytes64_ov, bytes128_ov, bytes4096_ov, wf64_ov, wf128_ov]
+  false decode_spec
+  (w4_unint_bitwuzla ["blockCode", "be32From", "be64From", "bytesFrom", "wellFormedUtf8"]);
+proven "decode_core";
+
+print "WB001-SAW DECODE ALL-PROVEN";

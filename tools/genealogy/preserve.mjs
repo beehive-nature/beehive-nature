@@ -163,8 +163,9 @@ function declaredContents() {
   const packs = new Set(Object.values(corpus.meta?.packs || {}));
   for (const p of Object.values(overlay.persons || {})) if (p?.evidencePack) packs.add(p.evidencePack);
   const persons = Object.keys(corpus.persons || {}).map((iid) => LINEAGE + "/persons/" + iid + ".json");
-  const personPages = readdirSync(join(REPO, LINEAGE, "persons"))
-    .filter((f) => f.endsWith(".html")).map((f) => LINEAGE + "/persons/" + f);
+  // Pages have the same publication boundary as their declared person objects.
+  // Directory leftovers must neither expand the edition nor hide missing pages.
+  const personPages = persons.map((file) => file.replace(/\.json$/, ".html"));
   return {
     files: [...new Set([...MANDATORY, runtimePath, ...runtime.files, ...persons, ...[...packs].map((p) => LINEAGE + "/" + p), ...personPages])],
     runtime,

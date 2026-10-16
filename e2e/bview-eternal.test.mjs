@@ -51,10 +51,13 @@ async function open(reg) {
 const FRONT = { bee: '.et-b', raver: '.et-r', cypherpunk: '.et-c' };
 const shown = p => p.evaluate(() => ['.et-b', '.et-r', '.et-c'].filter(s => getComputedStyle(document.querySelector('#eternal>' + s)).display !== 'none'));
 
+// the founder's chosen UI (2026-10-05): new bee is paper with bold system sans titles and a forest green
+// pill; raver is night purple (the sovereign tint) with plain bold sans titles and its magenta pill;
+// cypherpunk is unchanged. Each value is asserted exactly.
 test('one front per register, each in its own dress, and the one real action inside it', async () => {
   const want = {
-    bee: { bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, action: 'rgb(168, 35, 140)', radius: '16px' },
-    raver: { bg: 'rgb(6, 17, 12)', title: /Unbounded/, action: 'rgb(214, 85, 187)', radius: '999px' },
+    bee: { bg: 'rgb(251, 247, 240)', title: /^ui-sans-serif, system-ui/, action: 'rgb(38, 77, 54)', radius: '999px' },
+    raver: { bg: 'rgb(18, 14, 30)', title: /^ui-sans-serif, system-ui/, action: 'rgb(214, 85, 187)', radius: '999px' },
     cypherpunk: { bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, action: 'rgb(69, 194, 220)', radius: '6px' },
   };
   for (const [reg, w] of Object.entries(want)) {
