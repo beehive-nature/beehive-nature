@@ -51,12 +51,15 @@ PASS stack-inventory known-GOOD: a regenerated, staged page commits with a recei
 PASS stack-inventory: the generator's own --check is unchanged for CI
 ```
 
-`node scripts/build-stack-inventory.mjs --check` on this branch: `{"components":24,"workspaceCrates":78,…,"mode":"checked"}`. The commit of this change itself ran the new hook on this box and printed the skip receipt (neither file staged), which is the live wiring proof. The neighbouring selftests (`push-preflight.sh --selftest`, `identity-check.sh --selftest`, `secret-scan.sh selftest`) are run and recorded in the commit message. CI on the PR head is the receipt that governs.
+`node scripts/build-stack-inventory.mjs --check` on this branch: `{"components":24,"workspaceCrates":78,…,"mode":"checked"}`. The neighbouring selftests pass on this box: `push-preflight.sh --selftest` ("selftest ok — refuses what it must, permits what it must."), `identity-check.sh --selftest` (through T8-E), `secret-scan.sh selftest` ("the blocker blocks, the marked pass, the noise collapses"). CI on the PR head is the receipt that governs.
+
+**Corrected after the first commit (`4555d5ff2`):** that commit's message says the commit itself ran the new hook and printed the skip receipt. It did not. Its hook output carries the secret scan and the two §7 lines only, because on this box `core.hooksPath` is the ABSOLUTE path of the main checkout's `.githooks`, so a worktree runs the main checkout's copy of the hook, not its own; the new hook becomes live here only once main carries it and the main checkout is updated. The executed proof of the wiring is therefore the five worktree rows above, which run the checked-in hook explicitly through `-c core.hooksPath=<worktree>/.githooks`, and CI's run of the same test on the PR head. A commit message cannot be edited; this paragraph is the correction, forward.
 
 ## 3 · Two convictions of this seat, kept as facts
 
 - The first draft of the rows set `git config user.email probe@invalid` inside the temp worktree. A worktree shares the repository config: that write replaced the founder identity in this checkout's `.git/config`, and the §7 check then refused the probe. The identity was restored by hand (`loVis waTer <loviswater44@gmail.com>`, the constants in `identity-check.sh`), and the rows now pass the identity through the environment only. The lesson is written into the test.
 - The rows first ran against the detached worktree's HEAD, which held `origin/main`'s hook, not the uncommitted one, so the inventory step did not exist there and the skip receipt never appeared. The rig now copies this checkout's hook and scripts in; in CI that is a no-op.
+- The first commit's message claimed a live skip receipt from the hook on this box. The hook that ran was the main checkout's, through the absolute `core.hooksPath` this box carries (see §2). The claim is withdrawn above rather than left prettier than the truth.
 
 ## 4 · Boundaries not crossed, and what is not claimed
 
