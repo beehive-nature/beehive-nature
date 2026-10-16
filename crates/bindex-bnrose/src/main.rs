@@ -20,7 +20,8 @@ fn usage() -> i32 {
          authority --db FILE --authority HEX [--after SEQ] [--limit N]\n\
          steps    --db FILE --root HEX\n\
          status   --db FILE\n\
-         serve    --db FILE --addr HOST:PORT [--max-connections N] [--replay-cap N] [--poll-ms N] [--cors]\n\
+         serve    --db FILE --addr HOST:PORT [--max-connections N] [--replay-cap N] [--poll-ms N]\n\
+                  [--header-timeout SECS] [--write-timeout SECS] [--cors]   (zero or absurd bounds refuse by name)\n\
          prove-keyless"
     );
     2
@@ -47,6 +48,12 @@ fn main() {
                 poll_ms: arg(&args, "--poll-ms")
                     .and_then(|s| s.parse().ok())
                     .unwrap_or(500),
+                header_timeout_secs: arg(&args, "--header-timeout")
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(5),
+                write_timeout_secs: arg(&args, "--write-timeout")
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(10),
                 cors: args.iter().any(|a| a == "--cors"),
                 ..bindex_bnrose::serve::ServeOptions::default()
             };

@@ -64,6 +64,42 @@ test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
 Three convictions of this seat during the build, kept as facts: the keyless scan convicted the serve module's own doc comment for naming the forbidden word (reworded, the scan kept); the first status-equality row left a null `serve` key behind and failed on it (the test now removes the key); and a held stream was not released when its client went away until the next write, fifteen seconds later by the default keepalive (the server now probes the socket while idle and the row holds at one second).
 
+## 3a · The independent review of `ccfc56473` and the corrections (second commit of this PR)
+
+The founder posted an independent source review on the PR (comment `6205954749`, 2026-10-16T01:29:58Z) with five findings. All five held against the code; each is repaired narrowly and each has a regression row that fails on the old code. None changed the embedded-storage or keyless design.
+
+| finding | what was wrong at `ccfc56473` | the repair | the row |
+|---|---|---|---|
+| 1 · the cap was not a cap on threads | `run()` spawned a thread per accepted socket before any header byte; `handle()` counted the slot only after `read_request()`, and non-GET bypassed the count; the read timeout was per read, not an absolute deadline | the slot is taken at ACCEPT, before any thread exists; one over the bound is answered `503` inline from the accept loop; the slot is a drop guard moved into the thread; the request head is read under an absolute `header_timeout_secs` deadline (per-read timeout = time remaining); a timed-out head is counted as `headerTimeouts`; non-GET is counted like any connection | `the_bound_is_taken_before_any_header_byte_and_a_slow_client_is_dropped_at_the_deadline`: a client sending half a header holds the one slot; the next GET and a POST both get 503 inline; at the 1 s deadline the slot returns and `headerTimeouts` counts |
+| 2 · reconnect replayed the bootstrap | `?since=` was preferred over `Last-Event-ID`; a reconnecting `EventSource` re-sends its URL and advances the header, so the stale query cursor won and the origin was replayed | a present, well-formed header wins (`parse_cursor_strict`); `?since=` serves the first subscription only; a malformed header falls back to the query, never to a crash | `a_reconnect_with_both_cursor_sources_resumes_from_the_header_without_duplicates`: `?since=i0-d0` with `Last-Event-ID: i2-d0` yields hello at `i2-d0` and only `i3`; a garbage header falls back |
+| 3 · read-write open, then a PRAGMA | `Connection::open` (read-write, create) then `query_only`; a GET on a missing path would have created a file | `open_read_only`: `SQLITE_OPEN_READ_ONLY` natively (a missing file is refused, never created), `query_only` kept as defense in depth; WAL reading verified against the ingest-written file | `the_serving_handle_is_natively_read_only_and_never_creates_a_file`: `is_readonly(Main)` true; an INSERT refused even after the PRAGMA is toggled off; a missing index answers `500 serve:db` and no file appears |
+| 4 · zero bounds accepted; the cap was per table | `--replay-cap 0` and `--poll-ms 0` accepted; `batch()` capped each table separately, so a batch could carry up to twice the cap | `ServeOptions::validate` at `bind` refuses by name (`serve:config: <option>: <why>`) zero or absurd values of every bound, and the CLI exits 2 on it; the cap now bounds the MERGED batch | `zero_or_absurd_options_are_refused_by_name_at_bind` (seven refusals, the default accepted) |
+| 5 · order across batches; no write deadline | per-table lookahead could emit an earlier ingest after a later divergence once a batch was cut; `write_all` had no deadline | each table is read with a lookahead of `cap + 1` in id order, the union sorted by `(at_unix, kind, id)`, and the first `cap` are the batch: a time-prefix of everything pending, so order holds across cuts; every connection carries `write_timeout_secs` | `a_replay_is_capped_over_the_merged_stream_and_keeps_time_order_across_batches`: rows at three distinct seconds, cap 1: `i1`, `i2`, `d1`, `i3`, exactly one event per batch |
+
+The `serve` confession in `/status` now also carries `headerTimeoutSecs`, `writeTimeoutSecs`, `headerTimeouts`, `boundTakenAt` and `dbHandle`, so a reader can see which guarantees the running server makes.
+
+Not exercised: a client that stops reading while events keep flowing. The write deadline is set and confessed, but filling a loopback socket buffer deterministically in a test was not attempted; the row is named here as the gap, not claimed.
+
+Receipts, `cargo test -p bindex-bnrose --locked --no-fail-fast` (WSL, rustc 1.98.1), 2026-10-16, after `cargo fmt`:
+
+```
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.75s
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.58s
+test cors_header_appears_only_with_the_flag ... ok
+test connections_are_bounded_and_the_refusal_is_confessed_in_status ... ok
+test non_get_is_405_by_construction_and_a_planted_write_is_refused_by_name ... ok
+test get_answers_are_exactly_the_query_json_and_status_confesses_the_server ... ok
+test a_reconnect_with_both_cursor_sources_resumes_from_the_header_without_duplicates ... ok
+test the_serving_handle_is_natively_read_only_and_never_creates_a_file ... ok
+test zero_or_absurd_options_are_refused_by_name_at_bind ... ok
+test events_replay_then_follow_a_live_ingest_and_a_divergence ... ok
+test the_bound_is_taken_before_any_header_byte_and_a_slow_client_is_dropped_at_the_deadline ... ok
+test a_replay_is_capped_over_the_merged_stream_and_keeps_time_order_across_batches ... ok
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.07s
+```
+
+26 rows; `cargo fmt --all --check` clean; clippy clean for this crate; no new dependency.
+
 ## 4 · Boundaries not crossed, and what is not claimed
 
 - No websocket, no authentication, no TLS (a reverse proxy's job), no multi-supervisor federation, no change to `bindexer`'s own routes or to `bnrose-exec-*`.

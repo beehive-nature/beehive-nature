@@ -7,42 +7,58 @@
 //!   counters); nothing inside the query's answer is touched.
 //! - `/events` is a Server-Sent Events stream (`text/event-stream`, plain
 //!   GET, static-friendly): one `ingest` event per row of the `ingests`
-//!   table, one `divergence` event per row of `divergences`, in time order,
-//!   replayed from a cursor the client supplies either as the standard
-//!   `Last-Event-ID` header or as `?since=` (an `EventSource` cannot set
-//!   headers). The cursor is `i<ingest id>-d<divergence id>`: everything up
-//!   to and including those ids has been seen. The tables ARE the backlog
-//!   (durable, in the sealed file); a replay sends at most `replay_cap`
-//!   rows per table per batch and says so with a `truncated` event, then
-//!   keeps delivering in later batches.
-//! - Each connection gets its own SQLite connection with `PRAGMA query_only`
-//!   set: the engine refuses every write on it, so the serving process has
-//!   no write path even by accident.
-//! - Connections are bounded (`max_connections`); one over the bound is
-//!   answered `503` with a named refusal, counted, and confessed in
-//!   `/status`. Non-GET is `405` with `Allow: GET` by construction.
+//!   table, one `divergence` event per row of `divergences`, in time order
+//!   within AND across batches (second resolution; ties by kind, then id),
+//!   replayed from a cursor. A present, well-formed `Last-Event-ID` header
+//!   wins (a reconnecting `EventSource` re-sends its original URL but
+//!   advances the header); `?since=` serves the first subscription only,
+//!   because an `EventSource` cannot set headers. The cursor is
+//!   `i<ingest id>-d<divergence id>`: everything up to and including those
+//!   ids has been seen. The tables ARE the backlog (durable, in the sealed
+//!   file); one batch holds at most `replay_cap` events in total, says so
+//!   with a `truncated` event, and the next batch continues from the
+//!   cursor, so the merged stream stays a time-prefix at every cut.
+//! - Each connection gets its own SQLite handle opened NATIVELY read-only
+//!   (`SQLITE_OPEN_READ_ONLY`: a missing file is refused, never created)
+//!   with `PRAGMA query_only` on top as defense in depth: the serving
+//!   process has no write path, by the engine, even by a defect here.
+//! - Connections are bounded (`max_connections`), and the bound is taken
+//!   at ACCEPT, before any thread exists and before any header byte is
+//!   read, so a client that never finishes its headers holds exactly one
+//!   slot for at most `header_timeout_secs` and nothing more; one over the
+//!   bound is answered `503` inline with a named refusal, counted, and
+//!   confessed in `/status`. Non-GET is `405` with `Allow: GET` by
+//!   construction and is counted like any other connection.
+//! - Writes carry a deadline (`write_timeout_secs`): a client that stops
+//!   reading while events continue is dropped and its slot released.
+//! - Options with zero or absurd bounds are refused by name at `bind`.
 //! - CORS headers appear only with the explicit `cors` flag.
 
 use crate::query;
 use crate::store::Store;
 use crate::{now_unix, unhex32};
-use rusqlite::{params, Connection};
+use rusqlite::{params, Connection, OpenFlags};
 use serde_json::{json, Value};
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 #[derive(Clone, Debug)]
 pub struct ServeOptions {
     pub max_connections: usize,
+    /// the total number of events one batch may carry (both tables merged)
     pub replay_cap: usize,
     pub poll_ms: u64,
     pub cors: bool,
     /// seconds between keepalive comments on an idle stream
     pub keepalive_secs: u64,
+    /// the absolute deadline for a client to finish sending its headers
+    pub header_timeout_secs: u64,
+    /// the deadline for any single write to a client
+    pub write_timeout_secs: u64,
 }
 
 impl Default for ServeOptions {
@@ -53,7 +69,39 @@ impl Default for ServeOptions {
             poll_ms: 500,
             cors: false,
             keepalive_secs: 15,
+            header_timeout_secs: 5,
+            write_timeout_secs: 10,
         }
+    }
+}
+
+impl ServeOptions {
+    /// Refuse by name anything that would stall the stream, spin the poll
+    /// loop, or make a bound meaningless.
+    pub fn validate(&self) -> Result<(), String> {
+        let bad = |what: &str, why: &str| Err(format!("serve:config: {what}: {why}"));
+        if self.replay_cap == 0 || self.replay_cap > 100_000 {
+            return bad(
+                "replay_cap",
+                "must be 1..=100000 (0 would never deliver a backlog)",
+            );
+        }
+        if self.poll_ms < 10 || self.poll_ms > 60_000 {
+            return bad("poll_ms", "must be 10..=60000 (0 would spin the poll loop)");
+        }
+        if self.max_connections == 0 || self.max_connections > 10_000 {
+            return bad("max_connections", "must be 1..=10000");
+        }
+        if self.keepalive_secs == 0 || self.keepalive_secs > 3600 {
+            return bad("keepalive_secs", "must be 1..=3600");
+        }
+        if self.header_timeout_secs == 0 || self.header_timeout_secs > 300 {
+            return bad("header_timeout_secs", "must be 1..=300");
+        }
+        if self.write_timeout_secs == 0 || self.write_timeout_secs > 300 {
+            return bad("write_timeout_secs", "must be 1..=300");
+        }
+        Ok(())
     }
 }
 
@@ -63,8 +111,18 @@ pub struct Counters {
     pub active: AtomicUsize,
     pub accepted: AtomicU64,
     pub refused_over_bound: AtomicU64,
+    pub header_timeouts: AtomicU64,
     pub events_sent: AtomicU64,
     pub started_at_unix: AtomicU64,
+}
+
+/// One held slot of the connection bound; released on every exit path.
+struct Slot(Arc<Counters>);
+
+impl Drop for Slot {
+    fn drop(&mut self) {
+        self.0.active.fetch_sub(1, Ordering::SeqCst);
+    }
 }
 
 pub struct Server {
@@ -74,15 +132,23 @@ pub struct Server {
     pub counters: Arc<Counters>,
 }
 
-/// A connection the engine will not let write: `PRAGMA query_only = 1`.
-pub fn open_query_only(db: &Path) -> rusqlite::Result<Connection> {
-    let conn = Connection::open(db)?;
+/// The handle every connection reads through: natively read-only (a
+/// missing file is refused, never created) and `query_only` on top.
+pub fn open_read_only(db: &Path) -> rusqlite::Result<Connection> {
+    let conn = Connection::open_with_flags(
+        db,
+        OpenFlags::SQLITE_OPEN_READ_ONLY
+            | OpenFlags::SQLITE_OPEN_NO_MUTEX
+            | OpenFlags::SQLITE_OPEN_URI,
+    )?;
     conn.pragma_update(None, "query_only", 1)?;
     Ok(conn)
 }
 
 impl Server {
     pub fn bind(db: &Path, addr: &str, opts: ServeOptions) -> std::io::Result<Server> {
+        opts.validate()
+            .map_err(|why| std::io::Error::new(std::io::ErrorKind::InvalidInput, why))?;
         let listener = TcpListener::bind(addr)?;
         let counters = Arc::new(Counters::default());
         counters
@@ -100,17 +166,38 @@ impl Server {
         self.listener.local_addr()
     }
 
-    /// The accept loop; never returns under normal operation.
+    /// The accept loop; never returns under normal operation. The bound is
+    /// taken HERE, before any thread exists for the connection.
     pub fn run(self) -> std::io::Result<()> {
         for stream in self.listener.incoming() {
-            let stream = match stream {
+            let mut stream = match stream {
                 Ok(s) => s,
                 Err(_) => continue,
             };
             let c = self.counters.clone();
+            c.accepted.fetch_add(1, Ordering::Relaxed);
+            let prev = c.active.fetch_add(1, Ordering::SeqCst);
+            if prev >= self.opts.max_connections {
+                c.active.fetch_sub(1, Ordering::SeqCst);
+                c.refused_over_bound.fetch_add(1, Ordering::Relaxed);
+                let _ = stream
+                    .set_write_timeout(Some(Duration::from_secs(self.opts.write_timeout_secs)));
+                write_json(
+                    &mut stream,
+                    "503 Service Unavailable",
+                    &json!({"refusal": "serve:connections-exhausted", "maxConnections": self.opts.max_connections}),
+                    self.opts.cors,
+                    "Retry-After: 1\r\n",
+                );
+                continue;
+            }
+            let slot = Slot(c.clone());
             let db = self.db.clone();
             let opts = self.opts.clone();
-            std::thread::spawn(move || handle(stream, db, opts, c));
+            std::thread::spawn(move || {
+                let _slot = slot;
+                handle(stream, db, opts, c)
+            });
         }
         Ok(())
     }
@@ -128,11 +215,19 @@ struct Request {
     last_event_id: Option<String>,
 }
 
-fn read_request(stream: &mut TcpStream) -> Option<Request> {
-    let _ = stream.set_read_timeout(Some(Duration::from_secs(10)));
+/// Reads the request head under an ABSOLUTE deadline: the per-read timeout
+/// is always the time remaining, so a client trickling bytes cannot hold
+/// the slot past `header_timeout`.
+fn read_request(stream: &mut TcpStream, header_timeout: Duration) -> Option<Request> {
+    let deadline = Instant::now() + header_timeout;
     let mut head = Vec::new();
     let mut buf = [0u8; 1024];
     loop {
+        let remaining = deadline.saturating_duration_since(Instant::now());
+        if remaining.is_zero() {
+            return None;
+        }
+        let _ = stream.set_read_timeout(Some(remaining.max(Duration::from_millis(1))));
         let n = match stream.read(&mut buf) {
             Ok(0) => return None,
             Ok(n) => n,
@@ -195,10 +290,11 @@ fn write_json(stream: &mut TcpStream, code: &str, body: &Value, cors: bool, extr
 }
 
 fn handle(mut stream: TcpStream, db: PathBuf, opts: ServeOptions, c: Arc<Counters>) {
-    let Some(req) = read_request(&mut stream) else {
+    let _ = stream.set_write_timeout(Some(Duration::from_secs(opts.write_timeout_secs)));
+    let Some(req) = read_request(&mut stream, Duration::from_secs(opts.header_timeout_secs)) else {
+        c.header_timeouts.fetch_add(1, Ordering::Relaxed);
         return;
     };
-    c.accepted.fetch_add(1, Ordering::Relaxed);
     if req.method != "GET" {
         // one 405 for every non-GET: read-only by construction
         write_json(
@@ -210,35 +306,14 @@ fn handle(mut stream: TcpStream, db: PathBuf, opts: ServeOptions, c: Arc<Counter
         );
         return;
     }
-    // the bound: counted before any work, released on every exit path
-    let prev = c.active.fetch_add(1, Ordering::SeqCst);
-    if prev >= opts.max_connections {
-        c.active.fetch_sub(1, Ordering::SeqCst);
-        c.refused_over_bound.fetch_add(1, Ordering::Relaxed);
-        write_json(
-            &mut stream,
-            "503 Service Unavailable",
-            &json!({"refusal": "serve:connections-exhausted", "maxConnections": opts.max_connections}),
-            opts.cors,
-            "Retry-After: 1\r\n",
-        );
-        return;
-    }
-    struct Release<'a>(&'a Arc<Counters>);
-    impl Drop for Release<'_> {
-        fn drop(&mut self) {
-            self.0.active.fetch_sub(1, Ordering::SeqCst);
-        }
-    }
-    let _release = Release(&c);
 
-    let conn = match open_query_only(&db) {
+    let conn = match open_read_only(&db) {
         Ok(k) => k,
         Err(e) => {
             write_json(
                 &mut stream,
                 "500 Internal Server Error",
-                &json!({"refusal": "serve:db", "why": e.to_string()}),
+                &json!({"refusal": "serve:db", "why": e.to_string(), "note": "the file is opened read-only and never created"}),
                 opts.cors,
                 "",
             );
@@ -291,9 +366,15 @@ fn handle(mut stream: TcpStream, db: PathBuf, opts: ServeOptions, c: Arc<Counter
                 .and_then(|r| query::steps(&store, &r)),
         ),
         ("events", None) => {
-            let since = query_param(&req.query, "since")
+            // a present, well-formed header wins: it is the advancing cursor
+            // of a reconnecting EventSource; the query parameter is the
+            // first subscription's bootstrap and is stale on reconnect
+            let since = req
+                .last_event_id
+                .as_deref()
+                .filter(|s| parse_cursor_strict(s).is_some())
                 .map(|s| s.to_string())
-                .or(req.last_event_id);
+                .or_else(|| query_param(&req.query, "since").map(|s| s.to_string()));
             stream_events(stream, store, &opts, &c, since.as_deref());
         }
         _ => write_json(
@@ -330,7 +411,7 @@ fn index_json() -> Value {
     json!({
         "crate": "bindex-bnrose",
         "surface": "read-only HTTP + SSE over one sealed index file",
-        "routes": ["/status", "/entity/{hex}", "/authority/{hex}?after=&limit=", "/steps/{hex}", "/events?since=i0-d0 (SSE; or Last-Event-ID)"],
+        "routes": ["/status", "/entity/{hex}", "/authority/{hex}?after=&limit=", "/steps/{hex}", "/events?since=i0-d0 (SSE; Last-Event-ID wins on reconnect)"],
         "methods": "GET only; every other method is 405",
         "keyless": true,
         "sendtx": "NO: permanently",
@@ -341,33 +422,37 @@ fn serve_json(opts: &ServeOptions, c: &Counters) -> Value {
     json!({
         "maxConnections": opts.max_connections,
         "activeConnections": c.active.load(Ordering::SeqCst),
-        "acceptedRequests": c.accepted.load(Ordering::Relaxed),
+        "acceptedConnections": c.accepted.load(Ordering::Relaxed),
         "refusedOverBound": c.refused_over_bound.load(Ordering::Relaxed),
+        "headerTimeouts": c.header_timeouts.load(Ordering::Relaxed),
         "replayCap": opts.replay_cap,
         "pollMs": opts.poll_ms,
         "keepaliveSecs": opts.keepalive_secs,
+        "headerTimeoutSecs": opts.header_timeout_secs,
+        "writeTimeoutSecs": opts.write_timeout_secs,
         "cors": opts.cors,
         "eventsSent": c.events_sent.load(Ordering::Relaxed),
         "startedAtUnix": c.started_at_unix.load(Ordering::Relaxed),
-        "backlog": "the ingests and divergences tables of the sealed file; a replay batch is bounded by replayCap and says so with a truncated event",
+        "boundTakenAt": "accept, before any thread or header byte; the 503 is written inline",
+        "dbHandle": "SQLITE_OPEN_READ_ONLY per connection, plus PRAGMA query_only",
+        "backlog": "the ingests and divergences tables of the sealed file; one batch carries at most replayCap events in total (both tables merged, time order kept across batches) and says so with a truncated event",
     })
 }
 
 /// `i<ingest id>-d<divergence id>`; anything unparseable is the origin.
 pub fn parse_cursor(s: Option<&str>) -> (i64, i64) {
-    let Some(s) = s else { return (0, 0) };
-    let Some((i, d)) = s.split_once('-') else {
-        return (0, 0);
-    };
-    let i = i
-        .strip_prefix('i')
-        .and_then(|x| x.parse().ok())
-        .unwrap_or(0);
-    let d = d
-        .strip_prefix('d')
-        .and_then(|x| x.parse().ok())
-        .unwrap_or(0);
-    (i, d)
+    s.and_then(parse_cursor_strict).unwrap_or((0, 0))
+}
+
+/// The strict form: `None` unless both halves parse.
+pub fn parse_cursor_strict(s: &str) -> Option<(i64, i64)> {
+    let (i, d) = s.split_once('-')?;
+    let i: i64 = i.strip_prefix('i')?.parse().ok()?;
+    let d: i64 = d.strip_prefix('d')?.parse().ok()?;
+    if i < 0 || d < 0 {
+        return None;
+    }
+    Some((i, d))
 }
 
 pub fn cursor_string(i: i64, d: i64) -> String {
@@ -381,15 +466,19 @@ struct Ev {
     data: Value,
 }
 
-/// One batch: every ingest row past `i` and every divergence row past `d`,
-/// each table capped, merged by time. Returns the rows and whether a cap hit.
+/// One batch: the next `cap` events of the merged, time-ordered union of
+/// the two tables past the cursor. Each table is read with a lookahead of
+/// `cap + 1` rows in id order (ids are time order within a table), the
+/// union is sorted by (at_unix, kind, id), and the first `cap` are the
+/// batch: a time-prefix of everything pending, so the stream stays ordered
+/// across cuts. `truncated` says more rows were pending.
 fn batch(store: &Store, i: i64, d: i64, cap: usize) -> Result<(Vec<Ev>, bool), rusqlite::Error> {
-    let mut out = Vec::new();
+    let look = (cap + 1) as i64;
     let mut stmt = store.conn.prepare(
         "SELECT id, at_unix, covered_through_seq, index_head, agreement, single_replica, outcome FROM ingests WHERE id > ?1 ORDER BY id ASC LIMIT ?2",
     )?;
     let ing: Vec<Ev> = stmt
-        .query_map(params![i, (cap + 1) as i64], |r| {
+        .query_map(params![i, look], |r| {
             let head: Vec<u8> = r.get(3)?;
             Ok(Ev {
                 kind: "ingest",
@@ -411,7 +500,7 @@ fn batch(store: &Store, i: i64, d: i64, cap: usize) -> Result<(Vec<Ev>, bool), r
         "SELECT id, at_unix, seq, replica_a, replica_b, digest_a, digest_b FROM divergences WHERE id > ?1 ORDER BY id ASC LIMIT ?2",
     )?;
     let div: Vec<Ev> = stmt
-        .query_map(params![d, (cap + 1) as i64], |r| {
+        .query_map(params![d, look], |r| {
             let da: Vec<u8> = r.get(5)?;
             let db: Vec<u8> = r.get(6)?;
             Ok(Ev {
@@ -430,15 +519,15 @@ fn batch(store: &Store, i: i64, d: i64, cap: usize) -> Result<(Vec<Ev>, bool), r
             })
         })?
         .collect::<Result<_, _>>()?;
-    let truncated = ing.len() > cap || div.len() > cap;
-    out.extend(ing.into_iter().take(cap));
-    out.extend(div.into_iter().take(cap));
-    out.sort_by(|a, b| {
+    let mut all: Vec<Ev> = ing.into_iter().chain(div).collect();
+    all.sort_by(|a, b| {
         a.at.cmp(&b.at)
             .then(a.kind.cmp(b.kind))
             .then(a.id.cmp(&b.id))
     });
-    Ok((out, truncated))
+    let truncated = all.len() > cap;
+    all.truncate(cap);
+    Ok((all, truncated))
 }
 
 fn stream_events(
