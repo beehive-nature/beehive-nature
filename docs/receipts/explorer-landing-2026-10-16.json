@@ -176,10 +176,10 @@
    "completed": "2026-10-16T19:54:28Z"
   },
   "served_bytes_equal_main": {
-   "surfaces/myspace.js": "218d6e1477bbb640",
-   "surfaces/myspace.html": "2c0bf59affebeb92",
-   "surfaces/bnr-explorer-worker.js": "f892792e41ab8d0f",
-   "surfaces/bnr-explorer.wasm": "7739e3990ddc999c (= PREVIEW_SHA256 pin)"
+   "surfaces/myspace.js": {"sha256": "218d6e1477bbb64054a5387fd5c24851c475302d2c74123afadefe892d47350b", "equals": "git show 9d8ba900c:surfaces/myspace.js", "scan": "PUBLIC-CONSTANT digest of a published file"},
+   "surfaces/myspace.html": {"sha256": "2c0bf59affebeb927353a8ed8cd0e042d167a9106292404772113f75436ece90", "equals": "git show 9d8ba900c:surfaces/myspace.html", "scan": "PUBLIC-CONSTANT digest of a published file"},
+   "surfaces/bnr-explorer-worker.js": {"sha256": "f892792e41ab8d0f899b715eec5991274aa7bf00b0ea66b367b16738d02de844", "equals": "git show 9d8ba900c:surfaces/bnr-explorer-worker.js", "scan": "PUBLIC-CONSTANT digest of a published file"},
+   "surfaces/bnr-explorer.wasm": {"sha256": "7739e3990ddc999ce15c6accf89e6b9073a4919854ae6413fd2db1cfeccf079f", "equals": "git show 9d8ba900c:surfaces/bnr-explorer.wasm", "scan": "PUBLIC-CONSTANT digest of a published file"}
   },
   "live_browser": "skaists.dev/surfaces/myspace.html in the app browser pane: a 45-byte text file added under Just for now (temp rail, digest recorded); Preview showed it exactly with \"Checked: these are exactly the bytes you added.\"; worker up (19 wasm pages); zero off-site requests; a reload swept it (\"One file was only for that visit, and it is gone.\"), leaving the pane profile empty as before"
  },

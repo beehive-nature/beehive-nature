@@ -28,6 +28,11 @@
    "read_back": {
     "status": "completed",
     "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
    }
   },
   {
@@ -39,6 +44,11 @@
    "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
    "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
    "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
     "status": "completed",
     "conclusion": "cancelled"
    }
@@ -54,6 +64,11 @@
    "read_back": {
     "status": "completed",
     "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
    }
   },
   {
@@ -65,6 +80,11 @@
    "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
    "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
    "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
     "status": "completed",
     "conclusion": "cancelled"
    }
@@ -80,6 +100,11 @@
    "read_back": {
     "status": "completed",
     "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
    }
   },
   {
@@ -91,6 +116,11 @@
    "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
    "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
    "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
     "status": "completed",
     "conclusion": "cancelled"
    }
@@ -106,6 +136,11 @@
    "read_back": {
     "status": "completed",
     "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
    }
   },
   {
@@ -117,6 +152,11 @@
    "superseding_sha": "56ef693488b401bcef90d10570b50d845c8e4506",
    "reason": "superseded: claude-LoVis/sovexec-004-bindex-sse is now at 56ef69348 (branch head); this result can no longer gate a merge",
    "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
     "status": "completed",
     "conclusion": "cancelled"
    }
@@ -132,6 +172,11 @@
    "read_back": {
     "status": "completed",
     "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
    }
   },
   {
@@ -145,6 +190,11 @@
    "read_back": {
     "status": "completed",
     "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
    }
   },
   {
@@ -156,6 +206,11 @@
    "superseding_sha": "56ef693488b401bcef90d10570b50d845c8e4506",
    "reason": "superseded: claude-LoVis/sovexec-004-bindex-sse is now at 56ef69348 (branch head); this result can no longer gate a merge",
    "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
     "status": "completed",
     "conclusion": "cancelled"
    }
@@ -172,7 +227,12 @@
     "status": "in_progress",
     "conclusion": null
    },
-   "note": "run-level status read queued at the check, but its saw job had started at 05:53:19Z; the cancel stopped saw-ntt and saw-ntt-dsa, and saw kept running because its steps carry if: always(), which GitHub executes even after cancellation. Not force-cancelled: the ruling covered queued runs."
+   "note": "run-level status read queued at the check, but its saw job had started at 05:53:19Z; the cancel stopped saw-ntt and saw-ntt-dsa, and saw ran on for a while because its steps carry if: always(), which GitHub executes even after cancellation. Not force-cancelled: the ruling covered queued runs. Final readback: completed/cancelled.",
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
   },
   {
    "run_id": 38833981758,
@@ -183,6 +243,11 @@
    "superseding_sha": "56ef693488b401bcef90d10570b50d845c8e4506",
    "reason": "superseded: claude-LoVis/sovexec-004-bindex-sse is now at 56ef69348 (branch head); this result can no longer gate a merge",
    "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
     "status": "completed",
     "conclusion": "cancelled"
    }
@@ -198,6 +263,11 @@
    "read_back": {
     "status": "completed",
     "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
    }
   },
   {
@@ -209,6 +279,11 @@
    "superseding_sha": "56ef693488b401bcef90d10570b50d845c8e4506",
    "reason": "superseded: claude-LoVis/sovexec-004-bindex-sse is now at 56ef69348 (branch head); this result can no longer gate a merge",
    "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
     "status": "completed",
     "conclusion": "cancelled"
    }
@@ -224,6 +299,11 @@
    "read_back": {
     "status": "completed",
     "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
    }
   },
   {
@@ -235,6 +315,11 @@
    "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
    "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
    "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
     "status": "completed",
     "conclusion": "cancelled"
    }
@@ -250,6 +335,11 @@
    "read_back": {
     "status": "completed",
     "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
    }
   },
   {
@@ -261,6 +351,11 @@
    "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
    "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
    "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
     "status": "completed",
     "conclusion": "cancelled"
    }
@@ -276,6 +371,11 @@
    "read_back": {
     "status": "completed",
     "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
    }
   },
   {
@@ -287,6 +387,11 @@
    "superseding_sha": "c4ec1aa196e435a43d5382c5162579cdc78269a4",
    "reason": "superseded: zcode/bnrose-netpart-001 is now at c4ec1aa19 (branch head); this result can no longer gate a merge",
    "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
     "status": "completed",
     "conclusion": "cancelled"
    }
@@ -302,6 +407,11 @@
    "read_back": {
     "status": "completed",
     "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
    }
   },
   {
@@ -315,6 +425,11 @@
    "read_back": {
     "status": "completed",
     "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
    }
   },
   {
@@ -326,6 +441,11 @@
    "superseding_sha": "c4ec1aa196e435a43d5382c5162579cdc78269a4",
    "reason": "superseded: zcode/bnrose-netpart-001 is now at c4ec1aa19 (branch head); this result can no longer gate a merge",
    "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
     "status": "completed",
     "conclusion": "cancelled"
    }
@@ -363,5 +483,8 @@
  "untouched_prs": {
   "447": "ca084190d21bfb545236856b0d48483d663fb08d",
   "452": "60964197a6399f4321a8dc4978f54ae6403adabc"
+ },
+ "final_tally": {
+  "completed/cancelled": 24
  }
 }
