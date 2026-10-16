@@ -34,6 +34,14 @@ jobs:
       - name: Build the bnrose-exec wasm worker
         if: always()
         run: cargo build -p bnrose-exec-wasm --target wasm32-unknown-unknown --release --locked
+      # bnr-explorer: the preview module My Space runs IS this tree's build.
+      # Rebuilt with the machine's paths remapped and compared byte for byte
+      # with the committed surfaces/bnr-explorer.wasm, whose sha256 the page
+      # pins; `cargo test` then reads that same committed module and asserts
+      # it imports nothing.
+      - name: bnr-explorer wasm — the committed module is this tree's build
+        if: always()
+        run: sh scripts/bnr-explorer/build-wasm.sh --check
       - name: Test workspace
         if: always()
         env:
@@ -703,6 +711,20 @@ jobs:
         if: always()
         working-directory: e2e
         run: node myspace-seam.mjs
+      # MY SPACE as an explorer (crates/bnr-explorer in the page): the list
+      # does not wait for the slowest rail, a late read never paints over a
+      # newer one, previews are identity-first and bounded and fail closed
+      # without isolation, a listed row is revalidated at the tap, and a share
+      # that fails after hand-off never says nothing left. Two runs per size;
+      # the only speed gate is the old 4.5 s freeze at 20,000 rows.
+      - name: MY SPACE — explorer (stale work, previews, isolation, honest outcomes)
+        timeout-minutes: 8 # measured locally: ~3.5 min with two runs per size
+        if: always()
+        working-directory: e2e
+        env:
+          EXPLORER_SIZES: '200,20000'
+          EXPLORER_RUNS: '2'
+        run: node myspace-explorer.mjs
       # THE DOORS, RENDERED (founder order 2026-08-26): each door at 390px,
       # tap floor, footer clearance, zero page errors, and every link a door
       # lists resolves 200 with body text. Which pages are doors comes from
