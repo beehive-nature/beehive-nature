@@ -1,0 +1,33 @@
+{
+ "record": "EXPLORER-PRIVACY-001: what a My Space preview leaves behind",
+ "base": "main 968eafc06",
+ "gate": "node e2e/myspace-explorer.mjs (section 10; alone: --only-privacy)",
+ "verified": "memory ISOLATION: the preview module's linear memory, the worker's lifetime, and the page's live objects",
+ "not_verified": "physical RAM erasure, swap, OS page reuse, and what the JavaScript engine does with memory it has already released; a browser cannot observe these",
+ "changes": {
+  "module": "bx_free zeroes the request (the object's bytes) with volatile stores before freeing it; new export bx_wipe zeroes the verdict arena after the host copies the verdict; the kernel allocates the text excerpt at its full 64 KB budget so no outgrown buffer is freed holding plaintext, and zeroes it before dropping it",
+  "worker": "calls bx_wipe immediately after copying each verdict",
+  "page": "closing a look terminates its worker, releasing the module memory and the worker's JavaScript copies; the next look starts a new worker from the same pinned module",
+  "unchanged": "the module still has no imports; the TEMP rail file keeps its this-visit lifetime (closing a preview does not delete the file the visitor chose to keep)",
+  "residual_named": "a few bytes of hash state or parser locals on the module stack are not zeroed; the worker's termination on close releases them"
+ },
+ "module": {"previous_sha256": "7739e3990ddc999ce15c6accf89e6b9073a4919854ae6413fd2db1cfeccf079f", "scan": "PUBLIC-CONSTANT", "this_lane_sha256": "ed106c550547b42877a5ec7f13322fa716bc0b417c28366e0eac3449d392cc73", "scan2": "PUBLIC-CONSTANT", "bytes": 41610},
+ "results_this_branch": {
+  "10a_residue": "canary text (~190 KB, 4,096 copies) previewed through the module ABI in Node: 0 copies left in module memory after the call; control: 4,096 seen while in memory",
+  "10a_finding_during_work": "the first fix left 181 copies: a growing String freed outgrown buffers; fixed by preallocating the excerpt",
+  "10b_worker": "closing a text look ends its worker; the look view holds nothing",
+  "10c_temp": "the this-visit file is still listed after its look closes",
+  "10d_urls": "an image look closed mid-decode: every preview object URL revoked, nothing repainted",
+  "10e_memory": "100 x 8 MiB previews: 147 wasm pages (9 MiB) on every run; 10 x 32 MiB: 660 pages (41 MiB) on every run; page JS heap 38 MiB",
+  "cost": "one 32 MiB preview in Node (hash, parse, wipe, free), median of 3: 308 ms with zeroing, 272 ms before"
+ },
+ "red_first": {
+  "10a": "module before this lane (9d8ba900c): canary still in memory after free (control asserted in the gate on every run); main's page served the same module: 7,189 copies left",
+  "10b": "main's page: closing a look leaves the worker running (FAIL)",
+  "10d": "an object URL deliberately left unrevoked is counted (control asserted in the gate)",
+  "10e": "20 allocations deliberately never freed grow memory by >= 160 MiB (control asserted in the gate)",
+  "run_against_main": "10 passed, 2 failed (10a residue, 10b worker) with EXPLORER_ROOT = git archive of main 968eafc06"
+ },
+ "other_gates_this_branch": {"myspace-explorer.mjs": "66 passed, 0 failed", "myspace-seam.mjs": "136 passed, 0 failed", "myspace-eternal.test.mjs": "4 passed", "cargo test bnr-explorer + bnr-explorer-wasm": "48 passed"},
+ "one_machine": "Windows 11 box, Chromium 151 via Playwright, Node 24; not a fleet or mobile measurement"
+}

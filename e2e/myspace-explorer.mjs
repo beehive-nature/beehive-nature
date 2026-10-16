@@ -27,6 +27,7 @@ import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { readFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { deflateSync } from 'node:zlib';
 import { serveTree, offBox } from './lib/serve.mjs';
@@ -36,6 +37,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 // meter can read the page as it was before; only --measure makes sense against it
 const SERVE = process.env.EXPLORER_ROOT || ROOT;
 const MEASURE_ONLY = process.argv.includes('--measure');
+const ONLY_PRIVACY = process.argv.includes('--only-privacy');   // section 10 alone (also how it is run red against an older tree)
 const SIZES = (process.env.EXPLORER_SIZES || '200,2000,20000').split(',').map(Number);
 const RUNS = Number(process.env.EXPLORER_RUNS || 5);
 const SLOW_MS = 3000;
@@ -279,7 +281,6 @@ async function gate() {
   await closeLook(p3);
   v = await look(p3, files.named.id);
   ok('the content decides, not the name: a ".png" that is text is shown as text', v.kind === 'text' && v.pre === TEXT, JSON.stringify(v));
-  await closeLook(p3);
 
   console.log('\n9 · the worker that reads the bytes has no network or storage of its own');
   const w = p3.workers().find(x => x.url().endsWith('/bnr-explorer-worker.js'));
@@ -287,7 +288,8 @@ async function gate() {
   ok('fetch, XMLHttpRequest, WebSocket, indexedDB, importScripts and caches are all gone inside it',
     !!reach && reach.every(x => x === 'undefined'), JSON.stringify(reach));
   const lk = await p3.evaluate(() => window.__myspace.look());
-  ok('the look state is published for the gates (worker up, memory in pages)', lk.worker === true && lk.pages > 0, JSON.stringify(lk));
+  ok('the look state is published for the gates (worker up while a look is open, memory in pages)', lk.worker === true && lk.pages > 0, JSON.stringify(lk));
+  await closeLook(p3);
   ok('six private looks sent nothing anywhere', out3.length === 0, out3.join(' | '));
   ok('no page errors across the looks', errs3.length === 0, errs3.join(' | '));
 
@@ -450,6 +452,146 @@ async function gate() {
   }
 }
 
+/* ---------- 10 · EXPLORER-PRIVACY-001: what a preview leaves behind ----------
+   Verified here: memory ISOLATION, i.e. what this module's linear memory and this
+   page's live objects still hold. Not verified, and not claimable from a browser:
+   physical RAM erasure, swap, or what the JavaScript engine's collector does with
+   memory it has already released. */
+const CANARY = 'CANARY-7f3e19d2-a look that must not linger-';
+
+function count(hay, needle) {
+  let n = 0;
+  for (let i = hay.indexOf(needle[0]); i !== -1 && i <= hay.length - needle.length; i = hay.indexOf(needle[0], i + 1)) {
+    let j = 1; while (j < needle.length && hay[i + j] === needle[j]) j++;
+    if (j === needle.length) n++;
+  }
+  return n;
+}
+
+// one preview through the module's own ABI in Node, then a scan of its whole memory
+async function residue(bytes, text) {
+  const { instance } = await WebAssembly.instantiate(bytes, {});
+  const X = instance.exports;
+  const body = Buffer.from(text);
+  const len = 42 + body.length;
+  const req = X.bx_alloc(len);
+  const mem = () => new Uint8Array(X.memory.buffer);
+  mem().set(Buffer.concat([Buffer.from('BXPQ\x01\x01', 'latin1'), Buffer.from(sha(body), 'hex'), Buffer.from(Uint32Array.of(body.length).buffer)]), req);
+  mem().set(body, req + 42);
+  const needle = Buffer.from(CANARY);
+  const before = count(mem(), needle);
+  const n = X.bx_preview(req, len, X.bx_verdict_arena(), X.bx_verdict_cap());
+  const verdict = mem().slice(X.bx_verdict_arena(), X.bx_verdict_arena() + n);
+  if (typeof X.bx_wipe === 'function') X.bx_wipe();
+  X.bx_free(req, len);
+  return { before, after: count(mem(), needle), kind: verdict[5], wipe: typeof X.bx_wipe === 'function' };
+}
+
+async function privacy() {
+  console.log('\n10 · EXPLORER-PRIVACY-001 — what a preview leaves behind');
+  const text = (CANARY + '\n').repeat(4096);  // ~190 KB: the excerpt (64 KB) and the full request both carry it
+
+  // 10a residue in the module's memory, with the red control: the module this lane replaces
+  const now = await residue(await readFile(join(SERVE, 'surfaces/bnr-explorer.wasm')), text);
+  ok('10a CONTROL — the scanner sees the canary while the request is still in memory', now.before > 1000, JSON.stringify(now));
+  ok('10a after a text preview the canary is nowhere in the module\'s memory (request, excerpt and verdict arena zeroed)',
+    now.kind === 1 && now.after === 0, JSON.stringify(now));
+  let old = null;
+  try { old = await residue(execFileSync('git', ['-C', ROOT, 'show', '9d8ba900c:surfaces/bnr-explorer.wasm'], { maxBuffer: 1 << 24 }), text); } catch (e) { old = null; }
+  ok('10a RED CONTROL — the module before this lane (9d8ba900c) still holds the canary after free, so the check can fail',
+    !!old && old.after > 0, JSON.stringify(old));
+
+  // 10e RED CONTROL and the cost of zeroing, in Node against the module itself
+  {
+    const bytes = await readFile(join(SERVE, 'surfaces/bnr-explorer.wasm'));
+    const { instance: { exports: L } } = await WebAssembly.instantiate(bytes, {});
+    const start = L.memory.buffer.byteLength;
+    for (let i = 0; i < 20; i++) L.bx_alloc(8 << 20);                   // cleanup deliberately disabled: never freed
+    const grew = L.memory.buffer.byteLength - start;
+    ok('10e RED CONTROL — allocations never freed DO grow the memory the ceiling watches, so the ceiling can fail', grew >= 20 * (8 << 20), `${grew >> 20} MiB grew`);
+    const timeIt = async b => {
+      const { instance: { exports: X } } = await WebAssembly.instantiate(b, {});
+      const body = Buffer.alloc(32 << 20, 0x61), len = 42 + body.length, d = Buffer.from(sha(body), 'hex');
+      const ms = [];
+      for (let k = 0; k < 4; k++) {
+        const req = X.bx_alloc(len), m = new Uint8Array(X.memory.buffer);
+        m.set(Buffer.concat([Buffer.from('BXPQ\x01\x01', 'latin1'), d, Buffer.from(Uint32Array.of(body.length).buffer)]), req); m.set(body, req + 42);
+        const t0 = performance.now();
+        X.bx_preview(req, len, X.bx_verdict_arena(), X.bx_verdict_cap()); if (X.bx_wipe) X.bx_wipe(); X.bx_free(req, len);
+        ms.push(performance.now() - t0);
+      }
+      return Math.round(ms.slice(1).sort((a, b) => a - b)[1]);
+    };
+    const tNew = await timeIt(bytes);
+    let tOld = null; try { tOld = await timeIt(execFileSync('git', ['-C', ROOT, 'show', '9d8ba900c:surfaces/bnr-explorer.wasm'], { maxBuffer: 1 << 24 })); } catch (e) { tOld = null; }
+    console.log(`  cost of zeroing, one 32 MiB preview (hash + parse + wipe + free), median of 3 in Node: ${tNew} ms now, ${tOld} ms before`);
+  }
+
+  // 10b-e in the page
+  const { ctx } = await context({
+    init: () => {
+      window.__urls = { made: new Set(), revoked: new Set() };
+      const mk = URL.createObjectURL.bind(URL), rv = URL.revokeObjectURL.bind(URL);
+      URL.createObjectURL = o => { const u = mk(o); window.__urls.made.add(u); return u; };
+      URL.revokeObjectURL = u => { window.__urls.revoked.add(u); return rv(u); };
+    }
+  });
+  const { p, errs } = await open(ctx);
+  const workerUp = () => p.workers().some(x => x.url().endsWith('/bnr-explorer-worker.js'));
+  const leftover = () => p.evaluate(() => [...window.__urls.made].filter(u => !window.__urls.revoked.has(u)).length);
+
+  const t = await add(p, 'now', 'canary-visit.txt', 'text/plain', Buffer.from(text));
+  const v1 = await look(p, t.id);
+  ok('10b PRECONDITION — the look is open and a worker holds it', v1.kind === 'text' && workerUp(), JSON.stringify({ kind: v1.kind, worker: workerUp() }));
+  await closeLook(p);
+  await p.waitForTimeout(300);
+  ok('10b closing a text look ends its worker', !workerUp() && (await p.evaluate(() => window.__myspace.look().worker)) === false);
+  ok('10b and the page holds no copy: the view is empty', await p.evaluate(() => document.getElementById('look-view').childElementCount === 0));
+  const rows = await p.evaluate(() => window.__myspace.rows().then(r => r.map(x => x.name)));
+  ok('10c the this-visit file itself is untouched by closing the look (it goes with the visit, not the preview)', rows.includes('canary-visit.txt'), JSON.stringify(rows));
+
+  const img = await add(p, 'keep', 'canary.png', 'image/png', PNG_OK);
+  const made0 = await p.evaluate(() => window.__urls.made.size);
+  await p.click(`#look-${img.id}`);
+  await p.waitForFunction(m => window.__urls.made.size > m, made0, { timeout: 10000 }).catch(() => {});
+  await p.click('#lookClose');                              // during decode, or just after
+  await p.waitForTimeout(1200);
+  const late = await p.evaluate(() => ({ state: document.body.dataset.state, imgs: document.querySelectorAll('#look-view img').length }));
+  ok('10d an image look closed mid-decode: every preview URL revoked, nothing repainted', (await leftover()) === 0 && late.imgs === 0 && late.state !== 'look', JSON.stringify(late));
+  const leak = await p.evaluate(() => URL.createObjectURL(new Blob(['never revoked'])));   // cleanup deliberately skipped
+  ok('10d RED CONTROL — an object URL left unrevoked IS counted, so the cleanup check can fail', (await leftover()) === 1);
+  await p.evaluate(u => URL.revokeObjectURL(u), leak);
+
+  // 10e memory ceiling: the worker driven directly, 100 x 8 MiB then 10 x 32 MiB
+  const pin = /PREVIEW_SHA256 = '([0-9a-f]{64})'/.exec(await readFile(join(SERVE, 'surfaces/myspace.js'), 'utf8'))[1];
+  const mem = await p.evaluate(async pin => {
+    const w = new Worker('bnr-explorer-worker.js');
+    const next = () => new Promise(r => { w.onmessage = e => r(e.data); });
+    w.postMessage({ op: 'init', url: 'bnr-explorer.wasm?v=' + pin.slice(0, 12), pin });
+    const ready = await next();
+    const pages = [];
+    const run = async (size, times) => {
+      const b = new Uint8Array(size); for (let i = 0; i < size; i += 4096) b[i] = (i >> 12) & 255;
+      const d = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', b)), x => x.toString(16).padStart(2, '0')).join('');
+      for (let i = 0; i < times; i++) { w.postMessage({ op: 'preview', id: i, digest: d, bytes: b }); const v = await next(); pages.push(v.pages); if (v.refused) return v.refused; }
+      return null;
+    };
+    const r8 = await run(8 << 20, 100);
+    const r32 = await run(32 << 20, 10);
+    w.terminate();
+    return { ready: ready.op, r8, r32, pages, heap: performance.memory ? performance.memory.usedJSHeapSize : null };
+  }, pin);
+  const p8 = mem.pages.slice(0, 100), p32 = mem.pages.slice(100);
+  const MiB = x => Math.round(x * 64 / 1024);
+  console.log(`  memory: 8 MiB x100 -> pages ${Math.min(...p8)}..${Math.max(...p8)} (${MiB(Math.max(...p8))} MiB); 32 MiB x10 -> pages ${Math.min(...p32)}..${Math.max(...p32)} (${MiB(Math.max(...p32))} MiB); page heap ${mem.heap ? Math.round(mem.heap / 1048576) + ' MiB' : 'n/a'}`);
+  ok('10e 110 large previews all answered', mem.ready === 'ready' && !mem.r8 && !mem.r32 && mem.pages.length === 110, JSON.stringify({ r8: mem.r8, r32: mem.r32, n: mem.pages.length }));
+  ok('10e repeated 8 MiB previews do not grow memory (run 100 = run 2)', p8[99] === p8[1], `${p8[1]} -> ${p8[99]}`);
+  ok('10e repeated 32 MiB previews do not grow memory and stay under 1,200 pages (75 MiB)', p32[9] === p32[1] && Math.max(...p32) <= 1200, `${p32[1]} -> ${p32[9]}, max ${Math.max(...p32)}`);
+
+  ok('10 no page errors', errs.length === 0, errs.join(' | '));
+  await ctx.close();
+}
+
 /* ---------- M · measure ---------- */
 // installed before any page script: when the first and the N-th row arrive, and the longest
 // animation frame in which myspace.js ran (long-animation-frame attributes script time by file,
@@ -536,7 +678,11 @@ async function measure() {
 }
 
 try {
-  if (!MEASURE_ONLY) await gate();
+  if (ONLY_PRIVACY) {
+    await privacy();
+    console.log(`\n${passed} passed, ${failed} failed`);
+  } else {
+  if (!MEASURE_ONLY) { await gate(); await privacy(); }
   const rows = await measure();
   if (!MEASURE_ONLY) {
     const big = rows.filter(r => r.n === Math.max(...SIZES) && r.mode !== 'slow').flatMap(r => r.runs);
@@ -545,6 +691,7 @@ try {
       worst <= FREEZE_BUDGET_MS, Math.round(worst) + ' ms');
     ok('M · every run drew every row', rows.every(r => r.runs.every(x => x.all != null)));
     console.log(`\n${passed} passed, ${failed} failed`);
+  }
   }
 } finally {
   await browser.close();

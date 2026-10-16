@@ -496,7 +496,10 @@ fn text(b: &[u8], budget: &Budget) -> Preview {
     if controls * 8 > total {
         return Preview::Unavailable(Unavailable::Binary);
     }
-    let mut out = String::new();
+    // The whole budget up front: a growing String frees each outgrown buffer
+    // with plaintext still in it, and only the final one can be zeroed
+    // (wire::handle does). Measured: 181 canary copies survived without this.
+    let mut out = String::with_capacity(budget.max_text_bytes);
     let mut lines = 0u32;
     let mut truncated = cut;
     let mut chars = s.chars().peekable();
