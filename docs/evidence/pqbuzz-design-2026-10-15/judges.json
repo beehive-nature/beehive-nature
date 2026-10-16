@@ -1,0 +1,492 @@
+[
+ {
+  "lens": "Law and honesty. Tests: are collisions escalated rather than resolved; do citations say what the design claims; do claims stay within the crypto ceiling and the separate-tracks rule; is any ruling invented. I checked about 60 citations against source. Files: R docs and crates, the Buzz fork (BZ), the LOVErnment-DAO specs (LD), the scratchpad up/ and x0x copies, and the memory order file. Verified: pirate-haul-rulings.md:17-20 and :51; CONSTITUTION.md:49-52, 83-86, 92, 107; RULING_B_SPEND_BOUNDARY:6-12; BUZZ_A_METERING_SPEC.md:39-53, 78-83, 97-112, 127; LANE_RELAY_DUALHOME:7-11 and 72-90; dns-independence:35-58, 66-72, 88-92; SPEC-BPQ-1 §1-§6 line ranges; bsigner CONTRACT.md:1-62; bpq-core layout.rs:36-66; bzdid genesis.rs:12-66 and succession.rs:38-52; bzdid-architecture-decision:47-61, 155-198, 371-391; spend.rs:36-82 and 128-156; voucher-escrow lib.rs:1-20; events.rs:8-11 and 210-220; buzz-acp relay.rs:3800-3806; ingest.rs:344, 356-358, 2014-2028; config.rs:240; room.rs:46-49; LOADMODEL-1M:85-92 and 135-138; SPEC-BTUNGSTEN-1:26-39, 100-110, 134-140, 420-427; SPEC-BTUNGSTEN-PQ-1:668-673 and 1010-1014; up/adr/0095:81, 0012:117-121, 0049:37; README-v0.48.0:45, 122, 147; LANE_M_B_METER:5-6; RULING_RAIL_C:14-30 and 78-100; article-vi-s3 §3.3-3.5; canonical-biometric-key.md:339; AGENT-1:28-31 and 160-169; RULINGS-2026-10-04:59-66; RULINGS-2026-09-30:21-28; SPEC-BCHAT-1:1-8, 28-35, 50-84, 100-113; memory sovereign order:12-27. Most citations hold; the errors I found are listed for each design.\n\nFive findings apply to more than one design, so they are listed here once:\n1. All five extend RULINGS-2026-10-04 R4 to every device. R4 is the Safe 7 hardware-signer ruling (SPEC-BPQ-1.md:280: \"Ruled by R4 ... the device has its own bzpq1 id\").\n2. All five extend AGENT-1 Q-5 to every agent. Q-5 is written about bQueenBee's posting: AGENT-1.md:169 \"Her app password requires a human heartbeat\".\n3. Four designs cite VENDOR-HELD as the rule for APNs push. The text defines it as \"A browser-resident feature ... whose substance ... lives in the vendor's browser binary\" (RULINGS-2026-09-30.md:23-26). Only BESIDE says \"applied by analogy\".\n4. All five read \"Buzz NEVER a privacy layer\" as \"privacy belongs to bChat Core\". Each lists that as an escalation, which is lawful.\n5. Every design escalates PLANE LAW (Buzz over x0x) and runs lawfully without a ruling. They differ on the DNS-origin ruling, the bsigner freeze on the attestation path, and how far each reports test results as passed.",
+  "scores": [
+   {
+    "design": "BESIDE (lawful-minimal.md)",
+    "score": 8.5,
+    "fatalFlaws": [
+     "No flaw is fatal under this lens. The most serious law gap: P1 says 'the relay fork accepts the four kinds'. That means deploying a modified relay on Hostinger, and the memory records a relay change as RED class needing founder word and a DB snapshot. The P1 row does not name that gate.",
+     "The product ceiling is stated honestly but it is severe: no cross-community DMs, PQ confidentiality only up to 29 recipient devices, no forward secrecy, and about 10^6 community-funded relays. Under this lens these are honest limits, not violations."
+    ],
+    "bestIdeas": [
+     "It is the only design that keeps Buzz (NIP-01 relays) as the human plane exactly as PLANE LAW and 'own the relay' (pirate-haul-rulings.md:51) assign it. Every other design demotes or retires the relay.",
+     "It is the only design that caught the bsigner freeze collision on the attestation path. CONTRACT.md:12-24 lists no bpq-attest-nostr, but the code ships it (bsigner main.rs:120), and pq-tungsten §6 records the 18-subcommand freeze as 'ESCALATED, founder-only'. BESIDE signs with the bpq.js twin and verifies with the frozen bpq-verify.",
+     "It honours the ORIGIN ruling as written ('IT IS IDENTITY, LOAD-BEARING — it must stay skaists.buzz', LANE_RELAY_DUALHOME:83). It keeps the name byte for byte and moves acceptance authority to a PQ-attested charter, so the design obeys both the origin ruling and the DNS-independence rule ('names help people find the system; cryptographic authority determines what the system accepts', dns-independence:90-92).",
+     "Its separate-tracks wording is the best of the five: 'classical now, post-quantum settled at checkpoint', with 'settled' and never 'PQ-signed event'. It says NIP-44 is harvest-now-decrypt-later exposed. Its rule 'attest what you signed, never what you observed' reads ids from the author's own outbox.",
+     "The checkpoint construction needs no new bpq1 label, so the 14-label domainsDisjoint proof (layout.rs:44-59) stays valid. It reuses §5b unchanged.",
+     "It names its weak spot honestly: at M=1, PQ costs 14 times the message bytes.",
+     "E4 surfaces the agent-PQ-seed versus Seat-3 key-custody collision; E16 surfaces AGENT-1 Q-5 versus the founder's 'remove me from gating'.",
+     "Retroactive checkpoints are claimed only as 'attested at T_now, before any break'."
+    ],
+    "citationErrors": [
+     "BUZZ_A_METERING_SPEC.md:104-105 is cited for rule 2 ('Buzz's own A pays ... its relay'). The rule is at :105-106: '105: 2. **Buzz's own A pays for Buzz's own resources only** — its relay, its epoch anchors. 106: That is the leader-funds-the-commit line, unchanged.' Line 104 is the end of rule 1. Off by one line.",
+     "LD/AGENT-1.md:168-169 is presented as the general rule requiring owner-bound expiring delegation for every agent. The text is scoped to bQueenBee's posting: '169: Her app password requires a human heartbeat on a fixed interval.' This is a reading, not the rule's scope.",
+     "RULINGS-2026-10-04.md:59-66 is applied to every device as 'model (A)'. The ruling is about the hardware signer ('the device derives its PQ keys from ... its own seed (BSAFE-DEVICE-1 §4 ...)'; SPEC-BPQ-1.md:280 '§7 Hardware signer (Safe 7, T3W1) Ruled by R4'). The extension is reasonable but should be labelled a reading."
+    ]
+   },
+   {
+    "design": "STRATA (millennium-first.md)",
+    "score": 7.5,
+    "fatalFlaws": [
+     "M6 'retire the legacy road' has no founder gate; it waits only on drill D2 and on all members reading bzm1. That is a relay retirement, a RED-class change, and it cuts against 'own the relay' (pirate-haul-rulings.md:51: 'every actor keyed, every action a signed event, own the relay'). COMB's mesh-native design puts the sunset date in the founder's hands; STRATA does not.",
+     "P1 'rides today's Buzz relay' with outer bytes 'inside a custom kind' and never says the relay must change. BZ ingest.rs:344: 'Returns `Err` for unknown kinds — the relay rejects them.' The relay-fork change is hidden, and so is the gate it needs."
+    ],
+    "bestIdeas": [
+     "It found real defects at the root of the law book and escalated them instead of resolving them. E6, the r0 priority inversion: succession.rs:44-46 'the lower `signedBy` index wins — r0, the key kept furthest offline', while bzdid-architecture-decision.md:50 says '`r0` = PRF-derived', which is WebAuthn and domain-bound. It labels its attack reading UNVERIFIED analysis and adds drill D13. E5: KeyAlg is {Ed25519, MlDsa65}, 'added BY RULING' (genesis.rs:36-44). E19: the root is SHA-256 forever (genesis.rs:16).",
+     "The §10.4 validity rule has a third state, UNATTRIBUTABLE, distinct from VALID and INVALID, and obligation F6 requires it to be monotone. The 'claimed at' time is never treated as evidence.",
+     "The algorithm registry has four records (admit, prefer, retire_new, distrust) and no redefine. This matches CONTRACT.md:39 'New ids are ADDED, never redefined'.",
+     "Evidence renewal hashes ciphertext, so anyone can renew it without being able to read it.",
+     "The airgapped verifier has a receipt: strace counts zero connect() calls. Drills D1-D14 each carry a positive control, and the CT century-transition drill runs them all.",
+     "The Art VI tiering proposal is escalated (E13) and its figures check out: Safety K=4 and a 13% quorum match article-vi-s3 §3.3-3.4.",
+     "Crypto wording is the most conservative of the five: 'sound by construction, not audited, not proven end to end'."
+    ],
+    "citationErrors": [
+     "LOADMODEL-1M.md:86 is cited for 'the CLAIMED $100/month box'. Line 86 is the U-10G row: '| **U-10G** (ledgered) | 64 GB RAM, 10 Gbps non-shared | ... realism contested by [VPS-CA] ($300–500/mo) |'. The ~$101/mo figure is at :87 ('128 GB ECC, 24 TB HDD, **1 Gbps** unmetered, ~$101/mo').",
+     "N/law-constitutional.md #44 is cited for 'An agent holds its own bzpq key under its owner'. #44 says 'bQueenBee is the ONLY agent holding its own bDiD'. It supports the hierarchy, not agent key-holding.",
+     "E4 says lab seals use the frozen `bsigner sign`. The suite 0x0001 seal is ML-DSA-65 AND Ed25519, but bsigner's registry is ML-DSA only (CONTRACT.md:37 'signature side: `ml-dsa-44`, `ml-dsa-65`, `ml-dsa-87`'; :61 'this organ is ML-DSA by design'). The Ed25519 half cannot come from that organ, and the design does not say where it comes from.",
+     "Huddle transcripts are posted as text with no escalation of BIO-1 B-1 ('If a bit was computed from a body, it stays on the body's device', LD/BIO-1.md:35). COMB's mesh-native design (E20) and BESIDE (risk 9) do raise it."
+    ]
+   },
+   {
+    "design": "COMB mesh-native (mesh-native.md)",
+    "score": 6.5,
+    "fatalFlaws": [
+     "§8 says 'The marginal cost to BNR of user 10^10 is **0**. **PASSED by construction.**' That reports a test verdict before any run. SPEC-BTUNGSTEN-1.md:37 says 'A property with no receipt is a hypothesis, not a result', and the brief allows a design only to name receipts.",
+     "The allowed claim wording is inconsistent with its own engine. The sentence promises 'post-quantum key agreement (X-Wing) ... at suite 0x0001, pinned engine <id@sha>'. But the first engine candidate is saorsa-mls, whose 'PQ ciphersuite IDs are saorsa-mls \"SPEC-2\" (`0x0B**`)' (up/adr/0012:119-120). Its own ciphersuites are not X-Wing suite 0x0001. And §3's amortized authentication is a 'declared deviation from RFC 9420'. So the claim describes crypto no named engine implements, and it is reachable only by writing a home-grown TreeKEM variant. The claim is gated on receipts, but the stated object of the claim is wrong.",
+     "E4 calls 'Buzz becomes surfaces plus a legacy road' a 'naming change only', and E10 sunsets the relay. PLANE LAW assigns the human plane to Buzz and the raid ledger rules 'own the relay' (pirate-haul-rulings.md:51). Retiring Buzz's relay from the human plane is a plane-assignment question, not a rename, and it is under-escalated. The sunset is founder-dated, which mitigates it."
+    ],
+    "bestIdeas": [
+     "The road-policy law file {road, planes, pin}, with a ROAD_PLANE_FORBIDDEN refusal, makes the E1 switch mechanical and founder-signed. The proposed amendment text is clearly marked 'NOT a ruling' and leaves X-1 and X-3 unchanged.",
+     "It requires x0x ADR 0023 local history OFF for any group, because that history stores MLS plaintext (x0x.md:33). No other design caught this.",
+     "It avoids the x0x second-device user.key copy by using the opt-in owner key (README-v0.48.0:45, :122). That addresses critic N6 directly.",
+     "The delivery state machine (ADMITTED, SENT, HELD, DELIVERED, plus UNKNOWN and EXPIRED) carries the identical-bytes law (btmd-mesh-dependability:38-43).",
+     "E20 escalates speech transcripts against BIO-1 B-1.",
+     "Twenty escalation rows, and its citations are accurate: 0095:81, 0012:117-121, pq-net-store:71-89, BTUNGSTEN-PQ:671-672 and wallet.html:1366-1368 all verified."
+    ],
+    "citationErrors": [
+     "E15 cites `RULINGS-2026-09-30.md:23-28` as the rule for APNs/FCM push. The text defines VENDOR-HELD as 'A browser-resident feature that needs no operator-run host ... whose substance ... lives in the vendor's browser binary'. A vendor push gateway is not that class; this is an analogy presented as the rule.",
+     "§1 cites the law-file mechanism (`SPEC-BPQ-1.md:135-142`) as the vehicle for a PLANE LAW amendment. Those lines govern files listed in docs/PQ-LAW.json ('`docs/CONSTITUTION.md`, `ORDERS-1.md`, `docs/RULINGS-*.md`'). Adding a road-policy file to that set is itself a governance change the design does not name."
+    ]
+   },
+   {
+    "design": "PQ Buzz COMB planet-scale (planet-scale.md)",
+    "score": 6,
+    "fatalFlaws": [
+     "It never escalates the ORIGIN ruling. §5 states as design fact 'Community identity is a key, never a DNS name', and the escalation table has no DNS row. The record is a founder hold ('THE ORIGIN RULING — 2026-08-29 (founder: don't touch it until you know which it is)', LANE_RELAY_DUALHOME:72) with the finding '83: **IT IS IDENTITY, LOAD-BEARING — it must stay skaists.buzz.**'. Changing community identity without naming that ruling resolves a collision by silence. BESIDE, COMB mesh-native and STRATA all escalate it.",
+     "E6 ships an optional user-held prepaid postage float without a ruling. RULING_RAIL_C:88 says 'FOUNDER QUESTION IN FLIGHT — DO NOT BUILD AGAINST EITHER READING' and :80-81 'Any design that pre-positions a resource-token balance per identity fails at 10^10'. A user-bought credit plausibly survives hardline :23 ('SURVIVES ONLY where USERS BUY the credits'), and the design does escalate it. But making it the default P-path before a ruling leans on one reading."
+    ],
+    "bestIdeas": [
+     "The locality law is testable: probe-node load regressed on log10 N across 100, 1k and 10k nodes, with a 95% confidence interval that includes 0 and a slope of at most 2% per decade, and a planted subscriber to a global topic that must be convicted. This is the most falsifiable scale claim in the round.",
+     "Its scale claims are honest: it does not claim the ten-billionth-user test unconditionally. It says 'answered no, conditional on E14 and on keepers being run by parties other than BNR'.",
+     "Header wording 'isolated by design: the envelope header names no sender...' is allowed only after a rung-1 header-scan test passes. That is the right way to gate the wording ceiling.",
+     "Tier-S per-message ML-DSA applies to authority-bearing control messages (membership, keeper set, grants, moderation). Ordinary chat is amortized.",
+     "Total recovery is 'social re-admission, not social key recovery': nobody rotates another person's bzDiD, and E9 escalates the rest.",
+     "ρ ≥ 2 keepers in distinct failure domains, each with an fsync receipt, maps correctly onto SPEC-RUSTEOSVM-1 §2.4.",
+     "Its note citations are accurate: pq-tungsten.md:73, x0x.md:25, buzz.md:124, law-identity-scale.md:82, scale.md:81/84/157 and SPEC-BTUNGSTEN-1.md:35 all verified."
+    ],
+    "citationErrors": [
+     "E7 cites `RULINGS-2026-09-30.md:23-28` as governing vendor push. The same VENDOR-HELD scope stretch applies: the text is about 'A browser-resident feature ... whose substance ... lives in the vendor's browser binary'.",
+     "§8 assigns a held connection the unit MeshSecond, 'closest existing variant'. BUZZ_A_METERING_SPEC.md:53: '**Adding a unit requires a ruling, never a caller-supplied string.**' Reusing MeshSecond with a new meaning is a semantic change to a closed enum. It is flagged as needing a ruling, but the design ships it anyway in §8."
+    ]
+   },
+   {
+    "design": "PQ Buzz METABOLIC (economics-first.md)",
+    "score": 5.5,
+    "fatalFlaws": [
+     "It puts quotation marks around words the ruling does not contain. E3 quotes a free tier 'on estate iron, no charge' citing `LANE_M_B_METER_2026-08-29.md:6`. The line reads: 'FREE tier = the box/qwen compute lane (guest keys, no charge, capped fairly — the Lane-H service caps are the fair cap)'. 'estate iron' appears nowhere in the file (grep: 0 hits). Under cite-or-stop, a fabricated quotation of a founder law is the gravest honesty defect in this round.",
+     "It never escalates the ORIGIN ruling. §0 and §5 say 'A community is a signed roster with a roads card, never a DNS name', and none of E1-E18 names LANE_RELAY_DUALHOME:83 ('IT IS IDENTITY, LOAD-BEARING — it must stay skaists.buzz').",
+     "It uses voucher-escrow for third-party provider settlement while E10 says there is 'No tithe line on third-party commodity forwarding'. The crate's ruled laws include 'THE TITHE: 10% on top of cost basis, a DISTINCT line on every receipt' (voucher-escrow lib.rs:9). Either the crate's law changes or a tithe appears; the tension is unflagged."
+    ],
+    "bestIdeas": [
+     "Its spam reasoning rests on the ruling's own text. Postage at commodity rate is defensible because RULING_B_SPEND_BOUNDARY:11 itself says 'Consuming physical resources is metered. **Two transactions, two layers.**' The recipient-premium field is unnameable, so an attention price cannot be expressed. It still escalates (E4).",
+     "The ECON negative-control family: ECON-1 (one funder settling two users' operations must FAIL), ECON-2 (a planted auto-top-up must turn red), ECON-4 (byte-scan every receipt for plaintext), ECON-7 (system-issued per-identity balances equal 0), ECON-9 (client tally against the provider's epoch receipt, which catches a 1% over-count).",
+     "SpendReceipts are aggregated per voucher per epoch, never one per message. The spender_bdid pairwise-persona reading is explicitly flagged for the spec owner to confirm (spend.rs:151-154 FROZEN field).",
+     "E5 names the gaps in the closed ResourceClass and E6 names the Vaulta account-supply ceiling on A-native settlement (0.13-0.30% of 10^10).",
+     "The seed-budget cap has a named refusal ('seed budget exhausted — use an invite'), and joins through an invite touch no seed."
+    ],
+    "citationErrors": [
+     "E3: 'on estate iron, no charge' is attributed to `docs/dispatches/LANE_M_B_METER_2026-08-29.md:6`. The actual line: '- **THE TIER LADDER (founder law):** FREE tier = the box/qwen compute lane (guest keys, no charge, capped fairly — the Lane-H service caps are the fair cap)'. The quoted phrase is fabricated.",
+     "§8.5 cites `docs/canonical-biometric-key.md:339` for 'Rate-limit with proof-of-work, not an operator' as messaging-spam precedent. The phrase exists, but it ends a line about biometric list decoding: 'a returning user decodes **1:1 against their own published head** ... Worth 2–4 orders on `q` for lapsed users. Rate-limit with proof-of-work, not an operator.' The precedent is taken out of context.",
+     "§3.2 says the LINK record is '123 B + body'. Its own fields sum to 8+2+32+8+8+9+32+4+12+16 = 131 B, so every downstream per-message figure (323 B, 664 B, 902 B) is understated by 8 B. A minor arithmetic error, but it propagates.",
+     "E16 cites `docs/RULINGS-2026-09-30.md:21-27` as the rule for vendor push. That text defines VENDOR-HELD as a browser-resident vendor feature, not a push gateway."
+    ]
+   }
+  ],
+  "recommendedBase": "BESIDE (lawful-minimal.md). It is the only design that is lawful under every current ruling without depending on any reading of its own. Buzz relays stay the human plane, as PLANE LAW and 'own the relay' assign. The ORIGIN ruling is kept byte for byte, and acceptance authority still moves to a PQ-attested charter. It is the only design that saw that bpq-attest-nostr ships outside the frozen bsigner surface, and it routes around the freeze. Its separate-tracks wording ('settled', never 'PQ-signed') is exact, and its Buzz-fork citations are line-accurate (relay.rs:3804-3806, ingest.rs:344, 2014 and 2023-2028, config.rs:240, room.rs:49). Its weaknesses are product and scale: no cross-community DMs, a 29-device cap on PQ confidentiality, and about 10^6 community-funded relays. Under this lens those are honest limits, not violations, and the other designs supply the parts it lacks. Rank under this lens: BESIDE 8.5 > STRATA 7.5 > COMB mesh-native 6.5 > COMB planet-scale 6 > METABOLIC 5.5.",
+  "mustGraft": [
+   "From STRATA: the root-level escalations BESIDE lacks. E6: succession.rs:44-46 makes r0 win every fork ('the lower `signedBy` index wins — r0, the key kept furthest offline'), while bzdid-architecture-decision.md:50 makes r0 PRF-derived (WebAuthn, domain-bound). Add drill D13. E5: no hash-based key in KeyAlg (genesis.rs:36-44). E19: the SHA-256 root (genesis.rs:16). These are law-book defects for the founder, not design choices.",
+   "From STRATA: the §10.4 validity rule with the third state UNATTRIBUTABLE and obligation F6 (monotone). The admit/prefer/retire_new/distrust registry with no redefine. Keyless renewal over ciphertext. The airgapped-verifier receipt (zero connect() calls under strace). Drills D1-D14, each with a positive control, plus the CT century drill. BESIDE's §10 currently has only a list of drill names.",
+   "From COMB mesh-native: the E1 switch as a founder-signed road-policy law file {road, planes, pin} with a named ROAD_PLANE_FORBIDDEN refusal, so a PLANE LAW amendment is a signature, not code. Also name that adding a file to PQ-LAW.json is itself a governance change. And the rule that x0x ADR 0023 local history is OFF for any group, because it stores MLS plaintext.",
+   "From COMB mesh-native: the delivery state machine (ADMITTED, SENT, HELD, DELIVERED, plus UNKNOWN and EXPIRED) under the identical-bytes law. And E20, which escalates transcripts against BIO-1 B-1 (BESIDE has this only as risk 9).",
+   "From METABOLIC: the negative-control family as same-job teeth. ECON-1 shared funder must FAIL, ECON-2 planted auto-top-up, ECON-4 receipt byte-scan for plaintext, ECON-7 system-issued per-identity balances equal 0, ECON-9 double-entry tally against the provider receipt. Plus epoch-aggregated SpendReceipts and E5/E6 (ResourceClass gaps; the Vaulta account-supply ceiling on A settlement). Do NOT graft its E3 quotation or its LINK size figure.",
+   "From COMB planet-scale: the locality-law test ladder (probe load regressed on log10 N, 95% CI including 0, slope at most 2% per decade, planted global-topic subscriber convicted). Header wording 'isolated by design' gated on a passing header scan. Tier-S per-message ML-DSA for authority-bearing control messages. ρ ≥ 2 keepers in distinct failure domains with fsync receipts, as the scale-out path for BESIDE's single-relay cache.",
+   "Corrections to BESIDE itself. (1) Gate P1's relay-fork deploy on founder word: a relay change is RED class. (2) Fix the BUZZ_A_METERING_SPEC rule-2 citation to :105-106. (3) Label the R4 extension (hardware device to all devices) and the AGENT-1 Q-5 extension (bQueenBee to all agents) as readings, and escalate them. (4) Keep 'by analogy' on VENDOR-HELD. (5) Make sure no grafted section says PASSED or otherwise reports a verdict without a receipt; COMB mesh-native's 'PASSED by construction' must not travel."
+  ]
+ },
+ {
+  "lens": "Buildability, reuse and migration. Questions asked of each design: does it reuse existing estate crates and the running Buzz stack instead of building rivals (sovereign order)? Can P0 run now with no pending ruling? Is the cutover of today's users, Postgres history and the 18 agents on buzz-acp and buzz-cli concrete and safe? I checked the designs against source. buzz-src e1035672: ingest.rs, nip11.rs, buzz-acp config.rs and relay.rs, buzz-cli client.rs. Repo 69ef2c717: bsigner CONTRACT.md and main.rs, bpq-core layout.rs, bchat-core.js, bpq.js, SPEC-BPQ-1, bzdid genesis.rs and succession.rs, bnr-archive, btungsten-bench, btungsten-pq Cargo.toml, voucher-escrow, shared-types spend.rs, adapter-arweave gateway.rs, btmd budgets. Also the x0x upstream copies: bridge-README, ADR 0049/0095/0012, A05, README v0.48.0. The deciding finding is about the bridge. Four of the five designs migrate agents through a facade modelled on x0x-nostr-bridge. That bridge is only \"NIP-01 subset + NIP-11/16/42/50\", and its own README puts Buzz's extended dialect in an unbuilt \"bridge v2\". buzz-cli is not a websocket client at all. It is a reqwest HTTP client that signs NIP-98 and calls the relay's /events, /query and /media endpoints. So \"buzz-cli unchanged against a facade\" has no basis. BESIDE is the only design that keeps the real relay and avoids this.",
+  "scores": [
+   {
+    "design": "BESIDE (lawful-minimal.md)",
+    "score": 8,
+    "fatalFlaws": [],
+    "bestIdeas": [
+     "Keeps the running Buzz relay, its Postgres and all 129 kinds, including workflows, NIP-29 relay-signed group state, huddles, git and Blossom. Migration therefore needs no facade, and no relay-side feature has to be reimplemented. It is the only design whose agent cutover cannot lose WF-08, NIP-43 or the HTTP bridge buzz-cli depends on.",
+     "Relay change is small and verified in source. ingest.rs:344 says \"Returns `Err` for unknown kinds — the relay rejects them\", so the change is exactly one match arm per new kind. The PQ-private lane needs no relay change because of the gift-wrap exemption at ingest.rs:2023-2025 (`let is_gift_wrap = kind_u32 == KIND_GIFT_WRAP; if event.pubkey != *auth.pubkey() && !is_gift_wrap`).",
+     "Uses only PQ code that is already built. Signing is bpq.js attestNostr (bpq.js:334, 702). The independent verifier is the frozen `bsigner bpq-verify`, which really does verify kind nostr-event (main.rs:664-665). No new bpq1 label is added, so the PQ04 domainsDisjoint proof stands. E5 correctly notes that bpq-attest-nostr is absent from the frozen command table (CONTRACT.md:13-23).",
+     "P0 closes tonight's incident class first. P0.a (roads) reuses the MULTIRELAY §roads design, the live dual-home server and the b-onboard ladder. The pass criterion is a live drill on the filtered network with 0 manual actions for the desktop and all 18 agents. It also re-classifies an AUTH denial from an unverified road as transport failure, which defuses buzz-acp's `!message.trim_start().starts_with(\"error:\")` terminal rule (relay.rs:3806).",
+     "The checkpoint is fixed-width concatenated ids under one §5b attestation. That costs zero new crypto and is injective by construction. The arithmetic checks: at M=1 it is (1+3)×590×365 plus about 8.2 KB/day of checkpoints, about 3.9 MB/yr.",
+     "Outbox journal as a bnrose-exec-host consumer crate that redelivers identical bytes only. The receipt honestly says \"single-domain, not §2.4\" until a second failure domain exists.",
+     "Every non-lawful feature is a named switch (E1-E16) that adds or flips something without changing the format."
+    ],
+    "citationErrors": [
+     "Internal contradiction. The thesis says \"buzz-acp harness, buzz-cli and the 18 agents keep working unchanged\", but §5 and M1 require \"buzz-acp gains a road list in place of the single `BUZZ_RELAY_URL` (config.rs:240)\". The source is `#[arg(long, env = \"BUZZ_RELAY_URL\", default_value = \"ws://localhost:3000\")]`. The AUTH-denial reclassification is also a code change. So every agent needs a rebuilt harness. The change is safe but it is not \"unchanged\".",
+     "M3 says checkpoint ids come \"from **their own** export and not from the relay\". buzz.md §3 records that buzz-acp \"does not persist state\", so the 18 agents have no own export. Their history exists only in the relay's Postgres. That is fine before the break because Schnorr re-verifies, but under the design's own rule it must be labelled observed-attested.",
+     "Minor paraphrase. §9 quotes \"Reports are signals, never triggers\" (ingest.rs:356-358). The source line reads \"reports are signals, never enforcement triggers\"."
+    ]
+   },
+   {
+    "design": "STRATA (millennium-first.md)",
+    "score": 6,
+    "fatalFlaws": [
+     "Agent migration depends on a facade that does not exist. M3 says \"`buzz-acp` and `buzz-cli` are unchanged; they talk NIP-42/NIP-01 to a localhost `bzm` bridge\". buzz-cli speaks HTTP NIP-98 to /events, /query and /media (client.rs:79 `Sign a NIP-98 HTTP auth event (kind:27235)`). No NIP-01 bridge serves it, and no estate code implements Buzz's relay-side dialect: NIP-29 39000-39003, NIP-43, workflows. The cutover therefore hides a full Buzz-relay reimplementation."
+    ],
+    "bestIdeas": [
+     "M0, \"anchor now while BIP-340 is still sound\": a read-only export, then a `bnr-archive` batch (it exists: crates/bnr-archive/src/batch.rs, deterministic \"BNRARCV1\", no network calls), then SHA-256 and SHA3-256 roots, then an OTS stamp. This is the cheapest high-value migration act, doable now, and it should be grafted into P0 of the base.",
+     "A P0 made almost entirely of reuse that needs no ruling: btungsten-bench, btungsten-wb004 (D11 time battery), btungsten-teeth, the WB001 ladder, and `bzm-verify` under `unshare -n` with strace counting 0 connect() calls (the A11 receipt).",
+     "E6 is a real, source-verified escalation. succession.rs:44-47 says \"the lower `signedBy` index wins — r0\", while r0 is WebAuthn PRF-derived and domain-bound. That is a takeover vector on RP-domain capture. Every design should carry it.",
+     "A three-state validity rule (VALID / UNATTRIBUTABLE / INVALID) with monotonicity obligation F6.",
+     "Mailbox leases are the only things that expire; the messages themselves never do. That keeps L2 separate from the record."
+    ],
+    "citationErrors": [
+     "E4 says \"lab seals use the frozen `bsigner sign` (`bheart.signature/1`) with a seal-only keyset\". Per CONTRACT.md the frozen `sign` produces \"sign file bytes → `bheart.signature/1` envelope\", and the signature registry is \"`ml-dsa-44`, `ml-dsa-65`, `ml-dsa-87`\" only. The STRATA seal is composite ML-DSA-65 plus Ed25519 in a bzm1 layout. Lab seals would therefore be a different accepted language from production seals, and proofs about them fall under the right-language law (SPEC-BTUNGSTEN-1:278-283).",
+     "M2 says \"bzm1 rides [the Buzz relay] as a road ... inside a custom kind\" and never mentions that ingest.rs:344 \"Returns `Err` for unknown kinds — the relay rejects them\". That is a fork relay change, and memory classes relay changes RED (founder word plus a DB snapshot). It is missing from P1.",
+     "§10.5 cites `R/crates/btungsten-bench/src/lib.rs:12-13` as the \"RB04/RB05 ladder\". Those lines cover RB04 (the Daedalus WB001 parser) only."
+    ]
+   },
+   {
+    "design": "PQ Buzz METABOLIC (economics-first.md)",
+    "score": 5,
+    "fatalFlaws": [
+     "M3 says \"The reference provider exposes a NIP-01/NIP-42 compatibility facade, in the pattern of the x0x-nostr-bridge prior art ... so buzz-acp needs **zero changes**\". That bridge is \"NIP-01 subset + NIP-11/16/42/50\" with \"NIP-42 relay-tag check skipped\" and \"no cross-bridge history catch-up\" (bridge-README). The design never says what buzz-cli (HTTP NIP-98) or relay-side workflows and NIP-29 state run on.",
+     "The free tier depends on R0 direct device-to-device delivery plus store-carry. No estate transport stack implements NAT traversal or a non-x0x QUIC peer link. The design excludes x0x and names no replacement, so the free tier has no buildable road in any phase."
+    ],
+    "bestIdeas": [
+     "The best reuse of the metering estate. voucher-escrow already carries the needed laws: \"Refuse-before-write\", \"USDC deposits additionally cite the conversion rate and where it was read (rate_ref)\" and \"THE TITHE ... a DISTINCT line on every receipt\" (voucher-escrow lib.rs:9-14). It also uses shared-types SpendReceipt with the closed ResourceClass (spend.rs:62-71).",
+     "P0.c `buzz-metabolic-sim` turns the 8d claim into a receipt: ECON-1 shared-funder must FAIL, ECON-2 FloorRefusal, ECON-6 unfillable swap. Planted subsidies are convicted in the same job, and it needs no ruling. Graft it.",
+     "Group keying as one epoch key wrapped with X-Wing per member device, with no MLS. It can be built from bpq sealed-object slots that already exist, and it avoids the unselected MLS engine the mesh designs depend on. This is the right P6 group-key slot for BESIDE.",
+     "Per-provider epoch-aggregated SpendReceipt instead of per-message receipts, with a client tally as dispute evidence (ECON-9).",
+     "Archive batches of 63 chunks or fewer, to stay off the merkle-path fence."
+    ],
+    "citationErrors": [
+     "§8.1 says `spender_bdid` \"carries the pairwise payment persona\" and calls this \"a semantic reading of the frozen field\". The source marks the field as frozen wire: \"FROZEN schema-v1 wire field ... Renames land only with a schema_version bump\" (spend.rs:149-151). A change in meaning on a frozen field is a spec-owner decision. The design flags it but still builds P1 on it."
+    ]
+   },
+   {
+    "design": "PQ Buzz COMB, cell-only (planet-scale.md)",
+    "score": 5,
+    "fatalFlaws": [
+     "§12.3 says \"buzz-acp and buzz-cli keep speaking NIP-42/NIP-98 to the bridge unchanged\". NIP-98 is HTTP: buzz-cli posts to /events and /query. The cited bridge is a websocket NIP-01-subset facade backed by x0x gossip, so neither claim holds. The design also defers the real agent move to an unspecified \"native COMB ACP adapter\". Until then agents stay on today's relay with only PQ13 attestations, so the 18 agents never actually migrate.",
+     "Sealed cells of 33-256 leaves (P3) need \"a pinned MLS with PQ KEM (selection is work)\". The estate has none, and saorsa-mls has no IETF interop: ADR 0012 says \"no IETF wire interop in this release\"."
+    ],
+    "bestIdeas": [
+     "The most precise and buildable P0 bench in any design. It is an rbench lane in btungsten-bench and gets the details right: PERCENTILE_MIN_N = 20 (stats.rs:12); WSL because \"Off Unix there is no `wait4`\" (measure.rs:25-26); pinned `ml-dsa = \"=0.1.1\"` and `libcrux-ml-dsa = \"=0.0.11\"` (btungsten-pq Cargo.toml:20,25); integritychain fips204 rows only if E1 is ruled; teeth that turn a miswired run red. Graft it verbatim to replace BESIDE's vaguer P0.b.",
+     "A workload calculator crate whose tests reproduce every number in §7. Prose arithmetic becomes a CI receipt.",
+     "A locality-law physical ladder with a planted global-topic tooth that must show load growing with N.",
+     "New `bzc1/` labels kept in a new crate, so bpq-core and bsigner stay untouched (E10 respects DOMAIN_CAP = 20, layout.rs:40)."
+    ],
+    "citationErrors": [
+     "E11 places \"keeper forwarding = L3 (LOADMODEL precedent)\". The charter defines L3 as \"bTiMe vouchers on bMeshLLM, metered in b\" (SPEC-BNROSE-0-CHARTER via bnrose.md §1). That contradicts the design's own E13 (\"A only\") and B1 (\"b does not appear in the alpha metering path at all\")."
+    ]
+   },
+   {
+    "design": "COMB, mesh-native on bChat Core (mesh-native.md)",
+    "score": 4,
+    "fatalFlaws": [
+     "Migration relies on a bridge that does not do what is claimed. §12.2 says \"buzz-acp, buzz-cli and the desktop connect unmodified\" to a local Nostr facade (x0x-nostr-bridge prior art). The bridge README says it is \"NIP-01 subset + NIP-11/16/42/50\" and that \"This repository is the base for **bridge v2**, whose scope is Buzz's extended relay dialect\". buzz-cli is an HTTP NIP-98 client. The relay's workflows (WF-08), NIP-29 relay-signed group state, NIP-43, git Smart HTTP and Blossom have no counterpart on an inbox node. The relay \"retires on the founder's date\", so these features are lost or must be rebuilt.",
+     "It builds rivals where reuse was possible. Inbox nodes are a new server class that replaces the Buzz relay; a 90%-hosted inbox market by \"many independent operators\" does not exist; and authentication is a custom deviation from RFC 9420 that \"needs its own proof and an outside review\". The P1 alpha is blocked on a group engine with no estate receipts: saorsa-mls, where \"PQ05/PQ06 receipts do not transfer\", or a second implementation that is \"UNVERIFIED that one exists\"."
+    ],
+    "bestIdeas": [
+     "A signed road-policy law file whose entries are `{road, planes, pin}`, with a named ROAD_PLANE_FORBIDDEN refusal. It is signed through the existing `wallet.html#pq-law` one-press law-file pattern. This is the cleanest mechanism for the E1 x0x switch, as a signature rather than code. Graft it into BESIDE's charter.",
+     "A delivery state machine ADMITTED → SENT → HELD → DELIVERED, with UNKNOWN that is never success, EXPIRED that is visible, and redelivery of identical bytes only.",
+     "Day-segmented ReplicatedJournal (one per UTC day per mailbox, chained by the final tag). It works around the real cost of opexec.rs:235-240 reloading both full replicas on every run.",
+     "A P0 rig run with synthetic machine-plane traffic only. It answers the x0x feasibility questions (owner-private idle bytes, stream shedding, dial-by-hint) without touching PLANE LAW."
+    ],
+    "citationErrors": [
+     "E7 says \"No x0x `user.key` is ever created or copied ... the owner key is opt-in (README-v0.48.0.md:45)\", yet road X-A has \"Device link and owner sync ride x0x streams\". The cited line says the owner key is what enables sync: \"With it, your install gets names, a Home space, a certified-sub-agent roster, cross-device sync\". README:122 says a second device needs \"the same user key\". X-A as written contradicts E7.",
+     "§2 says agent grants are \"an ML-DSA-65 `bpq1/intent` attestation over a WB001 envelope\" and E17 says agent grants \"reuse `bpq-attest-intent`\". SPEC-BPQ-1 §5c says \"The signer then refuses unless `id` is the authority it pins\": one pinned authority, not per-owner grants. `bsigner bpq-attest-intent` needs `--rec-env VAR` (main.rs:77, the root recovery code). It is also absent from the frozen command table (CONTRACT.md:13-23), so it sits inside the unresolved 18-command freeze collision."
+    ]
+   }
+  ],
+  "recommendedBase": "BESIDE (lawful-minimal.md). It is the only design whose migration needs no new relay, facade or group engine. It is also the only one whose P0 starts by closing the outage class that triggered the ask, and it rests on components I verified in source. The record stays the NIP-01 bytes on the real Buzz relay. The relay changes are exactly one match arm per kind (ingest.rs:344). The private lane uses the existing gift-wrap exemption (ingest.rs:2023-2025). Signing uses the built bpq.js attestNostr, and the independent verifier is the frozen bsigner bpq-verify, which handles kind nostr-event (main.rs:664-665). There is no new bpq1 label, and the journal is a bnrose-exec-host consumer. The other four designs all migrate through an x0x-nostr-bridge-style facade. That bridge covers only a NIP-01 subset, and its Buzz dialect is an unbuilt v2. buzz-cli is an HTTP NIP-98 client the facade cannot serve. Those four cutovers therefore hide a full reimplementation of the Buzz relay, which is unsafe for the 18 agents.",
+  "mustGraft": [
+   "From STRATA, into BESIDE P0: M0 \"anchor now while BIP-340 is sound\". Steps: a read-only export of the Hostinger history, a `bnr-archive` batch (it already exists, deterministic BNRARCV1), SHA-256 and SHA3-256 roots, then an OTS stamp. BESIDE's later M3/M4 then reuse bnr-archive and invent no new bundle packing.",
+   "From STRATA: escalation E6. bzdid succession.rs:44-47 says \"the lower `signedBy` index wins — r0\", while r0 is domain-bound WebAuthn, so capturing the RP domain becomes a takeover vector. Add drill D13 to BESIDE's matrix.",
+   "From STRATA: the airgapped `bzm-verify` receipt adapted to BESIDE's record (zero connect() calls under `unshare -n`), the D11 time battery on btungsten-wb004, and the VALID / UNATTRIBUTABLE / INVALID classification for history after a break.",
+   "From planet-scale: replace BESIDE P0.b with its exact rbench lane in btungsten-bench. That means PERCENTILE_MIN_N = 20, WSL hosts for wait4, pinned ml-dsa =0.1.1 and libcrux-ml-dsa =0.0.11, noble in headless Chromium, teeth that turn a miswired run red, and a budget stated before the run. Add its workload-calculator crate so every number in §7 is a CI receipt.",
+   "From METABOLIC: P0.c `buzz-metabolic-sim` over shared-types SpendReceipt and voucher-escrow (refuse-before-write, rate_ref, distinct tithe line). ECON-1 (shared funder must FAIL), ECON-2 (FloorRefusal) and ECON-6 must be green with planted subsidies convicted. This gives BESIDE's E3 switch, relay metering, a ready engine.",
+   "From METABOLIC: one epoch key per group, wrapped with X-Wing per member device (no MLS), as BESIDE's P6 group-key slot to lift the 29-device cap. Add the rule of at most 63 chunks per archive batch to stay off the merkle-path fence, and per-epoch aggregated receipts.",
+   "From mesh-native: the signed road-policy law file (`{road, planes, pin}`, ROAD_PLANE_FORBIDDEN, signed by the existing wallet.html#pq-law press) as the concrete mechanism for BESIDE's E1 x0x switch. Also take its day-segmented journal so the opexec.rs:235-240 full-replica reload stays bounded.",
+   "From mesh-native: the P0 rig run with synthetic machine-plane traffic only. It measures owner-private idle bytes, stream shedding and dial-by-hint, so the E1 ruling is asked with data.",
+   "Fixes BESIDE itself must take. (1) Restate the thesis honestly: buzz-acp gets a rebuilt harness (a road list replacing BUZZ_RELAY_URL at config.rs:240, and a narrowed `is_terminal_auth_failure` at relay.rs:3806), rolled out one agent at a time with rollback. (2) M3 for agents must read history from the relay with Schnorr re-verification, labelled observed-attested-pre-break, because buzz-acp keeps no state. (3) Choose Rust ML-DSA signing inside buzz-acp, using the bpq attest_nostr path in bsigner/src/bpq.rs, over a Node sidecar, or justify the sidecar.",
+   "For every design: no migration step may claim buzz-cli works unchanged against a NIP-01 websocket facade. buzz-cli calls HTTP /events, /query and /media with NIP-98 (client.rs:79). Any facade must implement that HTTP bridge, or the real relay must stay in the path."
+  ]
+ },
+ {
+  "lens": "Scale and economics arithmetic. I re-ran every size, bandwidth, connection, storage, verify-CPU and cost line in all five designs, using node and the designs' own inputs, and I ran BESIDE's three calc scripts in pqbuzz/lm/. All of BESIDE's printed outputs matched its tables. For each design I asked three questions. (1) Does the cost of the ten-billionth user land on BNR (HARDLINE 8d, RULINGS_HARDLINE_METHOD_ADOPTION_2026-08-08.md:9-27; Art. V.1, CONSTITUTION.md:83)? (2) Is the free tier real? (3) Is spam priced without breaking \"No person pays to *use* a BNR function\" (RULING_B_SPEND_BOUNDARY_MULTIASSET_ESCROW_2026-08-07.md:11)?\n\nFive findings cut across all designs.\n\n(A) Four of the five assume an amortization factor that their own checkpoint window cannot deliver at human message rates. The windows are 5 s of quiet (STRATA), 10 s (METABOLIC groups), and 60 s (both COMBs). A human sending 10-50 messages a day across several conversations will almost never fill such a window, so real messages per signature is about 1-5, not 4-16. Only BESIDE's 24 h / 1,024-id window actually reaches its stated ratio, and it names its latency cost (\"not yet settled\").\n\n(B) Delivered-copy traffic is dominated by group and channel messages. Any blended per-message average weighted by messages sent understates wire bytes and verify counts.\n\n(C) Every design prices the Autonomi archive from one quote on one date ($0.0035/chunk) and multiplies by 10^10, giving $0.2B to $5.9B a year. Rail C requires \"state the market-cap vs acquirable-liquidity check explicitly\" (RULING_RAIL_C_NO_FRONTLOAD_2026-08-08.md, depth workflow). Today's whole-network node income is about $10/day (SPEC-VENDING-1.md:55-66 via paystack.md §4). None of the five did that check. The cost is user-paid, so HARDLINE 8d still passes, but the per-user-year figures are not credible at scale.\n\n(D) No design prices the per-transaction gas of archive uploads below the merkle threshold. The only current gas figure is the merkle-batch one ($0.000158/chunk, RECEIPT_zCode_ANT_ETH_GAS_SPLIT_2026-08-21.md:90).\n\n(E) All five pass HARDLINE 8d structurally, because BNR is held to fixed-capacity bootstrap seeds. Only METABOLIC proves it with numbers.",
+  "scores": [
+   {
+    "design": "PQ Buzz COMB (Cell-Only Messaging Bus), planet-scale.md",
+    "score": 8,
+    "fatalFlaws": [
+     "No fatal flaw under this lens. The most serious defect is an internal arithmetic contradiction in a pass/fail criterion. §3 and §7.8 rung 1 state checkpoint = pad128(3,381 + 32b + 84). The design's own worked sum is 2+32+4+2+512+3,309 = 3,861 at b=16, which is 3,349 + 32b. At b=16 the stated formula gives pad128(3,977) = 4,096 B, but the table and the encoder give 3,968 B. Rung 1 as written would convict the design's own correct encoder.",
+     "b=16 at the centre case is optimistic for a trigger of '60 s after a burst ends'. Human sessions give b of about 5. Recomputed at b=5: the checkpoint pads to 3,712 B and costs 742 B per message, so a delivered copy is about 1,126 B, not 632 B. DM cells are deniable and carry 384 B with no checkpoint. Weighting by delivered copies (channel cells are 65% of copies at the centre mix) gives about 1,070 B per copy. That is 1.7x the modelled figure, which moves centre keeper egress from 901 Gbps to about 1.5 Tbps. Still user-paid.",
+     "Settlement is fragmented and unquantified. Postage is paid per cell to that cell's at least 2 keepers, so a user needs balances at several keeper operators. The design names no settlement tx/s. At METABOLIC's own 317 tx/s for one yearly top-up per user, 5-20 operators per user would mean about 1.6k-6.3k tx/s (about 19k-76k tx/s with monthly top-ups). Prepaid batches are also the per-keeper float that Rail C names as the wrong shape (E6 escalates it, but the scale is unpriced).",
+     "'Seed load 0 (invites carry roads)' skips cold start for a user who has no invite. METABOLIC's seed cap arithmetic (2.18e8 fetches/day, capped at 1e7) is the honest version."
+    ],
+    "bestIdeas": [
+     "The most complete workload model of the five. It has low, centre and high columns plus the ruled floor, and every row reproduces: centre is 1e12 messages/day, 117.0 Gbps keeper ingress, 901.2 Gbps keeper egress (5,658 Gbps if every message were ML-DSA signed), 37.92 PB keeper text held (3.79 MB/user), and 21.39 Tbps of media. It is the only design that prices media, and it shows media is 24x the text plane.",
+     "The locality law as a measurable gate: a regression of probe-node load on log10 N across rungs 100, 1k and 10k must have a 95% CI that includes 0 and a slope within 2% per decade. A planted global-topic subscriber must be convicted. This is the only design that turns 'no global state' into a falsifiable scale receipt.",
+     "The connection model: only foreground devices hold connections, D x c x K = 2e9, which is 20,000 boxes at the centre case instead of 200,000 always-on. Background polls are costed at 21.1M/s, 253 Gbps and 1,056 cores. It also identifies which constraint binds: connections for text, bandwidth for media (91,671 U-1G at media peak). All of these reproduce.",
+     "The verify-CPU budget is a pass/fail formula: t_v,p95 <= 5 s / (10,000 / b), which is 2 ms at b=4 and 8 ms at b=16. Keepers must show 0 ML-DSA verifies on sealed cells. The bench plan prints NOT-RUN rather than extrapolating.",
+     "Payer of record is split cleanly: conversation-cell egress is sender-paid including the k fetches, while open and broadcast cells are reader-paid. So the free tier really receives everything senders paid to hold, and no BNR line exists outside E14.",
+     "Archive granularity arithmetic is correct: per-message files cost $383 a year against $0.021 for one yearly file of a user's sent text. Small-group rekey is (n'-1)^2 x 1,168 B, which caps sealed cells at 32 leaves. The TreeKEM commit table caps cells at 256 leaves, and it reproduces: 10,517, 17,525 and 22,197 B."
+    ],
+    "citationErrors": [
+     "ARITH: §3 formula 'checkpoint = 3,381 + 32b + 84' contradicts its own worked line '2 + 32 + 4 + 2 + 512 + 3,309 = 3,861', which implies 3,349 + 32b. The rung-1 criterion inherits the wrong constant.",
+     "Minor: the design cites the constrained-leaf budget at btmd-budgets-1.json:34, which is correct ('\"idle_combined_bytes_per_min_max\": 2097152'). scale.md row 11 had cited :28 for the same budget, so the design is right and the reader note is stale."
+    ]
+   },
+   {
+    "design": "PQ Buzz METABOLIC (economics-first), economics-first.md",
+    "score": 7.5,
+    "fatalFlaws": [
+     "Its central traffic figures are a weighting error. The 902 B per message blends 70% pairwise and 30% group weighted by messages sent, and is then multiplied by fan-out F=12.7. But 94.5% of delivered copies come from group messages (0.25x8 + 0.05x200 = 12 of the 12.7). Weighted by delivered copies the cost is (0.7x663.7 + 12x1,458.7)/12.7 = 1,415 B per copy. Corrected: aggregate traffic is 1.66 Tbps, not 1.06; inbound per device is about 898 KB/day, not 573 KB; verifies per device-day are about 203, not 108; global verifies are about 47M/s, not 25.0M/s; the archive is about 345 MB/yr (about 83 chunks, two batches at the 63-chunk cap), not 225.6 MB/54 chunks.",
+     "The amortization factors (K about 3 for groups with a '10 s or 16 msgs' window, K about 10 for pairwise 'hourly or 64') are assumptions the windows do not support. A 10 s group window gives K of about 1 at human typing rates, which is 3,730 B per message, essentially per-message signing.",
+     "The paid-inbox cost '$0.0124/yr per user' counts one connection ($0.0121 per device-year) while the model has d=2 devices. That is about $0.024/yr. Small, but it is the dominant line of the paid tier.",
+     "Flat group rekey is (n-1) x 1,120 B per membership change, 1.12 MB at n=1,000. If that rekey object is broadcast to every member rather than slot-routed, delivery is O(n^2): about 1.1 GB per change in a 1,000-member room. The design does not say which.",
+     "The free tier is BYO direct device-to-device delivery with 'zero third-party resources' (F-2). It ignores the 20-40% NAT/TURN fraction (scale.md row 34) and iOS background socket loss. For phone-only users the free tier is 'both foregrounded and NAT-traversable at the same moment'. 'Delay is the free tier's price' understates that: for those pairs the delay can be unbounded."
+    ],
+    "bestIdeas": [
+     "The meter table: every resource has a closed ResourceClass unit, a counter, a payer of record and a named refusal. It also flags the enum gap honestly: there is no byte-time or connection-time unit (E5, spend.rs:62-70 has only MeshSecond, VramByteSecond, RamByte, CpuMicrosecond, NetByte, ChunkCount, StorageByte, ChainFee).",
+     "Settlement friction is quantified and designed around. Provider unit costs ($1.40e-13 per byte-day, $4.45e-13 per byte forwarded, $0.0121 per connection-year, all reproduced) show that payment friction dominates, so it uses user-bought vouchers in voucher-escrow. Chain load is 3.2/31.7/317 tx/s for yearly top-ups and 38/380/3,805 tx/s for monthly. It is the only design to state this.",
+     "HARDLINE 8d is proven with numbers. Cold-start seed demand is 2.18e8 fetches/day (0.89 TB/day). BNR caps seeds at 1e7/day (41 GB, 3.79 Mbps), the cap binds at about 4.58e8 users, after which dBNR/dN = 0, with a named overflow refusal. Invite joins touch no seed. All figures reproduce.",
+     "E6 quantifies the A-settlement ceiling: 12.7M-30.0M self-accounted payers fit in all unallocated Vaulta RAM (RECEIPT_R8_VAULTA_RAM.md:47-50), which is 0.13-0.30% of 10^10. So the paid tier settles on bPay first-line rails.",
+     "Spam is priced without contradicting free access. Contacts and introductions are free. Stranger postage is charged at the provider's commodity rate only, and a recipient premium field does not exist in the format ('unnameable beats forbidden'). PoW is the sender's own CPU. This is consistent with 'Consuming physical resources is metered. Two transactions, two layers' (SPEND_BOUNDARY:11).",
+     "Economic tests with teeth: ECON-1 (shared funder must FAIL), ECON-2 (FloorRefusal), ECON-6 (unfillable swap refused), ECON-7 (zero system-issued balances; a planted genesis grant turns it red), ECON-9 (double-entry check of client tally against provider receipt). Also A1-ECON-8D, a simulator requiring the BNR-paid quantity to stay constant in N. Receipts are aggregated per voucher per epoch, so receipt volume scales with users, not messages.",
+     "Broadcast is costed: a 10 KB post read by 1e9 readers costs the publisher about $4.45 of egress, never BNR."
+    ],
+    "citationErrors": [
+     "ARITH: the §3.2 LINK row lists 'CBOR framing 8, suite 2, conv id 32, sender roster index 8, seq 8, t 9, prev-link 32, policy 4, AEAD nonce 12, tag 16', which sums to 131 B, not '123 B + body'. Every downstream LINK figure (323, 663.7, 1,458.7, 902) is 8 B low.",
+     "ARITH: §7.1 'verifies per device/day 108' equals received x (902-323)/3,407, which treats the sent-weighted average as the received mix. The delivered-weighted figure is about 203.",
+     "The F-3 precedent 'free-tier receipts simply charge zero' (LANE_M_B_METER_2026-08-29.md:6) is quoted correctly. But the same line defines the free tier as 'the box/qwen compute lane', which runs on estate iron and is the V.1 collision paystack.md §7.1 escalates. The design does flag this in E3, so this is context, not a fabrication."
+    ]
+   },
+   {
+    "design": "BESIDE: post-quantum Buzz under current law, lawful-minimal.md",
+    "score": 6.5,
+    "fatalFlaws": [
+     "The archive flush rule contradicts the archive cost table. §6 says 'Bundles accumulate to at least 256 KiB, then go to ANT'. A 256 KiB bundle is one file at the 3-chunk minimum. At M=10 (17.75 MB/yr) that is about 68 bundles, about 203 chunks, about $0.71/yr. The table instead assumes one yearly file (5 chunks, about $0.018). That is a roughly 40x unpriced swing. Using the yearly file instead means up to a year of history is held only on the device.",
+     "The scale model sets k=6 delivered copies, which hides the reader side of per-author checkpoints. A K_CP lists every event the author signed across the whole community, and settling any one of that author's messages needs the 7,706 B K_ATT plus the checkpoint. A channel reader in a 10K-member community who sees one message each from 1,000 authors a day fetches about 8.3 MB and does about 1,000 ML-DSA verifies, against the modelled 9 verifies per device-day. At the relay, attestation egress can exceed message egress: 10K x 3 x 7.7 KB x 1,000 readers is about 231 GB/day against about 118 GB/day of messages. The 51-861 B per message figure is sender-side only.",
+     "Relay cost is unmetered and community-funded until E3 is ruled. For each of about 1e6 communities that is a shared funder across per-user items, the shape B1 calls 'the breach' (BUZZ_A_METERING_SPEC.md:97). It lands on community operators, not BNR, so HARDLINE 8d passes. But the free tier is real only if some third party runs a relay and admits free members, and nothing guarantees that at 1e10.",
+     "At M=1 the PQ layer costs 14x the message bytes (8,229 B/day against 590 B), and per-message attestation would be cheaper. The design states this honestly. It matters because M=1 is the ruled floor workload."
+    ],
+    "bestIdeas": [
+     "The only amortization whose ratio survives realistic human message rates. It closes at n=1,024 or T_max=24 h, so the sender-side ratio is real. The settlement window is named in the UI as 'not yet settled' rather than hidden. Every number reproduces from its scripts (calc-lm.js, calc-priv.js, calc-nip17.js): K_ATT is 7,706 B, the checkpoint is 523-44,171 B, the frame holds at most 1,524 ids, and the private lane fits at most 29 devices in 64 KiB.",
+     "It reuses an already-built statement (§5b), so there is zero new crypto and no relay verify cost. Relays verify only Schnorr. Client verifies come to 2.08e6/s globally at M=10, c=3, k=6 (correct within its k assumption).",
+     "HARDLINE 8d is passed by the simplest construction. BNR runs a fixed number of fixed-capacity seeds, a full seed returns a named refusal, communities fund their relays at about $0.12 per member-year (from $100/mo divided by 10K members), and the B1 negative control (one BNR rail settling two users must FAIL) becomes a test.",
+     "Spam is lawful with no postage: membership gate, per-member quotas, and wallet-gated per-address quotas (RULING_WALLET_GATED_OPS_2026-08-20.md:59-61, 'the caller-pays doctrine ... made mechanical'). Over-quota purchase of NetByte is only an E9 switch.",
+     "The connection arithmetic is honest: 2e10 always-on connections need 200,000 boxes; at 10% concurrency, 20,000; the community count (1e6) binds first."
+    ],
+    "citationErrors": [
+     "None found in the economics citations I checked. B1 rule 2 at BUZZ_A_METERING_SPEC.md:104-105 is correct. CD-13 'no half-born accounts' is at feature-backlog.md:305, inside the cited 302-306. HARDLINE :9-27 is correct.",
+     "ARITH note, not a citation error: §8's 'Archive per user-year ... ANT chunk payments 5 (one yearly file)' is consistent only with yearly files, not with the §6 256 KiB flush rule."
+    ]
+   },
+   {
+    "design": "COMB: a mesh-native PQ Buzz on bChat Core, mesh-native.md",
+    "score": 6,
+    "fatalFlaws": [
+     "The MID and HIGH traffic rows apply one m̄ (4 or 16) to every message. But 89% of MID delivered copies come from 500-member rooms (0.05x499/28), where a 60 s 'min(64 msgs, 60 s after first unsigned)' window gives m̄ of about 1, which is 4,037 B per copy. Delivered-weighted, MID is about 3,700 B per copy, not 1,317 B, so inbox-tier traffic is about 4.8 Tbps, not 1.71 (about 2.8x). Device-tier traffic and per-device verifies (350/day) scale the same way.",
+     "HIGH is internally inconsistent: 10% of messages go to 1,000-member groups at 5 devices each, which is 5,000 leaves. That exceeds the design's own 1,500-leaf cap on E2EE rooms, so those messages should be open rooms published to Autonomi, not inbox fan-out.",
+     "An unmetered cross-subsidy: rooms of more than 32 member inboxes use 'a fan-out tree among member inboxes'. Other members' paid 30-day inbox reservations then forward the sender's traffic. That breaks B1 rule 1, 'Every metered operation names the paying account, and it is the USER's', inside a design that otherwise meters per user.",
+     "Settlement friction is ignored. E16 sells 30-day inbox reservations through bPay. At MID, $0.036 per user-year is about $0.003 per reservation, below any rail's fee. With 90% hosted at 1e10 that is about 0.9e10 x 12 / 3.156e7, roughly 3,400 tx/s. METABOLIC's voucher and yearly-top-up treatment is missing.",
+     "The phone-only free tier gives 'latency stated as unbounded'. That is honest but nominal for the median user."
+    ],
+    "bestIdeas": [
+     "The phone is never a mesh peer. One Comb Link uses about 288 KB/day of keepalive (100 B every 30 s), against about 75 GB/day for an x0x idle leaf. Inbox-to-inbox warm peering costs about 10.4 MB/day (50 x 3,456 x 60 B). Both reproduce.",
+     "The global-gossip arithmetic that bans public-mesh membership: 1e9 inbox nodes x 75 GB/day = 75 EB/day before any message. Presence beacons at the 10.31 KB floor cost N x 29.7 MB/day, which is 267 MB at N=9 and 7.6 GB at N=256.",
+     "The TreeKEM commit and tree-state table reproduces: commits of 15,575, 25,111, 39,415 and 48,951 B, and member state of n x 7,757 B (11.6 MB at 1,500 leaves, 233 MB at 30,000). It sets a quantified 1,500-leaf cap.",
+     "The archive batching lever is correct: 697 MB/yr at MID costs about $0.59 in monthly ANT batches, $3.83 in daily files, and $21.13 on Arweave.",
+     "Hosted inbox box sizing reproduces: 33,333 users per box, 6.15e10 B/day intake, 5.7 Mbps, 3.7 TB hot store, about $0.036 per user-year. It also gives a verify gate of at most 10 s of CPU per device-day at HIGH, which means v <= 7.6 ms."
+    ],
+    "citationErrors": [
+     "None found in the economics citations. The '$101/mo box' correctly cites LOADMODEL-1M.md:87 ('~$101/mo') as CLAIMED, and the '100k+' ceiling at :91 is labelled CLAIMED. Note that :91 itself concludes 'Forward bandwidth binds long before connection count' for video, the opposite of the text case. The design uses the number without stating that context."
+    ]
+   },
+   {
+    "design": "STRATA: PQ Buzz as a millennium envelope, millennium-first.md",
+    "score": 4.5,
+    "fatalFlaws": [
+     "The amortization claim is void at its own workload. Seals fire 'after 16 messages or 5 s of quiet'. At M=10 messages a day, any human typing gap is longer than 5 s, so n̄ is about 1. Every message then costs about 4,045 B (512 B padded wire + 3,533 B seal), which is 1.11x the brief's per-message-signed shape B (3,641 B). The design models n̄=4 (1,395 B). Real wire traffic is about 2.9x the §7 table: about 225 Gbps delivered at M=10, not 77.5.",
+     "The 'seal verifies/s globally' column is seals produced (msgs/s ÷ 4), not verifies. Each seal reaches k=6 devices, so M=10 is about 1.74M verifies/s, not 289,352 (6x undercount; another 4x if n̄=1). The design then prices '58 cores worldwide' at 200 µs as a server cost, but it says relays never verify ML-DSA. The work happens on devices, and the composite seal also needs an Ed25519 verify.",
+     "Economics is the thinnest of the five. There is no seed budget arithmetic. 'Passes by construction, NOT RUN' has no number behind it. 'StorageByte-days' is used as a unit although ResourceClass has no time dimension, and that gap is not flagged (contrast METABOLIC E5). Durable ack needs at least 2 independent relays per user, but the per-user relay cost uses one box divided by 500,000 users.",
+     "The free tier is 'reciprocal store-and-forward on contacts' devices', with no NAT or iOS analysis. It is nominal for phone-only users."
+    ],
+    "bestIdeas": [
+     "Archive arithmetic is correct and clever. Seals are compacted to the last seal per author-conversation, because the chain covers earlier messages. Monthly bundles cost $0.020, $0.126 and $0.126 per user-year at M=1, 10 and 100 (AR, ANT 3 chunks, ANT 3 chunks), and quarterly bundles bring M=10 to $0.042. All reproduce.",
+     "Keyless renewal: evidence records hash ciphertext, so any party (a renew-only agent, a peer, a paid service) can renew a sealed bundle without reading it. Renewal for all users costs about $621,033 per era on Arweave (1e10 x 2 KB, reproduced), user-paid. The OTS header file is 4.21 MB per year and 4.2 GB over 1,000 years.",
+     "The handover cost is placed explicitly: 498.6 TB spread across devices per era, 7.48 MB per user with 150 contacts. Connection duty of 0.1 gives 20,000 boxes, about $0.0024 per user-year."
+    ],
+    "citationErrors": [
+     "§7 cites 'the CLAIMED $100/month box (`:86`)'. LOADMODEL-1M.md:86 is the U-10G row, '64 GB RAM, 10 Gbps non-shared ... realism contested by [VPS-CA] ($300–500/mo)'. :17 adds that the spec 'does not exist anywhere in 2026'. The real $101/mo unit (:87) is the 1 Gbps class, so $0.0024 per user-year is understated by 3-5x if a 10 Gbps box is meant.",
+     "ARITH: the §7 'seal verifies/s globally' column (28,935 / 289,352 / 2,893,519) equals msgs/s ÷ 4, the seal production rate, not the verify rate (×k=6)."
+    ]
+   }
+  ],
+  "recommendedBase": "planet-scale.md (PQ Buzz COMB, Cell-Only Messaging Bus) should be the base. Under this lens it has the most complete arithmetic skeleton. Its workload model has low, centre and high columns plus the ruled floor, and it covers media, keeper storage, polls, the foreground-only connection model and a verify-CPU budget written as a formula. It is the only design that makes 'no global state' a falsifiable scale receipt (the locality slope gate with a planted global-topic tooth). Its payer-of-record split (sender pays conversation-cell egress including k fetches; reader pays for open cells) gives a free tier that genuinely receives, with no BNR line beyond E14. Its arithmetic reproduced except one constant (3,381 vs 3,349) and an optimistic b=16. METABOLIC is the better economics design but is weaker on scale. BESIDE is the only design whose amortization ratios hold at realistic message rates, but its scale model is one community per relay with k=6.",
+  "mustGraft": [
+   "From METABOLIC: the full meter table (ResourceClass unit, counter, payer of record, named refusal per resource), plus E5. E5 says byte-time and connection-time units do not exist in spend.rs:62-70 and need a ruling. COMB-planet's use of MeshSecond for connections must be relabelled as the interim mapping.",
+   "From METABOLIC: user-bought vouchers in voucher-escrow, one aggregated SpendReceipt per voucher per epoch, and the settlement tx/s table (317 tx/s for yearly top-ups at 1e10). The base must add the multiplier for keeper-operator fragmentation, then cap or consolidate it (for example one voucher provider fronting several keepers). It must stay inside Rail C: no system-issued per-identity balance, enforced by test ECON-7.",
+   "From METABOLIC: the seed-cap arithmetic and the dBNR/dN = 0 proof (2.18e8 cold-start fetches/day, capped at 1e7/day = 41 GB/day, binding at about 4.58e8 users, with a named overflow refusal). It replaces the base's unsupported 'seed load 0'.",
+   "From METABOLIC: ECON-1/2/6/7/9 and A1-ECON-8D as negative-control tests in the same job. Also E6 (A-native settlement fits only 12.7M-30.0M payers, RECEIPT_R8_VAULTA_RAM.md:47-50) and the 'no recipient premium field' spam rule.",
+   "From BESIDE: realistic amortization. Every design must state messages-per-signature as a function of its window and a declared per-conversation burst model, and must recompute traffic by delivered copy, not by sent message. Adopt BESIDE's long-window option (a T_max of hours, shown as 'not yet settled') for low-rate senders. Keep the per-cell checkpoint so readers amortize too, and do not adopt BESIDE's per-author cross-channel checkpoint.",
+   "From BESIDE: reproducible calc scripts for every number. The base's P0(c) workload calculator must also fix the 3,381/3,349 constant before rung 1 can pass. Also take BESIDE's lawful no-postage spam fallback (membership plus per-address quotas, RULING_WALLET_GATED_OPS_2026-08-20.md:59-61) for use while E5 is unruled.",
+   "From STRATA: archive seal compaction (keep only the last seal per author-conversation) and keyless renewal of ciphertext evidence by any party. Renewal costs about $621K per era for all users, user-paid.",
+   "From COMB mesh-native: the single phone link at about 288 KB/day idle, the presence-beacon arithmetic that bans public-mesh membership (N x 29.7 MB/day), and the TreeKEM commit and tree-state table behind its leaf cap.",
+   "For all designs: a Rail C depth check on the archive line. Compare aggregate ANT demand at 1e10 against acquirable liquidity and network capacity: $0.2B to $5.9B a year against roughly $10/day of current network-wide node income. Price the non-merkle per-transaction gas. Show the archive cost as a range, not a one-date point, and keep devices as the system of record so an unfillable swap degrades to 'archive waits', never to message loss.",
+   "For all designs: an honest free-tier statement for phone-only users that covers NAT/TURN (20-40%, unmeasured, G-3 BLOCKED) and iOS background limits. Free receive works through sender-paid keepers. Free send to an offline phone-only recipient works only when both parties are online at the same time."
+  ]
+ },
+ {
+  "lens": "Tungsten conformance, security and longevity. Questions asked of each design: does every axis 1-6 and law L1-L5 map to a falsifiable test family with teeth and the correct ruled evidence class? Are the PQ choices sound: hybrid modes, signature amortization that does not quietly weaken authenticity, and an honest MLS/TreeKEM status? Is metadata privacy addressed? Does the design survive the extinction of each component, DNS included (tonight's SNI incident) and WebAuthn RP-domain capture? I checked the load-bearing citations against primary sources: the bzdid succession.rs and genesis.rs, SPEC-BPQ-1, SPEC-RUSTEOSVM-1 §2.4, bsigner CONTRACT.md, bpq-core layout.rs, the btungsten-bench and meshdep budgets, buzz-relay ingest.rs, buzz-acp relay.rs, the ledger, voucher-escrow and spend.rs.",
+  "scores": [
+   {
+    "design": "BESIDE (lawful-minimal)",
+    "score": 6,
+    "fatalFlaws": [
+     "The relay timestamp gate breaks BESIDE's own healing and replacement claims. The Buzz relay refuses any event whose created_at is more than 900 s from server time, with no kind exemption (C:/Users/travi/buzz-src/crates/buzz-relay/src/handlers/ingest.rs:2005-2011: `const MAX_TIMESTAMP_DRIFT_SECS: i64 = 900; // ±15 minutes` ... `\"invalid: event timestamp too far from server time\"`). Section 6 lets the outbox re-deliver identical bytes only and forbids re-signing. So after any outage longer than 15 minutes, the pending events are refused forever. PQB-HEAL ('partition the relay', zero duplicates after recovery) and PQB-REMOVE ('replacement relay seeded from archives and devices') cannot pass. BESIDE says the relay change is 'one match arm per kind', which is not enough.",
+     "One extinction row cannot pass as written. PQB-EXTINCT says 'relay software replaced by a different NIP-01 relay' must recover the same PQ-settled history. But BESIDE's own §3.4 says stock relays refuse K_BIND, K_CP and K_ATT, so a non-fork relay cannot serve the attestations.",
+     "The format of record is NIP-01 plus secp256k1, permanently. After a Shor break, every new message is unauthenticated until its checkpoint (T_max defaults to 24 h). The only alternative is per-message attestation at about 8.2 KB per message, more than double native per-message ML-DSA (3,641 B). This is a transitional design, not a millennium format.",
+     "It is the weakest on confidentiality and metadata. Channels are plaintext on the relay. The PQ-private lane exposes participant p-tags and timing to the relay, has no forward secrecy anywhere, and stops at 29 recipient devices. Checkpoints add a new leak: activity counts per window.",
+     "The matrix names evidence as 'live receipt' and 'CI vectors + live drill' rather than the ruled result classes. The L1 row's teeth are just 'as axis 6'."
+    ],
+    "bestIdeas": [
+     "No new bpq1 label and no new crypto. Reusing the §5b statement over a checkpoint event keeps the PQ04 domainsDisjoint proof valid unchanged.",
+     "'Attest what you signed, never what you observed.' Checkpoint ids come from the signer's own journaled outbox, and relay-observed attestation gets a weaker named class.",
+     "The checkpoint is hybrid by construction. Each event still carries Schnorr, the checkpoint carries ML-DSA-65, and the SHA-256 id list is fixed-width and injective, so authenticity is never weaker than today's.",
+     "L5 AGREEMENT is defined as 'the relay serves this persona's own latest K_CP from its journal head'.",
+     "An AUTH denial is terminal only when it comes from a relay whose key is in the charter, so a captive portal cannot stop an agent. This matches the verified buzz-acp hazard (relay.rs:3804-3806: `!message.trim_start().starts_with(\"error:\")`).",
+     "F1 nip01SerInjective is a formal obligation, using the bChat '0' marker bug as the RED precedent.",
+     "The P0.a live drill runs on the SNI-filtered building network with 0 manual actions and a per-agent 'road N, rung M' receipt.",
+     "Retroactive checkpoints are worded 'attested at T_now, never at send time'."
+    ],
+    "citationErrors": []
+   },
+   {
+    "design": "COMB (mesh-native on bChat Core)",
+    "score": 6,
+    "fatalFlaws": [
+     "The core E2EE-room property has no candidate implementation. It needs a 'TreeKEM-class, X-Wing path encryption' GroupKeyEngine that exists at no pin. saorsa-mls uses 'SPEC-2' ids with no RFC 9420 interop (up/adr/0012: 'no IETF wire interop in this release'), and its multi-member status is conflicting. A second PQ MLS implementation is UNVERIFIED.",
+     "The checkpoint signing message is ML-DSA over `\"bpq1/comb-ckpt\" ‖ SHA3-256(root ‖ device_id ‖ window ‖ ts)`, which carries no group or conversation id and no suite id. Cross-room binding rests on chain-head contents the design never specifies. In linked mode one Merkle root spans rooms, so splice and replay binding is not defined, and only the high-level `checkpointBindsChain` obligation is listed for it.",
+     "It deliberately departs from RFC 9420 per-message content authentication, opening a 60 s or 64-message insider window. Its own §14.3 says this 'needs its own proof and an outside review', yet no formal obligation for insider-forgery detection is scheduled.",
+     "Attribution is ML-DSA-65 only, with no classical or hash-based hedge on messages. A lattice break leaves only OTS-anchored archives.",
+     "The L1 row has no teeth and L2 names only a refusal criterion. Most rows are classed 'MEASURED', even for properties that should be formal."
+    ],
+    "bestIdeas": [
+     "The road-policy law file. A PLANE LAW amendment becomes a signature rather than code: an adapter refuses any frame whose plane is unlisted with a named ROAD_PLANE_FORBIDDEN, and a road counts only after its own runtime receipts.",
+     "Named authenticity states: provisional, UNBOUND (the window passed with no valid checkpoint) and FORGED (a checkpoint omits a message in its own chain range). Authority-bearing messages (approvals, grants, membership changes, payments) are always signed individually.",
+     "The T_rekey = 10 min app-level rule, with the visible state 'a departed member can still read new messages' and sends held in sensitive rooms.",
+     "x0x presence arithmetic: N × 29.7 MB/day per cell from the global presence topic, which forces x0x cells to stay owner-private. Delivery never uses the x0x store, and gaps are repaired by pulling identical bytes.",
+     "The SLH-DSA checkpoint fallback is priced (50,174 B framed, 1,194 B per message at m̄=64), so ML-DSA extinction has a costed path.",
+     "Mailbox token = HMAC-SHA3(pairwise_secret, label ‖ day), and no sender id appears on the road."
+    ],
+    "citationErrors": [
+     "§6 says authority-bearing messages are 'admitted with `E_STEP_ADMITTED` (`memory/fable-seat-policy-selected-senders.md:17-19`)'. Those memory lines concern WF-08 ('The open problem is no longer \"can Fable work\" ... but **WF-08**: Fable candidate → Buzz durably suspends the workflow ...') and do not contain E_STEP_ADMITTED. That code is defined in crates/bnrose-exec-core/src/lib.rs and used in crates/bnrose-exec-host/src/opexec.rs."
+    ]
+   },
+   {
+    "design": "PQ Buzz METABOLIC (economics-first)",
+    "score": 4.5,
+    "fatalFlaws": [
+     "Metadata (PLAUSIBLE, because the layout leaves it ambiguous). The LINK record lists conv id 32, sender roster index 8, seq 8 and t 9 beside an AEAD nonce and tag. Read that way, providers see a static per-conversation id, per-sender index, sequence and timestamp. The allowed wording 'Providers see sizes, timing and locators, never contents' is then prettier than the truth (false-signal law), and rotating inbox locators do not help while conv id stays static.",
+     "Groups of up to about 1,000 members share one epoch key, re-wrapped only on membership change. That gives no forward secrecy, no post-compromise security, and an insider forgery window until the checkpoint. The design never says how the X-Wing epoch-key encapsulation is sender-authenticated: the KEM is unauthenticated, and it is unstated whether the rekey rides a signed ROSTER record.",
+     "L1 is misread. Its matrix row tests 'no two live keys for one persona' with a 'PROVE (roster state machine)' class. L1 is ≥10B active sovereigns for 1,000 years with no dependence on any original key, algorithm, clock, chain, organization or UI. Its extinction rows exist only as prose in §10.",
+     "Attribution is ML-DSA-only, with no hybrid. The pairwise attribution window is up to 1 hour or 64 messages.",
+     "The reference provider's settlement reuses voucher-escrow, whose ruled law puts a tithe line on every receipt. That contradicts E10's 'no tithe line on third-party commodity forwarding' (see the citation error)."
+    ],
+    "bestIdeas": [
+     "Economic negative controls with teeth in the same job: ECON-1 (one funder settles two users, which must FAIL), ECON-2 (planted auto-top-up is red), ECON-4 (byte-scan every receipt for plaintext, conv ids and message hashes), ECON-7 (planted genesis grant convicted) and ECON-9 (client tally versus provider epoch receipt catches 1% over-count).",
+     "Providers issue one SpendReceipt per voucher per epoch, aggregated, with a pairwise payment persona in spender_bdid. Receipts then scale with users, not messages, and per-message timing is hidden from the receipt store.",
+     "The offer card has no recipient-premium field, so an attention price cannot be expressed ('unnameable beats forbidden').",
+     "Padding and cover traffic are a metered resource the user chooses to buy, so privacy is metered rather than promised.",
+     "Seed-budget arithmetic shows ∂(BNR cost)/∂N = 0 beyond the cap, with a named refusal for overflow joiners and seed-free invite joins."
+    ],
+    "citationErrors": [
+     "E10 says a tithe line on BNR providers is something 'voucher-escrow supports (`crates/voucher-escrow/src/lib.rs:9`)', as if it were optional. The source states it as law on every receipt: 'THE TITHE: 10% on top of cost basis, a DISTINCT line on every receipt.' Reusing voucher-escrow for third-party providers (§8.3) would therefore emit the tithe line that E10 says is absent."
+    ]
+   },
+   {
+    "design": "STRATA (millennium-first, bzm1 = bChat Core v2)",
+    "score": 8,
+    "fatalFlaws": [
+     "The global verify-CPU arithmetic omits fan-out. The 'seal verifies/s globally' column is msgs/s ÷ n̄ (289,352/s at M=10). But every one of the k=6 recipient devices verifies, so the real figure is about 1.74M/s. The '58 cores worldwide' figure is 6× low and framed as server work, although relays never verify ML-DSA.",
+     "Authority-bearing messages inside conversations (agent commands, approvals, grants) are not required to carry their own seal. Agents could act on an 'unsealed', insider-forgeable group message during the 5 s window. COMB and METABOLIC both sign such kinds individually.",
+     "The pairwise X-Wing handshake and group sender-key distribution do not say what authenticates them. A KEM ciphertext is unauthenticated until a seal arrives.",
+     "'Durably acknowledged' is redefined as device fsync plus 'held by at least 2 independently operated relays'. That counts leased caches (30-day default) as one of the §2.4 stores, so 'durable' can lapse when the lease ends.",
+     "Lab seals use frozen `bsigner sign` (bheart.signature/1 over file bytes) and carry no `bzm1/seal` label, so F2 domainsDisjoint does not cover them. Axis 2 replay refusal is classed 'KAT + DIFFERENTIAL', which are algorithm-vector classes, not protocol-refusal classes. The L1 row's teeth are '—'."
+    ],
+    "bestIdeas": [
+     "Every seal is a composite ML-DSA-65 plus Ed25519 signature (+64 B), which hedges both a young-lattice break and a Shor break. It is the only real hybrid signature in the round.",
+     "A three-state validity rule, VALID / INVALID / UNATTRIBUTABLE, decided by component status and evidence predating `distrust`, with obligation F6 that the rule is monotone. The claimed `at` is never evidence.",
+     "Evidence records carry both SHA3-256 and SHA-256 digests. RFC 4998 timestamp and hash-tree renewal runs over ciphertext, so anyone can renew without being able to read.",
+     "An algorithm registry of admit / prefer / retire_new / distrust records with no 'redefine', plus a 'two independent conforming implementations' Proof gate before `prefer`.",
+     "An airgapped verifier receipt (`bzm-verify` under `unshare -n`, strace counts 0 `connect()`), a zero-import wasm verifier and a Rosetta field naming the spec, model and verifier addresses.",
+     "Drills D1-D14 plus a century-transition run, each with PASS criteria stated before the run and a positive control. This applies the CLAUDE.md §5 rule that uniform failure means the probe is broken.",
+     "E6 finds a real domain-capture inversion, verified in source: crates/bzdid/src/succession.rs:44-47 says 'the lower `signedBy` index wins — r0', and r0 is PRF-derived (bzdid-architecture-decision.md:49). Capturing the RP domain then threatens takeover, not just availability. Drill D13 is red until this is ruled. No other design caught it.",
+     "E19 flags that the bzDiD root is SHA-256 forever (genesis.rs: `bzDiD = \"did:b:\" || base32(sha256(genesis_op))`).",
+     "T-TRUNCATE lengths are placed at the correct SHA3-256 rate boundary (135/136/137, 271/272/273)."
+    ],
+    "citationErrors": [
+     "Minor: the WB004 quote 'at 29 days out a 30-day TTL refuses to exist' is cited at scripts/btungsten/README.md:426, but it sits on line 427. Its other spot-checked citations are correct: pirate-haul-rulings-2026q3.md:73 ('the ONLY component that survives platform denial') and :86 ('someone in 200 years holding an archived CAR'), genesis.rs KeyAlg {Ed25519, MlDsa65} 'added BY RULING', succession.rs r0 priority, atmirror record_sig.rs 3309 B, bnr-archive BNRARCV1, bpq.js ROSETTA."
+    ]
+   },
+   {
+    "design": "PQ Buzz COMB (Cell-Only Messaging Bus, planet-scale)",
+    "score": 7,
+    "fatalFlaws": [
+     "Message id = (cell, slot, generation) omits the key epoch. In MLS-class schedules generations restart per epoch and leaf slots are reused after removal, so 'duplicates refused' can drop legitimate messages and gap detection can alias across epochs. The checkpoint signing string (`bzc1/checkpoint ‖ cell_id ‖ slot ‖ gen_start ‖ count ‖ SHA3-256(leaf_digests)`) has the same omission and also omits the alg/suite id.",
+     "Attribution is ML-DSA-65 only, with no hybrid. The 1,000-year section is thin: there is no validity rule for old signatures after a break, no SHA-256 or SHA3 extinction drill, and nothing on the bzDiD root's SHA-256 dependence. OTS renewal is the only re-anchoring.",
+     "Its own text admits that messages from a device that dies before checkpointing stay group-authentic forever. That is a permanent authenticity gap, not a window.",
+     "P3 (sealed cells of 33-256 leaves) depends on a PQ MLS implementation the estate does not have and has not selected.",
+     "RP-domain loss is treated as touching only r0, which misses the verified r0-outranks-r1 arbitration law (succession.rs:44-47)."
+    ],
+    "bestIdeas": [
+     "A falsifiable locality law for axis 5. A probe node's load must not depend on N, checked by regressing it on log10 N over rungs 100/1k/10k (95% CI includes 0 and |slope| ≤ 2% per decade). The teeth are a planted global-topic subscriber that must show N-proportional load and be convicted, including in simulation.",
+     "A 54 B outer header with no DID, npub or recipient. 'Isolated by design: the header names no sender' is allowed only after a header-scan test, and header layout carries a PROVE-UNIVERSAL obligation. It also honestly names the postage-pseudonym linkage at a keeper.",
+     "The most rigorous ML-DSA bench plan in the round: ≥20 runs so p90/p95 are reportable (stats.rs PERCENTILE_MIN_N = 20), the no-wait4 caveat on Windows (measure.rs), RustCrypto, libcrux and noble as separate rows, and saorsa/integritychain fips204 only as its own rows if E1 is ruled. Phone results are NOT-RUN rather than extrapolated, and bit-flip and empty-signature teeth mark a run Miswired.",
+     "Tier-S control messages (membership, keepers, grants, moderation) are individually ML-DSA-signed with expiry.",
+     "The leaf digest covers plaintext, so a checkpoint survives re-encryption and archiving.",
+     "Keepers must show 0 ML-DSA verifies on sealed cells, enforced by a counter.",
+     "The verify budget is fixed before the run: a 10,000-message backlog in ≤5 s CPU, mapped to t_v per b.",
+     "Recovery-storm load is bounded per cell (2,315 re-admissions/s spread across cells)."
+    ],
+    "citationErrors": []
+   }
+  ],
+  "recommendedBase": "STRATA (millennium-first) should be the base under this lens. It is the only design whose continuity machinery would be hard to retrofit later: composite ML-DSA plus Ed25519 seals, the VALID / INVALID / UNATTRIBUTABLE validity rule with a monotonicity proof, dual-hash evidence renewed over ciphertext, an append-only algorithm registry with no redefine, an airgapped verifier receipt, and D1-D14 plus century-transition drills with positive controls. It is also the only design that found the verified r0 RP-domain capture inversion and the SHA-256 root dependence. Its defects are local and fixable: the fan-out arithmetic, unsealed authority messages, unstated handshake authentication, relay-lease 'durable ack', and a few evidence classes. The other designs' defects are structural: BESIDE's NIP-01 format of record and the relay drift gate, COMB's missing group engine, METABOLIC's metadata leak and L1 misread.",
+  "mustGraft": [
+   "From planet-scale: the axis-5 locality law with its falsifiable regression criterion (|slope| ≤ 2% per decade over rungs 100/1k/10k, 95% CI includes 0) and the planted global-topic tooth, carried into simulation as the MODEL class.",
+   "From planet-scale: the 54 B identifier-free outer header with the header-scan test and PROVE-UNIVERSAL header obligation, the keeper zero-ML-DSA-verify counter, and its ML-DSA bench lane (n ≥ 20, implementation rows separated, the Windows wait4 caveat, phone NOT-RUN never extrapolated, bit-flip and empty-signature teeth).",
+   "From planet-scale: Tier-S control messages individually signed with expiry. Fold this into STRATA so any authority-bearing kind (agent commands, approvals, grants, membership changes, payments) carries its own composite seal and is never acted on while unsealed.",
+   "From COMB (mesh-native): the named authenticity states provisional, UNBOUND and FORGED, plus the T_rekey rule with its visible 'departed member can still read' state and send-hold for sensitive rooms.",
+   "From COMB (mesh-native): the PLANE LAW switch as a signed road-policy law file (founder one-press, ROAD_PLANE_FORBIDDEN refusal, a road counts only after runtime receipts). This makes the x0x amendment a signature, not a rewrite.",
+   "From BESIDE: P0.a roads and charter on the live Buzz relay as the immediate SNI-incident fix (live drill on the building network, 0 manual actions, per-agent 'road N, rung M' receipts, SHA-256-checked media rewrite).",
+   "From BESIDE: AUTH denial is terminal only from a relay whose key is in the charter, and the L5 AGREEMENT definition 'the road serves the persona's own latest checkpoint head'.",
+   "From BESIDE: the §5b-over-checkpoint migration bridge with zero new labels ('attest what you signed, never what you observed', retroactive checkpoints worded 'attested at T_now') and the F1 nip01SerInjective obligation for legacy NIP-01 records. The relay fork must also relax or bypass the ±900 s created_at gate (ingest.rs:2005-2011) for outbox redelivery and archive re-import, or identical-bytes healing fails.",
+   "From METABOLIC: the ECON negative-control battery (ECON-1 shared funder must FAIL, ECON-2 planted auto-top-up red, ECON-4 receipt byte-scan for contents and ids, ECON-7 zero system-issued balances, ECON-9 double-entry tally) and epoch-aggregated SpendReceipts under a pairwise payment persona.",
+   "Fixes STRATA must make itself: correct the global verify figures for fan-out (×k); specify the ML-DSA authentication of the X-Wing handshake and sender-key distribution; bind epoch and suite id into every seal and message id; keep §2.4 durable ack on stores the user controls or pays for durably, not on 30-day leases; map axis-2 rows to MEASURED or CHECK-SAMPLED classes rather than KAT/DIFFERENTIAL; add teeth to the L1 row; add a `bzm1/seal` label to lab seals before F2 can claim to cover them."
+  ]
+ }
+]
