@@ -205,7 +205,13 @@ s = socket.create_connection(("127.0.0.1", int(sys.argv[1])), timeout=10)
 s.sendall(b"STATS\n")
 open(sys.argv[2], "wb").write(s.makefile("rb").readline())
 PYEOF
-printf '%s\n%s\n%s\n' "$latencies" "$(cat "$W/rss-b1" 2>/dev/null)" "$(cat "$W/rss-c3" 2>/dev/null)" > "$W/raw-metrics"
+# RSS collectors: GNU time writes its exit-status diagnostic into the
+# same stream — keep only the numeric measurement, and FAIL if it is
+# missing (a silent empty field is not a measurement; review refinement).
+RSS_B=$(grep -E '^[0-9]+$' "$W/rss-b1" 2>/dev/null | tail -1)
+RSS_C=$(grep -E '^[0-9]+$' "$W/rss-c3" 2>/dev/null | tail -1)
+[ -n "$RSS_B" ] && [ -n "$RSS_C" ] || { echo "FATAL: RSS measurement missing (b=[$RSS_B] c=[$RSS_C]; raw: b=$(tr '\n' ' ' < "$W/rss-b1" 2>/dev/null) c=$(tr '\n' ' ' < "$W/rss-c3" 2>/dev/null))"; exit 1; }
+printf '%s\n%s\n%s\n' "$latencies" "$RSS_B" "$RSS_C" > "$W/raw-metrics"
 python3 - "$W" "$JSON_OUT" <<'PYEOF'
 import json, sys
 w, out = sys.argv[1], sys.argv[2]
@@ -225,6 +231,7 @@ receipt = {
     "faults": ["cut-before-dispatch", "cut-after-dispatch", "cut-during-recovery",
                "duplicate GET delivery", "wrong-key receipt delivery"],
     "leg2Dispatches": len(lat),
+    "latencyNote": "10 dual dispatches on one host, fsyncs included — a baseline, not a statistically strong scale result",
     "dispatchLatencyMs": {"p50": pct(50), "p95": pct(95), "p99": pct(99), "max": lat[-1]},
     "courier": stats,
     "nodePeakRssKiB": {"nodeB-dispatch": lines[1].strip(), "nodeC-lose-response": lines[2].strip()},

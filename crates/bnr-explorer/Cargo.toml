@@ -1,0 +1,15 @@
+[package]
+name = "bnr-explorer"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Read-only explorer kernel (serves L1, eternal data): bounded listing batches with stale-result refusal, open-time revalidation, and identity-first bounded previews. no_std, no clock, no I/O — every byte it judges arrives as an argument."
+publish = false
+
+[dependencies]
+sha2 = { version = "0.10", default-features = false }
+
+# the estate's existing Rust storage trait, for the end-to-end test only: the
+# kernel reads THROUGH `atmirror::rail::Rail`, it never becomes a second one
+[dev-dependencies]
+atmirror = { path = "../atmirror" }

@@ -100,7 +100,7 @@
 
   /* the sheets: a bottom sheet over a scrim, two answers side by side */
   .sheet { display: none; position: fixed; inset: 0; background: var(--scrim); align-items: flex-end; z-index: 60; }
-  body[data-state="delete"] .sheet-del, body[data-state="flip"] .sheet-flip { display: flex; }
+  body[data-state="delete"] .sheet-del, body[data-state="flip"] .sheet-flip, body[data-state="look"] .sheet-look { display: flex; }
   .sheet .card {
     width: 100%; max-width: 620px; margin: 0 auto; padding: 22px 16px calc(22px + env(safe-area-inset-bottom));
     border-radius: var(--sk-radius-xl) var(--sk-radius-xl) 0 0; background: var(--card); border-top: 1px solid var(--line);
@@ -110,12 +110,20 @@
   .sheet .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 0; }
   .sheet .actions button { min-height: 52px; padding: 8px 12px; font-size: 17px; }
   #flip-actions { grid-template-columns: 1fr; gap: 10px; }
+  /* the look sheet: what the preview worker returned, bounded on screen as it is in memory */
+  .look { max-height: 52vh; overflow: auto; margin-bottom: 18px; }
+  .look:empty { display: none; }
+  .look pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 400 14px/1.5 ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; color: var(--ink); }
+  .look img { display: block; max-width: 100%; height: auto; border-radius: var(--r-thumb); }
+  /* a long list lays out only the rows near the screen (no visual change) */
+  .file { content-visibility: auto; contain-intrinsic-size: auto 190px; }
 
   .hide { display: none !important; }
   body[data-state="empty"] .has-file { display: none !important; }
   body[data-state="file"] .empty-only,
   body[data-state="delete"] .empty-only,
-  body[data-state="flip"] .empty-only { display: none !important; }
+  body[data-state="flip"] .empty-only,
+  body[data-state="look"] .empty-only { display: none !important; }
 
   /* RAVER — the same page after dark: violet ground, magenta for the one thing to do */
   body[data-reg="raver"] {
@@ -225,6 +233,21 @@
          With three rails this is no longer a toggle, and a toggle-shaped control
          would have to choose one of two destinations for the visitor. -->
     <div class="actions" id="flip-actions"></div>
+  </div>
+</div>
+
+<!-- A look before saving. What fills #look-view comes from the preview worker
+     (bnr-explorer-worker.js running surfaces/bnr-explorer.wasm), never from the
+     file's name; `data-kind` on it says which verdict is showing. -->
+<div class="sheet sheet-look" role="dialog" aria-modal="true" aria-labelledby="look-title">
+  <div class="card">
+    <h2 id="look-title">A look at this file</h2>
+    <p id="look-body"></p>
+    <div class="look" id="look-view"></div>
+    <div class="actions">
+      <button class="ghost" type="button" id="lookClose" data-reg-copy="look-close">Close</button>
+      <button class="primary" type="button" id="lookSave" data-reg-copy="look-save">Save to this phone</button>
+    </div>
   </div>
 </div>
 
