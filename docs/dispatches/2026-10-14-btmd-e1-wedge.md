@@ -337,3 +337,23 @@ unique records — is dedup-shaped), not more priority. E1 remains
 UNQUALIFIED for promotion; stronger claims need n≥30/leg.
 
 [skip ci]
+
+## E1-IHAVE-COALESCE-001 — scoping measurement (2026-10-16)
+
+Founder-named next optimization, scoping step executed from the
+campaign's own receipts (window deltas; `scripts/btmd/e1/e1-coalesce-scope.mjs`):
+
+- **e1 leg**: IHAVE deferrals Δ = 425,195 over 90 node-trials → retry
+  multiplicity ≈ **472× per unique record per node**.
+- **e1off leg**: ≈ 314× per unique record per node.
+
+The IHAVE load is overwhelmingly RETRIES of ~10 unique announcement
+identities per trial. Bounded coalescing/deduplication is the correct
+next mechanism — exactly the founder's capacity question: the
+reservation redistributes bandwidth; the demand curve itself is
+inflated ~300–470× by redundant re-announcements. Design constraints
+carried forward: coalescing must not suppress DISTINCT records, must
+not delay the FIRST useful announcement, the hard budget stays
+unchanged, and qualification is n≥30 interleaved trials per leg.
+
+[skip ci]
