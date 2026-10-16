@@ -36,6 +36,12 @@ const FORBIDDEN: &[&str] = &[
     "mnemonic",
     "seed_phrase",
     "keystore",
+    // the static-friendly law of the serving surface: no cookies, no websocket, no framework
+    "Set-Cookie",
+    "websocket",
+    "tungstenite",
+    "hyper::",
+    "actix",
 ];
 
 fn src_dir() -> PathBuf {
