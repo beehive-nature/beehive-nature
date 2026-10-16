@@ -301,3 +301,39 @@ deliverable, announcement coalescing/dedup is the next mechanism, not
 more priority).
 
 [skip ci]
+
+## E1 comparison campaign — 5 legs × 10 interleaved trials (2026-10-15/16)
+
+Evidence: `docs/dispatches/evidence/2026-10-15-btmd-e1-campaign/`
+(campaign.json — individual outcomes preserved; summary.md). Runner:
+screen-run.sh v2 (fail-fast, verdict identity validated). Zero trial
+failures; 50/50 verdicts.
+
+| leg | within-gate (mean share of pairs) | LATE latency median | NEVER |
+|---|---|---|---|
+| baseline (release, observe_only) | 20/20 × 10 trials (100%) | — | 0 |
+| shed (release, stock) | ~42.5% | 58.3 s | 3 |
+| shedhi (release, budget×10) | 100% | — | 0 |
+| e1off (candidate, share 0) | ~55% | 56.8 s | 0 |
+| **e1 (candidate, share 250)** | **~76%** | **15.6 s** | **0** |
+
+The controlled comparison (e1 vs e1off — identical binary, identical
+budget, the ONLY difference being the reservation): within-gate
+delivery rises from ~55% to ~76% of pairs and the late tail collapses
+from the ~57 s anti-entropy cycle to a median of 15.6 s; the NEVER
+tail is absent in both candidate legs (3 occurrences in stock shed).
+The build-version control (e1off vs shed, share 0 in both) shows
+~55% vs ~42.5% within this sample's spread (0–18/20 per trial) —
+recorded, not explained.
+
+**Verdict (screening-level, n=10/leg):** the recovery-lane reservation
+is a real, direction-positive mechanism — but 100% within-gate is NOT
+reached, and the remaining late deliveries sit just past the gate
+(median 15.6 s, max 21.2 s). That shape matches the founder's capacity
+ceiling: a reservation redistributes bandwidth, it does not create it.
+The named next mechanism is announcement COALESCING/DEDUPLICATION of
+IHAVE for store scopes (the retry storm — 2,724 deferrals for ~10
+unique records — is dedup-shaped), not more priority. E1 remains
+UNQUALIFIED for promotion; stronger claims need n≥30/leg.
+
+[skip ci]

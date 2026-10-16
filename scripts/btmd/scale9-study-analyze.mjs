@@ -104,7 +104,7 @@ function attribution(rd) {
 }
 
 for (const run of readdirSync(runsDir).sort()) {
-  if (!run.startsWith('s9study-') && !run.startsWith('e1-')) continue;
+  if (!run.startsWith('s9study-') && !run.startsWith('e1camp-') && !run.startsWith('e1-')) continue;
   const rd = join(runsDir, run);
   const vPath = join(rd, 'receipts', 'verdict.json');
   const lPath = join(rd, 'receipts', 'ledger.json');
