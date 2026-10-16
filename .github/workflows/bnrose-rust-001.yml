@@ -170,7 +170,10 @@ jobs:
           echo "$HOME/mir-json-inst/bin" >> "$GITHUB_PATH"
           echo "SAW_RUST_LIBRARY_PATH=$HOME/mir-json/rlibs" >> "$GITHUB_ENV"
           "$HOME/mir-json-inst/bin/mir-json" --version
-      - name: BNROSE SAW — correspondence (2 proofs + 2 teeth)
+      - name: BNROSE SAW — classifier selftest (tool failures are never counterexamples)
+        if: always()
+        run: sh scripts/bnrose-rust-001/saw-check.sh --selftest
+      - name: BNROSE SAW — correspondence (2 proofs + 2 teeth, explicit verdicts only)
         if: always()
         timeout-minutes: 15
         run: sh scripts/bnrose-rust-001/saw-check.sh "$HOME/saw/bin/saw"

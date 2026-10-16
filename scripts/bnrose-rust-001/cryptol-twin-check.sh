@@ -138,11 +138,17 @@ fi
 # ---- the composed verdict ---------------------------------------------------
 # A composition, never a single :prove verdict: PROVEN only if every
 # obligation it rests on printed Q.E.D. in this run.
+_TOTAL=$(echo $OBLIGATIONS | wc -w | tr -d " ")
+_PROVED=$(echo $PROVEN | wc -w | tr -d " ")
 if [ -z "$OPEN" ] && [ "$RED" = 0 ]; then
-  say "COMPOSED  the exact replacement law + its composition (fail-closed without the flag; any recorded effect closes the gate; the gate is exactly the conjunction; a replacement's entity is fresh and rowless below saturation; old records stand; the saturation corner reuses slot 15; the SAW binding lemmas; two sovereigns one effect under the ASSUMED destination model): PROVEN over $(echo $OBLIGATIONS | wc -w | tr -d " ") obligations + 2 controls"
+  say "COMPOSED  the exact replacement law + its composition (fail-closed without the flag; any recorded effect closes the gate; the gate is exactly the conjunction; a replacement's entity is fresh and rowless below saturation; old records stand; the saturation corner reuses slot 15; the SAW binding lemmas; two sovereigns one effect under the ASSUMED destination model): PROVEN over $_TOTAL obligations + 2 controls"
 elif [ "$RED" = 0 ]; then
   say "COMPOSED  the exact replacement law: NOT-PROVEN (open:$OPEN) — recorded, never a wedge"
 fi
 
 [ "$RED" = 0 ] || { say "cryptol-twin: RED — see the REFUTED/RED rows above" >&2; exit 1; }
-say "cryptol-twin: green (every executed obligation PROVEN; open ones recorded, never success)"
+# Qualification-record distinction (independent review 2026-10-16): the
+# green line CARRIES THE COUNTS. A green workflow with open obligations
+# is a legitimate recorded state — but it must never be readable as
+# "all obligations proved".
+say "cryptol-twin: green — proved $_PROVED/$_TOTAL obligations; open $(($_TOTAL - _PROVED)) (recorded, never success); green here means NO REFUTED obligation, not all-proved"
