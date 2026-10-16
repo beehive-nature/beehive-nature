@@ -44,6 +44,12 @@ jobs:
         env:
           BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm
         run: sh scripts/bnrose-rust-001/crossnode-demo.sh target/release/bnrose-exec-host docs/receipts/bnrose-rust-001/crossnode-demo-ci.txt
+      - name: Network-partition gate (rootless netns; REAL iptables drops or a loud failure — simulated faults are never a substitute)
+        run: |
+          command -v unshare >/dev/null 2>&1 || { echo "FAIL CLOSED: unshare is missing; the netpart gate requires real namespaces"; exit 1; }
+          command -v iptables >/dev/null 2>&1 || { echo "FAIL CLOSED: iptables is missing; the netpart gate requires real packet drops"; exit 1; }
+          unshare -Urn sh scripts/bnrose-rust-001/netpart-control.sh || exit 1
+          unshare -Urn sh scripts/bnrose-rust-001/netpart-demo.sh target/release/bnrose-exec-host docs/receipts/bnrose-rust-001/netpart-demo-ci.txt docs/receipts/bnrose-rust-001/netpart-metrics-ci.json
       - name: "Benchmarks (labeled workload + this runner)"
         env:
           BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm

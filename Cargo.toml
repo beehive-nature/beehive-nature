@@ -12,6 +12,7 @@ members = [
     "crates/adapter-carrier",
     "crates/adapter-lti",
     "crates/adapter-pixellab",
+    "crates/adapter-store",
     "crates/atmirror",
     "crates/b-token",
     "crates/bswap",
