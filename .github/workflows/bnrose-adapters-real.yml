@@ -1,0 +1,50 @@
+name: BNROSE-ADAPTERS-REAL
+
+# The settlement-adapter lane (successor to NETPART-001, founder order
+# 2026-10-17): the Hive and EVM rails whose transaction ids are recomputed
+# from canonical bytes, under live-wire fault injection (drop, drop-ack,
+# delay) against a REAL EVM node. Fail closed everywhere: a missing anvil
+# is an ERROR, never a skip. Live-chain probes are NOT run here — they are
+# receipt-only (docs/receipts/bnrose-adapters-real/), the wb004-live
+# precedent.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && github.run_id || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lane:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      # real EVM node software, fail closed (the tests panic loudly when
+      # the binary is missing — a skipped suite is not a pass)
+      - name: Install anvil (pinned foundry v1.8.5)
+        run: |
+          set -e
+          mkdir -p "$RUNNER_TEMP/foundry"
+          curl -sSL -o f.tar.gz https://github.com/foundry-rs/foundry/releases/download/v1.8.5/foundry_v1.8.5_linux_amd64.tar.gz
+          curl -sSL https://github.com/foundry-rs/foundry/releases/download/v1.8.5/foundry_v1.8.5_linux_amd64.sha256 -o f.sha256
+          sha256sum -c <(awk '{print $1"  f.tar.gz"}' f.sha256)
+          tar -xzf f.tar.gz -C "$RUNNER_TEMP/foundry" anvil
+          command -v "$RUNNER_TEMP/foundry/anvil" >/dev/null || { echo "FAIL CLOSED: anvil missing"; exit 1; }
+          echo "BNROSE_ANVIL_BIN=$RUNNER_TEMP/foundry/anvil" >> "$GITHUB_ENV"
+      - name: Battery (unit vectors + wire-mock + the anvil devnet partition battery)
+        env:
+          BNROSE_ANVIL_BIN: ${{ env.BNROSE_ANVIL_BIN }}
+        run: |
+          test -x "$BNROSE_ANVIL_BIN" || { echo "FAIL CLOSED: anvil missing — the devnet battery is not a skip"; exit 1; }
+          cargo test -p bnrose-settle-adapters --locked
+      - name: Probe selftest (offline pin checks)
+        run: cargo run -p bnrose-settle-adapters --bin bnrose-adapter-probe --locked -- selftest
