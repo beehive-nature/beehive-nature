@@ -55,20 +55,24 @@ choosing them is the sovereign's act (ORDERS-1:61).
 
 ## Receipts (this beat)
 
-`cargo test -p bnrose-evolve`: 8 unit + 23 battery rows, both engines,
-real processes. `scripts/bnrose-evolve/bsigner-xcheck.sh`: envelopes from
-the real `bsigner` binary verify by role and fail closed.
-`scripts/bnrose-evolve/teeth.sh`: 12 planted faults, each convicted by its
-row. CI: `.github/workflows/bnrose-evolve.yml`. Local receipts are in
+`cargo test -p bnrose-evolve`: 10 unit + 28 battery rows (5 of them the
+anchor), both engines, real processes. `scripts/bnrose-evolve/bsigner-xcheck.sh`:
+envelopes from the real `bsigner` binary verify by role and fail closed.
+`scripts/bnrose-evolve/teeth.sh`: 17 planted faults (5 in the anchor), each
+convicted by its row. CI: `.github/workflows/bnrose-evolve.yml`. Local receipts are in
 `docs/receipts/bnrose-evolve/`.
 
 ## Boundaries, named
 
-- **Journal tamper-evidence is an unkeyed SHA3 chain.** It convicts
-  unchained edits, reordering and truncation. A writer with store access can
-  rewrite it consistently. Catching that needs `Journal::head()` anchored
-  where that writer cannot reach (Vaulta, Autonomi, a peer over x0x): the
-  next beat, not built.
+- **Journal tamper-evidence is an unkeyed SHA3 chain, plus an external
+  anchor when one is used.** The chain convicts unchained edits, reordering
+  and truncation; a writer with store access can rewrite it consistently, and
+  `Controller::open` accepts that. `Controller::open_anchored` compares the
+  journal against the latest `anchor::AnchorStatement` (head, latest PROMOTE
+  digest, policy digest) and refuses a shorter journal or an anchored prefix
+  that is not the anchored one, before recovery writes anything. Records
+  after the latest anchor are only as strong as the chain. The Vaulta
+  carrier is `crates/bnrose-anchor-vaulta` (this crate stays socket-free).
 - **Workers are bounded by wall time and reaped, not sandboxed.** There is no
   namespace and no syscall filter, and a worker's own children are not
   tracked. After a controller crash, an orphaned worker is named and never

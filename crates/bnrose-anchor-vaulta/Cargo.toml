@@ -1,0 +1,13 @@
+[package]
+name = "bnrose-anchor-vaulta"
+version = "0.1.0"
+edition.workspace = true
+license = "Apache-2.0"
+description = "The Vaulta carrier for bnrose-evolve journal anchors: reads the latest anchor of a subject from the evanchor contract's table (chain id pinned, every endpoint must agree, any doubt fails closed) and builds the UNSIGNED anchor action for the estate's signer lanes. It holds no key and signs nothing; the anchor statement and the open-time check live in bnrose-evolve, which stays socket-free."
+publish = false
+
+[dependencies]
+bnrose-evolve = { path = "../bnrose-evolve" }
+serde_json = "1"
+# the same pin and features banchor reads chains with; reads only
+ureq = { version = "2.12", default-features = false, features = ["tls", "json"] }

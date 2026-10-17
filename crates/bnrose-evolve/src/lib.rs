@@ -54,15 +54,20 @@
 //! - Storage is the embedded `adapter-store` seam (SQLite reference,
 //!   SurrealKV candidate; NO-SERVER-DB). The journal is an unkeyed SHA3 chain:
 //!   it convicts unchained edits and truncation; a writer with store access
-//!   can rewrite it consistently, which only an external anchor of
-//!   [`journal::Journal::head`] would catch (not built here).
+//!   can rewrite it consistently, which only an external anchor catches:
+//!   [`anchor`] states the head and checks a journal against the latest
+//!   anchor at [`Controller::open_anchored`]; carrying the statement to
+//!   Vaulta is the `bnrose-anchor-vaulta` crate, which this crate does not
+//!   depend on.
 //! - The executor bounds a worker by wall time and reaps it; it does not
 //!   sandbox it (no namespace, no syscall filter), and a worker's own
 //!   children are not tracked. Native workers are bounded by the OS only.
-//! - Nothing here signs, holds a key, opens a socket, or spends. Anchoring a
-//!   decision on Vaulta, persisting evidence on Autonomi, and carrying
-//!   decisions between peers over x0x are later beats with their own gates.
+//! - Nothing here signs, holds a key, opens a socket, or spends. Publishing
+//!   an anchor on Vaulta is signed in the estate's signer lanes, never here;
+//!   persisting evidence on Autonomi and carrying decisions between peers
+//!   over x0x are later beats with their own gates.
 
+pub mod anchor;
 pub mod attest;
 pub mod canon;
 pub mod controller;
@@ -74,6 +79,7 @@ pub mod lessons;
 pub mod policy;
 pub mod tree;
 
+pub use anchor::{AnchorCheck, AnchorLookup, AnchorStatement};
 pub use attest::{Role, RoleKey, SigAlg, TrustRoot};
 pub use controller::{Controller, Decision, DecisionKind, RecoveryReport};
 pub use digest::Digest32;

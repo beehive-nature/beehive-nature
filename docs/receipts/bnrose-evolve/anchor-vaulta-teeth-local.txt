@@ -1,0 +1,10 @@
+$ sh scripts/bnrose-evolve/anchor-vaulta-teeth.sh
+# tree: merge 62bc51891 (anchor 308489608 + base 4f75e1292); Linux 6.18.33.2-microsoft-standard-WSL2 x86_64; 8 cpu; 2026-10-17T00:41:53Z
+control: the unmutated copy runs the carrier suite
+control: GREEN
+TEETH wrong-chain-read: CONVICTED by only_a_wrong_chain_is_refused_by_the_chain_check
+TEETH split-answers-merge: CONVICTED by endpoints_must_all_answer_and_all_agree
+TEETH row-trusted-over-statement: CONVICTED by a_row_that_does_not_carry_its_statement_is_refused
+TEETH failed-endpoint-skipped: CONVICTED by endpoints_must_all_answer_and_all_agree
+TEETH: 4 convicted, 0 escaped
+exit=0

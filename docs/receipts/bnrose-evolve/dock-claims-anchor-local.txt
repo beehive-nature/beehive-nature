@@ -1,0 +1,15 @@
+$ node e2e/dock-claims.mjs
+# tree: merge 62bc51891 (anchor 308489608 + base 4f75e1292); 2026-10-17T00:34:54Z
+  page prints: 35 · 8 · 2
+  PASS the page prints exactly three hero numbers — 3 found
+  PASS CLAIM 35s · the timed crate is unchanged since measurement — chain-zano tree 6a56c1ba
+  PASS CLAIM 35s · the page carries its stamp
+  (skipping the real cold run — pass --remeasure to actually time it)
+  PASS CLAIM 3 · held-test count matches the page — #[ignore] attributes = 8, page says 8
+  PASS CLAIM 3 · every held test names its own blocker — crates/adapter-lti/src/lib.rs, crates/bnrose-anchor-vaulta/tests/carrier.rs, crates/bsigner/src/bpq.rs, crates/bsigner/src/psbt.rs, crates/bsigner/src/taproot.rs, crates/chain-zano/src/slip0010.rs, crates/mastery-ledger/src/lib.rs, crates/watchpay/tests/ledger_contention.rs
+  PASS CLAIM 2 · STATUS.md still carries the unstarted-work sentence
+  PASS CLAIM 2 · and it still names both lanes (firmware, legal review)
+  PASS CLAIM 2 · the page says 2, matching the two lanes named — page says 2
+
+8 passed, 0 failed
+exit=0
