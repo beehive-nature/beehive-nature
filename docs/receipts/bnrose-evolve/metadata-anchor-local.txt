@@ -1,4 +1,4 @@
 $ sh -c cargo metadata --locked --format-version 1 >/dev/null && echo metadata-ok
-# tree: merge 3ff396919 (anchor 70f216ca8 + base 16e3a6b59); Linux 6.18.33.2-microsoft-standard-WSL2 x86_64; 8 cpu; 2026-10-15T12:54:54Z
+# tree: merge 62bc51891 (anchor 308489608 + base 4f75e1292); Linux 6.18.33.2-microsoft-standard-WSL2 x86_64; 8 cpu; 2026-10-17T00:34:42Z
 metadata-ok
 exit=0
