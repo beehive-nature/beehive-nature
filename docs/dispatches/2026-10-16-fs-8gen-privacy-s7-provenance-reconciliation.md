@@ -118,3 +118,66 @@ gate. No ratification has been issued: both PRs remain open, and this
 document claims no founder authority by itself.
 
 — zCode seat, instrument staged, 2026-10-16
+
+## Rider 2 — RATIFICATION EXECUTED (founder word recorded; audit corrections applied)
+
+**The founder's word, recorded verbatim from this seat's chat, 2026-10-16:**
+`RATIFY APPROVED` — the explicit gesture the staged instrument called for.
+The relaying review's "no authorization is inferred" clause speaks for the
+review itself; the founder's covering word is the decision.
+
+**Both audit corrections applied before recording:**
+
+1. **All three §7-failure receipts preserved** (not two):
+   [38975122019](https://github.com/beehive-nature/beehive-nature/actions/runs/38975122019)
+   and [38975139548](https://github.com/beehive-nature/beehive-nature/actions/runs/38975139548)
+   (both `tests` at the landing push `c210e4269`) and
+   [38974880451](https://github.com/beehive-nature/beehive-nature/actions/runs/38974880451)
+   (PR pull-request `tests`). All three failed in `static` at the §7
+   identity check and remain in the audit trail permanently.
+2. **Committer description corrected, precisely as the metadata reads:**
+   the nine commits as they stand on MAIN carry the founder's GITHUB-NOREPLY
+   identity as AUTHOR and the founder's LOCAL GIT identity
+   (`loVis waTer <loviswater44@gmail.com>`) as COMMITTER — a rebase
+   artifact, not a separately-identified local seat. The ORIGINAL 10-05 PR
+   lineage carried the noreply identity as BOTH author and committer.
+   NEITHER shape satisfies §7's web-flow exemption. The earlier "local seat
+   as committer" wording is withdrawn as imprecise; the violation itself
+   was and remains real.
+
+**The ruled exception set — full 40-char hashes, with the original PR
+lineage mapping retained:**
+
+| # | On main (rebased landing) | Original 10-05 PR commit | Subject |
+|---|---|---|---|
+| 1 | fbba92ddb8142a95a6ffeadc30d3288835d5b6fd | f6a7c8bb8afe4b576fe4f91bfc7ed9f59ca0363f | start public tree at deceased branch entries |
+| 2 | 4c39ad70d75528660c09431d9f3a1838290dec69 | 0a3538c003f56f9f655dd91d40aba02a76831230 | focus the active spatial tree after climb |
+| 3 | 0b0e3cc5df228500bb6cc99b228606f3b083430a | a344d22013f5e3dad0a07f16bba6900038f3822a | publish deceased-entry tree renderer |
+| 4 | 345d7a762437e37731b1b5ca3039fe066a6c816f | d2e10f4db0f94ccc83633e3c3c45478f4c3c446d | follow spatial tree contract and exclude living UI |
+| 5 | 959fff653e8c81c241ca8f6c0c032b672abfdfe2 | ab08ae7345b4ada96b2d98ddb38d066b94bb90fd | lock deceased-entry tree privacy boundary |
+| 6 | c917e0da339043572c7c53c045abefb67dc34207 | d4a2f4c22044aef366f293e24a5ce7c2b96e774c | render grandparent self branch without blank path |
+| 7 | bacebeaaad5f4865d801cfa4b18d993b295a551b | c4a51b2df20ce431965e2bc04615099c9822c5c5 | lock grandparent self rendering |
+| 8 | 12392476dd621765a1328c5fcabb7fddf716cef2 | 6d82f02bada858d5bea69e4c5f4e1eda02c07c38 | traverse hidden living stubs without rendering them |
+| 9 | 4e5d3989027ea1f621f00bdbf80d192528e41346 | 785ff43be07c42caefa79766a2fe02cf9cf9861a | keep ancestry beyond hidden living relatives |
+
+**The ruling as executed** (five conditions, per the ratified instrument):
+(1) the eighteen hashes above — nine landed, nine original — are the
+COMPLETE exception set; (2) the nine are authorized DELEGATED work (the
+codex seat under the founder's GitHub account), with NO claim that the
+original metadata satisfied §7 or that the founder personally authored
+them; (3) the three §7-failure runs stay preserved — this is an explicit
+historical exception, never a retroactive passing verdict; (4) §7 stands
+unchanged for all future commits (identity-check.sh untouched; this seat's
+ranges comply); (5) this ratification authorizes NOTHING else — no
+additional genealogy collection, no ANT publication (both remain their own
+gates).
+
+**Closure verified + executed this turn**: coverage re-verified (the ten
+genealogy files byte-unchanged `c210e4269` → tip, so the hosted green runs
+— `d938ba682`, `7d1bcc766`, `1c8727f1d` — tested exactly the landed
+implementation); receipts with both the green-run links and the three §7
+failures posted on both PRs; PR 347 takes landed-through-main; PR 346
+takes superseded; both take their receipts and the API closure this turn.
+ANT publication remains separately gated.
+
+— zCode seat, executing the founder's recorded word, 2026-10-16

@@ -10,7 +10,11 @@
 #
 # The hook is a thin delegator - all scanning logic lives in
 # scripts/secret-scan.sh (single source of truth, diff mode), so the hook
-# can never drift from what CI re-scans with on push.
+# can never drift from what CI re-scans with on push. Since 2026-10-16 it
+# also delegates to scripts/stack-inventory-check.sh (the generator's own
+# --check against the STAGED member list and page) when that script exists
+# in the checkout, so a stale surfaces/stack.html is refused at commit time
+# with its remedy instead of on four CI heads at once.
 #
 # Contract: e2e/hooks-installed.test.sh proves the wiring in a fresh
 # repository (vector refused, PUBLIC-CONSTANT marker passes, clean passes)
@@ -45,7 +49,11 @@ cat >"$hook" <<'HOOK'
 # remedy, never a bare block (order 2b1d848a: a guard that blocks the
 # documented workflow with no remedy line gets bypassed with --no-verify
 # by the second person who hits it).
-sh "$(git rev-parse --show-toplevel)/scripts/secret-scan.sh" diff
+# Since 2026-10-16: the generated stack inventory (surfaces/stack.html)
+# is checked against the staged workspace member list the same way, by
+# scripts/stack-inventory-check.sh, when that script exists here.
+top=$(git rev-parse --show-toplevel)
+sh "$top/scripts/secret-scan.sh" diff
 rc=$?
 if [ "$rc" -eq 2 ]; then
   echo "pre-commit: the scanner REFUSED this environment - nothing was scanned." >&2
@@ -55,9 +63,14 @@ if [ "$rc" -eq 2 ]; then
   echo "  at all - git itself fatals there before any hook runs)." >&2
   echo "  --no-verify is not a bypass: CI re-scans the whole tree on push." >&2
 fi
+if [ "$rc" -eq 0 ] && [ -f "$top/scripts/stack-inventory-check.sh" ]; then
+  sh "$top/scripts/stack-inventory-check.sh" diff
+  rc=$?
+fi
 exit "$rc"
 HOOK
 chmod +x "$hook" 2>/dev/null || true
 
 echo "install-hooks: wired $hook"
 echo "  proof: stage a 48+ hex line without a marker and commit - it must refuse."
+echo "  proof: add a workspace member without regenerating surfaces/stack.html - it must refuse."
