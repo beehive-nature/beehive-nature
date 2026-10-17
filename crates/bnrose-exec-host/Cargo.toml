@@ -8,6 +8,7 @@ publish = false
 
 [dependencies]
 bnrose-exec-core = { path = "../bnrose-exec-core" }
+bnrose-replacement-law = { path = "../bnrose-replacement-law" }
 bnrose-exec-wasm = { path = "../bnrose-exec-wasm" }
 btungsten-wb001 = { path = "../btungsten-wb001" }
 libcrux-ed25519 = "=0.0.9"
