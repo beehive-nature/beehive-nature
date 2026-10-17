@@ -73,3 +73,48 @@ this turn. A pointer to this dispatch is posted on PR #347 where reviewers
 look.
 
 — zCode seat, provenance reconciliation, 2026-10-16
+
+## Rider — the staged ratification instrument (verified review adopted; awaiting the founder's word)
+
+The founder-directed review verified this reconciliation and ADOPTED the
+exception route with a framing correction, retiring option (b):
+
+- **Correction adopted**: any ratification names the nine as **authorized
+  delegated work, not commits personally authored by the founder** — the
+  original metadata never satisfied §7 and is not claimed to have.
+- **Option (b) retired as weaker**: re-landing identical content adds no
+  history (the changes are already on main), cannot remove the nine, and
+  typing the approved identity into new metadata proves nothing about the
+  founder's authorization. A recorded hash-scoped exception is cleaner and
+  more auditable.
+
+**The instrument, staged for the founder's explicit gesture** — on the
+founder's word ("ratified", or his own wording, in chat or on the PR), the
+ruling is recorded as follows:
+
+1. The nine immutable commit hashes are the COMPLETE exception set:
+   `fbba92ddb` `4c39ad70d` `0b0e3cc5d` `345d7a762` `959fff653`
+   `c917e0da3` `bacebeaaa` `12392476d` `4e5d39890`.
+2. The founder accepts the work and its delegated provenance (codex seat
+   under his GitHub account), WITHOUT claiming the original metadata
+   satisfied §7.
+3. The original failing CI receipts remain preserved in the audit trail,
+   pinned by ID: tests run `38975122019` (the landing push, static §7) and
+   PR pull-request tests run `38974880451` (static §7) — links to be
+   attached to both PRs at closure, beside the green privacy runs.
+4. All future commits remain subject to the UNCHANGED §7 identity and
+   attribution rules (identity-check.sh untouched; this seat's ranges
+   already comply).
+5. This ratification authorizes NOTHING else — no additional genealogy
+   collection, no ANT publication (both remain their own gates).
+
+**Closure sequence on ratification** (owning seat, mechanical): record the
+founder's exact ruling → attach the nine hashes + the hosted-test receipts
+(green: `d938ba682` / `7d1bcc766` / `1c8727f1d` runs; §7 failures: the two
+pinned above) → verify both PRs' substantive coverage one final time →
+receipt on PR #347 as landed-through-main and close it → receipt on PR #346
+as superseded and close it → ANT proceeds only through its own separate
+gate. No ratification has been issued: both PRs remain open, and this
+document claims no founder authority by itself.
+
+— zCode seat, instrument staged, 2026-10-16
