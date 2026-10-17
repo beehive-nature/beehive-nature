@@ -1,0 +1,21 @@
+[package]
+name = "adapter-store"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "NO-SERVER-DB (founder ruling 2026-10-13): the engine-neutral embedded-storage trait. SQLite is the reference implementation, SurrealKV the candidate; both are in-process libraries with path-only constructors — no database daemon, no remote endpoint, no privileged operator. Neither engine receives authority over identity, consensus, receipts or peer discovery."
+
+[dependencies]
+rusqlite = { version = "0.32", features = ["bundled"] }
+surrealkv = { version = "1", optional = true }
+# SurrealKV 1.0's commit()/close() are async; the adapter drives them on a
+# private current-thread runtime so the seam stays synchronous. tokio is
+# already transitive through surrealkv itself.
+tokio = { version = "1", features = ["rt"], optional = true }
+
+[features]
+# The SurrealKV candidate rides a feature so a stripped build can carry the
+# reference implementation alone; CI runs the default set (both engines),
+# because an untested candidate is prose, not a qualification.
+default = ["surrealkv"]
+surrealkv = ["dep:surrealkv", "dep:tokio"]
