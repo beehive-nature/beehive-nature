@@ -26,7 +26,7 @@ Four axes kept separate — copyright / contract (FS ToS §83) / custodian agree
 - `hint-census-2026-10-07`: 823 pids swept, 85 open hints (23 cohort + 62 extramural), 3 extramural persons redacted.
 - Copyright axis: the VALUES are facts — not protectable expression. Contract/custodian axis: this is bulk-extracted FS index-database content; FS's published guidance permits personal research, not wholesale index republication. Both axes recorded separately; the qualification does not convert one into the other.
 
-**Completion criteria for the Class-I gate (either, founder's call):** (a) rule replicate-as-is; or (b) the next ANT edition ships Class-I files stripped to the conclusions already expressed in the estate-authored corpus person objects (Class F) — the facts survive, the FS index-database dump does not ride the permanent network.
+**Completion criteria for the Class-I gate (corrected 2026-10-17 — a founder ruling sets risk posture, it does not create redistribution rights):** (a) rights established through the FS/custodian channel (ToS §83 contemplates prior written permission); or (b) **omitted from the permanent-network edition — the recommended default**: the ANT edition is built from rights-qualified estate-authored facts and citations, so the facts survive in Class-F conclusions while the FS index-database dump does not ride the permanent network. GO files are per-file candidates, never blanket clearance.
 
 ## Custodian census (title-regex bucketing — this pass's own method, boundary named)
 
@@ -39,7 +39,7 @@ Notes: the us-federal bucket's UNDERLYING records are US public domain — that 
 - `ETERNALIZATION-RECEIPT.json`: quoted-not-purchased, purchased=null, uploaded=null.
 - **Correction (descendant commit, founder order 2026-10-17):** the first push of this dispatch cited the shared checkout's stale 2026-10-02 copy of `zblood-storage-economics.json` — "2.76 ANT quote exceeded the 2.5 ANT ceiling → paid path code-disabled" — **withdrawn as superseded**. Main's current file carries the founder's **100 ANT storage cap** (ruling 2026-10-03, "that is like $0.25 cents. 100 ANT cap for now", banked by PR #326 + `ETERNALIZATION-EDITION-V2.json::separatedCeilings`; **reaffirmed by founder order today, "THE CEILING IS 100 ANT"**) and a 2026-10-11 quote of 5.009 ANT for the 286,801,920-byte edition — within bounds. Purchased/uploaded remain false. Spend approval is STANDING-GRANTED (founder 2026-10-02c, "approval always. never gate me"); the payment path is disabled for **capability, not price**: ant 0.3.9 exposes no atomic storage/gas ceilings, and the hosted purchase path caps files at 32 MiB. The one irreducible act stays the founder's key-holder signature.
 - Image harvest terminal @dbe231eac (2026-10-16): 382 attempted = 314 downloaded / 84,055,524 B / 68 explicit denials; queue 376 entries 100% resolved.
-- **Privacy gate separate and open:** PRs **#346** and **#347** verified OPEN today via `gh` — rights qualification does not substitute for them; both gates close before any ANT edition.
+- **Privacy gate — RECONCILED 2026-10-17 (stale at first push, corrected):** PRs **#346** (superseded) and **#347** (landed-through-main) are **CLOSED** — closures executed 2026-10-17T19:09Z via API with receipts, gh-verified this lane, after this lane's earlier same-day OPEN check; founder ratification **"RATIFY APPROVED, chat 2026-10-16"** recorded verbatim in the s7 instrument @8e5fa5d05 (nine-hash exception set in full, no founder-personal-authorship claim, no retroactive CI verdict, and a NO-EXPANSION clause: **no genealogy collection, no ANT publication**). ANT remains separately gated behind the rights + purchase gates below; this seat verified the repo record, not the original approval conversation.
 
 ## Provenance of the analysis
 
@@ -52,8 +52,16 @@ Notes: the us-federal bucket's UNDERLYING records are US public domain — that 
 - No FamilySearch access of any kind this lane; no corpus mutations; nothing deleted (retain order); no GitHub writes before this branch; no money, no ANT.
 - The Class-I content's standing git-history exposure is retained per the founder order — this qualification governs the future irreversible replication step, not the retained past.
 
+## Reconciliation rider 2026-10-17 (descendant, after external review)
+
+- **Privacy gate reconciled:** first push recorded #346/#347 OPEN (true at this lane's earlier gh check); the closures executed 2026-10-17T19:09Z after that check. Corrected above; the ratification commits (a2b2abf7d + aa5e366dd + 8e5fa5d05, with the no-expansion clause) now sit under this branch via the origin/main merge.
+- **Quote-staleness law adopted:** the 2026-10-11 quote (5.009055375 ANT / 286,801,920 B) is historical affordability evidence under the 100 ANT cap — never a purchase authorization against a new edition hash; upload time requires a fresh quote bound to the exact artifact + destination, both ceilings enforced against the actual transaction, stop on any mismatch.
+- **Class-I boundary sharpened:** rights are established through the custodian channel or the content is omitted — a founder ruling alone cannot create them (FS guidance distinguishes fact extraction for family history from wholesale index republication). Recommended default adopted: the ANT edition omits Class-I.
+- **CI state named:** every hosted check on this branch was pending at rider-writing (fleet saturation continuing from the 10-16 watches); no verdict exists; no polling loop per estate discipline — the next push or wake re-checks once.
+- No FS access, no corpus mutations, no money, no ANT, no merge of this PR by this seat.
+
 ## Next owners
 
-- **Class-I ruling + ANT edition assembly** → zBlood/preservation seat (criteria above; privacy PRs #346/#347 must merge first).
+- **Class-I disposition + ANT edition assembly** → zBlood/preservation seat (criteria above; privacy gate now CLOSED @8e5fa5d05; recommended composition = Class-I omitted; the payment-client capability blocker is owned there too).
 - **Custodian census completion** (5,248 unresolved titles) → optional follow-up, needed only if custodian-exact accounting is ever required.
 - **NARA re-source lane** (public-domain federal subset, if the founder ever wants image bytes on a permanent network) → new lane, founder-gated.
