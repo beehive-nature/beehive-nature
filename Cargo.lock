@@ -625,6 +625,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "bnrose-netpart"
+version = "0.1.0"
+dependencies = [
+ "bnrose-exec-core",
+ "bnrose-exec-host",
+ "btungsten-wb001",
+ "serde_json",
+]
 name = "bnrose-replacement-law"
 version = "0.1.0"
 
