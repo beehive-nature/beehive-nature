@@ -107,3 +107,35 @@ Zero FamilySearch mutations. Writes: the walker fix (private tier, backed
 up) + this dispatch.
 
 — zCode seat, order27 wake, 2026-10-16
+
+## Authed continuation rider (same wake, founder signed in mid-poll)
+
+Founder word "your logged in" + the staged bounce-back landed the tab on the
+control ark. **Oracle AUTHED, wire-proven**: v8 `person/KWJ4-XBD/details` =
+200 / 120,649 B — byte-identical to every authed read since 10-09; the
+session survived four SPA wedges and one webview-guest death, re-proven by
+wire after each recovery. Shape note banked: `sourceCount` / `readOnly` /
+`name` are TOP-LEVEL fields on this wire (fact-level nested paths mislead a
+naive parse — one parse slip caught and corrected in-session).
+
+- **KWJ4-XBD readOnly:true — 5TH CONFIRMATION** (Albert Perry Rockwood,
+  9 June 1805 – 26 November 1879, sourceCount 108, living false). Its 5
+  parked hints + NUMIDENT refusal stay behind the founder lock call.
+- **Control-ark 404 anomaly REPRODUCED while authed** (2nd authed occurrence
+  — now a recurring class, no longer one-off): robots.txt and the tree-data
+  wires serve normally around it → record-page-specific, undiagnosed,
+  monitor. That record's image is already downloaded in the manifest — no
+  data risk. Wire stays the auth criterion.
+- **Tasks page UNREADABLE today** — honestly NOT checked: 3 tasks-SPA wedges
+  (getState 30s timeouts), 1 webview-guest death (order-15 class, recovered
+  by pause), and the person-details page wedged once too; robots.txt cure
+  applied each time. The empty-tasks streak stands on the 10-11, 10-15 and
+  10-16-morning reads. Operational law reinforced: on wedge-heavy days stop
+  SPA attempts early — the founder's signed-in session outranks the check
+  (it did survive; nothing was lost).
+- Pane parked STABLE on robots.txt (wire oracle proven from there); session
+  named "FamilySearch — image queue — KEEP".
+
+Zero FS mutations this rider. Opens unchanged: 4 restricted arks behind the
+founder-gated 401-shift guard fix; founder rulings (QG8Q class, Christen
+cluster, Briggs duplicate, Norway parish, Don Ray pass); ANT #346/#347 codex.
