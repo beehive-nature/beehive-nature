@@ -52,20 +52,23 @@ say() { printf '%s\n' "$*"; }
 # process died outside the prover's control — the verdict is not
 # trustworthy, whichever direction it points. Contradictory verdicts
 # (success AND failure evidence in one log) are likewise never green
-# (review round 3, 2026-10-17). Exit-status contract (round 3):
+# (review round 3, 2026-10-17). Exit-status contract (rounds 3+4):
 #   PROVEN  requires rc == 0.
-#   REFUTED requires a terminal exit COMPATIBLE WITH SAW's actual
-#           refutation behavior — the script aborts with an ordinary
-#           non-zero code (observed 2 hosted). Explicitly refused:
-#           rc == 124 (the timeout(1) wrapper) and rc >= 128 (death
-#           by signal). A counterexample printed by a process that
-#           then timed out or was killed is not a refutation.
+#   REFUTED requires rc in 1..=123 — an ORDINARY nonzero exit from
+#           the SAW process itself (observed 2 hosted; 1 also pinned).
+#           Explicitly refused: rc == 0 (the documented contract says
+#           refutations terminate nonzero — a zero exit with failure
+#           evidence is not a clean refutation), GNU timeout's
+#           reserved codes 124..=127 (time limit / timeout-command
+#           failure / not-executable / not-found — wrapper failures,
+#           not SAW verdicts), and rc >= 128 (death by signal).
 #   Everything else — unknown tool failures included — INCONCLUSIVE.
 classify_log() {
   _log="$1"; _rc="${2:-0}"
-  # Timeout / signal termination first: no verdict from a killed
-  # process is trustworthy, in either direction.
-  if [ "$_rc" = 124 ] || [ "$_rc" -ge 128 ] 2>/dev/null; then
+  # Killed or wrapper-failed process first: no verdict from it is
+  # trustworthy, in either direction. 124 = timeout fired; 125..=127 =
+  # timeout-command failure / not executable / not found; >=128 = signal.
+  if [ "$_rc" -ge 124 ] 2>/dev/null; then
     printf 'INCONCLUSIVE\n'
     return 0
   fi
@@ -80,7 +83,10 @@ classify_log() {
   elif grep -q 'Proof succeeded' "$_log" 2>/dev/null; then
     if [ "$_rc" = 0 ]; then printf 'PROVEN\n'; else printf 'INCONCLUSIVE\n'; fi
   elif grep -qi 'counterexample\|Proof failed' "$_log" 2>/dev/null; then
-    printf 'REFUTED\n'
+    # A refutation must come from a process that terminated nonzero
+    # (round 4): rc == 0 with failure evidence contradicts the
+    # documented SAW contract and fails closed.
+    if [ "$_rc" -ge 1 ] 2>/dev/null; then printf 'REFUTED\n'; else printf 'INCONCLUSIVE\n'; fi
   else
     printf 'INCONCLUSIVE\n'
   fi
@@ -110,7 +116,15 @@ if [ "${1:-}" = "--selftest" ]; then
   [ "$(classify_log "$T/refuted-124.log" 124)" = INCONCLUSIVE ] || { say "selftest: refutation-from-a-timed-out-process misclassified (round-3 counterexample 1: a tooth must not pass on timeout)"; exit 1; }
   [ "$(classify_log "$T/contradictory.log" 0)" = INCONCLUSIVE ] || { say "selftest: contradictory verdicts misclassified (round-3 counterexample 2: success AND failure evidence is never green)"; exit 1; }
   [ "$(classify_log "$T/refuted-signal.log" 137)" = INCONCLUSIVE ] || { say "selftest: refutation-from-a-signalled-process misclassified"; exit 1; }
-  say "saw-check selftest: GREEN (explicit, clean, terminal verdicts only; timeouts, signals, crashes, mixed and contradictory results are never green in either direction)"
+  # Round-4 boundary: GNU timeout reserves 125..=127 for wrapper
+  # failure / not-executable / not-found — not SAW verdicts; and a
+  # ZERO exit with failure evidence contradicts the documented
+  # refutation contract (SAW aborts nonzero). Both fail closed.
+  [ "$(classify_log "$T/refuted.log" 125)" = INCONCLUSIVE ] || { say "selftest: refutation-with-timeout-wrapper-failure (125) misclassified"; exit 1; }
+  [ "$(classify_log "$T/refuted.log" 126)" = INCONCLUSIVE ] || { say "selftest: refutation-with-not-executable (126) misclassified"; exit 1; }
+  [ "$(classify_log "$T/refuted.log" 127)" = INCONCLUSIVE ] || { say "selftest: refutation-with-not-found (127) misclassified"; exit 1; }
+  [ "$(classify_log "$T/refuted.log" 0)" = INCONCLUSIVE ] || { say "selftest: refutation-with-zero-exit misclassified (zero exit contradicts the documented nonzero refutation contract)"; exit 1; }
+  say "saw-check selftest: GREEN (explicit, clean, terminal verdicts only; timeouts, wrapper failures, signals, crashes, zero-exit and contradictory results are never green in either direction)"
   exit 0
 fi
 
