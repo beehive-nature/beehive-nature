@@ -100,3 +100,47 @@ Aug 1955 marriage date stays recorded, not resolved.
   `readOnly` recheck, then probe PAGE_RENDERABLE on the control ark. The frontier
   starts only if that page renders.
 - On the founder's word: land the §3 correction; act on R1–R5.
+
+## 6. Addendum, same day: signed-in wake (founder signed in, chat 2026-10-17)
+
+Four-state oracle, re-run 2026-10-17T23:23:21Z (tab parked on `/en/`):
+
+| state | verdict | receipt |
+|---|---|---|
+| AUTHENTICATED | **TRUE** | v8 wires answer 200 |
+| API_READABLE | **TRUE** | v8 `person/KWJ4-XBD/details` = 200 / 120,644 B / "Albert Perry Rockwood" / sourceCount 108 / living false; `summary` = 200 / 1,186 B |
+| PAGE_RENDERABLE | **TRUE** | control ark `33S7-9GY8-1XT` now renders the image viewer (Film # 004811600, image 852 of 1,895), after the three authed "Page Not Found" readings ending 10-16 |
+| PROVIDER_WRITABLE (KWJ4-XBD) | **FALSE** | `readOnly: true` on both summary and details. Seventh confirmation; the Rockwood lock stands |
+
+### Frontier method, probed read-only on one record
+
+- **Rendered DOM works:** `1:1:Q29L-TFNZ` (a Massachusetts town birth
+  record, colonial era) rendered in about 16 s and links exactly one image ark,
+  `3:1:33S7-9RSP-NG1`.
+- **The SPA's own data wire carries the mapping:** the record page calls
+  `/ark:/61903/1:1:{id}?useSLS=true&useRolesOverride=false` (200). Its JSON
+  holds `EXT_DATA_ORIG.IMAGE_ARK` = `3:1:33S7-9RSP-NG1` plus
+  `FS_UNSUPPORTED.FS_IMAGE_APID` = `TH-1951-22583-15089-78`. This revises the
+  09-28/09-29 receipt: `?useSLS=true` **alone** 404s, but with
+  `&useRolesOverride=false` the wire is live. The apid in this payload is a
+  lead only. The BINDING LAW still takes the apid from das/v2, never from here.
+- **Raw HTML fetch is dead authed too:** `fetch('/ark:/61903/1:1:Q29L-TFNZ')`
+  signed in = 200 / 20,057 B shell, zero 3:1 arks. The fast-path question from
+  09-28 is now answered for HTML.
+- **Direct replay of the data wire is header-gated:** a cookie-only `fetch` of
+  the same wire gave 401 on 3 of 4 records and 200 on 1 (`6XV1-BMMZ` →
+  `3:1:3QHK-SQH7-TSGP`). The SPA itself got 200 on a record that 401'd for the
+  bare fetch (`6KWG-ZBHL`, a NUMIDENT entry with no image link). So the gap is
+  a header the SPA adds, not record restriction. No seat copied a session
+  token into a header to close it. That stays unproven and unattempted.
+
+**What this means for the frontier:** the run is possible again. The proven
+method costs one SPA navigation per record (≈16 s), with the mapping read
+from the SPA's own data response rather than DOM links. At 7,037 arks that is
+about 31 hours of navigation. That needs the writer lock
+(`skaists.writer-lock/1`; the current claim from 10-16 is stale), the walker
+guard, and a queue extension, as its own run. A public-layer recount by a
+broader ark regex reads 7,114 distinct 1:1 arks against the 10-13 measured
+7,037; not reconciled here.
+
+Zero FamilySearch mutations; zero private-tier writes; no image fetched.
