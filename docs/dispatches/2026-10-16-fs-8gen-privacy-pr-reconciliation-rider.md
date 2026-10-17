@@ -46,3 +46,18 @@ pre-stated decision rule stays armed for the next wake that finds the fleet
 drained (daily cadence or any seat): green → landing stands + the two PRs
 take their landed-via-main / supersession receipts and close; red →
 fix-forward or revert descendant. This watch does not loop.
+
+**Addendum 2 (founder-review safeguard, 2026-10-16 evening):** the closure
+bar for the two privacy PRs is RAISED by verified review — before either PR
+takes its landed-via-main / supersession receipt and closes, the executing
+wake must verify (a) the relevant privacy tests EXECUTED SUCCESSFULLY
+against the LANDED implementation (the eternal genealogy step + static +
+node + meter actually ran and passed on the landed head — a cancellation
+supplies neither success nor failure), and (b) BOTH PRs' unique
+requirements are covered on main: the three repairs (deceased-entry
+rooting, tol-space focus transfer, grandparent self) AND the ported
+nonduplicate residual (CI wiring, austras spatial e2e, grandparent-self
+e2e, founder-ruling doc). Only then the receipts; a genuine regression
+routes to fix-forward or explicit revert with evidence. Fleet re-checked
+this turn: still saturated (1 pending, rest queued, tip 6ebef2584) — no
+verdict, no polling loop, no new automation.
