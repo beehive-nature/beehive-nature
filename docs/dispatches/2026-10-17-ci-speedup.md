@@ -72,17 +72,41 @@ until a main push seeds the caches — expected, not a defect.
   the three workflows; validator script and extracted originals live
   OUTSIDE the worktree (nothing stray staged).
 
+## Hosted receipts (updated same day — PR, merge, seeding)
+
+- **PR #462 CI: 18/18 runs green, zero red** — nine push + nine
+  pull_request executions of the branch `zcode/ci-speedup-2026-10-17`
+  (runs 39057230796–39057237089). The PR-event `tests` run (39057237019)
+  shows every job green (test, static, node, wallet, eternal, meter,
+  formal, formal-cryptol-leg) and its test job's input dump shows the
+  runner received all four workspace mappings plus rust-cache's own
+  defaults. The PR-event `bTunGsTeN PQ` run (39057237018) shows all six
+  jobs green with `save-if: false` evaluated on the PR ref — the
+  main-only policy working as designed; pq12's cold run still installed
+  cargo-audit (no warm cache existed yet), and `/home/runner/.cargo/bin`
+  entered the cache scope (cache-all-crates active).
+- **Merged to main at `988e7805c`** (mergeStateStatus CLEAN before the
+  click; no-stall law — the seat executed the merge itself).
+- **Seeding CONFIRMED from the repo cache store** (gh cache list,
+  2026-10-17, all scoped `refs/heads/main`): `v0-rust-pq00-teeth` 149.8 MB
+  (22:39:58), `pq01-vectors` 247.3 MB (22:41:46), `pq05-xwing` 159.8 MB
+  (22:40:19), `pq10-plonky3` 30.6 MB (22:41:04, key hash `2c29160b` ≠ the
+  root-workspace jobs' `a0d4a5cf` — Plonky3's own lockfile is being
+  hashed, the workspace mapping is live), `pq11-classic` 169.9 MB
+  (22:40:36), `pq12-taproot` 315.9 MB (22:44:00), `twin-grid` 346.6 MB
+  (22:41:53). The tests.yml cache re-keyed from `…-a0d4a5cf` (root-only,
+  1078 MB) to `…-ec3650f2` (workspaces config, 936.9 MB). Seeding-run
+  jobs that matter: BNROSE 39075936391 green, PQ 39075936364 green.
+
 ## What is NOT yet claimed
 
-- **No hosted run** of this branch has completed at dispatch-writing
-  time; the PR's own CI is the first hosted exercise of the patch.
-- **No warm-cache before/after measurement** exists yet. The acceptance
-  criterion stays the report's own: **net time saved** — cache restore
-  can cost more than it saves on short jobs, and the first run is cold
-  by design. The measurement plan: after merge, compare the next
-  main-push PQ12 audit-step time (expect ~5 s of audit work instead of
-  ~187 s) and the tests.yml x402 step time against the cited runs, on
-  the same job definitions.
+- **The warm-cache before/after measurement.** The acceptance criterion
+  stays the report's own: **net time saved**. The next main push after
+  seeding (this dispatch's rider commit) is the first warm candidate;
+  its numbers land in a follow-up rider. Note the repo cache budget:
+  these entries total ~5.5 GB of GitHub's 10 GB; branch/PR-scoped
+  entries (e.g. the 1 GB `v0-rust-test` copies) evict first, which is
+  the main-only save policy doing its job.
 - Phases 2–4 below are **unstarted**.
 
 ## Phase 2 — one expensive candidate path (next owner: this lane, next session)
