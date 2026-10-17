@@ -260,7 +260,7 @@
   <div class="hero-open">
   <div class="wrap">
     <div class="eyebrow" data-i18n="ledger.eyebrow">the receipt ledger · machine-readable</div>
-    <h1>the receipt <span>ledger</span></h1>
+    <h1>the receipt <span data-i18n="ledger.kicker">ledger</span></h1>
 
     <p class="lead" data-reg="bee" data-i18n="ledger.beeLead">every meaningful action, on one line you can check.</p>
     <p class="lead" data-reg="raver" data-i18n="ledger.raverLead">the receipts never stop.</p>
@@ -311,15 +311,15 @@
     <div class="actions">
       <button class="act" id="export-copy" type="button" data-i18n="ledger.copyJson">copy ledger JSON</button>
       <button class="act" id="export-dl" type="button" data-i18n="ledger.exportJson">export ledger JSON</button>
-      <button class="act" id="reverify" type="button">re-verify the chain</button>
-      <button class="act" id="reset" type="button">restore the seed ledger</button>
+      <button class="act" id="reverify" type="button" data-i18n="ledger.reverify">re-verify the chain</button>
+      <button class="act" id="reset" type="button" data-i18n="ledger.reset">restore the seed ledger</button>
     </div>
-    <p class="sub" id="export-note" style="margin-top:8px">the export is the whole ledger — missions, receipts, chain — exactly as verified. local edits live in this browser only.</p>
+    <p class="sub" id="export-note" style="margin-top:8px" data-i18n="ledger.exportNote">the export is the whole ledger — missions, receipts, chain — exactly as verified. local edits live in this browser only.</p>
   </section>
 
   <div class="grid" style="margin-top:14px">
     <section class="card" style="grid-column:span 12" aria-label="the ledger table">
-      <h2>the ledger — every receipt, newest first</h2>
+      <h2 data-i18n="ledger.h">the ledger — every receipt, newest first</h2>
       <div class="filters">
         <select id="f-mission" aria-label="filter by mission"></select>
         <select id="f-kind" aria-label="filter by kind"></select>
@@ -328,9 +328,9 @@
       <div class="tablewrap">
         <table class="ledger" id="ledger-table">
           <thead><tr>
-            <th>seq</th><th>when</th><th>mission</th>
-            <th>kind · actor</th><th>action</th>
-            <th>cost</th><th class="hashcol">hash</th>
+            <th data-i18n="ledger.th.seq">seq</th><th data-i18n="ledger.th.when">when</th><th data-i18n="ledger.th.mission">mission</th>
+            <th data-i18n="ledger.th.kindActor">kind · actor</th><th data-i18n="ledger.th.action">action</th>
+            <th data-i18n="ledger.th.cost">cost</th><th class="hashcol" data-i18n="ledger.th.hash">hash</th>
           </tr></thead>
           <tbody id="ledger-body"></tbody>
         </table>

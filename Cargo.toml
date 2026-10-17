@@ -81,6 +81,8 @@ members = [
     "crates/bpq-core",
     "crates/bheraldry",
     "crates/bpq-device-xcheck",
+    "crates/bnr-explorer",
+    "crates/bnr-explorer-wasm",
 ]
 
 [workspace.metadata]

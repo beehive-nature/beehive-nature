@@ -331,7 +331,7 @@
   <div class="hero-open">
   <div class="wrap">
     <div class="eyebrow" data-i18n="missions.eyebrow">LOVErnment DAO · supervised autonomy</div>
-    <h1>the mission <span>desk</span></h1>
+    <h1>the mission <span data-i18n="missions.desk">desk</span></h1>
 
     <!-- one lead per view — same desk, three temperatures -->
     <p class="lead" data-reg="bee" data-i18n="missions.beeLead">you set the mission and the limits. the agents work inside them.</p>
@@ -343,18 +343,18 @@
     <p class="intro" data-reg="cypherpunk" data-i18n="missions.cypherIntro">off-chain first rail: proposals and hash-chained receipts with testnet accounting, local-first over a deterministic seed. the Buzz relay wire and the ERC20i treasury are later rails — named, not claimed. verify the chain; trust nothing unlabeled.</p>
 
     <ul class="steplist" data-reg="bee" aria-label="how a mission runs">
-      <li>you state the mission and its constraints.</li>
-      <li>the budget and tithe calculator prices it; independent review checks it.</li>
-      <li>you approve the ceiling. milestone one is funded; the team works in the open.</li>
-      <li>A separate reviewer verifies; the evaluator continues, pauses, or escalates.</li>
-      <li>the final report compares projections with receipts; reputation follows delivery.</li>
+      <li data-i18n="missions.step1">you state the mission and its constraints.</li>
+      <li data-i18n="missions.step2">the budget and tithe calculator prices it; independent review checks it.</li>
+      <li data-i18n="missions.step3">you approve the ceiling. milestone one is funded; the team works in the open.</li>
+      <li data-i18n="missions.step4">A separate reviewer verifies; the evaluator continues, pauses, or escalates.</li>
+      <li data-i18n="missions.step5">the final report compares projections with receipts; reputation follows delivery.</li>
     </ul>
 
     <nav class="nav" aria-label="mission desk links">
-      <a href="mission-room.html">the mission room</a>
-      <a href="receipts.html">the receipt ledger</a>
+      <a href="mission-room.html" data-i18n="missions.navRoom">the mission room</a>
+      <a href="receipts.html" data-i18n="missions.navReceipts">the receipt ledger</a>
       <a href="or-board.html" data-i18n="missions.navOr">the OR board, live</a>
-      <a href="dao-dashboard/index.html">the DAO dashboard</a>
+      <a href="dao-dashboard/index.html" data-i18n="missions.navDao">the DAO dashboard</a>
       <button class="pill" id="motion" type="button" hidden aria-pressed="false" data-i18n="ux.pause">pause motion</button>
     </nav>
 
@@ -399,8 +399,8 @@
 
   <div id="list-view">
     <section class="card" style="margin-top:14px" aria-label="the docket">
-      <h2>the docket — every mission, one state each</h2>
-      <p class="sub">approve a ceiling, stop a mission, or open one to read its whole envelope.</p>
+      <h2 data-i18n="missions.docket.h">the docket — every mission, one state each</h2>
+      <p class="sub" data-i18n="missions.docket.sub">approve a ceiling, stop a mission, or open one to read its whole envelope.</p>
       <div id="mission-list"></div>
     </section>
   </div>
@@ -424,10 +424,10 @@
     </section>
   </div>
 
-  <div class="law"><b>desk law.</b> <span>the attending human is not required to direct each action. they supervise: mission approval, spending and permission ceilings, escalation policy, milestone review, emergency stop, final acceptance. inside that envelope the team continues autonomously — and every meaningful action leaves a machine-readable receipt.</span></div>
+  <div class="law"><b data-i18n="missions.deskLaw">desk law.</b> <span data-i18n="missions.lawBody">the attending human is not required to direct each action. they supervise: mission approval, spending and permission ceilings, escalation policy, milestone review, emergency stop, final acceptance. inside that envelope the team continues autonomously — and every meaningful action leaves a machine-readable receipt.</span></div>
 </main>
 
-<footer>the mission desk · LOVErnment · one station of three with the mission room and the receipt ledger · every figure is a testnet-accounting fixture · <a href="receipts.html">verify the chain</a></footer>
+<footer>the mission desk · LOVErnment · one station of three with the mission room and the receipt ledger · every figure is a testnet-accounting fixture · <a href="receipts.html" data-i18n="missions.verifyChain">verify the chain</a></footer>
 
 <script src="mission-seed.js"></script>
 <script src="mission-core.js"></script>
@@ -467,7 +467,7 @@
     if (v && v.ok) {
       $('status-dot').className = 'dot ok';
       $('status').textContent = T('missions.stOk', 'ledger loaded');
-      $('status-note').textContent = '· ' + l.missions.length + ' missions · ' + v.count + ' receipts · ' + T('missions.chainVerified', 'chain verified');
+      $('status-note').textContent = '· ' + l.missions.length + ' ' + T('missions.noteMissions', 'missions') + ' · ' + v.count + ' ' + T('missions.noteReceipts', 'receipts') + ' · ' + T('missions.chainVerified', 'chain verified');
     } else {
       $('status-dot').className = 'dot bad';
       $('status').textContent = T('missions.stBroken', 'receipt chain broken');
@@ -483,7 +483,7 @@
     var span = document.createElement('span');
     span.className = 'chip' + (cls ? ' ' + cls : '');
     span.dataset.missionState = st;
-    span.textContent = st;
+    span.textContent = T('missions.state.' + st, st);
     return span;
   }
   function spendBar(ev) {
