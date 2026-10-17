@@ -52,16 +52,19 @@ say() { printf '%s\n' "$*"; }
 # process died outside the prover's control — the verdict is not
 # trustworthy, whichever direction it points. Contradictory verdicts
 # (success AND failure evidence in one log) are likewise never green
-# (review round 3, 2026-10-17). Exit-status contract (rounds 3+4):
+# (review round 3, 2026-10-17). Exit-status contract (rounds 3-5):
 #   PROVEN  requires rc == 0.
-#   REFUTED requires rc in 1..=123 — an ORDINARY nonzero exit from
-#           the SAW process itself (observed 2 hosted; 1 also pinned).
-#           Explicitly refused: rc == 0 (the documented contract says
-#           refutations terminate nonzero — a zero exit with failure
-#           evidence is not a clean refutation), GNU timeout's
-#           reserved codes 124..=127 (time limit / timeout-command
-#           failure / not-executable / not-found — wrapper failures,
-#           not SAW verdicts), and rc >= 128 (death by signal).
+#   REFUTED requires rc in the DOCUMENTED refutation exits of the
+#           pinned SAW runner — {1, 2} (2 observed on a hosted tooth;
+#           1 pinned as the portable abort code). Round 5 closes the
+#           allow-list: any other nonzero exit (3, 42, …) with failure
+#           evidence is an UNEXPECTED tool failure and fails closed —
+#           INCONCLUSIVE, never a green tooth. A new SAW version with
+#           another legitimate refutation exit must be verified hosted
+#           BEFORE its code joins this list.
+#           Refused as before: rc == 0 (zero exit with failure
+#           evidence contradicts the nonzero contract), 124..=127
+#           (GNU timeout's reserved wrapper codes), >= 128 (signals).
 #   Everything else — unknown tool failures included — INCONCLUSIVE.
 classify_log() {
   _log="$1"; _rc="${2:-0}"
@@ -83,10 +86,10 @@ classify_log() {
   elif grep -q 'Proof succeeded' "$_log" 2>/dev/null; then
     if [ "$_rc" = 0 ]; then printf 'PROVEN\n'; else printf 'INCONCLUSIVE\n'; fi
   elif grep -qi 'counterexample\|Proof failed' "$_log" 2>/dev/null; then
-    # A refutation must come from a process that terminated nonzero
-    # (round 4): rc == 0 with failure evidence contradicts the
-    # documented SAW contract and fails closed.
-    if [ "$_rc" -ge 1 ] 2>/dev/null; then printf 'REFUTED\n'; else printf 'INCONCLUSIVE\n'; fi
+    # Round 5: a refutation is trusted ONLY from a documented SAW
+    # refutation exit. Everything else — unexpected tool failures
+    # included — fails closed.
+    if [ "$_rc" = 1 ] || [ "$_rc" = 2 ]; then printf 'REFUTED\n'; else printf 'INCONCLUSIVE\n'; fi
   else
     printf 'INCONCLUSIVE\n'
   fi
@@ -124,7 +127,15 @@ if [ "${1:-}" = "--selftest" ]; then
   [ "$(classify_log "$T/refuted.log" 126)" = INCONCLUSIVE ] || { say "selftest: refutation-with-not-executable (126) misclassified"; exit 1; }
   [ "$(classify_log "$T/refuted.log" 127)" = INCONCLUSIVE ] || { say "selftest: refutation-with-not-found (127) misclassified"; exit 1; }
   [ "$(classify_log "$T/refuted.log" 0)" = INCONCLUSIVE ] || { say "selftest: refutation-with-zero-exit misclassified (zero exit contradicts the documented nonzero refutation contract)"; exit 1; }
-  say "saw-check selftest: GREEN (explicit, clean, terminal verdicts only; timeouts, wrapper failures, signals, crashes, zero-exit and contradictory results are never green in either direction)"
+  # Round-5 boundary: only the DOCUMENTED SAW refutation exits {1, 2}
+  # are accepted. Any other nonzero exit with failure evidence is an
+  # unexpected tool failure and fails closed — the reviewer's exact
+  # synthetic case (rc=3 + 'saw: fatal: failed to finish') included.
+  printf '...\nProof failed, counterexample found\nsaw: fatal: failed to finish\n' > "$T/refuted-3-fatal.log"
+  [ "$(classify_log "$T/refuted-3-fatal.log" 3)" = INCONCLUSIVE ] || { say "selftest: refutation-with-undocumented-exit-3 misclassified (round-5 counterexample: unexpected tool exits are never green teeth)"; exit 1; }
+  [ "$(classify_log "$T/refuted.log" 3)" = INCONCLUSIVE ] || { say "selftest: refutation-with-exit-3 (no error marker) misclassified (undocumented exits fail closed)"; exit 1; }
+  [ "$(classify_log "$T/refuted.log" 42)" = INCONCLUSIVE ] || { say "selftest: refutation-with-exit-42 misclassified (undocumented exits fail closed)"; exit 1; }
+  say "saw-check selftest: GREEN (explicit, clean, DOCUMENTED-exit verdicts only; timeouts, wrapper failures, signals, crashes, zero-exit, undocumented-exit and contradictory results are never green in either direction)"
   exit 0
 fi
 
