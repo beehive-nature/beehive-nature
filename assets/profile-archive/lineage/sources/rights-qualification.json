@@ -78,13 +78,19 @@
  },
  "antState": {
   "uploaded": false,
-  "basis": ["ETERNALIZATION-RECEIPT.json: quoted-not-purchased, purchased=null, uploaded=null", "zblood-storage-economics.json v3 (2026-10-02): approved=false, purchased=false, uploaded=false; ANT quote 2.76 ANT exceeded the 2.5 ANT storage ceiling so the paid path is code-disabled"],
+  "ceiling": {
+   "storageMaxANT": 100,
+   "gasMaxETH": 0.0002,
+   "source": "founder ruling 2026-10-03 ('100 ANT cap for now') banked by PR #326 + ETERNALIZATION-EDITION-V2.json::separatedCeilings; REAFFIRMED by founder order 2026-10-17 ('THE CEILING IS 100 ANT'); the 2.5 ANT bound was retired 2026-10-03",
+   "quoteWithinCeiling": "current quote 5.009055375 ANT (2026-10-11, 286,801,920-byte edition) — within bounds"
+  },
+  "basis": ["ETERNALIZATION-RECEIPT.json: quoted-not-purchased, purchased=null, uploaded=null", "zblood-storage-economics.json (current on main, quoted 2026-10-11): purchased=false, uploaded=false; spend approval STANDING-GRANTED (founder 2026-10-02c, 'approval always. never gate me'); payment disabled for CAPABILITY, not price — ant 0.3.9 exposes no atomic storage/gas ceilings and the hosted purchase path caps files at 32 MiB (the edition exceeds it); path re-opens when a ceiling-enforcing client lands, then rebuild + fresh quote per the artifact-change stop-conditions, then the founder's single key-holder signature"],
   "meaning": "no irreversible replication has occurred; this qualification lands BEFORE the one-way door"
  },
  "gates": [
   { "gate": "privacy", "state": "OPEN — PRs #346 and #347 verified OPEN 2026-10-17 via gh; living-relative tree-UI privacy; separate requirement from rights — satisfying one does not satisfy the other" },
   { "gate": "rights (this document)", "state": "Class-I ruling owed: records.json evidence[], both sources-sync files, hint-census — replicate-as-is by founder ruling, OR next ANT edition ships them stripped to the conclusions already expressed in the estate-authored corpus person objects (which are Class F)" },
-  { "gate": "purchase", "state": "founder signing gesture in his own terminal within the banked spend ceilings; quote re-anchored at upload time" }
+  { "gate": "purchase", "state": "CEILING CLEARED — 100 ANT storage / 0.0002 ETH gas (founder 2026-10-03, reaffirmed 2026-10-17); spend approval STANDING-GRANTED (2026-10-02c, never-gate-the-founder law); remaining blocker is capability, not price: a payment client enforcing both ceilings atomically (ant 0.3.9 does not; hosted path caps 32 MiB), then rebuild + fresh quote per artifact-change stop-conditions, then the founder's single key-holder signature" }
  ],
  "boundaries": [
   "no FamilySearch access was performed by this qualification — read-only analysis of committed files plus git-show copies of main-only files",

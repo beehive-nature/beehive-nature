@@ -37,7 +37,7 @@ Notes: the us-federal bucket's UNDERLYING records are US public domain — that 
 ## ANT state verified — the one-way door is still closed
 
 - `ETERNALIZATION-RECEIPT.json`: quoted-not-purchased, purchased=null, uploaded=null.
-- `zblood-storage-economics.json` v3 (2026-10-02): approved/purchased/uploaded all false; the 2.76 ANT quote exceeded the 2.5 ANT storage ceiling → **paid path code-disabled**.
+- **Correction (descendant commit, founder order 2026-10-17):** the first push of this dispatch cited the shared checkout's stale 2026-10-02 copy of `zblood-storage-economics.json` — "2.76 ANT quote exceeded the 2.5 ANT ceiling → paid path code-disabled" — **withdrawn as superseded**. Main's current file carries the founder's **100 ANT storage cap** (ruling 2026-10-03, "that is like $0.25 cents. 100 ANT cap for now", banked by PR #326 + `ETERNALIZATION-EDITION-V2.json::separatedCeilings`; **reaffirmed by founder order today, "THE CEILING IS 100 ANT"**) and a 2026-10-11 quote of 5.009 ANT for the 286,801,920-byte edition — within bounds. Purchased/uploaded remain false. Spend approval is STANDING-GRANTED (founder 2026-10-02c, "approval always. never gate me"); the payment path is disabled for **capability, not price**: ant 0.3.9 exposes no atomic storage/gas ceilings, and the hosted purchase path caps files at 32 MiB. The one irreducible act stays the founder's key-holder signature.
 - Image harvest terminal @dbe231eac (2026-10-16): 382 attempted = 314 downloaded / 84,055,524 B / 68 explicit denials; queue 376 entries 100% resolved.
 - **Privacy gate separate and open:** PRs **#346** and **#347** verified OPEN today via `gh` — rights qualification does not substitute for them; both gates close before any ANT edition.
 
