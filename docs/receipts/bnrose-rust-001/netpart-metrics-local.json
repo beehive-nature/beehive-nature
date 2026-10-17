@@ -1,0 +1,35 @@
+{
+ "format": "bnrose-exec/netpart/1",
+ "topology": "one isolated rootless netns; sovereigns + destination as independent processes; real TCP via courier (links 7001/7002/7003); partitions = iptables OUTPUT DROP per link",
+ "faults": [
+  "cut-before-dispatch",
+  "cut-after-dispatch",
+  "cut-during-recovery",
+  "duplicate GET delivery",
+  "wrong-key receipt delivery"
+ ],
+ "leg2Dispatches": 10,
+ "dispatchLatencyMs": {
+  "p50": 38,
+  "p95": 142,
+  "p99": 142,
+  "max": 142
+ },
+ "courier": {
+  "bytes_in": 17405,
+  "bytes_out": 17630,
+  "puts": 25,
+  "gets": 25,
+  "hits": 25,
+  "misses": 0
+ },
+ "nodePeakRssKiB": {
+  "nodeB-dispatch": "4076",
+  "nodeC-lose-response": "Command exited with non-zero status 3"
+ },
+ "claims": [
+  "safety under genuine network failure demonstrated",
+  "NO global exactly-once claim",
+  "NO consensus claim"
+ ]
+}

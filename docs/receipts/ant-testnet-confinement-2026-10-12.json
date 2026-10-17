@@ -1,0 +1,43 @@
+{
+  "schema": "bnr.ant-testnet-confinement/1",
+  "at": "2026-10-13T05:36:21Z",
+  "host": "LOVIS (Windows 11 Pro 10.0.26200) with WSL2 guest loVis, NAT networking, no .wslconfig (localhostForwarding default)",
+  "lab": {
+    "ant_devnet": "WithAutonomi/ant-node v0.22.0 (008d2ad), ant-devnet --preset small --host 172.27.13.251 --webrtc-direct --serve-port 25000 --enable-evm --enable-logging",
+    "anvil": "Foundry v1.8.5 (51a52c5), spawned by ant-devnet as `anvil -p 0`",
+    "network_id": "local-devnet-30444-2026-10-12T21:08:53.077667131+00:00",
+    "note": "this instance was started after the paid run recorded in ant-testnet-loop-live-2026-10-12.json (network created 21:08:53Z; that receipt reconciled at 21:07:22Z); the measurements below are of the running lab, not of the paid run's instance"
+  },
+  "guest": {
+    "collector": "tools/ant-testnet/evidence.sh + health.sh, 2026-10-13T05:22:38Z",
+    "health": "9 of 9 checks ok (manifest, network id, chain 31337 in manifest and from the chain, 10 private-address endpoints, both processes)",
+    "address": "172.27.13.251/20 (eth0)",
+    "listening": [
+      "tcp 0.0.0.0:25000 ant-devnet (manifest service; --host binds 0.0.0.0, open CORS)",
+      "tcp 0.0.0.0:43229 anvil (test chain; this instance predates start.sh's ANVIL_IP_ADDR=127.0.0.1 — the next start binds it to loopback)",
+      "udp 0.0.0.0:30444-30463 ant-devnet (ten nodes: QUIC 30444-30453, WebRTC Direct 30454-30463)"
+    ],
+    "advertised_addresses": ["/ip4/172.27.13.251/ (private, RFC 1918)"],
+    "footprint": "ant-devnet rss 268328 kB, anvil rss 26464 kB, ~62 MB disk, 8 cores",
+    "manifest_carries": "Anvil's well-known dev-account private key (public test material, nothing of value); the page never reads it"
+  },
+  "windows_host": {
+    "collector": "tools/ant-testnet/evidence.ps1, 2026-10-13T05:36:21Z",
+    "wslrelay_listeners": ["TCP 127.0.0.1:25000 LISTENING pid 26932 (wslrelay)", "TCP 127.0.0.1:43229 LISTENING pid 26932 (wslrelay)"],
+    "portproxy": ["10.34.7.157:5173 -> 172.27.13.251:5173 (an unrelated vite entry on a stale Wi-Fi address; no lab port is proxied)"],
+    "hyperv_vm_firewall": "{40E0AC32-46A5-438A-A0B2-2B479E8F2E90} Enabled, DefaultInboundAction Block, LoopbackEnabled True",
+    "hyperv_inbound_allow_rules_naming_lab_ports": [],
+    "host_inbound_allow_rules_naming_lab": [],
+    "host_addresses": ["172.27.0.1 (vEthernet WSL)", "10.34.6.13 (Wi-Fi)"],
+    "manifest_http_reach_off_loopback": {"172.27.0.1:25000": "no answer (Unable to connect to the remote server)", "10.34.6.13:25000": "no answer (Unable to connect to the remote server)"},
+    "manifest_http_reach_on_loopback": "HTTP 200 at http://127.0.0.1:25000 and, from the host directly, HTTP 200 at http://172.27.13.251:25000 (the host reaches the guest address; LoopbackEnabled)"
+  },
+  "outside": {
+    "oracle": "check-host.net TCP probes of this network's public address, three nodes each",
+    "port_25000": {"report": "https://check-host.net/check-report/50a4225akd9d", "result": "es2, kz1, md1: Connection timed out"},
+    "port_43229": {"report": "https://check-host.net/check-report/50a4239bkecf", "result": "br1, ru3, tr1: Connection timed out"},
+    "earlier_probe_same_evening": {"port_25000": "https://check-host.net/check-report/50a2f562k5b3 (ca1, rs1, vn1: timed out)", "port_43229": "https://check-host.net/check-report/50a2f571k4a6 (at1, ir1, us1: timed out)"}
+  },
+  "conclusion": "the manifest and the test chain are reachable from this computer only: forwarded on 127.0.0.1 by wslrelay, not proxied, blocked from the LAN by the Hyper-V VM firewall's default inbound Block with no allow rule for any lab port, not answering on the host's LAN address, and not connectable from outside on either port. The guest-side 0.0.0.0 binds are what the browser on the host needs for WebRTC Direct; they are not a public exposure on this box. This is a measurement of this box, not a property of the kit: another host runs evidence.sh and evidence.ps1 and records its own.",
+  "_public": "PUBLIC-CONSTANT: socket, firewall and probe facts of a local test lab; no key material, nothing of value"
+}

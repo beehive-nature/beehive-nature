@@ -1,4 +1,6 @@
-# 2026-10-13 — fs 8-gen order #24: reconciliation (24th verbatim issuance)
+# 2026-10-15 — fs 8-gen order #24: reconciliation + authed continuation (rider-corrected date)
+
+[DATE CORRECTION RIDER 2026-10-15: this file was first committed misdated 2026-10-13 — written and landed 2026-10-15; the wake itself ran 10-15. Original preserved in git history at the 8f9633c30 parent.]
 
 Order received verbatim (4th-issued standing text): "scrape every bit of
 familysearch.com material evidence for at least 8 dead (grandparents on)
@@ -83,3 +85,37 @@ attached, created, or downloaded — session never authenticated).
 Next owner: any session finding the oracle AUTHED (control-ark bounce or v8
 wire 200) works vein 1 in census-queue order; otherwise this dispatch stands
 as the wake's delta.
+
+## Authed continuation (same wake, post-dispatch) — STOOD DOWN to a live concurrent seat
+
+- Founder signed into the staged pane; the bounce-back landed on the control
+  ark viewer. Oracle re-proven wire-side AUTHED (v8 KWJ4-XBD details from
+  page context: 200 / 120,646 B / sourceCount 108 — byte-shape identical to
+  the standing record). readOnly not exposed on this wire (the lock finding
+  rides the v8 summary wire; 3× confirmed standing).
+- **Ten-ark identity verified READ-ONLY before any labor** (evidence-binding
+  law): every probe ark's apid differs from ALL existing manifest states'
+  apids — 10/10 apidMatch=false, same film/docket numbers with different
+  image indexes (e.g. probe TH-909-53984-951-62 vs existing
+  TH-909-53984-28552-11) → genuinely NEW images, not truncated duplicates of
+  the 4-segment downloads sharing the prefixes.
+- **Concurrent seat found LIVE on this exact queue**: sweep-queue.json
+  already extended 2026-10-14 to 376 entries (all ten arks members,
+  emphasis "binding-probe-10-extension 2026-10-14"; three carry 10-15
+  page-side image.xml 403 authed-restricted probe notes); writer lock held
+  by imgqueue-order25/zcode, heartbeat refreshed to
+  imgqueue-order25/zcode-r2 at 17:31:47Z with queue writes at 17:23:59Z —
+  demonstrably active minutes before this seat's check. **STOOD DOWN per the
+  writer-lock law; the queue is the order-25 seat's.** Zero queue writes,
+  zero FS mutations beyond the read-only oracle fetch; this seat's browser
+  tab left parked untouched for the active seat.
+- Ordinal CORRECTION (amended pre-push after rebase exposed it): this seat
+  self-numbered 24 from a stale count — issuances 25 (2026-10-14, @25258d564)
+  and 26 (2026-10-15, e55462a11, concurrent with this wake) both exist. This
+  wake is a concurrent issuance alongside 26; the file keeps its original
+  self-number only as identity. Order-26 also stood down on the live
+  order-25 writer and named the identical next-owner chain (extension
+  receipt → ten-ark state verify → images-summary regen → KWJ4-XBD recheck).
+  Three seats, one queue, one lock — the writer-lock law held.
+- Rider also rebases over main's advance during this wake (pq-lane merge
+  4c689a953; genealogy surfaces untouched).

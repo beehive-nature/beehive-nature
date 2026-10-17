@@ -34,6 +34,14 @@ jobs:
       - name: Build the bnrose-exec wasm worker
         if: always()
         run: cargo build -p bnrose-exec-wasm --target wasm32-unknown-unknown --release --locked
+      # bnr-explorer: the preview module My Space runs IS this tree's build.
+      # Rebuilt with the machine's paths remapped and compared byte for byte
+      # with the committed surfaces/bnr-explorer.wasm, whose sha256 the page
+      # pins; `cargo test` then reads that same committed module and asserts
+      # it imports nothing.
+      - name: bnr-explorer wasm — the committed module is this tree's build
+        if: always()
+        run: sh scripts/bnr-explorer/build-wasm.sh --check
       - name: Test workspace
         if: always()
         env:
@@ -182,7 +190,7 @@ jobs:
         run: node e2e/door-counts.mjs --selftest
       - name: Front door — search, source parity and accessible art
         if: always()
-        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs e2e/bearth-views.test.mjs e2e/bsymposium-views.test.mjs e2e/bfood-views.test.mjs e2e/review-views.test.mjs e2e/bigen-views.test.mjs e2e/university-views.test.mjs e2e/onboarding-views.test.mjs e2e/blongevity-views.test.mjs e2e/buzz-directory-views.test.mjs e2e/profile-views.test.mjs e2e/agent-mail-profile.test.mjs e2e/first-work.test.mjs e2e/bloom-work-pack.test.mjs e2e/bnames-rpc.test.mjs e2e/no-dead-host.test.mjs e2e/music-cleanup.test.mjs e2e/bnamesday.test.mjs e2e/bnamesday-sky.test.mjs e2e/ant-pay.test.mjs e2e/ant-hosted-purchase.test.mjs e2e/ant-testnet-pin.test.mjs e2e/keychain-genesis.test.mjs e2e/bui-daily-art.test.mjs e2e/vending-deck.test.mjs e2e/vending-machine.test.mjs e2e/vending-cert.test.mjs e2e/a1-log.test.mjs e2e/ans104.test.mjs e2e/bchat-core.test.mjs e2e/ant-transport.test.mjs e2e/bchat-cockpit.test.mjs
+        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs e2e/bearth-views.test.mjs e2e/bsymposium-views.test.mjs e2e/bfood-views.test.mjs e2e/review-views.test.mjs e2e/bigen-views.test.mjs e2e/university-views.test.mjs e2e/onboarding-views.test.mjs e2e/blongevity-views.test.mjs e2e/buzz-directory-views.test.mjs e2e/profile-views.test.mjs e2e/agent-mail-profile.test.mjs e2e/first-work.test.mjs e2e/bloom-work-pack.test.mjs e2e/bnames-rpc.test.mjs e2e/no-dead-host.test.mjs e2e/music-cleanup.test.mjs e2e/bnamesday.test.mjs e2e/bnamesday-sky.test.mjs e2e/ant-pay.test.mjs e2e/ant-hosted-purchase.test.mjs e2e/ant-testnet-pin.test.mjs e2e/keychain-testnet-build.test.mjs e2e/keychain-genesis.test.mjs e2e/bui-daily-art.test.mjs e2e/vending-deck.test.mjs e2e/vending-machine.test.mjs e2e/vending-cert.test.mjs e2e/a1-log.test.mjs e2e/ans104.test.mjs e2e/bchat-core.test.mjs e2e/ant-transport.test.mjs e2e/bchat-cockpit.test.mjs
       # tools/genealogy holds TWELVE suites (3,419 lines) and NO job has ever
       # run one of them. That is why a real regression sat on an open, mergeable
       # PR for three days with nothing red naming it: the gate was not weak, it
@@ -703,6 +711,20 @@ jobs:
         if: always()
         working-directory: e2e
         run: node myspace-seam.mjs
+      # MY SPACE as an explorer (crates/bnr-explorer in the page): the list
+      # does not wait for the slowest rail, a late read never paints over a
+      # newer one, previews are identity-first and bounded and fail closed
+      # without isolation, a listed row is revalidated at the tap, and a share
+      # that fails after hand-off never says nothing left. Two runs per size;
+      # the only speed gate is the old 4.5 s freeze at 20,000 rows.
+      - name: MY SPACE — explorer (stale work, previews, isolation, honest outcomes)
+        timeout-minutes: 8 # measured locally: ~3.5 min with two runs per size
+        if: always()
+        working-directory: e2e
+        env:
+          EXPLORER_SIZES: '200,20000'
+          EXPLORER_RUNS: '2'
+        run: node myspace-explorer.mjs
       # THE DOORS, RENDERED (founder order 2026-08-26): each door at 390px,
       # tap floor, footer clearance, zero page errors, and every link a door
       # lists resolves 200 with body text. Which pages are doors comes from
@@ -1034,14 +1056,18 @@ jobs:
         if: always()
         timeout-minutes: 10
         run: node e2e/ant-hosted-browser.mjs
-      - name: Isolated keychain — own origin, passkey-born root, decoded confirm, refusals, the hosted purchase paid from it, the Hive drop door, and host-loss succession
+      - name: Isolated keychain — own origin, passkey-born root, decoded confirm, refusals, the hosted purchase paid from it, the Hive drop door, host-loss succession, the TEST BUILD keychain on the test network, network confinement, the named recovery cases, and the record importer
         if: always()
-        timeout-minutes: 15
+        timeout-minutes: 25
         run: |
           node e2e/keychain-isolation.mjs
           node e2e/keychain-wallet-purchase.mjs
           node e2e/keychain-hive.mjs
           node e2e/keychain-succession.mjs
+          node e2e/keychain-devnet.mjs
+          node e2e/ant-testnet-confinement.mjs
+          node e2e/ant-replacement-recovery.mjs
+          node e2e/ant-record-import.mjs
       - name: Wallet guided flow — identity confirmation and retained invoice inputs in all three styles
         if: always()
         timeout-minutes: 10
@@ -1088,6 +1114,11 @@ jobs:
         if: always()
         working-directory: e2e
         run: node --test blood-eternal.test.mjs bigen-eternal.test.mjs bfood-eternal.test.mjs bearth-eternal.test.mjs blongevity-eternal.test.mjs austras-koks-eternal.test.mjs buzz-directory-eternal.test.mjs bnames-eternal.test.mjs bnamesday-eternal.test.mjs bdata-eternal.test.mjs vending-eternal.test.mjs profile-eternal.test.mjs bview-eternal.test.mjs museum-eternal.test.mjs watch-eternal.test.mjs music-eternal.test.mjs listening-eternal.test.mjs festival-eternal.test.mjs plur-eternal.test.mjs plur-festival-entry.test.mjs blight-museum-eternal.test.mjs blight-index-eternal.test.mjs blight-gallery-eternal.test.mjs blight-market-eternal.test.mjs read-eternal.test.mjs blanguage-eternal.test.mjs review-eternal.test.mjs university-eternal.test.mjs onboarding-eternal.test.mjs receive-eternal.test.mjs myspace-eternal.test.mjs kandi-eternal.test.mjs fleet-eternal.test.mjs acid-cascade-eternal.test.mjs indigo-index-eternal.test.mjs resonance-eternal.test.mjs bnr-dashboard-eternal.test.mjs blight-midi-eternal.test.mjs blight-midi-organ-eternal.test.mjs blight-midiroom-eternal.test.mjs blight-midivault-eternal.test.mjs blight-studio-music-eternal.test.mjs hardware-index-eternal.test.mjs hardware-build-eternal.test.mjs hardware-lab-eternal.test.mjs hardware-security-eternal.test.mjs stack-eternal.test.mjs blight-pixelrefiner-eternal.test.mjs blight-studio-gate-eternal.test.mjs blight-inscription-explorer-eternal.test.mjs blight-compare-eternal.test.mjs blight-bnri-gallery-eternal.test.mjs doors-index-eternal.test.mjs doors-beehivenature-eternal.test.mjs doors-skaists-eternal.test.mjs doors-plur-eternal.test.mjs doors-bnature-social-eternal.test.mjs bnature-bio-eternal.test.mjs beehivebiomass-eternal.test.mjs beehivenature-buzz-eternal.test.mjs skaists-buzz-eternal.test.mjs ant-door-eternal.test.mjs forge-index-eternal.test.mjs forge-hexfield-eternal.test.mjs forge-huddle-eternal.test.mjs forge-room-eternal.test.mjs comb-eternal.test.mjs recover-eternal.test.mjs addresses-eternal.test.mjs royalguard-eternal.test.mjs privacy-lens-eternal.test.mjs attest-eternal.test.mjs intake-tracker-eternal.test.mjs flower-lab-eternal.test.mjs edible-tracker-eternal.test.mjs spliff-lab-eternal.test.mjs blend-lab-eternal.test.mjs dock-eternal.test.mjs fieldnotes-eternal.test.mjs law-of-the-sea-eternal.test.mjs design-system-eternal.test.mjs blight-pulse-eternal.test.mjs blight-hearth-eternal.test.mjs blight-farmers-eternal.test.mjs blight-coop-eternal.test.mjs blight-c1-aid-eternal.test.mjs blight-profile-eternal.test.mjs biq-eternal.test.mjs bqueenbee-live-eternal.test.mjs local-agent-eternal.test.mjs or-board-eternal.test.mjs devroom-eternal.test.mjs bset-eternal.test.mjs bchat-eternal.test.mjs bdrop-eternal.test.mjs bdrop-preserve.test.mjs record-eternal.test.mjs btranslated-eternal.test.mjs buzz-studio-eternal.test.mjs bsymposium-eternal.test.mjs blight-demo-eternal.test.mjs blight-qrroses-eternal.test.mjs blight-qrroses-smil-eternal.test.mjs blight-qrtree-eternal.test.mjs blight-vaulta-reader-eternal.test.mjs blight-workbench-eternal.test.mjs b4b-eternal.test.mjs bantfarm-eternal.test.mjs bfactory-eternal.test.mjs bmeshasi-eternal.test.mjs dao-dashboard-eternal.test.mjs
+      - name: Genealogy — spatial tree privacy and branch navigation
+        timeout-minutes: 4
+        if: always()
+        working-directory: e2e
+        run: node --test blood-tree-of-life.test.mjs
       # SKAISTS, THE DESIGN SYSTEM IN CODE (founder, 2026-09-26: "there is real UX/UI/standards metrics").
       # surfaces/skaists.css is compiled from docs/design/skaists/tokens.json (graded A- 2026-09-19) and must
       # stay fresh; a three-UI front must score 100% on the standards meter per register: every painted

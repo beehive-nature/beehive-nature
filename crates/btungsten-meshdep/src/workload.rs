@@ -18,6 +18,65 @@ use crate::identity::{envelope_bytes, intent, op_digest, OpClass};
 use crate::ledger::{Event, Ledger, OperationRecord, RetryVerdict};
 use crate::rig::Rig;
 
+fn record_store_put_result(
+    ledger: &mut Ledger,
+    op_id: &str,
+    result: Result<(u16, String), String>,
+) -> Result<(), String> {
+    let at_ms = crate::client::now_ms();
+    let (status, response, response_truncated, response_digest, error) = match &result {
+        Ok((s, body)) => (
+            Some(*s),
+            Some(body.chars().take(512).collect()),
+            body.chars().count() > 512,
+            Some(op_digest(body.as_bytes())),
+            None,
+        ),
+        Err(e) => (None, None, false, None, Some(e.clone())),
+    };
+    ledger.record(Event::StorePutResult {
+        op_id: op_id.into(),
+        at_ms,
+        status,
+        response,
+        response_truncated,
+        response_digest,
+        error,
+    });
+    // The pinned x0x put_kv_value route returns 200 {ok:true} only after
+    // publication. 202 persists locally but may still attempt direct delivery.
+    // A malformed or contradictory success body is not publication evidence.
+    let reason = match &result {
+        Ok((200, body))
+            if serde_json::from_str::<serde_json::Value>(body)
+                .ok()
+                .is_some_and(|v| v["ok"] == true && v["published"] != false) =>
+        {
+            ledger.record(Event::Published {
+                op_id: op_id.into(),
+                at_ms,
+            });
+            return Ok(());
+        }
+        Ok((202, _)) => "HTTP 202: local persistence reported, publication unconfirmed".into(),
+        Ok((200, _)) => "HTTP 200: malformed or contradictory acceptance body".into(),
+        Ok((s, _)) => {
+            format!("HTTP {s}: store API did not acknowledge acceptance; propagation unproven")
+        }
+        Err(_) => "no complete HTTP response: store acceptance and propagation unknown".into(),
+    };
+    ledger.record(Event::Unresolved {
+        op_id: op_id.into(),
+        at_ms,
+        reason: reason.clone(),
+    });
+    if status == Some(202) {
+        Ok(())
+    } else {
+        Err(reason)
+    }
+}
+
 pub struct WorkloadCtx<'a> {
     pub rig: &'a Rig,
     pub epoch: u64,
@@ -330,27 +389,60 @@ impl<'a> WorkloadCtx<'a> {
         op.intended = intended.iter().map(|s| s.to_string()).collect();
         let op_id = op.op_id.clone();
         ledger.record_op(op);
-        let c = self.client(node)?;
         let body = serde_json::json!({"value": b64::encode(&env), "content_type": "application/octet-stream"});
-        let (s, b) = c.put_json(
-            &format!("/stores/{}/{}", Self::store_seg(store_id), key),
-            &body.to_string(),
-        )?;
-        ledger.record(Event::Published {
-            op_id: op_id.clone(),
-            at_ms: crate::client::now_ms(),
+        let result = self.client(node).and_then(|c| {
+            c.put_json(
+                &format!("/stores/{}/{}", Self::store_seg(store_id), key),
+                &body.to_string(),
+            )
         });
-        if s != 200 && s != 202 {
-            return Err(format!("store put {node}/{key} -> {s}: {b}"));
-        }
-        if s == 202 {
-            ledger.record(Event::Unresolved {
-                op_id: op_id.clone(),
-                at_ms: crate::client::now_ms(),
-                reason: format!("202 published:false — local-only, announce failed: {b}"),
-            });
-        }
+        record_store_put_result(ledger, &op_id, result)?;
         Ok(op_id)
+    }
+
+    pub fn store_observe_recorded(
+        &self,
+        ledger: &mut Ledger,
+        node: &str,
+        store_id: &str,
+        key: &str,
+        op_id: &str,
+    ) -> bool {
+        let result = self
+            .client(node)
+            .and_then(|c| c.get(&format!("/stores/{}/{}", Self::store_seg(store_id), key)));
+        let (status, matches, error) = match result {
+            Ok((s, b)) => {
+                let parsed = if s == 200 {
+                    serde_json::from_str::<serde_json::Value>(&b)
+                        .map_err(|e| e.to_string())
+                        .and_then(|v| {
+                            v.get("value")
+                                .and_then(|v| v.as_str())
+                                .ok_or_else(|| "missing value".to_string())
+                                .and_then(b64::decode)
+                        })
+                        .map(|bytes| op_digest(&bytes) == op_id)
+                } else {
+                    Ok(false)
+                };
+                (
+                    Some(s),
+                    parsed.as_ref().copied().unwrap_or(false),
+                    parsed.err(),
+                )
+            }
+            Err(e) => (None, false, Some(e)),
+        };
+        ledger.record(Event::StoreReadResult {
+            op_id: op_id.into(),
+            node: node.into(),
+            at_ms: crate::client::now_ms(),
+            status,
+            matches,
+            error,
+        });
+        matches
     }
 
     /// Observe a store value at a node: DELIVERED evidence when the exact
@@ -573,5 +665,119 @@ impl<'a> WorkloadCtx<'a> {
             .and_then(|i| i.as_str())
             .map(|s| s.to_string())
             .ok_or_else(|| "no machine_id in /agent".to_string())
+    }
+}
+
+#[cfg(test)]
+mod store_result_tests {
+    use super::*;
+    use crate::ledger::RecipientVerdict;
+    use std::io::{Read, Write};
+    use std::net::TcpListener;
+
+    #[test]
+    fn http_put_receipts_distinguish_acceptance_refusal_and_no_response() {
+        for (status, body, published) in [
+            (200, r#"{"ok":true,"evicted_keys":[]}"#, true),
+            (
+                202,
+                r#"{"ok":true,"published":false,"direct_attempted":2}"#,
+                false,
+            ),
+            (403, r#"{"ok":false,"error":"unauthorized"}"#, false),
+            (500, r#"{"ok":false,"error":"persistence failed"}"#, false),
+            (200, r#"{"ok":true,"published":false}"#, false),
+            (200, "bad json", false),
+            (0, "", false),
+        ] {
+            let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+            let addr = listener.local_addr().unwrap();
+            let server = std::thread::spawn(move || {
+                let (mut stream, _) = listener.accept().unwrap();
+                let mut request = Vec::new();
+                let mut byte = [0];
+                while !request.ends_with(b"\r\n\r\n") {
+                    stream.read_exact(&mut byte).unwrap();
+                    request.push(byte[0]);
+                }
+                let mut payload = [0; 2];
+                stream.read_exact(&mut payload).unwrap();
+                assert!(request.starts_with(b"PUT /stores/test/key HTTP/1.1"));
+                if status != 0 {
+                    write!(stream, "HTTP/1.1 {status} Result\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}", body.len()).unwrap();
+                }
+            });
+            let mut ledger = Ledger::default();
+            ledger.record_op(OperationRecord {
+                op_id: "op".into(),
+                logical_id: "key".into(),
+                class: OpClass::StateSync,
+                sender: "seed".into(),
+                destination: "store:key".into(),
+                intended: vec!["n1".into()],
+                payload_bytes: 2,
+                envelope_b64: String::new(),
+                published_at_ms: 0,
+                deadline_ms: u64::MAX,
+            });
+            let result = NodeClient::new(&addr.to_string(), "").put_json("/stores/test/key", "{}");
+            let _ = record_store_put_result(&mut ledger, "op", result);
+            server.join().unwrap();
+            assert!(
+                matches!(&ledger.events[0], Event::StorePutResult { status: s, .. }
+                if *s == if status == 0 { None } else { Some(status) })
+            );
+            assert_eq!(
+                ledger
+                    .events
+                    .iter()
+                    .any(|e| matches!(e, Event::Published { .. })),
+                published
+            );
+            assert_eq!(
+                matches!(
+                    ledger.classify_for("op", "n1"),
+                    RecipientVerdict::Unknown { .. }
+                ),
+                !published
+            );
+            // A 202/direct fallback or even a lost response may still deliver.
+            ledger.record(Event::Delivered {
+                op_id: "op".into(),
+                node: "n1".into(),
+                at_ms: 1,
+            });
+            assert!(matches!(
+                ledger.classify_for("op", "n1"),
+                RecipientVerdict::Delivered { .. }
+            ));
+            let encoded = serde_json::to_string(&ledger.events).unwrap();
+            let restored =
+                Ledger::from_journal(ledger.ops.clone(), serde_json::from_str(&encoded).unwrap());
+            assert_eq!(
+                restored.classify_for("op", "n1"),
+                ledger.classify_for("op", "n1")
+            );
+        }
+    }
+
+    #[test]
+    fn response_excerpt_is_unicode_safe_and_marks_truncation() {
+        let body = "é".repeat(600);
+        let mut ledger = Ledger::default();
+        assert!(record_store_put_result(&mut ledger, "op", Ok((403, body.clone()))).is_err());
+        match &ledger.events[0] {
+            Event::StorePutResult {
+                response: Some(s),
+                response_truncated,
+                response_digest: Some(d),
+                ..
+            } => {
+                assert_eq!(s.chars().count(), 512);
+                assert!(*response_truncated);
+                assert_eq!(*d, op_digest(body.as_bytes()));
+            }
+            _ => panic!("missing response receipt"),
+        }
     }
 }
