@@ -1,0 +1,31 @@
+# replace.sh, WSL (Ubuntu) on the founder's Windows laptop, 2026-10-13; loopback only, no GitHub, no Docker
+# command: bash ops/keys-edge/lab/replace.sh <throwaway chain dir> $HOME/kd-int-target/release/keys-door $HOME/kd-bsigner-target/debug/bsigner
+# chain: release.mjs prepare/sign-test/envelope from this tree, one throwaway signer; not a production release
+== versions
+keys-door 0.1.0 (commit f1890a163+peerpack)
+bsigner 0.1.0 — the deciding organ of bHEartWALLet (ML-DSA/ML-KEM, agility envelopes, keys never leave)
+v22.22.1
+Python 3.14.4
+== trust pins (from CHAIN_DIR, not from any peer): genesis u0ad-uZaOMZi3RikhPDIvXsOrj3n345Y-wDDLjm4bj8, signer bzpq1m9w8p9p4laxqg3nnz6ms72jwvkxz8ck5dky49hc0zrmj4qr6y3wskdkhmd
+== 1. edge A from its inbox and a mock ANT door
+PASS 1. edge A serves seq 2: {"seq":2,"record_sha3":"hJ-qVtlngZpkv0hAzWeNQzFx26K6hWX6mjaj0uZ0Z0Q","state":"serving","equivocation":null,"last_error":null}
+== 2. edge B: empty state, empty inbox, no rail, peers = [A] only
+PASS 2. edge B reached seq 2 from its peer: {"seq":2,"record_sha3":"hJ-qVtlngZpkv0hAzWeNQzFx26K6hWX6mjaj0uZ0Z0Q","state":"serving","equivocation":null,"last_error":null}
+== 3. edge A, its state and the ANT door destroyed; edge C from edge B alone
+PASS 3. edge A is gone (health down, state deleted)
+PASS 3. edge C recovered seq 2 from surviving peer B: {"seq":2,"record_sha3":"hJ-qVtlngZpkv0hAzWeNQzFx26K6hWX6mjaj0uZ0Z0Q","state":"serving","equivocation":null,"last_error":null}
+PASS 3. edge C serves every file at the record's size and sha256
+== 4. edge B restarted with its peer gone
+PASS 4. edge B serves seq 2 from its own state after restart: {"seq":2,"record_sha3":"hJ-qVtlngZpkv0hAzWeNQzFx26K6hWX6mjaj0uZ0Z0Q","state":"serving","equivocation":null,"last_error":"peer http://127.0.0.1:18302 seq 3: io: Connection refused (os error 111)"}
+== 5. hostile peers against fresh edges holding the right pins
+PASS 5. missing history (no release/1): nothing served
+PASS 5. forged seq 2: refused; the honest seq 1 below it is served
+PASS 5. truncated pack: nothing served
+PASS 5. two peers on conflicting seq-3 branches: neither chosen, seq 2 served, the fork reported ({"seq":2,"record_sha3":"hJ-qVtlngZpkv0hAzWeNQzFx26K6hWX6mjaj0uZ0Z0Q","state":"serving","equivocation":{"seq":3,"records":["KpLLaeuxxYW-sa5i4Y4brMuYB02Z-a_4XIio2ube3rc","vh5gkbiGqLDUR1HuG96F98282CsH3EDVuT4PI_1YHGo"]},"last_error":null})
+PASS 5. wrong genesis pin (r2's sha3): nothing served from an honest peer
+== 6. edge B's floor file corrupted, then restarted
+edge B: {"seq":null,"record_sha3":null,"state":"unverified","equivocation":null,"last_error":"floor file /tmp/keys-replace.OkgGDR/B/state/floor is corrupt: refusing every new release until it is repaired"}
+PASS 6. an unreadable floor is reported, not reset to 0
+PASS 6. the floor file is left as found
+== summary: 0 failed
+logs: /tmp/keys-replace.OkgGDR

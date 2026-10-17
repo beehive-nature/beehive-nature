@@ -1,0 +1,43 @@
+# keys-door config for the keys.skaists.dev edge (contract §4), read by ops/keys-door/src/config.rs:
+# an unknown key is refused. No secrets: every value here is public. Copy to
+# /opt/keys-edge/edge.toml on the host. keys-door refuses to start while the two genesis pins
+# below are unfilled: the release signer is unruled (R-SIGNER, docs/KEYCHAIN-RELEASE-SIGNERS.json).
+
+origin = "https://keys.skaists.dev"
+rp_id = "keys.skaists.dev"
+
+# base64url SHA3-256 (43 characters) of the ruled seq-1 record.json bytes
+genesis_sha3 = "UNFILLED-ruled-genesis-record-sha3"
+# signer ids allowed to sign seq 1 (bzpq1... for SPEC-BPQ-1 §3b, or mldsa65:... for a
+# bheart.signature/1 from bsigner); genesis only, later records name their own signers
+genesis_signers = ["UNFILLED-ruled-release-signer-id"]
+# the configured floor; state_dir/floor only rises above it
+min_seq = 1
+
+# the keys-state volume
+state_dir = "/var/lib/keys-door/state"
+# the host's /opt/keys-edge/inbox, mounted read-only
+inbox_dir = "/var/lib/keys-door/inbox"
+# keys-net only (10.80.96.2); compose publishes no port
+listen = "0.0.0.0:8096"
+# inside the container only; the compose healthcheck reads it
+health_listen = "127.0.0.1:8097"
+# rule 2's second verifier, copied into the image beside keys-door
+bsigner_path = "/usr/local/bin/bsigner"
+# base64url SHA-256 of that exact bsigner build: the image records it in
+# /usr/local/share/keys-door/bsigner.sha256 and its label org.beehive-nature.bsigner.sha256.
+# keys-door hashes the binary at startup, before every spawn and at every poll, and refuses on
+# mismatch. Version-specific compatibility, not a guarantee of bsigner's interface: a new bsigner
+# means re-running keys-door's compatibility tests against it and pinning it anew.
+bsigner_sha256 = "UNFILLED-sha256-of-the-pinned-bsigner"
+poll_secs = 60
+
+# Contract §7 A3: https anywhere, plain http only to loopback. The public ANT read door; keys-door
+# never joins buzz-prod_buzz-net.
+ant_doors = ["https://relay.skaists.dev/ant"]
+# Arweave discovery stays off while arweave_owners is empty (an unfiltered tag query is anyone's).
+arweave_gateways = []
+arweave_owners = []
+# peer edges, walked through /.well-known/bnr-keychain/release/<seq> (contract §7 A1); the ant_doors
+# rule: https, or plain http only to loopback (a forwarder beside keys-door). None yet.
+peers = []

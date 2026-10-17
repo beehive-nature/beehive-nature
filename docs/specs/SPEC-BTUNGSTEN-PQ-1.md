@@ -1098,3 +1098,12 @@ PQ00 teeth ──┬─> PQ01 vectors ──> PQ02 SHA-3 ──> PQ03 SHA-2/HKDF
   prediction this document makes.
 - **libcrux adoption** for ML-KEM / ML-DSA turns on what their pinned
   verification status says (PQ05, PQ06).
+- **The keychain edge's client-trust dependency** (`ops/keys-edge/TRUST.md`).
+  Releases of the isolated keychain are ML-DSA-65-signed and verified by the
+  serving edge (`ops/keys-door`, two implementations). That is edge-enforced
+  release verification: a browser checks only the classical WebPKI
+  certificate of `keys.skaists.dev` and runs whatever that origin serves, so
+  whoever controls the TLS terminator can serve other code. The hybrid
+  `X25519MLKEM768` key exchange protects session confidentiality only. A
+  pre-execution check in the browser, by a verifier the edge does not serve,
+  is not built.
