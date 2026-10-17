@@ -83,6 +83,7 @@ members = [
     "crates/bpq-device-xcheck",
     "crates/bnr-explorer",
     "crates/bnr-explorer-wasm",
+    "crates/btungsten-qeval",
 ]
 
 [workspace.metadata]

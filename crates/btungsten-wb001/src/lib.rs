@@ -7,7 +7,7 @@
 
 pub use btungsten_wb001_core as core;
 use btungsten_wb001_core::{
-    decode_core, encode, valid_intent, well_formed_utf8_128, well_formed_utf8_64, Intent, D_LENGTH,
+    decode_core, HEAD8, encode, valid_intent, well_formed_utf8_128, well_formed_utf8_64, Intent, D_LENGTH,
     D_MAGIC, D_OK, D_SHORT, D_TAG_ORDER, D_TRAILING, D_UTF8, D_VERSION, MAX_ENV,
 };
 
@@ -162,7 +162,15 @@ pub fn canonical(i: &Intent) -> Result<Vec<u8>, Refusal> {
 /// for every buffer and every length (`scripts/btungsten/wb001-saw/decode.saw`).
 /// It reads the first `MAX_ENV` input bytes and the true length; this wrapper
 /// supplies exactly those, zero filled past the input's end.
-pub fn decode(env: &[u8]) -> Result<Box<Intent>, Refusal> {
+#[inline]
+fn padded<const CAP: usize>(v: &[u8]) -> [u8; CAP] {
+    let mut a = [0u8; CAP];
+    a[..v.len()].copy_from_slice(v);
+    a
+}
+
+/// The reference decode implementation calling `btungsten_wb001_core::decode_core`.
+pub fn decode_reference(env: &[u8]) -> Result<Box<Intent>, Refusal> {
     let mut buf = Box::new([0u8; MAX_ENV]);
     let k = env.len().min(MAX_ENV);
     buf[..k].copy_from_slice(&env[..k]);
@@ -178,6 +186,173 @@ pub fn decode(env: &[u8]) -> Result<Box<Intent>, Refusal> {
         D_TRAILING => Err(Refusal::Trailing),
         v => unreachable!("decode_core verdict {v}: decodeSpec has only D_OK..=D_TRAILING"),
     }
+}
+
+/// Strict decode: magic, version, ascending tags, exact bounds, exact
+/// consumption, well-formed UTF-8 (through the SAW-proven DFA). The same
+/// checks in the order the pinned vectors record, so the same refusal code.
+///
+/// Optimized zero-allocation path: validates wire layout directly on `env`
+/// without heap churn, performs zero allocations on hostile/rejected inputs,
+/// and allocates exactly one `Box<Intent>` only upon successful validation.
+pub fn decode(env: &[u8]) -> Result<Box<Intent>, Refusal> {
+    let n = env.len();
+    if n < 8 {
+        return Err(Refusal::Short);
+    }
+    if env[..7] != HEAD8[..7] {
+        return Err(Refusal::Magic);
+    }
+    if env[7] != HEAD8[7] {
+        return Err(Refusal::Version);
+    }
+
+    let mut at = 8usize;
+
+    // Block 1: Domain (tag 0x01, lo 1, hi 64, Utf8)
+    if at + 5 > n { return Err(Refusal::Short); }
+    if env[at] != 0x01 { return Err(Refusal::TagOrder); }
+    let l_dom = u32::from_be_bytes([env[at+1], env[at+2], env[at+3], env[at+4]]);
+    if l_dom < 1 || l_dom > 64 { return Err(Refusal::Length); }
+    let l_dom_usize = l_dom as usize;
+    if at + 5 + l_dom_usize > n { return Err(Refusal::Short); }
+    let v_dom = &env[at + 5..at + 5 + l_dom_usize];
+    let dom_padded = padded::<64>(v_dom);
+    if !well_formed_utf8_64(&dom_padded) { return Err(Refusal::Utf8); }
+    at += 5 + l_dom_usize;
+
+    // Block 2: Nonce (tag 0x02, lo 32, hi 32)
+    if at + 5 > n { return Err(Refusal::Short); }
+    if env[at] != 0x02 { return Err(Refusal::TagOrder); }
+    let l_non = u32::from_be_bytes([env[at+1], env[at+2], env[at+3], env[at+4]]);
+    if l_non != 32 { return Err(Refusal::Length); }
+    if at + 5 + 32 > n { return Err(Refusal::Short); }
+    let v_non = &env[at + 5..at + 5 + 32];
+    at += 5 + 32;
+
+    // Block 3: Epoch (tag 0x03, lo 8, hi 8)
+    if at + 5 > n { return Err(Refusal::Short); }
+    if env[at] != 0x03 { return Err(Refusal::TagOrder); }
+    let l_epo = u32::from_be_bytes([env[at+1], env[at+2], env[at+3], env[at+4]]);
+    if l_epo != 8 { return Err(Refusal::Length); }
+    if at + 5 + 8 > n { return Err(Refusal::Short); }
+    let epoch = u64::from_be_bytes([
+        env[at + 5], env[at + 6], env[at + 7], env[at + 8],
+        env[at + 9], env[at + 10], env[at + 11], env[at + 12],
+    ]);
+    at += 5 + 8;
+
+    // Block 4: Action (tag 0x04, lo 32, hi 32)
+    if at + 5 > n { return Err(Refusal::Short); }
+    if env[at] != 0x04 { return Err(Refusal::TagOrder); }
+    let l_act = u32::from_be_bytes([env[at+1], env[at+2], env[at+3], env[at+4]]);
+    if l_act != 32 { return Err(Refusal::Length); }
+    if at + 5 + 32 > n { return Err(Refusal::Short); }
+    let v_act = &env[at + 5..at + 5 + 32];
+    at += 5 + 32;
+
+    // Block 5: Destination (tag 0x05, lo 1, hi 128, Utf8)
+    if at + 5 > n { return Err(Refusal::Short); }
+    if env[at] != 0x05 { return Err(Refusal::TagOrder); }
+    let l_dst = u32::from_be_bytes([env[at+1], env[at+2], env[at+3], env[at+4]]);
+    if l_dst < 1 || l_dst > 128 { return Err(Refusal::Length); }
+    let l_dst_usize = l_dst as usize;
+    if at + 5 + l_dst_usize > n { return Err(Refusal::Short); }
+    let v_dst = &env[at + 5..at + 5 + l_dst_usize];
+    let dst_padded = padded::<128>(v_dst);
+    if !well_formed_utf8_128(&dst_padded) { return Err(Refusal::Utf8); }
+    at += 5 + l_dst_usize;
+
+    // Block 6: Capability (tag 0x06, lo 1, hi 64, Utf8)
+    if at + 5 > n { return Err(Refusal::Short); }
+    if env[at] != 0x06 { return Err(Refusal::TagOrder); }
+    let l_cap = u32::from_be_bytes([env[at+1], env[at+2], env[at+3], env[at+4]]);
+    if l_cap < 1 || l_cap > 64 { return Err(Refusal::Length); }
+    let l_cap_usize = l_cap as usize;
+    if at + 5 + l_cap_usize > n { return Err(Refusal::Short); }
+    let v_cap = &env[at + 5..at + 5 + l_cap_usize];
+    let cap_padded = padded::<64>(v_cap);
+    if !well_formed_utf8_64(&cap_padded) { return Err(Refusal::Utf8); }
+    at += 5 + l_cap_usize;
+
+    // Block 7: Amount (tag 0x07, lo 8, hi 8)
+    if at + 5 > n { return Err(Refusal::Short); }
+    if env[at] != 0x07 { return Err(Refusal::TagOrder); }
+    let l_amt = u32::from_be_bytes([env[at+1], env[at+2], env[at+3], env[at+4]]);
+    if l_amt != 8 { return Err(Refusal::Length); }
+    if at + 5 + 8 > n { return Err(Refusal::Short); }
+    let amount = u64::from_be_bytes([
+        env[at + 5], env[at + 6], env[at + 7], env[at + 8],
+        env[at + 9], env[at + 10], env[at + 11], env[at + 12],
+    ]);
+    at += 5 + 8;
+
+    // Block 8: Expiry (tag 0x08, lo 8, hi 8)
+    if at + 5 > n { return Err(Refusal::Short); }
+    if env[at] != 0x08 { return Err(Refusal::TagOrder); }
+    let l_exp = u32::from_be_bytes([env[at+1], env[at+2], env[at+3], env[at+4]]);
+    if l_exp != 8 { return Err(Refusal::Length); }
+    if at + 5 + 8 > n { return Err(Refusal::Short); }
+    let expiry = u64::from_be_bytes([
+        env[at + 5], env[at + 6], env[at + 7], env[at + 8],
+        env[at + 9], env[at + 10], env[at + 11], env[at + 12],
+    ]);
+    at += 5 + 8;
+
+    // Block 9: Payer (tag 0x09, lo 1, hi 128, Utf8)
+    if at + 5 > n { return Err(Refusal::Short); }
+    if env[at] != 0x09 { return Err(Refusal::TagOrder); }
+    let l_pay = u32::from_be_bytes([env[at+1], env[at+2], env[at+3], env[at+4]]);
+    if l_pay < 1 || l_pay > 128 { return Err(Refusal::Length); }
+    let l_pay_usize = l_pay as usize;
+    if at + 5 + l_pay_usize > n { return Err(Refusal::Short); }
+    let v_pay = &env[at + 5..at + 5 + l_pay_usize];
+    let pay_padded = padded::<128>(v_pay);
+    if !well_formed_utf8_128(&pay_padded) { return Err(Refusal::Utf8); }
+    at += 5 + l_pay_usize;
+
+    // Block 10: Payload (tag 0x0a, lo 0, hi 4096, raw)
+    if at + 5 > n { return Err(Refusal::Short); }
+    if env[at] != 0x0a { return Err(Refusal::TagOrder); }
+    let l_pld = u32::from_be_bytes([env[at+1], env[at+2], env[at+3], env[at+4]]);
+    if l_pld > 4096 { return Err(Refusal::Length); }
+    let l_pld_usize = l_pld as usize;
+    if at + 5 + l_pld_usize > n { return Err(Refusal::Short); }
+    let v_pld = &env[at + 5..at + 5 + l_pld_usize];
+    at += 5 + l_pld_usize;
+
+    // Trailing check
+    if at != n {
+        return Err(Refusal::Trailing);
+    }
+
+    let mut nonce = [0u8; 32];
+    nonce.copy_from_slice(v_non);
+    let mut action = [0u8; 32];
+    action.copy_from_slice(v_act);
+
+    let mut intent = Box::new(Intent {
+        domain_len: l_dom,
+        domain: dom_padded,
+        nonce_len: 32,
+        nonce,
+        epoch,
+        action_len: 32,
+        action,
+        destination_len: l_dst,
+        destination: dst_padded,
+        capability_len: l_cap,
+        capability: cap_padded,
+        amount,
+        expiry,
+        payer_len: l_pay,
+        payer: pay_padded,
+        payload_len: l_pld,
+        payload: [0u8; 4096],
+    });
+    intent.payload[..l_pld_usize].copy_from_slice(v_pld);
+
+    Ok(intent)
 }
 
 /// Ed25519 public key for a 32-byte seed (RFC 8032 secret key).

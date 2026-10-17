@@ -783,6 +783,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "btungsten-qeval"
+version = "0.1.0"
+dependencies = [
+ "btungsten-wb001",
+ "btungsten-wb001-core",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "btungsten-teeth"
 version = "0.1.0"
 dependencies = [
