@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 
 import { buildArchive, upLabel, downLabel } from '../../surfaces/person-panel-corpus.mjs';
-import { wikipediaLink, familyGroups, grandparentBranches, genContextText, ambiguityHeadline, relationshipSummary, hopArrow, layerAttributionLines, buildTeasers, kinshipTerm, descentTiers, hopWindow, esc } from '../../surfaces/person-panel.mjs';
+import { wikipediaLink, familyGroups, grandparentBranches, grandparentPathHtml, genContextText, ambiguityHeadline, relationshipSummary, hopArrow, layerAttributionLines, buildTeasers, kinshipTerm, descentTiers, hopWindow, esc } from '../../surfaces/person-panel.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
@@ -738,6 +738,15 @@ test('Charlemagne and Louis I trace to Donna, independent of the chart starting 
     assert.deepEqual(branches.filter(b => b.direct).map(b => b.grandparent.id), [DONNA]);
   }
   assert.match(relationshipSummary(archive.relationship(DONNA, APR), id => archive.getPerson(id).name), /not a marriage to each other/);
+});
+
+test('direct grandparent self branch renders identity text, never an empty X-to-X disclosure', () => {
+  const donna = archive.getPerson(DONNA);
+  const self = grandparentBranches(archive, FOUNDER, DONNA).find(b => b.grandparent.id === DONNA);
+  assert.equal(self.relationship.kind, 'self');
+  const html = grandparentPathHtml(self, donna, () => '<div>should not render</div>');
+  assert.match(html, /head of this grandparent branch/);
+  assert.doesNotMatch(html, /<details>|Show the parent-to-child line|should not render/);
 });
 
 test('marriage grouping uses both recorded parents and preserves every child', () => {
