@@ -83,7 +83,7 @@ say "== SPEC-CHECK PQ05: KemNtt.cry closed terms =="
 for prop in zetasMatchAppendixA gammasMatchAppendixA inverseOf128 inverseUndoesForward nttMultipliesPolynomials; do
   _out=$(cd "$CRYDIR" && "$CRYPTOL" -c ":load KemNtt.cry" -c ":prove $prop" 2>&1) || {
     say "SPEC-CHECK $prop: ABORTED. Output:"; say "$_out"; exit 1; }
-  if ! say "$_out" | grep -aq 'Q.E.D.'; then
+  if ! say "$_out" | grep -a 'Q.E.D.' > /dev/null; then
     say "SPEC-CHECK $prop: FAIL. Output:"; say "$_out"; exit 1
   fi
   say "SPEC-CHECK $prop: PASS"
@@ -97,7 +97,9 @@ run_required() {
   _t1=$(clock)
   say "$_log" | grep -a -E 'PQ05-SAW|Subgoal failed|rror' || true
   for _ob in "$@"; do
-    if ! say "$_log" | grep -aqxF "PQ05-SAW PROVEN $_ob"; then
+    # Read the complete captured log: grep -q closes the pipe early and makes
+    # printf report an I/O error on large successful proof transcripts.
+    if ! say "$_log" | grep -axF "PQ05-SAW PROVEN $_ob" > /dev/null; then
       say "SAW $_script: '$_ob' NOT PROVEN (rc=$_rc). Full output:"
       say "$_log"
       exit 1
@@ -111,12 +113,12 @@ run_teeth_verify() {
   _script=$1
   say "== SAW PQ05 NTT: TEETH $_script — must FAIL with a counterexample =="
   _log=$(cd "$SAWDIR" && "$SAW" +RTS -M13g -RTS "$_script" 2>&1) && _rc=0 || _rc=$?
-  say "$_log" | grep -a -E 'PQ05-SAW-TEETH|Subgoal failed|ounterexample' | head -12 || true
-  if say "$_log" | grep -aq 'UNEXPECTED-PROVEN' || [ "$_rc" -eq 0 ]; then
+  say "$_log" | grep -a -E 'PQ05-SAW-TEETH|Subgoal failed|ounterexample' | sed -n '1,12p' || true
+  if say "$_log" | grep -a 'UNEXPECTED-PROVEN' > /dev/null || [ "$_rc" -eq 0 ]; then
     say "SAW-TEETH $_script: FAIL — the wrong obligation was accepted"
     exit 1
   fi
-  if ! say "$_log" | grep -aq 'PQ05-SAW-TEETH obligation' || ! say "$_log" | grep -aqiE 'counterexample|^Invalid: \['; then
+  if ! say "$_log" | grep -a 'PQ05-SAW-TEETH obligation' > /dev/null || ! say "$_log" | grep -aiE 'counterexample|^Invalid: \[' > /dev/null; then
     say "SAW-TEETH $_script: FAIL — saw failed, but not with a counterexample on the obligation. Full output:"
     say "$_log"
     exit 1

@@ -1,0 +1,5 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /workspace/wt-pq-battery/crates/bnr-keys/Cargo.toml
+workspace: /workspace/wt-pq-battery/Cargo.toml
+chilldkg-rs v0.5.0
+└── bsigner v0.1.0 (/workspace/wt-pq-battery/crates/bsigner)

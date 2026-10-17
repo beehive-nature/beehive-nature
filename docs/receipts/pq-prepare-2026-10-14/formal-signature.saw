@@ -1,0 +1,4 @@
+include "common.saw";
+print "PREPARE CONTROL signature obligation";
+check "pq_prepare_proof::truncate_signature" 1 3310 1 true;
+print "PREPARE UNEXPECTED-PROVEN";

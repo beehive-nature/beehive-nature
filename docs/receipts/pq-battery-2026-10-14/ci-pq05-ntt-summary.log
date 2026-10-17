@@ -1,0 +1,98 @@
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	﻿2026-10-14T16:30:38.9424635Z ##[group]Run sh scripts/btungsten/pq05-ntt-check.sh saw "$HOME/saw/bin/cryptol"
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:38.9425366Z [36;1msh scripts/btungsten/pq05-ntt-check.sh saw "$HOME/saw/bin/cryptol"[0m
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:38.9467801Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:38.9468306Z env:
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:38.9468790Z   MIR_JSON_REV: 8cbf9af1821075ef47cf784fef78d2650827730d
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:38.9469230Z   MIR_JSON_TOOLCHAIN: nightly-2026-03-21
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:38.9469684Z   SAW_RUST_LIBRARY_PATH: /home/runner/mir-json/rlibs
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:38.9470135Z ##[endgroup]
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:38.9645208Z == SAW PQ05 NTT: toolchain ==
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:38.9680068Z 1.6 (68eed5f release-1.6)
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:38.9798205Z Cryptol 3.6.0
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:38.9919897Z == SAW PQ05 NTT: PIN the harness lock to the workspace lock ==
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:39.2761677Z SAW-PIN PQ05: PASS (18 packages, each the workspace's version and checksum)
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:39.2762578Z == SAW PQ05 NTT: BUILD the harness to MIR JSON (cargo-saw-build) ==
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:39.3915668Z     Updating crates.io index
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:39.9113002Z  Downloading crates ...
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:39.9715303Z   Downloaded cfg-if v1.0.4
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:39.9762408Z   Downloaded crypto-common v0.2.2
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:39.9840904Z   Downloaded keccak v0.2.2
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:39.9887062Z   Downloaded cmov v0.5.4
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:39.9899802Z   Downloaded autocfg v1.5.1
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:39.9923981Z   Downloaded kem v0.3.0
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:39.9930211Z   Downloaded block-buffer v0.12.1
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:39.9948633Z   Downloaded ctutils v0.4.2
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.0062672Z   Downloaded module-lattice v0.2.3
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.0101009Z   Downloaded rand_core v0.10.1
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.0135239Z   Downloaded digest v0.11.3
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.0156752Z   Downloaded ml-kem v0.3.2
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.0175838Z   Downloaded num-traits v0.2.19
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.0192778Z   Downloaded hybrid-array v0.4.14
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.0264759Z   Downloaded typenum v1.20.1
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.0400170Z   Downloaded sha3 v0.11.0
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.5032372Z    Compiling cmov v0.5.4
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.5033192Z    Compiling typenum v1.20.1
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.5038966Z    Compiling rand_core v0.10.1
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.5043769Z    Compiling autocfg v1.5.1
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.6110453Z    Compiling cfg-if v1.0.4
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.6364120Z    Compiling keccak v0.2.2
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.6835052Z    Compiling ctutils v0.4.2
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:40.8853477Z    Compiling num-traits v0.2.19
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:41.2396004Z    Compiling hybrid-array v0.4.14
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:41.8725001Z    Compiling crypto-common v0.2.2
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:41.8725655Z    Compiling block-buffer v0.12.1
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:41.8726222Z    Compiling module-lattice v0.2.3
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:42.9344542Z    Compiling digest v0.11.3
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:42.9345765Z    Compiling kem v0.3.0
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:43.0318329Z    Compiling sha3 v0.11.0
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:43.3294757Z    Compiling ml-kem v0.3.2
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:44.2169629Z    Compiling pq05_ntt v0.0.0 (/home/runner/work/beehive-nature/beehive-nature/scripts/btungsten/pq05-ntt)
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:45.3444762Z Linking 18 mir files into /home/runner/work/beehive-nature/beehive-nature/target/saw-pq05-ntt/cargo/x86_64-unknown-linux-gnu/debug/deps/pq05_ntt-9b01612c36b1fb5f.linked-mir.json
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:45.4390835Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 6.12s
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:45.4431774Z   Executable unittests src/lib.rs (/home/runner/work/beehive-nature/beehive-nature/target/saw-pq05-ntt/cargo/x86_64-unknown-linux-gnu/debug/deps/pq05_ntt-9b01612c36b1fb5f)
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.0069086Z SAW-BUILD PQ05: PASS (12176483 bytes of linked MIR; names:)
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.0084774Z   let elem_adt_name = "module_lattice/f91531d7::algebra::Elem::_adt2ef3e55d13c40680[0]";
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.0085684Z   let poly_adt_name = "module_lattice/f91531d7::algebra::Polynomial::_adt2ef3e55d13c40680[0]";
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.0086419Z   let npoly_adt_name = "module_lattice/f91531d7::algebra::NttPolynomial::_adt2ef3e55d13c40680[0]";
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.0087415Z   let arr_adt_name = "hybrid_array/3e4a3fc7::Array::_adt332565ab07ffc4d0[0]";
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.0088074Z   let add_name = "module_lattice::algebra::{impl#4}::add::_inst2ef3e55d13c40680";
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.0088639Z   let sub_name = "module_lattice::algebra::{impl#5}::sub::_inst2ef3e55d13c40680";
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.0089240Z   let mul_name = "module_lattice::algebra::{impl#6}::mul::_inst2ef3e55d13c40680";
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.0089775Z   let ntt_name = "ml_kem::algebra::{impl#0}::ntt";
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.0090324Z   let ntt_inverse_name = "ml_kem::algebra::{impl#2}::ntt_inverse";
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.0091008Z   let barrett_name = "ml_kem::algebra::{impl#5}::barrett_reduce";
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.0091686Z   let base_case_name = "ml_kem::algebra::base_case_multiply";
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.0092427Z   let multiply_ntt_name = "ml_kem::algebra::{impl#4}::multiply_ntt";
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.0093380Z == SPEC-CHECK PQ05: KemNtt.cry closed terms ==
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.1947500Z SPEC-CHECK zetasMatchAppendixA: PASS
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.3705301Z SPEC-CHECK gammasMatchAppendixA: PASS
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:46.5476784Z SPEC-CHECK inverseOf128: PASS
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:48.4576818Z SPEC-CHECK inverseUndoesForward: PASS
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:54.5280015Z SPEC-CHECK nttMultipliesPolynomials: PASS
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T16:30:54.5280621Z == SAW PQ05 NTT: ntt.saw ==
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:04:14.5893944Z PQ05-SAW PROVEN ml-kem Elem add
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:04:14.5894747Z PQ05-SAW PROVEN ml-kem Elem sub
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:04:14.5895137Z PQ05-SAW PROVEN ml-kem Elem mul
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:04:14.5895548Z PQ05-SAW PROVEN ml-kem ntt (FIPS 203 Algorithm 9)
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:04:14.5896407Z PQ05-SAW PROVEN ml-kem ntt_inverse (FIPS 203 Algorithm 10)
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:04:14.5897162Z PQ05-SAW PROVEN ml-kem barrett_reduce (sums of two products)
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:04:14.5897943Z PQ05-SAW PROVEN ml-kem base_case_multiply (FIPS 203 Algorithm 12)
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:04:14.5898683Z PQ05-SAW PROVEN ml-kem multiply_ntt (FIPS 203 Algorithm 11)
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:04:14.6121100Z scripts/btungsten/pq05-ntt-check.sh: 40: printf: printf: I/O error
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:04:14.6349486Z scripts/btungsten/pq05-ntt-check.sh: 40: printf: printf: I/O error
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:04:14.6571255Z scripts/btungsten/pq05-ntt-check.sh: 40: printf: printf: I/O error
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:04:14.6798823Z scripts/btungsten/pq05-ntt-check.sh: 40: printf: printf: I/O error
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:04:14.7719603Z SAW ntt.saw: 8 obligations PROVEN in 2000s
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:04:14.7720794Z == SAW PQ05 NTT: TEETH ntt-teeth.saw — must FAIL with a counterexample ==
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:48.8492169Z PQ05-SAW-TEETH obligation bentTwiddle
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:48.8493837Z Subgoal failed: ml_kem/4652ec92::algebra[0]::{impl#0}[0]::ntt[0] Literal equality postcondition
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:48.8494874Z ----------Counterexample----------
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:48.8722103Z scripts/btungsten/pq05-ntt-check.sh: 40: printf: printf: I/O error
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:48.8835533Z SAW-TEETH ntt-teeth.saw: PASS (counterexample found, as required)
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:48.8836508Z == SAW PQ05 NTT: TEETH ntt-teeth-gamma.saw — must FAIL with a counterexample ==
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:54.8553931Z PQ05-SAW-TEETH obligation bentGamma
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:54.8555202Z Subgoal failed: ml_kem/4652ec92::algebra[0]::base_case_multiply[0] Literal equality postcondition
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:54.8559021Z ----------Counterexample----------
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:54.8594512Z SAW-TEETH ntt-teeth-gamma.saw: PASS (counterexample found, as required)
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:54.8595079Z == SAW PQ05 NTT: ladder state ==
+saw-ntt	PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH	2026-10-14T17:11:54.8595840Z PIN: PASS | BUILD: PASS | SPEC-CHECK: PASS (5) | EQUIVALENCE: PROVEN (8: Elem add, sub, mul; the NTT and its inverse composed from them; Barrett, base case, multiply_ntt) | TEETH: PASS (2)

@@ -1,0 +1,5 @@
+PQ05-XWING bpq-lib vector 1: keygen ok, encapsulate ok, decapsulate ok
+PQ05-XWING bpq-lib vector 2: keygen ok, encapsulate ok, decapsulate ok
+PQ05-XWING bpq-lib vector 3: keygen ok, encapsulate ok, decapsulate ok
+PQ05-XWING TEETH one shared-secret byte changed: caught
+PQ05-XWING SUMMARY bpq-lib: 3 of 3 vectors pass, draft-connolly-cfrg-xwing-kem-11

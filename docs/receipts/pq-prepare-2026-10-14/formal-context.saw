@@ -1,0 +1,4 @@
+include "common.saw";
+print "PREPARE CONTROL context obligation";
+check_ignored_context;
+print "PREPARE UNEXPECTED-PROVEN";

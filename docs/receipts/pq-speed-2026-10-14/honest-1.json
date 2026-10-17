@@ -1,0 +1,784 @@
+{
+  "acvp_commit": "975de31eb83d87039ec88934fdc47d8c312b892d",
+  "assurance": {
+    "executed": 414,
+    "failures": [],
+    "not_run": {
+      "L2-L5 prepared/FIPS equivalence and protocol properties": "executed KAT/DIFFERENTIAL/TEETH only; BNR RustCrypto proofs do not transfer",
+      "other PQ algorithms, ANT/Autonomi storage, transport and full-system qualification": "public-key verification comparator; no network, storage or population-scale run"
+    },
+    "passed": 414,
+    "rows": [
+      {
+        "executed": 36,
+        "implementation": "prepared-fips204-0.4.6",
+        "key": "TEETH empty signature",
+        "passed": 36,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 36,
+        "implementation": "prepared-fips204-0.4.6",
+        "key": "TEETH last context byte",
+        "passed": 36,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 36,
+        "implementation": "prepared-fips204-0.4.6",
+        "key": "TEETH last message byte",
+        "passed": 36,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 36,
+        "implementation": "prepared-fips204-0.4.6",
+        "key": "TEETH last signature byte",
+        "passed": 36,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 3,
+        "implementation": "prepared-fips204-0.4.6",
+        "key": "TEETH malformed public-key length",
+        "passed": 3,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 36,
+        "implementation": "prepared-fips204-0.4.6",
+        "key": "TEETH overlong context",
+        "passed": 36,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 36,
+        "implementation": "prepared-fips204-0.4.6",
+        "key": "TEETH overlong signature",
+        "passed": 36,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 36,
+        "implementation": "prepared-fips204-0.4.6",
+        "key": "TEETH replaced identity key",
+        "passed": 36,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 36,
+        "implementation": "prepared-fips204-0.4.6",
+        "key": "TEETH truncated signature",
+        "passed": 36,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 36,
+        "implementation": "libcrux",
+        "key": "boundary DIFFERENTIAL",
+        "passed": 36,
+        "result_class": "DIFFERENTIAL"
+      },
+      {
+        "executed": 36,
+        "implementation": "prepared-fips204-0.4.6",
+        "key": "boundary DIFFERENTIAL",
+        "passed": 36,
+        "result_class": "DIFFERENTIAL"
+      },
+      {
+        "executed": 36,
+        "implementation": "rustcrypto",
+        "key": "boundary DIFFERENTIAL",
+        "passed": 36,
+        "result_class": "DIFFERENTIAL"
+      },
+      {
+        "executed": 12,
+        "implementation": "prepared-fips204-0.4.6",
+        "key": "official invalid KAT",
+        "passed": 12,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 3,
+        "implementation": "prepared-fips204-0.4.6",
+        "key": "official valid KAT",
+        "passed": 3,
+        "result_class": "KAT"
+      }
+    ]
+  },
+  "batch_operations": 64,
+  "coverage_complete": true,
+  "empty_vectors": false,
+  "encoded_public_key_bytes": 1952,
+  "experimental_comparator": true,
+  "full_system_qualification": "UNESTABLISHED",
+  "inventory": {
+    "coverage": [
+      {
+        "algorithm": "ML-KEM-768",
+        "assurance": "L1 and two-implementation testing; full L2 Cryptol/L3-L5 NOT RUN",
+        "call_sites": [
+          "src/groups/kem_envelope.rs:AgentKemKeypair::generate",
+          "src/groups/kem_envelope.rs:AgentKemKeypair::decapsulate",
+          "src/groups/kem_envelope.rs:seal_group_secret_to_recipient / seal_bytes_to_recipient",
+          "src/dm.rs"
+        ],
+        "evidence": [
+          "official ACVP FIPS203 and FIPS203-tr1",
+          "RustCrypto/libcrux DIFFERENTIAL",
+          "changed-ciphertext implicit rejection",
+          "empty import refusal"
+        ],
+        "functions": [
+          "keyGen",
+          "encapsulation",
+          "decapsulation",
+          "encapsulationKeyCheck",
+          "decapsulationKeyCheck"
+        ],
+        "implementation": "fips203 0.4.3 / saorsa-pqc 0.5.1"
+      },
+      {
+        "algorithm": "ML-DSA-65",
+        "assurance": "L1 and two-implementation testing; full L2 Cryptol/L3-L5 NOT RUN",
+        "call_sites": [
+          "src/upgrade/signature.rs:verify_bytes_signature_with_key",
+          "src/bin/x0x-keygen.rs",
+          "src/identity.rs:MachineIdentity::generate (ant-quic wrapper)"
+        ],
+        "evidence": [
+          "official ACVP FIPS204 and FIPS204-tr1",
+          "RustCrypto/libcrux DIFFERENTIAL",
+          "last message/signature byte, wrong signer and empty import controls"
+        ],
+        "functions": [
+          "keyGen",
+          "sigGen",
+          "sigVer"
+        ],
+        "implementation": "fips204 0.4.6 / Saorsa API and legacy MlDsa65 wrappers"
+      },
+      {
+        "algorithm": "ChaCha20-Poly1305",
+        "assurance": "NOT RUN in this lane; separate qualification required"
+      },
+      {
+        "algorithm": "BLAKE3",
+        "assurance": "NOT RUN in this lane; separate qualification required"
+      },
+      {
+        "algorithm": "SHA-256",
+        "assurance": "NOT RUN in this lane; separate qualification required"
+      },
+      {
+        "algorithm": "RNG entropy and failure propagation",
+        "assurance": "NOT RUN in this lane; separate qualification required"
+      },
+      {
+        "algorithm": "transport handshake and every application composition",
+        "assurance": "NOT RUN in this lane; separate qualification required"
+      },
+      {
+        "algorithm": "full-system properties",
+        "assurance": "NOT RUN in this lane; separate qualification required"
+      }
+    ],
+    "coverage_boundary": "ML-KEM-768 / ML-DSA-65 FIPS cores and Saorsa API wrappers; selected x0x composition tests recorded separately; no full-system qualification",
+    "packages": [
+      {
+        "checksum": "sha256:yL22RU9pLKKitFzVVMaCjGOdf5yWjPg6Z4iZ7ERDooA",
+        "name": "fips203",
+        "version": "0.4.3"
+      },
+      {
+        "checksum": "sha256:yftaNnuYRpM-Jxo8KpkpMHQ_gq5ejLf6p4BxWoD6CxU",
+        "name": "fips204",
+        "version": "0.4.6"
+      },
+      {
+        "checksum": "sha256:ou0uQp5Wc3Y2JcpShby_FScPoWkYy15j_JWrq6y7Gkw",
+        "name": "saorsa-pqc",
+        "version": "0.5.1"
+      },
+      {
+        "checksum": "sha256:p1B9gZdp0Bo2WrcHeUpAhDksgk9Up6anhi-MPQiSsoM",
+        "name": "sha2",
+        "version": "0.10.9"
+      },
+      {
+        "checksum": "sha256:d_1wKDRdQVpANM-Hd81PirGFEnQjO0X4Tj2VVQLZOHQ",
+        "name": "sha3",
+        "version": "0.10.9"
+      },
+      {
+        "checksum": "sha256:7AvkeV4vaigGm-wLX_PirJuvyZ5qmn3DVHmWxcgWkiw",
+        "name": "rand_core",
+        "version": "0.6.4"
+      },
+      {
+        "checksum": "sha256:4FjH3gsmr3d4DHaUFNYleDC7JA88OEd9vCwW5fVNbUw",
+        "name": "rand",
+        "version": "0.8.8"
+      }
+    ],
+    "schema": "btungsten.x0x-pq-inventory/1",
+    "source_files": [
+      {
+        "bytes": 7712,
+        "path": "Cargo.toml",
+        "sha256": "sha256:hCRMCqCaETBEtSa5vw_kVptJ220HxON7ndTyUK9UUzM"
+      },
+      {
+        "bytes": 144103,
+        "path": "Cargo.lock",
+        "sha256": "sha256:7Kgvw2uUFxH7jKH4IwJVXQ-a5j7P1df8BkT9__a9QgY"
+      },
+      {
+        "bytes": 17562,
+        "path": "src/groups/kem_envelope.rs",
+        "sha256": "sha256:YE1PcUHgtDt9sQJt_kVViwkSuW6Qfdo-Bmu-kQ-A220"
+      },
+      {
+        "bytes": 22933,
+        "path": "src/upgrade/signature.rs",
+        "sha256": "sha256:4w1R5GFBIFydpJhp23lH1KZ-dQPOuEQu71DXyPCeAE4"
+      },
+      {
+        "bytes": 67099,
+        "path": "src/identity.rs",
+        "sha256": "sha256:wqkGPwlR210-SREDXkPFA87pkUho-z4KosgdSXsspZY"
+      },
+      {
+        "bytes": 13953,
+        "path": "src/bin/x0x-keygen.rs",
+        "sha256": "sha256:Ct8QQl6-WL2sJsOjHCjBwKHFWsAwNSJFj_D_Tp71hi0"
+      }
+    ],
+    "x0x": {
+      "commit": "32bf552808cc907ed47978e2bb7c896d7c815858",
+      "version": "0.48.0"
+    }
+  },
+  "missing": [],
+  "prepared_public_key_resident_bytes": 6240,
+  "required_rows": 14,
+  "result": "PASS",
+  "sabotage_accept": false,
+  "sabotage_truncate": false,
+  "samples": 17,
+  "schema": "btungsten.pq-speed/1",
+  "timings": [
+    {
+      "ant_legacy_warm": {
+        "max_ns_per_op": 292311.546875,
+        "median_ns_per_op": 194115.546875,
+        "min_ns_per_op": 190719.78125,
+        "ns_per_op_samples": [
+          202201.546875,
+          191475.109375,
+          203243.5,
+          257784.8125,
+          194783.53125,
+          193163.4375,
+          191025.65625,
+          190741.0625,
+          194698.0625,
+          190719.78125,
+          292311.546875,
+          190850.953125,
+          193934.890625,
+          190862.234375,
+          196594.265625,
+          196983.75,
+          194115.546875
+        ]
+      },
+      "context_bytes": 0,
+      "message_bytes": 0,
+      "prepared_cold": {
+        "max_ns_per_op": 267097.984375,
+        "median_ns_per_op": 192530.6875,
+        "min_ns_per_op": 190369.109375,
+        "ns_per_op_samples": [
+          267097.984375,
+          196614.953125,
+          192530.6875,
+          196730.640625,
+          205009.8125,
+          190369.109375,
+          190459.59375,
+          191468.046875,
+          195158.140625,
+          193733.265625,
+          191112.546875,
+          191147.59375,
+          191013.59375,
+          191484.65625,
+          190924.375,
+          203811.453125,
+          197372.140625
+        ]
+      },
+      "prepared_warm": {
+        "max_ns_per_op": 189631.625,
+        "median_ns_per_op": 160412.859375,
+        "min_ns_per_op": 159467.96875,
+        "ns_per_op_samples": [
+          161753.8125,
+          166616.25,
+          166783.921875,
+          189631.625,
+          163155.0625,
+          159917.25,
+          161168.8125,
+          159467.96875,
+          160752.546875,
+          160412.859375,
+          159497.078125,
+          160063.453125,
+          159640.78125,
+          159475.0,
+          160861.671875,
+          159951.046875,
+          159946.046875
+        ]
+      },
+      "saorsa_api_cold": {
+        "max_ns_per_op": 311809.375,
+        "median_ns_per_op": 225826.203125,
+        "min_ns_per_op": 224183.71875,
+        "ns_per_op_samples": [
+          235408.296875,
+          228551.328125,
+          228598.921875,
+          224980.390625,
+          228141.03125,
+          230649.328125,
+          224183.71875,
+          225537.203125,
+          225147.71875,
+          311809.375,
+          228766.734375,
+          225200.171875,
+          225488.53125,
+          225692.5,
+          225826.203125,
+          231754.234375,
+          224895.53125
+        ]
+      },
+      "saorsa_api_warm": {
+        "max_ns_per_op": 338881.90625,
+        "median_ns_per_op": 194195.375,
+        "min_ns_per_op": 191017.359375,
+        "ns_per_op_samples": [
+          191605.34375,
+          218556.578125,
+          191227.921875,
+          194195.375,
+          199340.21875,
+          236944.15625,
+          191425.015625,
+          191371.78125,
+          194597.859375,
+          194181.921875,
+          338881.90625,
+          191017.359375,
+          191176.40625,
+          194304.34375,
+          201067.859375,
+          199743.5,
+          192812.0
+        ]
+      },
+      "speedup_vs_ant_legacy_warm": 1.2100996617809339,
+      "speedup_vs_api_cold": 1.1729361488152377,
+      "speedup_vs_api_warm": 1.210597303461975
+    },
+    {
+      "ant_legacy_warm": {
+        "max_ns_per_op": 318860.109375,
+        "median_ns_per_op": 196053.25,
+        "min_ns_per_op": 191651.53125,
+        "ns_per_op_samples": [
+          195570.328125,
+          200692.3125,
+          227879.03125,
+          240465.640625,
+          191804.46875,
+          199642.984375,
+          318860.109375,
+          191887.609375,
+          196053.25,
+          191871.625,
+          192941.625,
+          191651.53125,
+          199246.453125,
+          197316.5625,
+          196427.078125,
+          195547.609375,
+          191951.625
+        ]
+      },
+      "context_bytes": 0,
+      "message_bytes": 256,
+      "prepared_cold": {
+        "max_ns_per_op": 342552.25,
+        "median_ns_per_op": 193323.265625,
+        "min_ns_per_op": 191573.09375,
+        "ns_per_op_samples": [
+          204571.65625,
+          199109.015625,
+          194667.53125,
+          192219.9375,
+          206153.0625,
+          342552.25,
+          191734.046875,
+          191891.359375,
+          192862.546875,
+          191573.09375,
+          193323.265625,
+          197968.421875,
+          192208.6875,
+          199184.15625,
+          195825.640625,
+          191871.328125,
+          192896.6875
+        ]
+      },
+      "prepared_warm": {
+        "max_ns_per_op": 239219.859375,
+        "median_ns_per_op": 162057.84375,
+        "min_ns_per_op": 160145.640625,
+        "ns_per_op_samples": [
+          166783.296875,
+          161738.15625,
+          162374.515625,
+          182050.625,
+          163422.59375,
+          239219.859375,
+          167488.828125,
+          160645.171875,
+          160773.078125,
+          161238.78125,
+          162057.84375,
+          160609.328125,
+          160145.640625,
+          169306.015625,
+          161758.515625,
+          160316.890625,
+          162220.328125
+        ]
+      },
+      "saorsa_api_cold": {
+        "max_ns_per_op": 322253.703125,
+        "median_ns_per_op": 227311.640625,
+        "min_ns_per_op": 225651.8125,
+        "ns_per_op_samples": [
+          226372.84375,
+          226997.609375,
+          229705.21875,
+          230560.28125,
+          226810.09375,
+          322253.703125,
+          229810.265625,
+          227105.625,
+          226532.671875,
+          232195.375,
+          225651.8125,
+          227311.640625,
+          228634.75,
+          226749.5,
+          228029.109375,
+          226502.625,
+          229390.5625
+        ]
+      },
+      "saorsa_api_warm": {
+        "max_ns_per_op": 243835.09375,
+        "median_ns_per_op": 194440.53125,
+        "min_ns_per_op": 191444.265625,
+        "ns_per_op_samples": [
+          192408.265625,
+          194348.796875,
+          194440.53125,
+          243835.09375,
+          193993.75,
+          193837.671875,
+          194275.515625,
+          206051.765625,
+          195625.421875,
+          199227.828125,
+          191681.90625,
+          191444.265625,
+          199768.84375,
+          194960.890625,
+          201434.15625,
+          191473.859375,
+          195120.40625
+        ]
+      },
+      "speedup_vs_ant_legacy_warm": 1.2097732850403917,
+      "speedup_vs_api_cold": 1.1758110949042686,
+      "speedup_vs_api_warm": 1.1998217843127386
+    },
+    {
+      "ant_legacy_warm": {
+        "max_ns_per_op": 267626.15625,
+        "median_ns_per_op": 206495.890625,
+        "min_ns_per_op": 202572.09375,
+        "ns_per_op_samples": [
+          202922.125,
+          203166.328125,
+          203090.265625,
+          210257.375,
+          206734.46875,
+          207910.421875,
+          267626.15625,
+          204618.140625,
+          208952.546875,
+          203645.984375,
+          203493.359375,
+          206495.890625,
+          205462.21875,
+          202572.09375,
+          207780.34375,
+          207777.203125,
+          220094.609375
+        ]
+      },
+      "context_bytes": 0,
+      "message_bytes": 4096,
+      "prepared_cold": {
+        "max_ns_per_op": 227340.296875,
+        "median_ns_per_op": 205642.875,
+        "min_ns_per_op": 202074.59375,
+        "ns_per_op_samples": [
+          202935.75,
+          202746.484375,
+          202558.46875,
+          202871.5625,
+          205090.28125,
+          206718.8125,
+          205642.875,
+          222154.421875,
+          227340.296875,
+          226503.40625,
+          218023.84375,
+          202866.859375,
+          216036.96875,
+          202074.59375,
+          203547.84375,
+          224987.421875,
+          208543.65625
+        ]
+      },
+      "prepared_warm": {
+        "max_ns_per_op": 178643.125,
+        "median_ns_per_op": 173513.921875,
+        "min_ns_per_op": 171533.1875,
+        "ns_per_op_samples": [
+          175810.90625,
+          172450.0625,
+          173574.515625,
+          175991.875,
+          171705.828125,
+          176544.015625,
+          172671.40625,
+          173875.703125,
+          177486.25,
+          173513.921875,
+          174714.3125,
+          171533.1875,
+          172212.890625,
+          172234.5,
+          171708.1875,
+          173211.3125,
+          178643.125
+        ]
+      },
+      "saorsa_api_cold": {
+        "max_ns_per_op": 266220.703125,
+        "median_ns_per_op": 238496.625,
+        "min_ns_per_op": 236085.671875,
+        "ns_per_op_samples": [
+          240505.09375,
+          237461.234375,
+          244824.15625,
+          247864.71875,
+          238496.625,
+          237268.84375,
+          249199.4375,
+          237738.953125,
+          240189.5,
+          237758.203125,
+          236454.328125,
+          238251.46875,
+          236085.671875,
+          238148.625,
+          243814.4375,
+          266220.703125,
+          243468.171875
+        ]
+      },
+      "saorsa_api_warm": {
+        "max_ns_per_op": 228761.578125,
+        "median_ns_per_op": 206222.09375,
+        "min_ns_per_op": 202678.390625,
+        "ns_per_op_samples": [
+          205544.5625,
+          205140.515625,
+          211821.078125,
+          223560.6875,
+          205898.359375,
+          211565.28125,
+          210141.1875,
+          203929.5,
+          207152.90625,
+          204534.078125,
+          202678.390625,
+          204079.78125,
+          205732.734375,
+          206222.09375,
+          228761.578125,
+          206993.078125,
+          209535.671875
+        ]
+      },
+      "speedup_vs_ant_legacy_warm": 1.1900825501123784,
+      "speedup_vs_api_cold": 1.159761187933207,
+      "speedup_vs_api_warm": 1.1885045967583112
+    },
+    {
+      "ant_legacy_warm": {
+        "max_ns_per_op": 475995.265625,
+        "median_ns_per_op": 384896.515625,
+        "min_ns_per_op": 381675.78125,
+        "ns_per_op_samples": [
+          382542.875,
+          409394.53125,
+          403157.640625,
+          475995.265625,
+          433224.390625,
+          388199.9375,
+          385085.3125,
+          382315.734375,
+          383310.875,
+          388380.265625,
+          381675.78125,
+          385627.421875,
+          383901.84375,
+          384155.125,
+          382575.4375,
+          384896.515625,
+          382585.765625
+        ]
+      },
+      "context_bytes": 0,
+      "message_bytes": 65536,
+      "prepared_cold": {
+        "max_ns_per_op": 482621.953125,
+        "median_ns_per_op": 388723.578125,
+        "min_ns_per_op": 382115.5,
+        "ns_per_op_samples": [
+          392098.375,
+          431875.921875,
+          482621.953125,
+          415187.78125,
+          407820.46875,
+          387322.515625,
+          384284.28125,
+          385374.140625,
+          382115.5,
+          389125.109375,
+          389416.765625,
+          383930.015625,
+          386820.0,
+          384026.765625,
+          388723.578125,
+          383295.390625,
+          390328.484375
+        ]
+      },
+      "prepared_warm": {
+        "max_ns_per_op": 716145.46875,
+        "median_ns_per_op": 354258.6875,
+        "min_ns_per_op": 350268.65625,
+        "ns_per_op_samples": [
+          372303.59375,
+          354258.6875,
+          390824.25,
+          716145.46875,
+          358391.765625,
+          352951.6875,
+          352438.828125,
+          354104.78125,
+          357880.8125,
+          355524.5,
+          359855.9375,
+          351203.875,
+          350694.9375,
+          350568.90625,
+          359959.875,
+          352430.546875,
+          350268.65625
+        ]
+      },
+      "saorsa_api_cold": {
+        "max_ns_per_op": 455840.28125,
+        "median_ns_per_op": 421423.59375,
+        "min_ns_per_op": 416411.328125,
+        "ns_per_op_samples": [
+          425770.25,
+          427293.234375,
+          455840.28125,
+          450664.75,
+          450285.90625,
+          421423.59375,
+          427006.4375,
+          419491.359375,
+          418410.421875,
+          433280.296875,
+          419718.015625,
+          418029.0625,
+          416962.84375,
+          427068.125,
+          416646.15625,
+          416411.328125,
+          419456.296875
+        ]
+      },
+      "saorsa_api_warm": {
+        "max_ns_per_op": 534350.984375,
+        "median_ns_per_op": 387995.34375,
+        "min_ns_per_op": 380989.15625,
+        "ns_per_op_samples": [
+          534350.984375,
+          403356.125,
+          390908.46875,
+          409012.40625,
+          400035.828125,
+          394272.46875,
+          391495.203125,
+          383960.234375,
+          387995.34375,
+          384556.203125,
+          387264.734375,
+          380989.15625,
+          382719.140625,
+          385779.28125,
+          381516.25,
+          392052.03125,
+          382882.875
+        ]
+      },
+      "speedup_vs_ant_legacy_warm": 1.0864843381575504,
+      "speedup_vs_api_cold": 1.0841215132427209,
+      "speedup_vs_api_warm": 1.0952316977406518
+    }
+  ],
+  "warmup_batches_per_profile": 1
+}

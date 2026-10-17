@@ -1,0 +1,21 @@
+    Fetching advisory database from `https://github.com/RustSec/advisory-db.git`
+      Loaded 1314 security advisories (from /home/agent/.cargo/advisory-db)
+    Updating crates.io index
+    Scanning /workspace/wt-pq-battery/crates/btungsten-x0x-pq/Cargo.lock for vulnerabilities (222 crate dependencies)
+Crate:     atomic-polyfill
+Version:   1.0.3
+Warning:   unmaintained
+Title:     atomic-polyfill is unmaintained
+Date:      2023-07-11
+ID:        RUSTSEC-2023-0089
+URL:       https://rustsec.org/advisories/RUSTSEC-2023-0089
+
+Crate:     proc-macro-error2
+Version:   2.0.1
+Warning:   unmaintained
+Title:     proc-macro-error2 is unmaintained
+Date:      2026-06-07
+ID:        RUSTSEC-2026-0173
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0173
+
+warning: 2 allowed warnings found

@@ -1,0 +1,45 @@
+== SAW PQ02 sponge022: toolchain ==
+1.6 (68eed5f release-1.6)
+Cryptol 3.6.0
+== SAW PQ02 sponge022: PIN the harness lock to the workspace lock ==
+SAW-PIN PQ02 sponge022: PASS (10 packages, each the workspace's version and checksum)
+== SAW PQ02 sponge022: BUILD the harness to MIR JSON (cargo-saw-build) ==
+   Compiling typenum v1.20.1
+   Compiling cfg-if v1.0.4
+   Compiling keccak v0.2.2
+   Compiling hybrid-array v0.4.14
+   Compiling block-buffer v0.12.1
+   Compiling crypto-common v0.2.2
+   Compiling digest v0.11.3
+   Compiling sha3 v0.11.0
+   Compiling pq02_sponge022 v0.0.0 (/workspace/wt-pq-battery/scripts/btungsten/pq02-sponge022)
+Linking 11 mir files into /workspace/wt-pq-battery/target/saw-pq02-sponge022/cargo/x86_64-unknown-linux-gnu/debug/deps/pq02_sponge022-dcdb08c86e78635a.linked-mir.json
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.24s
+  Executable unittests src/lib.rs (/workspace/wt-pq-battery/target/saw-pq02-sponge022/cargo/x86_64-unknown-linux-gnu/debug/deps/pq02_sponge022-dcdb08c86e78635a)
+SAW-BUILD PQ02 sponge022: PASS (5078252 bytes of linked MIR; let keccak_p_name = "keccak::backends::soft::keccak_p::_instb72a0ffc992cdb45";)
+== SPEC-CHECK PQ02 sponge022: KeccakF1600.cry closed terms ==
+SPEC-CHECK sha3_512Of33: PASS
+SPEC-CHECK sha3_256Of1184: PASS
+SPEC-CHECK shake128Of34To504: PASS
+SPEC-CHECK shake256Of1120: PASS
+SPEC-CHECK shake256Of33To128: PASS
+== SAW PQ02 sponge022: sponge022.saw ==
+PQ02-SAW ASSUMED keccak 0.2.2 keccak_p::<u64, 24> = keccakF (tied by shipped022.saw and agree022.saw)
+PQ02-SAW PROVEN sha3 0.11.0 sha3_256_1184
+PQ02-SAW PROVEN sha3 0.11.0 sha3_512_33
+PQ02-SAW PROVEN sha3 0.11.0 shake256_1120_32
+PQ02-SAW PROVEN sha3 0.11.0 shake256_33_128
+PQ02-SAW PROVEN sha3 0.11.0 shake128_34_504
+SAW sponge022.saw: 5 obligations PROVEN in 8s
+== SAW PQ02 sponge022: TEETH sponge022-teeth-512.saw — must FAIL with a counterexample ==
+PQ02-SAW-TEETH obligation sha3_512_33 at rate 136
+Subgoal failed: pq02_sponge022/feb90517::sha3_512_33[0] Literal equality postcondition
+----------Counterexample----------
+SAW-TEETH sponge022-teeth-512.saw: PASS (counterexample found, as required)
+== SAW PQ02 sponge022: TEETH sponge022-teeth-128.saw — must FAIL with a counterexample ==
+PQ02-SAW-TEETH obligation shake128_34_504 at rate 136
+Subgoal failed: pq02_sponge022/feb90517::shake128_34_504[0] Literal equality postcondition
+----------Counterexample----------
+SAW-TEETH sponge022-teeth-128.saw: PASS (counterexample found, as required)
+== SAW PQ02 sponge022: ladder state ==
+PIN: PASS | BUILD: PASS | SPEC-CHECK: PASS (5) | EQUIVALENCE: PROVEN (5: ML-KEM-768's H, G, J, PRF and SampleNTT XOF shapes) with keccak_p::<u64, 24> ASSUMED = keccakF (tied by the loop lane) | TEETH: PASS (2)
