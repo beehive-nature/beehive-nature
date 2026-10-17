@@ -82,6 +82,7 @@ members = [
     "crates/bheraldry",
     "crates/bpq-device-xcheck",
     "crates/antelope-authority",
+    "crates/bindex-bnrose",
     "crates/bnr-explorer",
     "crates/bnr-explorer-wasm",
 ]
