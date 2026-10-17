@@ -21,9 +21,12 @@
 //             reach evidence that was never stored.
 //   COMPRESS— compress() folds a full-registry vote into five
 //             per-constituency tallies plus one fixed-weight verdict.
-//   SETTLE  — future beat: an Antelope/Vaulta multisig or whatever
-//             successor exists centuries later. NOT MODELED HERE; the
-//             spec names it, no code claims it.
+//   SETTLE  — MODELED 2026-10-09 at model scale by the WB004 bridge
+//             (crates/btungsten-wb004/tests/skaists_bridge.rs): the
+//             compressed verdict drives the epochal engine's bounded
+//             msig and lands as an immutable receipt. A LIVE
+//             Antelope/Vaulta settlement stays future work — named,
+//             not claimed (the non-inheritance law).
 //
 // THE ARITHMETIC (part of the constitution, not an implementation
 // detail): SEAT_CAP = 6^5 = 7,776, DERIVED at load from the sixfold
