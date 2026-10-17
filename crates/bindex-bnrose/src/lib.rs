@@ -68,6 +68,7 @@
 pub mod ingest;
 pub mod journal_read;
 pub mod query;
+pub mod serve;
 pub mod store;
 pub mod verify;
 
