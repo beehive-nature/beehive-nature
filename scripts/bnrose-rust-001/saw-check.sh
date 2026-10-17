@@ -50,12 +50,31 @@ say() { printf '%s\n' "$*"; }
 # Mixed-result logs are INCONCLUSIVE (independent review round 2,
 # 2026-10-16): a verdict line followed by a tool error means the
 # process died outside the prover's control — the verdict is not
-# trustworthy, whichever direction it points. Error indicators anywhere
-# in the log veto PROVEN and REFUTED alike; and PROVEN additionally
-# requires the process exit status to be 0 (a "success" verdict from a
-# crashed process is not a success).
+# trustworthy, whichever direction it points. Contradictory verdicts
+# (success AND failure evidence in one log) are likewise never green
+# (review round 3, 2026-10-17). Exit-status contract (round 3):
+#   PROVEN  requires rc == 0.
+#   REFUTED requires a terminal exit COMPATIBLE WITH SAW's actual
+#           refutation behavior — the script aborts with an ordinary
+#           non-zero code (observed 2 hosted). Explicitly refused:
+#           rc == 124 (the timeout(1) wrapper) and rc >= 128 (death
+#           by signal). A counterexample printed by a process that
+#           then timed out or was killed is not a refutation.
+#   Everything else — unknown tool failures included — INCONCLUSIVE.
 classify_log() {
   _log="$1"; _rc="${2:-0}"
+  # Timeout / signal termination first: no verdict from a killed
+  # process is trustworthy, in either direction.
+  if [ "$_rc" = 124 ] || [ "$_rc" -ge 128 ] 2>/dev/null; then
+    printf 'INCONCLUSIVE\n'
+    return 0
+  fi
+  # Contradictory verdict evidence: refuse before either class wins.
+  if grep -q 'Proof succeeded' "$_log" 2>/dev/null \
+     && grep -qi 'counterexample\|Proof failed' "$_log" 2>/dev/null; then
+    printf 'INCONCLUSIVE\n'
+    return 0
+  fi
   if grep -qi 'internal error\|^Error:\|error:\s\|Panic\|panicked\|stack overflow\|out of memory' "$_log" 2>/dev/null; then
     printf 'INCONCLUSIVE\n'
   elif grep -q 'Proof succeeded' "$_log" 2>/dev/null; then
@@ -77,14 +96,21 @@ if [ "${1:-}" = "--selftest" ]; then
   printf '...\nProof succeeded\nsaw: internal error\n' > "$T/ok-then-error.log"
   printf '...\nProof failed\nsaw: internal error\n' > "$T/refuted-then-error.log"
   printf '...\nProof succeeded\n' > "$T/ok-bad-rc.log"
+  printf '...\nProof failed, counterexample found\n' > "$T/refuted-124.log"
+  printf '...\nProof succeeded\nProof failed, counterexample found\n' > "$T/contradictory.log"
+  printf '...\nProof failed, counterexample found\n' > "$T/refuted-signal.log"
   [ "$(classify_log "$T/ok.log" 0)" = PROVEN ]        || { say "selftest: ok.log misclassified"; exit 1; }
   [ "$(classify_log "$T/refuted.log" 1)" = REFUTED ]  || { say "selftest: refuted.log misclassified"; exit 1; }
+  [ "$(classify_log "$T/refuted.log" 2)" = REFUTED ]  || { say "selftest: refuted.log (SAW's observed abort code 2) misclassified"; exit 1; }
   [ "$(classify_log "$T/empty.log" 124)" = INCONCLUSIVE ] || { say "selftest: empty.log (timeout shape) misclassified"; exit 1; }
   [ "$(classify_log "$T/crash.log" 1)" = INCONCLUSIVE ] || { say "selftest: crash.log misclassified"; exit 1; }
   [ "$(classify_log "$T/ok-then-error.log" 0)" = INCONCLUSIVE ] || { say "selftest: mixed ok-then-error misclassified"; exit 1; }
   [ "$(classify_log "$T/refuted-then-error.log" 1)" = INCONCLUSIVE ] || { say "selftest: mixed refuted-then-error misclassified (a negative control must not pass on a crashed process)"; exit 1; }
   [ "$(classify_log "$T/ok-bad-rc.log" 1)" = INCONCLUSIVE ] || { say "selftest: success-verdict-with-nonzero-rc misclassified"; exit 1; }
-  say "saw-check selftest: GREEN (explicit verdicts only; mixed results and crashed processes are never green, in either direction)"
+  [ "$(classify_log "$T/refuted-124.log" 124)" = INCONCLUSIVE ] || { say "selftest: refutation-from-a-timed-out-process misclassified (round-3 counterexample 1: a tooth must not pass on timeout)"; exit 1; }
+  [ "$(classify_log "$T/contradictory.log" 0)" = INCONCLUSIVE ] || { say "selftest: contradictory verdicts misclassified (round-3 counterexample 2: success AND failure evidence is never green)"; exit 1; }
+  [ "$(classify_log "$T/refuted-signal.log" 137)" = INCONCLUSIVE ] || { say "selftest: refutation-from-a-signalled-process misclassified"; exit 1; }
+  say "saw-check selftest: GREEN (explicit, clean, terminal verdicts only; timeouts, signals, crashes, mixed and contradictory results are never green in either direction)"
   exit 0
 fi
 
