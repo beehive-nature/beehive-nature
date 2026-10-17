@@ -140,6 +140,14 @@ export function grandparentBranches (archive, founder, person) {
   });
 }
 
+export function grandparentPathHtml (branch, person, chainHtml = () => '') {
+  const g = branch?.grandparent;
+  if (!g || !person) return '';
+  if (branch.relationship?.kind === 'self' || g.id === person.id)
+    return '<p class="pp-branch-self">This person is the head of this grandparent branch.</p>';
+  return '<details><summary>Show the parent-to-child line from ' + esc(g.name) + ' to ' + esc(person.name) + '</summary>' + chainHtml(branch.relationship) + '</details>';
+}
+
 export function wikipediaLink (person) {
   if (!person || person.living) return null;
   const articles = { p1790a81049: 'Charlemagne', paf36b10c53: 'Louis_the_Pious' };
@@ -552,7 +560,7 @@ export function mountPersonPanel (host, archive, opts) {
         const g = b.grandparent;
         const title = /^F/i.test(g.gender || '') ? 'Grandma ' : /^M/i.test(g.gender || '') ? 'Grandpa ' : '';
         h += '<p class="pp-branch"><strong>Through ' + title + esc(g.name) + '</strong></p>';
-        h += '<details><summary>Show the parent-to-child line from ' + esc(g.name) + ' to ' + esc(p.name) + '</summary>' + relChainsHtml(b.relationship) + '</details>';
+        h += grandparentPathHtml(b, p, relChainsHtml);
       }
     } else h += '<p>No direct ancestral path through the four grandparents is recorded for this person yet.</p>';
     h += '<details><summary>Check all four grandparent branches</summary>';

@@ -547,6 +547,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "bnr-explorer"
+version = "0.1.0"
+dependencies = [
+ "atmirror",
+ "sha2 0.10.9",
+]
+
+[[package]]
+name = "bnr-explorer-wasm"
+version = "0.1.0"
+dependencies = [
+ "bnr-explorer",
+]
+
+[[package]]
 name = "bnr-keys"
 version = "0.1.0"
 dependencies = [

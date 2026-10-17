@@ -138,6 +138,13 @@ pub trait EmbeddedStore: Send + Sync {
     /// Engine-side structural check. SQLite: `PRAGMA integrity_check`.
     /// SurrealKV: `inspect_db` over the on-disk state.
     fn integrity_check(&self) -> Result<()>;
+
+    /// Engine maintenance, honest per engine: reclaim what the engine's
+    /// own facilities allow. SQLite: WAL checkpoint(TRUNCATE) + VACUUM —
+    /// real space reclaim. SurrealKV 1.0: `flush_wal(true)` only — leveled
+    /// compaction is background policy with no public manual trigger in
+    /// 1.0, so receipts name which reclaim actually happened.
+    fn compact(&self) -> Result<()>;
 }
 
 /// Exclusive upper bound for a prefix range (`prefix` itself if it is all

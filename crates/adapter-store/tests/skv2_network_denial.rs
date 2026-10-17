@@ -27,7 +27,7 @@ use std::time::Duration;
 
 use adapter_store::{corpus_key, corpus_value, open_named};
 
-const OPS: u64 = 2000;
+const OPS: u64 = 20000;
 
 fn child_binary() -> std::path::PathBuf {
     let mut p = std::env::current_exe().expect("cwd");
@@ -93,6 +93,17 @@ fn all_sockets_for(pid: u32) -> usize {
             // tells the caller to re-check liveness instead of counting
             // a sample (the ladder's first Linux run hit exactly this).
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => return usize::MAX,
+            // The same race one step earlier: the process EXITED but is not
+            // reaped yet (the sampler's try_wait ran before it died). A
+            // zombie has no address space, so the kernel hands its /proc
+            // files to root and a reader gets EACCES, not ENOENT (measured
+            // 2026-10-16: zombie -> "Permission denied", reaped -> "No such
+            // file"); run 38848057868 flaked exactly that way. Only a zombie
+            // or an already-vanished pid is the race: EACCES on a live
+            // process is still an unobservable host and still fails below.
+            Err(e) if e.kind() == std::io::ErrorKind::PermissionDenied && exited_unreaped(pid) => {
+                return usize::MAX
+            }
             Err(e) => {
                 panic!("SKV2-RECEIPT method=/proc pid={pid} verdict=UNOBSERVABLE ({e}; a skipped observation is not a pass)")
             }
@@ -101,6 +112,62 @@ fn all_sockets_for(pid: u32) -> usize {
     } else {
         panic!("SKV2-RECEIPT verdict=UNOBSERVABLE on this OS (a skipped observation is not a pass)")
     }
+}
+
+/// True when `pid` has exited and is waiting to be reaped (state Z or X in
+/// /proc/<pid>/stat, which stays world-readable for a zombie), or is gone.
+/// The state is read after the LAST ')' because the command name before it
+/// may itself contain spaces or parentheses.
+fn exited_unreaped(pid: u32) -> bool {
+    match std::fs::read_to_string(format!("/proc/{pid}/stat")) {
+        Ok(stat) => stat
+            .rfind(')')
+            .and_then(|i| stat[i + 1..].split_whitespace().next())
+            .is_some_and(|state| state == "Z" || state == "X"),
+        Err(e) => e.kind() == std::io::ErrorKind::NotFound,
+    }
+}
+
+/// The race, made deterministic: a child that has exited but is not reaped
+/// must read as the exit race (usize::MAX), never as UNOBSERVABLE — and a
+/// live child must still be observed (the control: the answer is not
+/// always MAX).
+#[cfg(target_os = "linux")]
+#[test]
+fn an_exited_unreaped_child_is_the_exit_race_not_an_unobservable_host() {
+    let deadline = std::time::Instant::now() + Duration::from_secs(10);
+
+    let mut live = Command::new("sleep").arg("5").spawn().expect("spawn sleep");
+    assert!(
+        !exited_unreaped(live.id()),
+        "a running process is not a zombie"
+    );
+    assert_ne!(
+        all_sockets_for(live.id()),
+        usize::MAX,
+        "a live process is observed"
+    );
+    live.kill().expect("kill sleep");
+    live.wait().expect("reap sleep");
+
+    let mut done = Command::new("true").spawn().expect("spawn true");
+    let pid = done.id();
+    // `done` is not waited on, so once `true` exits it stays a zombie
+    while !exited_unreaped(pid) {
+        assert!(std::time::Instant::now() < deadline, "`true` never exited");
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    assert_eq!(
+        all_sockets_for(pid),
+        usize::MAX,
+        "a zombie is the exit race"
+    );
+    done.wait().expect("reap true");
+    assert_eq!(
+        all_sockets_for(pid),
+        usize::MAX,
+        "a reaped pid is the exit race"
+    );
 }
 
 fn replay_all() -> HashMap<Vec<u8>, Vec<u8>> {
@@ -181,7 +248,7 @@ fn run_workload(
     let mut samples = Vec::new();
     let mut max_sockets = 0usize;
     loop {
-        std::thread::sleep(Duration::from_millis(120));
+        std::thread::sleep(Duration::from_millis(60));
         match child.try_wait().expect("try_wait") {
             Some(_) => break,
             None => {
