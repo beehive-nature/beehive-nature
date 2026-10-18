@@ -277,3 +277,30 @@ This seat's spot-checks:
 `MQWY-6C8` (1855 MA census) and `QVMZ-BNWJ` (the unknown person with Joseph
 Perry). The citation-date audit stays 353 / 169 / 1 / 7. Nothing is
 resolved, the corpus is unchanged and rights are UNASSESSED.
+
+## 9. Rockwood necrology located (2026-10-18)
+
+This revises §8's "unconfirmed by this seat". My two OCR windows stopped
+before the entry, at pp. 91–139. This seat has now read it at a later offset
+of the archive.org item `newenglandhistor28wate` (NEHGR vol. XXVIII, 1874).
+Thomas Temple Rockwood's entry runs from p. 210 onto p. 211. It follows
+Noah Amherst Phelps and precedes Oliver Mayhew Whipple, and reads "died in
+that town October 11, 1872, aged 60 years", with birth on 5 June 1812 at
+Holliston.
+
+The item's `page_numbers.json` maps printed p. 210 to leaf 232, p. 211 to
+leaf 233 (confidence 100) and p. 216 to leaf 238. That last page is where
+the dates are repeated, from the same volume, so it is no independent
+witness. Locator, relayed and now confirmed by this seat: p. 210 = leaf 232,
+p. 211 = leaf 233.
+
+Status:
+- The OCR passage is read and the leaf mapping verified.
+- **The page images are not visually checked.**
+- The frozen 3 Oct versus the published 11 Oct 1872 stays an unresolved
+  conflict.
+- An XXIX marker in the OCR just before p. 210 is unexplained without the
+  image.
+
+Counts are unchanged: six new candidates and six gaps with none. The corpus
+is unchanged.
