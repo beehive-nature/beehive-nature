@@ -149,11 +149,22 @@ require_count() { # $1 what it counts, $2 the captured value
 # the PRE-selftest gate and erases the test along with the defect.
 if [ "${1:-}" = "--selftest" ]; then
   unset S7_STAGED S7_MSG_FILE S7_RANGE S7_BEFORE S7_SHA S7_TARGET
+  # Git's repository-selection variables inherited from the caller (GIT_DIR,
+  # GIT_WORK_TREE, GIT_INDEX_FILE, ...) would aim every git command below at
+  # THAT repository: the init, the user.* and core.hooksPath writes, the fixture
+  # commits. 2026-10-17: a caller with GIT_DIR/GIT_WORK_TREE exported had this
+  # selftest write core.worktree into a real shared .git/config. Clear them, as
+  # githooks(5) prescribes for work in another repository; T0 below proves it.
+  unset $(git rev-parse --local-env-vars 2>/dev/null) GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_OBJECT_DIRECTORY
   T=$(mktemp -d 2>/dev/null) || { echo "selftest FAIL — mktemp"; exit 1; }
   trap 'rm -rf "$T"' EXIT INT TERM
   SELF=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
 
   git init -q "$T/repo" && cd "$T/repo" || { echo "selftest FAIL — git init"; exit 1; }
+  top0=$(cd "$(git rev-parse --show-toplevel)" && pwd -P); gd0=$(cd "$(git rev-parse --git-dir)" && pwd -P)
+  if [ "$top0" != "$(pwd -P)" ] || [ "$gd0" != "$(pwd -P)/.git" ]; then
+    echo "selftest FAIL — git resolves '$top0' (git dir '$gd0'), not the fixture $(pwd -P); refusing to write config or commits"; exit 1
+  fi
   git config user.name "$FOUNDER_NAME"
   git config user.email "$FOUNDER_EMAIL"
   mkdir -p .githooks scripts
@@ -165,6 +176,28 @@ if [ "${1:-}" = "--selftest" ]; then
   echo x > f.txt && git add f.txt
 
   st=0
+  # T0 — isolation from the caller's repository. A decoy repository stands in
+  # for the real one: the whole selftest runs again, nested, with GIT_DIR,
+  # GIT_WORK_TREE and GIT_INDEX_FILE aimed at the decoy, and the decoy's config,
+  # refs, HEAD and index must come out byte-identical. The real project is never
+  # the target. The nested run skips this arm (no recursion).
+  if [ -z "${S7_SELFTEST_NESTED:-}" ]; then
+    D="$T/decoy"
+    git init -q "$D" && git -C "$D" config user.name decoy && git -C "$D" config user.email decoy@x \
+      && echo d > "$D/d.txt" && git -C "$D" add d.txt && git -C "$D" commit -q -m decoy \
+      || { echo "selftest FAIL — decoy repository setup"; exit 1; }
+    snap0() { cat "$D/.git/config"; git -C "$D" for-each-ref --format='%(refname) %(objectname)'; git -C "$D" rev-parse HEAD; cksum < "$D/.git/index"; }
+    snap0 > "$T/decoy.before"
+    o0=$(env GIT_DIR="$D/.git" GIT_WORK_TREE="$D" GIT_INDEX_FILE="$D/.git/index" S7_SELFTEST_NESTED=1 sh "$SELF" --selftest 2>&1); r0=$?
+    snap0 > "$T/decoy.after"
+    if ! cmp -s "$T/decoy.before" "$T/decoy.after"; then
+      echo "  FAIL T0 inherited GIT_DIR/GIT_WORK_TREE reached the caller's repository — decoy changed:"; diff "$T/decoy.before" "$T/decoy.after" | sed 's/^/    /'; st=1
+    elif [ "$r0" -ne 0 ]; then
+      echo "  FAIL T0 the selftest under inherited git variables did not pass; rc=$r0 out: $o0"; st=1
+    else
+      echo "  PASS T0 inherited GIT_DIR/GIT_WORK_TREE/GIT_INDEX_FILE: decoy config, refs, HEAD and index unchanged"
+    fi
+  fi
   blocked() { # $1 desc — the commit under $@ must FAIL with a §7 FAIL and leave no commit
     desc=$1; shift
     out=$("$@" 2>&1); rc=$?
