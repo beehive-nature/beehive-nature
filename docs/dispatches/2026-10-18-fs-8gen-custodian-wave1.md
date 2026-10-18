@@ -232,3 +232,102 @@ unchanged.
 **Wave 1 page coverage now:** MA 387 of 398 and CT 131 of 132 have a
 printed-page or literature lead. That is 518 of 530; 12 have none (11 MA and
 `F7WV-H4N`). No identifier is resolved against an original manuscript yet.
+
+## 8. Open-items follow-up landed (2026-10-18)
+
+**Evidence:**
+`docs/dispatches/evidence/2026-10-18-five-town-wave1-open-items-followup.json`.
+This is another seat's pass, delivered by the founder: a one-line copy plus a
+provenance header, otherwise content-identical (checked by code). The
+delivered sha256 is
+`6750f3ffd72cbecd2e38d5c64ba0853fd6e60c61ede09cf47dc122c7fb4cab1d` <!-- PUBLIC-CONSTANT: sha256 of the delivered evidence file -->,
+the stated digest, and the original bytes are kept on the private tier. All
+12 gap identifiers are in the frozen 530 and in the file.
+
+**Precision on §7's "518 of 530":** that counts source-passage leads. By page
+evidence, 514 have a printed-page numeral observed in retrieved text, 2 have
+a page inferred from sequence, and 2 have the passage but no confirmed page.
+
+**New candidate passages for six of the twelve gaps.** None is resolved, and
+each linkage to its frozen identifier is unverified:
+
+| id | passage | caveat |
+|---|---|---|
+| `QVGY-PXXB` | Holliston VR p. 340, Elizabeth w. James Perry, d. 29 Dec 1753 | no maiden name Death in the passage |
+| `QVKB-1PFT` | Holliston VR p. 332, Capt. Ephraim Littlefield, d. 13 Nov 1778 | gravestone-photo lead (Worcester Historical Museum 2001.11.1.343), photo unexamined |
+| `QVK2-LBK3` | Holliston VR p. 299, Lieut. Isaac Bullard, d. 7 Jul 1742 | other Isaac Bullards nearby |
+| `QK16-53KX` | Holliston VR p. 328, Sarah Lealand, widow, d. 8 Oct 1775 | no maiden name Morse |
+| `QGN3-6XYX` | Sherborn VR p. 199, John Death Esq., d. 14 Dec 1754; cemetery section p. 2 | pagination restarts in the cemetery section |
+| `N75L-V6K` | NEHGR vol. 28 pp. 210–211, Thomas Temple Rockwood necrology, d. 11 Oct 1872 | **conflict** with the frozen 3 Oct 1872; both kept |
+
+Connecticut: the NEHGR vol. 63 (April 1909) p. 179 is an observed journal
+locator for `QPSF-453P` and `QPMC-VHGG`. The reprint's p. 3 stays labelled
+inferred. Olive Kendall (`F7WV-H4N`) has family context only (King genealogy
+p. 196, entry 199), so her 1790 birth is still unplaced.
+
+This seat's spot-checks:
+- **Holliston VR p. 340** reads "Elizabeth, w. James, Dec. 29, 1753, in 48th
+  y." It matches.
+- **NEHGR necrology:** not located in two OCR windows of the archive.org item.
+  The windows covered pp. 91–139 of a volume headed XXIX. It is
+  **unconfirmed by this seat**, not refuted.
+
+**Still without a candidate:** `F7WV-H4N`, `N7TT-RYQ` (Luther Rockwood death
+1856), `N7NF-N5P` (Luther E. death 1862), `MDSS-1T5` (1850 census),
+`MQWY-6C8` (1855 MA census) and `QVMZ-BNWJ` (the unknown person with Joseph
+Perry). The citation-date audit stays 353 / 169 / 1 / 7. Nothing is
+resolved, the corpus is unchanged and rights are UNASSESSED.
+
+## 9. Rockwood necrology located (2026-10-18)
+
+This revises §8's "unconfirmed by this seat". My two OCR windows stopped
+before the entry, at pp. 91–139. This seat has now read it at a later offset
+of the archive.org item `newenglandhistor28wate` (NEHGR vol. XXVIII, 1874).
+Thomas Temple Rockwood's entry runs from p. 210 onto p. 211. It follows
+Noah Amherst Phelps and precedes Oliver Mayhew Whipple, and reads "died in
+that town October 11, 1872, aged 60 years", with birth on 5 June 1812 at
+Holliston.
+
+The item's `page_numbers.json` maps printed p. 210 to leaf 232, p. 211 to
+leaf 233 (confidence 100) and p. 216 to leaf 238. That last page is where
+the dates are repeated, from the same volume, so it is no independent
+witness. Locator, relayed and now confirmed by this seat: p. 210 = leaf 232,
+p. 211 = leaf 233.
+
+Status:
+- The OCR passage is read and the leaf mapping verified.
+- **The page images are not visually checked.**
+- The frozen 3 Oct versus the published 11 Oct 1872 stays an unresolved
+  conflict.
+- An XXIX marker in the OCR just before p. 210 is unexplained without the
+  image.
+
+Counts are unchanged: six new candidates and six gaps with none. The corpus
+is unchanged.
+
+## 10. Rockwood page images viewed (2026-10-18)
+
+This seat downloaded the archive.org page renders (BookReader jp2 for leaves
+231, 232, 233 and 238, plus the title page) to its scratch space and looked
+at them directly:
+- **Leaf 232 = printed p. 210.** The running head reads "Necrology of
+  Historic, Genealogical Society. [April,". The Noah Amherst Phelps entry is
+  followed by "THOMAS TEMPLE ROCKWOOD was born in Holliston, Mass., June 5,
+  1812, and died in that town October 11, 1872, aged 60 years. His father,
+  Luther⁶ Rockwood …". The entry continues past the page foot, with mother
+  Ruth Littlefield, dau. of Asa Littlefield of Framingham.
+- **Leaf 231 = printed p. 209**, with running head "1874.]". Its footer
+  prints "VOL. XXIX. 19".
+- **Title page** reads "For the year 1874. Volume XXVIII", Boston, 1874.
+
+So the XXIX marker is printed on the page itself, not an OCR fault, and it
+contradicts the title page. The relayed reading, an erroneous printed volume
+footer, is the one the images support. The p. 216 repetition (leaf 238) is
+the relaying seat's visual check. It is the same volume and no independent
+witness.
+
+Status now: **the printed source is visually verified.** The frozen 3 Oct
+against the printed 11 Oct 1872 stays an unresolved conflict, because the
+original Massachusetts death entry has not been seen. Nothing in the corpus
+changes. Images are kept in scratch only; nothing was committed or
+republished.

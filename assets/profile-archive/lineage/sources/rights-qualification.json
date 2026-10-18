@@ -1,0 +1,101 @@
+{
+ "schema": "skaists.sources-rights/1",
+ "generated": "2026-10-17T18:20:00Z",
+ "scope": "rights-and-provenance qualification of the committed 8-generation FamilySearch material-evidence corpus (809 cohort persons, 13,249 unique records) — classifies every committed layer and every local-only tier for permanent-network (ANT) replication suitability",
+ "orders": {
+  "harvest": "founder 2026-09-18 — scrape every bit of familysearch.com material evidence for at least 8 dead (grandparents on) blood relative generations; stage here, github, later ANT (executed by the zBlood lane, dispatch 2026-09-18-zblood-source-harvest-8gen.md)",
+  "retain": "founder 2026-10-17 — we keep everything harvested thus far; no re-harvest, no deletions; the corpus as committed stands",
+  "context": "founder 2026-10-17 — the family are original investors to the LDS church; recorded as custodian-relationship CONTEXT for the church-record material, not as a rights grant (no document conferring one is in evidence)"
+ },
+ "axes": {
+  "copyright": "facts (names, dates, places, relationships) and short factual citations/pointers are not copyrightable expression; verbatim record images and prose transcriptions are licensed custodian content",
+  "contract": "FamilySearch Terms of Use §83 prohibits bulk harvesting/scraping without written permission; the corpus was acquired over the founder's own signed-in session via the site's own wires — recorded here as acquisition fact, per the retain order it is not being litigated or undone by this qualification",
+  "custodian": "record images and wholesale index republication are restricted by FamilySearch's record-custodian agreements (their published guidance permits personal genealogical research use, not republication of images or wholesale indexing)",
+  "privacy": "living persons — separate gate from rights; estate privacy law already keeps living-flagged material unnamed/unkeyed in public layers and full-fidelity tiers box-local"
+ },
+ "classes": {
+  "F-family-facts": "genealogical facts and estate-authored analysis (person conclusions, relationship audit reasoning, harvest receipts) — estate's own work product over uncopyrightable facts",
+  "P-pointers": "citation strings, collection titles, ark URLs, film/record ids, attachment dates, image digests — short factual pointers with attribution inherent (they name FamilySearch, the collection, and the access date)",
+  "I-fs-index-data": "FamilySearch record-service index-field triplets {factType, fieldType, value} and hint metadata — bulk-extracted database content; values are facts but the extraction is the contract/custodian axis",
+  "B-image-bytes": "record image bytes (deepzoom tile assemblies) — custodian-licensed; never committed, box-local only",
+  "R-private-tier": "full-fidelity raw dump, notes, change messages, contributor ids, living-household arrays — box-local by estate privacy law"
+ },
+ "files": {
+  "manifest.json": { "classes": ["F-family-facts"], "antVerdict": "GO", "basis": "estate-authored harvest receipt" },
+  "index.json": { "classes": ["F-family-facts", "P-pointers"], "antVerdict": "GO", "basis": "809 persons keyed by internal iid; per-source citation strings + affected conclusions + attachment dates — facts and pointers" },
+  "relationship-audit.json": { "classes": ["F-family-facts"], "antVerdict": "GO", "basis": "935 edges of estate-authored reasoning (child/parent/era/class/why)" },
+  "search-evidence.json": { "classes": ["F-family-facts", "P-pointers"], "antVerdict": "GO", "basis": "search-derived citations for the two zero-attached-source grandparents; obituary/household TEXT stayed private-tier at harvest (dispatch 2026-09-18)" },
+  "images-summary.json": { "classes": ["P-pointers"], "antVerdict": "GO", "basis": "counts, dims, sha256 digests, ark/apid pointers, method/boundary prose — zero image bytes; its own boundary field states bytes are private-tier only" },
+  "records.json": { "classes": ["P-pointers", "I-fs-index-data"], "antVerdict": "SPLIT — P-part GO, I-part HELD", "basis": "13,249 records: citation/title/event layers are pointers; evidence[] carries 49,342 FS index-field triplets — held from ANT pending the Class-I ruling" },
+  "sources-sync-2026-10-12.json": { "classes": ["F-family-facts", "P-pointers", "I-fs-index-data"], "antVerdict": "HELD", "basis": "11 persons, 37 newSources, 153 index-field triplets (post-freeze sync debt)" },
+  "sources-sync-2026-10-13.json": { "classes": ["F-family-facts", "P-pointers", "I-fs-index-data"], "antVerdict": "HELD", "basis": "37 persons, 64 newSources, 427 index-field triplets (the transcription pass on the founder's live session)" },
+  "hint-census-2026-10-07.json": { "classes": ["I-fs-index-data"], "antVerdict": "HELD", "basis": "FamilySearch open-hint metadata: 823 pids swept, 85 open hints (23 cohort + 62 extramural), 3 extramural persons redacted" },
+  "image-bytes (NOT COMMITTED — C:/Users/travi/family-lineage/images-harvest/)": { "classes": ["B-image-bytes"], "antVerdict": "HELD — default never", "basis": "314 downloaded images / 84,055,524 B box-local; custodian agreements restrict republication; the only public artifact is the digest summary" },
+  "private tier (NOT COMMITTED — sources-harvest 41,237,393 B · fs-sync 2,004,287 B · hint-sweep 203,411 B)": { "classes": ["R-private-tier"], "antVerdict": "EXCLUDED", "basis": "estate privacy law: raw transcriptions, notes, contributor ids, living households never leave the box" }
+ },
+ "counts": {
+  "cohortPersons": 809,
+  "uniqueRecords": 13249,
+  "sourceRefs": 23673,
+  "sourcesAttached": 13589,
+  "recordsWithEvidence": 9577,
+  "evidenceTriplets": 49342,
+  "evidenceNonNullValues": 44384,
+  "evidenceOriginalFieldtype": 15146,
+  "evidenceInterpretedFieldtype": 28241,
+  "maxEvidencePerRecord": 72,
+  "topFactTypes": { "Name": 16803, "OTHER": 15190, "Gender": 10589, "Birth": 1945, "Death": 705, "Census": 662, "Age": 656, "RelationshipToHead": 508, "Burial": 469, "Race": 453, "MaritalStatus": 324, "Residence": 250 },
+  "syncTriplets": { "2026-10-12": 153, "2026-10-13": 427 },
+  "images": { "attempted": 382, "downloaded": 314, "bytes": 84055524, "xml-403": 62, "xml-403-all": 6, "queue": "376 entries, 375 unique arks, 100% resolved (terminal 2026-10-16 @dbe231eac)" }
+ },
+ "custodianCensus": {
+  "method": "title-regex bucketing of records.json collection titles (this qualification's own pass; bucket boundaries named below)",
+  "buckets": {
+   "us-state-town-vital": 4571,
+   "church-records (LDS Record of Members / Church Census; England + Denmark parish)": 1408,
+   "partner-index-trees (Ancestry trees, Find A Grave, Geneanet, Millennium File, AGBI, American Ancestors, SAR, Family Data Collection)": 1223,
+   "us-federal (federal census, NUMIDENT/SSA)": 779,
+   "published-family-histories": 20,
+   "unresolved (title regex did not match — needs per-record pass to complete)": 5248
+  },
+  "notes": [
+   "us-federal bucket: underlying federal records are US public domain as works of the federal government; the FamilySearch-served SCANS and index remain custodian-licensed — public-domain status benefits a re-source-from-NARA lane, not redistribution of these bytes",
+   "partner-index-trees bucket carries the strongest index-restriction sensitivity (commercial/partner databases); its staged content is facts-and-citations only, no prose",
+   "church-records bucket is the founder's LDS-investor-family custodian context — context recorded, no rights claim made"
+  ]
+ },
+ "acquisition": {
+  "session": "founder-signed-in familysearch.org session, the site's own UI wires, credentials never handled by agents",
+  "wires": [
+   "/service/tree/tree-data/v8/person/{pid}/details",
+   "/service/tree/tf/person/{pid}/entityref?version=2",
+   "/service/tree/links/sources/{ids}?readExternalData=true",
+   "/service/search/hr/v2/personas (search-evidence pass)",
+   "dascloud das/v2/3:1:{ark}/name?namespace=apid (image binding) + image.xml + deepzoom tiles (images)"
+  ],
+  "discipline": "pacing ≥160ms, single resumable worker (2,502 requests, 0 errors); walker-guard code-enforced queue law; only downloads and EXPLICIT site denials are outcomes; 2026-10-15 finding: FS shifted unauthenticated image.xml to 401-for-everything — denial banking now rides a session-plane verifier, guard code untouched",
+  "receipts": ["manifest.json harvestMeta", "dispatch 2026-09-18-zblood-source-harvest-8gen.md", "commits de36ef416 + dbe231eac (orders 25/26)", "images-summary.json identity field"]
+ },
+ "antState": {
+  "uploaded": false,
+  "ceiling": {
+   "storageMaxANT": 100,
+   "gasMaxETH": 0.0002,
+   "source": "founder ruling 2026-10-03 ('100 ANT cap for now') banked by PR #326 + ETERNALIZATION-EDITION-V2.json::separatedCeilings; REAFFIRMED by founder order 2026-10-17 ('THE CEILING IS 100 ANT'); the 2.5 ANT bound was retired 2026-10-03",
+   "quoteWithinCeiling": "current quote 5.009055375 ANT (2026-10-11, 286,801,920-byte edition) — within bounds"
+  },
+  "basis": ["ETERNALIZATION-RECEIPT.json: quoted-not-purchased, purchased=null, uploaded=null", "zblood-storage-economics.json (current on main, quoted 2026-10-11): purchased=false, uploaded=false; spend approval STANDING-GRANTED (founder 2026-10-02c, 'approval always. never gate me'); payment disabled for CAPABILITY, not price — ant 0.3.9 exposes no atomic storage/gas ceilings and the hosted purchase path caps files at 32 MiB (the edition exceeds it); path re-opens when a ceiling-enforcing client lands, then rebuild + fresh quote per the artifact-change stop-conditions, then the founder's single key-holder signature"],
+  "meaning": "no irreversible replication has occurred; this qualification lands BEFORE the one-way door"
+ },
+ "gates": [
+  { "gate": "privacy", "state": "CLOSED — PRs #346 (superseded) + #347 (landed-through-main) closed 2026-10-17T19:09Z via API with receipts, gh-verified this lane; founder ratification 'RATIFY APPROVED, chat 2026-10-16' recorded verbatim @8e5fa5d05 with the nine-hash exception set and a NO-EXPANSION clause: no genealogy collection, no ANT publication; boundary: this seat verified the repo record — the original approval conversation is not independently witnessed" },
+  { "gate": "rights (this document)", "state": "OPEN — Class-I (records.json evidence[] 49,342 triplets, sources-sync 153+427, hint-census 85) stays out of ANT editions until redistribution rights are ESTABLISHED, not ruled: a founder ruling sets estate risk posture but cannot create rights under the FS custodian agreements (their guidance permits fact extraction for family history, not wholesale index republication). Closing paths: (i) rights established through the FS/custodian channel (ToS §83 contemplates prior written permission), or (ii) OMITTED from the permanent-network edition — the RECOMMENDED DEFAULT: build from rights-qualified estate-authored facts and citations. GO files are per-file candidates, never blanket clearance" },
+  { "gate": "purchase", "state": "CEILING CLEARED — 100 ANT storage / 0.0002 ETH gas (founder 2026-10-03, reaffirmed 2026-10-17); spend approval STANDING-GRANTED (2026-10-02c, never-gate-the-founder law); NUMERICAL CEILING APPROVAL IS NOT ARTIFACT-LEVEL PAYMENT READINESS: economics file records bindingIntact:false, approvedAt:null, enforceableByClient:false, and the 2026-10-11 5.009 ANT quote is historical affordability evidence, not an authorization against a new edition hash. Remaining blocker is capability, not price: a payment client enforcing both ceilings atomically against the ACTUAL transaction (ant 0.3.9 does not; hosted path caps 32 MiB); at upload time a fresh quote binds the exact edition hash + destination and any mismatch stops; the founder key-holder signature is the one irreducible act" }
+ ],
+ "boundaries": [
+  "no FamilySearch access was performed by this qualification — read-only analysis of committed files plus git-show copies of main-only files",
+  "no corpus file was mutated; this file is additive metadata beside the frozen layers",
+  "nothing was deleted (founder retain order); git-history exposure of Class-I content is standing — this qualification governs the FUTURE irreversible step (permanent-network replication), not the retained past",
+  "crypto/hash claims: none made here beyond reading already-committed digests"
+ ]
+}

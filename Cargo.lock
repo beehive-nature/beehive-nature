@@ -212,6 +212,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "antelope-authority"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+]
+
+[[package]]
 name = "anyhow"
 version = "1.0.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -421,6 +428,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b1f45e9417d87227c7a56d22e471c6206462cba514c7590c09aff4cf6d1ddcad"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "bindex-bnrose"
+version = "0.1.0"
+dependencies = [
+ "bnrose-exec-core",
+ "bnrose-exec-host",
+ "btungsten-wb001",
+ "rusqlite",
+ "serde_json",
+ "sha2 0.10.9",
 ]
 
 [[package]]
