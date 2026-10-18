@@ -29,7 +29,9 @@ const inventory=[
  ['hosting','Delivery','GitHub Pages + shared UI','Open the same estate in three views.','One set of facts, three ways to explore it.','implemented','The public edition is served through GitHub Pages. tour.js and skaists.css provide shared navigation, language and register styling. Reachability is not proof of permanent-storage publication.','surfaces/tour.js','index.html']
 ].map(([id,layer,name,bee,raver,state,evidence,source,door])=>({id,layer,name,bee,raver,state,evidence,source,door}));
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const members=[...readFileSync(root+'Cargo.toml','utf8').split('members = [')[1].split(']')[0].matchAll(/"([^"]+)"/g)].map(x=>x[1]);
+// STACK_INVENTORY_CARGO / STACK_INVENTORY_PAGE: the commit-time check (scripts/stack-inventory-check.sh) points --check at the STAGED blobs; unset, the tree's files, as CI runs it.
+const cargoPath=process.env.STACK_INVENTORY_CARGO||root+'Cargo.toml';
+const members=[...readFileSync(cargoPath,'utf8').split('members = [')[1].split(']')[0].matchAll(/"([^"]+)"/g)].map(x=>x[1]);
 for(const path of [...members,...inventory.map(x=>x.source),...inventory.filter(x=>x.door).map(x=>'surfaces/'+x.door)]) if(!existsSync(root+path)) throw Error('Missing inventory source: '+path);
 if(new Set(inventory.map(x=>x.id)).size!==inventory.length) throw Error('Duplicate inventory identity');
 const source=(path,label='source')=>`<a href="https://github.com/beehive-nature/beehive-nature/${statSync(root+path).isDirectory()?'tree':'blob'}/main/${esc(path)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`;
@@ -74,7 +76,7 @@ body[data-reg="cypherpunk"] #stackInventory{font:400 14px/1.6 var(--sk-font-mono
 (function(){var host=document.getElementById('stackInventory'),query=document.getElementById('stackSearch'),state=document.getElementById('stackState');var states=${JSON.stringify(Object.fromEntries(inventory.map(x=>[x.id,x.state])))};function filter(){var q=query.value.trim().toLowerCase(),ids=new Set();host.querySelectorAll('[data-component]').forEach(function(row){var match=(!q||row.dataset.search.includes(q))&&(state.value==='all'||states[row.dataset.component]===state.value);row.hidden=!match;if(match)ids.add(row.dataset.component);});host.querySelectorAll('.sc-band').forEach(function(band){band.hidden=!Array.from(band.querySelectorAll('[data-component]')).some(function(row){return !row.hidden;});});document.getElementById('stackResult').textContent=ids.size+' of ${inventory.length} components';document.getElementById('stackEmpty').hidden=ids.size!==0;}query.addEventListener('input',filter);state.addEventListener('change',filter);})();
 </script>
 <!-- STACK INVENTORY END -->`;
-const file=root+'surfaces/stack.html';
+const file=process.env.STACK_INVENTORY_PAGE||root+'surfaces/stack.html';
 let page=readFileSync(file,'utf8');
 const marker=/<!-- STACK INVENTORY START[^]*?<!-- STACK INVENTORY END -->/;
 const clean=page.replace(marker,'').replace(/<main>\s*/, '<main>\n');

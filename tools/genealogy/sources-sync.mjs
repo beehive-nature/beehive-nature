@@ -58,7 +58,7 @@ export const DECEASED_EXTRAMURAL_SYNC = {
   "LBYC-QZ8": { name: "Martin Olaf Martinsen", lifespan: "1875–1952", basis: "NUMIDENT-anchored person (hint-census allowlist precedent; assistant dispatch 2026-10-03)" },
   "PNC6-GJQ": { name: "Nels Martinsen", lifespan: "–", basis: "assistant dispatch 2026-10-03g (father of the b.1875 son; 19th-century, deceased-by-age)" },
   "PNCX-S8Q": { name: "unnamed mother of Martin Olaf Martinsen", lifespan: "–", basis: "assistant dispatch 2026-10-03g (created Deceased)" },
-  "L1N9-SL2": { name: "Christen Olsen (census cluster)", lifespan: "1806–Deceased", basis: "authed-wake dispatch 2026-10-06; transcription-only — attach work stays parked behind the founder merge call" },
+  "L1N9-SL2": { name: "Lars Christensen", lifespan: "1839–", basis: "assistant dispatch 2026-10-03 (Lars, christened 1839 Bakkendrup; the census-cluster father is L1N9-S2L); transcription-only — attach work stays parked behind the founder merge call" },
   "LW9Z-S11": { name: "Christen Olsen (1780 contested cluster)", lifespan: "1780–", basis: "assistant dispatch 2026-10-03g attach target; transcription-only, contested cluster" },
   "KWCT-391": { name: "Mary Ann Hadlock", lifespan: "1885–1927", basis: "tasks-harvest dispatch 2026-10-04" },
   "LCZ5-8QV": { name: "Dwight Dow", lifespan: "–", basis: "tasks-harvest dispatch 2026-10-04 (father in the 1910 baptism record of his b.1902 son; deceased-by-age)" },
