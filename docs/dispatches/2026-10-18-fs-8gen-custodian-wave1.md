@@ -304,3 +304,30 @@ Status:
 
 Counts are unchanged: six new candidates and six gaps with none. The corpus
 is unchanged.
+
+## 10. Rockwood page images viewed (2026-10-18)
+
+This seat downloaded the archive.org page renders (BookReader jp2 for leaves
+231, 232, 233 and 238, plus the title page) to its scratch space and looked
+at them directly:
+- **Leaf 232 = printed p. 210.** The running head reads "Necrology of
+  Historic, Genealogical Society. [April,". The Noah Amherst Phelps entry is
+  followed by "THOMAS TEMPLE ROCKWOOD was born in Holliston, Mass., June 5,
+  1812, and died in that town October 11, 1872, aged 60 years. His father,
+  Luther⁶ Rockwood …". The entry continues past the page foot, with mother
+  Ruth Littlefield, dau. of Asa Littlefield of Framingham.
+- **Leaf 231 = printed p. 209**, with running head "1874.]". Its footer
+  prints "VOL. XXIX. 19".
+- **Title page** reads "For the year 1874. Volume XXVIII", Boston, 1874.
+
+So the XXIX marker is printed on the page itself, not an OCR fault, and it
+contradicts the title page. The relayed reading, an erroneous printed volume
+footer, is the one the images support. The p. 216 repetition (leaf 238) is
+the relaying seat's visual check. It is the same volume and no independent
+witness.
+
+Status now: **the printed source is visually verified.** The frozen 3 Oct
+against the printed 11 Oct 1872 stays an unresolved conflict, because the
+original Massachusetts death entry has not been seen. Nothing in the corpus
+changes. Images are kept in scratch only; nothing was committed or
+republished.
