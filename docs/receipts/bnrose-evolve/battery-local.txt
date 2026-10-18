@@ -1,21 +1,21 @@
-$ cargo test -p bnrose-evolve --locked   # 2026-10-18T23:10:43Z · Linux 6.18.33.2-microsoft-standard-WSL2 x86_64 · 8 cpu · WSL2 on the founder's Windows box · tree +worktree
+$ cargo test -p bnrose-evolve --locked   # 2026-10-18T23:35:47Z · Linux 6.18.33.2-microsoft-standard-WSL2 x86_64 · 8 cpu · WSL2 on the founder's Windows box · tree +worktree
 warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
 package:   /mnt/c/Users/travi/wt-bevolve/crates/bnr-keys/Cargo.toml
 workspace: /mnt/c/Users/travi/wt-bevolve/Cargo.toml
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.92s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.58s
      Running unittests src/lib.rs (/home/travi/tgt/bevolve/debug/deps/bnrose_evolve-00e40f705a3f08dc)
 
 running 8 tests
 test digest::tests::b64u_roundtrip_and_strictness ... ok
-test tree::tests::prefixes_are_exact ... ok
-test canon::tests::roundtrip_and_strict_end ... ok
 test digest::tests::domain_and_boundaries_separate ... ok
+test canon::tests::roundtrip_and_strict_end ... ok
 test policy::tests::proposal_parse ... ok
+test tree::tests::prefixes_are_exact ... ok
 test tree::tests::changed_sees_add_remove_modify ... ok
 test policy::tests::parses_and_refuses_strictly ... ok
 test controller::tests::executed_but_unsettled_settles_from_its_record ... ok
 
-test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
 
      Running unittests src/bin/bnrose-evolve.rs (/home/travi/tgt/bevolve/debug/deps/bnrose_evolve-65312444570bb1c5)
 
@@ -34,29 +34,29 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 running 23 tests
 test adversarial::forged_success_report_is_only_a_claim ... ok
 test adversarial::removed_test_and_policy_edits_are_refused_at_admission ... ok
-test adversarial::lessons_close_only_on_verifier_held_evidence ... ok
 test adversarial::a_failed_canary_rolls_back_and_keeps_the_current_implementation ... ok
+test adversarial::an_exhausted_budget_stops_attempts_and_promotion ... ok
 test authority::dependencies_are_exactly_the_named_four ... ok
 test authority::no_source_names_a_key_a_socket_or_a_client ... ok
-test adversarial::role_confusion_is_refused ... ok
-test adversarial::an_exhausted_budget_stops_attempts_and_promotion ... ok
+test adversarial::lessons_close_only_on_verifier_held_evidence ... ok
 test adversarial::a_passing_retry_does_not_erase_a_failure ... ok
+test adversarial::role_confusion_is_refused ... ok
 test adversarial::undeclared_changes_and_stale_bases_are_refused ... ok
 test adversarial::swapped_verifier_and_moved_artifact_are_refused ... ok
 test adversarial::stale_evidence_does_not_carry_across_a_verifier_upgrade ... ok
 test recovery::a_tampered_blob_is_refused_on_read ... ok
 test recovery::one_holder_at_a_time ... ok
-test adversarial::hung_scribbling_and_flooding_workers_are_degraded_never_pass ... ok
 test lifecycle::a_recurrence_under_the_same_policy_needs_a_new_repair ... ok
-test lifecycle::an_old_promotion_cannot_close_what_a_stronger_verifier_reproduced ... ok
-test lifecycle::a_stronger_verifier_reopens_a_closed_class ... ok
-test recovery::the_state_matrix_settles_by_evidence ... ok
+test adversarial::hung_scribbling_and_flooding_workers_are_degraded_never_pass ... ok
 test lifecycle::the_sovereign_declares_what_is_in_force ... ok
+test lifecycle::an_old_promotion_cannot_close_what_a_stronger_verifier_reproduced ... ok
+test recovery::the_state_matrix_settles_by_evidence ... ok
+test lifecycle::a_stronger_verifier_reopens_a_closed_class ... ok
 test recovery::a_killed_controller_is_rescued_never_rerun_never_zeroed ... ok
 test recovery::the_journal_fails_closed_on_tampering ... ok
 test lifecycle::full_loop_both_engines ... ok
 
-test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 28.16s
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 69.05s
 
    Doc-tests bnrose_evolve
 
