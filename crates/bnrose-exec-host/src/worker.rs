@@ -21,8 +21,29 @@
 //! envelopes, policies, states and clocks; verdicts carry decisions and
 //! digests. The signing seed and the MAC keys live in the supervisor.
 
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, Barrier};
 use std::time::Duration;
+
+/// Atomic counter of active watchdog threads (for Gate 5 verification).
+pub static ACTIVE_WATCHDOG_THREADS: AtomicUsize = AtomicUsize::new(0);
+
+/// Scoped watchdog handle that terminates and joins the background epoch
+/// ticker thread when the WasmWorker is dropped.
+pub struct Watchdog {
+    stop: Arc<AtomicBool>,
+    handle: Option<std::thread::JoinHandle<()>>,
+}
+
+impl Drop for Watchdog {
+    fn drop(&mut self) {
+        self.stop.store(true, Ordering::Release);
+        if let Some(h) = self.handle.take() {
+            h.thread().unpark();
+            let _ = h.join();
+        }
+    }
+}
 
 /// The pinned Wasmtime this host was built against (see Cargo.toml; the
 /// pin is the receipt's word for "which engine produced these verdicts").
@@ -179,6 +200,7 @@ pub struct WasmWorker {
     bounds: Bounds,
     fuel_used: u64,
     peak_mem: usize,
+    _watchdog: Watchdog,
 }
 
 impl WasmWorker {
@@ -246,21 +268,32 @@ impl WasmWorker {
         instance
             .get_typed_func::<(i32, i32, i32, i32), i32>(&mut store, "bnrose_step")
             .map_err(|e| WorkerError::Unusable(format!("bnrose_step: {e}")))?;
-        // the watchdog: one thread per engine, ticking the epoch forever
+        // the watchdog: one thread per engine, ticking the epoch, safely stopped on drop
+        let stop = Arc::new(AtomicBool::new(false));
+        let stop_in_thread = stop.clone();
         let engine_handle = Arc::new(engine.clone());
         let started = Arc::new(Barrier::new(2));
         let gate = started.clone();
-        std::thread::Builder::new()
+        let handle = std::thread::Builder::new()
             .name("bnrose-wasm-watchdog".into())
             .spawn(move || {
+                ACTIVE_WATCHDOG_THREADS.fetch_add(1, Ordering::SeqCst);
                 gate.wait();
-                loop {
-                    std::thread::sleep(WATCHDOG_INTERVAL);
+                while !stop_in_thread.load(Ordering::Acquire) {
+                    std::thread::park_timeout(WATCHDOG_INTERVAL);
+                    if stop_in_thread.load(Ordering::Acquire) {
+                        break;
+                    }
                     engine_handle.increment_epoch();
                 }
+                ACTIVE_WATCHDOG_THREADS.fetch_sub(1, Ordering::SeqCst);
             })
             .map_err(|e| WorkerError::Unusable(format!("watchdog: {e}")))?;
         started.wait();
+        let watchdog = Watchdog {
+            stop,
+            handle: Some(handle),
+        };
         let req_off = req_fn
             .call(&mut store, ())
             .map_err(|e| WorkerError::Unusable(format!("req arena: {e}")))?
@@ -279,6 +312,7 @@ impl WasmWorker {
             bounds,
             fuel_used: 0,
             peak_mem: 0,
+            _watchdog: watchdog,
         })
     }
 

@@ -293,7 +293,10 @@ pub struct ReplicatedJournal {
 }
 
 impl ReplicatedJournal {
-    pub fn open(paths: &[PathBuf], key: &[u8; 32]) -> Result<ReplicatedJournal, JournalError> {
+    pub fn open_with_records(
+        paths: &[PathBuf],
+        key: &[u8; 32],
+    ) -> Result<(ReplicatedJournal, Vec<Record>), JournalError> {
         if paths.is_empty() {
             return Err(JournalError::Io("no replicas given".into()));
         }
@@ -319,11 +322,18 @@ impl ReplicatedJournal {
         for p in paths {
             replicas.push(Journal::open(p, key)?);
         }
-        Ok(ReplicatedJournal {
-            replicas,
-            paths: paths.to_vec(),
-            observed_at_open: observed,
-        })
+        Ok((
+            ReplicatedJournal {
+                replicas,
+                paths: paths.to_vec(),
+                observed_at_open: observed,
+            },
+            records,
+        ))
+    }
+
+    pub fn open(paths: &[PathBuf], key: &[u8; 32]) -> Result<ReplicatedJournal, JournalError> {
+        Self::open_with_records(paths, key).map(|(j, _)| j)
     }
 
     pub fn head(&self) -> [u8; 32] {

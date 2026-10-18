@@ -43,6 +43,10 @@ pub struct Supervisor {
     pub worker: Box<dyn Worker>,
     pub policy: Policy,
     pub state_dir: PathBuf,
+    /// Optional authority allowlist: if Some, only authorities in this set are admitted.
+    pub allowed_authorities: Option<std::collections::BTreeSet<[u8; 32]>>,
+    /// In-memory index of admitted (authority, nonce) -> op_id (or root for steps)
+    admitted: BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>,
     /// the exclusive authority over this state directory (see Claim)
     _claim: Claim,
 }
@@ -178,10 +182,12 @@ impl Supervisor {
         std::fs::create_dir_all(state_dir.join("receipts")).map_err(|e| e.to_string())?;
         std::fs::create_dir_all(state_dir.join("replica")).map_err(|e| e.to_string())?;
         let keys = SupervisorKeys::load(state_dir)?;
-        let journal = ReplicatedJournal::open(&replica_paths(state_dir), &keys.journal_mac)
-            .map_err(|e| e.to_string())?;
+        let (journal, records) =
+            ReplicatedJournal::open_with_records(&replica_paths(state_dir), &keys.journal_mac)
+                .map_err(|e| e.to_string())?;
         let ledger = EffectLedger::open(&state_dir.join("effects.bin"), &keys.ledger_mac)
             .map_err(|e| e.to_string())?;
+        let admitted = nonces_of(&records)?;
         Ok(Supervisor {
             keys,
             journal,
@@ -189,6 +195,8 @@ impl Supervisor {
             worker,
             policy,
             state_dir: state_dir.to_path_buf(),
+            allowed_authorities: None,
+            admitted,
             _claim: claim,
         })
     }
@@ -229,14 +237,41 @@ impl Supervisor {
         Ok((r, p, v))
     }
 
-    /// The (authority, nonce) keys already admitted. Uniqueness here is
-    /// one half of no-second-logical-operation; the ledger's idempotent
-    /// apply is the other half (named in the dispatch).
-    fn admitted_nonces(&self) -> Result<BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>, String> {
+    /// Set an explicit authority allowlist on the supervisor.
+    pub fn with_allowed_authorities<I>(mut self, authorities: I) -> Self
+    where
+        I: IntoIterator<Item = [u8; 32]>,
+    {
+        self.allowed_authorities = Some(authorities.into_iter().collect());
+        self
+    }
+
+    /// Read the in-memory fast index of admitted nonces (O(1) clone).
+    pub fn admitted_nonces(&self) -> Result<BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>, String> {
+        Ok(self.admitted.clone())
+    }
+
+    /// Full journal replay: reloads and HMAC-verifies all replicas from disk
+    /// to prove the in-memory index equals a complete journal replay.
+    pub fn replay_journal_nonces(&self) -> Result<BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>, String> {
         let (records, _) =
             ReplicatedJournal::load_state(&replica_paths(&self.state_dir), &self.keys.journal_mac)
                 .map_err(|e| e.to_string())?;
         nonces_of(&records)
+    }
+
+    /// Check if a specific (authority, nonce) has been admitted in O(log n).
+    pub fn is_nonce_admitted(&self, authority: &[u8; 32], nonce: &[u8; 32]) -> bool {
+        self.admitted.contains_key(&(*authority, *nonce))
+    }
+
+    /// Access reference to the in-memory admitted map.
+    pub fn admitted_map(&self) -> &BTreeMap<([u8; 32], [u8; 32]), [u8; 32]> {
+        &self.admitted
+    }
+
+    pub fn admitted_count(&self) -> usize {
+        self.admitted.len()
     }
 
     /// Run one operation: verify, admit, reserve, dispatch, effect,
@@ -258,9 +293,18 @@ impl Supervisor {
             receipt_path: None,
             receipt_json: None,
         };
-        // 1. the WB001 binding: the envelope verifies under the authority,
-        //    structurally and cryptographically (the frozen contract's own
-        //    verifier; nothing downstream sees a signature again)
+        // 1a. the policy authority allowlist (if configured: unknown keys refused before journal, ledger, or signature verify)
+        if let Some(ref allowed) = self.allowed_authorities {
+            if !allowed.contains(&intent.authority) {
+                return RunOutcome {
+                    refused: Some("admission:unauthorized-authority".into()),
+                    ..none
+                };
+            }
+        }
+        // 1b. the WB001 binding: the envelope verifies under the authority,
+        //     structurally and cryptographically (the frozen contract's own
+        //     verifier; nothing downstream sees a signature again)
         if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
             return RunOutcome {
                 refused: Some("wb001:binding-refused".into()),
@@ -276,12 +320,9 @@ impl Supervisor {
                 }
             }
         };
-        // 2. no second logical operation: this authority has spent this nonce
-        if self
-            .admitted_nonces()
-            .map(|m| m.contains_key(&(intent.authority, decoded.nonce)))
-            .unwrap_or(true)
-        {
+        // 2. fast in-memory nonce gate: this authority has spent this nonce (O(log n) in-memory)
+        // Eliminates O(N) full-journal disk reloads on every admission.
+        if self.admitted.contains_key(&(intent.authority, decoded.nonce)) {
             return RunOutcome {
                 refused: Some("admission:nonce-reuse".into()),
                 ..none
@@ -343,6 +384,7 @@ impl Supervisor {
                 ..none
             };
         }
+        self.admitted.insert((intent.authority, decoded.nonce), op);
         let mut state = OpState::ADMITTED_ZERO;
         state.seq = 0;
         // 5. reserve (bounded worker, its budget journaled before it runs)
@@ -485,15 +527,8 @@ impl Supervisor {
     /// whether ANY attempt of this step has a ledger row (an effect that
     /// was recorded — conclusive execution, or worse, uncertainty)
     fn step_has_any_recorded_effect(&self, root: &[u8; 32], step: u8) -> bool {
-        let rows = match ledger::load(&self.state_dir.join("effects.bin"), &self.keys.ledger_mac) {
-            Ok(r) => r,
-            Err(_) => return true, // unreadable ledger: assume the worst
-        };
-        step_has_row_among(
-            &rows.iter().map(|r| r.op_id).collect::<Vec<_>>(),
-            root,
-            step,
-        )
+        let op_ids: Vec<[u8; 32]> = self.ledger.rows().keys().copied().collect();
+        step_has_row_among(&op_ids, root, step)
     }
 
     /// journal one step admission and run it to its end (or its crash
@@ -547,6 +582,7 @@ impl Supervisor {
                 ..none
             };
         }
+        self.admitted.insert((intent.authority, decoded.nonce), *root);
         let mut state = OpState::ADMITTED_ZERO;
         state.seq = 0;
         let res = reservations_payload(bounds);
@@ -826,6 +862,7 @@ impl Supervisor {
                 "receipt": recovered_receipt,
             }));
         }
+        self.admitted = nonces;
         let replication_json = match &replication {
             ReplicationState::Healthy { replicas } => json!({
                 "state": "healthy",
@@ -888,11 +925,15 @@ impl Supervisor {
                 ..none
             };
         };
-        if self
-            .admitted_nonces()
-            .map(|m| m.contains_key(&(intent.authority, decoded.nonce)))
-            .unwrap_or(true)
-        {
+        if let Some(ref allowed) = self.allowed_authorities {
+            if !allowed.contains(&intent.authority) {
+                return RunOutcome {
+                    refused: Some("admission:unauthorized-authority".into()),
+                    ..none
+                };
+            }
+        }
+        if self.admitted.contains_key(&(intent.authority, decoded.nonce)) {
             return RunOutcome {
                 refused: Some("admission:nonce-reuse".into()),
                 ..none
@@ -943,6 +984,7 @@ impl Supervisor {
                 ..none
             };
         }
+        self.admitted.insert((intent.authority, decoded.nonce), op);
         let mut state = OpState::ADMITTED_ZERO;
         state.seq = 0;
         let res = reservations_payload(bounds);
@@ -1244,6 +1286,22 @@ impl Supervisor {
             }
         };
         let root = op_id_of(&intent.authority, &intent.env);
+        if let Some(ref allowed) = self.allowed_authorities {
+            if !allowed.contains(&intent.authority) {
+                return RunOutcome {
+                    refused: Some("admission:unauthorized-authority".into()),
+                    ..none
+                };
+            }
+        }
+        if let Some(prev_root) = self.admitted.get(&(intent.authority, decoded.nonce)) {
+            if *prev_root != root {
+                return RunOutcome {
+                    refused: Some("admission:nonce-reuse — the authorization already lives in another operation".into()),
+                    ..none
+                };
+            }
+        }
         // the new-process reconstruction: what exists, at which state
         let records = match ReplicatedJournal::load_state(
             &replica_paths(&self.state_dir),
@@ -1257,23 +1315,6 @@ impl Supervisor {
                 }
             }
         };
-        let nonces = match nonces_of(&records) {
-            Ok(n) => n,
-            Err(e) => {
-                return RunOutcome {
-                    refused: Some(format!("journal:{e}")),
-                    ..none
-                }
-            }
-        };
-        if let Some(prev_root) = nonces.get(&(intent.authority, decoded.nonce)) {
-            if *prev_root != root {
-                return RunOutcome {
-                    refused: Some("admission:nonce-reuse — the authorization already lives in another operation".into()),
-                    ..none
-                };
-            }
-        }
         let existing = match step_entities(&records) {
             Ok(e) => e,
             Err(e) => {
