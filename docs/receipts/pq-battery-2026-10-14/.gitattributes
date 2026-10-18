@@ -1,0 +1,2 @@
+# Preserve blank final lines in native execution transcripts.
+*.log whitespace=-blank-at-eof

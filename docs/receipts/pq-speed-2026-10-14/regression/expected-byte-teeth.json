@@ -1,0 +1,711 @@
+{
+  "acvp_commit": "975de31eb83d87039ec88934fdc47d8c312b892d",
+  "controls": {
+    "empty_vectors": false,
+    "sabotage_applied": true,
+    "sabotage_expected": true
+  },
+  "errors": [],
+  "full_system_qualification": "UNESTABLISHED",
+  "inventory": {
+    "coverage": [
+      {
+        "algorithm": "ML-KEM-768",
+        "assurance": "L1 and two-implementation testing; full L2 Cryptol/L3-L5 NOT RUN",
+        "call_sites": [
+          "src/groups/kem_envelope.rs:AgentKemKeypair::generate",
+          "src/groups/kem_envelope.rs:AgentKemKeypair::decapsulate",
+          "src/groups/kem_envelope.rs:seal_group_secret_to_recipient / seal_bytes_to_recipient",
+          "src/dm.rs"
+        ],
+        "evidence": [
+          "official ACVP FIPS203 and FIPS203-tr1",
+          "RustCrypto/libcrux DIFFERENTIAL",
+          "changed-ciphertext implicit rejection",
+          "empty import refusal"
+        ],
+        "functions": [
+          "keyGen",
+          "encapsulation",
+          "decapsulation",
+          "encapsulationKeyCheck",
+          "decapsulationKeyCheck"
+        ],
+        "implementation": "fips203 0.4.3 / saorsa-pqc 0.5.1"
+      },
+      {
+        "algorithm": "ML-DSA-65",
+        "assurance": "L1 and two-implementation testing; full L2 Cryptol/L3-L5 NOT RUN",
+        "call_sites": [
+          "src/upgrade/signature.rs:verify_bytes_signature_with_key",
+          "src/bin/x0x-keygen.rs",
+          "src/identity.rs:MachineIdentity::generate (ant-quic wrapper)"
+        ],
+        "evidence": [
+          "official ACVP FIPS204 and FIPS204-tr1",
+          "RustCrypto/libcrux DIFFERENTIAL",
+          "last message/signature byte, wrong signer and empty import controls"
+        ],
+        "functions": [
+          "keyGen",
+          "sigGen",
+          "sigVer"
+        ],
+        "implementation": "fips204 0.4.6 / Saorsa API and legacy MlDsa65 wrappers"
+      },
+      {
+        "algorithm": "ChaCha20-Poly1305",
+        "assurance": "NOT RUN in this lane; separate qualification required"
+      },
+      {
+        "algorithm": "BLAKE3",
+        "assurance": "NOT RUN in this lane; separate qualification required"
+      },
+      {
+        "algorithm": "SHA-256",
+        "assurance": "NOT RUN in this lane; separate qualification required"
+      },
+      {
+        "algorithm": "RNG entropy and failure propagation",
+        "assurance": "NOT RUN in this lane; separate qualification required"
+      },
+      {
+        "algorithm": "transport handshake and every application composition",
+        "assurance": "NOT RUN in this lane; separate qualification required"
+      },
+      {
+        "algorithm": "full-system properties",
+        "assurance": "NOT RUN in this lane; separate qualification required"
+      }
+    ],
+    "coverage_boundary": "ML-KEM-768 / ML-DSA-65 FIPS cores and Saorsa API wrappers; selected x0x composition tests recorded separately; no full-system qualification",
+    "packages": [
+      {
+        "checksum": "sha256:yL22RU9pLKKitFzVVMaCjGOdf5yWjPg6Z4iZ7ERDooA",
+        "name": "fips203",
+        "version": "0.4.3"
+      },
+      {
+        "checksum": "sha256:yftaNnuYRpM-Jxo8KpkpMHQ_gq5ejLf6p4BxWoD6CxU",
+        "name": "fips204",
+        "version": "0.4.6"
+      },
+      {
+        "checksum": "sha256:ou0uQp5Wc3Y2JcpShby_FScPoWkYy15j_JWrq6y7Gkw",
+        "name": "saorsa-pqc",
+        "version": "0.5.1"
+      },
+      {
+        "checksum": "sha256:p1B9gZdp0Bo2WrcHeUpAhDksgk9Up6anhi-MPQiSsoM",
+        "name": "sha2",
+        "version": "0.10.9"
+      },
+      {
+        "checksum": "sha256:d_1wKDRdQVpANM-Hd81PirGFEnQjO0X4Tj2VVQLZOHQ",
+        "name": "sha3",
+        "version": "0.10.9"
+      },
+      {
+        "checksum": "sha256:7AvkeV4vaigGm-wLX_PirJuvyZ5qmn3DVHmWxcgWkiw",
+        "name": "rand_core",
+        "version": "0.6.4"
+      },
+      {
+        "checksum": "sha256:4FjH3gsmr3d4DHaUFNYleDC7JA88OEd9vCwW5fVNbUw",
+        "name": "rand",
+        "version": "0.8.8"
+      }
+    ],
+    "schema": "btungsten.x0x-pq-inventory/1",
+    "source_files": [
+      {
+        "bytes": 7712,
+        "path": "Cargo.toml",
+        "sha256": "sha256:hCRMCqCaETBEtSa5vw_kVptJ220HxON7ndTyUK9UUzM"
+      },
+      {
+        "bytes": 144103,
+        "path": "Cargo.lock",
+        "sha256": "sha256:7Kgvw2uUFxH7jKH4IwJVXQ-a5j7P1df8BkT9__a9QgY"
+      },
+      {
+        "bytes": 17562,
+        "path": "src/groups/kem_envelope.rs",
+        "sha256": "sha256:YE1PcUHgtDt9sQJt_kVViwkSuW6Qfdo-Bmu-kQ-A220"
+      },
+      {
+        "bytes": 22933,
+        "path": "src/upgrade/signature.rs",
+        "sha256": "sha256:4w1R5GFBIFydpJhp23lH1KZ-dQPOuEQu71DXyPCeAE4"
+      },
+      {
+        "bytes": 67099,
+        "path": "src/identity.rs",
+        "sha256": "sha256:wqkGPwlR210-SREDXkPFA87pkUho-z4KosgdSXsspZY"
+      },
+      {
+        "bytes": 13953,
+        "path": "src/bin/x0x-keygen.rs",
+        "sha256": "sha256:Ct8QQl6-WL2sJsOjHCjBwKHFWsAwNSJFj_D_Tp71hi0"
+      }
+    ],
+    "x0x": {
+      "commit": "32bf552808cc907ed47978e2bb7c896d7c815858",
+      "version": "0.48.0"
+    }
+  },
+  "missing": [],
+  "report": {
+    "executed": 752,
+    "failures": [
+      "ML-KEM-768 keyGen (FIPS203) [fips203] tcId 26",
+      "ML-KEM-768 keyGen (FIPS203) KAT [saorsa-pqc] tcId 26"
+    ],
+    "not_run": {
+      "L2 Cryptol comparison / L3-L5 FIPS and Saorsa proofs": "this lane executes official-vector and independent-implementation tests; BNR's RustCrypto proofs do not transfer",
+      "ML-DSA-65 internal/mu/prehash [saorsa-pqc]": "not exercised through x0x's pure external wrapper path; fips204 internal cases have their own result",
+      "ML-DSA-65 sigGen [saorsa-pqc] KAT": "wrapper fixes OsRng; supplied-randomness KAT runs on fips204; wrapper signatures checked by RustCrypto and libcrux",
+      "ML-DSA-65 sigGen ext-prehash det (FIPS204)": "HashML-DSA (pre-hash) is not used anywhere in the estate",
+      "ML-DSA-65 sigGen ext-prehash det (FIPS204-tr1, expanded)": "HashML-DSA (pre-hash) is not used anywhere in the estate",
+      "ML-DSA-65 sigGen ext-prehash det (FIPS204-tr1, seed)": "HashML-DSA (pre-hash) is not used anywhere in the estate",
+      "ML-DSA-65 sigGen ext-prehash hedged (FIPS204)": "HashML-DSA (pre-hash) is not used anywhere in the estate",
+      "ML-DSA-65 sigGen ext-prehash hedged (FIPS204-tr1, expanded)": "HashML-DSA (pre-hash) is not used anywhere in the estate",
+      "ML-DSA-65 sigGen ext-prehash hedged (FIPS204-tr1, seed)": "HashML-DSA (pre-hash) is not used anywhere in the estate",
+      "ML-DSA-65 sigGen internal-mu det (FIPS204) [fips204]": "this implementation exposes no external-μ interface; the estate never signs or verifies μ",
+      "ML-DSA-65 sigGen internal-mu det (FIPS204-tr1, expanded) [fips204]": "this implementation exposes no external-μ interface; the estate never signs or verifies μ",
+      "ML-DSA-65 sigGen internal-mu det (FIPS204-tr1, seed) [fips204]": "this implementation exposes no external-μ interface; the estate never signs or verifies μ",
+      "ML-DSA-65 sigGen internal-mu hedged (FIPS204) [fips204]": "this implementation exposes no external-μ interface; the estate never signs or verifies μ",
+      "ML-DSA-65 sigGen internal-mu hedged (FIPS204-tr1, expanded) [fips204]": "this implementation exposes no external-μ interface; the estate never signs or verifies μ",
+      "ML-DSA-65 sigGen internal-mu hedged (FIPS204-tr1, seed) [fips204]": "this implementation exposes no external-μ interface; the estate never signs or verifies μ",
+      "ML-DSA-65 sigVer ext-prehash (FIPS204)": "HashML-DSA (pre-hash) is not used anywhere in the estate",
+      "ML-DSA-65 sigVer internal-mu (FIPS204) [fips204]": "this implementation exposes no external-μ interface; the estate never signs or verifies μ",
+      "ML-KEM-768 encapsulation [saorsa-pqc] KAT": "wrapper fixes OsRng; deterministic encapsulation KAT runs on fips203; randomized wrapper tested separately",
+      "RNG assurance": "OsRng calls exercised; entropy quality, validation status and failure injection not established",
+      "other crypto and full-system qualification": "ChaCha20-Poly1305, BLAKE3, SHA-256, transport, all application call sites and full-system properties require separate lanes"
+    },
+    "passed": 750,
+    "rows": [
+      {
+        "executed": 12,
+        "implementation": "libcrux",
+        "key": "ML-DSA-65 OsRng keyGen/sign DIFFERENTIAL",
+        "passed": 12,
+        "result_class": "DIFFERENTIAL"
+      },
+      {
+        "executed": 12,
+        "implementation": "rustcrypto",
+        "key": "ML-DSA-65 OsRng keyGen/sign DIFFERENTIAL",
+        "passed": 12,
+        "result_class": "DIFFERENTIAL"
+      },
+      {
+        "executed": 12,
+        "implementation": "saorsa-pqc",
+        "key": "ML-DSA-65 TEETH last message byte",
+        "passed": 12,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 12,
+        "implementation": "saorsa-pqc",
+        "key": "ML-DSA-65 TEETH last signature byte",
+        "passed": 12,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 12,
+        "implementation": "saorsa-pqc",
+        "key": "ML-DSA-65 TEETH wrong signer",
+        "passed": 12,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 25,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 keyGen (FIPS204)",
+        "passed": 25,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 25,
+        "implementation": "saorsa-pqc",
+        "key": "ML-DSA-65 keyGen (FIPS204) KAT",
+        "passed": 25,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 keyGen (FIPS204) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 1,
+        "implementation": "libcrux",
+        "key": "ML-DSA-65 legacy wrapper DIFFERENTIAL",
+        "passed": 1,
+        "result_class": "DIFFERENTIAL"
+      },
+      {
+        "executed": 1,
+        "implementation": "rustcrypto",
+        "key": "ML-DSA-65 legacy wrapper DIFFERENTIAL",
+        "passed": 1,
+        "result_class": "DIFFERENTIAL"
+      },
+      {
+        "executed": 1,
+        "implementation": "saorsa-pqc",
+        "key": "ML-DSA-65 legacy wrapper TEETH message",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 30,
+        "implementation": "saorsa-pqc",
+        "key": "ML-DSA-65 sigGen ext-pure (FIPS204) DIFFERENTIAL",
+        "passed": 30,
+        "result_class": "DIFFERENTIAL"
+      },
+      {
+        "executed": 60,
+        "implementation": "saorsa-pqc",
+        "key": "ML-DSA-65 sigGen ext-pure (FIPS204-tr1) DIFFERENTIAL",
+        "passed": 60,
+        "result_class": "DIFFERENTIAL"
+      },
+      {
+        "executed": 15,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen ext-pure det (FIPS204)",
+        "passed": 15,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen ext-pure det (FIPS204) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 15,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, expanded)",
+        "passed": 15,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, expanded) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 15,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, seed)",
+        "passed": 15,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, seed) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 15,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen ext-pure hedged (FIPS204)",
+        "passed": 15,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen ext-pure hedged (FIPS204) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 15,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, expanded)",
+        "passed": 15,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, expanded) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 15,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, seed)",
+        "passed": 15,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, seed) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 15,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen internal det (FIPS204)",
+        "passed": 15,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen internal det (FIPS204) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 15,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen internal det (FIPS204-tr1, expanded)",
+        "passed": 15,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen internal det (FIPS204-tr1, expanded) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 15,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen internal det (FIPS204-tr1, seed)",
+        "passed": 15,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen internal det (FIPS204-tr1, seed) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 15,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen internal hedged (FIPS204)",
+        "passed": 15,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen internal hedged (FIPS204) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 15,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen internal hedged (FIPS204-tr1, expanded)",
+        "passed": 15,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen internal hedged (FIPS204-tr1, expanded) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 15,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen internal hedged (FIPS204-tr1, seed)",
+        "passed": 15,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigGen internal hedged (FIPS204-tr1, seed) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 15,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigVer ext-pure (FIPS204)",
+        "passed": 15,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 15,
+        "implementation": "saorsa-pqc",
+        "key": "ML-DSA-65 sigVer ext-pure (FIPS204) KAT",
+        "passed": 15,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 15,
+        "implementation": "fips204",
+        "key": "ML-DSA-65 sigVer internal (FIPS204)",
+        "passed": 15,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 12,
+        "implementation": "libcrux",
+        "key": "ML-KEM-768 OsRng keyGen/encapsulation DIFFERENTIAL",
+        "passed": 12,
+        "result_class": "DIFFERENTIAL"
+      },
+      {
+        "executed": 12,
+        "implementation": "rustcrypto",
+        "key": "ML-KEM-768 OsRng keyGen/encapsulation DIFFERENTIAL",
+        "passed": 12,
+        "result_class": "DIFFERENTIAL"
+      },
+      {
+        "executed": 12,
+        "implementation": "saorsa-pqc",
+        "key": "ML-KEM-768 TEETH changed ciphertext (implicit rejection)",
+        "passed": 12,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 TEETH decapsulation key check",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 1,
+        "implementation": "saorsa-pqc",
+        "key": "ML-KEM-768 TEETH decapsulation key check",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 TEETH encapsulation key check",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 1,
+        "implementation": "saorsa-pqc",
+        "key": "ML-KEM-768 TEETH encapsulation key check",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 10,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 decapsulation (FIPS203)",
+        "passed": 10,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 10,
+        "implementation": "saorsa-pqc",
+        "key": "ML-KEM-768 decapsulation (FIPS203) KAT",
+        "passed": 10,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 decapsulation (FIPS203) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 10,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 decapsulation (FIPS203-tr1, expanded)",
+        "passed": 10,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 10,
+        "implementation": "saorsa-pqc",
+        "key": "ML-KEM-768 decapsulation (FIPS203-tr1, expanded) KAT",
+        "passed": 10,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 decapsulation (FIPS203-tr1, expanded) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 10,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 decapsulation (FIPS203-tr1, seed)",
+        "passed": 10,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 10,
+        "implementation": "saorsa-pqc",
+        "key": "ML-KEM-768 decapsulation (FIPS203-tr1, seed) KAT",
+        "passed": 10,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 decapsulation (FIPS203-tr1, seed) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 10,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 decapsulationKeyCheck (FIPS203)",
+        "passed": 10,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 10,
+        "implementation": "saorsa-pqc",
+        "key": "ML-KEM-768 decapsulationKeyCheck (FIPS203) KAT",
+        "passed": 10,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 10,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 decapsulationKeyCheck (FIPS203-tr1, expanded)",
+        "passed": 10,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 10,
+        "implementation": "saorsa-pqc",
+        "key": "ML-KEM-768 decapsulationKeyCheck (FIPS203-tr1, expanded) KAT",
+        "passed": 10,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 25,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 encapsulation (FIPS203)",
+        "passed": 25,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 encapsulation (FIPS203) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 25,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 encapsulation (FIPS203-tr1)",
+        "passed": 25,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 encapsulation (FIPS203-tr1) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 10,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 encapsulationKeyCheck (FIPS203)",
+        "passed": 10,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 10,
+        "implementation": "saorsa-pqc",
+        "key": "ML-KEM-768 encapsulationKeyCheck (FIPS203) KAT",
+        "passed": 10,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 10,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 encapsulationKeyCheck (FIPS203-tr1)",
+        "passed": 10,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 10,
+        "implementation": "saorsa-pqc",
+        "key": "ML-KEM-768 encapsulationKeyCheck (FIPS203-tr1) KAT",
+        "passed": 10,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 12,
+        "implementation": "libcrux",
+        "key": "ML-KEM-768 independent encapsulation/wrapper decapsulation DIFFERENTIAL",
+        "passed": 12,
+        "result_class": "DIFFERENTIAL"
+      },
+      {
+        "executed": 12,
+        "implementation": "rustcrypto",
+        "key": "ML-KEM-768 independent encapsulation/wrapper decapsulation DIFFERENTIAL",
+        "passed": 12,
+        "result_class": "DIFFERENTIAL"
+      },
+      {
+        "executed": 25,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 keyGen (FIPS203)",
+        "passed": 24,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 25,
+        "implementation": "saorsa-pqc",
+        "key": "ML-KEM-768 keyGen (FIPS203) KAT",
+        "passed": 24,
+        "result_class": "KAT"
+      },
+      {
+        "executed": 1,
+        "implementation": "fips203",
+        "key": "ML-KEM-768 keyGen (FIPS203) TEETH one input byte flipped",
+        "passed": 1,
+        "result_class": "TEETH"
+      },
+      {
+        "executed": 1,
+        "implementation": "saorsa-pqc",
+        "key": "T-VACUOUS malformed imports TEETH",
+        "passed": 1,
+        "result_class": "TEETH"
+      }
+    ]
+  },
+  "required_rows": 37,
+  "result": "FAIL",
+  "schema": "btungsten.x0x-pq-receipt/1"
+}

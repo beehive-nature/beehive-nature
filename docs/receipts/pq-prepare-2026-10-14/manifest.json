@@ -1,0 +1,366 @@
+{
+  "encoding": "sha256 base64url without padding",
+  "files": {
+    "Boundary.cry": {
+      "bytes": 562,
+      "gzip": false,
+      "original_bytes": 562,
+      "original_name": "Boundary.cry",
+      "original_sha256": "sha256:IRikIVxi_1DIn2eTFUUlw-Kd0y0_Q1saP0amoWU1O-Q",
+      "sha256": "sha256:IRikIVxi_1DIn2eTFUUlw-Kd0y0_Q1saP0amoWU1O-Q"
+    },
+    "clippy.log": {
+      "bytes": 164,
+      "gzip": false,
+      "original_bytes": 164,
+      "original_name": "clippy.log",
+      "original_sha256": "sha256:XviA2NMjwyy951zWBkS2Iiz_iMIByTLdx3uhxG2QfPE",
+      "sha256": "sha256:XviA2NMjwyy951zWBkS2Iiz_iMIByTLdx3uhxG2QfPE"
+    },
+    "common.saw": {
+      "bytes": 6716,
+      "gzip": false,
+      "original_bytes": 6716,
+      "original_name": "common.saw",
+      "original_sha256": "sha256:Cil5Rmobr1CCU2c860KlUw6WFrg3g6ldtxfdVBR2j24",
+      "sha256": "sha256:Cil5Rmobr1CCU2c860KlUw6WFrg3g6ldtxfdVBR2j24"
+    },
+    "controller.log": {
+      "bytes": 1252,
+      "gzip": false,
+      "original_bytes": 1252,
+      "original_name": "controller.log",
+      "original_sha256": "sha256:hpEjQ4uGscRQTKWhsC0x5nVlrKgkYrpLVR1TNYAZLA0",
+      "sha256": "sha256:hpEjQ4uGscRQTKWhsC0x5nVlrKgkYrpLVR1TNYAZLA0"
+    },
+    "formal-accept.log.gz": {
+      "bytes": 577,
+      "gzip": true,
+      "original_bytes": 1125,
+      "original_name": "formal-accept.log",
+      "original_sha256": "sha256:bYgpDY9QdH-bWjOdeGhcsaAevbAcrlrxao48KpMBknU",
+      "sha256": "sha256:Oks6Hsy3-x_jrZ7KYhAaz8nya-a9nQYAzU0DMYidne4"
+    },
+    "formal-accept.saw": {
+      "bytes": 149,
+      "gzip": false,
+      "original_bytes": 149,
+      "original_name": "formal-accept.saw",
+      "original_sha256": "sha256:47G-_amJVW_ldIQdCfAWkTFON932Zq1J3SU1LLjLBuM",
+      "sha256": "sha256:47G-_amJVW_ldIQdCfAWkTFON932Zq1J3SU1LLjLBuM"
+    },
+    "formal-context.log.gz": {
+      "bytes": 5811,
+      "gzip": true,
+      "original_bytes": 1059777,
+      "original_name": "formal-context.log",
+      "original_sha256": "sha256:KLi3bL4BoKged9Os5kvongsse48qsn5l2uSDlXNE1j0",
+      "sha256": "sha256:7v3D8X1nBvVbxgrIMND330ivi5J2KJ-ORL_ro0yQiMA"
+    },
+    "formal-context.saw": {
+      "bytes": 124,
+      "gzip": false,
+      "original_bytes": 124,
+      "original_name": "formal-context.saw",
+      "original_sha256": "sha256:2eH649r6tKwzJjDLTex4NpMSktU71AMth1FgV8Rg2yY",
+      "sha256": "sha256:2eH649r6tKwzJjDLTex4NpMSktU71AMth1FgV8Rg2yY"
+    },
+    "formal-honest.log.gz": {
+      "bytes": 137518,
+      "gzip": true,
+      "original_bytes": 30064640,
+      "original_name": "formal-honest.log",
+      "original_sha256": "sha256:dC3QuKFfmL6e7LWeCAvcjnz_VmTJGBkjNhTjtC8SCKQ",
+      "sha256": "sha256:_pmF0vb9MWZ4RPYhxi0ykw6mEOr82abYCmVYn3MSRbU"
+    },
+    "formal-honest.saw": {
+      "bytes": 3490,
+      "gzip": false,
+      "original_bytes": 3490,
+      "original_name": "formal-honest.saw",
+      "original_sha256": "sha256:41Fg-s5vQTrKM-QsL0JAdkZrcMexgyPOg5WZkejZNcI",
+      "sha256": "sha256:41Fg-s5vQTrKM-QsL0JAdkZrcMexgyPOg5WZkejZNcI"
+    },
+    "formal-key.log.gz": {
+      "bytes": 5709,
+      "gzip": true,
+      "original_bytes": 1063751,
+      "original_name": "formal-key.log",
+      "original_sha256": "sha256:m7q3vNgPhwPjjjW-pBiGU4scH8NVbxgbVcUKe7XDpPY",
+      "sha256": "sha256:NHAq1qdLglJ0FCJlX9gwLswtS5NAl2rUPpkrO8g9gYE"
+    },
+    "formal-key.saw": {
+      "bytes": 151,
+      "gzip": false,
+      "original_bytes": 151,
+      "original_name": "formal-key.saw",
+      "original_sha256": "sha256:neOgy1EWpIRCYETO8d9Pg2Iw3esmF_Ttnbun4OzHdtA",
+      "sha256": "sha256:neOgy1EWpIRCYETO8d9Pg2Iw3esmF_Ttnbun4OzHdtA"
+    },
+    "formal-message.log.gz": {
+      "bytes": 6661,
+      "gzip": true,
+      "original_bytes": 1070131,
+      "original_name": "formal-message.log",
+      "original_sha256": "sha256:-k_pE6tVH8npX5QW1lb4KegN1AoowddQXlTtBbAGV5M",
+      "sha256": "sha256:KbQWJQ639zXxRWti7gMMYyX03pEHuaATLa_Po0L8buY"
+    },
+    "formal-message.saw": {
+      "bytes": 124,
+      "gzip": false,
+      "original_bytes": 124,
+      "original_name": "formal-message.saw",
+      "original_sha256": "sha256:z0yNCfhS7LWJFhAPlqAzAkaHhXXoNyANRaL5GdRQWcw",
+      "sha256": "sha256:z0yNCfhS7LWJFhAPlqAzAkaHhXXoNyANRaL5GdRQWcw"
+    },
+    "formal-reject.log.gz": {
+      "bytes": 737,
+      "gzip": true,
+      "original_bytes": 22359,
+      "original_name": "formal-reject.log",
+      "original_sha256": "sha256:87WJOw2DsoIA2HSJ99_ycNbyluSQVTVjwJ7jCpSM2F8",
+      "sha256": "sha256:n9CDiWAl4P3S9STE-i567AAijrvluiufRqrezpRLeXM"
+    },
+    "formal-reject.saw": {
+      "bytes": 153,
+      "gzip": false,
+      "original_bytes": 153,
+      "original_name": "formal-reject.saw",
+      "original_sha256": "sha256:1Mw6GhQmFOYTFej6_Gj5VB9Alj0qKpk1QKDdz3LnfEQ",
+      "sha256": "sha256:1Mw6GhQmFOYTFej6_Gj5VB9Alj0qKpk1QKDdz3LnfEQ"
+    },
+    "formal-reuse.log.gz": {
+      "bytes": 5847,
+      "gzip": true,
+      "original_bytes": 1074966,
+      "original_name": "formal-reuse.log",
+      "original_sha256": "sha256:7nZduYx1v-gwnPmWnDS8poi220zf66oRiCq37OQ4CDs",
+      "sha256": "sha256:EEX_AEVs4ve2xxayhmf_YLfRu0ES-csbD1oV6-eD1RA"
+    },
+    "formal-reuse.saw": {
+      "bytes": 146,
+      "gzip": false,
+      "original_bytes": 146,
+      "original_name": "formal-reuse.saw",
+      "original_sha256": "sha256:sI8ir8LKJuW708-9jBbVuyjHqw7vH6RmsStn_4N0V7M",
+      "sha256": "sha256:sI8ir8LKJuW708-9jBbVuyjHqw7vH6RmsStn_4N0V7M"
+    },
+    "formal-signature.log.gz": {
+      "bytes": 15891,
+      "gzip": true,
+      "original_bytes": 1194144,
+      "original_name": "formal-signature.log",
+      "original_sha256": "sha256:aDWA0qxEq8fH31Zyea2CQ4NT4o1UFw_dr1Zb5htAYkE",
+      "sha256": "sha256:U5Aaq8ChCG8PpXUj5V4FoUzKbFxLJ1cJq8s7QY1XJyw"
+    },
+    "formal-signature.saw": {
+      "bytes": 163,
+      "gzip": false,
+      "original_bytes": 163,
+      "original_name": "formal-signature.saw",
+      "original_sha256": "sha256:81RONIjgbGUnAMmGgsluf9ZNCyuvVRSOWISuWq3WBy0",
+      "sha256": "sha256:81RONIjgbGUnAMmGgsluf9ZNCyuvVRSOWISuWq3WBy0"
+    },
+    "gate-tests.log.gz": {
+      "bytes": 333,
+      "gzip": true,
+      "original_bytes": 494,
+      "original_name": "gate-tests.log",
+      "original_sha256": "sha256:cyfr6yBfXFu_u0RWFVPqF8P_7ia4v7xEznq85k6jRK4",
+      "sha256": "sha256:LrrqqQHi-sESoIyH1TYSB4v1Ti9CJj5pyOFFJHa_yc8"
+    },
+    "hooks.log": {
+      "bytes": 572,
+      "gzip": false,
+      "original_bytes": 572,
+      "original_name": "hooks.log",
+      "original_sha256": "sha256:fMpK5iU2EErAyKQAdb_qVmvce8DH3mMyxOOjHY-XPyo",
+      "sha256": "sha256:fMpK5iU2EErAyKQAdb_qVmvce8DH3mMyxOOjHY-XPyo"
+    },
+    "mir-build.log": {
+      "bytes": 4327,
+      "gzip": false,
+      "original_bytes": 4327,
+      "original_name": "mir-build.log",
+      "original_sha256": "sha256:DO21epOR2HeTyGBEIgO4MEn1XyG_xHykPjp9pzvzMaQ",
+      "sha256": "sha256:DO21epOR2HeTyGBEIgO4MEn1XyG_xHykPjp9pzvzMaQ"
+    },
+    "names.saw": {
+      "bytes": 588,
+      "gzip": false,
+      "original_bytes": 588,
+      "original_name": "names.saw",
+      "original_sha256": "sha256:aotsoAO_C6EZ90M_K2r1uAfUU74GGUYJMMx1CcVPEXs",
+      "sha256": "sha256:aotsoAO_C6EZ90M_K2r1uAfUU74GGUYJMMx1CcVPEXs"
+    },
+    "native-accept.json.gz": {
+      "bytes": 21061,
+      "gzip": true,
+      "original_bytes": 1135139,
+      "original_name": "native-accept.json",
+      "original_sha256": "sha256:dcn9pmtLyL_aCmM4PKvik7WHtWjNzV_WprbxnH__ZP8",
+      "sha256": "sha256:qFE99dzWjwroMf_PPUfrB-bq_ASSIXTggyjvOT-BzFI"
+    },
+    "native-accept.log": {
+      "bytes": 76,
+      "gzip": false,
+      "original_bytes": 76,
+      "original_name": "native-accept.log",
+      "original_sha256": "sha256:nBrS87sJTms3K-WzyIG-nHL_YMbGPzuxbhpgVJY5hLg",
+      "sha256": "sha256:nBrS87sJTms3K-WzyIG-nHL_YMbGPzuxbhpgVJY5hLg"
+    },
+    "native-context.json.gz": {
+      "bytes": 2779,
+      "gzip": true,
+      "original_bytes": 93762,
+      "original_name": "native-context.json",
+      "original_sha256": "sha256:Nqyf8vXh1WtUTnAqRCIgvSsq7uLEjN8eWQtKy82pSmA",
+      "sha256": "sha256:zaLOT_u9pHwtWjEka0oksGz_Yf6x3qnrygZJ51siXIc"
+    },
+    "native-context.log": {
+      "bytes": 77,
+      "gzip": false,
+      "original_bytes": 77,
+      "original_name": "native-context.log",
+      "original_sha256": "sha256:TDpCHPKNLg4YIZU8hSC-IfM8NBitOH6-6o2rvAYNok4",
+      "sha256": "sha256:TDpCHPKNLg4YIZU8hSC-IfM8NBitOH6-6o2rvAYNok4"
+    },
+    "native-empty.json": {
+      "bytes": 2115,
+      "gzip": false,
+      "original_bytes": 2115,
+      "original_name": "native-empty.json",
+      "original_sha256": "sha256:6BrUoghbVAYUmfNDU4fFShpoLsah7MNnLHF9nOJQLM0",
+      "sha256": "sha256:6BrUoghbVAYUmfNDU4fFShpoLsah7MNnLHF9nOJQLM0"
+    },
+    "native-empty.log": {
+      "bytes": 68,
+      "gzip": false,
+      "original_bytes": 68,
+      "original_name": "native-empty.log",
+      "original_sha256": "sha256:KKWaRZ2sVTVv0P76BDQeMr7SQjz-1FzzHXNNGVFJzIQ",
+      "sha256": "sha256:KKWaRZ2sVTVv0P76BDQeMr7SQjz-1FzzHXNNGVFJzIQ"
+    },
+    "native-honest.json": {
+      "bytes": 1367,
+      "gzip": false,
+      "original_bytes": 1367,
+      "original_name": "native-honest.json",
+      "original_sha256": "sha256:JcH6gogUlyzHXM6-ARRVE480Tro5ffRKw4inhxxWBuk",
+      "sha256": "sha256:JcH6gogUlyzHXM6-ARRVE480Tro5ffRKw4inhxxWBuk"
+    },
+    "native-honest.log": {
+      "bytes": 74,
+      "gzip": false,
+      "original_bytes": 74,
+      "original_name": "native-honest.log",
+      "original_sha256": "sha256:qv8kmG899JWHEzHoj55gAYexJUk2xfEE_Vf8-HFPu7Q",
+      "sha256": "sha256:qv8kmG899JWHEzHoj55gAYexJUk2xfEE_Vf8-HFPu7Q"
+    },
+    "native-message.json.gz": {
+      "bytes": 2402,
+      "gzip": true,
+      "original_bytes": 79669,
+      "original_name": "native-message.json",
+      "original_sha256": "sha256:l4DeUMN14wwFW9TkInJbAs8K8ITjG1Cca2q2fXBPomI",
+      "sha256": "sha256:_M2Mf46wF511RicX_j-qqrUe4pjZdR6DKPEkx4pYibA"
+    },
+    "native-message.log": {
+      "bytes": 77,
+      "gzip": false,
+      "original_bytes": 77,
+      "original_name": "native-message.log",
+      "original_sha256": "sha256:yJDSPzqZWSzsrK_I6Do7pI4yzhKLJwQhM8vlbB0Q_00",
+      "sha256": "sha256:yJDSPzqZWSzsrK_I6Do7pI4yzhKLJwQhM8vlbB0Q_00"
+    },
+    "native-reject.json.gz": {
+      "bytes": 2619,
+      "gzip": true,
+      "original_bytes": 90299,
+      "original_name": "native-reject.json",
+      "original_sha256": "sha256:J3psExXpF-tWu5roZCSaZOd_c0irk4wZU4nJidnFKHc",
+      "sha256": "sha256:NTUKUFBmWqkjtw2vAYx64rrrpq4K4OOr2XZzeUC_-U8"
+    },
+    "native-reject.log": {
+      "bytes": 76,
+      "gzip": false,
+      "original_bytes": 76,
+      "original_name": "native-reject.log",
+      "original_sha256": "sha256:s1Tm2Sla3-dwPT-sElJwOhcH_RwsZ_0bqB3BtIPutZc",
+      "sha256": "sha256:s1Tm2Sla3-dwPT-sElJwOhcH_RwsZ_0bqB3BtIPutZc"
+    },
+    "native-signature.json": {
+      "bytes": 15275,
+      "gzip": false,
+      "original_bytes": 15275,
+      "original_name": "native-signature.json",
+      "original_sha256": "sha256:lnn8_aokqSl2oCkHgwo8IszlE51MPpjJ4s5GGavV5oE",
+      "sha256": "sha256:lnn8_aokqSl2oCkHgwo8IszlE51MPpjJ4s5GGavV5oE"
+    },
+    "native-signature.log": {
+      "bytes": 78,
+      "gzip": false,
+      "original_bytes": 78,
+      "original_name": "native-signature.log",
+      "original_sha256": "sha256:NUMa1VWr74DpO2CgN3gNDKH7J7ZTti2LTQON_Hkm23c",
+      "sha256": "sha256:NUMa1VWr74DpO2CgN3gNDKH7J7ZTti2LTQON_Hkm23c"
+    },
+    "operational-controls.json": {
+      "bytes": 392,
+      "gzip": false,
+      "original_bytes": 392,
+      "original_name": "operational-controls.json",
+      "original_sha256": "sha256:8OsNqhPVeg1X4mkpxIznvV4RVWmR_b_94KCR_ZgaDIQ",
+      "sha256": "sha256:8OsNqhPVeg1X4mkpxIznvV4RVWmR_b_94KCR_ZgaDIQ"
+    },
+    "operational-missing-tool.log": {
+      "bytes": 53,
+      "gzip": false,
+      "original_bytes": 53,
+      "original_name": "operational-missing-tool.log",
+      "original_sha256": "sha256:LJFmuHJceTizroCC-T8wpiz-FTMtOb0pwgvj0Z5WjHw",
+      "sha256": "sha256:LJFmuHJceTizroCC-T8wpiz-FTMtOb0pwgvj0Z5WjHw"
+    },
+    "operational-run.json": {
+      "bytes": 10903,
+      "gzip": false,
+      "original_bytes": 10903,
+      "original_name": "operational-run.json",
+      "original_sha256": "sha256:yftSU6_Tjh4AWzxiM_MTqNyZN0CTNi6dTk6opZqgAZY",
+      "sha256": "sha256:yftSU6_Tjh4AWzxiM_MTqNyZN0CTNi6dTk6opZqgAZY"
+    },
+    "operational-source-drift.log": {
+      "bytes": 52,
+      "gzip": false,
+      "original_bytes": 52,
+      "original_name": "operational-source-drift.log",
+      "original_sha256": "sha256:Qo2VOIJxS4-8eFWT9jSG5Ve4sJIjIEst2T_t9qIHXrU",
+      "sha256": "sha256:Qo2VOIJxS4-8eFWT9jSG5Ve4sJIjIEst2T_t9qIHXrU"
+    },
+    "proof.linked-mir.json.gz": {
+      "bytes": 1171494,
+      "gzip": true,
+      "original_bytes": 16367225,
+      "original_name": "proof.linked-mir.json",
+      "original_sha256": "sha256:Ig1H2-T54znh35hcn9lrIqcHGxWO0dsW28YMVyZdjbg",
+      "sha256": "sha256:vEfM06xFyZFEDroFchiYEQ1GFUjZaDmCCG7DiaAADVs"
+    },
+    "run.json": {
+      "bytes": 21997,
+      "gzip": false,
+      "original_bytes": 21997,
+      "original_name": "run.json",
+      "original_sha256": "sha256:X9p05M12r_9HrgcTD8lN8cIcjV2UJ9p3Cm0i64PFfjw",
+      "sha256": "sha256:X9p05M12r_9HrgcTD8lN8cIcjV2UJ9p3Cm0i64PFfjw"
+    },
+    "source-pins.json": {
+      "bytes": 10115,
+      "gzip": false,
+      "original_bytes": 10115,
+      "original_name": "source-pins.json",
+      "original_sha256": "sha256:CydimjPrtxy5SvYNLSlocc4ohz08dPL_f7TvHl22fJs",
+      "sha256": "sha256:CydimjPrtxy5SvYNLSlocc4ohz08dPL_f7TvHl22fJs"
+    }
+  },
+  "schema": "btungsten.prepared-proof-retained/1"
+}
