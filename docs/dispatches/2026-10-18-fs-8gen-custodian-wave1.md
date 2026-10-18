@@ -190,3 +190,45 @@ CSL microfilm 3966.
 Next: page-assess Connecticut's 132 identifiers against the published
 Suffield vital records and the Barbour volumes, and place the 11 unassigned
 Massachusetts identifiers. Rights stay UNASSESSED.
+
+## 7. Connecticut page pass landed (2026-10-18)
+
+**Evidence:**
+`docs/dispatches/evidence/2026-10-18-connecticut-vital-record-candidates.json`.
+This is another seat's pass, delivered by the founder. It is a one-line
+re-serialization with a provenance header and is otherwise content-identical
+(checked by code). The delivered sha256 is
+`1ee01c243b56b2d1395d19afbb0418e54ba89b7e34c7655e445ab3c51873fd42` <!-- PUBLIC-CONSTANT: sha256 of the delivered evidence file -->,
+the stated digest, and the original bytes are kept on the private tier. Its
+132 identifiers equal this lane's Connecticut set exactly, with 159 role rows.
+
+| result | ids |
+|---|---|
+| Salisbury, published-page candidate, date-compatible | 55 |
+| Salisbury, published-page lead, year conflict (`F73G-8BD`: 1748 cited, 1749 printed) | 1 |
+| Suffield, family-genealogy lead, page number seen in retrieved text | 71 |
+| Suffield, family-genealogy lead, page inferred | 2 |
+| Suffield, passage found, page unconfirmed | 2 |
+| Suffield, no passage (`F7WV-H4N`) | 1 |
+
+This seat spot-checked two leads against the sources:
+- **Salisbury** *Historical Collections* Vol. I has Catharen White, 25 April
+  1749, on p. 73 and Hermon White, 5 Feb 1753, on p. 74. The mirror itself
+  states its text "was generated using artificial intelligence so there may
+  be some errors."
+- The **Granger** genealogy (1893, archive.org OCR) reads "David, b. 25 Jan.,
+  1718-19" and "Jonathan, b. 25 Jan., 1718-19" after the printed page 74
+  header. The five frozen citations reading 1708 stay a conflict and are not
+  corrected.
+
+Status is unchanged in kind. These are published compilation and family
+genealogy pages, not Barbour entries and not original town volumes. Barbour
+Vol. 45 (Suffield 1674–1850, published 2002) exists, but no entry page was
+recovered. The citation-date audit stands at 353 / 169 / 1 / 7. The relayed
+note about the 530 and 659 counts in `f58729e66` agrees with what §6 already
+says, so no correction was needed. Rights stay UNASSESSED and the corpus is
+unchanged.
+
+**Wave 1 page coverage now:** MA 387 of 398 and CT 131 of 132 have a
+printed-page or literature lead. That is 518 of 530; 12 have none (11 MA and
+`F7WV-H4N`). No identifier is resolved against an original manuscript yet.
