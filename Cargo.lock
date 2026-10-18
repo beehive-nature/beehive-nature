@@ -626,6 +626,7 @@ version = "0.1.0"
 dependencies = [
  "bnrose-exec-core",
  "bnrose-exec-wasm",
+ "bnrose-replacement-law",
  "btungsten-wb001",
  "ed25519-dalek",
  "hmac 0.12.1",
@@ -651,6 +652,10 @@ dependencies = [
  "btungsten-wb001",
  "serde_json",
 ]
+
+[[package]]
+name = "bnrose-replacement-law"
+version = "0.1.0"
 
 [[package]]
 name = "borsh"

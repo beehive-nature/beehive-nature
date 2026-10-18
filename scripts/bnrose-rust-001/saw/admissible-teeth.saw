@@ -1,0 +1,18 @@
+// BNROSE-SAW-001 — the gate tooth: a MUTATED spec (the opt-in conjunct
+// dropped: the tooth admits any rowless step whatever the flag) MUST make
+// the proof FAIL. Expected NONZERO exit; saw-check.sh requires it.
+
+enable_experimental;
+import "../cryptol/BnroseReplacement.cry";
+
+m <- mir_load_module "../../../target/saw-bnrose/bnrose_replacement_law.linked-mir.json";
+
+let admissible_tooth = do {
+  ar <- mir_fresh_var "ar" mir_bool;
+  o <- mir_fresh_var "o" mir_bool;
+  mir_execute_func [mir_term ar, mir_term o];
+  mir_return (mir_term {{ ar == False }});
+};
+
+mir_verify m "bnrose_saw_harness::saw_admissible" [] false admissible_tooth (w4_unint_yices []);
+print "BNROSE-SAW TOOTH UNCAUGHT — the mutated spec verified; RED";
