@@ -90,3 +90,145 @@ record the repository, the catalog or microfilm identifier, the coverage dates
 and the copy and publication conditions. Keep originals-holder distinct from
 any third-party host of copies. No downloads, no FamilySearch requests, no
 outreach.
+
+## 5. Addendum: five priority towns, routes and date match (2026-10-18)
+
+Founder rule, chat 2026-10-18: no more approval gates. Authorized research
+proceeds and is reported. These are official public pages, read-only, with no
+FamilySearch session. Evidence:
+`docs/dispatches/evidence/2026-10-18-frontier-town-match.json` (counts only).
+Town counts here cover **every** collection citing an event in the town, so
+they run slightly above the two-collection partition (Holliston 182 vs 164).
+
+| town | route this seat read | unresolved ids | event years | date match |
+|---|---|---|---|---|
+| Holliston, MA | Historical Society "Births, Marriages, and Deaths from 1729 to 1843", assembled from the Town Clerk's vital records (hollistonhistoricalsociety.org/births-marriages-and-deaths-1729-to-1843/); current custodian of the originals not stated | 182 | 1726–1856 | 85 in 1729–1843 · 2 before · 3 after · 92 citations carry no year |
+| Chelmsford, MA | town Historic Records page (chelmsfordma.gov/570/Historic-Records) links vital-record indexes and a "Historic Town Records" document, but states no early year ranges; the relayed 1650–1750 / 1710–1774 volumes are **not confirmed here** | 117 | 1679–1767 | all 94 dated ids fall inside the relayed 1650–1774 span · 23 no year |
+| Sherborn, MA | Town Clerk page states no historical holdings; Sherborn Library listed | 99 | 1688–1750 | no volume span known · 34 no year |
+| Suffield, CT | Town Clerk: public search stations, copies $1/page, land indexes 1700s–1983; vital years not stated; Barbour + published Suffield VR per the State Library guide | 76 | 1684–1790 | 62 dated ids fall within the Barbour pre-1850 scope · 14 no year |
+| Salisbury, CT | Town Clerk vault holds birth, marriage and death records; open for research; appointments recommended; land index vol. 1 1741–1844 | 56 | 1748–1791 | all 42 dated ids after the 1741 start · 14 no year |
+
+Readings, all to be verified at the custodian before any match is claimed:
+- **Holliston / Sherborn:** relayed fact, set off from Sherborn in 1724.
+  Holliston's earliest unresolved event is 1726, so none of its identifiers
+  predate the split. Sherborn's 99 (1688–1750) are mostly pre-1724 and are
+  Sherborn's own records. The two 1726–1728 Holliston events fall between
+  the split and the compilation's 1729 start.
+- **Suffield:** general historical knowledge, not cited here. Suffield was a
+  Massachusetts town until 1749, so its 1684–1748 events may sit in
+  Massachusetts-era records as well as Connecticut's Barbour/published set.
+  It needs a custodian check.
+- **Undated citations** (92 + 23 + 34 + 14 + 14) need the record's own date
+  from the index entry before they can be placed against a volume.
+
+What this is: five verified or partly verified research routes and a date
+fit. What it is not: 530 individual-record matches, or permission to copy or
+publish anything. Rights stay UNASSESSED. Next: read each town's linked index
+documents (Chelmsford Historic Town Records, Holliston compilation) and match
+dated identifiers to volume and page, offline, from the published indexes.
+
+## 6. Correction + five-town reconciliation landed (2026-10-18)
+
+**Correction of §5, my own claim:** "177 citations carry no year" was
+**wrong**. The 92 / 23 / 34 / 14 / 14 "no year" figures came from my rule
+`/,\s*(\d{4})\.\s*$/`. That rule reads only citations ending in ", YYYY." and
+misses endings like ", 9 June 1805." and ", 31 Jan 1730/1.". I re-counted
+the same 530 identifiers from the public `records.json` with a rule that
+admits day-month dates and dual years:
+`/,\s*(?:(\d{1,2})\s+([A-Za-z]{3,9})\s+)?(\d{4})(?:\/(\d{1,2}))?\.\s*$/`.
+It gives **353 year-only, 169 full date, 1 dual year, 7 without an event
+date**:
+
+| town | ids | year-only | full | dual | none |
+|---|---|---|---|---|---|
+| Holliston | 182 | 90 | 88 | 1 | 3 |
+| Chelmsford | 117 | 94 | 23 | 0 | 0 |
+| Sherborn | 99 | 65 | 32 | 0 | 2 |
+| Suffield | 76 | 62 | 12 | 0 | 2 |
+| Salisbury | 56 | 42 | 14 | 0 | 0 |
+
+The undated seven are QVGY-PXXB, QVKB-1PFT, QVK2-LBK3, QVMZ-BNWJ, QGN3-6XYX,
+QPMC-VHGG and QPMC-X18R. They match the delivered file identifier for
+identifier, with the same 530 and no extras on either side. The §5 in-span
+counts used only year-ending citations and are superseded by the delivered
+assessments.
+
+**Landed as evidence:**
+`docs/dispatches/evidence/2026-10-18-five-town-reconciliation.json`. This is
+another seat's reconciliation pass, delivered by the founder. It is a one-line
+re-serialization with a provenance header and is otherwise content-identical
+(checked by code). The delivered file's sha256 is
+`ef0b0ef989698ede1ad46a8b9f584988de74180208cb1a1cd0db4ca3b064ca60` <!-- PUBLIC-CONSTANT: sha256 of the delivered evidence file -->,
+and its original bytes are kept on the private tier. It holds 530 identifier
+assessments, 659 role rows, and 129 printed-page event groups across the
+Holliston (1908), Chelmsford (1914) and Sherborn (1911) published vital
+records. Of the 398 Massachusetts identifiers, 387 have printed-page
+candidates; 11 have none, and Connecticut's 132 are not yet page-assessed.
+
+This seat spot-checked two candidates against the archive.org OCR:
+- Holliston p. 129 reads "Albert Perry, s. Luther and Ruth, June 9, 1805."
+  under the header "HOLLISTON BIRTHS. 129" (`FHP5-TD4`).
+- Sherborn p. 73 reads "Perry, Jeams, s. of Joseph and Martha, May 15,
+  1703." under the header "SHERBORN BIRTHS. 73" (`Q29L-B4ZD`).
+
+Both match. These are **printed-book pages**, not manuscript volume and page;
+no manuscript match and no page image is verified. The conflicts stay
+explicit as delivered. The frozen Rockwood/Haven marriage claims ("4 February
+1427", "31 December 1904") stand against the compilation's intention of 4 Feb
+1827 and church record of 3 Apr 1827, and Meriam M. Rockwood's 11 vs 16 Feb
+1834 and Albert T. vs P. stand too. Nothing in the corpus is changed.
+
+The delivered pass also corrects §5's coverage readings. Holliston's births
+volume runs 1725–1844, its marriages 1729–1843 and its deaths 1725–1843, so
+1729 is no blanket start. Chelmsford's 1650–1750 and 1710–1774 town books
+are now confirmed on the town inventory as general town records, not
+established vital volumes. Sherborn event places can differ from the
+collection town. Suffield was annexed from Massachusetts in May 1749 (CT
+register table). Salisbury births, marriages and deaths run 1740–1905 on
+CSL microfilm 3966.
+
+Next: page-assess Connecticut's 132 identifiers against the published
+Suffield vital records and the Barbour volumes, and place the 11 unassigned
+Massachusetts identifiers. Rights stay UNASSESSED.
+
+## 7. Connecticut page pass landed (2026-10-18)
+
+**Evidence:**
+`docs/dispatches/evidence/2026-10-18-connecticut-vital-record-candidates.json`.
+This is another seat's pass, delivered by the founder. It is a one-line
+re-serialization with a provenance header and is otherwise content-identical
+(checked by code). The delivered sha256 is
+`1ee01c243b56b2d1395d19afbb0418e54ba89b7e34c7655e445ab3c51873fd42` <!-- PUBLIC-CONSTANT: sha256 of the delivered evidence file -->,
+the stated digest, and the original bytes are kept on the private tier. Its
+132 identifiers equal this lane's Connecticut set exactly, with 159 role rows.
+
+| result | ids |
+|---|---|
+| Salisbury, published-page candidate, date-compatible | 55 |
+| Salisbury, published-page lead, year conflict (`F73G-8BD`: 1748 cited, 1749 printed) | 1 |
+| Suffield, family-genealogy lead, page number seen in retrieved text | 71 |
+| Suffield, family-genealogy lead, page inferred | 2 |
+| Suffield, passage found, page unconfirmed | 2 |
+| Suffield, no passage (`F7WV-H4N`) | 1 |
+
+This seat spot-checked two leads against the sources:
+- **Salisbury** *Historical Collections* Vol. I has Catharen White, 25 April
+  1749, on p. 73 and Hermon White, 5 Feb 1753, on p. 74. The mirror itself
+  states its text "was generated using artificial intelligence so there may
+  be some errors."
+- The **Granger** genealogy (1893, archive.org OCR) reads "David, b. 25 Jan.,
+  1718-19" and "Jonathan, b. 25 Jan., 1718-19" after the printed page 74
+  header. The five frozen citations reading 1708 stay a conflict and are not
+  corrected.
+
+Status is unchanged in kind. These are published compilation and family
+genealogy pages, not Barbour entries and not original town volumes. Barbour
+Vol. 45 (Suffield 1674–1850, published 2002) exists, but no entry page was
+recovered. The citation-date audit stands at 353 / 169 / 1 / 7. The relayed
+note about the 530 and 659 counts in `f58729e66` agrees with what §6 already
+says, so no correction was needed. Rights stay UNASSESSED and the corpus is
+unchanged.
+
+**Wave 1 page coverage now:** MA 387 of 398 and CT 131 of 132 have a
+printed-page or literature lead. That is 518 of 530; 12 have none (11 MA and
+`F7WV-H4N`). No identifier is resolved against an original manuscript yet.
