@@ -89,6 +89,12 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
+      # caches the bnrose-grid-agreement release build's target dir; saved
+      # only from successful main pushes so PR runs restore main's warm
+      # cache instead of churning per-PR entries (ci-speedup, 2026-10-17)
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: install cryptol 3.6.0 (pinned, with bundled solvers) and GNU time
         if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         timeout-minutes: 8
