@@ -90,3 +90,39 @@ record the repository, the catalog or microfilm identifier, the coverage dates
 and the copy and publication conditions. Keep originals-holder distinct from
 any third-party host of copies. No downloads, no FamilySearch requests, no
 outreach.
+
+## 5. Addendum: five priority towns, routes and date match (2026-10-18)
+
+Founder rule, chat 2026-10-18: no more approval gates. Authorized research
+proceeds and is reported. These are official public pages, read-only, with no
+FamilySearch session. Evidence:
+`docs/dispatches/evidence/2026-10-18-frontier-town-match.json` (counts only).
+Town counts here cover **every** collection citing an event in the town, so
+they run slightly above the two-collection partition (Holliston 182 vs 164).
+
+| town | route this seat read | unresolved ids | event years | date match |
+|---|---|---|---|---|
+| Holliston, MA | Historical Society "Births, Marriages, and Deaths from 1729 to 1843", assembled from the Town Clerk's vital records (hollistonhistoricalsociety.org/births-marriages-and-deaths-1729-to-1843/); current custodian of the originals not stated | 182 | 1726–1856 | 85 in 1729–1843 · 2 before · 3 after · 92 citations carry no year |
+| Chelmsford, MA | town Historic Records page (chelmsfordma.gov/570/Historic-Records) links vital-record indexes and a "Historic Town Records" document, but states no early year ranges; the relayed 1650–1750 / 1710–1774 volumes are **not confirmed here** | 117 | 1679–1767 | all 94 dated ids fall inside the relayed 1650–1774 span · 23 no year |
+| Sherborn, MA | Town Clerk page states no historical holdings; Sherborn Library listed | 99 | 1688–1750 | no volume span known · 34 no year |
+| Suffield, CT | Town Clerk: public search stations, copies $1/page, land indexes 1700s–1983; vital years not stated; Barbour + published Suffield VR per the State Library guide | 76 | 1684–1790 | 62 dated ids fall within the Barbour pre-1850 scope · 14 no year |
+| Salisbury, CT | Town Clerk vault holds birth, marriage and death records; open for research; appointments recommended; land index vol. 1 1741–1844 | 56 | 1748–1791 | all 42 dated ids after the 1741 start · 14 no year |
+
+Readings, all to be verified at the custodian before any match is claimed:
+- **Holliston / Sherborn:** relayed fact, set off from Sherborn in 1724.
+  Holliston's earliest unresolved event is 1726, so none of its identifiers
+  predate the split. Sherborn's 99 (1688–1750) are mostly pre-1724 and are
+  Sherborn's own records. The two 1726–1728 Holliston events fall between
+  the split and the compilation's 1729 start.
+- **Suffield:** general historical knowledge, not cited here. Suffield was a
+  Massachusetts town until 1749, so its 1684–1748 events may sit in
+  Massachusetts-era records as well as Connecticut's Barbour/published set.
+  It needs a custodian check.
+- **Undated citations** (92 + 23 + 34 + 14 + 14) need the record's own date
+  from the index entry before they can be placed against a volume.
+
+What this is: five verified or partly verified research routes and a date
+fit. What it is not: 530 individual-record matches, or permission to copy or
+publish anything. Rights stay UNASSESSED. Next: read each town's linked index
+documents (Chelmsford Historic Town Records, Holliston compilation) and match
+dated identifiers to volume and page, offline, from the published indexes.
