@@ -1,0 +1,490 @@
+{
+ "record": "superseded proof-lane runs, selective cancellation",
+ "ruling": "founder 2026-10-16: cancel queued proof-lane runs for obsolete non-main commits; preserve current heads, main, manual dispatches, tests.yml, secret-scan.yml and any run a receipt needs",
+ "planned_at": "2026-10-16T05:56:27.338Z",
+ "queued_when_planned": 136,
+ "rules": {
+  "proof_workflows": [
+   "bTunGsTeN PQ",
+   "bTunGsTeN PQ SAW",
+   "bTunGsTeN RB",
+   "WB001 SAW proofs",
+   "WB002 SAW equivalence",
+   "WB002 WASM corpus",
+   "BNROSE-RUST-001"
+  ],
+  "superseded": "run head_sha is not its branch head and not any open PR head; for a deleted branch, superseded by its merged PR",
+  "receipt_check": "9-char prefix not found in docs/ e2e/ scripts/ tools/ on origin/main, nor in main commit messages since 2026-10-10"
+ },
+ "cancelled": [
+  {
+   "run_id": 38840853560,
+   "workflow": "WB002 SAW equivalence",
+   "event": "push",
+   "branch": "zcode/btmd-scale9-study",
+   "obsolete_sha": "0e187cf28148f5e92f4a58a846bc3b16fd82f082",
+   "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
+   "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38840853549,
+   "workflow": "bTunGsTeN PQ",
+   "event": "push",
+   "branch": "zcode/btmd-scale9-study",
+   "obsolete_sha": "0e187cf28148f5e92f4a58a846bc3b16fd82f082",
+   "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
+   "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38840853584,
+   "workflow": "BNROSE-RUST-001",
+   "event": "push",
+   "branch": "zcode/btmd-scale9-study",
+   "obsolete_sha": "0e187cf28148f5e92f4a58a846bc3b16fd82f082",
+   "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
+   "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38840853517,
+   "workflow": "bTunGsTeN PQ SAW",
+   "event": "push",
+   "branch": "zcode/btmd-scale9-study",
+   "obsolete_sha": "0e187cf28148f5e92f4a58a846bc3b16fd82f082",
+   "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
+   "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38840853559,
+   "workflow": "WB002 WASM corpus",
+   "event": "push",
+   "branch": "zcode/btmd-scale9-study",
+   "obsolete_sha": "0e187cf28148f5e92f4a58a846bc3b16fd82f082",
+   "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
+   "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38840853602,
+   "workflow": "WB001 SAW proofs",
+   "event": "push",
+   "branch": "zcode/btmd-scale9-study",
+   "obsolete_sha": "0e187cf28148f5e92f4a58a846bc3b16fd82f082",
+   "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
+   "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38840853627,
+   "workflow": "bTunGsTeN RB",
+   "event": "push",
+   "branch": "zcode/btmd-scale9-study",
+   "obsolete_sha": "0e187cf28148f5e92f4a58a846bc3b16fd82f082",
+   "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
+   "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38834013507,
+   "workflow": "bTunGsTeN RB",
+   "event": "pull_request",
+   "branch": "claude-LoVis/sovexec-004-bindex-sse",
+   "obsolete_sha": "ccfc564735995796e0395645ddd8a01570ca0c92",
+   "superseding_sha": "56ef693488b401bcef90d10570b50d845c8e4506",
+   "reason": "superseded: claude-LoVis/sovexec-004-bindex-sse is now at 56ef69348 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38834013482,
+   "workflow": "BNROSE-RUST-001",
+   "event": "pull_request",
+   "branch": "claude-LoVis/sovexec-004-bindex-sse",
+   "obsolete_sha": "ccfc564735995796e0395645ddd8a01570ca0c92",
+   "superseding_sha": "56ef693488b401bcef90d10570b50d845c8e4506",
+   "reason": "superseded: claude-LoVis/sovexec-004-bindex-sse is now at 56ef69348 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38834013468,
+   "workflow": "WB002 SAW equivalence",
+   "event": "pull_request",
+   "branch": "claude-LoVis/sovexec-004-bindex-sse",
+   "obsolete_sha": "ccfc564735995796e0395645ddd8a01570ca0c92",
+   "superseding_sha": "56ef693488b401bcef90d10570b50d845c8e4506",
+   "reason": "superseded: claude-LoVis/sovexec-004-bindex-sse is now at 56ef69348 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38834013357,
+   "workflow": "bTunGsTeN PQ",
+   "event": "pull_request",
+   "branch": "claude-LoVis/sovexec-004-bindex-sse",
+   "obsolete_sha": "ccfc564735995796e0395645ddd8a01570ca0c92",
+   "superseding_sha": "56ef693488b401bcef90d10570b50d845c8e4506",
+   "reason": "superseded: claude-LoVis/sovexec-004-bindex-sse is now at 56ef69348 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38834013394,
+   "workflow": "bTunGsTeN PQ SAW",
+   "event": "pull_request",
+   "branch": "claude-LoVis/sovexec-004-bindex-sse",
+   "obsolete_sha": "ccfc564735995796e0395645ddd8a01570ca0c92",
+   "superseding_sha": "56ef693488b401bcef90d10570b50d845c8e4506",
+   "reason": "superseded: claude-LoVis/sovexec-004-bindex-sse is now at 56ef69348 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "in_progress",
+    "conclusion": null
+   },
+   "note": "run-level status read queued at the check, but its saw job had started at 05:53:19Z; the cancel stopped saw-ntt and saw-ntt-dsa, and saw ran on for a while because its steps carry if: always(), which GitHub executes even after cancellation. Not force-cancelled: the ruling covered queued runs. Final readback: completed/cancelled.",
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38833981758,
+   "workflow": "bTunGsTeN RB",
+   "event": "push",
+   "branch": "claude-LoVis/sovexec-004-bindex-sse",
+   "obsolete_sha": "ccfc564735995796e0395645ddd8a01570ca0c92",
+   "superseding_sha": "56ef693488b401bcef90d10570b50d845c8e4506",
+   "reason": "superseded: claude-LoVis/sovexec-004-bindex-sse is now at 56ef69348 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38833981657,
+   "workflow": "bTunGsTeN PQ SAW",
+   "event": "push",
+   "branch": "claude-LoVis/sovexec-004-bindex-sse",
+   "obsolete_sha": "ccfc564735995796e0395645ddd8a01570ca0c92",
+   "superseding_sha": "56ef693488b401bcef90d10570b50d845c8e4506",
+   "reason": "superseded: claude-LoVis/sovexec-004-bindex-sse is now at 56ef69348 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38833981677,
+   "workflow": "bTunGsTeN PQ",
+   "event": "push",
+   "branch": "claude-LoVis/sovexec-004-bindex-sse",
+   "obsolete_sha": "ccfc564735995796e0395645ddd8a01570ca0c92",
+   "superseding_sha": "56ef693488b401bcef90d10570b50d845c8e4506",
+   "reason": "superseded: claude-LoVis/sovexec-004-bindex-sse is now at 56ef69348 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38833456478,
+   "workflow": "bTunGsTeN PQ SAW",
+   "event": "push",
+   "branch": "zcode/btmd-scale9-study",
+   "obsolete_sha": "4fa9f594d6d9525d6ba458cea895fa323b38a169",
+   "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
+   "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38833456535,
+   "workflow": "bTunGsTeN RB",
+   "event": "push",
+   "branch": "zcode/btmd-scale9-study",
+   "obsolete_sha": "4fa9f594d6d9525d6ba458cea895fa323b38a169",
+   "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
+   "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38833456511,
+   "workflow": "WB002 SAW equivalence",
+   "event": "push",
+   "branch": "zcode/btmd-scale9-study",
+   "obsolete_sha": "4fa9f594d6d9525d6ba458cea895fa323b38a169",
+   "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
+   "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38833456540,
+   "workflow": "bTunGsTeN PQ",
+   "event": "push",
+   "branch": "zcode/btmd-scale9-study",
+   "obsolete_sha": "4fa9f594d6d9525d6ba458cea895fa323b38a169",
+   "superseding_sha": "4dd7d3ff6880d6f619da22867934f838dfd199f3",
+   "reason": "superseded: zcode/btmd-scale9-study is now at 4dd7d3ff6 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38829044115,
+   "workflow": "bTunGsTeN RB",
+   "event": "pull_request",
+   "branch": "zcode/bnrose-saw-001-2026-10-14",
+   "obsolete_sha": "dba77b8267e9e024f879c84ab985a25a80a2f086",
+   "superseding_sha": "5d5fa4080eb99d50d2e50421bf726fd6b38e9bd1",
+   "reason": "superseded: zcode/bnrose-saw-001-2026-10-14 is now at 5d5fa4080 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38816986459,
+   "workflow": "bTunGsTeN RB",
+   "event": "pull_request",
+   "branch": "zcode/bnrose-netpart-001",
+   "obsolete_sha": "07e5b014b1f07f77e6e9e5f5af91bb97ec604509",
+   "superseding_sha": "c4ec1aa196e435a43d5382c5162579cdc78269a4",
+   "reason": "superseded: zcode/bnrose-netpart-001 is now at c4ec1aa19 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38815257310,
+   "workflow": "bTunGsTeN RB",
+   "event": "pull_request",
+   "branch": "zcode/bnrose-saw-001-2026-10-14",
+   "obsolete_sha": "19a7c9d570d234bc60355fe8c5f083335e0b41d8",
+   "superseding_sha": "5d5fa4080eb99d50d2e50421bf726fd6b38e9bd1",
+   "reason": "superseded: zcode/bnrose-saw-001-2026-10-14 is now at 5d5fa4080 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38815250355,
+   "workflow": "bTunGsTeN RB",
+   "event": "push",
+   "branch": "zcode/bnrose-saw-001-2026-10-14",
+   "obsolete_sha": "19a7c9d570d234bc60355fe8c5f083335e0b41d8",
+   "superseding_sha": "5d5fa4080eb99d50d2e50421bf726fd6b38e9bd1",
+   "reason": "superseded: zcode/bnrose-saw-001-2026-10-14 is now at 5d5fa4080 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  },
+  {
+   "run_id": 38812671377,
+   "workflow": "bTunGsTeN RB",
+   "event": "pull_request",
+   "branch": "zcode/bnrose-netpart-001",
+   "obsolete_sha": "f63df327fab57aca3dd6ffef9041333116af6f45",
+   "superseding_sha": "c4ec1aa196e435a43d5382c5162579cdc78269a4",
+   "reason": "superseded: zcode/bnrose-netpart-001 is now at c4ec1aa19 (branch head); this result can no longer gate a merge",
+   "read_back": {
+    "status": "completed",
+    "conclusion": "cancelled"
+   },
+   "final_read_back": {
+    "at": "2026-10-16T20:03:44.755Z",
+    "status": "completed",
+    "conclusion": "cancelled"
+   }
+  }
+ ],
+ "preserved": [
+  {
+   "run_id": 38811978407,
+   "workflow": "bTunGsTeN RB",
+   "obsolete_sha": "167eda2c2e4c6d45694b7afe161bb6213d2397be",
+   "why": "cited three times in main history as PR #422's exact-head qualified commit (audit receipt): preserved"
+  },
+  {
+   "run_id": 38811972890,
+   "workflow": "WB002 SAW equivalence",
+   "obsolete_sha": "167eda2c2e4c6d45694b7afe161bb6213d2397be",
+   "why": "cited three times in main history as PR #422's exact-head qualified commit (audit receipt): preserved"
+  }
+ ],
+ "skipped": [],
+ "kept_by_rule": [
+  {
+   "why": "still the head of an open PR",
+   "n": 66
+  },
+  {
+   "why": "not a proof-lane workflow (tests / secret-scan / other are preserved)",
+   "n": 28
+  },
+  {
+   "why": "main run",
+   "n": 16
+  }
+ ],
+ "untouched_prs": {
+  "447": "ca084190d21bfb545236856b0d48483d663fb08d",
+  "452": "60964197a6399f4321a8dc4978f54ae6403adabc"
+ },
+ "final_tally": {
+  "completed/cancelled": 24
+ }
+}

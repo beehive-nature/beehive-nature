@@ -431,6 +431,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "bindex-bnrose"
+version = "0.1.0"
+dependencies = [
+ "bnrose-exec-core",
+ "bnrose-exec-host",
+ "btungsten-wb001",
+ "rusqlite",
+ "serde_json",
+ "sha2 0.10.9",
+]
+
+[[package]]
 name = "bindexer"
 version = "0.1.0"
 dependencies = [
