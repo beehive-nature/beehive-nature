@@ -1,0 +1,493 @@
+== red-first run 2026-10-15T21:57:38Z ==
+upstream HEAD 764d7529f691768bb3a44007bb471eed5b60fb73
+pack test sha256 68e3d661247f77ef
+git status (must show only tests/ untracked):
+?? tests/
+rustc 1.99.0 (b940084d7 2026-09-28)
+cargo 1.99.0 (5f94df478 2026-08-27)
+x86_64
+== cargo generate-lockfile ==
+    Updating crates.io index
+     Locking 486 packages to highest compatible versions
+      Adding criterion v0.5.1 (available: v0.8.2)
+      Adding generic-array v0.14.7 (available: v0.14.9)
+      Adding matchit v0.8.4 (available: v0.8.6)
+      Adding rand v0.8.8 (available: v0.10.3)
+      Adding saorsa-core v0.10.5 (available: v0.29.0)
+      Adding saorsa-pqc v0.4.2 (available: v0.5.2)
+      Adding unicode-width v0.2.0 (available: v0.2.2)
+generate-lockfile exit=0
+Cargo.lock sha256 6af1ff82dbd97b9b
+== cargo test --locked --test bnr_seal_rejection ==
+ Downloading crates ...
+  Downloaded array-init v2.1.0
+  Downloaded half v1.8.3
+  Downloaded nalgebra v0.33.3
+  Downloaded prometheus v0.14.0
+  Downloaded rand_distr v0.4.3
+  Downloaded reed-solomon-simd v3.1.0
+  Downloaded readme-rustdocifier v0.1.1
+  Downloaded rusqlite v0.37.0
+  Downloaded serde-big-array v0.5.1
+  Downloaded simba v0.9.1
+  Downloaded libsqlite3-sys v0.35.0
+  Downloaded saorsa-fec v0.4.14
+  Downloaded ant-quic v0.21.9
+  Downloaded saorsa-pqc v0.4.2
+  Downloaded saorsa-core v0.10.5
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling libc v0.2.190
+   Compiling cfg-if v1.0.5
+   Compiling serde_core v1.0.229
+   Compiling serde v1.0.229
+   Compiling typenum v1.20.1
+   Compiling version_check v0.9.5
+   Compiling subtle v2.6.1
+   Compiling generic-array v0.14.7
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.14
+   Compiling log v0.4.34
+   Compiling once_cell v1.21.4
+   Compiling autocfg v1.5.1
+   Compiling scopeguard v1.2.0
+   Compiling pin-project-lite v0.2.17
+   Compiling memchr v2.8.3
+   Compiling lock_api v0.4.14
+   Compiling itoa v1.0.18
+   Compiling parking_lot_core v0.9.12
+   Compiling cpufeatures v0.2.17
+   Compiling stable_deref_trait v1.2.1
+   Compiling futures-core v0.3.34
+   Compiling bytes v1.12.1
+   Compiling syn v2.0.119
+   Compiling syn v3.0.9
+   Compiling libm v0.2.16
+   Compiling pkg-config v0.3.34
+   Compiling jobserver v0.1.35
+   Compiling num-traits v0.2.19
+   Compiling cc v1.8.0
+   Compiling zerocopy v0.8.63
+   Compiling tracing-core v0.1.36
+   Compiling getrandom v0.2.17
+   Compiling rand_core v0.6.4
+   Compiling errno v0.3.14
+   Compiling signal-hook-registry v1.4.8
+   Compiling mio v1.2.4
+   Compiling socket2 v0.6.5
+   Compiling semver v1.0.28
+   Compiling dunce v1.0.5
+   Compiling fs_extra v1.3.0
+   Compiling futures-sink v0.3.34
+   Compiling rustc_version v0.4.1
+   Compiling zmij v1.0.23
+   Compiling cmake v0.1.58
+   Compiling futures-channel v0.3.34
+   Compiling slab v0.4.12
+   Compiling futures-task v0.3.34
+   Compiling futures-io v0.3.34
+   Compiling serde_json v1.0.154
+   Compiling bitflags v2.13.2
+   Compiling aws-lc-rs v1.18.2
+   Compiling crossbeam-utils v0.8.23
+   Compiling http v1.5.0
+   Compiling rand_core v0.10.1
+   Compiling writeable v0.6.4
+   Compiling aws-lc-sys v0.46.0
+   Compiling ring v0.17.14
+   Compiling litemap v0.8.3
+   Compiling untrusted v0.9.0
+   Compiling http-body v1.1.0
+   Compiling getrandom v0.4.3
+   Compiling synstructure v0.14.0
+   Compiling crossbeam-epoch v0.9.21
+   Compiling const-oid v0.9.6
+   Compiling opaque-debug v0.3.1
+   Compiling icu_properties_data v2.3.0
+   Compiling percent-encoding v2.3.2
+   Compiling icu_normalizer_data v2.3.0
+   Compiling utf8_iter v1.0.4
+   Compiling curve25519-dalek v4.1.3
+   Compiling ff v0.13.1
+   Compiling httparse v1.10.1
+   Compiling base16ct v0.2.0
+   Compiling thiserror v2.0.21
+   Compiling bytemuck v1.25.2
+   Compiling tower-service v0.3.3
+   Compiling rustls v0.23.46
+   Compiling crossbeam-deque v0.8.8
+   Compiling zeroize_derive v1.5.0
+   Compiling zerocopy-derive v0.8.63
+   Compiling tracing-attributes v0.1.31
+   Compiling curve25519-dalek-derive v0.1.1
+   Compiling safe_arch v0.7.4
+   Compiling zeroize v1.9.1
+   Compiling group v0.13.0
+   Compiling rustls-pki-types v1.15.1
+   Compiling serde_derive v1.0.229
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling tokio-macros v2.7.2
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling zerovec-derive v0.11.6
+   Compiling digest v0.10.7
+   Compiling displaydoc v0.2.7
+   Compiling zerofrom v0.1.8
+   Compiling tracing v0.1.44
+   Compiling futures-macro v0.3.34
+   Compiling inout v0.1.4
+   Compiling cipher v0.4.4
+   Compiling yoke v0.8.3
+   Compiling sha2 v0.10.9
+   Compiling hmac v0.12.1
+   Compiling zerotrie v0.2.5
+   Compiling zerovec v0.11.8
+   Compiling universal-hash v0.5.1
+   Compiling der v0.7.10
+   Compiling hkdf v0.12.4
+   Compiling futures-util v0.3.34
+   Compiling crypto-bigint v0.5.5
+   Compiling tinystr v0.8.4
+   Compiling icu_locale_core v2.3.0
+   Compiling potential_utf v0.1.6
+   Compiling icu_collections v2.3.0
+   Compiling smallvec v1.16.3
+   Compiling icu_provider v2.3.1
+   Compiling sec1 v0.7.3
+   Compiling parking_lot v0.12.5
+   Compiling thiserror-impl v2.0.21
+   Compiling tokio v1.53.3
+   Compiling deranged v0.5.9
+   Compiling rayon-core v1.13.0
+   Compiling keccak v0.1.6
+   Compiling powerfmt v0.2.1
+   Compiling utf8parse v0.2.2
+   Compiling cfg_aliases v0.2.2
+   Compiling time-core v0.1.9
+   Compiling equivalent v1.0.3
+   Compiling regex-syntax v0.8.11
+   Compiling num_threads v0.1.7
+   Compiling either v1.19.0
+   Compiling ppv-lite86 v0.2.21
+   Compiling num-conv v0.2.2
+   Compiling try-lock v0.2.5
+   Compiling base64 v0.23.1
+   Compiling want v0.3.2
+   Compiling rand_chacha v0.3.1
+   Compiling time v0.3.55
+   Compiling rand v0.8.8
+   Compiling anstyle-parse v1.0.0
+   Compiling sha3 v0.10.9
+   Compiling icu_properties v2.3.0
+   Compiling icu_normalizer v2.3.0
+   Compiling elliptic-curve v0.13.8
+   Compiling polyval v0.6.2
+   Compiling aead v0.5.2
+   Compiling wide v0.7.33
+   Compiling form_urlencoded v1.2.2
+   Compiling heapless v0.7.17
+   Compiling aho-corasick v1.1.5
+   Compiling sync_wrapper v1.0.2
+   Compiling anstyle-query v1.1.5
+   Compiling tower-layer v0.3.3
+   Compiling cpufeatures v0.3.1
+   Compiling anstyle v1.0.14
+   Compiling byteorder v1.5.0
+   Compiling atomic-waker v1.1.2
+   Compiling colorchoice v1.0.5
+   Compiling httpdate v1.0.3
+   Compiling base64ct v1.8.3
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling anstream v1.0.0
+   Compiling hash32 v0.2.1
+   Compiling idna_adapter v1.2.2
+   Compiling password-hash v0.5.0
+   Compiling regex-automata v0.4.18
+   Compiling primeorder v0.13.6
+   Compiling ghash v0.5.1
+   Compiling poly1305 v0.8.0
+   Compiling chacha20 v0.9.1
+   Compiling ctr v0.9.2
+   Compiling aes v0.8.4
+   Compiling blake3 v1.8.7
+   Compiling spin v0.9.9
+   Compiling strsim v0.11.1
+   Compiling heck v0.5.0
+   Compiling ipnet v2.12.2
+   Compiling anyhow v1.0.104
+   Compiling option-ext v0.2.0
+   Compiling hashbrown v0.17.1
+   Compiling readme-rustdocifier v0.1.1
+   Compiling hyper v1.12.0
+   Compiling signal-hook v0.3.18
+   Compiling ryu v1.0.23
+   Compiling clap_lex v1.1.1
+   Compiling signature v2.2.0
+   Compiling paste v1.0.15
+   Compiling ed25519 v2.2.3
+   Compiling indexmap v2.14.2
+   Compiling clap_builder v4.6.7
+   Compiling tower v0.5.3
+   Compiling clap_derive v4.6.7
+   Compiling hyper-util v0.1.21
+   Compiling aes-gcm v0.10.3
+   Compiling rayon v1.12.0
+   Compiling chacha20poly1305 v0.10.1
+   Compiling p256 v0.13.2
+   Compiling idna v1.1.0
+   Compiling x25519-dalek v2.0.1
+   Compiling cobs v0.3.0
+   Compiling futures-executor v0.3.34
+   Compiling http-body-util v0.1.5
+   Compiling matrixmultiply v0.3.11
+   Compiling memoffset v0.9.1
+   Compiling rustix v0.38.44
+   Compiling lazy_static v1.5.1
+   Compiling constant_time_eq v0.4.2
+   Compiling radium v0.7.0
+   Compiling thiserror v1.0.69
+   Compiling crc32fast v1.5.2
+   Compiling arrayvec v0.7.8
+   Compiling vcpkg v0.2.15
+   Compiling rand_core v0.9.5
+   Compiling hpke v0.13.0
+   Compiling futures v0.3.34
+   Compiling postcard v1.1.3
+   Compiling url v2.5.8
+   Compiling clap v4.6.7
+   Compiling libsqlite3-sys v0.35.0
+   Compiling ed25519-dalek v2.2.0
+   Compiling serde_urlencoded v0.7.1
+   Compiling pbkdf2 v0.12.2
+   Compiling fips203 v0.4.3
+   Compiling fips204 v0.4.6
+   Compiling fips205 v0.4.1
+   Compiling nix v0.29.0
+   Compiling quinn-udp v0.5.16
+   Compiling webpki-roots v1.0.9
+   Compiling thiserror-impl v1.0.69
+   Compiling num-complex v0.4.6
+   Compiling approx v0.5.1
+   Compiling num-integer v0.1.47
+   Compiling fnv v1.0.7
+   Compiling simd-adler32 v0.3.10
+   Compiling foldhash v0.1.5
+   Compiling fastrand v2.5.0
+   Compiling linux-raw-sys v0.4.15
+   Compiling hex v0.4.3
+   Compiling adler2 v2.0.1
+   Compiling rawpointer v0.2.1
+   Compiling iana-time-zone v0.1.65
+   Compiling rustix v1.1.5
+   Compiling openssl-probe v0.2.1
+   Compiling tap v1.0.1
+   Compiling wyz v0.5.1
+   Compiling chrono v0.4.45
+   Compiling rustls-native-certs v0.8.5
+   Compiling miniz_oxide v0.9.1
+   Compiling hashbrown v0.15.5
+   Compiling saorsa-pqc v0.4.2
+   Compiling num-rational v0.4.2
+   Compiling simba v0.9.1
+   Compiling signal-hook-mio v0.2.5
+   Compiling reed-solomon-simd v3.1.0
+   Compiling tower-http v0.6.11
+   Compiling sharded-slab v0.1.7
+   Compiling regex v1.13.1
+   Compiling matchers v0.2.0
+   Compiling tokio-util v0.7.20
+   Compiling dirs-sys v0.4.1
+   Compiling yasna v0.6.0
+   Compiling rand_distr v0.4.3
+   Compiling pem v4.0.0
+   Compiling uuid v1.28.0
+   Compiling tracing-serde v0.2.0
+   Compiling toml_datetime v0.6.11
+   Compiling serde_spanned v0.6.9
+   Compiling async-trait v0.1.92
+   Compiling tracing-log v0.2.0
+   Compiling thread_local v1.1.10
+   Compiling foldhash v0.2.0
+   Compiling toml_write v0.1.2
+   Compiling hashbrown v0.14.5
+   Compiling prometheus v0.14.0
+   Compiling mime v0.3.17
+   Compiling unsafe-libyaml v0.2.11
+   Compiling linux-raw-sys v0.12.1
+   Compiling allocator-api2 v0.2.21
+   Compiling funty v2.0.0
+   Compiling nu-ansi-term v0.50.3
+   Compiling winnow v0.7.15
+   Compiling base64 v0.22.1
+   Compiling tracing-subscriber v0.3.23
+   Compiling bitvec v1.1.1
+   Compiling hashbrown v0.16.1
+   Compiling dashmap v6.2.1
+   Compiling serde_yaml v0.9.34+deprecated
+   Compiling nalgebra v0.33.3
+   Compiling toml_edit v0.22.27
+   Compiling axum-core v0.5.6
+   Compiling rcgen v0.14.10
+   Compiling dirs v5.0.1
+   Compiling flate2 v1.1.10
+   Compiling crossterm v0.28.1
+   Compiling hashlink v0.10.0
+   Compiling dirs-sys v0.5.0
+   Compiling half v2.7.1
+   Compiling blake2 v0.10.6
+   Compiling rustls-pemfile v2.2.0
+   Compiling serde_path_to_error v0.1.20
+   Compiling socket2 v0.5.10
+   Compiling keyring v3.6.3
+   Compiling saorsa-core v0.10.5
+   Compiling unicode-width v0.2.0
+   Compiling fixedbitset v0.5.7
+   Compiling lru-slab v0.1.3
+   Compiling rustc-hash v2.1.3
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling ciborium-io v0.2.2
+   Compiling half v1.8.3
+   Compiling plotters-backend v0.3.7
+   Compiling fallible-iterator v0.3.0
+   Compiling matchit v0.8.4
+   Compiling tinyvec v1.13.3
+   Compiling bs58 v0.5.1
+   Compiling rusqlite v0.37.0
+   Compiling axum v0.8.9
+   Compiling four-word-networking v2.7.0
+   Compiling serde_cbor v0.11.2
+   Compiling plotters-svg v0.3.7
+   Compiling ciborium-ll v0.2.2
+   Compiling argon2 v0.5.3
+   Compiling dirs v6.0.0
+   Compiling toml v0.8.23
+   Compiling tempfile v3.27.0
+   Compiling lru v0.16.4
+   Compiling tokio-stream v0.1.19
+   Compiling itertools v0.10.5
+   Compiling serde-big-array v0.5.1
+   Compiling serde_bytes v0.11.19
+   Compiling num_cpus v1.17.0
+   Compiling wait-timeout v0.2.1
+   Compiling array-init v2.1.0
+   Compiling bit-vec v0.10.1
+   Compiling same-file v1.0.6
+   Compiling cast v0.3.0
+   Compiling quick-error v1.2.3
+   Compiling statrs v0.18.0
+   Compiling rusty-fork v0.3.1
+   Compiling bit-set v0.11.1
+   Compiling walkdir v2.5.0
+   Compiling saorsa-fec v0.4.14
+   Compiling ciborium v0.2.2
+   Compiling plotters v0.3.7
+   Compiling criterion-plot v0.5.0
+   Compiling chacha20 v0.10.2
+   Compiling rand v0.10.3
+   Compiling tinytemplate v1.2.1
+   Compiling rand_xorshift v0.5.0
+   Compiling is-terminal v0.4.17
+   Compiling anes v0.1.6
+   Compiling oorandom v11.1.5
+   Compiling unarray v0.1.4
+   Compiling core_detect v1.0.0
+   Compiling criterion v0.5.1
+   Compiling proptest v1.12.0
+   Compiling rustls-webpki v0.103.15
+   Compiling tokio-rustls v0.26.6
+   Compiling rustls-post-quantum v0.2.4
+   Compiling rustls-platform-verifier v0.6.2
+   Compiling hyper-rustls v0.27.10
+   Compiling reqwest v0.12.28
+   Compiling ant-quic v0.21.9
+   Compiling saorsa-seal v0.1.3 (/home/travi/sovexec-saorsa/saorsa-seal)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7m 20s
+     Running tests/bnr_seal_rejection.rs (target/debug/deps/bnr_seal_rejection-b49f3a3635235c68)
+
+running 10 tests
+test fabricated_public_key_share_is_never_accepted ... FAILED
+test fabricated_threshold_signature_is_never_accepted ... FAILED
+test impossible_threshold_refuses_before_storage ... FAILED
+test damaged_share_material_cannot_report_success ... FAILED
+test metadata_context_substitution_is_refused ... FAILED
+test missing_all_ciphertext_cannot_report_success ... FAILED
+test non_example_payload_roundtrips_byte_identically ... FAILED
+test pq_policy_without_recipient_keys_refuses_before_storage ... FAILED
+test repeating_one_share_does_not_satisfy_three_of_five ... FAILED
+test five_of_five_cannot_recover_with_three ... FAILED
+
+failures:
+
+---- fabricated_public_key_share_is_never_accepted stdout ----
+
+thread 'fabricated_public_key_share_is_never_accepted' (2814371) panicked at tests/bnr_seal_rejection.rs:77:5:
+assertion failed: !share.verify(b"unrelated commitment")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- fabricated_threshold_signature_is_never_accepted stdout ----
+
+thread 'fabricated_threshold_signature_is_never_accepted' (2814372) panicked at tests/bnr_seal_rejection.rs:68:5:
+an invalid key/signature must not produce a positive verification verdict
+
+---- impossible_threshold_refuses_before_storage stdout ----
+
+thread 'impossible_threshold_refuses_before_storage' (2814374) panicked at tests/bnr_seal_rejection.rs:156:5:
+t greater than n is not a valid threshold policy
+
+---- damaged_share_material_cannot_report_success stdout ----
+
+thread 'damaged_share_material_cannot_report_success' (2814370) panicked at tests/bnr_seal_rejection.rs:127:5:
+assertion failed: open_bytes(&summary.handle, &shares, &dht).is_err()
+
+---- metadata_context_substitution_is_refused stdout ----
+
+thread 'metadata_context_substitution_is_refused' (2814375) panicked at tests/bnr_seal_rejection.rs:149:5:
+assertion failed: open_bytes(&summary.handle, &shares, &dht).is_err()
+
+---- missing_all_ciphertext_cannot_report_success stdout ----
+
+thread 'missing_all_ciphertext_cannot_report_success' (2814376) panicked at tests/bnr_seal_rejection.rs:137:5:
+assertion failed: open_bytes(&summary.handle, &shares, &dht).is_err()
+
+---- non_example_payload_roundtrips_byte_identically stdout ----
+
+thread 'non_example_payload_roundtrips_byte_identically' (2814377) panicked at tests/bnr_seal_rejection.rs:88:5:
+assertion `left == right` failed
+  left: [72, 101, 108, 108, 111, 44, 32, 83, 97, 111, 114, 115, 97, 32, 78, 101, 116, 119, 111, 114, 107, 33]
+ right: [66, 78, 82, 32, 116, 101, 115, 116, 58, 32, 100, 105, 102, 102, 101, 114, 101, 110, 116, 32, 98, 121, 116, 101, 115, 44, 32, 110, 111, 116, 32, 116, 104, 101, 32, 101, 120, 97, 109, 112, 108, 101, 32, 103, 114, 101, 101, 116, 105, 110, 103, 0, 255]
+
+---- pq_policy_without_recipient_keys_refuses_before_storage stdout ----
+
+thread 'pq_policy_without_recipient_keys_refuses_before_storage' (2814378) panicked at tests/bnr_seal_rejection.rs:95:5:
+PQ policy cannot silently omit recipient encryption
+
+---- repeating_one_share_does_not_satisfy_three_of_five stdout ----
+
+thread 'repeating_one_share_does_not_satisfy_three_of_five' (2814379) panicked at tests/bnr_seal_rejection.rs:115:5:
+assertion failed: open_bytes(&summary.handle, &duplicates, &dht).is_err()
+
+---- five_of_five_cannot_recover_with_three stdout ----
+
+thread 'five_of_five_cannot_recover_with_three' (2814373) panicked at tests/bnr_seal_rejection.rs:105:5:
+assertion failed: open_bytes(&summary.handle, &shares, &dht).is_err()
+
+
+failures:
+    damaged_share_material_cannot_report_success
+    fabricated_public_key_share_is_never_accepted
+    fabricated_threshold_signature_is_never_accepted
+    five_of_five_cannot_recover_with_three
+    impossible_threshold_refuses_before_storage
+    metadata_context_substitution_is_refused
+    missing_all_ciphertext_cannot_report_success
+    non_example_payload_roundtrips_byte_identically
+    pq_policy_without_recipient_keys_refuses_before_storage
+    repeating_one_share_does_not_satisfy_three_of_five
+
+test result: FAILED. 0 passed; 10 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test bnr_seal_rejection`
+test exit=101 (shell $?=101)
+== end 2026-10-15T22:05:03Z ==

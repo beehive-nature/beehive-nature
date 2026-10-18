@@ -1513,7 +1513,7 @@
      (closed, or looked at another file) never paints. A look that runs past its
      deadline stops the worker, and the next look starts a new one. */
   var PREVIEW_MODULE = 'bnr-explorer.wasm';
-  var PREVIEW_SHA256 = '7739e3990ddc999ce15c6accf89e6b9073a4919854ae6413fd2db1cfeccf079f'; // PUBLIC-CONSTANT sha256 of surfaces/bnr-explorer.wasm (scripts/bnr-explorer/build-wasm.sh --check)
+  var PREVIEW_SHA256 = 'ed106c550547b42877a5ec7f13322fa716bc0b417c28366e0eac3449d392cc73'; // PUBLIC-CONSTANT sha256 of surfaces/bnr-explorer.wasm (scripts/bnr-explorer/build-wasm.sh --check)
   var PREVIEW_MAX = 32 * 1024 * 1024;
   var PREVIEW_DEADLINE = 5000;
   var PREVIEW_RECYCLE = 8 * 1024 * 1024;   // after a look this large, the worker is retired so its memory goes back
@@ -1725,9 +1725,17 @@
     }
   }
 
+  /* CLOSING A LOOK ENDS ITS WORKER. The module zeroes the object's bytes and
+     the verdict as soon as each call is done, but the worker's own JavaScript
+     heap held a copy too, and nothing can force that to be collected; ending
+     the worker releases all of it. The next look starts a new one from the
+     same pinned module (a cold start costs about a tenth of a second). The
+     file itself is untouched: a this-visit-only file stays until the visit
+     ends, as the visitor chose. */
   function closeLook() {
     ++lookTicket;
     lookRelease();
+    retire('closed');
     closeSheet();
   }
 

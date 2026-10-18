@@ -25,6 +25,17 @@ concurrency:
 permissions:
   contents: read
 
+# RUST CACHES (2026-10-17, ci-speedup lane): every job restores the same
+# pinned Swatinem rust-cache tests.yml uses; saves come only from
+# successful main pushes (save-if below) — PR runs restore main's warm
+# cache and never churn the 10GB repo cache budget with per-PR entries.
+# Every command below runs identically on a cache miss; a restored cache
+# changes no verdict. pq12 sets cache-all-crates so the audit step's
+# `cargo install cargo-audit --locked --version 0.22.2` (measured 181.6s
+# of a 187s step, run 39013417840, job 117340511416) recognizes its own
+# installation and skips the rebuild — the audit itself still runs. pq10
+# maps Plonky3's own workspace (crates/btungsten-p3count, own lockfile).
+
 jobs:
   pq00-teeth:
     runs-on: ubuntu-24.04
@@ -32,11 +43,14 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: PQ00 teeth library — positive controls and planted flaws
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         run: cargo test --locked -p btungsten-teeth
       - name: PQ00 teeth against the real Vortex defects (both must CONVICT)
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         run: sh scripts/btungsten/pq00-teeth-vortex.sh
 
   pq01-vectors:
@@ -45,16 +59,19 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Restore ACVP vector files (keyed on the manifest; every file is re-verified on use)
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/pq-vectors
           key: pq-vectors-${{ hashFiles('crates/btungsten-pq/kat-manifest.json') }}
       - name: PQ01 battery unit tests (manifest pins, joins, the pq-kat.json agreement)
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         run: cargo test --locked -p btungsten-pq
       - name: PQ01 every ACVP case for ML-KEM-512/768/1024, ML-DSA-44/65/87, SLH-DSA-SHAKE-256f on two implementations
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         run: |
           cargo build --locked --release -p btungsten-pq --bin pq-kat
           target/release/pq-kat --cache "$HOME/pq-vectors"
@@ -69,6 +86,9 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Restore classical vector files (keyed on the manifest; every file is re-verified on use)
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
@@ -91,6 +111,9 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Fetch the pinned X-Wing draft
         run: |
           url=$(node -e "console.log(require('./scripts/btungsten/pq05-xwing-draft.json').url)")
@@ -112,6 +135,13 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      # cache-all-crates keeps ~/.cargo/bin and the .crates.toml/.crates2.json
+      # install metadata, so the pinned cargo-audit install below recognizes
+      # itself (the comment atop this file has the measured cost)
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          cache-all-crates: true
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Fetch the pinned BIP-341 vectors and BIP-174 / BIP-371 texts
         run: |
           pin=./scripts/btungsten/pq12-bip341.json
@@ -129,10 +159,10 @@ jobs:
       # step 5: FROST behind the gate (crates/bsigner/src/frost.rs, feature
       # frost), over chilldkg-rs 0.5.0, unaudited
       - name: PQ12 bsigner FROST (2-of-3 ChillDKG signs an ML-DSA-authorized PSBT; every signature a valid key-path witness)
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         run: cargo test --locked -p bsigner --release --features frost frost -- --nocapture
       - name: PQ12 chilldkg-rs 0.5.0 upstream vectors (the .crate checked against Cargo.lock's checksum)
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         run: |
           want=$(awk '/^\[\[package\]\]/{n=""} /^name = /{n=$3} /^checksum = /{if (n=="\"chilldkg-rs\"") {gsub(/"/,"",$3); print $3}}' Cargo.lock)
           curl --fail --silent --show-error --location --retry 3 -o "$RUNNER_TEMP/chilldkg.crate" https://static.crates.io/crates/chilldkg-rs/chilldkg-rs-0.5.0.crate
@@ -145,12 +175,12 @@ jobs:
           [ "$rc" -eq 0 ] || { cat "$RUNNER_TEMP/chilldkg-test.log"; exit 1; }
           echo "chilldkg-rs upstream: $(grep -o '[0-9]* passed' "$RUNNER_TEMP/chilldkg-test.log" | awk '{s+=$1} END {print s}') tests passed"
       - name: PQ12 audit gate 1 (blocking) — chilldkg-rs is not in bsigner's default build
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         run: |
           if cargo tree --locked -p bsigner -e normal -i chilldkg-rs; then echo "chilldkg-rs reached the default build"; exit 1; fi
           echo "default build: chilldkg-rs absent"; cargo tree --locked -p bsigner -e normal --features frost -i chilldkg-rs
       - name: PQ12 audit gate 2 (recorded) — cargo audit of Cargo.lock, verbatim
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         run: |
           cargo install cargo-audit --locked --version 0.22.2
           cargo audit --file Cargo.lock && rc=0 || rc=$?
@@ -168,14 +198,20 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      # this job never builds the root workspace; the map covers Plonky3's
+      # own workspace only
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: crates/btungsten-p3count -> crates/btungsten-p3count/target
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: PQ10 model and AIR tests (the circuit's kept rule on all 128 leaf shapes, the asymmetric cohort, both true claims)
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         run: cargo test --locked --release
       - name: PQ10 FORGERY battery at n = 64 (the honest control must verify, every mutation must be refused)
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         run: cargo run --locked --release --bin p3count -- forgery
       - name: PQ10 SCALE and security figure at n = 64, 1024, 16384
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         run: |
           for nm in "64 40" "1024 1000" "16384 10000"; do
             set -- $nm

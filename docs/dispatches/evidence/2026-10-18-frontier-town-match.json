@@ -1,0 +1,167 @@
+{
+ "schema": "skaists.frontier-town-match/1",
+ "generated": "2026-10-18T01:17:44.023Z",
+ "towns": {
+  "Holliston": {
+   "identifiers": 182,
+   "byType": {
+    "Birth": 138,
+    "Marriage": 20,
+    "Christening": 15,
+    "Death": 3,
+    "Census": 2,
+    "Burial": 4
+   },
+   "byDecade": {
+    "1720s": 2,
+    "1730s": 16,
+    "1740s": 16,
+    "1750s": 10,
+    "1760s": 3,
+    "1770s": 12,
+    "1780s": 8,
+    "1800s": 2,
+    "1810s": 10,
+    "1820s": 5,
+    "1830s": 3,
+    "1850s": 3
+   },
+   "noYear": 92,
+   "inSpan": 85,
+   "beforeSpan": 2,
+   "afterSpan": 3,
+   "unknownSpan": 92,
+   "minYear": 1726,
+   "maxYear": 1856,
+   "spans": [
+    {
+     "label": "Holliston Historical Society compilation 1729-1843 (from Town Clerk vital records; seat3-read)",
+     "from": 1729,
+     "to": 1843
+    }
+   ],
+   "note": "relayed: set off from Sherborn 1724; pre-1724 events belong to Sherborn's records"
+  },
+  "Chelmsford": {
+   "identifiers": 117,
+   "byType": {
+    "Birth": 109,
+    "Death": 8
+   },
+   "byDecade": {
+    "1670s": 2,
+    "1700s": 23,
+    "1710s": 20,
+    "1720s": 12,
+    "1740s": 12,
+    "1750s": 18,
+    "1760s": 7
+   },
+   "noYear": 23,
+   "inSpan": 94,
+   "beforeSpan": 0,
+   "afterSpan": 0,
+   "unknownSpan": 23,
+   "minYear": 1679,
+   "maxYear": 1767,
+   "spans": [
+    {
+     "label": "relayed town-record volumes 1650-1750 and 1710-1774 (not confirmed by this seat)",
+     "from": 1650,
+     "to": 1774
+    }
+   ],
+   "note": null
+  },
+  "Sherborn": {
+   "identifiers": 99,
+   "byType": {
+    "Birth": 79,
+    "Marriage": 9,
+    "Burial": 2,
+    "Death": 9
+   },
+   "byDecade": {
+    "1680s": 2,
+    "1690s": 4,
+    "1700s": 16,
+    "1710s": 27,
+    "1720s": 13,
+    "1730s": 2,
+    "1750s": 1
+   },
+   "noYear": 34,
+   "inSpan": 0,
+   "beforeSpan": 0,
+   "afterSpan": 0,
+   "unknownSpan": 99,
+   "minYear": 1688,
+   "maxYear": 1750,
+   "spans": [],
+   "note": "no volume coverage identified yet"
+  },
+  "Suffield": {
+   "identifiers": 76,
+   "byType": {
+    "Birth": 67,
+    "Marriage": 8,
+    "Death": 1
+   },
+   "byDecade": {
+    "1680s": 1,
+    "1700s": 14,
+    "1710s": 12,
+    "1720s": 7,
+    "1730s": 7,
+    "1740s": 8,
+    "1750s": 8,
+    "1760s": 4,
+    "1790s": 1
+   },
+   "noYear": 14,
+   "inSpan": 62,
+   "beforeSpan": 0,
+   "afterSpan": 0,
+   "unknownSpan": 14,
+   "minYear": 1684,
+   "maxYear": 1790,
+   "spans": [
+    {
+     "label": "Barbour slips + published Suffield vital records (CT State Library guide; seat3-read; years not stated)",
+     "from": null,
+     "to": 1850
+    }
+   ],
+   "note": null
+  },
+  "Salisbury": {
+   "identifiers": 56,
+   "byType": {
+    "Birth": 50,
+    "Marriage": 6
+   },
+   "byDecade": {
+    "1740s": 2,
+    "1750s": 4,
+    "1770s": 14,
+    "1780s": 18,
+    "1790s": 4
+   },
+   "noYear": 14,
+   "inSpan": 42,
+   "beforeSpan": 0,
+   "afterSpan": 0,
+   "unknownSpan": 14,
+   "minYear": 1748,
+   "maxYear": 1791,
+   "spans": [
+    {
+     "label": "Town Clerk vault: birth, marriage, death records (seat3-read; years not stated); land index vol. 1 1741-1844",
+     "from": 1741,
+     "to": null
+    }
+   ],
+   "note": null
+  }
+ }
+}

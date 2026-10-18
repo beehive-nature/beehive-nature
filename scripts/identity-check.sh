@@ -148,7 +148,7 @@ require_count() { # $1 what it counts, $2 the captured value
 # breaking it — a `git checkout --` restore against uncommitted work restores
 # the PRE-selftest gate and erases the test along with the defect.
 if [ "${1:-}" = "--selftest" ]; then
-  unset S7_STAGED S7_MSG_FILE S7_RANGE S7_BEFORE S7_SHA
+  unset S7_STAGED S7_MSG_FILE S7_RANGE S7_BEFORE S7_SHA S7_TARGET
   T=$(mktemp -d 2>/dev/null) || { echo "selftest FAIL — mktemp"; exit 1; }
   trap 'rm -rf "$T"' EXIT INT TERM
   SELF=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
@@ -356,6 +356,47 @@ if [ "${1:-}" = "--selftest" ]; then
      env GIT_AUTHOR_NAME="Travis Remington" \
          GIT_AUTHOR_EMAIL="$FOUNDER_GH_ID+x@evil.example@$GH_NOREPLY_DOMAIN" \
          GIT_COMMITTER_NAME="$GH_WEBFLOW_NAME" GIT_COMMITTER_EMAIL="$GH_WEBFLOW_EMAIL" git commit
+  # T9 — the feature-branch contribution range (range-scope ruling). Shape of
+  # the PR #456 failure, rebuilt: main gains a commit that does not satisfy
+  # §7 (already main's own audit to answer), the feature branch gains good
+  # work and a catch-up merge of main.
+  t9() { # $1 desc, $2 ok|fail, $3 substring, then env assignments for the run
+    d9=$1; want9=$2; must9=$3; shift 3
+    o9=$(env "$@" sh "$SELF" 2>&1); r9=$?
+    if ! printf '%s\n' "$o9" | grep -qF "$must9"; then
+      echo "  FAIL $d9 — output lacks '$must9'; rc=$r9 out: $o9"; st=1
+    elif [ "$want9" = ok ] && [ "$r9" -ne 0 ]; then
+      echo "  FAIL $d9 — expected a pass; rc=$r9 out: $o9"; st=1
+    elif [ "$want9" = fail ] && [ "$r9" -eq 0 ]; then
+      echo "  FAIL $d9 — expected a refusal; out: $o9"; st=1
+    else
+      echo "  PASS $d9"
+    fi
+  }
+  x9=$(git rev-parse HEAD)
+  git branch -q t9-main "$x9" && git branch -q t9-feat "$x9" && git branch -q t9-old "$x9"
+  git checkout -q t9-main && echo m >> f.txt && git add f.txt \
+    && GIT_AUTHOR_NAME="Someone Else" GIT_AUTHOR_EMAIL="else@x" git commit -q --no-verify -m "T9 main commit outside §7"
+  git checkout -q t9-feat && echo f >> f.txt && git add f.txt && git commit -q --no-verify -m "T9 feature work"
+  f1=$(git rev-parse HEAD)
+  git merge -q --no-ff --no-verify -m "T9 catch-up merge of main" t9-main >/dev/null 2>&1 \
+    || { git checkout -q --theirs f.txt 2>/dev/null; git add f.txt; git commit -q --no-verify -m "T9 catch-up merge of main"; }
+  tip9=$(git rev-parse HEAD)
+  git checkout -q t9-old && echo o >> f.txt && git add f.txt \
+    && GIT_AUTHOR_NAME="bFUzZ" GIT_AUTHOR_EMAIL="bGoose@agents.skaists.dev" git commit -q --no-verify -m "T9 older seat-authored commit"
+  echo o2 >> f.txt && git add f.txt && git commit -q --no-verify -m "T9 later clean commit"
+  old9=$(git rev-parse HEAD); last9=$(git rev-parse HEAD~1)
+  t9 "T9-A feature push: main's imported commit is not charged to the branch" ok \
+     "feature-branch push: whole contribution" S7_TARGET=t9-main S7_SHA="$tip9"
+  t9 "T9-B CONTROL — the old before..sha range charges main's commit to the branch (the #456 failure)" fail \
+     "author is 'Someone Else <else@x>', not the founder" S7_BEFORE="$f1" S7_SHA="$tip9"
+  t9 "T9-C an older violating branch commit is caught though the last push was clean" fail \
+     "author is 'bFUzZ <bGoose@agents.skaists.dev>', not the founder" S7_TARGET=t9-main S7_SHA="$old9"
+  t9 "T9-D CONTROL — checking only that last clean push would have missed it" ok \
+     "push range" S7_BEFORE="$last9" S7_SHA="$old9"
+  t9 "T9-E an unresolvable target base fails closed" fail \
+     "target base 'no-such-target' does not resolve" S7_TARGET=no-such-target S7_SHA="$tip9"
+
   if [ "$st" -ne 0 ]; then echo "§7 selftest FAIL — a working gate and a dead one are not distinguishable by silence; these cases are the difference"; fi
   exit "$st"
 fi
@@ -401,6 +442,22 @@ resolve_commit() {
 if [ -n "${S7_RANGE:-}" ]; then
   RANGE="$S7_RANGE"
   say "range from S7_RANGE override: $RANGE"
+elif [ -n "${S7_TARGET:-}" ]; then
+  # FEATURE-BRANCH PUSH (range-scope ruling): the branch's WHOLE contribution
+  # relative to its target base, pinned to a full SHA for this assessment —
+  # B..H, every parent walked. Not before..sha: a catch-up merge of main put
+  # main's already-audited commits into that range and charged them to an
+  # unrelated branch (PR #456, run 39085227204: 95 of 96 commits imported).
+  # Not "the last push minus main" either: an older violating commit on the
+  # branch must not escape because a later push was clean. A new branch gets
+  # the same full check, never its tip alone. Main's own pushes do not set
+  # S7_TARGET and keep their before..after audit.
+  base=$(resolve_commit "$S7_TARGET") \
+    || die "feature-branch push: target base '$S7_TARGET' does not resolve in this checkout — the contribution range cannot be computed"
+  tip=$(resolve_commit "${S7_SHA:-HEAD}") \
+    || die "feature-branch push: head '${S7_SHA:-HEAD}' does not resolve"
+  RANGE="$base..$tip"
+  say "feature-branch push: whole contribution $RANGE (target '$S7_TARGET' pinned at $base, head $tip)"
 elif [ -n "${S7_BEFORE:-}" ]; then
   # Push event. github.event.before = the ref's previous tip; github.sha = now.
   case "$S7_BEFORE" in
