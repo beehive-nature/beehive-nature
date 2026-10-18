@@ -1,0 +1,20 @@
+[package]
+name = "bindex-bnrose"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "SOVEXEC-003: the BNROSE-facing read path of b-index. A keyless, stranger-auditable index over a BNRoSe state directory (journal replicas, effect rows, receipts) whose every answer carries its evidence class; receipts verified under a handed public key, identities and the state machine recomputed through bnrose-exec-core; the journal's HMAC chain named as served-only evidence."
+publish = false
+
+[dependencies]
+bnrose-exec-core = { path = "../bnrose-exec-core" }
+bnrose-exec-host = { path = "../bnrose-exec-host" }
+btungsten-wb001 = { path = "../btungsten-wb001" }
+rusqlite = { version = "0.32", features = ["bundled"] }
+serde_json = "1"
+sha2 = { workspace = true }
+
+[dev-dependencies]
+# the tests generate REAL state directories by driving the supervisor with
+# fixture roots (TESTNET-ONLY, deterministic), then index them keyless
+bnrose-exec-host = { path = "../bnrose-exec-host" }
