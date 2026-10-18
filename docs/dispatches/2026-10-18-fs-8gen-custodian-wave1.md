@@ -61,3 +61,32 @@ fields from the custodian's own pages, citing each one. England (wave 2) is
 partitioned by county and parish next. Nothing is acquired, matched at
 volume, or published until a collection's rights field is filled from a cited
 source.
+
+## 4. Addendum: first verification pass (founder word, chat 2026-10-18)
+
+This seat read the official pages read-only on 2026-10-18. Each qualification
+record now has a `verification` block with this seat's URL, check date and
+outcome, kept apart from the founder-relayed second pass. **Rule recorded in the
+file:** a landing page proves a research route only. It never verifies a
+collection, an original image or a publication right. Publication rights stay
+UNASSESSED for all 12. The Find a Grave record carries only a relayed
+contributor-permission note, also unverified.
+
+| collection | this seat's check | disposition |
+|---|---|---|
+| MA (both) | sec.state.ma.us page **unreadable** (empty body, fetch and pane) | not qualified; relayed: links largely return to FamilySearch; go per town |
+| CT (both) | Barbour guide **read** | originals at town halls + State Library microfilm; Coventry slips cite a published book, not the manuscript; Saybrook/Suffield/Windham have published + bound volumes; Salisbury not named; no copy terms on the page |
+| Rhode Island | **read** | open records online to print or download (access, not a licence); pre-1853 = town clerks, microfilm at the Archives |
+| Denmark | **read** | personal-use single downloads; contact before more than a few; pre-1892 colour images from Ancestry need Ancestry's written permission for more than a few |
+| Utah | **read** | registration by period (none before 1898; county 1898-1905; state 1905-1976); this guide states no reproduction terms; the relayed series-level permission is not confirmed here and never extends to FamilySearch-produced images |
+| Sweden | **read** | catalog of digitised church books; cost, bulk and reuse terms on linked pages not read |
+| LDS members | fetch failed | relayed only |
+| New Hampshire | HTTP 503 | unchecked; never circumvent |
+| England, Find a Grave | not checked here | relayed only (Find a Grave refused the relaying seat with 403) |
+
+Next research order: original-record repositories for Holliston (164),
+Chelmsford (112), Sherborn (86), Suffield (76) and Salisbury (50). For each,
+record the repository, the catalog or microfilm identifier, the coverage dates
+and the copy and publication conditions. Keep originals-holder distinct from
+any third-party host of copies. No downloads, no FamilySearch requests, no
+outreach.
