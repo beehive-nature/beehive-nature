@@ -99,3 +99,45 @@ oldRecordsStand recs = and [ (recs @ a) ==> (transition recs @ a) | a <- idx16 ]
 // the corner's existence so it cannot silently change shape.
 saturationCornerReusesSlot15 : [16]Bit -> Bit
 saturationCornerReusesSlot15 recs = (maxAttempt recs == 15) ==> (nextAttempt recs == 15)
+
+// ---- the SAW binding surface (BNROSE-SAW-001) ------------------------------
+// The compiled Rust core (crates/bnrose-replacement-law) binds at the
+// max-attempt / flag level. The DERIVED definitions below are compositions
+// of this module's own functions — not a second model — and the two lemmas
+// prove the bindings lose nothing.
+
+setBit : [16]Bit -> Attempt -> [16]Bit
+setBit xs a = [ if i == a then True else xs @ i | i <- idx16 ]
+
+// nextAttempt depends only on the max journaled attempt
+nextAttemptDependsOnlyOnMax : [16]Bit -> [16]Bit -> Bit
+nextAttemptDependsOnlyOnMax r1 r2 =
+  (maxAttempt r1 == maxAttempt r2) ==> (nextAttempt r1 == nextAttempt r2)
+
+// gate depends only on the flag and whether ANY row exists
+gateDependsOnlyOnAnyRow : Bit -> [16]Bit -> [16]Bit -> Bit
+gateDependsOnlyOnAnyRow o w1 w2 =
+  (anyRow w1 == anyRow w2) ==> (gate o w1 == gate o w2)
+
+// the derived binding functions (witness masks; well-defined by the
+// two lemmas above)
+attemptAfter : Attempt -> Attempt
+attemptAfter m = nextAttempt (setBit zero m)
+
+gateAt : Bit -> Bit -> Bit
+gateAt o anyRowFlag = gate o (if anyRowFlag then 0x0001 else 0x0000)
+
+// the full-domain extension the SAW bind proves against (the compiled
+// u8 arithmetic of replacement_attempt over ALL u8): 0..14 → +1;
+// 15..254 → 15 (saturate); 255 → 0 (the u8 wrap corner). On the
+// SUPPORTED domain — the attempt nibble 0..15, where every caller lives
+// (`encoded >> 4`) — attempt8 equals the twin's attemptAfter:
+// attempt8Agrees is that bridge, and the SAW theorem is
+//   compiled replacement_attempt(m) == attempt8(m)  for every u8 m
+// so the implementation matches the law exactly on the supported domain,
+// and the two out-of-domain corners are pinned facts rather than silence.
+attempt8 : [8] -> [8]
+attempt8 m = if m == 255 then 0 else if m >= 15 then 15 else m + 1
+
+attempt8Agrees : Attempt -> Bit
+attempt8Agrees m4 = attempt8 (zext m4 : [8]) == (zero # attemptAfter m4)

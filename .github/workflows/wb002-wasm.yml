@@ -53,7 +53,7 @@ jobs:
             WB002_RECEIPT="$PWD/receipts/wb002-$run.json" target/release/wb002-wasm-equiv
           done
       - name: Preserve fresh corpus receipts
-        if: always()
+        if: always()  # preservation: runs on cancel and on a timeout, so the evidence survives
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: wb002-wasm-${{ github.run_id }}-${{ github.run_attempt }}

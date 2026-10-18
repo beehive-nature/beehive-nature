@@ -618,6 +618,10 @@ jobs:
         env:
           S7_BEFORE: ${{ github.event.pull_request.base.sha || github.event.before }}
           S7_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          # a branch push (refs/heads/, not tags) to any branch but main checks the branch's whole contribution
+          # against main as this checkout fetched it (pinned to a full SHA in the
+          # log); main's own pushes keep before..after, pull requests base..head
+          S7_TARGET: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') && github.ref != 'refs/heads/main' && 'origin/main' || '' }}
         run: sh scripts/identity-check.sh
 
   node:
@@ -730,7 +734,7 @@ jobs:
       # that fails after hand-off never says nothing left. Two runs per size;
       # the only speed gate is the old 4.5 s freeze at 20,000 rows.
       - name: MY SPACE — explorer (stale work, previews, isolation, honest outcomes)
-        timeout-minutes: 8 # measured locally: ~3.5 min with two runs per size
+        timeout-minutes: 10 # measured locally: ~1.5-3.5 min with two runs per size, privacy section included
         if: always()
         working-directory: e2e
         env:

@@ -69,7 +69,7 @@ jobs:
           BNROSE_BENCH_HW: github-actions ubuntu-22.04 runner (2 vCPU)
         run: target/release/bnrose-bench docs/receipts/bnrose-rust-001/bench-ci.json
       - name: Preserve receipts
-        if: always()
+        if: always()  # preservation: runs on cancel and on a timeout, so the evidence survives
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: bnrose-rust-001-${{ github.run_id }}-${{ github.run_attempt }}
@@ -96,7 +96,7 @@ jobs:
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: install cryptol 3.6.0 (pinned, with bundled solvers) and GNU time
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         timeout-minutes: 8
         run: |
           set -eu
@@ -108,7 +108,7 @@ jobs:
           [ -x /usr/bin/time ] || { sudo apt-get update -qq && sudo apt-get install -y -qq time; }
           ./cryptol/bin/cryptol --version
       - name: Sampled-agreement grid (Rust <-> Cryptol, mechanically checked)
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         timeout-minutes: 15
         run: |
           cargo build --release -p bnrose-exec-host --bin bnrose-grid-agreement --locked
@@ -127,7 +127,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: install cryptol 3.6.0 (pinned, with bundled solvers) and GNU time
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         timeout-minutes: 8
         run: |
           set -eu
@@ -139,6 +139,66 @@ jobs:
           [ -x /usr/bin/time ] || { sudo apt-get update -qq && sudo apt-get install -y -qq time; }
           ./cryptol/bin/cryptol --version
       - name: BNROSE Cryptol twin — 6 :prove obligations + 2 negative controls
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         timeout-minutes: 15
         run: sh scripts/bnrose-rust-001/cryptol-twin-check.sh "$HOME/cryptol/bin/cryptol"
+
+  # BNROSE-SAW-001 — the implementation-correspondence leg: the compiled
+  # Rust replacement core (linked through the standalone saw-harness at
+  # the estate's pinned mir-json + nightly) proven equal to the Cryptol
+  # twin's terms, with teeth that must fail. ubuntu-24.04: both the saw
+  # and mir-json pins are built for it.
+  saw:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      MIR_JSON_REV: 8cbf9af1821075ef47cf784fef78d2650827730d # PUBLIC-CONSTANT: GaloisInc/saw-script v1.6 deps/mir-json submodule commit
+      MIR_JSON_TOOLCHAIN: nightly-2026-03-21
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install pinned SAW 1.6 (with bundled solvers)
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 -o /tmp/saw.tar.gz https://github.com/GaloisInc/saw-script/releases/download/v1.6/saw-1.6-ubuntu-24.04-X64-with-solvers.tar.gz
+          echo '0b25c8b32db8b4a7ec32d6700024af60bb2a0398ee350b630dd84ff377c938f7  /tmp/saw.tar.gz' | sha256sum --check # PUBLIC-CONSTANT: upstream release asset digest
+          mkdir -p "$HOME/saw" && tar -xzf /tmp/saw.tar.gz -C "$HOME/saw" --strip-components=1
+          echo "$HOME/saw/bin" >> "$GITHUB_PATH"
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
+      - name: Install the mir-json toolchain (${{ env.MIR_JSON_TOOLCHAIN }})
+        run: rustup toolchain install "$MIR_JSON_TOOLCHAIN" --profile minimal --component rustc-dev,rust-src,llvm-tools-preview
+      - name: Cache mir-json at SAW 1.6's pin
+        id: mirjson-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: |
+            ~/mir-json-inst
+            ~/mir-json/rlibs
+            ~/mir-json/rlibs_real
+          key: mir-json-v2-${{ env.MIR_JSON_REV }}-${{ env.MIR_JSON_TOOLCHAIN }}-ubuntu-24.04
+      - name: Build mir-json at SAW 1.6's pin
+        if: steps.mirjson-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --quiet https://github.com/GaloisInc/mir-json.git "$HOME/mir-json"
+          cd "$HOME/mir-json"
+          git checkout --quiet "$MIR_JSON_REV"
+          cargo "+$MIR_JSON_TOOLCHAIN" install --path . --locked --root "$HOME/mir-json-inst"
+          PATH="$HOME/mir-json-inst/bin:$PATH" mir-json-translate-libs
+      - name: Expose mir-json
+        shell: bash
+        run: |
+          set -euo pipefail
+          [ -f "$HOME/mir-json/rlibs/libstd.rlib" ] || {
+            echo "mir-json rlibs missing the translated std after build/restore:"; ls -la "$HOME/mir-json/rlibs" || true; exit 1; }
+          echo "$HOME/mir-json-inst/bin" >> "$GITHUB_PATH"
+          echo "SAW_RUST_LIBRARY_PATH=$HOME/mir-json/rlibs" >> "$GITHUB_ENV"
+          "$HOME/mir-json-inst/bin/mir-json" --version
+      - name: BNROSE SAW — classifier selftest (tool failures are never counterexamples)
+        if: always()
+        run: sh scripts/bnrose-rust-001/saw-check.sh --selftest
+      - name: BNROSE SAW — correspondence (2 proofs + 2 teeth, explicit verdicts only)
+        if: always()
+        timeout-minutes: 15
+        run: sh scripts/bnrose-rust-001/saw-check.sh "$HOME/saw/bin/saw"
