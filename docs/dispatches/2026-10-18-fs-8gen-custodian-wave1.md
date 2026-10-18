@@ -232,3 +232,48 @@ unchanged.
 **Wave 1 page coverage now:** MA 387 of 398 and CT 131 of 132 have a
 printed-page or literature lead. That is 518 of 530; 12 have none (11 MA and
 `F7WV-H4N`). No identifier is resolved against an original manuscript yet.
+
+## 8. Open-items follow-up landed (2026-10-18)
+
+**Evidence:**
+`docs/dispatches/evidence/2026-10-18-five-town-wave1-open-items-followup.json`.
+This is another seat's pass, delivered by the founder: a one-line copy plus a
+provenance header, otherwise content-identical (checked by code). The
+delivered sha256 is
+`6750f3ffd72cbecd2e38d5c64ba0853fd6e60c61ede09cf47dc122c7fb4cab1d` <!-- PUBLIC-CONSTANT: sha256 of the delivered evidence file -->,
+the stated digest, and the original bytes are kept on the private tier. All
+12 gap identifiers are in the frozen 530 and in the file.
+
+**Precision on §7's "518 of 530":** that counts source-passage leads. By page
+evidence, 514 have a printed-page numeral observed in retrieved text, 2 have
+a page inferred from sequence, and 2 have the passage but no confirmed page.
+
+**New candidate passages for six of the twelve gaps.** None is resolved, and
+each linkage to its frozen identifier is unverified:
+
+| id | passage | caveat |
+|---|---|---|
+| `QVGY-PXXB` | Holliston VR p. 340, Elizabeth w. James Perry, d. 29 Dec 1753 | no maiden name Death in the passage |
+| `QVKB-1PFT` | Holliston VR p. 332, Capt. Ephraim Littlefield, d. 13 Nov 1778 | gravestone-photo lead (Worcester Historical Museum 2001.11.1.343), photo unexamined |
+| `QVK2-LBK3` | Holliston VR p. 299, Lieut. Isaac Bullard, d. 7 Jul 1742 | other Isaac Bullards nearby |
+| `QK16-53KX` | Holliston VR p. 328, Sarah Lealand, widow, d. 8 Oct 1775 | no maiden name Morse |
+| `QGN3-6XYX` | Sherborn VR p. 199, John Death Esq., d. 14 Dec 1754; cemetery section p. 2 | pagination restarts in the cemetery section |
+| `N75L-V6K` | NEHGR vol. 28 pp. 210–211, Thomas Temple Rockwood necrology, d. 11 Oct 1872 | **conflict** with the frozen 3 Oct 1872; both kept |
+
+Connecticut: the NEHGR vol. 63 (April 1909) p. 179 is an observed journal
+locator for `QPSF-453P` and `QPMC-VHGG`. The reprint's p. 3 stays labelled
+inferred. Olive Kendall (`F7WV-H4N`) has family context only (King genealogy
+p. 196, entry 199), so her 1790 birth is still unplaced.
+
+This seat's spot-checks:
+- **Holliston VR p. 340** reads "Elizabeth, w. James, Dec. 29, 1753, in 48th
+  y." It matches.
+- **NEHGR necrology:** not located in two OCR windows of the archive.org item.
+  The windows covered pp. 91–139 of a volume headed XXIX. It is
+  **unconfirmed by this seat**, not refuted.
+
+**Still without a candidate:** `F7WV-H4N`, `N7TT-RYQ` (Luther Rockwood death
+1856), `N7NF-N5P` (Luther E. death 1862), `MDSS-1T5` (1850 census),
+`MQWY-6C8` (1855 MA census) and `QVMZ-BNWJ` (the unknown person with Joseph
+Perry). The citation-date audit stays 353 / 169 / 1 / 7. Nothing is
+resolved, the corpus is unchanged and rights are UNASSESSED.
