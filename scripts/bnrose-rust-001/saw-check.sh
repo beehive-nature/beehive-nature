@@ -52,19 +52,24 @@ say() { printf '%s\n' "$*"; }
 # process died outside the prover's control — the verdict is not
 # trustworthy, whichever direction it points. Contradictory verdicts
 # (success AND failure evidence in one log) are likewise never green
-# (review round 3, 2026-10-17). Exit-status contract (rounds 3-5):
+# (review round 3, 2026-10-17). Exit-status contract (rounds 3-6):
 #   PROVEN  requires rc == 0.
-#   REFUTED requires rc in the DOCUMENTED refutation exits of the
-#           pinned SAW runner — {1, 2} (2 observed on a hosted tooth;
-#           1 pinned as the portable abort code). Round 5 closes the
-#           allow-list: any other nonzero exit (3, 42, …) with failure
-#           evidence is an UNEXPECTED tool failure and fails closed —
-#           INCONCLUSIVE, never a green tooth. A new SAW version with
-#           another legitimate refutation exit must be verified hosted
-#           BEFORE its code joins this list.
-#           Refused as before: rc == 0 (zero exit with failure
-#           evidence contradicts the nonzero contract), 124..=127
-#           (GNU timeout's reserved wrapper codes), >= 128 (signals).
+#   REFUTED requires ALL of: rc in the documented exits {1, 2}; the
+#           pinned SAW 1.6's COMPLETED-refutation output — an actual
+#           counterexample ('Counterexample') AND the 'Proof failed'
+#           marker; and NO unfinished-proof diagnostic ('goals
+#           remaining'). Round 6: exit 2 is NOT exclusive to
+#           refutation — SAW 1.6's exception handler (Utils.hs
+#           #L155-181) exits 2 for UnfinishedProof and other
+#           execution errors too, and UnfinishedProof emits
+#           'Proof failed N goals remaining.' (MIR Builtins.hs
+#           #L1516-1530). A bare 'Proof failed' substring is
+#           therefore insufficient: an UNFINISHED proof must never
+#           satisfy a negative control. A new SAW version's output
+#           shapes must be verified hosted BEFORE relaxing this.
+#           Refused as before: rc == 0, 124..=127 (GNU timeout's
+#           reserved wrapper codes), >= 128 (signals), and every
+#           unexpected nonzero exit (3, 42, …).
 #   Everything else — unknown tool failures included — INCONCLUSIVE.
 classify_log() {
   _log="$1"; _rc="${2:-0}"
@@ -85,11 +90,16 @@ classify_log() {
     printf 'INCONCLUSIVE\n'
   elif grep -q 'Proof succeeded' "$_log" 2>/dev/null; then
     if [ "$_rc" = 0 ]; then printf 'PROVEN\n'; else printf 'INCONCLUSIVE\n'; fi
-  elif grep -qi 'counterexample\|Proof failed' "$_log" 2>/dev/null; then
-    # Round 5: a refutation is trusted ONLY from a documented SAW
-    # refutation exit. Everything else — unexpected tool failures
-    # included — fails closed.
-    if [ "$_rc" = 1 ] || [ "$_rc" = 2 ]; then printf 'REFUTED\n'; else printf 'INCONCLUSIVE\n'; fi
+  elif grep -qi 'goals remaining' "$_log" 2>/dev/null; then
+    # SAW 1.6's UnfinishedProof diagnostic — an unfinished proof is
+    # never a refutation, whatever its exit code (round 6).
+    printf 'INCONCLUSIVE\n'
+  elif { [ "$_rc" = 1 ] || [ "$_rc" = 2 ]; } \
+        && grep -qi 'proof failed' "$_log" 2>/dev/null \
+        && grep -qi 'counterexample' "$_log" 2>/dev/null; then
+    # Documented exit + the pinned SAW version's COMPLETED-refutation
+    # output: the actual counterexample, printed by InvalidProof.
+    printf 'REFUTED\n'
   else
     printf 'INCONCLUSIVE\n'
   fi
@@ -135,7 +145,22 @@ if [ "${1:-}" = "--selftest" ]; then
   [ "$(classify_log "$T/refuted-3-fatal.log" 3)" = INCONCLUSIVE ] || { say "selftest: refutation-with-undocumented-exit-3 misclassified (round-5 counterexample: unexpected tool exits are never green teeth)"; exit 1; }
   [ "$(classify_log "$T/refuted.log" 3)" = INCONCLUSIVE ] || { say "selftest: refutation-with-exit-3 (no error marker) misclassified (undocumented exits fail closed)"; exit 1; }
   [ "$(classify_log "$T/refuted.log" 42)" = INCONCLUSIVE ] || { say "selftest: refutation-with-exit-42 misclassified (undocumented exits fail closed)"; exit 1; }
-  say "saw-check selftest: GREEN (explicit, clean, DOCUMENTED-exit verdicts only; timeouts, wrapper failures, signals, crashes, zero-exit, undocumented-exit and contradictory results are never green in either direction)"
+  # Round-6 boundary: exit 2 is NOT exclusive to refutation — SAW 1.6's
+  # exception handler exits 2 for UnfinishedProof too, emitting
+  # 'Proof failed N goals remaining.' (the reviewer's upstream-verified
+  # diagnostic). An UNFINISHED proof must never satisfy a tooth; a bare
+  # 'Proof failed' without the actual counterexample output fails closed.
+  printf '...\nProof failed 1 goals remaining.\n' > "$T/unfinished-2.log"
+  [ "$(classify_log "$T/unfinished-2.log" 2)" = INCONCLUSIVE ] || { say "selftest: UNFINISHED proof (goals remaining, exit 2) misclassified (round-6: SAW 1.6 exits 2 for unfinished proofs — never a green tooth)"; exit 1; }
+  [ "$(classify_log "$T/unfinished-2.log" 1)" = INCONCLUSIVE ] || { say "selftest: UNFINISHED proof at exit 1 misclassified (goals remaining is never a refutation)"; exit 1; }
+  printf '...\nProof failed.\n' > "$T/bare-failed-2.log"
+  [ "$(classify_log "$T/bare-failed-2.log" 2)" = INCONCLUSIVE ] || { say "selftest: BARE 'Proof failed' without a counterexample misclassified (round-6: the completed-refutation output is required)"; exit 1; }
+  # The required COMPLETED shape (SAW 1.6 InvalidProof output): both
+  # markers, no unfinished diagnostic, documented exit — stays REFUTED.
+  printf '...\nProof failed.\nCounterexample:\n  x = 0\n' > "$T/completed-2.log"
+  [ "$(classify_log "$T/completed-2.log" 2)" = REFUTED ] || { say "selftest: COMPLETED refutation (Proof failed + Counterexample, exit 2) misclassified (the shape control must stay green)"; exit 1; }
+  [ "$(classify_log "$T/completed-2.log" 1)" = REFUTED ] || { say "selftest: COMPLETED refutation at exit 1 misclassified"; exit 1; }
+  say "saw-check selftest: GREEN (explicit, clean, terminal, COMPLETED verdicts only; timeouts, wrapper failures, signals, crashes, zero-exit, undocumented-exit, UNFINISHED and contradictory results are never green in either direction)"
   exit 0
 fi
 
