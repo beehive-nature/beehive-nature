@@ -180,7 +180,7 @@ fn cmd_run(args: &[String]) -> i32 {
             return 1;
         }
     };
-    let is_prod = flag(args, "--production").is_some() || std::env::var("BNROSE_PRODUCTION").is_ok();
+    let is_prod = flag(args, "--production").is_some() || std::env::var("BNROSE_PRODUCTION").map(|v| v == "1" || v == "true" || v == "yes").unwrap_or(false);
     let mut sup = match if is_prod {
         Supervisor::open_production(&state, worker, test_policy())
     } else {

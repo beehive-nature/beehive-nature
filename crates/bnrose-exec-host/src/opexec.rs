@@ -23,6 +23,8 @@ use crate::keys::SupervisorKeys;
 use crate::ledger::{self, EffectLedger};
 use crate::receipt::{state_word, Receipt};
 use crate::worker::{Bounds, Worker};
+use crate::device_capacity::{DeviceCapacityLedger, DeviceLimits, ResourceBudget};
+use crate::load_shed::CrossDaoAdmissionControl;
 use crate::{
     admit_request, hex, parse_admit_verdict, parse_step_verdict, step_request, AdmitVerdict,
     StepVerdict,
@@ -53,6 +55,10 @@ pub struct Supervisor {
     step_entities: BTreeMap<u8, StepEntity>,
     /// In-memory map of (root, step) -> max_attempt
     step_attempts: BTreeMap<([u8; 32], u8), u8>,
+    pub capacity_ledger: DeviceCapacityLedger,
+    pub load_shed: CrossDaoAdmissionControl,
+    pub device_id: [u8; 32],
+    pub local_domain: String,
     /// the exclusive authority over this state directory (see Claim)
     _claim: Claim,
 }
@@ -234,6 +240,42 @@ impl Supervisor {
         if is_prod && allowed_authorities.is_none() {
             return Err("authorities: allowed_authorities file missing in production mode — refusing to start open".into());
         }
+
+        let mut capacity_ledger = DeviceCapacityLedger::new();
+        let device_id = keys.ed_public;
+        capacity_ledger.register_device(
+            device_id,
+            DeviceLimits {
+                capacity: ResourceBudget { fuel: 100_000_000_000, memory_pages: 1_000_000, wall_secs: 86400 },
+                reserve: ResourceBudget { fuel: 100_000, memory_pages: 100, wall_secs: 10 },
+            },
+        );
+
+        // Reconstruct active reservations across reboot
+        let mut terminal_ops = BTreeSet::new();
+        for row in ledger.rows().values() {
+            terminal_ops.insert(row.op_id);
+        }
+        for r in &records {
+            if r.event == E_RESPONSE || r.event == E_BOUNDED_FAIL {
+                terminal_ops.insert(r.op_id);
+            }
+        }
+        for r in &records {
+            if r.event == bnrose_exec_core::E_RESERVE && !terminal_ops.contains(&r.op_id) {
+                if r.payload.len() >= 16 {
+                    let fuel = u64::from_le_bytes(r.payload[0..8].try_into().unwrap());
+                    let mem = u32::from_le_bytes(r.payload[8..12].try_into().unwrap());
+                    let wall = u32::from_le_bytes(r.payload[12..16].try_into().unwrap());
+                    let b = ResourceBudget { fuel, memory_pages: mem, wall_secs: wall };
+                    capacity_ledger.reconstruct_active(&device_id, &r.op_id, &b);
+                }
+            }
+        }
+
+        let load_shed = CrossDaoAdmissionControl::new(10_000, 2_000);
+        let local_domain = "dao:local".to_string();
+
         Ok(Supervisor {
             keys,
             journal,
@@ -246,6 +288,10 @@ impl Supervisor {
             admitted_env_shas,
             step_entities,
             step_attempts,
+            capacity_ledger,
+            load_shed,
+            device_id,
+            local_domain,
             _claim: claim,
         })
     }
@@ -369,7 +415,7 @@ impl Supervisor {
             if let Ok(text) = std::fs::read_to_string(&p) {
                 if let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) {
                     if let Ok(r) = Receipt::from_json(&v) {
-                        if r.env_sha == *env_sha {
+                        if r.env_sha == *env_sha && r.verify(&self.keys.ed_public) {
                             return Some(RunOutcome {
                                 op: Some(*op),
                                 refused: None,
@@ -472,6 +518,16 @@ impl Supervisor {
                 }
             }
         };
+        // Gate 3: Cross-DAO Admission Control & Load Shedding
+        let domain_str = String::from_utf8_lossy(&decoded.domain[..decoded.domain_len as usize]);
+        let is_local = domain_str.is_empty() || domain_str == self.local_domain || domain_str.starts_with("local");
+        let now_ms = clock * 1000;
+        if let Err(e) = self.load_shed.admit(is_local, now_ms) {
+            return RunOutcome {
+                refused: Some(e.into()),
+                ..none
+            };
+        }
         // 2. fast in-memory nonce gate: this authority has spent this nonce (O(log n) in-memory)
         // Eliminates O(N) full-journal disk reloads on every admission.
         let prev_op = self.admitted.get(&(intent.authority, decoded.nonce)).copied();
@@ -491,7 +547,7 @@ impl Supervisor {
                     }
                 }
 
-                // 2. Check existing receipt file on disk if present
+                // 2. Check existing receipt file on disk if present (verifying Ed25519 signature)
                 let p = self.state_dir.join("receipts").join(format!("op-{}.json", hex(&prev_op)));
                 if p.exists() {
                     if let Ok(text) = std::fs::read_to_string(&p) {
@@ -501,6 +557,13 @@ impl Supervisor {
                                     return RunOutcome {
                                         op: Some(prev_op),
                                         refused: Some("admission:nonce-reuse — payload mismatch".into()),
+                                        ..none
+                                    };
+                                }
+                                if !r.verify(&self.keys.ed_public) {
+                                    return RunOutcome {
+                                        op: Some(prev_op),
+                                        refused: Some("receipt:signature-invalid".into()),
                                         ..none
                                     };
                                 }
@@ -515,6 +578,11 @@ impl Supervisor {
                             }
                         }
                     }
+                    return RunOutcome {
+                        op: Some(prev_op),
+                        refused: Some("receipt:signature-invalid".into()),
+                        ..none
+                    };
                 }
 
                 // 3. Check durable ledger row
@@ -550,12 +618,7 @@ impl Supervisor {
                     return outcome;
                 }
 
-                // 5. Half-written / lost response: recover so client gets recovery receipt
-                if let Ok(_report) = self.recover(clock) {
-                    if let Some(outcome) = self.try_serve_cached_receipt(&prev_op, &env_sha, clock) {
-                        return outcome;
-                    }
-                }
+                // Zero journal reload flood: unresolved ops return in O(1) time
                 return RunOutcome {
                     op: Some(prev_op),
                     refused: Some("admission:nonce-reuse — operation unresolved".into()),
@@ -573,10 +636,11 @@ impl Supervisor {
         let verdict = match self.worker.admit(&req) {
             Ok(v) => v,
             Err(e) => {
+                self.load_shed.complete(is_local);
                 return RunOutcome {
                     refused: Some(format!("worker:{e}")),
                     ..none
-                }
+                };
             }
         };
         let (op, env_sha, effect) = match parse_admit_verdict(&verdict) {
@@ -629,6 +693,20 @@ impl Supervisor {
         let mut state = OpState::ADMITTED_ZERO;
         state.seq = 0;
         // 5. reserve (bounded worker, its budget journaled before it runs)
+        // Gate 2: Device Capacity Ledger reservation
+        let budget = ResourceBudget {
+            fuel: bounds.fuel,
+            memory_pages: (bounds.memory_cap / 65_536) as u32,
+            wall_secs: ((bounds.ticks * crate::worker::WATCHDOG_INTERVAL.as_millis() as u64 / 1000) as u32).max(1),
+        };
+        if let Err(e) = self.capacity_ledger.reserve(&self.device_id, &op, &budget) {
+            self.load_shed.complete(is_local);
+            return RunOutcome {
+                refused: Some(e.into()),
+                op: Some(op),
+                ..none
+            };
+        }
         let res = reservations_payload(bounds);
         let expiry = decoded.expiry;
         match self.step_and_journal(
@@ -642,7 +720,9 @@ impl Supervisor {
         ) {
             Ok(()) => {}
             Err(w) => {
-                return RunOutcome {
+                self.capacity_ledger.release(&self.device_id, &op);
+                    self.load_shed.complete(is_local);
+                    return RunOutcome {
                     refused: Some(w),
                     op: Some(op),
                     ..none
@@ -656,11 +736,13 @@ impl Supervisor {
         ) {
             Ok(()) => {}
             Err(w) => {
+                self.capacity_ledger.release(&self.device_id, &op);
+                self.load_shed.complete(is_local);
                 return RunOutcome {
                     refused: Some(w),
                     op: Some(op),
                     ..none
-                }
+                };
             }
         }
         // 7. the effect door: the ledger accepts only the bound digest,
@@ -668,7 +750,9 @@ impl Supervisor {
         match self.ledger.apply(&op, &env_sha, &effect, clock) {
             Ok(_) => {}
             Err(e) => {
-                return RunOutcome {
+                self.capacity_ledger.release(&self.device_id, &op);
+                    self.load_shed.complete(is_local);
+                    return RunOutcome {
                     refused: Some(format!("ledger:{e}")),
                     op: Some(op),
                     ..none
@@ -676,6 +760,8 @@ impl Supervisor {
             }
         }
         if lose_response {
+            self.capacity_ledger.release(&self.device_id, &op);
+            self.load_shed.complete(is_local);
             return RunOutcome {
                 op: Some(op),
                 refused: None,
@@ -689,27 +775,37 @@ impl Supervisor {
         match self.step_and_journal(&op, &env_sha, &mut state, E_RESPONSE, &[1], clock, expiry) {
             Ok(()) => {}
             Err(w) => {
+                self.capacity_ledger.release(&self.device_id, &op);
+                self.load_shed.complete(is_local);
                 return RunOutcome {
                     refused: Some(w),
                     op: Some(op),
                     ..none
-                }
+                };
             }
         }
         match self.issue_receipt(&op, &env_sha, state, &effect, clock) {
-            Ok((r, p, v)) => RunOutcome {
-                op: Some(op),
-                refused: None,
-                lost_response: false,
-                receipt: Some(r),
-                receipt_path: Some(p),
-                receipt_json: Some(v),
-            },
-            Err(e) => RunOutcome {
-                refused: Some(e),
-                op: Some(op),
-                ..none
-            },
+            Ok((r, p, v)) => {
+                self.capacity_ledger.release(&self.device_id, &op);
+                self.load_shed.complete(is_local);
+                RunOutcome {
+                    op: Some(op),
+                    refused: None,
+                    lost_response: false,
+                    receipt: Some(r),
+                    receipt_path: Some(p),
+                    receipt_json: Some(v),
+                }
+            }
+            Err(e) => {
+                self.capacity_ledger.release(&self.device_id, &op);
+                self.load_shed.complete(is_local);
+                RunOutcome {
+                    refused: Some(e),
+                    op: Some(op),
+                    ..none
+                }
+            }
         }
     }
 
@@ -1328,7 +1424,7 @@ impl Supervisor {
                     refused: Some(e),
                     op: Some(op),
                     ..none
-                }
+                };
             }
             (Ok(_), Ok(Err(e))) => {
                 return RunOutcome {

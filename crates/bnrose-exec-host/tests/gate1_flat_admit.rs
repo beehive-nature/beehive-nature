@@ -185,7 +185,7 @@ fn test_gate1_flat_admit_latency_scaling() {
     // In the old code (reloading journal from disk on admission), ratio would be ~100x.
     // In our in-memory indexed supervisor, ratio is flat across 10^3, 10^4, 10^5 (within 3.0x variance in debug mode).
     assert!(
-        ratio_100k_to_1k < 3.0,
+        ratio_100k_to_1k < 1.5,
         "admit latency must stay flat from 10^3 to 10^5 journal ops; ratio was {ratio_100k_to_1k:.2} (10^3: {lat_1k:.1} µs, 10^5: {lat_100k:.1} µs)"
     );
 }

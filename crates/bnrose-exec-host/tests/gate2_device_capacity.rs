@@ -1,12 +1,51 @@
-//! Gate 2 Acceptance Test: Device Capacity Ledger & Overcommit Storm.
+//! Gate 2 Acceptance Test: Device Capacity Ledger & Anti-Sybil Proof.
 //!
 //! SPEC-RUSTEOSVM-1, Grok Review R-2:
-//! 1. Σ active_reservations(device, across all DAOs) ≤ capacity − reserve.
-//! 2. 1,000-attempt overcommit storm is 100% refused with zero accepted bookings over budget.
-//! 3. Proof-of-work / timed capacity challenge detects Sybil devices.
-//! 4. Deadline miss rate under oversubscription (1x, 2x, 6x) is bounded by refusing excess.
+//! 1. Hard capacity invariant: sum active_reservations(device) <= capacity - reserve.
+//! 2. Zero capacity leak: double reserve on same op_id does NOT leak capacity upon release.
+//! 3. 1,000-attempt overcommit storm is 100% refused with zero accepted bookings over budget.
+//! 4. Anti-Sybil proof: rejects fake 0 ms claims and sub-physical timing; enforces sequential work.
+//! 5. Deadline miss rate under oversubscription (1x, 2x, 6x) is bounded by refusing excess.
 
 use bnrose_exec_host::device_capacity::{DeviceCapacityLedger, DeviceLimits, ResourceBudget};
+
+#[test]
+fn test_gate2_double_reserve_does_not_leak_capacity() {
+    let mut ledger = DeviceCapacityLedger::new();
+    let device_id = [0x55; 32];
+    let limits = DeviceLimits {
+        capacity: ResourceBudget { fuel: 1_000, memory_pages: 10, wall_secs: 10 },
+        reserve: ResourceBudget { fuel: 200, memory_pages: 2, wall_secs: 2 },
+    };
+    ledger.register_device(device_id, limits);
+
+    let op_id = [0x42; 32];
+    let req = ResourceBudget { fuel: 400, memory_pages: 4, wall_secs: 4 };
+
+    // 1. First reservation
+    assert!(ledger.reserve(&device_id, &op_id, &req).is_ok());
+    assert_eq!(ledger.current_allocated(&device_id).fuel, 400);
+
+    // 2. Second reservation with same op_id (e.g. retry or step update)
+    assert!(ledger.reserve(&device_id, &op_id, &req).is_ok());
+    assert_eq!(
+        ledger.current_allocated(&device_id).fuel, 400,
+        "second reserve on same op_id must update in-place without double counting"
+    );
+
+    // 3. Single release
+    ledger.release(&device_id, &op_id);
+    assert_eq!(
+        ledger.current_allocated(&device_id).fuel, 0,
+        "release must free entire op reservation with zero stuck fuel (capacity leak prevented)"
+    );
+
+    // 4. Calling release again is an idempotent no-op
+    ledger.release(&device_id, &op_id);
+    assert_eq!(ledger.current_allocated(&device_id).fuel, 0);
+
+    println!("gate2: PASS - double reserve does not leak capacity upon release");
+}
 
 #[test]
 fn test_gate2_overcommit_storm_1000_attempts_100_percent_refused() {
@@ -56,26 +95,43 @@ fn test_gate2_overcommit_storm_1000_attempts_100_percent_refused() {
 fn test_gate2_sybil_device_capacity_challenge() {
     let device_id = [0x88; 32];
     let seed = [0x12; 32];
+    let qps = 50;
 
-    // Find a valid nonce for the proof-of-work capacity challenge
-    let mut nonce = 0u64;
-    loop {
-        if DeviceCapacityLedger::verify_capacity_challenge(&device_id, &seed, nonce, 5, 50) {
-            break;
-        }
-        nonce += 1;
-    }
+    // Solve honest challenge on hardware
+    let nonce = DeviceCapacityLedger::solve_capacity_challenge(&device_id, &seed, qps)
+        .expect("must find valid nonce for challenge");
 
-    // Honest execution: completed within 5 ms <= 50 ms deadline
-    assert!(DeviceCapacityLedger::verify_capacity_challenge(&device_id, &seed, nonce, 5, 50));
-
-    // Sybil attempt (1 device pretending to be 10 devices falls behind wall-clock deadline)
-    let sybil_timeout = 55; // 55 ms > 50 ms
+    // 1. Honest execution: measured duration 10 ms within [5 ms, 50 ms] -> PASS
     assert!(
-        !DeviceCapacityLedger::verify_capacity_challenge(&device_id, &seed, nonce, sybil_timeout, 50),
-        "Sybil device exceeding challenge deadline must be rejected"
+        DeviceCapacityLedger::verify_capacity_challenge(&device_id, &seed, nonce, qps, 10, 5, 50),
+        "honest challenge within measured window must pass"
     );
-    println!("gate2: PASS - Sybil capacity challenge correctly detects and rejects delayed responses");
+
+    // 2. FAKE 0 ms check: caller reporting 0 ms MUST BE REJECTED
+    assert!(
+        !DeviceCapacityLedger::verify_capacity_challenge(&device_id, &seed, nonce, qps, 0, 5, 50),
+        "fake 0 ms claim must be strictly rejected (cannot compute faster than physical limit)"
+    );
+
+    // 3. Sub-physical timing check: reporting 2 ms when minimum is 5 ms MUST BE REJECTED
+    assert!(
+        !DeviceCapacityLedger::verify_capacity_challenge(&device_id, &seed, nonce, qps, 2, 5, 50),
+        "sub-physical timing must be rejected"
+    );
+
+    // 4. Timeout / Sybil queue delay check: reporting 60 ms when max is 50 ms MUST BE REJECTED
+    assert!(
+        !DeviceCapacityLedger::verify_capacity_challenge(&device_id, &seed, nonce, qps, 60, 5, 50),
+        "timeout exceeding max duration must be rejected"
+    );
+
+    // 5. Wrong nonce / invalid proof MUST BE REJECTED
+    assert!(
+        !DeviceCapacityLedger::verify_capacity_challenge(&device_id, &seed, nonce + 9999, qps, 10, 5, 50),
+        "invalid sequential proof must be rejected"
+    );
+
+    println!("gate2: PASS - Sybil capacity challenge correctly validates physical execution time and rejects 0 ms fakes");
 }
 
 #[test]
