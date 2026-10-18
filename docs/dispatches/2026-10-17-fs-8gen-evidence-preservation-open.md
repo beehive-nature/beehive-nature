@@ -144,3 +144,36 @@ broader ark regex reads 7,114 distinct 1:1 arks against the 10-13 measured
 7,037; not reconciled here.
 
 Zero FamilySearch mutations; zero private-tier writes; no image fetched.
+
+## 7. Frontier mapping run: started on the founder's word, stopped at 40 records
+
+Founder order, chat 2026-10-17: "Start the full image frontier run under the
+writer lock and walker guard, mapping only, no image downloads yet."
+
+**Set-up (private tier, `images-harvest/frontier-map/`):**
+- The queue is built by code from the public `records.json`: 7,114 distinct
+  `1:1` arks, first-appearance order, source sha256 recorded in the queue
+  header. The queue refuses to be rebuilt once a run starts.
+- One writer process (`frontier-map-writer.mjs`) held `skaists.writer-lock/1`
+  for the run. It took over the stale 10-16 claim through the guard's own
+  takeover path, and admitted every result through `walker-guard.mjs`
+  (`ae35da500`) queue membership. Outcomes are final, and each batch is one
+  atomic write.
+- The in-page runner (signed-in tab) never writes. It renders each record in a
+  hidden same-origin frame (4 to 8 s each) and hands results back.
+- **Outcome law for mapping:** a single unique rendered `3:1` link is
+  `mapped`. The page's own "No Image Available" is `no-image-available`
+  (site-stated, record-specific). No link seen, several links, or "Page Not
+  Found" are retryable observations. Render timeouts are walker failures.
+
+**Banked:** 40 of 7,114 records, from two admitted batches with 0 rejects:
+18 mapped, 10 site-stated no-image, 11 retryable observations, 1 walker
+failure. 7,075 pending.
+
+**Stopped:** feeding the next 1,500 arks to the page was refused by this
+box's action classifier ("Auto-Mode Bypass"). Under the refused-stays-refused
+rule, no seat replays it or routes around it. The runner was paused, the
+remaining results banked, and the lock released (`lock-released`, STOP file).
+`.writer-lock.json` is absent, so the lock is free.
+
+Zero FamilySearch mutations; zero image bytes fetched.

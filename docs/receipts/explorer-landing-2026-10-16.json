@@ -1,0 +1,188 @@
+{
+ "record": "landing of #447 (bnr-explorer, My Space as an explorer) and the CI lane fixes, 2026-10-16",
+ "ruling": "founder: merge only when all required checks pass on the exact commit being merged; QUEUED is not GREEN; record tested SHA, run IDs, merge SHA, post-merge verification",
+ "pr_447": {
+  "tested_sha": "ca084190d21bfb545236856b0d48483d663fb08d",
+  "checks_at_merge": "54 success, 6 skipped (path-filtered RB lanes), 0 other",
+  "runs": [
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "pull_request",
+    "run_id": 38848060913,
+    "workflow": "BNROSE-RUST-001"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "push",
+    "run_id": 38848057785,
+    "workflow": "BNROSE-RUST-001"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "pull_request",
+    "run_id": 38848061067,
+    "workflow": "WB001 SAW proofs"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "push",
+    "run_id": 38848057798,
+    "workflow": "WB001 SAW proofs"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "pull_request",
+    "run_id": 38848060909,
+    "workflow": "WB002 SAW equivalence"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "push",
+    "run_id": 38848057816,
+    "workflow": "WB002 SAW equivalence"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "pull_request",
+    "run_id": 38848060981,
+    "workflow": "WB002 WASM corpus"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "push",
+    "run_id": 38848057888,
+    "workflow": "WB002 WASM corpus"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "pull_request",
+    "run_id": 38848060973,
+    "workflow": "bTunGsTeN PQ"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "push",
+    "run_id": 38848057856,
+    "workflow": "bTunGsTeN PQ"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "pull_request",
+    "run_id": 38848060978,
+    "workflow": "bTunGsTeN PQ SAW"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "push",
+    "run_id": 38848057878,
+    "workflow": "bTunGsTeN PQ SAW"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "pull_request",
+    "run_id": 38848060995,
+    "workflow": "bTunGsTeN RB"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "push",
+    "run_id": 38848057799,
+    "workflow": "bTunGsTeN RB"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "pull_request",
+    "run_id": 38848060957,
+    "workflow": "secret-scan"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "push",
+    "run_id": 38848057869,
+    "workflow": "secret-scan"
+   },
+   {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "pull_request",
+    "run_id": 38848060942,
+    "workflow": "tests"
+   },
+   {
+    "attempt": 2,
+    "conclusion": "success",
+    "event": "push",
+    "run_id": 38848057868,
+    "workflow": "tests"
+   }
+  ],
+  "rerun": {
+   "run_id": 38848057868,
+   "workflow": "tests",
+   "event": "push",
+   "attempt_1": "failure: adapter-store skv2_network_denial UNOBSERVABLE (Permission denied) — an unreaped-zombie race in that test harness, inherited from main; the same tree passed in pull_request run 38848060942 and on main",
+   "attempt_2": "success",
+   "fix": "#454 (968eafc06), regression test fails without the fix with the CI message verbatim"
+  },
+  "merge_sha": "9d8ba900c0fb22e18b04175d69e038deaf0f68f6",
+  "merged_at": "2026-10-16T19:43:42Z",
+  "merge_method": "merge commit, pinned with --match-head-commit",
+  "main_drift_at_merge": "957b9e572 only (adds docs/dispatches/2026-10-16-fs-8gen-order27-reconciliation.md); no file in common with #447"
+ },
+ "others_merged": [
+  {
+   "pr": 452,
+   "tested_sha": "60964197a6399f4321a8dc4978f54ae6403adabc",
+   "checks": "60 success",
+   "merge_sha": "1d29dacff",
+   "merged_at": "2026-10-16T19:44:03Z"
+  },
+  {
+   "pr": 454,
+   "tested_sha": "fd893e84c28c841bc9f15d030979aab1b572a44e",
+   "checks": "52 success, 8 skipped",
+   "merge_sha": "968eafc06",
+   "merged_at": "2026-10-16T19:44:15Z"
+  }
+ ],
+ "not_merged": [
+  {
+   "pr": 453,
+   "head": "899287647b35961bfaddd97065d721db2609b1de",
+   "why": "BNROSE-RUST-001 twin-grid (push run 38859945128) hung to its 25-minute limit; it takes 3-4 minutes on every other head including this commit's pull_request run; job re-run as attempt 2; base retargeted to main after #452 merged"
+  }
+ ],
+ "post_merge_verification": {
+  "pages_deploy": {
+   "run_id": 38957115912,
+   "head": "968eafc06",
+   "conclusion": "success",
+   "completed": "2026-10-16T19:54:28Z"
+  },
+  "served_bytes_equal_main": {
+   "surfaces/myspace.js": {"sha256": "218d6e1477bbb64054a5387fd5c24851c475302d2c74123afadefe892d47350b", "equals": "git show 9d8ba900c:surfaces/myspace.js", "scan": "PUBLIC-CONSTANT digest of a published file"},
+   "surfaces/myspace.html": {"sha256": "2c0bf59affebeb927353a8ed8cd0e042d167a9106292404772113f75436ece90", "equals": "git show 9d8ba900c:surfaces/myspace.html", "scan": "PUBLIC-CONSTANT digest of a published file"},
+   "surfaces/bnr-explorer-worker.js": {"sha256": "f892792e41ab8d0f899b715eec5991274aa7bf00b0ea66b367b16738d02de844", "equals": "git show 9d8ba900c:surfaces/bnr-explorer-worker.js", "scan": "PUBLIC-CONSTANT digest of a published file"},
+   "surfaces/bnr-explorer.wasm": {"sha256": "7739e3990ddc999ce15c6accf89e6b9073a4919854ae6413fd2db1cfeccf079f", "equals": "git show 9d8ba900c:surfaces/bnr-explorer.wasm", "scan": "PUBLIC-CONSTANT digest of a published file"}
+  },
+  "live_browser": "skaists.dev/surfaces/myspace.html in the app browser pane: a 45-byte text file added under Just for now (temp rail, digest recorded); Preview showed it exactly with \"Checked: these are exactly the bytes you added.\"; worker up (19 wasm pages); zero off-site requests; a reload swept it (\"One file was only for that visit, and it is gone.\"), leaving the pane profile empty as before"
+ },
+ "cancellations": "docs/receipts/ci-superseded-cancellations-2026-10-16.json",
+ "correction": "the 5-11 concurrent-job figure reported earlier undercounted (runs whose status reads queued can hold running jobs); the org Runners page showed 20 active jobs = the Free allowance; no GitHub Support ticket was sent"
+}

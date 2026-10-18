@@ -1,0 +1,263 @@
+{
+ "schema": "skaists.collection-qualification/1",
+ "generated": "2026-10-18",
+ "basis": "Preliminary routes relayed by the founder (chat 2026-10-18, desk research by another seat). Seat 3 has NOT independently fetched or verified any route below; every field is 'relayed' or 'UNASSESSED'. A route is a research lead, never a redistribution license.",
+ "fieldsRequiredBeforeAnyAcquisition": [
+  "custodian",
+  "catalogUrl",
+  "coverage",
+  "permittedResearchMethod",
+  "bulkAccessPolicy",
+  "publicationRights",
+  "supportingSource"
+ ],
+ "collections": [
+  {
+   "collection": "Massachusetts, Births and Christenings, 1639-1915",
+   "unresolved": 814,
+   "kind": "compiled index (originals = town and church registers)",
+   "custodian": "relayed: Massachusetts Archives, town clerks, original church registers",
+   "catalogUrl": "relayed: https://www.sec.state.ma.us/divisions/archives/collections/digital-records.htm",
+   "coverage": "UNASSESSED",
+   "permittedResearchMethod": "UNASSESSED",
+   "bulkAccessPolicy": "UNASSESSED",
+   "publicationRights": "UNASSESSED",
+   "supportingSource": "relayed desk research",
+   "wave": 1,
+   "verification": {
+    "seat3": {
+     "url": "https://www.sec.state.ma.us/divisions/archives/collections/digital-records.htm",
+     "checkedAt": "2026-10-18",
+     "outcome": "UNREADABLE from this seat: empty body via fetch and via the browser pane (twice); not pushed further"
+    },
+    "relayed": "page genuine, but many vital-record and early town-record links lead back to FamilySearch, so it cannot by itself qualify an independent route",
+    "disposition": "NOT QUALIFIED as an independent route; next = per-town original repositories (Holliston, Chelmsford, Sherborn first)"
+   }
+  },
+  {
+   "collection": "Massachusetts, Town Clerk, Vital and Town Records, 1626-2001",
+   "unresolved": 551,
+   "kind": "town-clerk record images (relayed: source repositories = local town clerks + Secretary of the Commonwealth)",
+   "custodian": "relayed: Massachusetts Archives and local town clerks",
+   "catalogUrl": "relayed: https://www.sec.state.ma.us/divisions/archives/collections/digital-records.htm",
+   "coverage": "UNASSESSED",
+   "permittedResearchMethod": "UNASSESSED",
+   "bulkAccessPolicy": "UNASSESSED",
+   "publicationRights": "UNASSESSED",
+   "supportingSource": "relayed desk research",
+   "wave": 1,
+   "verification": {
+    "seat3": {
+     "url": "https://www.sec.state.ma.us/divisions/archives/collections/digital-records.htm",
+     "checkedAt": "2026-10-18",
+     "outcome": "UNREADABLE from this seat (same page as above)"
+    },
+    "relayed": "same finding as the Births and Christenings route: links largely return to FamilySearch",
+    "disposition": "NOT QUALIFIED; originals = local town clerks; next = per-town repositories"
+   }
+  },
+  {
+   "collection": "Connecticut, Births and Christenings, 1649-1906",
+   "unresolved": 353,
+   "kind": "compiled index (relayed)",
+   "custodian": "relayed: Connecticut town clerks; Connecticut State Library historical collections",
+   "catalogUrl": "verified-reachable 2026-10-18: https://libguides.ctstatelibrary.org/c.php?g=211782&p=11144249",
+   "coverage": "UNASSESSED",
+   "permittedResearchMethod": "UNASSESSED",
+   "bulkAccessPolicy": "UNASSESSED",
+   "publicationRights": "UNASSESSED",
+   "supportingSource": "relayed desk research",
+   "wave": 1,
+   "verification": {
+    "seat3": {
+     "url": "https://libguides.ctstatelibrary.org/c.php?g=211782&p=11144249",
+     "checkedAt": "2026-10-18",
+     "outcome": "READ: originals generally at each Town Hall and on microfilm at the State Library (also viewable at LDS Family History Centers); the guide states no copy or publication terms and links a separate Disclaimers & Permissions page (not read)"
+    },
+    "disposition": "RESEARCH ROUTE confirmed at town-hall + State Library microfilm level; rights UNASSESSED"
+   }
+  },
+  {
+   "collection": "Connecticut, Vital Records, Prior to 1850",
+   "unresolved": 158,
+   "kind": "index (relayed: Barbour Collection, tied to underlying town records)",
+   "custodian": "relayed: Connecticut State Library (Barbour Collection)",
+   "catalogUrl": "verified-reachable 2026-10-18: https://libguides.ctstatelibrary.org/c.php?g=211782&p=11144249",
+   "coverage": "UNASSESSED",
+   "permittedResearchMethod": "UNASSESSED",
+   "bulkAccessPolicy": "UNASSESSED",
+   "publicationRights": "UNASSESSED",
+   "supportingSource": "relayed desk research",
+   "wave": 1,
+   "verification": {
+    "seat3": {
+     "url": "https://libguides.ctstatelibrary.org/c.php?g=211782&p=11144249",
+     "checkedAt": "2026-10-18",
+     "outcome": "READ: Barbour slips and bound volumes cite town originals; Coventry has no bound volume and its slips were taken from a published vital-records book (page refs point to that book, not the manuscript); Saybrook, Suffield and Windham have both published volumes and Barbour bound volumes; Salisbury not mentioned"
+    },
+    "disposition": "RESEARCH ROUTE confirmed; Coventry citations are to a published book, not the original; rights UNASSESSED"
+   }
+  },
+  {
+   "collection": "England, Births and Christenings, 1538-1975",
+   "unresolved": 653,
+   "kind": "compiled index (relayed)",
+   "custodian": "relayed: parish registers held by county archives and diocesan repositories",
+   "catalogUrl": "UNASSESSED",
+   "coverage": "UNASSESSED",
+   "permittedResearchMethod": "UNASSESSED",
+   "bulkAccessPolicy": "UNASSESSED",
+   "publicationRights": "UNASSESSED",
+   "supportingSource": "relayed desk research",
+   "wave": 2,
+   "next": "partition by county and parish",
+   "verification": {
+    "relayed": "official archive guidance supports county and parish repositories; no single nationwide original custodian",
+    "disposition": "not checked by this seat; partition by county and parish first"
+   }
+  },
+  {
+   "collection": "Find a Grave Index",
+   "unresolved": 318,
+   "kind": "partner index",
+   "custodian": "relayed: Find a Grave",
+   "catalogUrl": "relayed: https://www.findagrave.com/",
+   "coverage": "UNASSESSED",
+   "permittedResearchMethod": "UNASSESSED",
+   "bulkAccessPolicy": "UNASSESSED",
+   "publicationRights": "relayed: photograph permission generally requested from the contributing photographer",
+   "supportingSource": "relayed desk research",
+   "track": "separate rights review",
+   "verification": {
+    "relayed": "direct website returned HTTP 403 to the relaying seat",
+    "disposition": "UNVERIFIED; do not circumvent the refusal; photograph rights per contributor, unverified"
+   }
+  },
+  {
+   "collection": "The Church of Jesus Christ of Latter-day Saints, Record of Members (Worldwide), 1836-1970",
+   "unresolved": 299,
+   "kind": "church membership records",
+   "custodian": "relayed: Church History Library",
+   "catalogUrl": "relayed: https://churchhistorylibrary.churchofjesuschrist.org/guides/family-history?lang=eng",
+   "coverage": "UNASSESSED",
+   "permittedResearchMethod": "UNASSESSED",
+   "bulkAccessPolicy": "relayed: records can be restricted; bulk digitization or publication may need a separate request",
+   "publicationRights": "UNASSESSED",
+   "supportingSource": "relayed desk research",
+   "track": "separate rights review",
+   "verification": {
+    "seat3": {
+     "url": "https://churchhistorylibrary.churchofjesuschrist.org/guides/family-history?lang=eng",
+     "checkedAt": "2026-10-18",
+     "outcome": "FETCH FAILED from this seat (no output)"
+    },
+    "relayed": "Church History Library confirms the collection and its access procedure; publication rights separately controlled",
+    "disposition": "research access via the library's catalog process (relayed); rights UNASSESSED"
+   }
+  },
+  {
+   "collection": "Rhode Island, Births and Christenings, 1600-1914",
+   "unresolved": 210,
+   "kind": "compiled index (relayed)",
+   "custodian": "relayed: Rhode Island State Archives and town clerks",
+   "catalogUrl": "verified-reachable 2026-10-18: https://www.sos.ri.gov/divisions/state-archives/VitalRecords",
+   "coverage": "relayed: online historical vital records; pre-1853 may need town-clerk research",
+   "permittedResearchMethod": "UNASSESSED",
+   "bulkAccessPolicy": "UNASSESSED",
+   "publicationRights": "UNASSESSED",
+   "supportingSource": "relayed desk research",
+   "verification": {
+    "seat3": {
+     "url": "https://www.sos.ri.gov/divisions/state-archives/VitalRecords",
+     "checkedAt": "2026-10-18",
+     "outcome": "READ: holds open state vital records (births/marriages over 101 years, deaths over 51); states all open vital records and indices are online to print or download; certifies births/marriages 1853-1925 and deaths 1853-1975; pre-1853 municipal records on microfilm at the Archives, certified copies from the town clerk; no reproduction or publication terms stated"
+    },
+    "disposition": "RESEARCH ROUTE confirmed; 'print or download' is access, not a redistribution right; pre-1853 = town clerks; rights UNASSESSED"
+   }
+  },
+  {
+   "collection": "Denmark, Baptisms, 1618-1923",
+   "unresolved": 175,
+   "kind": "index of parish registers",
+   "custodian": "relayed: Danish National Archives (Rigsarkivet)",
+   "catalogUrl": "verified-reachable 2026-10-18: https://en.rigsarkivet.dk/guide/online-records/",
+   "coverage": "UNASSESSED",
+   "permittedResearchMethod": "UNASSESSED",
+   "bulkAccessPolicy": "relayed: contact required before downloading more than a few images; some Ancestry-supplied images further restricted",
+   "publicationRights": "UNASSESSED",
+   "supportingSource": "relayed desk research",
+   "verification": {
+    "seat3": {
+     "url": "https://en.rigsarkivet.dk/guide/online-records/",
+     "checkedAt": "2026-10-18",
+     "outcome": "READ: individual pictures may be downloaded for personal use; for more than a few, contact the National Archives before downloading; church-book colour images to 1892 were donated by Ancestry, may not be downloaded by genealogy-service companies, and more than a few need written permission from Ancestry; contact mail@rigsarkivet.dk"
+    },
+    "disposition": "RESEARCH ROUTE confirmed; any multi-image acquisition needs prior contact (and Ancestry's written permission for the pre-1892 colour images); publication UNASSESSED"
+   }
+  },
+  {
+   "collection": "Utah, Deaths and Burials, 1888-1946",
+   "unresolved": 163,
+   "kind": "index",
+   "custodian": "relayed: Utah State Archives",
+   "catalogUrl": "verified-reachable 2026-10-18: https://archives.utah.gov/research/guides/death/",
+   "coverage": "relayed: the record year decides which original series applies",
+   "permittedResearchMethod": "UNASSESSED",
+   "bulkAccessPolicy": "UNASSESSED",
+   "publicationRights": "UNASSESSED",
+   "supportingSource": "relayed desk research",
+   "verification": {
+    "seat3": {
+     "url": "https://archives.utah.gov/research/guides/death/",
+     "checkedAt": "2026-10-18",
+     "outcome": "READ: no state death registration before 1898; county clerks 1898-1905 (all-county name index in the Reference Room); Department of Health certificates 1905-1976; 1977 onward private for 50 years; this guide states no reproduction terms and does not mention FamilySearch"
+    },
+    "relayed": "a historical death-certificate series is marked available for reproduction and use, but some digital images were produced with FamilySearch (a separate rights question)",
+    "disposition": "RESEARCH ROUTE confirmed by period; the relayed series-level reproduction permission is NOT confirmed by this seat and must never be extended to FamilySearch-produced images"
+   }
+  },
+  {
+   "collection": "New Hampshire, Births and Christenings, 1714-1904",
+   "unresolved": 159,
+   "kind": "compiled index (relayed)",
+   "custodian": "relayed: NH Vital Records Administration",
+   "catalogUrl": "relayed: https://sos.nh.gov/archives-vital-records-records-management/vital-records-information/vital-records-administration",
+   "coverage": "UNASSESSED",
+   "permittedResearchMethod": "UNASSESSED",
+   "bulkAccessPolicy": "UNASSESSED",
+   "publicationRights": "UNASSESSED",
+   "supportingSource": "relayed desk research",
+   "verification": {
+    "seat3": {
+     "url": "https://sos.nh.gov/archives-vital-records-records-management/vital-records-information/vital-records-administration",
+     "checkedAt": "2026-10-18",
+     "outcome": "HTTP 503 from this seat"
+    },
+    "relayed": "HTTP 403 to the relaying seat",
+    "disposition": "UNCHECKED; retry later, never circumvent"
+   }
+  },
+  {
+   "collection": "Sweden, Baptisms, 1611-1920",
+   "unresolved": 144,
+   "kind": "index of parish registers",
+   "custodian": "relayed: Swedish National Archives (Riksarkivet)",
+   "catalogUrl": "verified-reachable 2026-10-18: https://sok.riksarkivet.se/en/digitala-forskarsalen",
+   "coverage": "UNASSESSED",
+   "permittedResearchMethod": "UNASSESSED",
+   "bulkAccessPolicy": "UNASSESSED",
+   "publicationRights": "UNASSESSED",
+   "supportingSource": "relayed desk research",
+   "verification": {
+    "seat3": {
+     "url": "https://sok.riksarkivet.se/en/digitala-forskarsalen",
+     "checkedAt": "2026-10-18",
+     "outcome": "READ: the collections include church books and a filter shows the Archives' own digitised volumes; this page states no cost, bulk or reuse terms (those sit on linked 'Order copies' and 'Access our data and datasets' pages, not read)"
+    },
+    "disposition": "CATALOG ROUTE confirmed; image rights and bulk terms UNASSESSED"
+   }
+  }
+ ],
+ "verificationRule": "An official archive landing page is evidence of a research route only; it never verifies a particular collection, original image, or publication right. Rights stay UNASSESSED unless a cited source expressly grants them.",
+ "updated": "2026-10-18"
+}

@@ -99,39 +99,39 @@ jobs:
         shell: bash
         run: sh scripts/btungsten/pq03-saw-check.sh saw saw-rustc
       - name: PQ04 SAW — BUILD + EQUIVALENCE + PROVE-UNIVERSAL + TEETH
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         shell: bash
         run: sh scripts/btungsten/pq04-saw-check.sh saw saw-rustc
       - name: PQ11 SAW — BIP-39 packing, BUILD + EQUIVALENCE + PROVE-UNIVERSAL + TEETH
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         shell: bash
         run: sh scripts/btungsten/pq11-saw-check.sh saw saw-rustc
       - name: PQ02 SAW — the shipped Keccak-f[1600] (keccak 0.1.6 and 0.2.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         shell: bash
         run: sh scripts/btungsten/pq02-saw-check.sh saw saw-rustc "$HOME/saw/bin/cryptol"
       - name: PQ02 SAW — the SHA-3 sponge in sha3 0.10.9 (SHA3-256, SHAKE256), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         shell: bash
         run: sh scripts/btungsten/pq02-sponge-check.sh saw "$HOME/saw/bin/cryptol"
       - name: PQ02 SAW — the SHA-3 sponge in sha3 0.11.0 on keccak 0.2.2 (ML-KEM-768 shapes), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         shell: bash
         run: sh scripts/btungsten/pq02-sponge022-check.sh saw "$HOME/saw/bin/cryptol"
       - name: PQ03 SAW — SHA-256 in sha2 0.10.9 (soft path), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         shell: bash
         run: sh scripts/btungsten/pq03-sha256-check.sh saw saw-rustc "$HOME/saw/bin/cryptol"
       - name: PQ03 SAW — HKDF-Expand(SHA-256) in hkdf 0.12.4 / hmac 0.12.1 / sha2 0.10.9, PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         shell: bash
         run: sh scripts/btungsten/pq03-hkdf-check.sh saw "$HOME/saw/bin/cryptol"
       - name: PQ05/PQ06 SAW — the ML-KEM and ML-DSA base fields (module-lattice 0.2.3), PIN + BUILD + EQUIVALENCE + TEETH
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         shell: bash
         run: sh scripts/btungsten/pq05-field-check.sh saw "$HOME/saw/bin/cryptol"
       - name: PQ05 SAW — X-Wing glue, BUILD + EQUIVALENCE + combinerBinds + TEETH
-        if: always()
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         shell: bash
         run: sh scripts/btungsten/pq05-saw-check.sh saw saw-rustc
 
