@@ -39,6 +39,9 @@
   var WAVE_CHUNK = 4190208;
   var WAVE_MAX_CHUNKS = 59;        // + 3 DataMap chunks + 1 public map record = 63; 64 records is merkle, which the bridge cannot finalize
   var WAVE_MAX_BYTES = WAVE_CHUNK * WAVE_MAX_CHUNKS;
+  // Browser memory/quota bound, independent of the remote payment shape.
+  // The disk shelf has its own configurable local ceiling.
+  var LOCAL_MAX_BYTES = 512 * 1024 * 1024;
   var FRESH_MS = 15 * 60 * 1000;   // past this a cached price is "earlier", never "current"
   var DEADLINE_MS = 150000;        // measured asks: 42-69 s; a hung one ends here
   var RETRY_MS = 3000;
@@ -664,7 +667,7 @@
 
   /* ── PHASE E-2: Add to manifest (picker + in-page sha256 + live/local intake) ──
      Two witnesses: the page hashes BEFORE anything is sent; the bridge hashes
-     while writing. Files over the wave limit are prose — never a dead button.
+     while writing. Local custody is independent of the remote payment limit.
      Unreachable loopback → honest browser-local shelf (never Autonomi claim). */
   function addManifestCard(){
     var h = walletCard();
@@ -685,7 +688,10 @@
       } else if (intake.result.shelf === 'meta') {
         h += '<p class="law" data-bdata-intake-honest="1" data-bdata-intake-meta="1">' + tx('bd.add.meta', 'the file itself was not saved') + '</p>';
       }
-      h += '<p class="law">' + tx('bd.add.next', 'audience → price → authorize → pay with your wallet — same chain as the registered object below') + '</p>';
+      if (intake.result.shelf !== 'meta') {
+        h += '<p class="law">' + tx('bd.add.local.complete', 'Local copy complete. Publishing a separate copy is optional.') + '</p>';
+        if (intake.result.bytes > WAVE_MAX_BYTES) h += '<p class="law" data-bdata-intake-publish-held="1">' + tx('bd.add.publish.large', 'This copy is kept locally. The current Autonomi payment path cannot publish a file this large.') + '</p>';
+      }
       h += '</section>';
       return h;
     }
@@ -706,7 +712,7 @@
       h += '<div class="actions"><button type="button" class="btn primary" data-bdata-intake-go="1" data-act="intake-go" data-fk="intake-go">➜ ' + tx('bd.add.go', 'Add to manifest') + '</button></div>';
     }
     if (intake.tooLarge) {
-      h += '<div class="opt na" data-bdata-intake-large="1" role="status"><span class="name">' + tx('bd.add.large', 'Not available yet') + '</span><span class="desc">' + tx('bd.add.largenote', 'files this large need batch payments, which are not built — nothing was sent') + ' · ' + Number(intake.bytes).toLocaleString('en-US') + ' ' + tx('bd.bytes', 'bytes') + ' &gt; ' + Number(WAVE_MAX_BYTES).toLocaleString('en-US') + '</span></div>';
+      h += '<div class="opt na" data-bdata-intake-large="1" role="status"><span class="name">' + tx('bd.add.local.large', 'Over this page’s local file limit') + '</span><span class="desc">' + tx('bd.add.local.largenote', 'This page has not copied the file. Its local memory limit is separate from publishing or payment.') + ' · ' + Number(intake.bytes).toLocaleString('en-US') + ' ' + tx('bd.bytes', 'bytes') + ' &gt; ' + Number(LOCAL_MAX_BYTES).toLocaleString('en-US') + '</span></div>';
     }
     // New bee: soft continuity only — never a purple fail / "could not" scare panel
     if (intake.soft) h += '<p class="sub note" data-bdata-intake-soft="1">' + esc(intake.soft) + '</p>';
@@ -720,10 +726,11 @@
     return o;
   }
   function hashFile(file){
-    intake = { file:file, name:file.name||'unnamed', bytes:file.size||0, sha256:null, hashing:true, placing:false, err:null, soft:null, result:null, tooLarge:file.size > WAVE_MAX_BYTES };
+    intake = { file:file, name:file.name||'unnamed', bytes:file.size||0, sha256:null, hashing:true, placing:false, err:null, soft:null, result:null, tooLarge:file.size > LOCAL_MAX_BYTES };
     render();
-    if (intake.tooLarge) { intake.hashing = false; render(); say(T('bd.add.largenote', 'files this large need batch payments, which are not built — nothing was sent')); return; }
-    // incremental SHA-256 (WebCrypto cannot stream a File directly on every browser — chunked digest)
+    if (intake.tooLarge) { intake.hashing = false; render(); say(T('bd.add.local.largenote', 'This page has not copied the file. Its local memory limit is separate from publishing or payment.')); return; }
+    // Chunked reads, then one WebCrypto digest; LOCAL_MAX_BYTES bounds the
+    // accumulated browser buffer. This is not a streaming hash.
     var chunk = 1024 * 1024, offset = 0, acc = [];
     function step(){
       if (offset >= file.size) {

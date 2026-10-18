@@ -3,7 +3,7 @@
 // repository or production files are touched.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, readdirSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { execFileSync } from "node:child_process";
@@ -96,6 +96,68 @@ test('interactive dependency missing fails before replacing an existing package'
   assert.notEqual(result.code, 0);
   assert.match(result.stderr, /tree-of-life\.mjs/);
   assert.equal(readFileSync(join(pkg, 'sentinel'), 'utf8'), 'keep');
+});
+
+test('local working edition retains text, activates local reading, and is refused by public approval and tar', () => {
+  const root = buildFixture(), pkg = join(root, 'local-pkg'), restored = join(root, 'restored');
+  writeFileSync(join(root, 'surfaces/blood.html'), '<!doctype html><html lang="en"><body>Archive</body></html>');
+  const result = run(['prepare-local', pkg], { cwd: root });
+  assert.equal(result.code, 0, result.stderr);
+  const manifest = JSON.parse(readFileSync(join(pkg, 'manifest.json'), 'utf8'));
+  assert.equal(manifest.schema, 'skaists.preservation-local/1');
+  const localText = readFileSync(join(pkg, 'assets/profile-archive/lineage/local-evidence/persons/pa1.json'), 'utf8');
+  assert.ok(localText.includes('PRIVATE TRANSCRIPTION'));
+  assert.ok(readFileSync(join(pkg, 'surfaces/blood.html'), 'utf8').includes('data-local-evidence="../assets/profile-archive/lineage/local-evidence/"'));
+  assert.equal(run(['verify', pkg], { cwd: root }).code, 0);
+  assert.equal(run(['restore', pkg, restored], { cwd: root }).code, 0);
+  assert.equal(readFileSync(join(restored, 'assets/profile-archive/lineage/local-evidence/persons/pa1.json'), 'utf8'), localText);
+  if (process.platform !== 'win32') {
+    assert.equal(statSync(restored).mode & 0o777, 0o700);
+    assert.equal(statSync(join(restored, 'assets/profile-archive/lineage/local-evidence/persons/pa1.json')).mode & 0o777, 0o600);
+  }
+  const approve = run(['approve', pkg, 'tester', 'public network'], { cwd: root });
+  assert.notEqual(approve.code, 0);
+  assert.match(approve.stderr, /local working copies are not publication editions/);
+  assert.throws(() => execFileSync('bash', [join(REPO, 'tools/genealogy/build-eternalization-tar.sh'), pkg, join(root, 'private.tar')],
+    { encoding: 'utf8', stdio: 'pipe' }), /public preservation edition/);
+  assert.equal(existsSync(join(root, 'private.tar')), false);
+  const publicPkg = join(root, 'public-pkg');
+  assert.equal(run(['prepare', publicPkg], { cwd: root }).code, 0);
+  assert.ok(!readFileSync(join(publicPkg, 'assets/profile-archive/lineage/sources/records.json'), 'utf8').includes('PRIVATE TRANSCRIPTION'));
+  assert.equal(existsSync(join(publicPkg, 'assets/profile-archive/lineage/local-evidence')), false);
+  assert.ok(!readFileSync(join(publicPkg, 'surfaces/blood.html'), 'utf8').includes('data-local-evidence'));
+});
+
+test('failed local acquisition leaves no partial working edition or blocked retry', () => {
+  const root = buildFixture(), pkg = join(root, 'local-pkg'), input = join(root, 'local-input.json');
+  writeFileSync(join(root, 'saved.txt'), 'actual bytes');
+  const evidence = { schema: 'skaists.local-evidence-input/1', artifacts: [{ sourceId: 'rec1', file: 'saved.txt',
+    mediaType: 'text/plain', digest: 'sha256:' + createHash('sha256').update('wrong bytes').digest('hex') }] };
+  writeFileSync(input, JSON.stringify(evidence));
+  const result = run(['prepare-local', pkg, input], { cwd: root });
+  assert.notEqual(result.code, 0);
+  assert.match(result.stderr, /digest mismatch/);
+  assert.equal(existsSync(pkg), false);
+  assert.equal(readdirSync(root).filter(p => p.startsWith('local-pkg.preparing-')).length, 0);
+  evidence.artifacts[0].digest = 'sha256:' + createHash('sha256').update('actual bytes').digest('hex');
+  writeFileSync(input, JSON.stringify(evidence));
+  assert.equal(run(['prepare-local', pkg, input], { cwd: root }).code, 0);
+});
+
+test('local preparation needs no quote or payment configuration; public export removes local activation', () => {
+  const root = buildFixture(), local = join(root, 'local');
+  const economics = join(root, 'assets/profile-archive/lineage/zblood-storage-economics.json');
+  const original = readFileSync(economics);
+  rmSync(economics);
+  assert.equal(run(['prepare-local', local], { cwd: root }).code, 0);
+  const status = JSON.parse(readFileSync(join(local, 'assets/profile-archive/lineage/zblood-storage-economics.json')));
+  assert.deepEqual(status.quotes, {});
+  assert.equal(status.states.uploaded, false);
+  writeFileSync(economics, original);
+  writeFileSync(join(root, 'surfaces/blood.html'), '<html lang="en" data-local-evidence="private/"><body>Archive</body></html>');
+  const publicPkg = join(root, 'public');
+  assert.equal(run(['prepare', publicPkg], { cwd: root }).code, 0);
+  assert.ok(!readFileSync(join(publicPkg, 'surfaces/blood.html'), 'utf8').includes('data-local-evidence'));
 });
 
 test('new transitive import refuses silent omission from the reviewed allowlist', () => {
