@@ -1,6 +1,6 @@
-$ sh scripts/bnrose-evolve/bsigner-xcheck.sh target/debug/bsigner target/debug/bnrose-evolve   # 2026-10-17T00:27:15Z · Linux 6.18.33.2-microsoft-standard-WSL2 x86_64 · 8 cpu · WSL2 on the founder's Windows box
-XCHECK ok   (exit 0): verified: 41 bytes, role sovereign, key bheart-TlatonZAsC307RXg
-XCHECK ok   (exit 0): verified: 41 bytes, role agent, key bheart-OuSoC_0p-gi9lo5j
+$ sh scripts/bnrose-evolve/bsigner-xcheck.sh target/debug/bsigner target/debug/bnrose-evolve   # 2026-10-18T00:55:05Z · Linux 6.18.33.2-microsoft-standard-WSL2 x86_64 · 8 cpu · WSL2 on the founder's Windows box
+XCHECK ok   (exit 0): verified: 41 bytes, role sovereign, key bheart-fzCwMtYnCHAbWXtd
+XCHECK ok   (exit 0): verified: 41 bytes, role agent, key bheart-JJco-onyzjSKhK09
 XCHECK ok   (exit 1): refused: attest:role: Role { needed: "sovereign", signed_by: "agent" }
 XCHECK ok   (exit 1): refused: attest: Attest("content digest mismatch: the signed bytes are not these bytes")
 XCHECK ok   (exit 1): refused: attest: Attest("signature does not verify")
