@@ -20,6 +20,8 @@ fn usage() -> i32 {
          authority --db FILE --authority HEX [--after SEQ] [--limit N]\n\
          steps    --db FILE --root HEX\n\
          status   --db FILE\n\
+         serve    --db FILE --addr HOST:PORT [--max-connections N] [--replay-cap N] [--poll-ms N]\n\
+                  [--header-timeout SECS] [--write-timeout SECS] [--cors]   (zero or absurd bounds refuse by name)\n\
          prove-keyless"
     );
     2
@@ -32,6 +34,48 @@ fn main() {
     };
     let db = || arg(&args, "--db").map(PathBuf::from);
     let code = match cmd.as_str() {
+        "serve" => {
+            let (Some(dbp), Some(addr)) = (db(), arg(&args, "--addr")) else {
+                std::process::exit(usage());
+            };
+            let opts = bindex_bnrose::serve::ServeOptions {
+                max_connections: arg(&args, "--max-connections")
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(64),
+                replay_cap: arg(&args, "--replay-cap")
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(1000),
+                poll_ms: arg(&args, "--poll-ms")
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(500),
+                header_timeout_secs: arg(&args, "--header-timeout")
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(5),
+                write_timeout_secs: arg(&args, "--write-timeout")
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(10),
+                cors: args.iter().any(|a| a == "--cors"),
+                ..bindex_bnrose::serve::ServeOptions::default()
+            };
+            match bindex_bnrose::serve::Server::bind(&dbp, &addr, opts) {
+                Ok(server) => {
+                    eprintln!(
+                        "bindex-bnrose read-only surface on http://{addr} (GET only; SSE at /events; sendtx: NO)"
+                    );
+                    match server.run() {
+                        Ok(()) => 0,
+                        Err(e) => {
+                            eprintln!("{e}");
+                            3
+                        }
+                    }
+                }
+                Err(e) => {
+                    eprintln!("bind {addr}: {e}");
+                    2
+                }
+            }
+        }
         "prove-keyless" => {
             println!(
                 "{}",
