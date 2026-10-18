@@ -730,7 +730,7 @@ jobs:
       # that fails after hand-off never says nothing left. Two runs per size;
       # the only speed gate is the old 4.5 s freeze at 20,000 rows.
       - name: MY SPACE — explorer (stale work, previews, isolation, honest outcomes)
-        timeout-minutes: 8 # measured locally: ~3.5 min with two runs per size
+        timeout-minutes: 10 # measured locally: ~1.5-3.5 min with two runs per size, privacy section included
         if: always()
         working-directory: e2e
         env:

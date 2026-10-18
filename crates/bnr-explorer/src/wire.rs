@@ -136,7 +136,15 @@ impl Writer<'_> {
 /// The whole module call: decode, judge under [`BUDGET`], encode.
 pub fn handle(req: &[u8], out: &mut [u8]) -> usize {
     let v = decode_request(req).map(|(id, body)| crate::preview::preview(&id, body, &BUDGET));
-    encode_verdict(&v, out)
+    let n = encode_verdict(&v, out);
+    // The excerpt is plaintext of the object; its heap buffer is overwritten
+    // before it is freed, so a reused allocation never hands it back.
+    if let Ok(Preview::Text(t)) = v {
+        let mut bytes = t.text.into_bytes();
+        bytes.fill(0);
+        core::hint::black_box(&bytes);
+    }
+    n
 }
 
 #[cfg(test)]
