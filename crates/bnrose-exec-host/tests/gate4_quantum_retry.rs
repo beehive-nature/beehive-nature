@@ -154,7 +154,8 @@ fn test_gate4_unresolved_op_retry_flood_zero_disk_reloads() {
         assert!(outcome.receipt.is_some());
     }
     let elapsed = t0.elapsed();
-    assert!(elapsed.as_millis() < 500, "500 retry checks must be fast in-memory lookups without journal reloads; took {} ms", elapsed.as_millis());
+    let limit_ms = if cfg!(debug_assertions) { 2000 } else { 500 };
+    assert!(elapsed.as_millis() < limit_ms, "500 retry checks must be fast in-memory lookups without journal reloads; took {} ms (limit {} ms)", elapsed.as_millis(), limit_ms);
     println!("gate4: PASS - 500 retry flood operates in memory with zero journal reload in {} ms", elapsed.as_millis());
 }
 

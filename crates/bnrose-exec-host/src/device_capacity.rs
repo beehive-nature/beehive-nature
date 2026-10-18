@@ -164,27 +164,48 @@ impl DeviceCapacityLedger {
     }
 
     /// Host issues a capacity challenge and records its own Instant::now().
+    /// Rejects absurd claims (> 50,000 QPS or 0) upfront.
+    /// Host generates the challenge seed unpredictably (prevents precomputation / d2).
     pub fn issue_challenge(
         &mut self,
         device_id: [u8; 32],
-        challenge_seed: [u8; 32],
         claimed_capacity_qps: u64,
-    ) {
+    ) -> Result<[u8; 32], &'static str> {
+        if claimed_capacity_qps == 0 || claimed_capacity_qps > 50_000 {
+            return Err("capacity:claimed-capacity-excessive");
+        }
+        // Host-generated unpredictable challenge seed
+        let mut seed = [0u8; 32];
+        let mut hasher = Sha256::new();
+        hasher.update(&device_id);
+        hasher.update(&claimed_capacity_qps.to_le_bytes());
+        hasher.update(
+            &std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_nanos()
+                .to_le_bytes(),
+        );
+        hasher.update(&(self.pending_challenges.len() as u64).to_le_bytes());
+        seed.copy_from_slice(&hasher.finalize());
+
         self.pending_challenges.insert(
-            challenge_seed,
+            seed,
             IssuedChallenge {
                 device_id,
-                challenge_seed,
+                challenge_seed: seed,
                 claimed_capacity_qps,
                 issued_at: Instant::now(),
             },
         );
+        Ok(seed)
     }
 
-    /// Host-measured Anti-Sybil verification (r3, r3b):
+    /// Host-measured Anti-Sybil verification (r3, r3b, d1, d2):
     /// The host measures elapsed time itself via Instant::now().elapsed().
     /// Rejects fake 0 ms reports (< 5 ms silicon floor), timeouts (> 30s),
-    /// and enforces 16-bit difficulty (digest[0] == 0 && digest[1] == 0).
+    /// enforces honest 16-bit difficulty (digest[0] == 0 && digest[1] == 0),
+    /// and verifies sequential iterations proportional to claimed QPS without clamping (fixes d1).
     pub fn verify_device_challenge(
         &mut self,
         challenge_seed: &[u8; 32],
@@ -206,8 +227,8 @@ impl DeviceCapacityLedger {
             return Ok(false);
         }
 
-        // 3. Sequential iterations proportional to claimed QPS with overflow protection
-        let iterations = issued.claimed_capacity_qps.saturating_mul(2).clamp(1, 50);
+        // 3. Sequential iterations proportional to claimed QPS (no flat clamp to 50!)
+        let iterations = (issued.claimed_capacity_qps as usize).max(1);
 
         let mut hasher = Sha256::new();
         hasher.update(&issued.device_id);
@@ -225,46 +246,16 @@ impl DeviceCapacityLedger {
         Ok(digest[0] == 0 && digest[1] == 0)
     }
 
-    /// Anti-Sybil Capacity Proof validator with explicit parameters.
-    pub fn verify_capacity_challenge(
-        device_id: &[u8; 32],
-        challenge_seed: &[u8; 32],
-        nonce: u64,
-        claimed_capacity_qps: u64,
-        measured_ms: u64,
-        min_expected_ms: u64,
-        max_duration_ms: u64,
-    ) -> bool {
-        // 1. Physical time window check: prevents instant 0 ms fake claims and timeouts
-        if measured_ms < min_expected_ms || measured_ms > max_duration_ms {
-            return false;
-        }
-
-        // 2. Sequential hash chain: iterations proportional to claimed capacity (with overflow protection)
-        let iterations = claimed_capacity_qps.saturating_mul(2).clamp(1, 50);
-        let mut hasher = Sha256::new();
-        hasher.update(device_id);
-        hasher.update(challenge_seed);
-        hasher.update(&nonce.to_le_bytes());
-        let mut digest = hasher.finalize();
-
-        for _ in 0..iterations {
-            let mut step = Sha256::new();
-            step.update(&digest);
-            digest = step.finalize();
-        }
-
-        // Difficulty: leading 2 bytes must be zero (16-bit difficulty)
-        digest[0] == 0 && digest[1] == 0
-    }
-
     /// Helper to solve the sequential capacity challenge on genuine hardware.
     pub fn solve_capacity_challenge(
         device_id: &[u8; 32],
         challenge_seed: &[u8; 32],
         claimed_capacity_qps: u64,
     ) -> Option<u64> {
-        let iterations = claimed_capacity_qps.saturating_mul(2).clamp(1, 50);
+        if claimed_capacity_qps == 0 || claimed_capacity_qps > 50_000 {
+            return None;
+        }
+        let iterations = (claimed_capacity_qps as usize).max(1);
         for nonce in 0..10_000_000u64 {
             let mut hasher = Sha256::new();
             hasher.update(device_id);

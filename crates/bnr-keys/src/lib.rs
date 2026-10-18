@@ -34,6 +34,53 @@ pub const TEST_DIGEST_HEX: &str =
 const B58: &[u8; 58] = b"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 /// base58 (bitcoin alphabet, leading zeros → '1's) — the law every EOSIO string rides on.
+pub fn base58_decode(s: &str) -> Result<Vec<u8>, &'static str> {
+    let bytes = s.as_bytes();
+    let zeros = bytes.iter().take_while(|&&b| b == b'1').count();
+    let mut digits: Vec<u8> = Vec::with_capacity(bytes.len());
+    for &ch in &bytes[zeros..] {
+        let val = match B58.iter().position(|&b| b == ch) {
+            Some(v) => v as u32,
+            None => return Err("invalid base58 character"),
+        };
+        let mut carry = val;
+        for d in digits.iter_mut() {
+            carry += (*d as u32) * 58;
+            *d = (carry & 0xff) as u8;
+            carry >>= 8;
+        }
+        while carry > 0 {
+            digits.push((carry & 0xff) as u8);
+            carry >>= 8;
+        }
+    }
+    let mut out = Vec::with_capacity(zeros + digits.len());
+    for _ in 0..zeros {
+        out.push(0);
+    }
+    for b in digits.iter().rev() {
+        out.push(*b);
+    }
+    Ok(out)
+}
+
+/// Decode a SIG_K1_ string: verifies "SIG_K1_" prefix, base58 decodes 69 bytes,
+/// verifies the ripemd160(65B + "K1")[0..4] checksum, and returns the 65-byte payload.
+pub fn decode_sig_k1(s: &str) -> Result<[u8; 65], &'static str> {
+    let stripped = s.strip_prefix("SIG_K1_").ok_or("missing SIG_K1_ prefix")?;
+    let decoded = base58_decode(stripped)?;
+    if decoded.len() != 69 {
+        return Err("invalid sig_k1 length");
+    }
+    let expected_ck = ripemd160_suffix4(&decoded[..65], "K1");
+    if decoded[65..69] != expected_ck {
+        return Err("sig_k1 checksum mismatch");
+    }
+    let mut out = [0u8; 65];
+    out.copy_from_slice(&decoded[..65]);
+    Ok(out)
+}
+
 pub fn base58_encode(data: &[u8]) -> String {
     let zeros = data.iter().take_while(|&&b| b == 0).count();
     let mut digits: Vec<u8> = Vec::with_capacity(data.len() * 138 / 100 + 1);
@@ -342,6 +389,15 @@ mod tests {
         assert_eq!(n, expect);
         assert!(account_name_u64("kingbeelovis").is_ok());
         assert!(account_name_u64("bad_name!").is_err());
+    }
+
+    #[test]
+    #[test]
+    fn test_base58_decode_and_sig_k1() {
+        let payload = decode_sig_k1(TEST_SIG_VECTOR).unwrap();
+        assert_eq!(hex_string(&payload), TEST_SIG_PAYLOAD_HEX);
+        let re_encoded = sig_k1_string(&payload);
+        assert_eq!(re_encoded, TEST_SIG_VECTOR);
     }
 
     #[test]

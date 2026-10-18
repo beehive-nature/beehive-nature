@@ -114,6 +114,7 @@ fn generate_bulk_journal(count: usize, key: &[u8; 32], policy_wire: &[u8]) -> Ve
 }
 
 #[test]
+#[cfg_attr(debug_assertions, ignore = "Gate 1 100k-op latency scaling requires --release")]
 fn test_gate1_flat_admit_latency_scaling() {
     let bounds = Bounds::default();
     let checkpoints = [1_000usize, 10_000usize, 100_000usize];

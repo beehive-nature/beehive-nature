@@ -25,6 +25,7 @@ use crate::receipt::{state_word, Receipt};
 use crate::worker::{Bounds, Worker};
 use crate::device_capacity::{DeviceCapacityLedger, DeviceLimits, ResourceBudget};
 use crate::load_shed::CrossDaoAdmissionControl;
+
 use crate::{
     admit_request, hex, parse_admit_verdict, parse_step_verdict, step_request, AdmitVerdict,
     StepVerdict,
@@ -55,7 +56,7 @@ pub struct Supervisor {
     step_entities: BTreeMap<u8, StepEntity>,
     /// In-memory map of (root, step) -> max_attempt
     step_attempts: BTreeMap<([u8; 32], u8), u8>,
-    cached_receipts: BTreeMap<[u8; 32], (PathBuf, Option<std::time::SystemTime>, Receipt, Value)>,
+    cached_receipts: BTreeMap<[u8; 32], (Option<std::time::SystemTime>, Receipt, Value)>,
     pub capacity_ledger: DeviceCapacityLedger,
     pub load_shed: CrossDaoAdmissionControl,
     pub device_id: [u8; 32],
@@ -177,10 +178,9 @@ impl Supervisor {
     pub fn issue_capacity_challenge(
         &mut self,
         device_id: [u8; 32],
-        challenge_seed: [u8; 32],
         claimed_capacity_qps: u64,
-    ) {
-        self.capacity_ledger.issue_challenge(device_id, challenge_seed, claimed_capacity_qps);
+    ) -> Result<[u8; 32], &'static str> {
+        self.capacity_ledger.issue_challenge(device_id, claimed_capacity_qps)
     }
 
     pub fn verify_device_challenge(
@@ -189,27 +189,6 @@ impl Supervisor {
         nonce: u64,
     ) -> Result<bool, &'static str> {
         self.capacity_ledger.verify_device_challenge(challenge_seed, nonce)
-    }
-
-    pub fn verify_capacity_challenge(
-        &self,
-        device_id: &[u8; 32],
-        challenge_seed: &[u8; 32],
-        nonce: u64,
-        claimed_capacity_qps: u64,
-        measured_ms: u64,
-        min_expected_ms: u64,
-        max_duration_ms: u64,
-    ) -> bool {
-        crate::device_capacity::DeviceCapacityLedger::verify_capacity_challenge(
-            device_id,
-            challenge_seed,
-            nonce,
-            claimed_capacity_qps,
-            measured_ms,
-            min_expected_ms,
-            max_duration_ms,
-        )
     }
 
     pub fn open(
@@ -305,12 +284,32 @@ impl Supervisor {
             }
         }
         let mut cached_receipts = BTreeMap::new();
-        // Startup recovery (r4): resolve any pre-dispatch operations interrupted by crash
-        // Marks unresolved pre-dispatch operations as E_BOUNDED_FAIL, caches receipt,
-        // and strictly releases capacity reservation (zero stuck capacity leak on reboot).
+        let mut dispatched_ops = BTreeSet::new();
         for r in &records {
-            if r.event == bnrose_exec_core::E_RESERVE && !terminal_ops.contains(&r.op_id) {
-                let op = r.op_id;
+            if r.event == bnrose_exec_core::E_DISPATCH {
+                dispatched_ops.insert(r.op_id);
+            }
+        }
+
+        // Collect all ops admitted or reserved before reboot
+        let mut admitted_candidates = BTreeSet::new();
+        for r in &records {
+            if r.event == bnrose_exec_core::E_ADMITTED || r.event == bnrose_exec_core::E_RESERVE {
+                admitted_candidates.insert(r.op_id);
+            }
+        }
+
+        // Startup sweep (r4, r4b, r6): resolve ONLY operations that crashed PRE-DISPATCH.
+        // If an operation reached DISPATCH, it is preserved as UNKNOWN per SPEC-RUSTEOSVM-1.
+        // It must NEVER be poisoned as E_BOUNDED_FAIL.
+        for op in admitted_candidates {
+            if !terminal_ops.contains(&op) {
+                if dispatched_ops.contains(&op) {
+                    // It dispatched! Worker ran it or sent it out.
+                    // Preserve as UNKNOWN across reboot. Do NOT append E_BOUNDED_FAIL!
+                    continue;
+                }
+                // Pre-dispatch crash (crashed after E_ADMITTED or E_RESERVE before E_DISPATCH)
                 let word = "crash:interrupted-pre-dispatch";
                 let mut p = Vec::new();
                 p.extend_from_slice(&1001u32.to_le_bytes());
@@ -349,7 +348,7 @@ impl Supervisor {
                         let _ = std::fs::write(&path, json_str);
                     }
                     let mtime = std::fs::metadata(&path).ok().and_then(|m| m.modified().ok());
-                    cached_receipts.insert(op, (path, mtime, r, v));
+                    cached_receipts.insert(op, (mtime, r, v));
                 }
             }
         }
@@ -389,7 +388,7 @@ impl Supervisor {
             .state_dir
             .join("receipts")
             .join(format!("op-{}.json", hex(&r.op)));
-        std::fs::write(&p, serde_json::to_string_pretty(&v).unwrap()).map_err(|e| e.to_string())?;
+        std::fs::write(&p, serde_json::to_string(&v).unwrap()).map_err(|e| e.to_string())?;
         Ok((p, v))
     }
 
@@ -417,7 +416,7 @@ impl Supervisor {
         r.sig = Receipt::sign_statement(&self.keys.ed_seed, &r.statement());
         let (p, v) = self.write_receipt(&r)?;
         let mtime = std::fs::metadata(&p).ok().and_then(|m| m.modified().ok());
-        self.cached_receipts.insert(*op, (p.clone(), mtime, r.clone(), v.clone()));
+        self.cached_receipts.insert(*op, (mtime, r.clone(), v.clone()));
         Ok((r, p, v))
     }
 
@@ -625,38 +624,37 @@ impl Supervisor {
                 }
 
 
-                // 2. Check cached receipt with disk freshness verification
-                if let Some((p, cached_mtime, r, v)) = self.cached_receipts.get(&prev_op) {
-                    let mtime = std::fs::metadata(p).ok().and_then(|m| m.modified().ok());
-                    if mtime.is_some() && mtime == *cached_mtime {
-                        if r.env_sha != env_sha {
-                            return RunOutcome {
-                                op: Some(prev_op),
-                                refused: Some("admission:nonce-reuse — payload mismatch".into()),
-                                ..none
-                            };
-                        }
-                        return RunOutcome {
-                            op: Some(prev_op),
-                            refused: None,
-                            lost_response: false,
-                            receipt: Some(r.clone()),
-                            receipt_path: Some(p.clone()),
-                            receipt_json: Some(v.clone()),
-                        };
-                    }
-                }
-
+                // 2. Check receipt on disk with mtime verification (fixes a1, Gate 4)
                 let p = self.state_dir.join("receipts").join(format!("op-{}.json", hex(&prev_op)));
                 if p.exists() {
                     let mtime = std::fs::metadata(&p).ok().and_then(|m| m.modified().ok());
-                    if let Ok(text) = std::fs::read_to_string(&p) {
-                        if let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) {
+                    if let Some((cached_mtime, r, v)) = self.cached_receipts.get(&prev_op) {
+                        if mtime.is_some() && mtime == *cached_mtime {
+                            if r.env_sha != env_sha {
+                                return RunOutcome {
+                                    op: Some(prev_op),
+                                    refused: Some("admission:nonce-reuse - payload mismatch".into()),
+                                    ..none
+                                };
+                            }
+                            return RunOutcome {
+                                op: Some(prev_op),
+                                refused: None,
+                                lost_response: false,
+                                receipt: Some(r.clone()),
+                                receipt_path: Some(p),
+                                receipt_json: Some(v.clone()),
+                            };
+                        }
+                    }
+
+                    if let Ok(bytes) = std::fs::read(&p) {
+                        if let Ok(v) = serde_json::from_slice::<serde_json::Value>(&bytes) {
                             if let Ok(r) = Receipt::from_json(&v) {
                                 if r.env_sha != env_sha {
                                     return RunOutcome {
                                         op: Some(prev_op),
-                                        refused: Some("admission:nonce-reuse — payload mismatch".into()),
+                                        refused: Some("admission:nonce-reuse - payload mismatch".into()),
                                         ..none
                                     };
                                 }
@@ -667,7 +665,7 @@ impl Supervisor {
                                         ..none
                                     };
                                 }
-                                self.cached_receipts.insert(prev_op, (p.clone(), mtime, r.clone(), v.clone()));
+                                self.cached_receipts.insert(prev_op, (mtime, r.clone(), v.clone()));
                                 return RunOutcome {
                                     op: Some(prev_op),
                                     refused: None,

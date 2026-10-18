@@ -223,6 +223,84 @@ pub fn authorize_vaulta_k1_action(
 }
 
 /// Verifies that an authorized action has a valid K1 signature matching the given seed and canonical digest.
+use std::path::PathBuf;
+
+/// Stateful Vaulta authorizer with durable spent-nonce tracking across node restarts.
+pub struct VaultaAuthorizer {
+    pub k1_seed: [u8; 32],
+    pub pinned_authority: String,
+    pub nonces_path: Option<PathBuf>,
+    pub seen_nonces: BTreeSet<[u8; 32]>,
+}
+
+impl VaultaAuthorizer {
+    pub fn open(
+        k1_seed: [u8; 32],
+        pinned_authority: String,
+        nonces_path: Option<PathBuf>,
+    ) -> Result<Self, String> {
+        let mut seen_nonces = BTreeSet::new();
+        if let Some(ref p) = nonces_path {
+            if p.exists() {
+                if let Ok(bytes) = std::fs::read(p) {
+                    for chunk in bytes.chunks_exact(32) {
+                        let mut nonce = [0u8; 32];
+                        nonce.copy_from_slice(chunk);
+                        seen_nonces.insert(nonce);
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            k1_seed,
+            pinned_authority,
+            nonces_path,
+            seen_nonces,
+        })
+    }
+
+    pub fn authorize(
+        &mut self,
+        trx: &VaultaTransaction,
+        pq_intent_authorization: Option<&str>,
+        current_time_secs: u32,
+    ) -> Result<VaultaAuthorizedAction, String> {
+        let action = authorize_vaulta_k1_action(
+            trx,
+            &self.k1_seed,
+            pq_intent_authorization,
+            &self.pinned_authority,
+            current_time_secs,
+            &mut self.seen_nonces,
+        )?;
+
+        if let Some(ref p) = self.nonces_path {
+            if let Some(auth_str) = pq_intent_authorization {
+                if let Ok(auth_val) = serde_json::from_str::<serde_json::Value>(auth_str) {
+                    if let Some((_, env_bytes)) = crate::bpq::verify_intent(&auth_val) {
+                        if let Ok(dec) = btungsten_wb001::decode(&env_bytes) {
+                            use std::io::Write;
+                            let mut file = std::fs::OpenOptions::new()
+                                .create(true)
+                                .append(true)
+                                .open(p)
+                                .map_err(|e| format!("vaulta:failed-to-persist-nonce: {e}"))?;
+                            file.write_all(&dec.nonce)
+                                .map_err(|e| format!("vaulta:failed-to-write-nonce: {e}"))?;
+                            file.flush()
+                                .map_err(|e| format!("vaulta:failed-to-flush-nonce: {e}"))?;
+                        }
+                    }
+                }
+            }
+        }
+        Ok(action)
+    }
+}
+
+
+
+/// Verifies that an authorized action has a valid K1 signature matching the given seed and canonical digest.
 pub fn verify_vaulta_k1_action(k1_seed: &[u8; 32], action: &VaultaAuthorizedAction) -> bool {
     let digest = action.transaction.digest();
     if action.pq_attestation.action_digest != digest {
@@ -231,7 +309,13 @@ pub fn verify_vaulta_k1_action(k1_seed: &[u8; 32], action: &VaultaAuthorizedActi
     let Ok(expected_pub) = bnr_keys::pub_k1_string(k1_seed) else {
         return false;
     };
-    action.k1_public_key == expected_pub
+    if action.k1_public_key != expected_pub {
+        return false;
+    }
+    let Ok(payload65) = bnr_keys::decode_sig_k1(&action.k1_signature) else {
+        return false;
+    };
+    bnr_keys::verify_digest65(k1_seed, &digest, &payload65)
 }
 
 #[cfg(test)]
@@ -530,5 +614,55 @@ mod tests {
         assert!(res.is_err());
         assert!(res.err().unwrap().contains("vaulta:authority-mismatch"));
         println!("vaulta: PASS - stranger authority correctly rejected");
+    }
+
+    #[test]
+    fn test_vaulta_forged_signature_refused() {
+        let trx = sample_transaction("eosio.token", "transfer", "alice", "active");
+        let prk = [0x44; 32];
+        let (attestation_str, auth_id) = make_valid_bpq_attestation(&trx, &prk, "vaulta", 101, 2_000_000_000);
+        let mut seen_nonces = BTreeSet::new();
+
+        let mut action = authorize_vaulta_k1_action(
+            &trx,
+            &TEST_K1_SEED,
+            Some(&attestation_str),
+            &auth_id,
+            1_700_000_000,
+            &mut seen_nonces,
+        ).unwrap();
+
+        assert!(verify_vaulta_k1_action(&TEST_K1_SEED, &action), "genuine signature must verify");
+
+        // Repro g5: forged garbage signature must be rejected
+        action.k1_signature = "SIG_K1_forgedforgedforged".into();
+        assert!(!verify_vaulta_k1_action(&TEST_K1_SEED, &action), "forged signature must be refused");
+    }
+
+    #[test]
+    fn test_vaulta_durable_nonces_persist_across_restarts() {
+        let temp_dir = std::env::temp_dir().join(format!("vaulta-test-{}", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
+        std::fs::create_dir_all(&temp_dir).unwrap();
+        let nonces_path = temp_dir.join("spent_nonces.bin");
+
+        let trx = sample_transaction("eosio.token", "transfer", "alice", "active");
+        let prk = [0x44; 32];
+        let (attestation_str, auth_id) = make_valid_bpq_attestation(&trx, &prk, "vaulta", 102, 2_000_000_000);
+
+        // Instance 1: Authorizes action and persists spent nonce to disk
+        {
+            let mut authorizer = VaultaAuthorizer::open(TEST_K1_SEED, auth_id.clone(), Some(nonces_path.clone())).unwrap();
+            let action = authorizer.authorize(&trx, Some(&attestation_str), 1_700_000_000).unwrap();
+            assert!(verify_vaulta_k1_action(&TEST_K1_SEED, &action));
+        }
+
+        // Instance 2 (Node restart): Re-opens from disk and proves spent nonce survives
+        {
+            let mut restarted = VaultaAuthorizer::open(TEST_K1_SEED, auth_id.clone(), Some(nonces_path.clone())).unwrap();
+            let replay = restarted.authorize(&trx, Some(&attestation_str), 1_700_000_000);
+            assert!(replay.is_err());
+            assert!(replay.err().unwrap().contains("vaulta:replay-detected"), "spent nonce must persist across restarts");
+        }
+        let _ = std::fs::remove_dir_all(&temp_dir);
     }
 }

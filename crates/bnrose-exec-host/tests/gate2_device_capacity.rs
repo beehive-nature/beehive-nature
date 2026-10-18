@@ -97,25 +97,21 @@ fn test_gate2_overcommit_storm_1000_attempts_100_percent_refused() {
 fn test_gate2_host_measured_sybil_device_capacity_challenge() {
     let mut ledger = DeviceCapacityLedger::new();
     let device_id = [0x88; 32];
-    let seed = [0x12; 32];
     let qps = 2; // small honest claimed QPS for fast test
 
-    // Solve honest 16-bit challenge on hardware
-    let nonce = DeviceCapacityLedger::solve_capacity_challenge(&device_id, &seed, qps)
-        .expect("must find valid nonce for 16-bit challenge");
-
-    // 1. Issue challenge on host with host-measured Instant::now()
-    ledger.issue_challenge(device_id, seed, qps);
-
-    // 2. FAKE 0 ms check: immediate verification without hardware execution time MUST BE REJECTED by host's clock
-    let instant_fake = ledger.clone().verify_device_challenge(&seed, nonce);
+    // 1. FAKE 0 ms check: immediate verification without hardware execution time (< 5 ms) MUST BE REJECTED by host's clock
+    let instant_seed = ledger.issue_challenge(device_id, qps).expect("issue challenge");
+    let instant_fake = ledger.verify_device_challenge(&instant_seed, 0);
     assert_eq!(
         instant_fake,
         Ok(false),
         "host must measure elapsed time itself and reject instant fake claims (< 5 ms silicon floor)"
     );
 
-    // 3. Physical silicon floor check: wait until at least 6 ms elapsed on genuine hardware
+    // 2. Physical silicon floor check: genuine hardware solution with host-measured >= 5 ms must be accepted
+    let seed = ledger.issue_challenge(device_id, qps).expect("issue challenge");
+    let nonce = DeviceCapacityLedger::solve_capacity_challenge(&device_id, &seed, qps)
+        .expect("must find valid nonce for 16-bit challenge");
     std::thread::sleep(std::time::Duration::from_millis(6));
     let honest_res = ledger.verify_device_challenge(&seed, nonce);
     assert_eq!(
@@ -131,11 +127,26 @@ fn test_gate2_host_measured_sybil_device_capacity_challenge() {
         "consumed challenge cannot be replayed"
     );
 
-    // 5. Overflow resistance check (r3b): 2^63 claimed QPS does not panic or overflow
+    // 5. Overflow & absurd claim resistance check (r3b, d2):
+    // 2^63 claimed QPS is rejected upfront as excessive by host
     let huge_qps = 1u64 << 63;
-    let _safe = DeviceCapacityLedger::verify_capacity_challenge(&device_id, &seed, nonce, huge_qps, 10, 5, 50);
+    assert_eq!(
+        ledger.issue_challenge(device_id, huge_qps),
+        Err("capacity:claimed-capacity-excessive"),
+        "absurd capacity claims must be rejected upfront"
+    );
 
-    println!("gate2: PASS - host-measured timing rejects 0 ms fakes, enforces 16-bit difficulty, and prevents QPS overflow");
+    // 6. Nonce binding to claimed capacity (d1):
+    // A nonce solved for QPS=2 cannot satisfy a challenge issued for QPS=10 (different iterations)
+    let seed2 = ledger.issue_challenge(device_id, 10).expect("issue second challenge");
+    std::thread::sleep(std::time::Duration::from_millis(6));
+    assert_eq!(
+        ledger.verify_device_challenge(&seed2, nonce),
+        Ok(false),
+        "nonce for QPS=2 must not satisfy QPS=10"
+    );
+
+    println!("gate2: PASS - host-measured timing rejects 0 ms fakes, enforces 16-bit difficulty, scales iterations, and rejects excessive claims");
 }
 
 #[test]
