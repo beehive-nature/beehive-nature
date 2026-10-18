@@ -618,6 +618,10 @@ jobs:
         env:
           S7_BEFORE: ${{ github.event.pull_request.base.sha || github.event.before }}
           S7_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          # a branch push (refs/heads/, not tags) to any branch but main checks the branch's whole contribution
+          # against main as this checkout fetched it (pinned to a full SHA in the
+          # log); main's own pushes keep before..after, pull requests base..head
+          S7_TARGET: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') && github.ref != 'refs/heads/main' && 'origin/main' || '' }}
         run: sh scripts/identity-check.sh
 
   node:
