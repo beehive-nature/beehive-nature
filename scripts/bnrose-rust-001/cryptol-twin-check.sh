@@ -52,7 +52,7 @@ for s in yices z3; do command -v "$s" >/dev/null 2>&1 && say "$s: $("$s" --versi
 [ -x /usr/bin/time ] || { say "cryptol-twin: /usr/bin/time is missing; the receipt needs peak RSS"; exit 1; }
 say "caps: address space ${MEM_CAP_KIB} KiB per process, a ${BUDGET_SECS}s clock per obligation"
 
-OBLIGATIONS="gateFailsClosed gateNeedsNeverExecuted gateOpensOnlyWhenBothHold replacementNeverTouchesARow freshAttemptBelowSaturation oldRecordsStand saturationCornerReusesSlot15"
+OBLIGATIONS="BnroseReplacement.cry:gateFailsClosed BnroseReplacement.cry:gateNeedsNeverExecuted BnroseReplacement.cry:gateOpensOnlyWhenBothHold BnroseReplacement.cry:replacementNeverTouchesARow BnroseReplacement.cry:freshAttemptBelowSaturation BnroseReplacement.cry:oldRecordsStand BnroseReplacement.cry:saturationCornerReusesSlot15 BnroseReplacement.cry:nextAttemptDependsOnlyOnMax BnroseReplacement.cry:gateDependsOnlyOnAnyRow BnroseReplacement.cry:attempt8Agrees BnroseComposition.cry:applyIdempotent BnroseComposition.cry:twoDispatchesAtMostOneEffect BnroseComposition.cry:oneEffectWhenFreshAndDispatched BnroseComposition.cry:staleViewsStillOneEffect BnroseComposition.cry:saturationReuseSingleEffect BnroseComposition.cry:reconciledGateCloses"
 N=0
 PROVEN=""
 OPEN=""
@@ -70,9 +70,11 @@ variant() {
   echo "$_d/BnroseReplacement.cry"
 }
 
-for ob in $OBLIGATIONS; do
+for entry in $OBLIGATIONS; do
+  ob=${entry#*:}
+  _file="$DIR/${entry%%:*}"
   N=$((N + 1))
-  printf '%s\n' "$CRYPTOL" yices "$BUDGET_SECS" "$SPEC" ":prove $ob" "$MEM_CAP_KIB" > "$OUT/$N.spec"
+  printf '%s\n' "$CRYPTOL" yices "$BUDGET_SECS" "$_file" ":prove $ob" "$MEM_CAP_KIB" > "$OUT/$N.spec"
   sh "$0" --one "$OUT/$N.spec"
   rc=$(cat "$OUT/$N.spec.rc"); log="$OUT/$N.spec.log"
   if   grep -q 'Q.E.D.' "$log"; then
@@ -94,6 +96,19 @@ for ob in $OBLIGATIONS; do
     RED=1
   fi
 done
+
+# ---- the composition control: a NAIVE destination must COUNTEREXAMPLE --------
+# (the destination's op-keyed dedup is load-bearing, not decorative)
+N=$((N + 1))
+printf '%s\n' "$CRYPTOL" yices "$BUDGET_SECS" "$DIR/BnroseComposition.cry" ":prove naiveDestinationDuplicates" "$MEM_CAP_KIB" > "$OUT/$N.spec"
+sh "$0" --one "$OUT/$N.spec"
+if grep -qi 'counterexample' "$OUT/$N.spec.log"; then
+  say "CONTROL naive-destination: counterexample (a dedup-free destination duplicates) — the enforcement is load-bearing"
+else
+  say "CONTROL naive-destination: FAIL — the naive model must refute" >&2
+  sed -n '1,12p' "$OUT/$N.spec.log" >&2
+  RED=1
+fi
 
 # ---- the negative controls: one substitution each, must COUNTEREXAMPLE ------
 GATE_LINE='gate optIn rows = optIn && (rows == zero)'
@@ -123,11 +138,17 @@ fi
 # ---- the composed verdict ---------------------------------------------------
 # A composition, never a single :prove verdict: PROVEN only if every
 # obligation it rests on printed Q.E.D. in this run.
+_TOTAL=$(echo $OBLIGATIONS | wc -w | tr -d " ")
+_PROVED=$(echo $PROVEN | wc -w | tr -d " ")
 if [ -z "$OPEN" ] && [ "$RED" = 0 ]; then
-  say "COMPOSED  the exact replacement law (fail-closed without the flag; any recorded effect closes the gate; the gate is exactly the conjunction; a replacement's entity is fresh and rowless below saturation; old records stand; the saturation corner reuses slot 15): PROVEN over $(echo $OBLIGATIONS | wc -w | tr -d " ") obligations + 2 controls"
+  say "COMPOSED  the exact replacement law + its composition (fail-closed without the flag; any recorded effect closes the gate; the gate is exactly the conjunction; a replacement's entity is fresh and rowless below saturation; old records stand; the saturation corner reuses slot 15; the SAW binding lemmas; two sovereigns one effect under the ASSUMED destination model): PROVEN over $_TOTAL obligations + 2 controls"
 elif [ "$RED" = 0 ]; then
   say "COMPOSED  the exact replacement law: NOT-PROVEN (open:$OPEN) — recorded, never a wedge"
 fi
 
 [ "$RED" = 0 ] || { say "cryptol-twin: RED — see the REFUTED/RED rows above" >&2; exit 1; }
-say "cryptol-twin: green (every executed obligation PROVEN; open ones recorded, never success)"
+# Qualification-record distinction (independent review 2026-10-16): the
+# green line CARRIES THE COUNTS. A green workflow with open obligations
+# is a legitimate recorded state — but it must never be readable as
+# "all obligations proved".
+say "cryptol-twin: green — proved $_PROVED/$_TOTAL obligations; open $(($_TOTAL - _PROVED)) (recorded, never success); green here means NO REFUTED obligation, not all-proved"
