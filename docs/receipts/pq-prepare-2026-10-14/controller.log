@@ -1,0 +1,29 @@
+   Compiling pq-prepare-proof v0.1.0 (/workspace/wt-pq-proof/crates/btungsten-x0x-pq/proof)
+    Finished `release` profile [optimized] target(s) in 2.60s
+     Running `crates/btungsten-x0x-pq/proof/target/release/pq-prepare-proof run target/pq-prepare-release /workspace/saw/bin/saw`
+PREPARE RUN gate-tests
+PREPARE RUN native-honest
+PREPARE RUN native-accept
+PREPARE RUN native-reject
+PREPARE RUN native-message
+PREPARE RUN native-context
+PREPARE RUN native-signature
+PREPARE RUN native-empty
+PREPARE RUN mir-build
+PREPARE RUN formal-honest
+PREPARE FORMAL formal-honest: all 36 required obligations proven
+PREPARE RUN formal-accept
+PREPARE FORMAL formal-accept: intended counterexample
+PREPARE RUN formal-reject
+PREPARE FORMAL formal-reject: intended counterexample
+PREPARE RUN formal-message
+PREPARE FORMAL formal-message: intended counterexample
+PREPARE RUN formal-context
+PREPARE FORMAL formal-context: intended counterexample
+PREPARE RUN formal-signature
+PREPARE FORMAL formal-signature: intended counterexample
+PREPARE RUN formal-key
+PREPARE FORMAL formal-key: intended counterexample
+PREPARE RUN formal-reuse
+PREPARE FORMAL formal-reuse: intended counterexample
+PREPARE PASS: conditional wrapper proof, native regressions, and convicted controls

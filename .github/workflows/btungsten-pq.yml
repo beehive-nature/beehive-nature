@@ -6,18 +6,16 @@ name: bTunGsTeN PQ
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
-# SUPERSEDED RUNS (2026-10-15): a newer push to the same branch, or a newer
-# head on the same pull request, cancels this workflow's run for the older
-# commit, whose result could never gate a merge again (measured that day: 89
-# of 192 queued runs repo-wide were for commits no longer any branch's head).
-# Main and manual dispatches each get a group of their own, so they are never
-# cancelled or folded into another run; the exact head always gets a full run.
-# tests.yml and secret-scan.yml are deliberately left out: the §7 identity
-# check reads only the commits a push added, so a cancelled push run there
-# would let those commits skip detection.
+# Feature heads run through pull_request once; a simultaneous branch-push
+# replay would duplicate the same batteries. Main and manual runs stay.
+# tests.yml and secret-scan.yml still audit every branch push independently.
+# A newer PR head cancels its superseded proof run. Main and manual runs
+# each get a unique group, so they are never folded into another run.
+# Independent identity and secret audits keep their existing run policy.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && github.run_id || github.ref }}
   cancel-in-progress: true
@@ -37,6 +35,31 @@ permissions:
 # maps Plonky3's own workspace (crates/btungsten-p3count, own lockfile).
 
 jobs:
+  x0x-pq:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: crates/btungsten-x0x-pq -> crates/btungsten-x0x-pq/target
+          cache-all-crates: true
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - name: Install the pinned audit tool
+        run: cargo install cargo-audit --locked --version 0.22.2
+      - name: x0x pinned implementations — official vectors, differential checks, sabotage and audits
+        run: python3 scripts/btungsten/x0x-pq-check.py
+      - name: Prepared public-key comparator — assurance, sabotage, and measured speed
+        run: python3 scripts/btungsten/pq-speed-check.py --out target/x0x-pq/speed
+      - name: Retain x0x evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: x0x-pq-evidence
+          path: target/x0x-pq/
+          if-no-files-found: error
+
   pq00-teeth:
     runs-on: ubuntu-24.04
     timeout-minutes: 30

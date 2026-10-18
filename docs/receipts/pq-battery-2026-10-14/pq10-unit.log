@@ -1,0 +1,133 @@
+    Updating git repository `https://github.com/Plonky3/Plonky3`
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded approx v0.5.1
+  Downloaded thiserror-impl v2.0.21
+  Downloaded either v1.19.0
+  Downloaded num-complex v0.4.6
+  Downloaded rawpointer v0.2.1
+  Downloaded spin v0.12.3
+  Downloaded thiserror v2.0.21
+  Downloaded num-rational v0.4.2
+  Downloaded tiny-keccak v2.0.2
+  Downloaded simba v0.10.2
+  Downloaded matrixmultiply v0.3.11
+  Downloaded safe_arch v1.2.0
+  Downloaded num-bigint v0.5.1
+  Downloaded wide v1.7.1
+  Downloaded statrs v0.19.1
+  Downloaded nalgebra v0.35.0
+  Downloaded glam v0.30.10
+  Downloaded libc v0.2.190
+  Downloaded glam v0.32.1
+  Downloaded glam v0.31.1
+  Downloaded glam v0.33.12
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.26
+   Compiling autocfg v1.5.1
+   Compiling libm v0.2.16
+   Compiling serde_core v1.0.229
+   Compiling libc v0.2.190
+   Compiling num-traits v0.2.19
+   Compiling cfg-if v1.0.5
+   Compiling rand_core v0.10.1
+   Compiling getrandom v0.4.3
+   Compiling syn v3.0.6
+   Compiling cpufeatures v0.3.1
+   Compiling serde v1.0.229
+   Compiling chacha20 v0.10.2
+   Compiling num-integer v0.1.47
+   Compiling rand v0.10.3
+   Compiling syn v2.0.119
+   Compiling paste v1.0.15
+   Compiling thiserror v2.0.21
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.21
+   Compiling tracing-core v0.1.36
+   Compiling pin-project-lite v0.2.17
+   Compiling either v1.19.0
+   Compiling p3-maybe-rayon v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling itertools v0.15.0
+   Compiling num-bigint v0.5.1
+   Compiling scopeguard v1.2.0
+   Compiling lock_api v0.4.14
+   Compiling spin v0.12.3
+   Compiling crunchy v0.2.4
+   Compiling tiny-keccak v2.0.2
+   Compiling bytemuck v1.25.2
+   Compiling p3-util v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling safe_arch v1.2.0
+   Compiling matrixmultiply v0.3.11
+   Compiling wide v1.7.1
+   Compiling approx v0.5.1
+   Compiling num-complex v0.4.6
+   Compiling rawpointer v0.2.1
+   Compiling zmij v1.0.23
+   Compiling tracing-attributes v0.1.31
+   Compiling num-rational v0.4.2
+   Compiling tracing v0.1.44
+   Compiling p3-field v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling typenum v1.20.1
+   Compiling serde_json v1.0.151
+   Compiling cobs v0.3.0
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling postcard v1.1.3
+   Compiling p3-matrix v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling p3-symmetric v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling p3-keccak v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling p3-dft v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling p3-air v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling p3-mds v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling p3-commit v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling p3-poseidon2 v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling p3-poseidon1 v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling p3-challenger v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling p3-monty-31 v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling p3-security v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling p3-koala-bear v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling p3-poseidon2-air v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling simba v0.10.2
+   Compiling p3-uni-stark v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling p3-fri v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling p3-merkle-tree v0.8.0 (https://github.com/Plonky3/Plonky3?rev=eab7f0e3662500cde47cb0b6dad61afc99e3deac#eab7f0e3)
+   Compiling nalgebra v0.35.0
+   Compiling statrs v0.19.1
+   Compiling btungsten-p3count v0.1.0 (/workspace/wt-pq-battery/crates/btungsten-p3count)
+    Finished `release` profile [optimized] target(s) in 3m 15s
+     Running unittests src/lib.rs (target/release/deps/btungsten_p3count-c66a903f3c377f2f)
+
+running 4 tests
+test statement::tests::kept_matches_the_circuit_on_every_leaf_shape ... ok
+test statement::tests::limbs_split_and_rejoin_64_bits ... ok
+test statement::tests::the_asymmetric_cohort_keeps_20_dead_and_19_live ... ok
+test statement::tests::the_root_depends_on_every_leaf ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/bin/p3count.rs (target/release/deps/p3count-ade876f68a5887e1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/p3count-scan.rs (target/release/deps/p3count_scan-c2bf55f3ac30d634)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/prove.rs (target/release/deps/prove-a77236d4a00c0965)
+
+running 1 test
+test the_true_claims_prove_and_verify ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+   Doc-tests btungsten_p3count
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

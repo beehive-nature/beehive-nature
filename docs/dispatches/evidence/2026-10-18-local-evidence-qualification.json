@@ -1,0 +1,41 @@
+{
+ "schema": "skaists.local-evidence-qualification/1",
+ "generated": "2026-10-18T21:27:57.847Z",
+ "seat": "zCode seat (integration wake, order-28 session)",
+ "package": "skaists.preservation-local/1 built from origin/main 82f81b14 + verified delivery 1e9d5d3b (combined patch)",
+ "reads": {
+  "transport": "filesystem-backed same-origin (test transport, zero network sockets)",
+  "totalRequests": 811,
+  "externalRequests": 0
+ },
+ "counts": {
+  "personsInManifest": 809,
+  "personsReady": 809,
+  "personsNotHeld": 0,
+  "personSourceAssociations": 13589,
+  "distinctSourceRecords": 13249,
+  "evidenceFieldEntriesShardSide": 49436,
+  "evidenceFieldEntriesPerDistinctRecord": 49342,
+  "artifactAssociations": 390,
+  "distinctArtifactDigests": 308
+ },
+ "artifactOpen": {
+  "opened": true,
+  "digestVerified": true,
+  "mediaType": "image/jpeg",
+  "revokeWorked": true,
+  "urlsRevokedOnDestroy": true
+ },
+ "crosswalk": {
+  "direct": 503,
+  "providerReferences": 306
+ },
+ "inputHashes": {
+  "recordsJson": "4c11aaf0fe7e2625bbfed7e6cbda07a1ad2304e7ff2dacbe689e944b74911679", "recordsJsonMarker": "PUBLIC-CONSTANT: sha256 of the public frozen records.json",
+  "imagesVerified": "314 files / 84,055,524 B, digest+length matched the private manifest before import",
+  "unimportedNoRecordedAssociation": [
+   "33S7-9GY8-1XT (control ark)",
+   "3Q9M-C911-X99L-G, 3Q9M-C9B8-595P-S, 33SQ-GYB3-3W7, 3QS7-99V3-CVK7, 3QS7-89MB-BJ3L (fetched outside the queue; no recorded record association)"
+  ]
+ }
+}

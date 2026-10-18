@@ -668,6 +668,19 @@ name = "bnrose-replacement-law"
 version = "0.1.0"
 
 [[package]]
+name = "bnrose-settle-adapters"
+version = "0.1.0"
+dependencies = [
+ "bnr-keys",
+ "bnrose-exec-core",
+ "bnrose-exec-host",
+ "serde_json",
+ "sha2 0.10.9",
+ "sha3 0.10.9",
+ "ureq",
+]
+
+[[package]]
 name = "borsh"
 version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -1,0 +1,1017 @@
+info: syncing channel updates for 1.95.0-x86_64-unknown-linux-gnu
+info: latest update on 2026-04-16 for version 1.95.0 (59807616e 2026-04-14)
+info: downloading 10 components
+warn: the missing active toolchain `1.95.0-x86_64-unknown-linux-gnu` has been auto-installed
+warn: this might cause rustup commands to take longer time to finish than expected
+info: you may opt out with `RUSTUP_AUTO_INSTALL=0` or `rustup set auto-install disable`
+    Updating crates.io index
+ Downloading crates ...
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/rustix/1.1.5/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/rustix/0.38.44/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/rcgen/0.14.10/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/rand_xorshift/0.4.0/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/rand/0.10.3/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/rand/0.9.5/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/rand/0.8.8/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/quote/1.0.47/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/quinn-proto/0.11.18/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/quinn/0.11.12/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/signal-hook/0.3.18/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/sharded-slab/0.1.7/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/sha1/0.10.7/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/serde_yaml/0.9.34+deprecated/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/serde_spanned/0.6.9/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/serde_json/1.0.151/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/serde_ignored/0.1.14/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/serde_derive/1.0.229/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/serde_core/1.0.229/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/serde_bytes/0.11.19/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/serde/1.0.229/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/saorsa-pqc/0.5.1/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/saorsa-mls/0.3.8/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/saorsa-gossip-types/0.5.88/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/saorsa-gossip-transport/0.5.88/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/saorsa-gossip-runtime/0.5.88/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/saorsa-gossip-rendezvous/0.5.88/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/saorsa-gossip-pubsub/0.5.88/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/saorsa-gossip-presence/0.5.88/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/saorsa-gossip-membership/0.5.88/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/saorsa-gossip-identity/0.5.88/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/saorsa-gossip-groups/0.5.88/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/saorsa-gossip-crdt-sync/0.5.88/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/saorsa-gossip-coordinator/0.5.88/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/same-file/1.0.6/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/safe_arch/0.7.4/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/rusty-fork/0.3.1/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/rustls-post-quantum/0.2.4/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/rustls-platform-verifier/0.6.2/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/rustls-pemfile/2.2.0/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/rustls-native-certs/0.8.4/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/rusticata-macros/4.1.0/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/quick-error/1.2.3/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/proptest/1.11.0/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/proc-macro2/1.0.107/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/potential_utf/0.1.6/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/plotters-svg/0.3.7/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/plotters-backend/0.3.7/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/plotters/0.3.7/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/pkg-config/0.3.34/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/pem/4.0.0/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/pbkdf2/0.12.2/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/password-hash/0.5.0/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/parking_lot_core/0.9.12/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/parking_lot/0.12.5/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/option-ext/0.2.0/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/openssl-probe/0.2.1/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/oorandom/11.1.5/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/oid-registry/0.8.1/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/num_threads/0.1.7/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/num-integer/0.1.47/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/num-bigint/0.4.8/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/nu-ansi-term/0.50.3/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/nom/7.1.3/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/nix/0.29.0/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/multiversion-macros/0.9.0/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/multiversion/0.9.0/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/multer/3.1.0/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/mio/1.2.3/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/miniz_oxide/0.9.1/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/minimal-lexical/0.2.1/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/minimad/0.13.1/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/memoffset/0.9.1/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/memchr/2.8.3/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/mdns-sd/0.19.2/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/matchit/0.7.3/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/matchers/0.2.0/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/lzma-sys/0.1.20/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/lzma-rs/0.3.0/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/lru-slab/0.1.3/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/lru/0.16.4/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/log/0.4.34/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/lock_api/0.4.14/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/litrs/1.0.0/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/litemap/0.8.3/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/linux-raw-sys/0.4.15/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/libc/0.2.189/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/lazy-regex-proc_macros/3.6.1/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/lazy-regex/3.6.1/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/keyring/3.6.3/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/itertools/0.10.5/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/is_terminal_polyfill/1.70.2/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/is-terminal/0.4.17/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/ipnet/2.12.2/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/igd-next/0.17.1/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/if-addrs/0.15.0/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/if-addrs/0.13.4/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/hyper-rustls/0.27.10/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/hyper/1.11.1/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://static.crates.io/crates/hyper/0.14.32/download` (172.31.7.189), got 503
+body:
+upstream connect error or disconnect/reset before headers. reset reason: remote refused stream reset
+  Downloaded dirs v5.0.1
+  Downloaded asn1-rs-impl v0.2.0
+  Downloaded crossbeam v0.8.5
+  Downloaded asn1-rs-derive v0.6.0
+  Downloaded cfg-if v1.0.5
+  Downloaded ciborium-ll v0.2.2
+  Downloaded async-stream-impl v0.3.6
+  Downloaded http-body v0.4.6
+  Downloaded dunce v1.0.5
+  Downloaded clap_lex v1.1.1
+  Downloaded async-stream v0.3.6
+  Downloaded cpufeatures v0.3.1
+  Downloaded document-features v0.2.12
+  Downloaded hash32 v0.2.1
+  Downloaded crc v3.4.0
+  Downloaded cast v0.3.0
+  Downloaded headers-core v0.3.0
+  Downloaded crokey-proc_macros v1.5.0
+  Downloaded futures-macro v0.3.34
+  Downloaded ciborium-io v0.2.2
+  Downloaded dirs-sys v0.4.1
+  Downloaded fs2 v0.4.3
+  Downloaded env_home v0.1.0
+  Downloaded futures-sink v0.3.34
+  Downloaded futures-task v0.3.34
+  Downloaded futures-core v0.3.34
+  Downloaded colorchoice v1.0.5
+  Downloaded http-body-util v0.1.5
+  Downloaded bit-vec v0.9.1
+  Downloaded anstyle-query v1.1.5
+  Downloaded convert_case v0.10.0
+  Downloaded anstyle-parse v1.0.0
+  Downloaded anes v0.1.6
+  Downloaded constant_time_eq v0.4.2
+  Downloaded crossbeam-deque v0.8.8
+  Downloaded axum-core v0.4.5
+  Downloaded deflate64 v0.1.12
+  Downloaded data-encoding v2.11.1
+  Downloaded crossbeam-queue v0.3.14
+  Downloaded find-msvc-tools v0.1.13
+  Downloaded either v1.18.0
+  Downloaded crc-catalog v2.5.0
+  Downloaded filetime v0.2.29
+  Downloaded anstream v1.0.0
+  Downloaded criterion-plot v0.5.0
+  Downloaded futures-executor v0.3.34
+  Downloaded fastrand v2.5.0
+  Downloaded symlink v0.1.0
+  Downloaded chacha20 v0.10.2
+  Downloaded clap_derive v4.6.7
+  Downloaded displaydoc v0.2.7
+  Downloaded cmake v0.1.58
+  Downloaded dashmap v6.2.1
+  Downloaded anstyle v1.0.14
+  Downloaded crc32fast v1.5.2
+  Downloaded crokey v1.5.0
+  Downloaded bzip2 v0.5.2
+  Downloaded crossbeam-utils v0.8.23
+  Downloaded futures-channel v0.3.34
+  Downloaded strict v0.2.0
+  Downloaded signal-hook-mio v0.2.5
+  Downloaded axum-extra v0.9.6
+  Downloaded bytemuck v1.25.2
+  Downloaded futures v0.3.34
+  Downloaded ciborium v0.2.2
+  Downloaded bitflags v2.13.2
+  Downloaded crossbeam-epoch v0.9.21
+  Downloaded half v2.7.1
+  Downloaded smallvec v1.16.1
+  Downloaded socket2 v0.5.10
+  Downloaded der-parser v10.0.0
+  Downloaded clap v4.6.7
+  Downloaded bytes v1.12.1
+  Downloaded flate2 v1.1.10
+  Downloaded headers v0.4.1
+  Downloaded heapless v0.7.17
+  Downloaded flume v0.11.1
+  Downloaded fs_extra v1.3.0
+  Downloaded attohttpc v0.30.1
+  Downloaded synstructure v0.14.0
+  Downloaded derive_more v2.1.1
+  Downloaded crossbeam-channel v0.5.17
+  Downloaded base64 v0.23.1
+  Downloaded terminal_size v0.4.4
+  Downloaded asn1-rs v0.7.2
+  Downloaded cc v1.4.7
+  Downloaded derive_more-impl v2.1.1
+  Downloaded http v0.2.12
+  Downloaded socket2 v0.6.5
+  Downloaded thiserror v2.0.20
+  Downloaded criterion v0.5.1
+  Downloaded http v1.5.0
+  Downloaded axum v0.7.9
+  Downloaded tar v0.4.46
+  Downloaded crossterm v0.28.1
+  Downloaded thiserror-impl v2.0.20
+  Downloaded crossterm v0.29.0
+  Downloaded coolor v1.1.0
+  Downloaded h2 v0.4.19
+  Downloaded futures-util v0.3.34
+  Downloaded clap_builder v4.6.7
+  Downloaded blake3 v1.8.7
+  Downloaded thread_local v1.1.10
+  Downloaded time-macros v0.2.32
+  Downloaded aws-lc-rs v1.18.1
+  Downloaded xattr v1.6.1
+  Downloaded tokio-rustls v0.26.5
+  Downloaded tokio-tungstenite v0.24.0
+  Downloaded tokio-stream v0.1.19
+  Downloaded tinytemplate v1.2.1
+  Downloaded syn v3.0.6
+  Downloaded syn v2.0.119
+  Downloaded time v0.3.55
+  Downloaded tokio-macros v2.7.2
+  Downloaded toml_write v0.1.2
+  Downloaded tracing-appender v0.2.5
+  Downloaded toml_datetime v0.6.11
+  Downloaded toml v0.8.23
+  Downloaded encoding_rs v0.8.41
+  Downloaded tracing-serde v0.2.0
+  Downloaded toml_edit v0.22.27
+  Downloaded bzip2-sys v0.1.13+1.0.8
+  Downloaded utf-8 v0.7.6
+  Downloaded unicode-ident v1.0.26
+  Downloaded unicode-segmentation v1.13.3
+  Downloaded unsafe-libyaml v0.2.11
+  Downloaded tungstenite v0.24.0
+  Downloaded tokio-util v0.7.19
+  Downloaded fips203 v0.4.3
+  Downloaded tracing-subscriber v0.3.23
+  Downloaded unicode-width v0.1.14
+  Downloaded tokio v1.53.1
+  Downloaded multiversion-macros v0.9.0
+  Downloaded num-bigint v0.4.8
+  Downloaded rustix v1.1.5
+  Downloaded hyper v1.11.1
+  Downloaded serde_core v1.0.229
+  Downloaded is-terminal v0.4.17
+  Downloaded litrs v1.0.0
+  Downloaded serde_yaml v0.9.34+deprecated
+  Downloaded lazy-regex v3.6.1
+  Downloaded litemap v0.8.3
+  Downloaded igd-next v0.17.1
+  Downloaded quinn v0.11.12
+  Downloaded termimad v0.30.1
+  Downloaded num-integer v0.1.47
+  Downloaded rand v0.9.5
+  Downloaded rcgen v0.14.10
+  Downloaded memchr v2.8.3
+  Downloaded lru v0.16.4
+  Downloaded socket-pktinfo v0.3.2
+  Downloaded matchers v0.2.0
+  Downloaded saorsa-pqc v0.5.1
+  Downloaded option-ext v0.2.0
+  Downloaded lzma-rs v0.3.0
+  Downloaded quick-error v1.2.3
+  Downloaded ipnet v2.12.2
+  Downloaded multer v3.1.0
+  Downloaded proc-macro2 v1.0.107
+  Downloaded sha1 v0.10.7
+  Downloaded which v7.0.3
+  Downloaded utf8parse v0.2.2
+  Downloaded tracing-log v0.2.0
+  Downloaded serde_bytes v0.11.19
+  Downloaded serde_spanned v0.6.9
+  Downloaded rustls-platform-verifier v0.6.2
+  Downloaded mdns-sd v0.19.2
+  Downloaded rand v0.10.3
+  Downloaded num_threads v0.1.7
+  Downloaded plotters v0.3.7
+  Downloaded libc v0.2.189
+  Downloaded wait-timeout v0.2.1
+  Downloaded saorsa-gossip-groups v0.5.88
+  Downloaded fips204 v0.4.6
+  Downloaded rusty-fork v0.3.1
+  Downloaded minimal-lexical v0.2.1
+  Downloaded yoke-derive v0.8.3
+  Downloaded xmltree v0.10.3
+  Downloaded zerofrom-derive v0.1.8
+  Downloaded saorsa-gossip-presence v0.5.88
+  Downloaded is_terminal_polyfill v1.70.2
+  Downloaded pbkdf2 v0.12.2
+  Downloaded rand_xorshift v0.4.0
+  Downloaded potential_utf v0.1.6
+  Downloaded saorsa-gossip-runtime v0.5.88
+  Downloaded openssl-probe v0.2.1
+  Downloaded if-addrs v0.15.0
+  Downloaded plotters-svg v0.3.7
+  Downloaded lock_api v0.4.14
+  Downloaded lru-slab v0.1.3
+  Downloaded plotters-backend v0.3.7
+  Downloaded lazy-regex-proc_macros v3.6.1
+  Downloaded if-addrs v0.13.4
+  Downloaded memoffset v0.9.1
+  Downloaded serde_ignored v0.1.14
+  Downloaded unarray v0.1.4
+  Downloaded walkdir v2.5.0
+  Downloaded rustls-pemfile v2.2.0
+  Downloaded quote v1.0.47
+  Downloaded rustls-native-certs v0.8.4
+  Downloaded oorandom v11.1.5
+  Downloaded zmij v1.0.23
+  Downloaded rusticata-macros v4.1.0
+  Downloaded nu-ansi-term v0.50.3
+  Downloaded hpke v0.13.0
+  Downloaded rustls-post-quantum v0.2.4
+  Downloaded pkg-config v0.3.34
+  Downloaded multiversion v0.9.0
+  Downloaded ant-quic v0.27.60
+  Downloaded oid-registry v0.8.1
+  Downloaded pem v4.0.0
+  Downloaded same-file v1.0.6
+  Downloaded password-hash v0.5.0
+  Downloaded hyper-rustls v0.27.10
+  Downloaded saorsa-gossip-types v0.5.88
+  Downloaded saorsa-gossip-identity v0.5.88
+  Downloaded saorsa-gossip-rendezvous v0.5.88
+  Downloaded xz2 v0.1.7
+  Downloaded matchit v0.7.3
+  Downloaded yasna v0.6.0
+  Downloaded parking_lot_core v0.9.12
+  Downloaded minimad v0.13.1
+  Downloaded serde_derive v1.0.229
+  Downloaded zopfli v0.8.3
+  Downloaded parking_lot v0.12.5
+  Downloaded sharded-slab v0.1.7
+  Downloaded signal-hook v0.3.18
+  Downloaded log v0.4.34
+  Downloaded saorsa-gossip-crdt-sync v0.5.88
+  Downloaded saorsa-gossip-transport v0.5.88
+  Downloaded uuid v1.26.1
+  Downloaded keyring v3.6.3
+  Downloaded xml-rs v0.8.29
+  Downloaded linux-raw-sys v0.4.15
+  Downloaded rand v0.8.8
+  Downloaded mio v1.2.3
+  Downloaded serde v1.0.229
+  Downloaded itertools v0.10.5
+  Downloaded wide v0.7.33
+  Downloaded nom v7.1.3
+  Downloaded x509-parser v0.18.1
+  Downloaded saorsa-gossip-membership v0.5.88
+  Downloaded saorsa-gossip-coordinator v0.5.88
+  Downloaded miniz_oxide v0.9.1
+  Downloaded safe_arch v0.7.4
+  Downloaded zip v2.4.2
+  Downloaded zerocopy-derive v0.8.57
+  Downloaded serde_json v1.0.151
+  Downloaded hyper v0.14.32
+  Downloaded winnow v0.7.15
+  Downloaded zlib-rs v0.6.8
+  Downloaded proptest v1.11.0
+  Downloaded zerocopy v0.8.57
+  Downloaded quinn-proto v0.11.18
+  Downloaded nix v0.29.0
+  Downloaded rustix v0.38.44
+  Downloaded zstd-sys v2.1.0+zstd.1.5.7
+  Downloaded saorsa-mls v0.3.8
+  Downloaded lzma-sys v0.1.20
+  Downloaded saorsa-gossip-pubsub v0.5.88
+  Downloaded four-word-networking v2.7.0
+  Downloaded aws-lc-sys v0.45.0
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.26
+   Compiling libc v0.2.189
+   Compiling cfg-if v1.0.5
+   Compiling serde_core v1.0.229
+   Compiling syn v2.0.119
+   Compiling syn v3.0.6
+   Compiling getrandom v0.2.17
+   Compiling version_check v0.9.5
+   Compiling serde v1.0.229
+   Compiling jobserver v0.1.35
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.13
+   Compiling rand_core v0.6.4
+   Compiling cc v1.4.7
+   Compiling subtle v2.6.1
+   Compiling generic-array v0.14.7
+   Compiling typenum v1.20.1
+   Compiling log v0.4.34
+   Compiling once_cell v1.21.4
+   Compiling scopeguard v1.2.0
+   Compiling smallvec v1.16.1
+   Compiling lock_api v0.4.14
+   Compiling parking_lot_core v0.9.12
+   Compiling itoa v1.0.18
+   Compiling pin-project-lite v0.2.17
+   Compiling memchr v2.8.3
+   Compiling pkg-config v0.3.34
+   Compiling errno v0.3.14
+   Compiling futures-core v0.3.34
+   Compiling signal-hook-registry v1.4.8
+   Compiling mio v1.2.3
+   Compiling zeroize_derive v1.5.0
+   Compiling cpufeatures v0.2.17
+   Compiling parking_lot v0.12.5
+   Compiling serde_derive v1.0.229
+   Compiling zeroize v1.9.0
+   Compiling zerocopy v0.8.57
+   Compiling futures-sink v0.3.34
+   Compiling zerocopy-derive v0.8.57
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling socket2 v0.6.5
+   Compiling digest v0.10.7
+   Compiling stable_deref_trait v1.2.1
+   Compiling tracing-core v0.1.36
+   Compiling tokio-macros v2.7.2
+   Compiling slab v0.4.12
+   Compiling futures-channel v0.3.34
+   Compiling tracing-attributes v0.1.31
+   Compiling futures-macro v0.3.34
+   Compiling synstructure v0.14.0
+   Compiling bytes v1.12.1
+   Compiling tracing v0.1.44
+   Compiling futures-io v0.3.34
+   Compiling futures-task v0.3.34
+   Compiling bitflags v2.13.2
+   Compiling futures-util v0.3.34
+   Compiling tokio v1.53.1
+   Compiling http v1.5.0
+   Compiling zerofrom-derive v0.1.8
+   Compiling crossbeam-utils v0.8.23
+   Compiling yoke-derive v0.8.3
+   Compiling zerofrom v0.1.8
+   Compiling zmij v1.0.23
+   Compiling semver v1.0.28
+   Compiling yoke v0.8.3
+   Compiling rustc_version v0.4.1
+   Compiling ppv-lite86 v0.2.21
+   Compiling zerovec-derive v0.11.6
+   Compiling displaydoc v0.2.7
+   Compiling equivalent v1.0.2
+   Compiling byteorder v1.5.0
+   Compiling serde_json v1.0.151
+   Compiling getrandom v0.3.4
+   Compiling inout v0.1.4
+   Compiling zerovec v0.11.8
+   Compiling cmake v0.1.58
+   Compiling fs_extra v1.3.0
+   Compiling hashbrown v0.17.1
+   Compiling fnv v1.0.7
+   Compiling httparse v1.10.1
+   Compiling crossbeam-epoch v0.9.21
+   Compiling dunce v1.0.5
+   Compiling aws-lc-sys v0.45.0
+   Compiling indexmap v2.14.2
+   Compiling cipher v0.4.4
+   Compiling rand_chacha v0.3.1
+   Compiling sha2 v0.10.9
+   Compiling hmac v0.12.1
+   Compiling spin v0.9.9
+   Compiling autocfg v1.5.1
+   Compiling thiserror v2.0.20
+   Compiling crossbeam-deque v0.8.8
+   Compiling rand v0.8.8
+   Compiling tinystr v0.8.4
+   Compiling universal-hash v0.5.1
+   Compiling rustls-pki-types v1.15.1
+   Compiling thiserror-impl v2.0.20
+   Compiling ring v0.17.14
+   Compiling num-conv v0.2.2
+   Compiling powerfmt v0.2.0
+   Compiling const-oid v0.9.6
+   Compiling time-core v0.1.9
+   Compiling writeable v0.6.4
+   Compiling opaque-debug v0.3.1
+   Compiling num_threads v0.1.7
+   Compiling deranged v0.5.8
+   Compiling litemap v0.8.3
+   Compiling percent-encoding v2.3.2
+   Compiling icu_locale_core v2.3.0
+   Compiling time v0.3.55
+   Compiling der v0.7.10
+   Compiling rand_core v0.9.5
+   Compiling potential_utf v0.1.6
+   Compiling zerotrie v0.2.5
+   Compiling http-body v1.1.0
+   Compiling ff v0.13.1
+   Compiling icu_properties_data v2.3.0
+   Compiling tower-service v0.3.3
+   Compiling either v1.18.0
+   Compiling utf8_iter v1.0.4
+   Compiling icu_normalizer_data v2.3.0
+   Compiling aws-lc-rs v1.18.1
+   Compiling base16ct v0.2.0
+   Compiling cpufeatures v0.3.1
+   Compiling sec1 v0.7.3
+   Compiling icu_collections v2.3.0
+   Compiling group v0.13.0
+   Compiling icu_provider v2.3.1
+   Compiling hkdf v0.12.4
+   Compiling tokio-util v0.7.19
+   Compiling heapless v0.7.17
+   Compiling curve25519-dalek v4.1.3
+   Compiling crypto-bigint v0.5.5
+   Compiling rand_core v0.10.1
+   Compiling try-lock v0.2.5
+   Compiling untrusted v0.9.0
+   Compiling rayon-core v1.13.0
+   Compiling httpdate v1.0.3
+   Compiling getrandom v0.4.3
+   Compiling keccak v0.1.6
+   Compiling regex-syntax v0.8.11
+   Compiling sha3 v0.10.9
+   Compiling elliptic-curve v0.13.8
+   Compiling want v0.3.1
+   Compiling form_urlencoded v1.2.2
+   Compiling polyval v0.6.2
+   Compiling aes v0.8.4
+   Compiling hash32 v0.2.1
+   Compiling aead v0.5.2
+   Compiling async-trait v0.1.92
+   Compiling curve25519-dalek-derive v0.1.1
+   Compiling aho-corasick v1.1.5
+   Compiling blake3 v1.8.7
+   Compiling base64 v0.22.1
+   Compiling anyhow v1.0.104
+   Compiling base64ct v1.8.3
+   Compiling atomic-waker v1.1.2
+   Compiling h2 v0.4.19
+   Compiling password-hash v0.5.0
+   Compiling regex-automata v0.4.18
+   Compiling ghash v0.5.1
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_properties v2.3.0
+   Compiling primeorder v0.13.6
+   Compiling cobs v0.3.0
+   Compiling poly1305 v0.8.0
+   Compiling num-traits v0.2.19
+   Compiling chacha20 v0.9.1
+   Compiling ctr v0.9.2
+   Compiling futures-executor v0.3.34
+   Compiling ahash v0.8.12
+   Compiling rustls v0.23.45
+   Compiling constant_time_eq v0.4.2
+   Compiling arrayvec v0.7.8
+   Compiling bytemuck v1.25.2
+   Compiling safe_arch v0.7.4
+   Compiling futures v0.3.34
+   Compiling aes-gcm v0.10.3
+   Compiling chacha20poly1305 v0.10.1
+   Compiling postcard v1.1.3
+   Compiling p256 v0.13.2
+   Compiling rayon v1.12.0
+   Compiling idna_adapter v1.2.2
+   Compiling hyper v1.11.1
+   Compiling x25519-dalek v2.0.1
+   Compiling pbkdf2 v0.12.2
+   Compiling sync_wrapper v1.0.2
+   Compiling tower-layer v0.3.3
+   Compiling signal-hook v0.3.18
+   Compiling ipnet v2.12.2
+   Compiling cfg_aliases v0.2.2
+   Compiling hex v0.4.3
+   Compiling utf8parse v0.2.2
+   Compiling anstyle-parse v1.0.0
+   Compiling hyper-util v0.1.20
+   Compiling hpke v0.13.0
+   Compiling idna v1.1.0
+   Compiling wide v0.7.33
+   Compiling fips203 v0.4.3
+   Compiling fips204 v0.4.6
+   Compiling fips205 v0.4.1
+   Compiling http-body-util v0.1.5
+   Compiling rustix v1.1.5
+   Compiling ryu v1.0.23
+   Compiling colorchoice v1.0.5
+   Compiling anstyle-query v1.1.5
+   Compiling anstyle v1.0.14
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling fastrand v2.5.0
+   Compiling anstream v1.0.0
+   Compiling saorsa-pqc v0.5.1
+   Compiling hashbrown v0.14.5
+   Compiling url v2.5.8
+   Compiling tower v0.5.3
+   Compiling lazy_static v1.5.0
+   Compiling clap_lex v1.1.1
+   Compiling heck v0.5.0
+   Compiling strsim v0.11.1
+   Compiling linux-raw-sys v0.12.1
+   Compiling clap_builder v4.6.7
+   Compiling clap_derive v4.6.7
+   Compiling serde_urlencoded v0.7.1
+   Compiling regex v1.13.1
+   Compiling memoffset v0.9.1
+   Compiling rustversion v1.0.23
+   Compiling clap v4.6.7
+   Compiling sharded-slab v0.1.7
+   Compiling saorsa-gossip-types v0.5.88
+   Compiling nix v0.29.0
+   Compiling quinn-udp v0.5.15
+   Compiling matchers v0.2.0
+   Compiling chacha20 v0.10.2
+   Compiling webpki-roots v1.0.9
+   Compiling tracing-serde v0.2.0
+   Compiling tracing-log v0.2.0
+   Compiling thread_local v1.1.10
+   Compiling iana-time-zone v0.1.65
+   Compiling openssl-probe v0.2.1
+   Compiling option-ext v0.2.0
+   Compiling unicode-segmentation v1.13.3
+   Compiling base64 v0.23.1
+   Compiling xml-rs v0.8.29
+   Compiling nu-ansi-term v0.50.3
+   Compiling xmltree v0.10.3
+   Compiling tracing-subscriber v0.3.23
+   Compiling pem v4.0.0
+   Compiling convert_case v0.10.0
+   Compiling dirs-sys v0.4.1
+   Compiling rustls-native-certs v0.8.4
+   Compiling chrono v0.4.45
+   Compiling rand v0.10.3
+   Compiling tower-http v0.6.11
+   Compiling attohttpc v0.30.1
+   Compiling dashmap v6.2.1
+   Compiling uuid v1.26.1
+   Compiling yasna v0.6.0
+   Compiling flume v0.11.1
+   Compiling socket-pktinfo v0.3.2
+   Compiling if-addrs v0.15.0
+   Compiling socket2 v0.5.10
+   Compiling unsafe-libyaml v0.2.11
+   Compiling tinyvec_macros v0.1.1
+   Compiling tinyvec v1.12.0
+   Compiling serde_yaml v0.9.34+deprecated
+   Compiling mdns-sd v0.19.2
+   Compiling rcgen v0.14.10
+   Compiling igd-next v0.17.1
+   Compiling dirs v5.0.1
+   Compiling derive_more-impl v2.1.1
+   Compiling rustls-pemfile v2.2.0
+   Compiling keyring v3.6.3
+   Compiling thiserror v1.0.69
+   Compiling unicode-width v0.2.2
+   Compiling rustc-hash v2.1.3
+   Compiling lru-slab v0.1.3
+   Compiling thiserror-impl v1.0.69
+   Compiling litrs v1.0.0
+   Compiling document-features v0.2.12
+   Compiling signal-hook-mio v0.2.5
+   Compiling half v2.7.1
+   Compiling sha1 v0.10.7
+   Compiling zstd-sys v2.1.0+zstd.1.5.7
+   Compiling ciborium-io v0.2.2
+   Compiling ciborium-ll v0.2.2
+   Compiling foldhash v0.2.0
+   Compiling allocator-api2 v0.2.21
+   Compiling mime v0.3.17
+   Compiling crc32fast v1.5.2
+   Compiling hashbrown v0.16.1
+   Compiling ciborium v0.2.2
+   Compiling derive_more v2.1.1
+   Compiling encoding_rs v0.8.41
+   Compiling multiversion-macros v0.9.0
+   Compiling lzma-sys v0.1.20
+   Compiling bzip2-sys v0.1.13+1.0.8
+   Compiling zstd-safe v7.3.0
+   Compiling vcpkg v0.2.15
+   Compiling data-encoding v2.11.1
+   Compiling simd-adler32 v0.3.10
+   Compiling rustix v0.38.44
+   Compiling radium v0.7.0
+   Compiling utf-8 v0.7.6
+   Compiling tungstenite v0.24.0
+   Compiling libsqlite3-sys v0.30.1
+   Compiling multiversion v0.9.0
+   Compiling crossterm v0.29.0
+   Compiling rustls-webpki v0.103.15
+   Compiling lru v0.16.4
+   Compiling saorsa-gossip-identity v0.5.88
+   Compiling crossbeam-channel v0.5.17
+   Compiling multer v3.1.0
+   Compiling crc-catalog v2.5.0
+   Compiling core_detect v1.0.0
+   Compiling strict v0.2.0
+   Compiling linux-raw-sys v0.4.15
+   Compiling simdutf8 v0.1.5
+   Compiling tokio-rustls v0.26.5
+   Compiling rustls-platform-verifier v0.6.2
+   Compiling hyper-rustls v0.27.10
+   Compiling reqwest v0.12.28
+   Compiling rustls-post-quantum v0.2.4
+   Compiling plotters-backend v0.3.7
+   Compiling adler2 v2.0.1
+   Compiling tap v1.0.1
+   Compiling multiversion_no_op v1.0.0
+   Compiling ant-quic v0.27.60
+   Compiling wyz v0.5.1
+   Compiling miniz_oxide v0.9.1
+   Compiling plotters-svg v0.3.7
+   Compiling crokey-proc_macros v1.5.0
+   Compiling crc v3.4.0
+   Compiling lazy-regex-proc_macros v3.6.1
+   Compiling tokio-tungstenite v0.24.0
+   Compiling axum-core v0.4.5
+   Compiling saorsa-gossip-groups v0.5.88
+   Compiling tempfile v3.27.0
+   Compiling itertools v0.10.5
+   Compiling http v0.2.12
+   Compiling crossbeam-queue v0.3.14
+   Compiling headers-core v0.3.0
+   Compiling serde_spanned v0.6.9
+   Compiling toml_datetime v0.6.11
+   Compiling serde_path_to_error v0.1.20
+   Compiling serde_bytes v0.11.19
+   Compiling wait-timeout v0.2.1
+   Compiling fs2 v0.4.3
+   Compiling funty v2.0.0
+   Compiling bumpalo v3.20.3
+   Compiling quick-error v1.2.3
+   Compiling bit-vec v0.8.0
+   Compiling toml_write v0.1.2
+   Compiling zip v2.4.2
+   Compiling same-file v1.0.6
+   Compiling winnow v0.7.15
+   Compiling cast v0.3.0
+   Compiling matchit v0.7.3
+   Compiling axum v0.7.9
+   Compiling toml_edit v0.22.27
+   Compiling criterion-plot v0.5.0
+   Compiling saorsa-gossip-transport v0.5.88
+   Compiling saorsa-gossip-coordinator v0.5.88
+   Compiling saorsa-gossip-membership v0.5.88
+   Compiling saorsa-gossip-pubsub v0.5.88
+   Compiling saorsa-gossip-presence v0.5.88
+   Compiling walkdir v2.5.0
+   Compiling bit-set v0.8.0
+   Compiling crokey v1.5.0
+   Compiling rusty-fork v0.3.1
+   Compiling zopfli v0.8.3
+   Compiling bitvec v1.1.1
+   Compiling headers v0.4.1
+   Compiling crossbeam v0.8.5
+   Compiling http-body v0.4.6
+   Compiling bzip2 v0.5.2
+   Compiling lazy-regex v3.6.1
+   Compiling xz2 v0.1.7
+   Compiling lzma-rs v0.3.0
+   Compiling crossterm v0.28.1
+   Compiling plotters v0.3.7
+   Compiling flate2 v1.1.10
+   Compiling zstd v0.13.3
+   Compiling coolor v1.1.0
+   Compiling saorsa-gossip-rendezvous v0.5.88
+   Compiling xattr v1.6.1
+   Compiling hashlink v0.9.1
+   Compiling rand_xorshift v0.4.0
+   Compiling rand_chacha v0.9.0
+   Compiling rand v0.9.5
+   Compiling tinytemplate v1.2.1
+   Compiling async-stream-impl v0.3.6
+   Compiling minimad v0.13.1
+   Compiling is-terminal v0.4.17
+   Compiling filetime v0.2.29
+   Compiling constant_time_eq v0.3.1
+   Compiling symlink v0.1.0
+   Compiling deflate64 v0.1.12
+   Compiling bs58 v0.5.1
+   Compiling fallible-iterator v0.3.0
+   Compiling env_home v0.1.0
+   Compiling oorandom v11.1.5
+   Compiling x0x v0.48.0 (/workspace/x0x)
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling anes v0.1.6
+   Compiling unicode-width v0.1.14
+   Compiling unarray v0.1.4
+   Compiling proptest v1.11.0
+   Compiling criterion v0.5.1
+   Compiling termimad v0.30.1
+   Compiling rusqlite v0.32.1
+   Compiling which v7.0.3
+   Compiling four-word-networking v2.7.0
+   Compiling tracing-appender v0.2.5
+   Compiling tar v0.4.46
+   Compiling async-stream v0.3.6
+   Compiling saorsa-gossip-runtime v0.5.88
+   Compiling axum-extra v0.9.6
+   Compiling hyper v0.14.32
+   Compiling saorsa-gossip-crdt-sync v0.5.88
+   Compiling toml v0.8.23
+   Compiling saorsa-mls v0.3.8
+   Compiling terminal_size v0.4.4
+   Compiling tokio-stream v0.1.19
+   Compiling bincode v1.3.3
+   Compiling serde_ignored v0.1.14
+   Compiling if-addrs v0.13.4
+    Finished `release` profile [optimized] target(s) in 24m 31s
+     Running unittests src/lib.rs (target/release/deps/x0x-2854d0aacfc48165)
+
+running 12 tests
+test groups::kem_envelope::tests::agent_kem_keypair_generate_creates_valid_keypair ... ok
+test groups::kem_envelope::tests::agent_kem_keypair_generates_different_keys ... ok
+test groups::kem_envelope::tests::agent_kem_keypair_debug_redacts_secret ... ok
+test groups::kem_envelope::tests::agent_kem_keypair_load_or_generate_creates_new_file ... ok
+test groups::kem_envelope::tests::agent_kem_keypair_load_or_generate_rejects_corrupted ... ok
+test groups::kem_envelope::tests::agent_kem_keypair_load_or_generate_loads_existing ... ok
+test groups::kem_envelope::tests::bytes_wrong_recipient_fails ... ok
+test groups::kem_envelope::tests::roundtrip_seal_open ... ok
+test groups::kem_envelope::tests::bytes_wrong_aad_fails ... ok
+test groups::kem_envelope::tests::roundtrip_seal_open_bytes ... ok
+test groups::kem_envelope::tests::wrong_aad_fails ... ok
+test groups::kem_envelope::tests::wrong_keypair_cannot_open ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 4535 filtered out; finished in 0.00s
+

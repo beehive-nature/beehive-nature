@@ -1,0 +1,27 @@
+    Blocking waiting for file lock on package cache
+    Finished `release` profile [optimized] target(s) in 0.16s
+     Running unittests src/lib.rs (crates/btungsten-x0x-pq/target/release/deps/btungsten_x0x_pq-35cfd1bb837c0905)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (crates/btungsten-x0x-pq/target/release/deps/btungsten_x0x_pq-7076d2ee60c6ce1d)
+
+running 1 test
+test tests::every_obligation_is_unique_and_an_empty_run_has_no_coverage ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/pq-speed.rs (crates/btungsten-x0x-pq/target/release/deps/pq_speed-a23c64089076177b)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests btungsten_x0x_pq
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

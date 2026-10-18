@@ -1,0 +1,15 @@
+// Shared deterministic leaves, deliberately UNINTERPRETED by the proof tactic.
+// These bodies are placeholders for type checking, not definitions of ML-DSA.
+// The tactic MUST retain all four names; controls exercise both Boolean outcomes.
+module Boundary where
+
+expandRho : [1952][8] -> [32][8]
+expandRho _ = zero
+expandTr : [1952][8] -> [64][8]
+expandTr _ = zero
+expandT : [1952][8] -> [6][256][32]
+expandT _ = zero
+
+decision : {m,c} (fin m, fin c) =>
+  [32][8] -> [64][8] -> [6][256][32] -> [m][8] -> [3309][8] -> [c][8] -> Bit
+decision _ _ _ _ _ _ = False

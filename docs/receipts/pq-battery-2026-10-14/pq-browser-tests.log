@@ -1,0 +1,40 @@
+✔ keys match the shared vectors (Rust derives the same bytes) (769.82667ms)
+✔ vector objects open for their readers and refuse everyone else (1536.286899ms)
+✔ the public head names no reader and no sealer (279.484613ms)
+✔ ranges decrypt by seeking; flips at four structural points, a cut byte and a trailing byte are refused (163.543105ms)
+✔ unknown versions are refused, never defaulted (108.844537ms)
+✔ cards and bindings verify; edits do not (125.075275ms)
+✔ detached signatures verify for their file only, under the signer id (186.318143ms)
+✔ bindings: a claim moved into `at`, a wrong version or kind, and claim shapes that sign alike are refused (195.989173ms)
+✔ cards: a wrong version or any kind is refused (3.236979ms)
+✔ detached signatures: a validly signed `at` that is not a UTC timestamp, a wrong version or kind are refused (168.717193ms)
+✔ a signed shared object (self + X-Wing reader + signer + meta): a change in KEYS, META, SEAL or BODY never passes (refused, or the seal reads not ok) (128.523892ms)
+✔ crafted objects: unknown slots and non-plain or oversized CORE numbers are refused; a failing seal record never reads ok (326.668797ms)
+✔ the succession key re-derives from the root and matches the commitment (152.452575ms)
+✔ wiped keys refuse to sign or decapsulate (106.636968ms)
+✔ the phrase-only vault key is the vault label under context root (an independent HKDF-Expand agrees), and is no persona vault (340.962535ms)
+✔ root vault vector objects open for their readers and refuse everyone else (646.178551ms)
+✔ a self slot under the root vault looks like one under a persona vault, and two root seals share no slot bytes (115.700997ms)
+✔ the context "root" is reserved: keys() and successionKeys() refuse it, rootVault is the only way in (105.295562ms)
+✔ contexts outside the bpq-core rule (1 to 64 printable ASCII) derive nothing, here and in the K1 derivation (99.842048ms)
+✔ an object sealed by the Rust sealer (crates/bsigner bpq::seal_self) opens in bpq.js and only for its vault (2.790097ms)
+✔ Nostr event attestations (SPEC-BPQ-1 section 5b): one verifies, every forgery is refused, the committed vector verifies (295.543951ms)
+✔ intent authorizations (SPEC-BPQ-1 section 5c): one verifies, every forgery is refused, both committed vectors verify (320.599016ms)
+✔ a Nostr event attestation made by crates/bsigner verifies in bpq.js (92.250234ms)
+✔ a wallet receipt becomes committed signatures that CI accepts, then fails a later edit as STALE (1418.185829ms)
+✔ a law file that is unsigned, unlisted, or a list that names nothing fails the build (2402.569716ms)
+✔ nothing is written for a receipt with a forged, foreign or out-of-list signature (1091.081455ms)
+✔ verifyDetachedClaim checks the signature over the hash it names, not a file (127.395019ms)
+✔ the vectors name their NIST source and every case its tgId/tcId (6.811252ms)
+✔ ML-DSA-65 keyGen: seed -> public key, byte for byte (84.685923ms)
+✔ ML-DSA-65 sigVer (external, pure, given context): the verdict NIST expects (71.793857ms)
+✔ ML-KEM-768 keyGen: d || z -> ek and expanded dk, byte for byte (56.249771ms)
+✔ ML-KEM-768 decapsulation (expanded dk): the shared key NIST expects, implicit rejection included (45.309961ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6451.35746

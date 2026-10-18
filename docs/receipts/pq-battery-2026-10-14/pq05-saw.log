@@ -1,0 +1,10 @@
+== SAW PQ05: BUILD bpq-core to MIR JSON ==
+Linking 3 mir files into /workspace/wt-pq-battery/target/saw-pq05/bpq_core.linked-mir.json
+SAW-BUILD PQ05: PASS (3299511 bytes of linked MIR)
+== SAW PQ05: xwing.saw ==
+PQ05-SAW PROVEN combiner_input
+PQ05-SAW PROVEN split_seed
+PQ05-SAW PROVEN combinerBinds
+PQ05-SAW-TEETH REFUTED combinerWithoutPk
+== SAW PQ05: ladder state ==
+BUILD: PASS | EQUIVALENCE: PROVEN (2, bpq-core xwing == XWing.cry) | PROVE-UNIVERSAL: PROVEN (combinerBinds) | TEETH: PASS (1)

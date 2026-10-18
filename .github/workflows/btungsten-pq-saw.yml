@@ -19,18 +19,16 @@ name: bTunGsTeN PQ SAW
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
-# SUPERSEDED RUNS (2026-10-15): a newer push to the same branch, or a newer
-# head on the same pull request, cancels this workflow's run for the older
-# commit, whose result could never gate a merge again (measured that day: 89
-# of 192 queued runs repo-wide were for commits no longer any branch's head).
-# Main and manual dispatches each get a group of their own, so they are never
-# cancelled or folded into another run; the exact head always gets a full run.
-# tests.yml and secret-scan.yml are deliberately left out: the §7 identity
-# check reads only the commits a push added, so a cancelled push run there
-# would let those commits skip detection.
+# Feature heads run through pull_request once; a simultaneous branch-push
+# replay would duplicate the long arithmetic jobs. Main and manual runs stay.
+# tests.yml and secret-scan.yml still audit every branch push independently.
+# A newer PR head cancels its superseded proof run. Main and manual runs
+# each get a unique group, so they are never folded into another run.
+# Independent identity and secret audits keep their existing run policy.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && github.run_id || github.ref }}
   cancel-in-progress: true
@@ -95,7 +93,26 @@ jobs:
           echo "$HOME/mir-json-inst/bin" >> "$GITHUB_PATH"
           echo "SAW_RUST_LIBRARY_PATH=$HOME/mir-json/rlibs" >> "$GITHUB_ENV"
           "$HOME/mir-json-inst/bin/mir-json" --version
+      # Report wrapper equivalence before the longer arithmetic replays.
+      - name: Prepared FIPS public key — conditional wrapper equivalence and sabotage (Rust controller)
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo fetch --locked --manifest-path crates/btungsten-x0x-pq/proof/Cargo.toml
+          cargo run --locked --release --manifest-path crates/btungsten-x0x-pq/proof/Cargo.toml -- run target/pq-prepare saw
+      - name: Retain prepared-key proof evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: prepared-key-wrapper-proof
+          path: |
+            target/pq-prepare/*.json
+            target/pq-prepare/*.log
+            target/pq-prepare/*.saw
+            target/pq-prepare/*.cry
       - name: PQ03 SAW — BUILD + EQUIVALENCE + PROVE-UNIVERSAL + TEETH
+        if: ${{ !cancelled() }}  # keep this replay independent of the prepared-key result
         shell: bash
         run: sh scripts/btungsten/pq03-saw-check.sh saw saw-rustc
       - name: PQ04 SAW — BUILD + EQUIVALENCE + PROVE-UNIVERSAL + TEETH

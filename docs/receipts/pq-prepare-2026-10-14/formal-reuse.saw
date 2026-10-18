@@ -1,0 +1,4 @@
+include "common.saw";
+print "PREPARE CONTROL reuse obligation";
+check_reuse "pq_prepare_proof::cached_result";
+print "PREPARE UNEXPECTED-PROVEN";

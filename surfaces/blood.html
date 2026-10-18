@@ -1539,6 +1539,7 @@ hex.setAttribute('data-pid',id);
 // path stays fully functional (the engine gates all read __guxAtlas).
 import { createAtlas, discoveries, bloodRoute, routeAlternates, routeAlternatesPhrase, ingest } from "./blood-atlas.mjs?v=20261002-labels";
 import { mountPersonPanel, esc as ppEsc } from "./person-panel.mjs?v=20261003-family2";
+import { createLocalEvidence } from "../tools/genealogy/local-evidence.mjs";
 import { fetchArchive } from "./person-panel-corpus.mjs";
 import { decodeHash, initialFromCtx, syncHash, syncEngineHash, setEngineSeam, mapView, RETURN_KEY, archiveUrl } from "./blood-nav.mjs";
 import { mountTreeOfLife } from "./tree-of-life.mjs?v=20261004-deceased";
@@ -1589,7 +1590,12 @@ try {
 
   // the panel (zGenePerson's organ) — the ONE explanation surface
   const { archive } = await fetchArchive(BASE);
+  // prepare-local stamps this on the package copy. The public edition has
+  // no local reader and never asks for private/local-only source payloads.
+  const localEvidenceBase = document.documentElement.dataset.localEvidence;
+  const localEvidence = localEvidenceBase ? createLocalEvidence({ base: localEvidenceBase }) : null;
   const panel = mountPersonPanel($("ppanel"), archive, {
+    localEvidence,
     root: init.root,
     founderRoot: corpus.root,
     scrollContainer: $("detail"),

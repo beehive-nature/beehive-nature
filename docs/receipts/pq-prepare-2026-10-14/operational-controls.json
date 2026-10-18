@@ -1,0 +1,17 @@
+{
+  "result": "PASS",
+  "source_drift": {
+    "native_exit": 2,
+    "source_restored_sha256": "sha256:YaDVzyatoYG0I3ci144hSdefx7blgCzK4J4NtYvisEY"
+  },
+  "stale_success": {
+    "native_exit": 1,
+    "old_artifacts_absent": [
+      "native-honest.json",
+      "formal-honest.log",
+      "proof.linked-mir.json",
+      "formal-honest-summary.json"
+    ],
+    "replacement_result": "FAIL"
+  }
+}
