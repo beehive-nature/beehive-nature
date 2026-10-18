@@ -67,6 +67,7 @@ members = [
     "crates/bnrose-exec-core",
     "crates/bnrose-exec-wasm",
     "crates/bnrose-exec-host",
+    "crates/bnrose-evolve",
     "crates/bnrose-netpart",
     "crates/btungsten-wb001-core",
     "crates/btungsten-wb001",

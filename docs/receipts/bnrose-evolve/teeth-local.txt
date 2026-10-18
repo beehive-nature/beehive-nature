@@ -1,0 +1,17 @@
+$ sh scripts/bnrose-evolve/teeth.sh   # 2026-10-18T00:55:06Z · Linux 6.18.33.2-microsoft-standard-WSL2 x86_64 · 8 cpu · WSL2 on the founder's Windows box, shared with other seats' builds
+control: the unmutated copy runs the whole battery
+control: GREEN
+TEETH missing-evidence-is-pass: CONVICTED by adversarial::forged_success_report_is_only_a_claim
+TEETH retry-erases-failure: CONVICTED by adversarial::a_passing_retry_does_not_erase_a_failure
+TEETH protected-ignored: CONVICTED by adversarial::removed_test_and_policy_edits_are_refused_at_admission
+TEETH role-unchecked: CONVICTED by adversarial::role_confusion_is_refused
+TEETH command-unpinned: CONVICTED by adversarial::swapped_verifier_and_moved_artifact_are_refused
+TEETH declaration-trusted: CONVICTED by adversarial::undeclared_changes_and_stale_bases_are_refused
+TEETH unknown-is-zero: CONVICTED by recovery::the_state_matrix_settles_by_evidence
+TEETH no-rescue-record: CONVICTED by recovery::a_killed_controller_is_rescued_never_rerun_never_zeroed
+TEETH head-unchecked: CONVICTED by recovery::the_journal_fails_closed_on_tampering
+TEETH old-verdict-recloses: CONVICTED by lifecycle::an_old_promotion_cannot_close_what_a_stronger_verifier_reproduced
+TEETH repair-replayed: CONVICTED by lifecycle::a_recurrence_under_the_same_policy_needs_a_new_repair
+TEETH unbounded-worker: CONVICTED by adversarial::hung_scribbling_and_flooding_workers_are_degraded_never_pass
+TEETH: 12 convicted, 0 escaped
+exit=0

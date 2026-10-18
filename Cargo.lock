@@ -594,6 +594,16 @@ name = "bnr-url"
 version = "0.1.0"
 
 [[package]]
+name = "bnrose-evolve"
+version = "0.1.0"
+dependencies = [
+ "adapter-store",
+ "ml-dsa",
+ "serde_json",
+ "sha3 0.10.9",
+]
+
+[[package]]
 name = "bnrose-exec-core"
 version = "0.1.0"
 dependencies = [
