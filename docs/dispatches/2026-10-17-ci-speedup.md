@@ -98,15 +98,60 @@ until a main push seeds the caches — expected, not a defect.
   1078 MB) to `…-ec3650f2` (workspaces config, 936.9 MB). Seeding-run
   jobs that matter: BNROSE 39075936391 green, PQ 39075936364 green.
 
+## Warm-cache measurement (rider `0a7233678` vs seed `988e7805c`, same day, identical job definitions)
+
+The seeding push (cold: new cache keys, nothing to restore) versus the
+receipts rider push (warm: full-match restores). Step timings from the
+Actions jobs API; job totals wall-clock.
+
+| job | cold seed | warm | net |
+|---|---:|---:|---:|
+| tests.yml `test` | 8m50s | 5m56s | **−2m54s** |
+| pq12-taproot | 4m54s | 1m19s | **−3m35s** |
+| twin-grid | 2m46s | 46s | **−2m00s** |
+| pq01-vectors | 2m38s | 55s | **−1m43s** |
+| pq11-classic | 1m29s | 36s | −53s |
+| pq05-xwing | 1m12s | 46s | −26s |
+| pq10-plonky3 | 1m58s | 1m54s | −4s (wash) |
+| pq00-teeth | 51s | 48s | −3s (wash) |
+| **eight jobs** | **24m38s** | **13m00s** | **−11m38s (−47%)** |
+
+Step-level receipts: pq12 audit gate 2 **174s → 5s** (the pinned
+cargo-audit install recognized and skipped; the audit itself ran); the
+test job's **Build workspace 161s → 32s**; twin-grid's grid step **130s →
+7s**; pq01's KAT battery **96s → 18s**. Restore cost is inside every
+number above — worst case +13s (the test job's restore step 11s → 24s,
+the ~937 MB workspaces cache); warm post-save dropped 23s → 0s (nothing
+changed, nothing re-uploaded).
+
+Honest boundaries, measured not assumed:
+
+- **pq10 is a wash despite a full-match restore** (log: `Restored from
+  cache key "v0-rust-pq10-plonky3-…-2c29160b" full match: true`, ~31 MB):
+  its runtime is dominated by the 128-shape model tests and the
+  n=16384 prove runs, not compilation. Same for pq00. The report's
+  warned failure mode (restore costing more than compilation saves) did
+  not occur anywhere — worst observed is break-even.
+- **The x402 step is test-execution-bound on today's runners**: warm
+  recompiled **0** crates vs **272** cold (the mapping mechanically
+  works, proven), yet the step read 76s cold vs 82s warm — the compile
+  saving vanished into run-time noise. The report's ~78s-compile
+  baseline came from run 39013417846; cold-seed here compiled 272 crates
+  inside a 76s step, i.e. that runner generation is simply faster than
+  the report's. The mechanism is live; the per-step payoff on this
+  hardware is ≈0.
+- Warm numbers hold while lockfiles hold: any dependency bump re-keys
+  the cache and the next run re-seeds (inherent rust-cache behavior).
+- What this patch cannot touch: **queue time**. The rider's `tests`
+  workflow still waited ~28 minutes for a runner. Phases 2–4 own that.
+
+Verdict against the acceptance rule (**net time saved**): PASS —
+11m38s of runner execution returned per warm main push on the eight
+measured jobs, at +2s–13s restore cost per job and ~5.5 GB of the
+10 GB cache budget, all main-scoped.
+
 ## What is NOT yet claimed
 
-- **The warm-cache before/after measurement.** The acceptance criterion
-  stays the report's own: **net time saved**. The next main push after
-  seeding (this dispatch's rider commit) is the first warm candidate;
-  its numbers land in a follow-up rider. Note the repo cache budget:
-  these entries total ~5.5 GB of GitHub's 10 GB; branch/PR-scoped
-  entries (e.g. the 1 GB `v0-rust-test` copies) evict first, which is
-  the main-only save policy doing its job.
 - Phases 2–4 below are **unstarted**.
 
 ## Phase 2 — one expensive candidate path (next owner: this lane, next session)
