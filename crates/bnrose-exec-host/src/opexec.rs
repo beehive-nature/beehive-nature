@@ -55,6 +55,7 @@ pub struct Supervisor {
     step_entities: BTreeMap<u8, StepEntity>,
     /// In-memory map of (root, step) -> max_attempt
     step_attempts: BTreeMap<([u8; 32], u8), u8>,
+    cached_receipts: BTreeMap<[u8; 32], (PathBuf, Option<std::time::SystemTime>, Receipt, Value)>,
     pub capacity_ledger: DeviceCapacityLedger,
     pub load_shed: CrossDaoAdmissionControl,
     pub device_id: [u8; 32],
@@ -169,6 +170,48 @@ impl Default for StepOptions {
 }
 
 impl Supervisor {
+    pub fn set_load_shed(&mut self, ctrl: CrossDaoAdmissionControl) {
+        self.load_shed = ctrl;
+    }
+
+    pub fn issue_capacity_challenge(
+        &mut self,
+        device_id: [u8; 32],
+        challenge_seed: [u8; 32],
+        claimed_capacity_qps: u64,
+    ) {
+        self.capacity_ledger.issue_challenge(device_id, challenge_seed, claimed_capacity_qps);
+    }
+
+    pub fn verify_device_challenge(
+        &mut self,
+        challenge_seed: &[u8; 32],
+        nonce: u64,
+    ) -> Result<bool, &'static str> {
+        self.capacity_ledger.verify_device_challenge(challenge_seed, nonce)
+    }
+
+    pub fn verify_capacity_challenge(
+        &self,
+        device_id: &[u8; 32],
+        challenge_seed: &[u8; 32],
+        nonce: u64,
+        claimed_capacity_qps: u64,
+        measured_ms: u64,
+        min_expected_ms: u64,
+        max_duration_ms: u64,
+    ) -> bool {
+        crate::device_capacity::DeviceCapacityLedger::verify_capacity_challenge(
+            device_id,
+            challenge_seed,
+            nonce,
+            claimed_capacity_qps,
+            measured_ms,
+            min_expected_ms,
+            max_duration_ms,
+        )
+    }
+
     pub fn open(
         state_dir: &Path,
         worker: Box<dyn Worker>,
@@ -207,7 +250,7 @@ impl Supervisor {
         std::fs::create_dir_all(state_dir.join("receipts")).map_err(|e| e.to_string())?;
         std::fs::create_dir_all(state_dir.join("replica")).map_err(|e| e.to_string())?;
         let keys = SupervisorKeys::load(state_dir)?;
-        let (journal, records) =
+        let (mut journal, records) =
             ReplicatedJournal::open_with_records(&replica_paths(state_dir), &keys.journal_mac)
                 .map_err(|e| e.to_string())?;
         let ledger = EffectLedger::open(&state_dir.join("effects.bin"), &keys.ledger_mac)
@@ -236,7 +279,7 @@ impl Supervisor {
             }
         }
         let allowed_authorities = Self::load_authorities_from_dir(state_dir)?;
-        let is_prod = std::env::var("BNROSE_PRODUCTION").map(|v| v == "1" || v == "true").unwrap_or(false);
+        let is_prod = crate::is_production_env();
         if is_prod && allowed_authorities.is_none() {
             return Err("authorities: allowed_authorities file missing in production mode — refusing to start open".into());
         }
@@ -261,20 +304,63 @@ impl Supervisor {
                 terminal_ops.insert(r.op_id);
             }
         }
+        let mut cached_receipts = BTreeMap::new();
+        // Startup recovery (r4): resolve any pre-dispatch operations interrupted by crash
+        // Marks unresolved pre-dispatch operations as E_BOUNDED_FAIL, caches receipt,
+        // and strictly releases capacity reservation (zero stuck capacity leak on reboot).
         for r in &records {
             if r.event == bnrose_exec_core::E_RESERVE && !terminal_ops.contains(&r.op_id) {
-                if r.payload.len() >= 16 {
-                    let fuel = u64::from_le_bytes(r.payload[0..8].try_into().unwrap());
-                    let mem = u32::from_le_bytes(r.payload[8..12].try_into().unwrap());
-                    let wall = u32::from_le_bytes(r.payload[12..16].try_into().unwrap());
-                    let b = ResourceBudget { fuel, memory_pages: mem, wall_secs: wall };
-                    capacity_ledger.reconstruct_active(&device_id, &r.op_id, &b);
+                let op = r.op_id;
+                let word = "crash:interrupted-pre-dispatch";
+                let mut p = Vec::new();
+                p.extend_from_slice(&1001u32.to_le_bytes());
+                p.push(word.len() as u8);
+                p.extend_from_slice(word.as_bytes());
+                let _ = journal.append(&op, E_BOUNDED_FAIL, &p);
+                terminal_ops.insert(op);
+
+                if let Some(&env_sha) = admitted_env_shas.get(&op) {
+                    let op_state = OpState {
+                        state: bnrose_exec_core::S_FAILED,
+                        recovered: 1,
+                        fail: 1001,
+                        bound_effect: [0u8; 32],
+                        seq: journal.next_seq().saturating_sub(1),
+                    };
+                    let r = Receipt {
+                        op,
+                        env_sha,
+                        state: op_state.state,
+                        recovered: op_state.recovered,
+                        fail: op_state.fail,
+                        effect: [0u8; 32],
+                        journal_head: journal.head(),
+                        completed_at: 0,
+                        seq_head: journal.next_seq(),
+                        sig: [0; 64],
+                    };
+                    let mut r = r;
+                    r.sig = Receipt::sign_statement(&keys.ed_seed, &r.statement());
+                    let v = r.to_json();
+                    let receipts_dir = state_dir.join("receipts");
+                    let _ = std::fs::create_dir_all(&receipts_dir);
+                    let path = receipts_dir.join(format!("op-{}.json", hex(&op)));
+                    if let Ok(json_str) = serde_json::to_string_pretty(&v) {
+                        let _ = std::fs::write(&path, json_str);
+                    }
+                    let mtime = std::fs::metadata(&path).ok().and_then(|m| m.modified().ok());
+                    cached_receipts.insert(op, (path, mtime, r, v));
                 }
             }
         }
 
         let load_shed = CrossDaoAdmissionControl::new(10_000, 2_000);
-        let local_domain = "dao:local".to_string();
+        let pol_domain = {
+            let (buf, len) = policy.domains[0];
+            let len = (len as usize).min(64);
+            String::from_utf8_lossy(&buf[..len]).to_string()
+        };
+        let local_domain = if pol_domain.is_empty() { "dao:local".to_string() } else { pol_domain };
 
         Ok(Supervisor {
             keys,
@@ -292,6 +378,7 @@ impl Supervisor {
             load_shed,
             device_id,
             local_domain,
+            cached_receipts,
             _claim: claim,
         })
     }
@@ -329,6 +416,8 @@ impl Supervisor {
         let mut r = r;
         r.sig = Receipt::sign_statement(&self.keys.ed_seed, &r.statement());
         let (p, v) = self.write_receipt(&r)?;
+        let mtime = std::fs::metadata(&p).ok().and_then(|m| m.modified().ok());
+        self.cached_receipts.insert(*op, (p.clone(), mtime, r.clone(), v.clone()));
         Ok((r, p, v))
     }
 
@@ -491,7 +580,7 @@ impl Supervisor {
             receipt_path: None,
             receipt_json: None,
         };
-        // 1a. the policy authority allowlist (if configured: unknown keys refused before journal, ledger, or signature verify)
+        // 1a. the policy authority allowlist
         if let Some(ref allowed) = self.allowed_authorities {
             if !allowed.contains(&intent.authority) {
                 return RunOutcome {
@@ -500,9 +589,7 @@ impl Supervisor {
                 };
             }
         }
-        // 1b. the WB001 binding: the envelope verifies under the authority,
-        //     structurally and cryptographically (the frozen contract's own
-        //     verifier; nothing downstream sees a signature again)
+        // 1b. the WB001 binding
         if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
             return RunOutcome {
                 refused: Some("wb001:binding-refused".into()),
@@ -518,18 +605,8 @@ impl Supervisor {
                 }
             }
         };
-        // Gate 3: Cross-DAO Admission Control & Load Shedding
-        let domain_str = String::from_utf8_lossy(&decoded.domain[..decoded.domain_len as usize]);
-        let is_local = domain_str.is_empty() || domain_str == self.local_domain || domain_str.starts_with("local");
-        let now_ms = clock * 1000;
-        if let Err(e) = self.load_shed.admit(is_local, now_ms) {
-            return RunOutcome {
-                refused: Some(e.into()),
-                ..none
-            };
-        }
         // 2. fast in-memory nonce gate: this authority has spent this nonce (O(log n) in-memory)
-        // Eliminates O(N) full-journal disk reloads on every admission.
+        // MUST RUN BEFORE load_shed.admit! (r1: prevents replay flood from consuming cross-DAO quota)
         let prev_op = self.admitted.get(&(intent.authority, decoded.nonce)).copied();
         if let Some(prev_op) = prev_op {
             if allow_retry {
@@ -547,9 +624,32 @@ impl Supervisor {
                     }
                 }
 
-                // 2. Check existing receipt file on disk if present (verifying Ed25519 signature)
+
+                // 2. Check cached receipt with disk freshness verification
+                if let Some((p, cached_mtime, r, v)) = self.cached_receipts.get(&prev_op) {
+                    let mtime = std::fs::metadata(p).ok().and_then(|m| m.modified().ok());
+                    if mtime.is_some() && mtime == *cached_mtime {
+                        if r.env_sha != env_sha {
+                            return RunOutcome {
+                                op: Some(prev_op),
+                                refused: Some("admission:nonce-reuse — payload mismatch".into()),
+                                ..none
+                            };
+                        }
+                        return RunOutcome {
+                            op: Some(prev_op),
+                            refused: None,
+                            lost_response: false,
+                            receipt: Some(r.clone()),
+                            receipt_path: Some(p.clone()),
+                            receipt_json: Some(v.clone()),
+                        };
+                    }
+                }
+
                 let p = self.state_dir.join("receipts").join(format!("op-{}.json", hex(&prev_op)));
                 if p.exists() {
+                    let mtime = std::fs::metadata(&p).ok().and_then(|m| m.modified().ok());
                     if let Ok(text) = std::fs::read_to_string(&p) {
                         if let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) {
                             if let Ok(r) = Receipt::from_json(&v) {
@@ -567,6 +667,7 @@ impl Supervisor {
                                         ..none
                                     };
                                 }
+                                self.cached_receipts.insert(prev_op, (p.clone(), mtime, r.clone(), v.clone()));
                                 return RunOutcome {
                                     op: Some(prev_op),
                                     refused: None,
@@ -631,12 +732,38 @@ impl Supervisor {
                 };
             }
         }
-        // 3. the worker's admission verdict (paranoid: native + wasm equal)
+
+        // Gate 3: Cross-DAO Admission Control & Load Shedding
+        // Strict exact local domain match (r2: prevents local priority spoofing e.g. 'local-evil-dao')
+        let domain_str = String::from_utf8_lossy(&decoded.domain[..decoded.domain_len as usize]);
+        let is_local = domain_str == self.local_domain && !self.local_domain.is_empty();
+        let now_ms = clock * 1000;
+        if let Err(e) = self.load_shed.admit(is_local, now_ms) {
+            return RunOutcome {
+                refused: Some(e.into()),
+                ..none
+            };
+        }
+
+        let outcome = self.run_inner_admitted(intent, clock, lose_response, bounds, &decoded, none);
+        self.load_shed.complete(is_local);
+        outcome
+    }
+
+    fn run_inner_admitted(
+        &mut self,
+        intent: &crate::fixtures::IntentFile,
+        clock: u64,
+        lose_response: bool,
+        bounds: &Bounds,
+        decoded: &btungsten_wb001::core::Intent,
+        none: RunOutcome,
+    ) -> RunOutcome {
+        // 3. worker admission verdict
         let req = admit_request(clock, &intent.authority, &self.policy, &intent.env);
         let verdict = match self.worker.admit(&req) {
             Ok(v) => v,
             Err(e) => {
-                self.load_shed.complete(is_local);
                 return RunOutcome {
                     refused: Some(format!("worker:{e}")),
                     ..none
@@ -662,18 +789,13 @@ impl Supervisor {
                 }
             }
         };
-        // cross-check: the supervisor derives the identity itself; a worker
-        // (even the paranoid pair, were both corrupted) cannot rename an op
         if op != op_id_of(&intent.authority, &intent.env) || env_sha != env_sha_of(&intent.env) {
             return RunOutcome {
                 refused: Some("worker:identity-mismatch".into()),
                 ..none
             };
         }
-        // 4. journal the admission: identity, authorized scope, the binding
-        //    (authority + signature + policy digest + the envelope itself),
-        //    and which worker kind will run it (bookkeeping only)
-        let mut payload = Vec::with_capacity(intent.env.len() + 140);
+                let mut payload = Vec::with_capacity(intent.env.len() + 140);
         payload.extend_from_slice(&intent.authority);
         payload.extend_from_slice(&intent.sig);
         payload.extend_from_slice(&policy_digest(&self.policy.wire()));
@@ -692,15 +814,12 @@ impl Supervisor {
         self.admitted_env_shas.insert(op, env_sha);
         let mut state = OpState::ADMITTED_ZERO;
         state.seq = 0;
-        // 5. reserve (bounded worker, its budget journaled before it runs)
-        // Gate 2: Device Capacity Ledger reservation
         let budget = ResourceBudget {
             fuel: bounds.fuel,
             memory_pages: (bounds.memory_cap / 65_536) as u32,
             wall_secs: ((bounds.ticks * crate::worker::WATCHDOG_INTERVAL.as_millis() as u64 / 1000) as u32).max(1),
         };
         if let Err(e) = self.capacity_ledger.reserve(&self.device_id, &op, &budget) {
-            self.load_shed.complete(is_local);
             return RunOutcome {
                 refused: Some(e.into()),
                 op: Some(op),
@@ -721,23 +840,19 @@ impl Supervisor {
             Ok(()) => {}
             Err(w) => {
                 self.capacity_ledger.release(&self.device_id, &op);
-                    self.load_shed.complete(is_local);
-                    return RunOutcome {
+                return RunOutcome {
                     refused: Some(w),
                     op: Some(op),
                     ..none
                 }
             }
         }
-        // 6. dispatch: THE DURABILITY LINE — the record (and its fsync)
-        //    precedes the effect door below, always
         match self.step_and_journal(
             &op, &env_sha, &mut state, E_DISPATCH, &effect, clock, expiry,
         ) {
             Ok(()) => {}
             Err(w) => {
                 self.capacity_ledger.release(&self.device_id, &op);
-                self.load_shed.complete(is_local);
                 return RunOutcome {
                     refused: Some(w),
                     op: Some(op),
@@ -745,14 +860,11 @@ impl Supervisor {
                 };
             }
         }
-        // 7. the effect door: the ledger accepts only the bound digest,
-        //    idempotently, once, forever
         match self.ledger.apply(&op, &env_sha, &effect, clock) {
             Ok(_) => {}
             Err(e) => {
                 self.capacity_ledger.release(&self.device_id, &op);
-                    self.load_shed.complete(is_local);
-                    return RunOutcome {
+                return RunOutcome {
                     refused: Some(format!("ledger:{e}")),
                     op: Some(op),
                     ..none
@@ -761,7 +873,6 @@ impl Supervisor {
         }
         if lose_response {
             self.capacity_ledger.release(&self.device_id, &op);
-            self.load_shed.complete(is_local);
             return RunOutcome {
                 op: Some(op),
                 refused: None,
@@ -771,12 +882,10 @@ impl Supervisor {
                 receipt_json: None,
             };
         }
-        // 8. the worker's response and the receipt
         match self.step_and_journal(&op, &env_sha, &mut state, E_RESPONSE, &[1], clock, expiry) {
             Ok(()) => {}
             Err(w) => {
                 self.capacity_ledger.release(&self.device_id, &op);
-                self.load_shed.complete(is_local);
                 return RunOutcome {
                     refused: Some(w),
                     op: Some(op),
@@ -784,28 +893,21 @@ impl Supervisor {
                 };
             }
         }
+        self.capacity_ledger.release(&self.device_id, &op);
         match self.issue_receipt(&op, &env_sha, state, &effect, clock) {
-            Ok((r, p, v)) => {
-                self.capacity_ledger.release(&self.device_id, &op);
-                self.load_shed.complete(is_local);
-                RunOutcome {
-                    op: Some(op),
-                    refused: None,
-                    lost_response: false,
-                    receipt: Some(r),
-                    receipt_path: Some(p),
-                    receipt_json: Some(v),
-                }
-            }
-            Err(e) => {
-                self.capacity_ledger.release(&self.device_id, &op);
-                self.load_shed.complete(is_local);
-                RunOutcome {
-                    refused: Some(e),
-                    op: Some(op),
-                    ..none
-                }
-            }
+            Ok((r, p, v)) => RunOutcome {
+                op: Some(op),
+                refused: None,
+                lost_response: false,
+                receipt: Some(r),
+                receipt_path: Some(p),
+                receipt_json: Some(v),
+            },
+            Err(e) => RunOutcome {
+                refused: Some(e),
+                op: Some(op),
+                ..none
+            },
         }
     }
 
@@ -887,6 +989,41 @@ impl Supervisor {
         decoded: &btungsten_wb001::core::Intent,
         env_sha: &[u8; 32],
     ) -> RunOutcome {
+        let domain_str = String::from_utf8_lossy(&decoded.domain[..decoded.domain_len as usize]);
+        let is_local = domain_str == self.local_domain && !self.local_domain.is_empty();
+        let now_ms = clock * 1000;
+        if let Err(e) = self.load_shed.admit(is_local, now_ms) {
+            return RunOutcome {
+                refused: Some(e.into()),
+                op: None,
+                lost_response: false,
+                receipt: None,
+                receipt_path: None,
+                receipt_json: None,
+            };
+        }
+        let outcome = self.execute_fresh_step_inner(
+            intent, root, encoded_step, id, effect, label, clock, bounds, lose, decoded, env_sha,
+        );
+        self.load_shed.complete(is_local);
+        outcome
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn execute_fresh_step_inner(
+        &mut self,
+        intent: &crate::fixtures::IntentFile,
+        root: &[u8; 32],
+        encoded_step: u8,
+        id: [u8; 32],
+        effect: [u8; 32],
+        label: &str,
+        clock: u64,
+        bounds: &Bounds,
+        lose: bool,
+        decoded: &btungsten_wb001::core::Intent,
+        env_sha: &[u8; 32],
+    ) -> RunOutcome {
         let none = RunOutcome {
             op: None,
             refused: None,
@@ -922,6 +1059,18 @@ impl Supervisor {
         self.admitted.insert((intent.authority, decoded.nonce), *root);
         let mut state = OpState::ADMITTED_ZERO;
         state.seq = 0;
+        let budget = ResourceBudget {
+            fuel: bounds.fuel,
+            memory_pages: (bounds.memory_cap / 65_536) as u32,
+            wall_secs: ((bounds.ticks * crate::worker::WATCHDOG_INTERVAL.as_millis() as u64 / 1000) as u32).max(1),
+        };
+        if let Err(e) = self.capacity_ledger.reserve(&self.device_id, &id, &budget) {
+            return RunOutcome {
+                refused: Some(e.into()),
+                op: Some(id),
+                ..none
+            };
+        }
         let res = reservations_payload(bounds);
         let expiry = decoded.expiry;
         for (event, pl) in [
@@ -931,6 +1080,7 @@ impl Supervisor {
             if let Err(w) =
                 self.step_and_journal(&id, env_sha, &mut state, event, pl, clock, expiry)
             {
+                self.capacity_ledger.release(&self.device_id, &id);
                 return RunOutcome {
                     refused: Some(w),
                     op: Some(id),
@@ -938,10 +1088,8 @@ impl Supervisor {
                 };
             }
         }
-        // the step's EXACT signed bytes and identity are durable (the step
-        // record carries envelope + signature); the effect commits after
-        // the acknowledgement
         if let Err(e) = self.ledger.apply(&id, env_sha, &effect, clock) {
+            self.capacity_ledger.release(&self.device_id, &id);
             return RunOutcome {
                 refused: Some(format!("ledger:{e}")),
                 op: Some(id),
@@ -949,6 +1097,7 @@ impl Supervisor {
             };
         }
         if lose {
+            self.capacity_ledger.release(&self.device_id, &id);
             self.step_entities.insert(
                 encoded_step & 0x0f,
                 StepEntity {
@@ -975,6 +1124,7 @@ impl Supervisor {
         if let Err(w) =
             self.step_and_journal(&id, env_sha, &mut state, E_RESPONSE, &[1], clock, expiry)
         {
+            self.capacity_ledger.release(&self.device_id, &id);
             return RunOutcome {
                 refused: Some(w),
                 op: Some(id),
@@ -995,6 +1145,7 @@ impl Supervisor {
         );
         let entry = self.step_attempts.entry((*root, encoded_step & 0x0f)).or_insert(0);
         *entry = (*entry).max(encoded_step >> 4);
+        self.capacity_ledger.release(&self.device_id, &id);
         match self.issue_receipt(&id, env_sha, state, &effect, clock) {
             Ok((r, p, v)) => RunOutcome {
                 op: Some(id),
@@ -1321,6 +1472,29 @@ impl Supervisor {
                 ..none
             };
         }
+        let domain_str = String::from_utf8_lossy(&decoded.domain[..decoded.domain_len as usize]);
+        let is_local = domain_str == self.local_domain && !self.local_domain.is_empty();
+        let now_ms = clock * 1000;
+        if let Err(e) = self.load_shed.admit(is_local, now_ms) {
+            return RunOutcome {
+                refused: Some(e.into()),
+                ..none
+            };
+        }
+        let outcome = self.run_raced_inner(intent, clock, bounds, worker_b, &decoded, none);
+        self.load_shed.complete(is_local);
+        outcome
+    }
+
+    fn run_raced_inner(
+        &mut self,
+        intent: &crate::fixtures::IntentFile,
+        clock: u64,
+        bounds: &Bounds,
+        worker_b: Box<dyn Worker>,
+        decoded: &btungsten_wb001::core::Intent,
+        none: RunOutcome,
+    ) -> RunOutcome {
         let req = admit_request(clock, &intent.authority, &self.policy, &intent.env);
         let verdict = match self.worker.admit(&req) {
             Ok(v) => v,
@@ -1367,8 +1541,21 @@ impl Supervisor {
             };
         }
         self.admitted.insert((intent.authority, decoded.nonce), op);
+        self.admitted_env_shas.insert(op, env_sha);
         let mut state = OpState::ADMITTED_ZERO;
         state.seq = 0;
+        let budget = ResourceBudget {
+            fuel: bounds.fuel,
+            memory_pages: (bounds.memory_cap / 65_536) as u32,
+            wall_secs: ((bounds.ticks * crate::worker::WATCHDOG_INTERVAL.as_millis() as u64 / 1000) as u32).max(1),
+        };
+        if let Err(e) = self.capacity_ledger.reserve(&self.device_id, &op, &budget) {
+            return RunOutcome {
+                refused: Some(e.into()),
+                op: Some(op),
+                ..none
+            };
+        }
         let res = reservations_payload(bounds);
         let expiry = decoded.expiry;
         if let Err(w) = self.step_and_journal(
@@ -1380,6 +1567,7 @@ impl Supervisor {
             clock,
             expiry,
         ) {
+            self.capacity_ledger.release(&self.device_id, &op);
             return RunOutcome {
                 refused: Some(w),
                 op: Some(op),
@@ -1395,10 +1583,10 @@ impl Supervisor {
             .spawn(move || {
                 let v = worker_b.step(&dreq);
                 let _ = tx.send(v);
-                // worker_b and its local state die with this thread
             })
             .map_err(|e| format!("race:spawn:{e}"));
         if let Err(w) = spawned {
+            self.capacity_ledger.release(&self.device_id, &op);
             return RunOutcome {
                 refused: Some(w),
                 op: Some(op),
@@ -1409,10 +1597,10 @@ impl Supervisor {
             &op, &env_sha, &state, E_DISPATCH, &effect, clock, expiry,
         ));
         let verdict_b = rx.recv().map_err(|e| format!("race:b:{e}"));
-        // the two independent implementations must agree byte for byte
         let (a, b) = match (verdict_a, verdict_b) {
             (Ok(a), Ok(Ok(b))) => (a, b),
             (Err(e), _) => {
+                self.capacity_ledger.release(&self.device_id, &op);
                 return RunOutcome {
                     refused: Some(format!("race:a:{e}")),
                     op: Some(op),
@@ -1420,6 +1608,7 @@ impl Supervisor {
                 }
             }
             (Ok(_), Err(e)) => {
+                self.capacity_ledger.release(&self.device_id, &op);
                 return RunOutcome {
                     refused: Some(e),
                     op: Some(op),
@@ -1427,6 +1616,7 @@ impl Supervisor {
                 };
             }
             (Ok(_), Ok(Err(e))) => {
+                self.capacity_ledger.release(&self.device_id, &op);
                 return RunOutcome {
                     refused: Some(format!("race:b:{e}")),
                     op: Some(op),
@@ -1435,6 +1625,7 @@ impl Supervisor {
             }
         };
         if a != b {
+            self.capacity_ledger.release(&self.device_id, &op);
             return RunOutcome {
                 refused: Some("race:disagreement".into()),
                 op: Some(op),
@@ -1444,6 +1635,7 @@ impl Supervisor {
         match parse_step_verdict(&a) {
             Ok(StepVerdict::Next(_)) => {}
             Ok(StepVerdict::Refused(r)) => {
+                self.capacity_ledger.release(&self.device_id, &op);
                 return RunOutcome {
                     refused: Some(format!("transition:{}", r.word())),
                     op: Some(op),
@@ -1451,6 +1643,7 @@ impl Supervisor {
                 }
             }
             Err(e) => {
+                self.capacity_ledger.release(&self.device_id, &op);
                 return RunOutcome {
                     refused: Some(format!("worker:{e}")),
                     op: Some(op),
@@ -1458,26 +1651,23 @@ impl Supervisor {
                 }
             }
         }
-        // exactly one Dispatched record — the acknowledgement the effect
-        // door stands behind (every replica, fsynced)
         if let Err(e) = self.journal.append(&op, E_DISPATCH, &effect) {
+            self.capacity_ledger.release(&self.device_id, &op);
             return RunOutcome {
                 refused: Some(format!("journal:{e}")),
                 op: Some(op),
                 ..none
             };
         }
-        // the effect commits
         if let Err(e) = self.ledger.apply(&op, &env_sha, &effect, clock) {
+            self.capacity_ledger.release(&self.device_id, &op);
             return RunOutcome {
                 refused: Some(format!("ledger:{e}")),
                 op: Some(op),
                 ..none
             };
         }
-        // THE FIRST WORKER IS KILLED here: its process state never records
-        // a response. The replacement's job is recover() with a fresh
-        // worker — no second effect, no second authorization.
+        self.capacity_ledger.release(&self.device_id, &op);
         RunOutcome {
             op: Some(op),
             refused: None,
@@ -1487,6 +1677,7 @@ impl Supervisor {
             receipt_json: None,
         }
     }
+
 }
 
 /// The (authority, nonce) → LOGICAL-OPERATION map: E_ADMITTED entities map

@@ -113,3 +113,15 @@ opt-level = 3
 opt-level = 3
 [profile.dev.package.keccak]
 opt-level = 3
+[profile.dev.package.curve25519-dalek]
+opt-level = 3
+[profile.dev.package.ed25519-dalek]
+opt-level = 3
+
+[profile.dev.package.libcrux-ed25519]
+opt-level = 3
+
+[profile.dev.package.btungsten-wb001]
+opt-level = 3
+[profile.dev.package.bnrose-exec-core]
+opt-level = 3

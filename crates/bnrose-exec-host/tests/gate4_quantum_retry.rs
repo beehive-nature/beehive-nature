@@ -1,19 +1,24 @@
-//! Gate 4 Acceptance Test: Quantum Lost-Response Retry & Envelope Receipt Binding.
+//! Gate 4 Acceptance Test: Quantum-Lost-Response Idempotent Replay,
+//! Receipt Binding, and Pre-Dispatch Crash Recovery (Zero Capacity Leak).
 //!
-//! SPEC-RUSTEOSVM-1, Grok Review R-6:
-//! 1. Lost-response retry: client retry of completed or dispatched op returns the
-//!    original receipt (bound to envelope hash) instead of dead refusal, preventing
+//! SPEC-RUSTEOSVM-1, Grok Review R-6 & PR #465 comments:
+//! 1. Lost response after dispatch: retry serves cached receipt in O(1) without
 //!    duplicate paid provider runs.
 //! 2. Zero duplicate ledger rows: verifies ledger has exactly 1 row after retry.
 //! 3. Tampered cached receipt protection: cached receipt signature is verified under
 //!    supervisor Ed25519 public key; forged/tampered receipts are strictly refused.
 //! 4. Envelope binding: a retry with the same nonce but a DIFFERENT envelope is
 //!    refused ("admission:nonce-reuse — payload mismatch"), never served the old receipt.
-//! 5. Zero disk reload flood: retry of unresolved op does NOT trigger full journal
-//!    reloads (O(1) memory check).
+//! 5. 500 retry flood: retry of admitted op operates in memory with zero journal reload.
+//! 6. Pre-dispatch crash recovery (r4): an op interrupted after reserve before dispatch
+//!    does NOT hold capacity forever across reboots; open_with marks it E_BOUNDED_FAIL,
+//!    releases capacity reservations (zero stuck fuel), and client retry receives
+//!    the bounded-fail receipt.
 
+use bnrose_exec_core::{E_ADMITTED, E_RESERVE};
 use bnrose_exec_host::fixtures::{fixture, read_intent, test_policy, Fixture, IntentFile};
-use bnrose_exec_host::opexec::Supervisor;
+use bnrose_exec_host::opexec::{replica_paths, Supervisor};
+use bnrose_exec_host::journal::ReplicatedJournal;
 use bnrose_exec_host::worker::{Bounds, NativeWorker};
 use btungsten_wb001::Text;
 use std::path::{Path, PathBuf};
@@ -108,7 +113,6 @@ fn test_gate4_tampered_cached_receipt_refused() {
     // Run to completion
     let out = sup.run(&intent, NOW, false, &bounds);
     assert!(out.refused.is_none(), "out.refused was: {:?}", out.refused);
-    let op = out.op.unwrap();
     let receipt_path = out.receipt_path.unwrap();
 
     // Tamper with receipt file on disk (alter effect digest)
@@ -136,18 +140,22 @@ fn test_gate4_unresolved_op_retry_flood_zero_disk_reloads() {
     let f = fixture(90_005, NOW, 600);
     let intent = read_intent(&f.to_json()).unwrap();
 
-    // 500 retries to verify zero journal reload
+    // Pre-admit op with lost response
+    let lost = sup.run(&intent, NOW, true, &bounds);
+    assert!(lost.lost_response);
+    let initial_op = lost.op.unwrap();
+
+    // 500 retries to verify zero journal reload & fast in-memory serving
     let t0 = std::time::Instant::now();
-    for _ in 0..100 {
-        let outcome = sup.retry(&intent, NOW, &bounds);
-        // First attempt admits or attempts run
-        if outcome.refused.is_some() {
-            break;
-        }
+    for _ in 0..500 {
+        let outcome = sup.retry(&intent, NOW + 1, &bounds);
+        assert!(outcome.refused.is_none(), "retry must succeed: {:?}", outcome.refused);
+        assert_eq!(outcome.op, Some(initial_op));
+        assert!(outcome.receipt.is_some());
     }
     let elapsed = t0.elapsed();
-    assert!(elapsed.as_millis() < 500, "retry checks must be fast in-memory lookups without journal reloads");
-    println!("gate4: PASS - retry flood operates in memory with zero journal reload");
+    assert!(elapsed.as_millis() < 500, "500 retry checks must be fast in-memory lookups without journal reloads; took {} ms", elapsed.as_millis());
+    println!("gate4: PASS - 500 retry flood operates in memory with zero journal reload in {} ms", elapsed.as_millis());
 }
 
 #[test]
@@ -200,5 +208,79 @@ fn test_gate4_half_written_crash_recovers_and_returns_receipt_to_client() {
         assert!(retried.refused.is_none(), "recovery retry must succeed: {:?}", retried.refused);
         assert!(retried.receipt.is_some(), "recovered receipt returned to client");
         println!("gate4: PASS - half-written operation recovers and delivers receipt to client");
+    }
+}
+
+#[test]
+fn test_gate4_pre_dispatch_crash_releases_capacity_and_returns_fail_receipt() {
+    let state = tmp("pre-dispatch-crash");
+    let bounds = Bounds::default();
+
+    let f = fixture(90_006, NOW, 600);
+    let intent = read_intent(&f.to_json()).unwrap();
+
+    // 1. Simulate an operation that crashed after RESERVE but before DISPATCH
+    {
+        let keys = bnrose_exec_host::keys::SupervisorKeys::init(&state, &[0x66; 32]).unwrap();
+        let paths = replica_paths(&state);
+        if let Some(p) = paths[0].parent() { std::fs::create_dir_all(p).unwrap(); }
+        if let Some(p) = paths[1].parent() { std::fs::create_dir_all(p).unwrap(); }
+        let (mut journal, _) = ReplicatedJournal::open_with_records(&paths, &keys.journal_mac).unwrap();
+
+        let op = bnrose_exec_core::op_id(&intent.authority, &intent.env);
+        let pol = test_policy();
+        let pol_wire = pol.wire();
+
+        let mut payload = Vec::with_capacity(intent.env.len() + 140);
+        payload.extend_from_slice(&intent.authority);
+        payload.extend_from_slice(&intent.sig);
+        payload.extend_from_slice(&bnrose_exec_core::policy_digest(&pol_wire));
+        payload.extend_from_slice(&(intent.env.len() as u16).to_le_bytes());
+        payload.extend_from_slice(&intent.env);
+        let name = "native-worker";
+        payload.push(name.len() as u8);
+        payload.extend_from_slice(name.as_bytes());
+
+        // Append E_ADMITTED
+        journal.append(&op, E_ADMITTED, &payload).unwrap();
+
+        // Append E_RESERVE with 16 bytes budget
+        let mut res = Vec::with_capacity(16);
+        res.extend_from_slice(&500_000u64.to_le_bytes()); // fuel
+        res.extend_from_slice(&10u32.to_le_bytes());      // mem pages
+        res.extend_from_slice(&5u32.to_le_bytes());       // wall secs
+        journal.append(&op, E_RESERVE, &res).unwrap();
+        // Crash here! Zero DISPATCH, zero RESPONSE.
+    }
+
+    // 2. Restart supervisor (simulating node reboot)
+    {
+        let mut sup = Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
+
+        // Verify zero capacity is held across reboot (r4: zero capacity leak)
+        let allocated = sup.capacity_ledger.current_allocated(&sup.device_id);
+        assert_eq!(
+            allocated.fuel, 0,
+            "pre-dispatch crashed op must NOT hold fuel capacity on reboot; was {}", allocated.fuel
+        );
+        assert_eq!(
+            allocated.memory_pages, 0,
+            "pre-dispatch crashed op must NOT hold memory pages on reboot"
+        );
+
+        // 3. Client retries the interrupted operation
+        let retried = sup.retry(&intent, NOW + 1, &bounds);
+        assert!(retried.refused.is_none(), "recovery retry must succeed: {:?}", retried.refused);
+        assert!(retried.receipt.is_some(), "fail receipt must be delivered to client");
+
+        let r = retried.receipt.unwrap();
+        assert_eq!(r.state, bnrose_exec_core::S_FAILED, "operation must be marked S_FAILED");
+        assert_eq!(r.fail, 1001, "fail code must be 1001 (interrupted-pre-dispatch)");
+        assert_eq!(r.recovered, 1, "receipt must record recovered = 1");
+
+        // Verify ledger has 0 rows (effect was never applied)
+        assert_eq!(sup.ledger.len(), 0, "no effect ever committed for pre-dispatch crash");
+
+        println!("gate4: PASS - pre-dispatch crash recovery releases capacity and returns bounded-fail receipt");
     }
 }

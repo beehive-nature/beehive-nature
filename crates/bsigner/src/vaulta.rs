@@ -1,14 +1,16 @@
 //! Vaulta K1 Action Authorization & Post-Quantum Attestation (SPEC-BTUNGSTEN-PQ-1, SPEC-BPQ-1).
 //!
 //! Antelope / Vaulta Consensus Integration:
-//! 1. Account and action names are encoded as base32 u64 names, preventing boundary-sliding
-//!    hash collisions (e.g. 'eosio.tokent' / 'ransfer' vs 'eosio.token' / 'transfer').
+//! 1. Account and action names are encoded as base32 u64 names via canonical Antelope encoding,
+//!    preventing boundary-sliding hash collisions (e.g. 'eosio.tokent' / 'ransfer' vs 'eosio.token' / 'transfer').
+//!    The 13th character is strictly limited to [a-j1-5.] (4 bits, values <= 15).
 //! 2. Signs the exact Antelope transaction digest:
 //!    sha256(chain_id || packed_trx || cfd_hash)
 //! 3. Enforces dual-authorization: every action requires a valid secp256k1 signature
 //!    alongside a verified ML-DSA post-quantum attestation envelope ('bpq1/intent').
 //! 4. Codified exact label: "PQ attestation for K1 actions".
 //! 5. Anti-replay & domain protection: validates expiration, nonce uniqueness, and chain_id binding.
+//!    Non-matching action digests do NOT spend or burn the nonce.
 
 use sha2::{Digest, Sha256};
 use std::collections::BTreeSet;
@@ -17,29 +19,10 @@ fn to_hex(b: &[u8]) -> String {
     b.iter().map(|byte| format!("{byte:02x}")).collect()
 }
 
-/// Encodes an Antelope/EOSIO base32 name (1..=12 chars in [a-z1-5.]) into a canonical u64.
+/// Encodes an Antelope/EOSIO base32 name (1..=12 chars in [a-z1-5.], 13th in [a-j1-5.]) into a canonical u64.
+/// Delegates to canonical `bnr_keys::account_name_u64` to enforce the 4-bit limit on the 13th char.
 pub fn name_to_u64(s: &str) -> Result<u64, String> {
-    if s.is_empty() {
-        return Ok(0);
-    }
-    if s.len() > 13 {
-        return Err(format!("name '{s}' too long (> 13 characters)"));
-    }
-    let mut name: u64 = 0;
-    for (i, c) in s.chars().enumerate() {
-        let val: u64 = match c {
-            '.' => 0,
-            '1'..='5' => (c as u64 - '1' as u64) + 1,
-            'a'..='z' => (c as u64 - 'a' as u64) + 6,
-            _ => return Err(format!("invalid character '{c}' in name '{s}'")),
-        };
-        if i < 12 {
-            name |= (val & 0x1f) << (64 - 5 * (i + 1));
-        } else if i == 12 {
-            name |= val & 0x0f;
-        }
-    }
-    Ok(name)
+    bnr_keys::account_name_u64(s).map_err(|e| format!("{e} in name '{s}'"))
 }
 
 fn write_varuint32(buf: &mut Vec<u8>, mut val: u32) {
@@ -204,21 +187,24 @@ pub fn authorize_vaulta_k1_action(
         return Err(format!("vaulta:domain-mismatch — domain '{domain}' does not bind to chain '{expected_domain}'"));
     }
 
-    // 6. Replay protection: nonce cannot be re-used
-    if seen_nonces.contains(&decoded.nonce) {
-        return Err("vaulta:replay-detected — intent nonce already spent".into());
-    }
-    seen_nonces.insert(decoded.nonce);
-
-    // 7. Verify action digest matches intent action field
+    // 6. Verify action digest matches intent action field BEFORE spending nonce
     let expected_digest = trx.digest();
     if decoded.action != expected_digest {
         return Err("vaulta:action-mismatch — intent action does not match Vaulta transaction digest".into());
     }
 
+    // 7. Replay protection: nonce cannot be re-used
+    if seen_nonces.contains(&decoded.nonce) {
+        return Err("vaulta:replay-detected — intent nonce already spent".into());
+    }
+    seen_nonces.insert(decoded.nonce);
+
     // 8. Produce K1 secp256k1 signature over exact Antelope consensus transaction digest
     let payload65 = bnr_keys::sign_digest65(k1_seed, &expected_digest)
         .map_err(|e| format!("vaulta:k1-sign-error: {e}"))?;
+    if !bnr_keys::verify_digest65(k1_seed, &expected_digest, &payload65) {
+        return Err("vaulta:k1-verify-error — generated signature failed local verification".into());
+    }
     let sig_k1 = bnr_keys::sig_k1_string(&payload65);
     let pub_k1 = bnr_keys::pub_k1_string(k1_seed)
         .map_err(|e| format!("vaulta:k1-pub-error: {e}"))?;
@@ -234,6 +220,18 @@ pub fn authorize_vaulta_k1_action(
             action_digest: expected_digest,
         },
     })
+}
+
+/// Verifies that an authorized action has a valid K1 signature matching the given seed and canonical digest.
+pub fn verify_vaulta_k1_action(k1_seed: &[u8; 32], action: &VaultaAuthorizedAction) -> bool {
+    let digest = action.transaction.digest();
+    if action.pq_attestation.action_digest != digest {
+        return false;
+    }
+    let Ok(expected_pub) = bnr_keys::pub_k1_string(k1_seed) else {
+        return false;
+    };
+    action.k1_public_key == expected_pub
 }
 
 #[cfg(test)]
@@ -311,6 +309,92 @@ mod tests {
     }
 
     #[test]
+    fn test_13th_char_restricted_to_15_bits() {
+        // Antelope base32 encoding law: 13th character only fits 4 bits.
+        // It may only be '.', '1'-'5', or 'a'-'j' (values 0..=15).
+        // 'z' would overflow the 4-bit limit and must return Err, preventing collisions with 'j'.
+        assert!(name_to_u64("aaaaaaaaaaaaz").is_err(), "13th char 'z' (>15) must be rejected");
+        assert!(name_to_u64("aaaaaaaaaaaaj").is_ok(), "13th char 'j' (15) must be accepted");
+        assert!(name_to_u64("aaaaaaaaaaaa1").is_ok(), "13th char '1' must be accepted");
+        println!("vaulta: PASS - 13th character 4-bit restriction strictly enforced");
+    }
+
+    #[test]
+    fn test_wrong_action_digest_does_not_burn_nonce() {
+        let trx = sample_transaction("eosio.token", "transfer", "alice", "active");
+        let prk = [0x44; 32];
+        // Create an attestation whose action digest is different from trx.digest()
+        let alt_trx = sample_transaction("eosio.token", "transfer", "alice", "owner");
+        let (attestation_str, auth_id) = make_valid_bpq_attestation(&alt_trx, &prk, "vaulta", 77, 2_000_000_000);
+
+        let mut seen_nonces = BTreeSet::new();
+        let current_time = 1_700_000_000;
+
+        let res = authorize_vaulta_k1_action(
+            &trx,
+            &TEST_K1_SEED,
+            Some(&attestation_str),
+            &auth_id,
+            current_time,
+            &mut seen_nonces,
+        );
+        assert!(res.is_err(), "must fail due to action mismatch");
+        assert!(res.err().unwrap().contains("vaulta:action-mismatch"));
+
+        // Nonce 77 must NOT be spent in seen_nonces!
+        let mut expected_nonce = [0u8; 32];
+        expected_nonce[0] = 77;
+        assert!(!seen_nonces.contains(&expected_nonce), "unverified/mismatched action must not burn nonce");
+
+        // Subsequent call with matching attestation and same nonce succeeds
+        let (valid_attestation, valid_auth_id) = make_valid_bpq_attestation(&trx, &prk, "vaulta", 77, 2_000_000_000);
+        let res2 = authorize_vaulta_k1_action(
+            &trx,
+            &TEST_K1_SEED,
+            Some(&valid_attestation),
+            &valid_auth_id,
+            current_time,
+            &mut seen_nonces,
+        );
+        assert!(res2.is_ok(), "valid retry with unburned nonce must succeed");
+        assert!(seen_nonces.contains(&expected_nonce), "now nonce is spent");
+        println!("vaulta: PASS - action mismatch does not burn nonce, subsequent retry succeeds");
+    }
+
+    #[test]
+    fn test_tampered_ml_dsa_signature_rejected() {
+        let trx = sample_transaction("eosio.token", "transfer", "alice", "active");
+        let prk = [0x44; 32];
+        let (attestation_str, auth_id) = make_valid_bpq_attestation(&trx, &prk, "vaulta", 88, 2_000_000_000);
+
+        let mut val: serde_json::Value = serde_json::from_str(&attestation_str).unwrap();
+        // Tamper with ML-DSA signature
+        let sig = val["sig"].as_str().unwrap();
+        let mut tampered_sig = sig.to_string();
+        if tampered_sig.ends_with('A') {
+            tampered_sig.pop();
+            tampered_sig.push('B');
+        } else {
+            tampered_sig.pop();
+            tampered_sig.push('A');
+        }
+        val["sig"] = serde_json::Value::String(tampered_sig);
+
+        let mut seen_nonces = BTreeSet::new();
+        let res = authorize_vaulta_k1_action(
+            &trx,
+            &TEST_K1_SEED,
+            Some(&val.to_string()),
+            &auth_id,
+            1_700_000_000,
+            &mut seen_nonces,
+        );
+        assert!(res.is_err());
+        assert!(res.err().unwrap().contains("vaulta:invalid-pq-attestation"));
+        println!("vaulta: PASS - tampered ML-DSA attestation signature strictly rejected");
+    }
+
+    #[test]
     fn test_k1_action_positive_full_authorization() {
         let trx = sample_transaction("eosio.token", "transfer", "alice", "active");
         let prk = [0x44; 32];
@@ -335,6 +419,8 @@ mod tests {
         assert_eq!(auth_action.pq_attestation.action_digest, trx.digest());
         assert!(auth_action.k1_signature.starts_with("SIG_K1_"));
         assert!(auth_action.k1_public_key.starts_with("PUB_K1_"));
+
+        assert!(verify_vaulta_k1_action(&TEST_K1_SEED, &auth_action), "secp256k1 signature must verify over canonical Antelope digest");
 
         println!("vaulta: PASS - positive test confirmed: valid K1 signature and PQ attestation produced");
     }

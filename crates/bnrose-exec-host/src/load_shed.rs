@@ -5,6 +5,7 @@
 //! 2. Explicit load-shed refusals: cross-DAO overload is shed at the door, preserving local quota.
 //! 3. Local task p99 deadline guarantee (< 15 ms) under all overcommit spikes.
 //! 4. Bounded retry amplification (R_amp <= 1.15) under exponential backoff and jitter.
+//! 5. RAII InFlightGuard guarantees zero active count leaks on any error or early exit.
 
 #[derive(Debug, Clone)]
 pub struct CrossDaoAdmissionControl {
@@ -69,6 +70,41 @@ impl CrossDaoAdmissionControl {
             self.local_active = self.local_active.saturating_sub(1);
         } else {
             self.cross_dao_active = self.cross_dao_active.saturating_sub(1);
+        }
+    }
+
+    /// Creates an RAII guard that automatically calls complete() when dropped,
+    /// preventing any leak of in-flight active counts across returns or errors.
+    pub fn guard(&mut self, is_local: bool) -> InFlightGuard<'_> {
+        InFlightGuard::new(self, is_local)
+    }
+}
+
+/// RAII guard ensuring active in-flight count is strictly decremented on drop.
+pub struct InFlightGuard<'a> {
+    shed: &'a mut CrossDaoAdmissionControl,
+    is_local: bool,
+    disarmed: bool,
+}
+
+impl<'a> InFlightGuard<'a> {
+    pub fn new(shed: &'a mut CrossDaoAdmissionControl, is_local: bool) -> Self {
+        Self {
+            shed,
+            is_local,
+            disarmed: false,
+        }
+    }
+
+    pub fn disarm(&mut self) {
+        self.disarmed = true;
+    }
+}
+
+impl<'a> Drop for InFlightGuard<'a> {
+    fn drop(&mut self) {
+        if !self.disarmed {
+            self.shed.complete(self.is_local);
         }
     }
 }

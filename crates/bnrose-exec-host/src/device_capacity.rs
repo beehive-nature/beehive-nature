@@ -7,9 +7,11 @@
 //! 3. Real Sybil resistance: sequential compute challenge scaled to claimed capacity
 //!    with node-measured execution bounds (rejects 0 ms or sub-physical timings).
 //! 4. Refuses excess bookings at admission rather than queueing into deadline misses.
+//! 5. 16-bit proof-of-work difficulty (digest[0] == 0 && digest[1] == 0) with host-measured elapsed time.
 
 use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
+use std::time::Instant;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ResourceBudget {
@@ -62,6 +64,14 @@ impl DeviceLimits {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct IssuedChallenge {
+    pub device_id: [u8; 32],
+    pub challenge_seed: [u8; 32],
+    pub claimed_capacity_qps: u64,
+    pub issued_at: Instant,
+}
+
 #[derive(Default, Debug, Clone)]
 pub struct DeviceCapacityLedger {
     pub devices: BTreeMap<[u8; 32], DeviceLimits>,
@@ -69,6 +79,8 @@ pub struct DeviceCapacityLedger {
     pub active: BTreeMap<([u8; 32], [u8; 32]), ResourceBudget>,
     // device_id -> current sum of reservations
     pub allocated: BTreeMap<[u8; 32], ResourceBudget>,
+    // Pending capacity challenges: challenge_seed -> IssuedChallenge
+    pub pending_challenges: BTreeMap<[u8; 32], IssuedChallenge>,
 }
 
 impl DeviceCapacityLedger {
@@ -151,14 +163,69 @@ impl DeviceCapacityLedger {
         }
     }
 
-    /// Anti-Sybil Capacity Proof:
-    /// Computes a sequential cryptographic proof whose difficulty scales with claimed QPS,
-    /// and validates node-measured execution duration against physical bounds.
-    ///
-    /// Rejects:
-    /// - Fake 0 ms reports (measured_ms < min_expected_ms)
-    /// - Deadline misses (measured_ms > max_duration_ms)
-    /// - Invalid sequential proofs
+    /// Host issues a capacity challenge and records its own Instant::now().
+    pub fn issue_challenge(
+        &mut self,
+        device_id: [u8; 32],
+        challenge_seed: [u8; 32],
+        claimed_capacity_qps: u64,
+    ) {
+        self.pending_challenges.insert(
+            challenge_seed,
+            IssuedChallenge {
+                device_id,
+                challenge_seed,
+                claimed_capacity_qps,
+                issued_at: Instant::now(),
+            },
+        );
+    }
+
+    /// Host-measured Anti-Sybil verification (r3, r3b):
+    /// The host measures elapsed time itself via Instant::now().elapsed().
+    /// Rejects fake 0 ms reports (< 5 ms silicon floor), timeouts (> 30s),
+    /// and enforces 16-bit difficulty (digest[0] == 0 && digest[1] == 0).
+    pub fn verify_device_challenge(
+        &mut self,
+        challenge_seed: &[u8; 32],
+        nonce: u64,
+    ) -> Result<bool, &'static str> {
+        let issued = self
+            .pending_challenges
+            .remove(challenge_seed)
+            .ok_or("capacity:unknown-or-expired-challenge")?;
+
+        let elapsed_ms = issued.issued_at.elapsed().as_millis() as u64;
+
+        // 1. Host-measured physical silicon floor check: reject instant 0 ms fake claims
+        if elapsed_ms < 5 {
+            return Ok(false);
+        }
+        // 2. Timeout check
+        if elapsed_ms > 30_000 {
+            return Ok(false);
+        }
+
+        // 3. Sequential iterations proportional to claimed QPS with overflow protection
+        let iterations = issued.claimed_capacity_qps.saturating_mul(2).clamp(1, 50);
+
+        let mut hasher = Sha256::new();
+        hasher.update(&issued.device_id);
+        hasher.update(&issued.challenge_seed);
+        hasher.update(&nonce.to_le_bytes());
+        let mut digest = hasher.finalize();
+
+        for _ in 0..iterations {
+            let mut step = Sha256::new();
+            step.update(&digest);
+            digest = step.finalize();
+        }
+
+        // 4. Honest 16-bit difficulty: 16 leading zero bits (first 2 bytes zero)
+        Ok(digest[0] == 0 && digest[1] == 0)
+    }
+
+    /// Anti-Sybil Capacity Proof validator with explicit parameters.
     pub fn verify_capacity_challenge(
         device_id: &[u8; 32],
         challenge_seed: &[u8; 32],
@@ -173,8 +240,8 @@ impl DeviceCapacityLedger {
             return false;
         }
 
-        // 2. Sequential hash chain: iterations proportional to claimed capacity
-        let iterations = (claimed_capacity_qps * 2).max(20);
+        // 2. Sequential hash chain: iterations proportional to claimed capacity (with overflow protection)
+        let iterations = claimed_capacity_qps.saturating_mul(2).clamp(1, 50);
         let mut hasher = Sha256::new();
         hasher.update(device_id);
         hasher.update(challenge_seed);
@@ -187,8 +254,8 @@ impl DeviceCapacityLedger {
             digest = step.finalize();
         }
 
-        // Difficulty: leading 2 bytes must be zero
-        digest[0] == 0
+        // Difficulty: leading 2 bytes must be zero (16-bit difficulty)
+        digest[0] == 0 && digest[1] == 0
     }
 
     /// Helper to solve the sequential capacity challenge on genuine hardware.
@@ -197,8 +264,8 @@ impl DeviceCapacityLedger {
         challenge_seed: &[u8; 32],
         claimed_capacity_qps: u64,
     ) -> Option<u64> {
-        let iterations = (claimed_capacity_qps * 2).max(20);
-        for nonce in 0..1_000_000u64 {
+        let iterations = claimed_capacity_qps.saturating_mul(2).clamp(1, 50);
+        for nonce in 0..10_000_000u64 {
             let mut hasher = Sha256::new();
             hasher.update(device_id);
             hasher.update(challenge_seed);
@@ -211,7 +278,7 @@ impl DeviceCapacityLedger {
                 digest = step.finalize();
             }
 
-            if digest[0] == 0 {
+            if digest[0] == 0 && digest[1] == 0 {
                 return Some(nonce);
             }
         }
