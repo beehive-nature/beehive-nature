@@ -47,6 +47,8 @@ pub struct Supervisor {
     pub allowed_authorities: Option<std::collections::BTreeSet<[u8; 32]>>,
     /// In-memory index of admitted (authority, nonce) -> op_id (or root for steps)
     admitted: BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>,
+    /// In-memory map of op_id -> original env_sha
+    admitted_env_shas: BTreeMap<[u8; 32], [u8; 32]>,
     /// In-memory step entities index (zero disk reloads in run_steps)
     step_entities: BTreeMap<u8, StepEntity>,
     /// In-memory map of (root, step) -> max_attempt
@@ -169,6 +171,19 @@ impl Supervisor {
         Self::open_with(state_dir, worker, policy, false)
     }
 
+    /// Production constructor: requires explicit allowlist file (refuses to start open)
+    pub fn open_production(
+        state_dir: &Path,
+        worker: Box<dyn Worker>,
+        policy: Policy,
+    ) -> Result<Self, String> {
+        let sup = Self::open(state_dir, worker, policy)?;
+        if sup.allowed_authorities.is_none() {
+            return Err("authorities: allowed_authorities file missing in production mode — refusing to start open".into());
+        }
+        Ok(sup)
+    }
+
     /// adopt_stale_claim: the explicit custody gesture after a crashed
     /// holder. Ordinary opens NEVER adopt.
     pub fn open_with(
@@ -194,6 +209,16 @@ impl Supervisor {
         let admitted = nonces_of(&records)?;
         let step_entities = step_entities(&records)?;
         let mut step_attempts = BTreeMap::new();
+        let mut admitted_env_shas = BTreeMap::new();
+        for r in &records {
+            if r.event == E_ADMITTED && r.payload.len() >= 130 {
+                let env_len = u16::from_le_bytes([r.payload[128], r.payload[129]]) as usize;
+                if r.payload.len() >= 130 + env_len {
+                    let env = &r.payload[130..130 + env_len];
+                    admitted_env_shas.insert(r.op_id, env_sha_of(env));
+                }
+            }
+        }
         for r in &records {
             if r.event == bnrose_exec_core::E_STEP_ADMITTED && r.payload.len() >= 34 {
                 let rec_root: [u8; 32] = r.payload[..32].try_into().unwrap();
@@ -205,6 +230,10 @@ impl Supervisor {
             }
         }
         let allowed_authorities = Self::load_authorities_from_dir(state_dir)?;
+        let is_prod = std::env::var("BNROSE_PRODUCTION").map(|v| v == "1" || v == "true").unwrap_or(false);
+        if is_prod && allowed_authorities.is_none() {
+            return Err("authorities: allowed_authorities file missing in production mode — refusing to start open".into());
+        }
         Ok(Supervisor {
             keys,
             journal,
@@ -214,6 +243,7 @@ impl Supervisor {
             state_dir: state_dir.to_path_buf(),
             allowed_authorities,
             admitted,
+            admitted_env_shas,
             step_entities,
             step_attempts,
             _claim: claim,
@@ -332,6 +362,62 @@ impl Supervisor {
     /// Run one operation: verify, admit, reserve, dispatch, effect,
     /// respond, receipt. `lose_response` stops after the effect, which is
     /// exactly the WB004 retry-failure crash point (non-spending).
+    /// Try serving a cached receipt or issuing one from durable ledger evidence.
+    pub fn try_serve_cached_receipt(&mut self, op: &[u8; 32], env_sha: &[u8; 32], clock: u64) -> Option<RunOutcome> {
+        let p = self.state_dir.join("receipts").join(format!("op-{}.json", hex(op)));
+        if p.exists() {
+            if let Ok(text) = std::fs::read_to_string(&p) {
+                if let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) {
+                    if let Ok(r) = Receipt::from_json(&v) {
+                        if r.env_sha == *env_sha {
+                            return Some(RunOutcome {
+                                op: Some(*op),
+                                refused: None,
+                                lost_response: false,
+                                receipt: Some(r),
+                                receipt_path: Some(p),
+                                receipt_json: Some(v),
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        if let Some(row) = self.ledger.row_for(op).cloned() {
+            if row.env_sha == *env_sha {
+                let op_state = OpState {
+                    state: bnrose_exec_core::S_COMPLETED,
+                    recovered: 1,
+                    fail: 0,
+                    bound_effect: row.effect_digest,
+                    seq: row.seq,
+                };
+                if let Ok((r, p, v)) = self.issue_receipt(op, env_sha, op_state, &row.effect_digest, clock) {
+                    return Some(RunOutcome {
+                        op: Some(*op),
+                        refused: None,
+                        lost_response: false,
+                        receipt: Some(r),
+                        receipt_path: Some(p),
+                        receipt_json: Some(v),
+                    });
+                }
+            }
+        }
+        None
+    }
+
+    /// Client retry of an operation (Gate 4): if already admitted, returns original receipt
+    /// bound to envelope hash, or resolves uncompleted/lost-response operation via recovery.
+    pub fn retry(
+        &mut self,
+        intent: &crate::fixtures::IntentFile,
+        clock: u64,
+        bounds: &Bounds,
+    ) -> RunOutcome {
+        self.run_inner(intent, clock, false, bounds, true)
+    }
+
     #[allow(clippy::too_many_lines)]
     pub fn run(
         &mut self,
@@ -339,6 +425,17 @@ impl Supervisor {
         clock: u64,
         lose_response: bool,
         bounds: &Bounds,
+    ) -> RunOutcome {
+        self.run_inner(intent, clock, lose_response, bounds, false)
+    }
+
+    fn run_inner(
+        &mut self,
+        intent: &crate::fixtures::IntentFile,
+        clock: u64,
+        lose_response: bool,
+        bounds: &Bounds,
+        allow_retry: bool,
     ) -> RunOutcome {
         let none = RunOutcome {
             op: None,
@@ -377,11 +474,99 @@ impl Supervisor {
         };
         // 2. fast in-memory nonce gate: this authority has spent this nonce (O(log n) in-memory)
         // Eliminates O(N) full-journal disk reloads on every admission.
-        if self.admitted.contains_key(&(intent.authority, decoded.nonce)) {
-            return RunOutcome {
-                refused: Some("admission:nonce-reuse".into()),
-                ..none
-            };
+        let prev_op = self.admitted.get(&(intent.authority, decoded.nonce)).copied();
+        if let Some(prev_op) = prev_op {
+            if allow_retry {
+                // Gate 4: Quantum / lost-response retry & receipt binding
+                let env_sha = env_sha_of(&intent.env);
+
+                // 1. Check in-memory index of original envelope sha
+                if let Some(&orig_sha) = self.admitted_env_shas.get(&prev_op) {
+                    if orig_sha != env_sha {
+                        return RunOutcome {
+                            op: Some(prev_op),
+                            refused: Some("admission:nonce-reuse — payload mismatch".into()),
+                            ..none
+                        };
+                    }
+                }
+
+                // 2. Check existing receipt file on disk if present
+                let p = self.state_dir.join("receipts").join(format!("op-{}.json", hex(&prev_op)));
+                if p.exists() {
+                    if let Ok(text) = std::fs::read_to_string(&p) {
+                        if let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) {
+                            if let Ok(r) = Receipt::from_json(&v) {
+                                if r.env_sha != env_sha {
+                                    return RunOutcome {
+                                        op: Some(prev_op),
+                                        refused: Some("admission:nonce-reuse — payload mismatch".into()),
+                                        ..none
+                                    };
+                                }
+                                return RunOutcome {
+                                    op: Some(prev_op),
+                                    refused: None,
+                                    lost_response: false,
+                                    receipt: Some(r),
+                                    receipt_path: Some(p),
+                                    receipt_json: Some(v),
+                                };
+                            }
+                        }
+                    }
+                }
+
+                // 3. Check durable ledger row
+                if let Some(row) = self.ledger.row_for(&prev_op).cloned() {
+                    if row.env_sha != env_sha {
+                        return RunOutcome {
+                            op: Some(prev_op),
+                            refused: Some("admission:nonce-reuse — payload mismatch".into()),
+                            ..none
+                        };
+                    }
+                    let op_state = OpState {
+                        state: bnrose_exec_core::S_COMPLETED,
+                        recovered: 1,
+                        fail: 0,
+                        bound_effect: row.effect_digest,
+                        seq: row.seq,
+                    };
+                    if let Ok((r, p, v)) = self.issue_receipt(&prev_op, &env_sha, op_state, &row.effect_digest, clock) {
+                        return RunOutcome {
+                            op: Some(prev_op),
+                            refused: None,
+                            lost_response: false,
+                            receipt: Some(r),
+                            receipt_path: Some(p),
+                            receipt_json: Some(v),
+                        };
+                    }
+                }
+
+                // 4. Try serving cached receipt
+                if let Some(outcome) = self.try_serve_cached_receipt(&prev_op, &env_sha, clock) {
+                    return outcome;
+                }
+
+                // 5. Half-written / lost response: recover so client gets recovery receipt
+                if let Ok(_report) = self.recover(clock) {
+                    if let Some(outcome) = self.try_serve_cached_receipt(&prev_op, &env_sha, clock) {
+                        return outcome;
+                    }
+                }
+                return RunOutcome {
+                    op: Some(prev_op),
+                    refused: Some("admission:nonce-reuse — operation unresolved".into()),
+                    ..none
+                };
+            } else {
+                return RunOutcome {
+                    refused: Some("admission:nonce-reuse".into()),
+                    ..none
+                };
+            }
         }
         // 3. the worker's admission verdict (paranoid: native + wasm equal)
         let req = admit_request(clock, &intent.authority, &self.policy, &intent.env);
@@ -440,6 +625,7 @@ impl Supervisor {
             };
         }
         self.admitted.insert((intent.authority, decoded.nonce), op);
+        self.admitted_env_shas.insert(op, env_sha);
         let mut state = OpState::ADMITTED_ZERO;
         state.seq = 0;
         // 5. reserve (bounded worker, its budget journaled before it runs)
@@ -946,6 +1132,7 @@ impl Supervisor {
             }));
         }
         self.admitted = nonces;
+        self.admitted_env_shas = ops.iter().map(|(op, rp)| (*op, env_sha_of(&rp.env))).collect();
         let (reloaded_records, _) =
             ReplicatedJournal::load_state(&replica_paths(&self.state_dir), &self.keys.journal_mac)
                 .map_err(|e| format!("journal:{e}"))?;

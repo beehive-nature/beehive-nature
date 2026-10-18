@@ -101,6 +101,7 @@ mod pq;
 mod psbt;
 mod taproot;
 mod x402;
+pub mod vaulta;
 
 use serde_json::{json, Value};
 

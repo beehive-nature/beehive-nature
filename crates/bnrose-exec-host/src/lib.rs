@@ -255,3 +255,6 @@ mod tests {
         assert!(unhex("abc").is_err());
     }
 }
+
+pub mod device_capacity;
+pub mod load_shed;
