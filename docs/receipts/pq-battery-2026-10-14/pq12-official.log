@@ -1,0 +1,71 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /workspace/wt-pq-battery/crates/bnr-keys/Cargo.toml
+workspace: /workspace/wt-pq-battery/Cargo.toml
+warning: use of deprecated trait `ml_kem::ExpandedKeyEncoding`: use `DecapsulationKey::from_seed` instead
+  --> crates/bsigner/src/kat.rs:50:61
+   |
+50 |     Ciphertext, DecapsulationKey, ExpandedDecapsulationKey, ExpandedKeyEncoding, MlKem768,
+   |                                                             ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `ml_kem::ExpandedKeyEncoding::to_expanded_bytes`: use `DecapsulationKey::from_seed` instead
+   --> crates/bsigner/src/kat.rs:237:23
+    |
+237 |             b64u(&key.to_expanded_bytes()),
+    |                       ^^^^^^^^^^^^^^^^^
+
+warning: use of deprecated associated function `ml_kem::DecapsulationKey::<P>::from_expanded`: use `DecapsulationKey::from_seed` instead
+   --> crates/bsigner/src/kat.rs:273:43
+    |
+273 |             DecapsulationKey::<MlKem768>::from_expanded(&dk).expect("dk passes its H(ek) check");
+    |                                           ^^^^^^^^^^^^^
+
+warning: `bsigner` (bin "bsigner" test) generated 3 warnings
+    Finished `release` profile [optimized] target(s) in 0.35s
+     Running unittests src/main.rs (target/release/deps/bsigner-b90a14b6b320c518)
+
+running 2 tests
+  bip174 refused "Network transaction, not PSBT format": it does not start with the magic bytes psbt 0xff
+  bip174 refused "PSBT missing outputs": not an unsigned transaction: it ends early
+  bip174 refused "PSBT where one input has a filled scriptSig in the unsigned tx": not an unsigned transaction: an input carries a scriptSig
+  bip174 refused "PSBT where inputs and outputs are provided but without an unsigned tx": there is no unsigned transaction
+  bip174 refused "PSBT with duplicate keys in an input": a key appears twice in the input map
+  bip174 refused "PSBT with invalid global transaction typed key": global key type 0x00 carries key data
+  bip174 refused "PSBT with invalid input witness utxo typed key": input key type 0x01 carries key data
+  bip174 refused "PSBT with invalid pubkey length for input partial signature typed key": input key type 0x02: the key data is not a public key
+  bip174 refused "PSBT with invalid redeemscript typed key": input key type 0x04 carries key data
+  bip174 refused "PSBT with invalid witnessscript typed key": input key type 0x05 carries key data
+  bip174 refused "PSBT with invalid pubkey in input BIP 32 derivation paths typed key": input key type 0x06: the key data is not a public key
+  bip174 refused "PSBT with invalid non-witness utxo typed key": input key type 0x00 carries key data
+  bip174 refused "PSBT with invalid final scriptsig typed key": input key type 0x07 carries key data
+  bip174 refused "PSBT with invalid final script witness typed key": input key type 0x08 carries key data
+  bip174 refused "PSBT with invalid pubkey in output BIP 32 derivation paths typed key": output key type 0x02: the key data is not a public key
+  bip174 refused "PSBT with invalid input sighash type typed key": input key type 0x03 carries key data
+  bip174 refused "PSBT with invalid output redeemScript typed key": output key type 0x00 carries key data
+  bip174 refused "PSBT with invalid output witnessScript typed key": output key type 0x01 carries key data
+  bip174 refused "PSBT with unsigned tx serialized with witness serialization format": not an unsigned transaction: it is in witness serialization, which BIP-174 forbids here
+  bip371 refused "PSBT With <tt>PSBT_IN_TAP_INTERNAL_KEY</tt> key that is too long (incorrectly serialized as compressed DER)": input key type 0x17: the value is 33 bytes, not 32
+  bip371 refused "PSBT With <tt>PSBT_KEY_PATH_SIG</tt> signature that is too short": input key type 0x13: a signature is 64 or 65 bytes, not 63
+  bip371 refused "PSBT With <tt>PSBT_KEY_PATH_SIG</tt> signature that is too long": input key type 0x13: a signature is 64 or 65 bytes, not 66
+  bip371 refused "PSBT With <tt>PSBT_IN_TAP_BIP32_DERIVATION</tt> key that is too long (incorrectly serialized as compressed DER)": input key type 0x16: the x-only key is 33 bytes, not 32
+  bip371 refused "PSBT With <tt>PSBT_OUT_TAP_INTERNAL_KEY</tt> key that is too long (incorrectly serialized as compressed DER)": output key type 0x05: the value is 33 bytes, not 32
+  bip371 refused "PSBT With <tt>PSBT_OUT_TAP_BIP32_DERIVATION</tt> key that is too long (incorrectly serialized as compressed DER)": output key type 0x07: the x-only key is 33 bytes, not 32
+  bip371 refused "PSBT With <tt>PSBT_IN_TAP_SCRIPT_SIG</tt> key that is too long (incorrectly serialized as compressed DER)": input key type 0x14: the key and leaf hash is 65 bytes, not 64
+  bip371 refused "PSBT With <tt>PSBT_IN_TAP_SCRIPT_SIG</tt> signature that is too long": input key type 0x14: a signature is 64 or 65 bytes, not 66
+  bip371 refused "PSBT With <tt>PSBT_IN_TAP_SCRIPT_SIG</tt> signature that is too short": input key type 0x14: a signature is 64 or 65 bytes, not 63
+  bip371 refused "PSBT With <tt>PSBT_IN_TAP_LEAF_SCRIPT</tt> Control block that is too long": input 0: a control block is 98 bytes
+  bip371 refused "PSBT With <tt>PSBT_IN_TAP_LEAF_SCRIPT</tt> Control block that is too short": input 0: a control block is 96 bytes
+PQ12-PSBT bsigner: bip174 invalid, refused: 19 of 19
+PQ12-PSBT bsigner: bip174 role walkthrough PSBTs, parsed: 10 of 10
+PQ12-PSBT bsigner: bip174 valid but failing BIP-174's P2SH/P2WSH signer checks, parsed (those checks not claimed): 4 of 4
+PQ12-PSBT bsigner: bip174 valid, parsed: 10 of 10
+PQ12-PSBT bsigner: bip371 invalid, refused: 11 of 11
+PQ12-PSBT bsigner: bip371 valid, parsed: 6 of 6
+PQ12-PSBT bsigner: key-path signatures carried by valid PSBTs that verify over bsigner's sighash (one flipped bit refused): 1
+test psbt::tests::bip174_and_bip371_vectors ... ok
+PQ12-BIP341 bsigner: 7 scriptPubKey cases (leaf hashes, root, tweak, key, address, control blocks), 1 transaction(s) (the 5 shared hashes) and 7 key-path inputs (SigMsg, sighash, tweak, the witness verifies and reproduces) pass; 20 teeth refused
+test taproot::tests::bip341_wallet_vectors ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 82 filtered out; finished in 0.02s
+

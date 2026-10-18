@@ -1,0 +1,23 @@
+== SAW PQ11: toolchain ==
+1.6 (68eed5f release-1.6)
+== SAW PQ11: BUILD bpq-core to MIR JSON ==
+Linking 3 mir files into /workspace/wt-pq-battery/target/saw-pq11/bpq_core.linked-mir.json
+SAW-BUILD PQ11: PASS (3299509 bytes of linked MIR)
+== SAW PQ11: bip39.saw ==
+PQ11-SAW PROVEN indices
+PQ11-SAW PROVEN indices_ok
+PQ11-SAW PROVEN unpack
+PQ11-SAW PROVEN decode_ok
+PQ11-SAW PROVEN mnemonicRoundTrip
+PQ11-SAW PROVEN mnemonicRoundTripBack
+PQ11-SAW PROVEN badChecksumRefused
+SAW bip39.saw: 7 obligations PROVEN in 4s
+== SAW PQ11: TEETH bip39-teeth.saw — both rows must be refuted ==
+PQ11-SAW-TEETH obligation checksumIgnored
+PQ11-SAW-TEETH REFUTED checksumIgnored
+PQ11-SAW-TEETH obligation lowBitsFirst
+Subgoal failed: bpq_core/19b3946e::bip39[0]::indices[0] Literal equality postcondition
+----------Counterexample----------
+SAW-TEETH bip39-teeth.saw: PASS (2 rows refuted with counterexamples)
+== SAW PQ11: ladder state ==
+BUILD: PASS | EQUIVALENCE: PROVEN (4, bpq-core bip39 == Bip39.cry) | PROVE-UNIVERSAL: PROVEN (3, for any checksum hash) | TEETH: PASS (2)

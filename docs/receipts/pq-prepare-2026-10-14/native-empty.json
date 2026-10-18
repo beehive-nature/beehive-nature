@@ -1,0 +1,120 @@
+{
+  "class": "NATIVE DIFFERENTIAL/TEETH; not a universal proof or official KAT",
+  "control": "empty",
+  "executed": 0,
+  "failures": [],
+  "legacy_checks": 0,
+  "missing": [
+    {
+      "executed": 0,
+      "expected": 48,
+      "row": "valid"
+    },
+    {
+      "executed": 0,
+      "expected": 48,
+      "row": "message-tail"
+    },
+    {
+      "executed": 0,
+      "expected": 48,
+      "row": "context-tail"
+    },
+    {
+      "executed": 0,
+      "expected": 48,
+      "row": "challenge"
+    },
+    {
+      "executed": 0,
+      "expected": 48,
+      "row": "wrong-key"
+    },
+    {
+      "executed": 0,
+      "expected": 48,
+      "row": "empty-signature"
+    },
+    {
+      "executed": 0,
+      "expected": 48,
+      "row": "short-signature"
+    },
+    {
+      "executed": 0,
+      "expected": 48,
+      "row": "long-signature"
+    },
+    {
+      "executed": 0,
+      "expected": 48,
+      "row": "context-256"
+    },
+    {
+      "executed": 0,
+      "expected": 48,
+      "row": "hint-overflow"
+    },
+    {
+      "executed": 0,
+      "expected": 48,
+      "row": "hint-decrease"
+    },
+    {
+      "executed": 0,
+      "expected": 48,
+      "row": "hint-duplicate"
+    },
+    {
+      "executed": 0,
+      "expected": 48,
+      "row": "hint-padding"
+    },
+    {
+      "executed": 0,
+      "expected": 48,
+      "row": "z-norm"
+    },
+    {
+      "executed": 0,
+      "expected": 3309,
+      "row": "every-short-length"
+    },
+    {
+      "executed": 0,
+      "expected": 256,
+      "row": "every-legal-context-length"
+    },
+    {
+      "executed": 0,
+      "expected": 4,
+      "row": "key-length"
+    },
+    {
+      "executed": 0,
+      "expected": 1,
+      "row": "ignored-message-suffix"
+    },
+    {
+      "executed": 0,
+      "expected": 1,
+      "row": "ignored-context"
+    },
+    {
+      "executed": 0,
+      "expected": 1,
+      "row": "ignored-signature-suffix"
+    },
+    {
+      "executed": 0,
+      "expected": 1,
+      "row": "owned-key-bytes"
+    }
+  ],
+  "passed": 0,
+  "required_rows": 21,
+  "result": "FAIL",
+  "rows": {},
+  "schema": "btungsten.prepared-native/1",
+  "unexpected": []
+}

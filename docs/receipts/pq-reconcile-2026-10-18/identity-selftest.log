@@ -1,0 +1,19 @@
+  PASS T0 inherited GIT_DIR/GIT_WORK_TREE/GIT_INDEX_FILE: decoy config, refs, HEAD and index unchanged
+§7 selftest — every case below, through the REAL hooks and a real range (throwaway repo, deleted after):
+  PASS T1 seat-as-author is blocked — blocked, §7 FAIL printed, no commit created
+  PASS T2 trailer-in-body is blocked — blocked, §7 FAIL printed, no commit created
+  PASS T3 correct shape lands — created A=loVis waTer C=bZiq trailer=1
+  PASS T4 founder-typed lands — created A=loVis waTer C=loVis waTer trailer=0
+  PASS T5 mixed-case trailer lands (I-1: git trailer keys are case-insensitive; the gate must match git) — created A=loVis waTer C=bZiq trailer=1
+  PASS T6 uncomputable counter dies named — rc=1, no ok line for 6ebe5dc6f8b3020a37c0f2b8405ff6eaf2eb11c2
+  PASS T7 range resolution — unresolvable dies named · empty still passes · --not still judged
+  PASS T8-A founder's GitHub web merge is ok
+  PASS T8-B another GitHub account's web merge is refused
+  PASS T8-C the founder's GitHub address with a SEAT as committer is refused
+  PASS T8-D a real seat-as-author commit still FAILs (9f6b943e's own idents)
+  PASS T8-E an address that merely ENDS in the noreply domain is refused
+  PASS T9-A feature push: main's imported commit is not charged to the branch
+  PASS T9-B CONTROL — the old before..sha range charges main's commit to the branch (the #456 failure)
+  PASS T9-C an older violating branch commit is caught though the last push was clean
+  PASS T9-D CONTROL — checking only that last clean push would have missed it
+  PASS T9-E an unresolvable target base fails closed

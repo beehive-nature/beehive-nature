@@ -1,0 +1,4 @@
+include "common.saw";
+print "PREPARE CONTROL reject obligation";
+check "pq_prepare_proof::reject_all" 1 3309 1 false;
+print "PREPARE UNEXPECTED-PROVEN";

@@ -1,0 +1,51 @@
+== SAW PQ04: toolchain ==
+1.6 (68eed5f release-1.6)
+== SAW PQ04: BUILD bpq-core to MIR JSON ==
+Linking 3 mir files into /workspace/wt-pq-battery/target/saw-pq04/bpq_core.linked-mir.json
+SAW-BUILD PQ04: PASS (3299513 bytes of linked MIR)
+== SAW PQ04: layout.saw ==
+PQ04-SAW PROVEN domain_byte
+PQ04-SAW PROVEN domain_len
+PQ04-SAW PROVEN nonce
+PQ04-SAW PROVEN seg_ok
+PQ04-SAW PROVEN segment_count
+PQ04-SAW PROVEN body_len_some
+PQ04-SAW PROVEN body_len_none
+PQ04-SAW PROVEN segment_plain_len
+PQ04-SAW PROVEN utc_timestamp
+PQ04-SAW PROVEN claim_kind
+SAW layout.saw: 10 obligations PROVEN in 5s
+== SAW PQ04: TEETH layout-teeth.saw — must FAIL with a counterexample ==
+PQ04-SAW-TEETH obligation utc_timestamp takes a lowercase z
+Subgoal failed: bpq_core/19b3946e::layout[0]::utc_timestamp[0] Literal equality postcondition
+----------Counterexample----------
+SAW-TEETH layout-teeth.saw: PASS (counterexample found, as required)
+== SAW PQ04: properties.saw ==
+PQ04-SAW PROVEN domainsDisjoint
+PQ04-SAW PROVEN nonceInjective
+PQ04-SAW PROVEN bodyExact
+PQ04-SAW PROVEN segmentsTile
+PQ04-SAW PROVEN atNoNewline
+PQ04-SAW PROVEN kindNoSeparator
+PQ04-SAW PROVEN bindInjective
+SAW properties.saw: 7 obligations PROVEN in 29s
+== SAW PQ04: TEETH properties-teeth.saw — every row must be REFUTED ==
+PQ04-SAW-TEETH obligation prefixDomain
+PQ04-SAW-TEETH REFUTED prefixDomain
+PQ04-SAW-TEETH obligation wrappingBody
+PQ04-SAW-TEETH REFUTED wrappingBody
+PQ04-SAW-TEETH obligation lastEmptyWhole
+PQ04-SAW-TEETH REFUTED lastEmptyWhole
+PQ04-SAW-TEETH obligation atAnyText
+PQ04-SAW-TEETH REFUTED atAnyText
+PQ04-SAW-TEETH obligation kindWithEquals
+PQ04-SAW-TEETH REFUTED kindWithEquals
+PQ04-SAW-TEETH obligation bindAtAnyText
+PQ04-SAW-TEETH REFUTED bindAtAnyText
+PQ04-SAW-TEETH obligation bindKindEquals
+PQ04-SAW-TEETH REFUTED bindKindEquals
+PQ04-SAW-TEETH obligation bindValueLines
+PQ04-SAW-TEETH REFUTED bindValueLines
+SAW-TEETH properties-teeth.saw: PASS (8 rows refuted with counterexamples)
+== SAW PQ04: ladder state ==
+BUILD: PASS | EQUIVALENCE: PROVEN (10, bpq-core layout == BpqLayout.cry) | PROVE-UNIVERSAL: PROVEN (7, incl. segmentsTile, bounded bindInjective) | TEETH: PASS (9)

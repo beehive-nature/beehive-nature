@@ -1,0 +1,169 @@
+ Downloading crates ...
+  Downloaded generic-array v0.14.9
+  Downloaded hybrid-array v0.4.12
+   Compiling proc-macro2 v1.0.106
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.45
+   Compiling typenum v1.20.1
+   Compiling libc v0.2.186
+   Compiling cfg-if v1.0.4
+   Compiling version_check v0.9.5
+   Compiling generic-array v0.14.9
+   Compiling subtle v2.6.1
+   Compiling syn v2.0.117
+   Compiling hybrid-array v0.4.12
+   Compiling const-oid v0.9.6
+   Compiling getrandom v0.2.17
+   Compiling base16ct v0.2.0
+   Compiling rand_core v0.6.4
+   Compiling thiserror v2.0.18
+   Compiling ff v0.13.1
+   Compiling crypto-common v0.2.2
+   Compiling group v0.13.0
+   Compiling either v1.18.0
+   Compiling cpufeatures v0.3.0
+   Compiling hex v0.4.3
+   Compiling itertools v0.15.0
+   Compiling zeroize_derive v1.5.0
+   Compiling thiserror-impl v2.0.18
+   Compiling zeroize v1.9.0
+   Compiling der v0.7.10
+   Compiling block-buffer v0.12.1
+   Compiling digest v0.11.3
+   Compiling sha2 v0.11.0
+   Compiling crypto-bigint v0.5.5
+   Compiling sec1 v0.7.3
+   Compiling elliptic-curve v0.13.8
+   Compiling k256 v0.13.4
+   Compiling chilldkg-rs v0.5.0 (/workspace/pq-artifacts/vendor/chilldkg-rs-0.5.0)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.86s
+     Running unittests src/lib.rs (/workspace/pq-artifacts/vendor/chilldkg-rs-0.5.0/target/debug/deps/chilldkg_rs-e69edc6d4da18029)
+
+running 34 tests
+test crypto::enc::tests::decrypt_rejects_invalid_index ... ok
+test crypto::certeq::tests::certeq_transcript_serialization_roundtrips ... ok
+test crypto::enc::tests::ecdh_pad_depends_on_context ... ok
+test crypto::enc::tests::ecdh_send_and_receive_pads_match_for_same_pair ... ok
+test crypto::enc::tests::self_pad_is_deterministic_and_context_bound ... ok
+test crypto::enc::tests::encrypt_rejects_invalid_inputs ... ok
+test crypto::enc::tests::ecdh_pad_depends_on_key_pair ... ok
+test crypto::lagrange::tests::rejects_missing_id_and_duplicates ... ok
+test crypto::lagrange::tests::interpolation_recovers_polynomial_at_zero ... ok
+test crypto::poly::tests::commits_empty_polynomial_as_empty_list ... ok
+test crypto::poly::tests::evaluates_constant_polynomial ... ok
+test crypto::poly::tests::evaluates_empty_polynomial_as_zero ... ok
+test crypto::poly::tests::evaluates_polynomial_at_scalar ... ok
+test crypto::poly::tests::evaluates_shares_at_one_based_indices ... ok
+test crypto::poly::tests::evaluates_zero_shares_as_empty_list ... ok
+test crypto::poly::tests::returns_coefficients_by_index ... ok
+test crypto::pop::tests::generated_pop_changes_with_seed ... ok
+test crypto::lagrange::tests::interpolate_pubkey_matches_commitment_to_secret ... ok
+test crypto::poly::tests::commits_coefficients_to_generator_multiples ... ok
+test crypto::pop::tests::signing_rejects_zero_secret ... ok
+test crypto::pop::tests::generated_pop_is_deterministic_for_same_inputs ... ok
+test crypto::pop::tests::verification_rejects_identity_pubkey ... ok
+test crypto::pop::tests::generated_pop_verifies_for_matching_key_and_index ... ok
+test crypto::pop::tests::verification_rejects_tampered_public_nonce ... ok
+test crypto::pop::tests::verification_rejects_tampered_response ... ok
+test crypto::pop::tests::verification_rejects_wrong_pubkey ... ok
+test crypto::tests::computes_tagged_hash ... ok
+test crypto::pop::tests::verification_rejects_wrong_index ... ok
+test crypto::enc::tests::encrypt_and_decrypt_aggregated_shares ... ok
+test crypto::tweak::tests::plain_tweak_shifts_key_by_tweak_times_generator ... ok
+test crypto::tweak::tests::rejects_out_of_range_tweak_and_infinity_result ... ok
+test crypto::tweak::tests::xonly_tweak_negates_odd_key_first ... ok
+test tests::success_generate_key ... ok
+test tests::success_generate_key_and_sign ... ok
+
+test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.58s
+
+     Running tests/coordinator_finalize_vectors.rs (/workspace/pq-artifacts/vendor/chilldkg-rs-0.5.0/target/debug/deps/coordinator_finalize_vectors-2f4407c3ece29a72)
+
+running 3 tests
+test test_coordinator_finalize_rejects_invalid_pmsg2_count ... ok
+test test_coordinator_finalize_rejects_invalid_signature ... ok
+test test_coordinator_finalize_passes ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/coordinator_step1_vectors.rs (/workspace/pq-artifacts/vendor/chilldkg-rs-0.5.0/target/debug/deps/coordinator_step1_vectors-b030825e867dbeb4)
+
+running 4 tests
+test test_coordinator_step1_invalid_threshold ... ok
+test test_coordinator_step1_duplicate ... ok
+test test_coordinator_step1_invalid_pmsg1 ... ok
+test test_coordinator_step1_passes ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/participant_finalize_vectors.rs (/workspace/pq-artifacts/vendor/chilldkg-rs-0.5.0/target/debug/deps/participant_finalize_vectors-dd69bafa78f0e4da)
+
+running 3 tests
+test test_participant_finalize_rejects_short_certificate ... ok
+test test_participant_finalize_rejects_invalid_signature ... ok
+test test_participant_finalize_passes ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/participant_step1_vectors.rs (/workspace/pq-artifacts/vendor/chilldkg-rs-0.5.0/target/debug/deps/participant_step1_vectors-5ee5741a1e32fc64)
+
+running 4 tests
+test test_participant_step1_invalid_threshold ... ok
+test test_participant_step1_duplicate_host_pubkey ... ok
+test test_participant_step1_host_seckey_mismatch ... ok
+test test_participant_step1_passes ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/participant_step2_vectors.rs (/workspace/pq-artifacts/vendor/chilldkg-rs-0.5.0/target/debug/deps/participant_step2_vectors-df5f9fda0faf7418)
+
+running 2 tests
+test test_participant_step2_passes ... ok
+test test_participant_step2_rejects_invalid_cmsg1 ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/recover_vectors.rs (/workspace/pq-artifacts/vendor/chilldkg-rs-0.5.0/target/debug/deps/recover_vectors-6b4df0c893fb0713)
+
+running 4 tests
+test test_participant_recover_rejects_host_seckey_mismatch ... ok
+test test_coordinator_recover_passes ... ok
+test test_recover_rejects_malformed_data ... ok
+test test_participant_recover_passes ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/sign_agg_vectors.rs (/workspace/pq-artifacts/vendor/chilldkg-rs-0.5.0/target/debug/deps/sign_agg_vectors-141adc2e9fa134bb)
+
+running 1 test
+test test_combine_passes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/sign_coordinator_vectors.rs (/workspace/pq-artifacts/vendor/chilldkg-rs-0.5.0/target/debug/deps/sign_coordinator_vectors-1604a4f85c2a736f)
+
+running 4 tests
+test test_coordinator_step1_rejects_invalid_inputs ... ok
+test test_coordinator_step1_passes ... ok
+test test_coordinator_finalize_rejects_invalid_inputs ... ok
+test test_coordinator_finalize_passes ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/sign_nonce_vectors.rs (/workspace/pq-artifacts/vendor/chilldkg-rs-0.5.0/target/debug/deps/sign_nonce_vectors-0529b23b9817a6d4)
+
+running 2 tests
+test test_aggr_pubnonces_passes ... ok
+test test_sample_nonce_passes ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/sign_vectors.rs (/workspace/pq-artifacts/vendor/chilldkg-rs-0.5.0/target/debug/deps/sign_vectors-f9e5c227ee0cee57)
+
+running 3 tests
+test test_verify_rejects_invalid_partial_signature ... ok
+test test_sign_rejects_invalid_inputs ... ok
+test test_sign_passes ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+

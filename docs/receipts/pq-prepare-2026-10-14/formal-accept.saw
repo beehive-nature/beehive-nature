@@ -1,0 +1,4 @@
+include "common.saw";
+print "PREPARE CONTROL accept obligation";
+check "pq_prepare_proof::accept_all" 1 0 1 true;
+print "PREPARE UNEXPECTED-PROVEN";
