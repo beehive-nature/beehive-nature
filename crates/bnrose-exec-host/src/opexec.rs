@@ -33,7 +33,7 @@ use bnrose_exec_core::{
     S_ADMITTED, S_DISPATCHED, S_RESERVED, S_UNKNOWN,
 };
 use serde_json::{json, Value};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 pub struct Supervisor {
@@ -47,6 +47,10 @@ pub struct Supervisor {
     pub allowed_authorities: Option<std::collections::BTreeSet<[u8; 32]>>,
     /// In-memory index of admitted (authority, nonce) -> op_id (or root for steps)
     admitted: BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>,
+    /// In-memory step entities index (zero disk reloads in run_steps)
+    step_entities: BTreeMap<u8, StepEntity>,
+    /// In-memory map of (root, step) -> max_attempt
+    step_attempts: BTreeMap<([u8; 32], u8), u8>,
     /// the exclusive authority over this state directory (see Claim)
     _claim: Claim,
 }
@@ -188,6 +192,19 @@ impl Supervisor {
         let ledger = EffectLedger::open(&state_dir.join("effects.bin"), &keys.ledger_mac)
             .map_err(|e| e.to_string())?;
         let admitted = nonces_of(&records)?;
+        let step_entities = step_entities(&records)?;
+        let mut step_attempts = BTreeMap::new();
+        for r in &records {
+            if r.event == bnrose_exec_core::E_STEP_ADMITTED && r.payload.len() >= 34 {
+                let rec_root: [u8; 32] = r.payload[..32].try_into().unwrap();
+                let encoded = r.payload[32];
+                let step = encoded & 0x0f;
+                let attempt = encoded >> 4;
+                let entry = step_attempts.entry((rec_root, step)).or_insert(0u8);
+                *entry = (*entry).max(attempt);
+            }
+        }
+        let allowed_authorities = Self::load_authorities_from_dir(state_dir)?;
         Ok(Supervisor {
             keys,
             journal,
@@ -195,8 +212,10 @@ impl Supervisor {
             worker,
             policy,
             state_dir: state_dir.to_path_buf(),
-            allowed_authorities: None,
+            allowed_authorities,
             admitted,
+            step_entities,
+            step_attempts,
             _claim: claim,
         })
     }
@@ -237,7 +256,43 @@ impl Supervisor {
         Ok((r, p, v))
     }
 
-    /// Set an explicit authority allowlist on the supervisor.
+    /// Check for production allowlist provisioned in state directory:
+    /// - `allowed_authorities.bin`: contiguous binary 32-byte public keys
+    /// - `allowed_authorities.json`: JSON array of hex-encoded public keys
+    pub fn load_authorities_from_dir(dir: &Path) -> Result<Option<BTreeSet<[u8; 32]>>, String> {
+        let bin = dir.join("allowed_authorities.bin");
+        if bin.exists() {
+            let bytes = std::fs::read(&bin).map_err(|e| format!("authorities: {e}"))?;
+            if bytes.len() % 32 != 0 {
+                return Err("authorities: allowed_authorities.bin length not a multiple of 32".into());
+            }
+            let mut set = BTreeSet::new();
+            for chunk in bytes.chunks_exact(32) {
+                set.insert(chunk.try_into().unwrap());
+            }
+            return Ok(Some(set));
+        }
+        let json = dir.join("allowed_authorities.json");
+        if json.exists() {
+            let text = std::fs::read_to_string(&json).map_err(|e| format!("authorities: {e}"))?;
+            let val: serde_json::Value = serde_json::from_str(&text).map_err(|e| format!("authorities JSON: {e}"))?;
+            if let Some(arr) = val.as_array() {
+                let mut set = BTreeSet::new();
+                for item in arr {
+                    if let Some(s) = item.as_str() {
+                        let key = crate::unhex(s).map_err(|e| format!("authorities hex: {e}"))?;
+                        if key.len() == 32 {
+                            set.insert(key.try_into().unwrap());
+                        }
+                    }
+                }
+                return Ok(Some(set));
+            }
+        }
+        Ok(None)
+    }
+
+    /// Set an explicit authority allowlist on the supervisor (deny-unknown).
     pub fn with_allowed_authorities<I>(mut self, authorities: I) -> Self
     where
         I: IntoIterator<Item = [u8; 32]>,
@@ -612,6 +667,20 @@ impl Supervisor {
             };
         }
         if lose {
+            self.step_entities.insert(
+                encoded_step & 0x0f,
+                StepEntity {
+                    root: *root,
+                    step: encoded_step,
+                    label: label.to_string(),
+                    env: intent.env.clone(),
+                    sig: intent.sig,
+                    authority: intent.authority,
+                    state,
+                },
+            );
+            let entry = self.step_attempts.entry((*root, encoded_step & 0x0f)).or_insert(0);
+            *entry = (*entry).max(encoded_step >> 4);
             return RunOutcome {
                 op: Some(id),
                 refused: None,
@@ -630,6 +699,20 @@ impl Supervisor {
                 ..none
             };
         }
+        self.step_entities.insert(
+            encoded_step & 0x0f,
+            StepEntity {
+                root: *root,
+                step: encoded_step,
+                label: label.to_string(),
+                env: intent.env.clone(),
+                sig: intent.sig,
+                authority: intent.authority,
+                state,
+            },
+        );
+        let entry = self.step_attempts.entry((*root, encoded_step & 0x0f)).or_insert(0);
+        *entry = (*entry).max(encoded_step >> 4);
         match self.issue_receipt(&id, env_sha, state, &effect, clock) {
             Ok((r, p, v)) => RunOutcome {
                 op: Some(id),
@@ -863,6 +946,22 @@ impl Supervisor {
             }));
         }
         self.admitted = nonces;
+        let (reloaded_records, _) =
+            ReplicatedJournal::load_state(&replica_paths(&self.state_dir), &self.keys.journal_mac)
+                .map_err(|e| format!("journal:{e}"))?;
+        self.step_entities = step_entities(&reloaded_records)?;
+        let mut step_attempts = BTreeMap::new();
+        for r in &reloaded_records {
+            if r.event == bnrose_exec_core::E_STEP_ADMITTED && r.payload.len() >= 34 {
+                let rec_root: [u8; 32] = r.payload[..32].try_into().unwrap();
+                let encoded = r.payload[32];
+                let step = encoded & 0x0f;
+                let attempt = encoded >> 4;
+                let entry = step_attempts.entry((rec_root, step)).or_insert(0u8);
+                *entry = (*entry).max(attempt);
+            }
+        }
+        self.step_attempts = step_attempts;
         let replication_json = match &replication {
             ReplicationState::Healthy { replicas } => json!({
                 "state": "healthy",
@@ -1302,28 +1401,8 @@ impl Supervisor {
                 };
             }
         }
-        // the new-process reconstruction: what exists, at which state
-        let records = match ReplicatedJournal::load_state(
-            &replica_paths(&self.state_dir),
-            &self.keys.journal_mac,
-        ) {
-            Ok((records, _)) => records,
-            Err(e) => {
-                return RunOutcome {
-                    refused: Some(format!("journal:{e}")),
-                    ..none
-                }
-            }
-        };
-        let existing = match step_entities(&records) {
-            Ok(e) => e,
-            Err(e) => {
-                return RunOutcome {
-                    refused: Some(format!("journal:{e}")),
-                    ..none
-                }
-            }
-        };
+        // in-memory step reconstruction: zero journal reloads on disk (O(1) memory lookup)
+        let existing = &self.step_entities;
         let env_sha = env_sha_of(&intent.env);
         for (idx, (label, lose)) in steps.iter().enumerate() {
             let step = idx as u8;
@@ -1348,8 +1427,8 @@ impl Supervisor {
                         // row stays refused whatever the policy says.
                         let never_executed = !self.step_has_any_recorded_effect(&root, step);
                         if replacement_admissible(!never_executed, &opts) {
-                            let attempt =
-                                replacement_attempt(step_entity_attempt(&records, &root, step));
+                            let max_att = self.step_attempts.get(&(root, step)).copied().unwrap_or(0);
+                            let attempt = replacement_attempt(max_att);
                             let encoded = step | (attempt << 4);
                             let id = bnrose_exec_core::step_op_id(&root, encoded);
                             let effect =
