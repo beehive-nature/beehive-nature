@@ -1,0 +1,779 @@
+{
+ "schema": "skaists.frontier-partition/1",
+ "generated": "2026-10-18T20:21:03.309Z",
+ "seat": "zCode seat (order-28 wake)",
+ "source": "records.json citations at origin/main 06f523c0b; identifiers = 1:1 arks embedded in citations of England-headed records, restricted to the frozen frontier queue (skaists.sweep-queue/1, 7,114); unresolved = no terminal outcome (mapped or no-image-available) in the stopped frontier-map run",
+ "rules": {
+  "collectionTitle": "first quoted segment of the citation, trailing commas/spaces folded; manifest twin rows folded",
+  "folds": [
+   "\"England, Births and Christenings, 1538-1975,\" trailing-comma variant folds into the canonical title",
+   "\"England Marriages, 1538–1973\" manifest twin rows (46 + 1 trailing-space) fold to 47"
+  ],
+  "identifier": "lane C-rule arks inside the citation string; a record with no embedded ark contributes nothing (its record.id is not a queue member by construction)",
+  "county": "event.place with \", United Kingdom\" and \", England\" tails stripped; last remaining segment = county, earlier segments = parish; an English historic-county tail without the country word is accepted as the county; single-segment remainders are \"(county only)\"; church-only places are \"(parish only, county unknown)\"",
+  "dateClass": "citation tail regex /,\\s*(?:(\\d{1,2})\\s+([A-Za-z]{3,9})\\s+)?(\\d{4})(?:\\/(\\d{1,2}))?\\.\\s*$/ — the order-28 corrected rule (day-month and dual years admitted)",
+  "geographyConflict": "an ark embedded in more than one record takes the first record's place/date; conflicts counted, not resolved",
+  "personData": "none — counts only"
+ },
+ "collections": {
+  "England, Births and Christenings, 1538-1975": {
+   "distinctIdentifiers": 653,
+   "unresolved": 653
+  },
+  "England, Buckinghamshire, Church Records, 1217-1994": {
+   "distinctIdentifiers": 64,
+   "unresolved": 64
+  },
+  "England Marriages, 1538–1973": {
+   "distinctIdentifiers": 46,
+   "unresolved": 46
+  },
+  "England, Somerset, Church Records, 1501-1999": {
+   "distinctIdentifiers": 40,
+   "unresolved": 40
+  },
+  "England, Yorkshire, Parish Registers, 1538-2016": {
+   "distinctIdentifiers": 35,
+   "unresolved": 35
+  },
+  "England, Yorkshire, Bishop's Transcripts, 1547-1957": {
+   "distinctIdentifiers": 32,
+   "unresolved": 32
+  },
+  "England, Berkshire, Parish Registers, 1515-1993": {
+   "distinctIdentifiers": 27,
+   "unresolved": 27
+  },
+  "England, Deaths and Burials, 1538-1991": {
+   "distinctIdentifiers": 20,
+   "unresolved": 20
+  },
+  "England, Rutland, Parish Registers, 1538-1991": {
+   "distinctIdentifiers": 16,
+   "unresolved": 16
+  },
+  "England and Wales, Non-Conformist Record Indexes (RG4-8), 1588-1977": {
+   "distinctIdentifiers": 14,
+   "unresolved": 14
+  },
+  "England, Warwickshire, Parish Registers, 1535-1972": {
+   "distinctIdentifiers": 9,
+   "unresolved": 9
+  },
+  "England, Wiltshire, Church Records, 1518-1990": {
+   "distinctIdentifiers": 9,
+   "unresolved": 9
+  },
+  "England, Bedfordshire, Parish Registers, 1538-1983": {
+   "distinctIdentifiers": 6,
+   "unresolved": 6
+  },
+  "England and Wales, Census, 1851": {
+   "distinctIdentifiers": 5,
+   "unresolved": 5
+  },
+  "England, Herefordshire, Bishop's Transcripts, 1583-1900": {
+   "distinctIdentifiers": 5,
+   "unresolved": 5
+  },
+  "England, Lincolnshire, Parish Registers, 1538-1990": {
+   "distinctIdentifiers": 5,
+   "unresolved": 5
+  },
+  "England and Wales, Census, 1841": {
+   "distinctIdentifiers": 4,
+   "unresolved": 4
+  },
+  "England, Yorkshire, Marriage Bonds and Allegations, 1613-1887": {
+   "distinctIdentifiers": 4,
+   "unresolved": 4
+  },
+  "England and Wales, Marriage Registration Index, 1837-2005": {
+   "distinctIdentifiers": 3,
+   "unresolved": 3
+  },
+  "England and Wales, Death Registration Index 1837-2007": {
+   "distinctIdentifiers": 3,
+   "unresolved": 3
+  },
+  "England and Wales, Birth Registration Index, 1837-2008": {
+   "distinctIdentifiers": 2,
+   "unresolved": 2
+  },
+  "England and Wales, Census, 1871": {
+   "distinctIdentifiers": 2,
+   "unresolved": 2
+  },
+  "England, Staffordshire, Church Records, 1538-1944": {
+   "distinctIdentifiers": 2,
+   "unresolved": 2
+  },
+  "England, Hertfordshire, Marriage Bonds, 1682-1837": {
+   "distinctIdentifiers": 2,
+   "unresolved": 2
+  },
+  "England, Cumbria, Parish Registers, 1538-1990": {
+   "distinctIdentifiers": 2,
+   "unresolved": 2
+  },
+  "England, Lancashire, Liverpool, Banns and Marriages, 1557-1960": {
+   "distinctIdentifiers": 1,
+   "unresolved": 1
+  },
+  "England and Wales, Census, 1861": {
+   "distinctIdentifiers": 1,
+   "unresolved": 1
+  },
+  "England, Hampshire, Bishop's Transcripts 1680-1892": {
+   "distinctIdentifiers": 1,
+   "unresolved": 1
+  },
+  "England, Surrey, Parish Registers, 1536-1992": {
+   "distinctIdentifiers": 1,
+   "unresolved": 1
+  },
+  "England, Devon, Parish Registers, 1538-1971": {
+   "distinctIdentifiers": 1,
+   "unresolved": 1
+  },
+  "England, Dorset, Parish Registers, 1538-2001": {
+   "distinctIdentifiers": 1,
+   "unresolved": 1
+  },
+  "England, Cheshire, Parish Registers, 1538-2000": {
+   "distinctIdentifiers": 1,
+   "unresolved": 1
+  },
+  "England, Cheshire, Bishop's Transcripts, 1598-1900": {
+   "distinctIdentifiers": 1,
+   "unresolved": 1
+  },
+  "England, Middlesex, Parish Registers, 1539-1988": {
+   "distinctIdentifiers": 1,
+   "unresolved": 1
+  },
+  "England, Devon Bishop's Transcripts, 1558-1887": {
+   "distinctIdentifiers": 1,
+   "unresolved": 1
+  }
+ },
+ "totals": {
+  "englandHeadedRecords": 1325,
+  "embeddedArkInstances": 1321,
+  "embeddedArksOutsideQueue": 0,
+  "distinctQueueIdentifiers": 1020,
+  "unresolvedIdentifiers": 1020,
+  "geographyConflicts": 6,
+  "terminalOverlapSubtracted": {
+   "mapped": 18,
+   "no-image-available": 10
+  }
+ },
+ "dateClasses": {
+  "year-only": 690,
+  "full-date": 325,
+  "dual-year": 0,
+  "no-event-date": 5
+ },
+ "byCounty": {
+  "Buckinghamshire": {
+   "identifiers": 189,
+   "parishes": {
+    "Aylesbury": 90,
+    "Chalfont St Giles": 46,
+    "Ivinghoe": 21,
+    "Dinton": 16,
+    "Denham": 8,
+    "Amersham": 7,
+    "St Mary's Church, Aylesbury": 1
+   },
+   "dateClasses": {
+    "full-date": 75,
+    "year-only": 113,
+    "no-event-date": 1
+   }
+  },
+  "Yorkshire": {
+   "identifiers": 138,
+   "parishes": {
+    "Wetwang": 34,
+    "Weaverthorpe": 10,
+    "Appleton le Street": 10,
+    "Cathedral Church of St Peter and St Paul Sheffield, Sheffield": 9,
+    "Cayton": 7,
+    "Amotherby": 6,
+    "Snaith": 5,
+    "Kirkbymoorside": 5,
+    "Hutton Bushel": 5,
+    "Helperthorpe": 5,
+    "Bulmer": 4,
+    "Huggate": 3,
+    "Sheffield": 3,
+    "(county only)": 3,
+    "Normanby": 3,
+    "Rillington": 3,
+    "Bedale": 3,
+    "Hutton Buscel": 2,
+    "York": 2,
+    "Thormanby": 2,
+    "Moor Monkton": 2,
+    "Doncaster": 1,
+    "Barnsley": 1,
+    "Scalby": 1,
+    "Birkin": 1,
+    "Cumberworth": 1,
+    "Thorganby": 1,
+    "Hatfield by Hornsea": 1,
+    "Seamer": 1,
+    "Filey": 1,
+    "Sigglesthorne": 1,
+    "Catwick": 1,
+    "Pickering": 1
+   },
+   "dateClasses": {
+    "year-only": 71,
+    "full-date": 67
+   }
+  },
+  "Bedfordshire": {
+   "identifiers": 113,
+   "parishes": {
+    "Studham": 75,
+    "Harrold": 22,
+    "Luton": 14,
+    "Bedford": 1,
+    "Silsoe": 1
+   },
+   "dateClasses": {
+    "year-only": 105,
+    "full-date": 8
+   }
+  },
+  "Somerset": {
+   "identifiers": 102,
+   "parishes": {
+    "Wincanton": 49,
+    "Frome": 29,
+    "Wilmington": 8,
+    "West Pennard": 6,
+    "Mells": 4,
+    "(county only)": 2,
+    "Bath": 1,
+    "Shepton Mallet": 1,
+    "Timberscombe": 1,
+    "Kilmington": 1
+   },
+   "dateClasses": {
+    "full-date": 54,
+    "year-only": 47,
+    "no-event-date": 1
+   }
+  },
+  "Gloucestershire": {
+   "identifiers": 91,
+   "parishes": {
+    "Chipping Campden": 44,
+    "Quinton": 12,
+    "Cheltenham": 10,
+    "Stroud Hill": 6,
+    "Avening": 5,
+    "Stroud": 4,
+    "Minchinhampton": 3,
+    "Kingscote": 2,
+    "Clifford Chambers": 1,
+    "Weston Subedge": 1,
+    "Temple Guiting": 1,
+    "Kineton": 1,
+    "Horsley": 1
+   },
+   "dateClasses": {
+    "year-only": 78,
+    "full-date": 13
+   }
+  },
+  "Berkshire": {
+   "identifiers": 64,
+   "parishes": {
+    "South Moreton": 20,
+    "Shinfield": 13,
+    "Bradfield": 13,
+    "Stanford in the Vale": 6,
+    "Cookham": 5,
+    "Wokingham": 4,
+    "North Moreton": 3
+   },
+   "dateClasses": {
+    "year-only": 32,
+    "full-date": 32
+   }
+  },
+  "Warwickshire": {
+   "identifiers": 63,
+   "parishes": {
+    "Foxcote": 37,
+    "Barford": 19,
+    "(county only)": 3,
+    "St Martin, Birmingham": 2,
+    "Packwood": 1,
+    "Bourton on Dunsmore": 1
+   },
+   "dateClasses": {
+    "year-only": 53,
+    "full-date": 10
+   }
+  },
+  "Worcestershire": {
+   "identifiers": 53,
+   "parishes": {
+    "Abberley": 24,
+    "Church Honeybourne": 21,
+    "Lenchwick": 3,
+    "Norton juxta Kempsey": 3,
+    "Honeybourne": 2
+   },
+   "dateClasses": {
+    "year-only": 53
+   }
+  },
+  "Dorset": {
+   "identifiers": 41,
+   "parishes": {
+    "Portesham": 40,
+    "Burton Bradstock": 1
+   },
+   "dateClasses": {
+    "year-only": 39,
+    "full-date": 2
+   }
+  },
+  "(no place)": {
+   "identifiers": 39,
+   "parishes": {
+    "(no place)": 39
+   },
+   "dateClasses": {
+    "year-only": 33,
+    "full-date": 5,
+    "no-event-date": 1
+   }
+  },
+  "Rutland": {
+   "identifiers": 31,
+   "parishes": {
+    "Seaton": 25,
+    "Rutland": 3,
+    "Lyddington": 2,
+    "Liddington": 1
+   },
+   "dateClasses": {
+    "year-only": 14,
+    "full-date": 17
+   }
+  },
+  "Wiltshire": {
+   "identifiers": 14,
+   "parishes": {
+    "Stourton": 5,
+    "Brokenborough": 3,
+    "Malmesbury": 2,
+    "Salisbury": 1,
+    "Fugglestone St Peter": 1,
+    "Longbridge Deverill with Crockerton": 1,
+    "Calne": 1
+   },
+   "dateClasses": {
+    "year-only": 5,
+    "full-date": 9
+   }
+  },
+  "Hertfordshire": {
+   "identifiers": 13,
+   "parishes": {
+    "Abbots Langley": 5,
+    "Little Gaddesden": 4,
+    "Studham": 2,
+    "(county only)": 1,
+    "Bishop's Stortford": 1
+   },
+   "dateClasses": {
+    "year-only": 11,
+    "full-date": 2
+   }
+  },
+  "London": {
+   "identifiers": 10,
+   "parishes": {
+    "St Giles without Cripplegate": 6,
+    "St Mary Magdalene's Church, East Ham, Newham": 2,
+    "St Mildred Bread Street with St Margaret Moses": 1,
+    "Bishopsgate": 1
+   },
+   "dateClasses": {
+    "year-only": 10
+   }
+  },
+  "Lincolnshire": {
+   "identifiers": 9,
+   "parishes": {
+    "(county only)": 4,
+    "Spalding": 4,
+    "Lincoln St Martin": 1
+   },
+   "dateClasses": {
+    "full-date": 5,
+    "year-only": 4
+   }
+  },
+  "Yorkshire East Riding": {
+   "identifiers": 8,
+   "parishes": {
+    "Huggate": 6,
+    "Wetwang": 2
+   },
+   "dateClasses": {
+    "full-date": 6,
+    "year-only": 2
+   }
+  },
+  "Kent": {
+   "identifiers": 6,
+   "parishes": {
+    "Brenchley": 4,
+    "Leeds": 2
+   },
+   "dateClasses": {
+    "year-only": 5,
+    "full-date": 1
+   }
+  },
+  "Surrey": {
+   "identifiers": 5,
+   "parishes": {
+    "Lambeth": 2,
+    "Bletchingley": 2,
+    "Croydon": 1
+   },
+   "dateClasses": {
+    "full-date": 2,
+    "year-only": 3
+   }
+  },
+  "Herefordshire": {
+   "identifiers": 5,
+   "parishes": {
+    "(county only)": 5
+   },
+   "dateClasses": {
+    "full-date": 5
+   }
+  },
+  "Staffordshire": {
+   "identifiers": 4,
+   "parishes": {
+    "Rushall": 2,
+    "(county only)": 2
+   },
+   "dateClasses": {
+    "full-date": 2,
+    "year-only": 2
+   }
+  },
+  "Middlesex": {
+   "identifiers": 3,
+   "parishes": {
+    "Saint Dunstan and All Saints Church, Stepney": 2,
+    "London St Magnus the Martyr with St Margaret New Fish Street and St Michael Crooked Lane": 1
+   },
+   "dateClasses": {
+    "year-only": 2,
+    "full-date": 1
+   }
+  },
+  "Norfolk": {
+   "identifiers": 3,
+   "parishes": {
+    "Thorpe St Andrew": 1,
+    "Cawston": 1,
+    "Norwich": 1
+   },
+   "dateClasses": {
+    "year-only": 3
+   }
+  },
+  "Lancashire": {
+   "identifiers": 2,
+   "parishes": {
+    "St Silas' Church, Liverpool": 1,
+    "Paddington": 1
+   },
+   "dateClasses": {
+    "full-date": 2
+   }
+  },
+  "Devon": {
+   "identifiers": 2,
+   "parishes": {
+    "(county only)": 1,
+    "Exeter": 1
+   },
+   "dateClasses": {
+    "year-only": 1,
+    "full-date": 1
+   }
+  },
+  "Cheshire": {
+   "identifiers": 2,
+   "parishes": {
+    "Sandbach": 2
+   },
+   "dateClasses": {
+    "full-date": 2
+   }
+  },
+  "North Yorkshire": {
+   "identifiers": 2,
+   "parishes": {
+    "Normanby": 2
+   },
+   "dateClasses": {
+    "no-event-date": 2
+   }
+  },
+  "Westmorland": {
+   "identifiers": 2,
+   "parishes": {
+    "Underbarrow": 1,
+    "Kendal": 1
+   },
+   "dateClasses": {
+    "year-only": 2
+   }
+  },
+  "Cumbria": {
+   "identifiers": 2,
+   "parishes": {
+    "Underbarrow": 1,
+    "Kendal": 1
+   },
+   "dateClasses": {
+    "full-date": 2
+   }
+  },
+  "Hampshire": {
+   "identifiers": 1,
+   "parishes": {
+    "Fareham": 1
+   },
+   "dateClasses": {
+    "full-date": 1
+   }
+  },
+  "(parish only, county unknown)": {
+   "identifiers": 1,
+   "parishes": {
+    "England": 1
+   },
+   "dateClasses": {
+    "year-only": 1
+   }
+  },
+  "Yorkshire North Riding": {
+   "identifiers": 1,
+   "parishes": {
+    "York": 1
+   },
+   "dateClasses": {
+    "full-date": 1
+   }
+  },
+  "Cambridgeshire": {
+   "identifiers": 1,
+   "parishes": {
+    "Cambridge": 1
+   },
+   "dateClasses": {
+    "year-only": 1
+   }
+  }
+ },
+ "reconciliationAgainstCustodianManifest": {
+  "England, Births and Christenings, 1538-1975": {
+   "manifest": 653,
+   "mine": 653,
+   "match": true
+  },
+  "England, Buckinghamshire, Church Records, 1217-1994": {
+   "manifest": 64,
+   "mine": 64,
+   "match": true
+  },
+  "England Marriages, 1538–1973": {
+   "manifest": 47,
+   "manifestIsAssignments": true,
+   "mine": 46,
+   "doubleRowedArk": "N2QQ-YYZ",
+   "note": "ark N2QQ-YYZ is embedded under both the canonical and the trailing-space twin spelling; 46 distinct unresolved identifiers = 47 assignments − 1 double row",
+   "match": true
+  },
+  "England, Somerset, Church Records, 1501-1999": {
+   "manifest": 40,
+   "mine": 40,
+   "match": true
+  },
+  "England, Yorkshire, Parish Registers, 1538-2016": {
+   "manifest": 35,
+   "mine": 35,
+   "match": true
+  },
+  "England, Yorkshire, Bishop's Transcripts, 1547-1957": {
+   "manifest": 32,
+   "mine": 32,
+   "match": true
+  },
+  "England, Berkshire, Parish Registers, 1515-1993": {
+   "manifest": 27,
+   "mine": 27,
+   "match": true
+  },
+  "England, Deaths and Burials, 1538-1991": {
+   "manifest": 20,
+   "mine": 20,
+   "match": true
+  },
+  "England, Rutland, Parish Registers, 1538-1991": {
+   "manifest": 16,
+   "mine": 16,
+   "match": true
+  },
+  "England and Wales, Non-Conformist Record Indexes (RG4-8), 1588-1977": {
+   "manifest": 14,
+   "mine": 14,
+   "match": true
+  },
+  "England, Warwickshire, Parish Registers, 1535-1972": {
+   "manifest": 9,
+   "mine": 9,
+   "match": true
+  },
+  "England, Wiltshire, Church Records, 1518-1990": {
+   "manifest": 9,
+   "mine": 9,
+   "match": true
+  },
+  "England, Bedfordshire, Parish Registers, 1538-1983": {
+   "manifest": 6,
+   "mine": 6,
+   "match": true
+  },
+  "England and Wales, Census, 1851": {
+   "manifest": 5,
+   "mine": 5,
+   "match": true
+  },
+  "England, Herefordshire, Bishop's Transcripts, 1583-1900": {
+   "manifest": 5,
+   "mine": 5,
+   "match": true
+  },
+  "England, Lincolnshire, Parish Registers, 1538-1990": {
+   "manifest": 5,
+   "mine": 5,
+   "match": true
+  },
+  "England and Wales, Census, 1841": {
+   "manifest": 4,
+   "mine": 4,
+   "match": true
+  },
+  "England, Yorkshire, Marriage Bonds and Allegations, 1613-1887": {
+   "manifest": 4,
+   "mine": 4,
+   "match": true
+  },
+  "England and Wales, Marriage Registration Index, 1837-2005": {
+   "manifest": 3,
+   "mine": 3,
+   "match": true
+  },
+  "England and Wales, Death Registration Index 1837-2007": {
+   "manifest": 3,
+   "mine": 3,
+   "match": true
+  },
+  "England and Wales, Birth Registration Index, 1837-2008": {
+   "manifest": 2,
+   "mine": 2,
+   "match": true
+  },
+  "England and Wales, Census, 1871": {
+   "manifest": 2,
+   "mine": 2,
+   "match": true
+  },
+  "England, Staffordshire, Church Records, 1538-1944": {
+   "manifest": 2,
+   "mine": 2,
+   "match": true
+  },
+  "England, Hertfordshire, Marriage Bonds, 1682-1837": {
+   "manifest": 2,
+   "mine": 2,
+   "match": true
+  },
+  "England, Cumbria, Parish Registers, 1538-1990": {
+   "manifest": 2,
+   "mine": 2,
+   "match": true
+  },
+  "England, Lancashire, Liverpool, Banns and Marriages, 1557-1960": {
+   "manifest": 1,
+   "mine": 1,
+   "match": true
+  },
+  "England and Wales, Census, 1861": {
+   "manifest": 1,
+   "mine": 1,
+   "match": true
+  },
+  "England, Hampshire, Bishop's Transcripts 1680-1892": {
+   "manifest": 1,
+   "mine": 1,
+   "match": true
+  },
+  "England, Surrey, Parish Registers, 1536-1992": {
+   "manifest": 1,
+   "mine": 1,
+   "match": true
+  },
+  "England, Devon, Parish Registers, 1538-1971": {
+   "manifest": 1,
+   "mine": 1,
+   "match": true
+  },
+  "England, Dorset, Parish Registers, 1538-2001": {
+   "manifest": 1,
+   "mine": 1,
+   "match": true
+  },
+  "England, Cheshire, Parish Registers, 1538-2000": {
+   "manifest": 1,
+   "mine": 1,
+   "match": true
+  },
+  "England, Cheshire, Bishop's Transcripts, 1598-1900": {
+   "manifest": 1,
+   "mine": 1,
+   "match": true
+  },
+  "England, Middlesex, Parish Registers, 1539-1988": {
+   "manifest": 1,
+   "mine": 1,
+   "match": true
+  },
+  "England, Devon Bishop's Transcripts, 1558-1887": {
+   "manifest": 1,
+   "mine": 1,
+   "match": true
+  }
+ }
+}

@@ -1,0 +1,99 @@
+{
+  "class": "NATIVE DIFFERENTIAL/TEETH; not a universal proof or official KAT",
+  "control": "honest",
+  "executed": 4245,
+  "failures": [],
+  "legacy_checks": 3456,
+  "missing": [],
+  "passed": 4245,
+  "required_rows": 21,
+  "result": "PASS",
+  "rows": {
+    "challenge": [
+      48,
+      48
+    ],
+    "context-256": [
+      48,
+      48
+    ],
+    "context-tail": [
+      48,
+      48
+    ],
+    "empty-signature": [
+      48,
+      48
+    ],
+    "every-legal-context-length": [
+      256,
+      256
+    ],
+    "every-short-length": [
+      3309,
+      3309
+    ],
+    "hint-decrease": [
+      48,
+      48
+    ],
+    "hint-duplicate": [
+      48,
+      48
+    ],
+    "hint-overflow": [
+      48,
+      48
+    ],
+    "hint-padding": [
+      48,
+      48
+    ],
+    "ignored-context": [
+      1,
+      1
+    ],
+    "ignored-message-suffix": [
+      1,
+      1
+    ],
+    "ignored-signature-suffix": [
+      1,
+      1
+    ],
+    "key-length": [
+      4,
+      4
+    ],
+    "long-signature": [
+      48,
+      48
+    ],
+    "message-tail": [
+      48,
+      48
+    ],
+    "owned-key-bytes": [
+      1,
+      1
+    ],
+    "short-signature": [
+      48,
+      48
+    ],
+    "valid": [
+      48,
+      48
+    ],
+    "wrong-key": [
+      48,
+      48
+    ],
+    "z-norm": [
+      48,
+      48
+    ]
+  },
+  "schema": "btungsten.prepared-native/1",
+  "unexpected": []
+}

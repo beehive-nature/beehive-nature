@@ -117,7 +117,7 @@ jobs:
           cargo build --locked --release -p btungsten-bench --bins
           target/release/rbench rb01 $RB_PLAN_FLAG --work "$RUNNER_TEMP/rb-work" --out "$RUNNER_TEMP/rb-out/rb01"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: always()
+        if: always()  # preservation: runs on cancel and on a timeout, so the evidence survives
         with:
           name: rb01-receipt
           path: ${{ runner.temp }}/rb-out/rb01
@@ -163,7 +163,7 @@ jobs:
           cargo build --locked --release -p btungsten-bench --bins
           target/release/rbench rb02 $RB_PLAN_FLAG --tools "$HOME/rbtools" --work "$RUNNER_TEMP/rb-work" --out "$RUNNER_TEMP/rb-out/rb02"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: always()
+        if: always()  # preservation: runs on cancel and on a timeout, so the evidence survives
         with:
           name: rb02-receipt
           path: ${{ runner.temp }}/rb-out/rb02
@@ -217,7 +217,7 @@ jobs:
           cargo build --locked --release -p btungsten-bench --bins
           target/release/rbench rb03 $RB_PLAN_FLAG --tools "$HOME/rbtools/crux" --work "$RUNNER_TEMP/rb-work" --out "$RUNNER_TEMP/rb-out/rb03"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: always()
+        if: always()  # preservation: runs on cancel and on a timeout, so the evidence survives
         with:
           name: rb03-receipt
           path: ${{ runner.temp }}/rb-out/rb03
@@ -251,20 +251,20 @@ jobs:
           cargo build --locked --release -p btungsten-bench --bins
           target/release/rbench rb04 $RB_PLAN_FLAG --tools "$HOME/rbtools" --work "$RUNNER_TEMP/rb-work" --out "$RUNNER_TEMP/rb-out/rb04"
       - name: Save the cabal home
-        if: always() && env.RB_PLAN_FLAG == '--quick' && steps.cabal.outputs.cache-hit != 'true'
+        if: always() && env.RB_PLAN_FLAG == '--quick' && steps.cabal.outputs.cache-hit != 'true'  # preservation: runs on cancel and on a timeout, so the evidence survives
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/rbtools/cabal
           key: rb04-cabal-v1-a4ad7592-ghc-9.8.4-index-2026-10-01T22-42-03Z-ubuntu-24.04
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: always()
+        if: always()  # preservation: runs on cancel and on a timeout, so the evidence survives
         with:
           name: rb04-receipt
           path: ${{ runner.temp }}/rb-out/rb04
           retention-days: 14
       - name: Upload the built generator (the daedalus executable at the pin)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: always()
+        if: always()  # preservation: runs on cancel and on a timeout, so the evidence survives
         with:
           name: rb04-daedalus-bin
           path: ${{ runner.temp }}/rb-work/rb04-bin

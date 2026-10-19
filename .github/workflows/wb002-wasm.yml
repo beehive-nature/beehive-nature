@@ -2,13 +2,14 @@ name: WB002 WASM corpus
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
-# SUPERSEDED RUNS (2026-10-15): a newer push to the same branch, or a newer
-# head on the same pull request, cancels this workflow's run for the older
-# commit, whose result could never gate a merge again (measured that day: 89
-# of 192 queued runs repo-wide were for commits no longer any branch's head).
+# One expensive qualification per PR candidate; main verifies the actual merge.
+# Branch pushes still receive tests.yml identity and secret-scan.yml audits.
+
+# A newer head on the same PR cancels the superseded candidate run.
 # Main and manual dispatches each get a group of their own, so they are never
 # cancelled or folded into another run; the exact head always gets a full run.
 # tests.yml and secret-scan.yml are deliberately left out: the §7 identity
@@ -53,7 +54,7 @@ jobs:
             WB002_RECEIPT="$PWD/receipts/wb002-$run.json" target/release/wb002-wasm-equiv
           done
       - name: Preserve fresh corpus receipts
-        if: always()
+        if: always()  # preservation: runs on cancel and on a timeout, so the evidence survives
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: wb002-wasm-${{ github.run_id }}-${{ github.run_attempt }}

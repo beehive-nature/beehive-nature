@@ -19,6 +19,9 @@
 //! stale and left alone — recovery does not invent terminal states.
 
 use crate::journal::{self, ReplicatedJournal, ReplicationState};
+// the exact replacement law's pure core lives in bnrose-replacement-law (one
+// definition set, dependency-free so cargo saw-build can link it alone);
+// re-exported so the public path is unchanged
 use crate::keys::SupervisorKeys;
 use crate::ledger::{self, EffectLedger};
 use crate::receipt::{state_word, Receipt};
@@ -32,6 +35,7 @@ use bnrose_exec_core::{
     E_BOUNDED_FAIL, E_DISPATCH, E_MIGRATION, E_RECOVERY_EVIDENCE, E_RECOVERY_NONE, E_RESPONSE,
     S_ADMITTED, S_DISPATCHED, S_RESERVED, S_UNKNOWN,
 };
+pub use bnrose_replacement_law::{replacement_admissible, replacement_attempt, StepOptions};
 use serde_json::{json, Value};
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -131,25 +135,6 @@ fn reservations_payload(bounds: &Bounds) -> Vec<u8> {
             .to_le_bytes(),
     );
     p
-}
-
-/// Options for step-based workflows. The replacement policy is OPT-IN
-/// and narrow (the founder's 2026-10-13 law): only a step whose prior
-/// attempt is conclusively never-executed (no ledger row for any
-/// attempt) may be replaced, and only when this flag is set. A failed
-/// step WITH a recorded effect, and any unresolved step, are never
-/// replaceable.
-#[derive(Clone, Copy, Debug)]
-pub struct StepOptions {
-    pub replace_never_executed_failed_steps: bool,
-}
-
-impl Default for StepOptions {
-    fn default() -> Self {
-        StepOptions {
-            replace_never_executed_failed_steps: false,
-        }
-    }
 }
 
 impl Supervisor {
@@ -1452,23 +1437,6 @@ pub fn step_entity_attempt(records: &[journal::Record], root: &[u8; 32], step: u
         }
     }
     max_attempt
-}
-
-/// The exact replacement law's GATE, one definition (the Cryptol twin's
-/// `gate` binds THIS function; the sampled-agreement grid compares them
-/// mechanically over a named input grid): admissible only when NO attempt
-/// of the step has a recorded effect AND the policy flag explicitly opts
-/// in (default false).
-pub fn replacement_admissible(has_any_recorded_effect: bool, opts: &StepOptions) -> bool {
-    !has_any_recorded_effect && opts.replace_never_executed_failed_steps
-}
-
-/// The replacement's attempt number: one past the highest journaled
-/// attempt, saturating at 15 (the Cryptol twin's `nextAttempt`; the
-/// saturation corner is named there and proven as a fact — at 16 journaled
-/// attempts the encoding of slot 15 is REUSED, by design).
-pub fn replacement_attempt(max_journaled_attempt: u8) -> u8 {
-    (max_journaled_attempt + 1).min(15)
 }
 
 /// Whether ANY attempt of this step has a row among `rows` — the pure

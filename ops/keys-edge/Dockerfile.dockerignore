@@ -1,0 +1,9 @@
+# Build context for ops/keys-edge/Dockerfile only (BuildKit reads <Dockerfile>.dockerignore).
+# The build reads Cargo.toml, Cargo.lock, crates/ and the files bsigner include_str!s from
+# surfaces/ and scripts/; it never reads these, the bulk of the tree.
+.git
+**/node_modules
+**/target
+assets
+media
+e2e

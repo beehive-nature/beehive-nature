@@ -1,0 +1,26 @@
+// BNROSE-SAW-001 — implementation correspondence, THE ATTEMPT NUMBERING.
+// The compiled `bnrose_saw_harness::saw_attempt` (which calls
+// replacement_attempt — the same MIR body the host's run path calls)
+// equals the twin's attempt8 for EVERY u8 input. attempt8 extends the
+// twin's attemptAfter (the max-level binding of nextAttempt) to the full
+// u8 domain; on the supported domain (the attempt nibble 0..15, where
+// every caller lives) attempt8Agrees proves attempt8 == attemptAfter, so
+// the compiled numbering matches the law exactly there, and the two
+// out-of-domain corners (15..254 saturate, 255 wraps) are pinned facts.
+//
+// usage (from this directory): saw attempt.saw
+//   with the linked MIR at ../../../target/saw-bnrose/bnrose_replacement_law.linked-mir.json
+
+enable_experimental;
+import "../cryptol/BnroseReplacement.cry";
+
+m <- mir_load_module "../../../target/saw-bnrose/bnrose_replacement_law.linked-mir.json";
+
+let attempt_spec = do {
+  mv <- mir_fresh_var "m" mir_u8;
+  mir_execute_func [mir_term mv];
+  mir_return (mir_term {{ attempt8 mv }});
+};
+
+mir_verify m "bnrose_saw_harness::saw_attempt" [] false attempt_spec (w4_unint_yices []);
+print "BNROSE-SAW PROVEN attempt: compiled replacement_attempt == attempt8 for every u8";

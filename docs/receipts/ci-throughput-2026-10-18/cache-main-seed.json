@@ -1,0 +1,48 @@
+{
+  "format": "bnr.github-cache-observation.v1",
+  "repository": "beehive-nature/beehive-nature",
+  "observed_at": "2026-10-19T01:31:20.954Z",
+  "attestation": "unsigned GitHub API and job-log observations",
+  "run_id": 39185102164,
+  "job_id": 117845761912,
+  "head": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+  "checkout": {
+    "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+    "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+  },
+  "conclusion": "success",
+  "started_at": "2026-10-19T01:24:17Z",
+  "completed_at": "2026-10-19T01:29:56Z",
+  "execution_seconds": 339,
+  "log_evidence": [
+    "2026-10-19T01:24:36.8630298Z   save-if: true",
+    "2026-10-19T01:24:45.2522756Z     /home/runner/work/beehive-nature/beehive-nature/crates/btungsten-x0x-pq/target",
+    "2026-10-19T01:24:45.3280659Z No cache found.",
+    "2026-10-19T01:29:49.0673544Z     /home/runner/work/beehive-nature/beehive-nature/crates/btungsten-x0x-pq/target",
+    "2026-10-19T01:29:49.8133715Z ... Saving cache ...",
+    "2026-10-19T01:29:54.4537375Z Sent 323960925 of 323960925 (100.0%), 207.1 MBs/sec"
+  ],
+  "seeded_cache_id": 9137203422,
+  "caches": [
+    {
+      "id": 9137203422,
+      "key": "v0-rust-x0x-pq-Linux-x64-ade52a28-96d697cf",
+      "ref": "refs/heads/main",
+      "created_at": "2026-10-19T01:29:54.534227Z",
+      "last_accessed_at": "2026-10-19T01:29:54.534227Z",
+      "size_in_bytes": 323960925,
+      "version_PUBLIC-CONSTANT": "3fbb3274a0fcc618402a493275c66270f687cf036e1dfdb162c4ff0819147aa2"
+    },
+    {
+      "id": 9134539875,
+      "key": "v0-rust-x0x-pq-Linux-x64-ade52a28-96d697cf",
+      "ref": "refs/heads/main",
+      "created_at": "2026-10-18T23:31:01.182894Z",
+      "last_accessed_at": "2026-10-19T01:16:31.696684Z",
+      "size_in_bytes": 221846611,
+      "version_PUBLIC-CONSTANT": "a4ebbbcf8e2a7beabcd6a59fe4880fee99705690e753b5f2851994189b71d11c"
+    }
+  ],
+  "scope_note": "Successful cold main x0x job and observed cache upload/store entry only. Whole-main qualification and subsequent warm restoration are separate.",
+  "log_sha256_PUBLIC-CONSTANT": "6e07619e42cccb0295871e17c4b32d7b67b0ea5fbf43c105f850fc6fd2c26c7f"
+}

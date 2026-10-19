@@ -1,0 +1,5 @@
+    Finished `release` profile [optimized] target(s) in 0.06s
+     Running `target/release/p3count prove 16384 10000`
+PQ10 SECURITY n=16384: proven 102 bits (unique 102, list 95), conjectured 104 bits (a conjecture), target 100; log_blowup 3 queries 104 query-PoW 16 bits; height 32768 width 402
+PQ10 SCALE n=16384 members=10000 kind=0 count=1407: prove 39901 ms, verify 39629 us, proof 729252 bytes, degree_bits 16, verified true (setup 641 ms)
+PQ10 SCALE n=16384 members=10000 kind=1 count=1453: prove 23786 ms, verify 9777 us, proof 720828 bytes, degree_bits 16, verified true (setup 641 ms)

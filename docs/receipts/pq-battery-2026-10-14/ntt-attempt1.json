@@ -1,0 +1,14 @@
+{
+  "result": "INCONCLUSIVE",
+  "cause": "UNVERIFIED",
+  "observations": [
+    "both workers became defunct without final gate output",
+    "tool session 65026 was unavailable on resume",
+    "memory.events reported zero OOM kills"
+  ],
+  "not_claimed": [
+    "proof success",
+    "counterexample",
+    "qualification"
+  ]
+}

@@ -1,0 +1,131 @@
+    Fetching advisory database from `https://github.com/RustSec/advisory-db.git`
+      Loaded 1314 security advisories (from /home/agent/.cargo/advisory-db)
+    Updating crates.io index
+    Scanning Cargo.lock for vulnerabilities (622 crate dependencies)
+error: couldn't check if the package is yanked: registry: status code '503 Service Unavailable': the status code is invalid for this protocol
+Caused by:
+  -> status code '503 Service Unavailable': the status code is invalid for this protocol
+error: couldn't check if the package is yanked: registry: status code '503 Service Unavailable': the status code is invalid for this protocol
+Caused by:
+  -> status code '503 Service Unavailable': the status code is invalid for this protocol
+error: couldn't check if the package is yanked: registry: status code '503 Service Unavailable': the status code is invalid for this protocol
+Caused by:
+  -> status code '503 Service Unavailable': the status code is invalid for this protocol
+error: couldn't check if the package is yanked: registry: status code '503 Service Unavailable': the status code is invalid for this protocol
+Caused by:
+  -> status code '503 Service Unavailable': the status code is invalid for this protocol
+error: couldn't check if the package is yanked: registry: status code '503 Service Unavailable': the status code is invalid for this protocol
+Caused by:
+  -> status code '503 Service Unavailable': the status code is invalid for this protocol
+error: couldn't check if the package is yanked: registry: status code '503 Service Unavailable': the status code is invalid for this protocol
+Caused by:
+  -> status code '503 Service Unavailable': the status code is invalid for this protocol
+Crate:     quinn-proto
+Version:   0.11.16
+Title:     Unbounded growth of pending connection ID retirements in quinn-proto
+Date:      2026-08-17
+ID:        RUSTSEC-2026-0339
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0339
+Solution:  Upgrade to >=0.11.17
+
+Crate:     quinn-proto
+Version:   0.11.16
+Title:     Remote peer can panic quinn-proto with zero-length STREAM frames during unordered reads
+Date:      2026-09-14
+ID:        RUSTSEC-2026-0338
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0338
+Solution:  Upgrade to >=0.11.18
+
+Crate:     quinn-proto
+Version:   0.11.16
+Title:     Peer minimum ACK delay can panic quinn-proto when ACK_FREQUENCY transmission is enabled
+Date:      2026-09-14
+ID:        RUSTSEC-2026-0340
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0340
+Severity:  7.5 (high)
+Solution:  Upgrade to >=0.11.18
+
+Crate:     quinn-proto
+Version:   0.11.16
+Title:     Zero-length DATAGRAM frames bypass the receive buffer limit in quinn-proto
+Date:      2026-08-17
+ID:        RUSTSEC-2026-0342
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0342
+Solution:  Upgrade to >=0.11.17
+
+Crate:     quinn-proto
+Version:   0.11.16
+Title:     Stream reassembly memory-exhaustion guard in quinn-proto can be bypassed
+Date:      2026-08-17
+ID:        RUSTSEC-2026-0341
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0341
+Severity:  7.5 (high)
+Solution:  Upgrade to >=0.11.17
+
+Crate:     rsa
+Version:   0.9.10
+Title:     Marvin Attack: potential key recovery through timing sidechannels
+Date:      2023-11-22
+ID:        RUSTSEC-2023-0071
+URL:       https://rustsec.org/advisories/RUSTSEC-2023-0071
+Severity:  5.9 (medium)
+Solution:  No fixed upgrade is available!
+
+Crate:     rustls
+Version:   0.23.45
+Title:     Brotli certificate decompression can allocate up to 1 GiB before authentication
+Date:      2026-10-14
+ID:        RUSTSEC-2026-0348
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0348
+Severity:  3.7 (low)
+Solution:  Upgrade to >=0.23.46
+
+Crate:     rustls
+Version:   0.23.45
+Title:     `Debug` impls for client session values expose TLS secrets
+Date:      2026-10-14
+ID:        RUSTSEC-2026-0346
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0346
+Severity:  4 (medium)
+Solution:  Upgrade to >=0.23.46
+
+Crate:     rustls
+Version:   0.23.45
+Title:     Unauthenticated ServerHello can downgrade later connections to classical key exchange
+Date:      2026-10-14
+ID:        RUSTSEC-2026-0349
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0349
+Severity:  3.7 (low)
+Solution:  Upgrade to >=0.23.46
+
+Crate:     rustls
+Version:   0.23.45
+Title:     Buffered application data sent to outer server after ECH rejection
+Date:      2026-10-14
+ID:        RUSTSEC-2026-0347
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0347
+Severity:  2.3 (low)
+Solution:  Upgrade to >=0.23.46
+
+Crate:     bincode
+Version:   1.3.3
+Warning:   unmaintained
+Title:     Bincode is unmaintained
+Date:      2025-12-16
+ID:        RUSTSEC-2025-0141
+URL:       https://rustsec.org/advisories/RUSTSEC-2025-0141
+
+Crate:     proc-macro-error2
+Version:   2.0.1
+Warning:   unmaintained
+Title:     proc-macro-error2 is unmaintained
+Date:      2026-06-07
+ID:        RUSTSEC-2026-0173
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0173
+
+Crate:     chacha20
+Version:   0.10.1
+Warning:   yanked
+
+error: 10 vulnerabilities found!
+warning: 3 allowed warnings found

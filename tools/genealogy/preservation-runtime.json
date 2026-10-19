@@ -27,6 +27,7 @@
     "surfaces/tree-of-life.mjs",
     "surfaces/archive-core.mjs",
     "tools/genealogy/model.mjs",
+    "tools/genealogy/local-evidence.mjs",
     "tools/genealogy/lifespan.mjs",
     "tools/genealogy/consent.mjs",
     "surfaces/rails-badge.js",

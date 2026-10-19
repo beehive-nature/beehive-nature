@@ -1,0 +1,59 @@
+== SAW PQ05 field: toolchain ==
+1.6 (68eed5f release-1.6)
+== SAW PQ05 field: PIN ==
+SAW-PIN PQ05: PASS (module-lattice 0.2.3, sha256 matches Cargo.lock)
+SAW-PIN PQ05: PASS (ml-kem 0.3.2, sha256 matches Cargo.lock)
+SAW-PIN PQ05: PASS (ml-dsa 0.1.1, sha256 matches Cargo.lock)
+SAW-PIN PQ05: PASS (ml-kem's and ml-dsa's define_field! invocations are the harness's)
+== SAW PQ05 field: BUILD the harness to MIR JSON (cargo-saw-build) ==
+   Compiling autocfg v1.5.1
+   Compiling typenum v1.20.1
+   Compiling num-traits v0.2.19
+   Compiling hybrid-array v0.4.14
+   Compiling module-lattice v0.2.3 (/workspace/wt-pq-battery/target/saw-pq05-field/module-lattice-0.2.3)
+   Compiling pq05_field v0.0.0 (/workspace/wt-pq-battery/scripts/btungsten/pq05-field)
+Linking 7 mir files into /workspace/wt-pq-battery/target/saw-pq05-field/cargo/x86_64-unknown-linux-gnu/debug/deps/pq05_field-7589698186086957.linked-mir.json
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.04s
+  Executable unittests src/lib.rs (/workspace/wt-pq-battery/target/saw-pq05-field/cargo/x86_64-unknown-linux-gnu/debug/deps/pq05_field-7589698186086957)
+   Compiling autocfg v1.5.1
+   Compiling typenum v1.20.1
+   Compiling num-traits v0.2.19
+   Compiling hybrid-array v0.4.14
+   Compiling module-lattice v0.2.3 (/workspace/wt-pq-battery/target/saw-pq05-field/module-lattice-0.2.3)
+   Compiling pq05_field v0.0.0 (/workspace/wt-pq-battery/scripts/btungsten/pq05-field)
+Linking 7 mir files into /workspace/wt-pq-battery/target/saw-pq05-field/cargo-release/x86_64-unknown-linux-gnu/debug/deps/pq05_field-088c2309ba72fc1c.linked-mir.json
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.75s
+  Executable unittests src/lib.rs (/workspace/wt-pq-battery/target/saw-pq05-field/cargo-release/x86_64-unknown-linux-gnu/debug/deps/pq05_field-088c2309ba72fc1c)
+SAW-BUILD PQ05: PASS (207335 bytes of linked MIR, and the release-semantics build)
+== SPEC-CHECK PQ05: Field.cry, ML-DSA Barrett over the integers ==
+SPEC-CHECK dsaBarrettConstants: PASS
+SPEC-CHECK dsaBarrettRange: PASS
+== SAW PQ05 field: field.saw ==
+PQ05-SAW PROVEN kem_small
+PQ05-SAW PROVEN kem_barrett
+PQ05-SAW PROVEN kem_barrett (sums of two products)
+PQ05-SAW PROVEN kem_add
+PQ05-SAW PROVEN kem_sub
+PQ05-SAW PROVEN kem_neg
+PQ05-SAW PROVEN kem_mul
+PQ05-SAW PROVEN dsa_small
+PQ05-SAW PROVEN dsa_add
+PQ05-SAW PROVEN dsa_sub
+PQ05-SAW PROVEN dsa_neg
+SAW field.saw: 11 obligations PROVEN in 123s
+== SAW PQ05 field: field-release.saw ==
+PQ05-SAW PROVEN dsa_barrett (release build) = the Barrett algorithm
+PQ05-SAW PROVEN dsa_mul (release build) = the Barrett algorithm of the product
+SAW field-release.saw: 2 obligations PROVEN in 1s
+== SAW PQ05 field: TEETH field-teeth-small.saw — must FAIL with a counterexample ==
+PQ05-SAW-TEETH obligation unboundedSmall
+Subgoal failed: pq05_field/8974a43e::kem_small[0] Literal equality postcondition
+----------Counterexample----------
+SAW-TEETH field-teeth-small.saw: PASS (counterexample found, as required)
+== SAW PQ05 field: TEETH field-teeth-range.saw — must FAIL with a counterexample ==
+PQ05-SAW-TEETH obligation unboundedBarrett
+Subgoal failed: pq05_field/8974a43e::kem_barrett[0] Literal equality postcondition
+----------Counterexample----------
+SAW-TEETH field-teeth-range.saw: PASS (counterexample found, as required)
+== SAW PQ05 field: ladder state ==
+PIN: PASS (3 crates + both define_field! invocations) | BUILD: PASS (and release semantics) | SPEC-CHECK: PASS (2) | EQUIVALENCE: PROVEN (13: 11, and ML-DSA Barrett and multiply as release builds run them) | TEETH: PASS (2)

@@ -1,0 +1,4594 @@
+{
+  "format": "bnr.ci-observation.v1",
+  "provider": "github",
+  "repository": "beehive-nature/beehive-nature",
+  "head": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+  "observed_at": "2026-10-19T02:03:12.804Z",
+  "attestation": "unsigned API and job-log observations",
+  "coverage_note": "Recorded runs only; compare against the required workflow/event plan before qualification.",
+  "timing_note": "Workflow creation to job start includes dependency and retry waiting; it is not pure runner queue time.",
+  "summary": {
+    "workflow_executions": 10,
+    "completed_successfully": 10,
+    "incomplete": 0,
+    "non_success": [],
+    "all_recorded_runs_successful": true,
+    "executed_jobs": 29,
+    "completed_jobs_without_start_evidence": [],
+    "jobs_with_checkout_binding": 29,
+    "completed_job_execution_seconds": 14200,
+    "timing_missing_job_ids": [],
+    "dispatch_to_job_start_seconds": [
+      {
+        "id": 117845761883,
+        "seconds": 4
+      },
+      {
+        "id": 117845762125,
+        "seconds": 4
+      },
+      {
+        "id": 117845762137,
+        "seconds": 4
+      },
+      {
+        "id": 117845761617,
+        "seconds": 3
+      },
+      {
+        "id": 117845762297,
+        "seconds": 4
+      },
+      {
+        "id": 117845762633,
+        "seconds": 4
+      },
+      {
+        "id": 117845823480,
+        "seconds": null
+      },
+      {
+        "id": 117845823657,
+        "seconds": null
+      },
+      {
+        "id": 117845823932,
+        "seconds": null
+      },
+      {
+        "id": 117845824366,
+        "seconds": null
+      },
+      {
+        "id": 117845762052,
+        "seconds": 19
+      },
+      {
+        "id": 117845761797,
+        "seconds": 109
+      },
+      {
+        "id": 117845761946,
+        "seconds": 4
+      },
+      {
+        "id": 117845761671,
+        "seconds": 3
+      },
+      {
+        "id": 117845761800,
+        "seconds": 4
+      },
+      {
+        "id": 117845761976,
+        "seconds": 25
+      },
+      {
+        "id": 117845762005,
+        "seconds": 158
+      },
+      {
+        "id": 117845762119,
+        "seconds": 339
+      },
+      {
+        "id": 117845761912,
+        "seconds": 72
+      },
+      {
+        "id": 117845762101,
+        "seconds": 85
+      },
+      {
+        "id": 117845762201,
+        "seconds": 241
+      },
+      {
+        "id": 117845762208,
+        "seconds": 156
+      },
+      {
+        "id": 117845762218,
+        "seconds": 368
+      },
+      {
+        "id": 117845762246,
+        "seconds": 421
+      },
+      {
+        "id": 117845762266,
+        "seconds": 428
+      },
+      {
+        "id": 117845761673,
+        "seconds": 135
+      },
+      {
+        "id": 117845761791,
+        "seconds": 188
+      },
+      {
+        "id": 117845761801,
+        "seconds": 207
+      },
+      {
+        "id": 117845761833,
+        "seconds": 362
+      },
+      {
+        "id": 117845761839,
+        "seconds": 345
+      },
+      {
+        "id": 117845761860,
+        "seconds": 207
+      },
+      {
+        "id": 117845762007,
+        "seconds": 413
+      },
+      {
+        "id": 117845762164,
+        "seconds": 466
+      }
+    ]
+  },
+  "runs": [
+    {
+      "id": 39185102153,
+      "name": "bTunGsTeN PQ SAW",
+      "event": "push",
+      "attempt": 1,
+      "head": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-19T01:23:05Z",
+      "url": "https://github.com/beehive-nature/beehive-nature/actions/runs/39185102153",
+      "pull_requests": [],
+      "jobs": [
+        {
+          "id": 117845761883,
+          "name": "saw-ntt-dsa",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:23:09Z",
+          "completed_at": "2026-10-19T01:59:17Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 4,
+          "execution_seconds": 2168,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:09Z",
+              "completed_at": "2026-10-19T01:23:10Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:10Z",
+              "completed_at": "2026-10-19T01:23:20Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Install pinned SAW 1.6 (with bundled solvers)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:20Z",
+              "completed_at": "2026-10-19T01:23:27Z",
+              "execution_seconds": 7
+            },
+            {
+              "number": 4,
+              "name": "Install the mir-json toolchain (nightly-2026-03-21)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:27Z",
+              "completed_at": "2026-10-19T01:23:49Z",
+              "execution_seconds": 22
+            },
+            {
+              "number": 5,
+              "name": "Restore mir-json build (keyed on its commit and toolchain)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:49Z",
+              "completed_at": "2026-10-19T01:23:51Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 6,
+              "name": "Build mir-json at SAW 1.6's pin",
+              "status": "completed",
+              "conclusion": "skipped",
+              "started_at": "2026-10-19T01:23:51Z",
+              "completed_at": "2026-10-19T01:23:51Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 7,
+              "name": "Expose mir-json",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:51Z",
+              "completed_at": "2026-10-19T01:23:51Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 8,
+              "name": "PQ06 SAW — ML-DSA NTT and inverse NTT (ml-dsa 0.1.1), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:51Z",
+              "completed_at": "2026-10-19T01:59:15Z",
+              "execution_seconds": 2124
+            },
+            {
+              "number": 15,
+              "name": "Post Restore mir-json build (keyed on its commit and toolchain)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:59:15Z",
+              "completed_at": "2026-10-19T01:59:15Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 16,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:59:15Z",
+              "completed_at": "2026-10-19T01:59:15Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 17,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:59:15Z",
+              "completed_at": "2026-10-19T01:59:15Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "eea387caa5c918dcbbba455eb5416cafb8183ba38de768eb12c1b342638baaeb"
+        },
+        {
+          "id": 117845762125,
+          "name": "saw",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:23:09Z",
+          "completed_at": "2026-10-19T01:44:37Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 4,
+          "execution_seconds": 1288,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:10Z",
+              "completed_at": "2026-10-19T01:23:11Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:11Z",
+              "completed_at": "2026-10-19T01:23:21Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Install pinned SAW 1.6 (with bundled solvers)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:21Z",
+              "completed_at": "2026-10-19T01:23:28Z",
+              "execution_seconds": 7
+            },
+            {
+              "number": 4,
+              "name": "Install the mir-json toolchain (nightly-2026-03-21)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:28Z",
+              "completed_at": "2026-10-19T01:23:50Z",
+              "execution_seconds": 22
+            },
+            {
+              "number": 5,
+              "name": "Restore mir-json build (keyed on its commit and toolchain)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:50Z",
+              "completed_at": "2026-10-19T01:23:52Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 6,
+              "name": "Build mir-json at SAW 1.6's pin",
+              "status": "completed",
+              "conclusion": "skipped",
+              "started_at": "2026-10-19T01:23:52Z",
+              "completed_at": "2026-10-19T01:23:52Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 7,
+              "name": "Expose mir-json",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:52Z",
+              "completed_at": "2026-10-19T01:23:52Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 8,
+              "name": "Prepared FIPS public key — conditional wrapper equivalence and sabotage (Rust controller)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:52Z",
+              "completed_at": "2026-10-19T01:30:05Z",
+              "execution_seconds": 373
+            },
+            {
+              "number": 9,
+              "name": "Retain prepared-key proof evidence, including failures",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:05Z",
+              "completed_at": "2026-10-19T01:30:07Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 10,
+              "name": "PQ03 SAW — BUILD + EQUIVALENCE + PROVE-UNIVERSAL + TEETH",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:07Z",
+              "completed_at": "2026-10-19T01:30:22Z",
+              "execution_seconds": 15
+            },
+            {
+              "number": 11,
+              "name": "PQ04 SAW — BUILD + EQUIVALENCE + PROVE-UNIVERSAL + TEETH",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:22Z",
+              "completed_at": "2026-10-19T01:31:00Z",
+              "execution_seconds": 38
+            },
+            {
+              "number": 12,
+              "name": "PQ11 SAW — BIP-39 packing, BUILD + EQUIVALENCE + PROVE-UNIVERSAL + TEETH",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:00Z",
+              "completed_at": "2026-10-19T01:31:05Z",
+              "execution_seconds": 5
+            },
+            {
+              "number": 13,
+              "name": "PQ02 SAW — the shipped Keccak-f[1600] (keccak 0.1.6 and 0.2.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:05Z",
+              "completed_at": "2026-10-19T01:38:38Z",
+              "execution_seconds": 453
+            },
+            {
+              "number": 14,
+              "name": "PQ02 SAW — the SHA-3 sponge in sha3 0.10.9 (SHA3-256, SHAKE256), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:38:38Z",
+              "completed_at": "2026-10-19T01:39:26Z",
+              "execution_seconds": 48
+            },
+            {
+              "number": 15,
+              "name": "PQ02 SAW — the SHA-3 sponge in sha3 0.11.0 on keccak 0.2.2 (ML-KEM-768 shapes), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:39:26Z",
+              "completed_at": "2026-10-19T01:41:24Z",
+              "execution_seconds": 118
+            },
+            {
+              "number": 16,
+              "name": "PQ03 SAW — SHA-256 in sha2 0.10.9 (soft path), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:41:24Z",
+              "completed_at": "2026-10-19T01:41:32Z",
+              "execution_seconds": 8
+            },
+            {
+              "number": 17,
+              "name": "PQ03 SAW — HKDF-Expand(SHA-256) in hkdf 0.12.4 / hmac 0.12.1 / sha2 0.10.9, PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:41:32Z",
+              "completed_at": "2026-10-19T01:42:38Z",
+              "execution_seconds": 66
+            },
+            {
+              "number": 18,
+              "name": "PQ05/PQ06 SAW — the ML-KEM and ML-DSA base fields (module-lattice 0.2.3), PIN + BUILD + EQUIVALENCE + TEETH",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:42:38Z",
+              "completed_at": "2026-10-19T01:44:33Z",
+              "execution_seconds": 115
+            },
+            {
+              "number": 19,
+              "name": "PQ05 SAW — X-Wing glue, BUILD + EQUIVALENCE + combinerBinds + TEETH",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:44:33Z",
+              "completed_at": "2026-10-19T01:44:34Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 37,
+              "name": "Post Restore mir-json build (keyed on its commit and toolchain)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:44:34Z",
+              "completed_at": "2026-10-19T01:44:35Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 38,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:44:35Z",
+              "completed_at": "2026-10-19T01:44:35Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 39,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:44:35Z",
+              "completed_at": "2026-10-19T01:44:35Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "0e21afb82f02f66e923590b8bd7cb57546182bce3fb389da2494a9efbdb63ae8"
+        },
+        {
+          "id": 117845762137,
+          "name": "saw-ntt",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:23:09Z",
+          "completed_at": "2026-10-19T01:49:12Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 4,
+          "execution_seconds": 1563,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:10Z",
+              "completed_at": "2026-10-19T01:23:10Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:10Z",
+              "completed_at": "2026-10-19T01:23:20Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Install pinned SAW 1.6 (with bundled solvers)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:20Z",
+              "completed_at": "2026-10-19T01:23:25Z",
+              "execution_seconds": 5
+            },
+            {
+              "number": 4,
+              "name": "Install the mir-json toolchain (nightly-2026-03-21)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:25Z",
+              "completed_at": "2026-10-19T01:23:42Z",
+              "execution_seconds": 17
+            },
+            {
+              "number": 5,
+              "name": "Restore mir-json build (keyed on its commit and toolchain)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:42Z",
+              "completed_at": "2026-10-19T01:23:44Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 6,
+              "name": "Build mir-json at SAW 1.6's pin",
+              "status": "completed",
+              "conclusion": "skipped",
+              "started_at": "2026-10-19T01:23:44Z",
+              "completed_at": "2026-10-19T01:23:44Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 7,
+              "name": "Expose mir-json",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:44Z",
+              "completed_at": "2026-10-19T01:23:44Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 8,
+              "name": "PQ05 SAW — ML-KEM NTT and inverse NTT (ml-kem 0.3.2), PIN + BUILD + SPEC-CHECK + EQUIVALENCE + TEETH",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:44Z",
+              "completed_at": "2026-10-19T01:49:10Z",
+              "execution_seconds": 1526
+            },
+            {
+              "number": 15,
+              "name": "Post Restore mir-json build (keyed on its commit and toolchain)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:49:10Z",
+              "completed_at": "2026-10-19T01:49:10Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 16,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:49:10Z",
+              "completed_at": "2026-10-19T01:49:10Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 17,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:49:10Z",
+              "completed_at": "2026-10-19T01:49:10Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "6ed117a09af4f1cd52e0123dbe01d776757d0a1db4697e56271553d24b32e88e"
+        }
+      ]
+    },
+    {
+      "id": 39185102111,
+      "name": "WB001 SAW proofs",
+      "event": "push",
+      "attempt": 1,
+      "head": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-19T01:23:05Z",
+      "url": "https://github.com/beehive-nature/beehive-nature/actions/runs/39185102111",
+      "pull_requests": [],
+      "jobs": [
+        {
+          "id": 117845761617,
+          "name": "saw",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:23:08Z",
+          "completed_at": "2026-10-19T01:50:43Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 3,
+          "execution_seconds": 1655,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:09Z",
+              "completed_at": "2026-10-19T01:23:10Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:10Z",
+              "completed_at": "2026-10-19T01:23:20Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Install pinned SAW 1.6 (with bundled solvers)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:20Z",
+              "completed_at": "2026-10-19T01:23:27Z",
+              "execution_seconds": 7
+            },
+            {
+              "number": 4,
+              "name": "Install the mir-json toolchain (nightly-2026-03-21)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:27Z",
+              "completed_at": "2026-10-19T01:23:50Z",
+              "execution_seconds": 23
+            },
+            {
+              "number": 5,
+              "name": "Restore mir-json build (keyed on its commit and toolchain)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:50Z",
+              "completed_at": "2026-10-19T01:23:51Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 6,
+              "name": "Build mir-json at SAW 1.6's pin",
+              "status": "completed",
+              "conclusion": "skipped",
+              "started_at": "2026-10-19T01:23:51Z",
+              "completed_at": "2026-10-19T01:23:51Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 7,
+              "name": "Expose mir-json",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:51Z",
+              "completed_at": "2026-10-19T01:23:52Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 8,
+              "name": "WB001 SAW — BUILD + EQUIVALENCE + DECODE-EQUIVALENCE + PROVE-UNIVERSAL + TEETH + Ed25519 SPEC-CHECK",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:52Z",
+              "completed_at": "2026-10-19T01:48:48Z",
+              "execution_seconds": 1496
+            },
+            {
+              "number": 9,
+              "name": "RB05 SAW — the RB04 grammar is the WB001 decoder on every input (PROVE-UNIVERSAL + TEETH)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:48:48Z",
+              "completed_at": "2026-10-19T01:50:41Z",
+              "execution_seconds": 113
+            },
+            {
+              "number": 17,
+              "name": "Post Restore mir-json build (keyed on its commit and toolchain)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:50:41Z",
+              "completed_at": "2026-10-19T01:50:42Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 18,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:50:42Z",
+              "completed_at": "2026-10-19T01:50:42Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 19,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:50:42Z",
+              "completed_at": "2026-10-19T01:50:42Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "4737a8b19a83f2888462b253046a9eeb07108e1aa9b8960b3b0ced66e420f5e9"
+        }
+      ]
+    },
+    {
+      "id": 39185102216,
+      "name": "bTunGsTeN RB",
+      "event": "push",
+      "attempt": 1,
+      "head": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-19T01:23:05Z",
+      "url": "https://github.com/beehive-nature/beehive-nature/actions/runs/39185102216",
+      "pull_requests": [],
+      "jobs": [
+        {
+          "id": 117845762297,
+          "name": "changes",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:23:09Z",
+          "completed_at": "2026-10-19T01:23:21Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 4,
+          "execution_seconds": 12,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:09Z",
+              "completed_at": "2026-10-19T01:23:10Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:10Z",
+              "completed_at": "2026-10-19T01:23:19Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 3,
+              "name": "Which lanes did this push touch",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:19Z",
+              "completed_at": "2026-10-19T01:23:19Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 6,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:19Z",
+              "completed_at": "2026-10-19T01:23:20Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 7,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:20Z",
+              "completed_at": "2026-10-19T01:23:20Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "1c240c528204df372ca79be487f3d283ee9e31ad0970c282c1914011b6e2a259"
+        },
+        {
+          "id": 117845762633,
+          "name": "fast",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:23:09Z",
+          "completed_at": "2026-10-19T01:24:15Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 4,
+          "execution_seconds": 66,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:10Z",
+              "completed_at": "2026-10-19T01:23:11Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:11Z",
+              "completed_at": "2026-10-19T01:23:21Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:21Z",
+              "completed_at": "2026-10-19T01:23:29Z",
+              "execution_seconds": 8
+            },
+            {
+              "number": 4,
+              "name": "RB harness — receipt, measurement, recognizer and fixture tests",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:29Z",
+              "completed_at": "2026-10-19T01:23:45Z",
+              "execution_seconds": 16
+            },
+            {
+              "number": 5,
+              "name": "RB03 harness, native — budget.rs (compiled by path) with its own unit tests and the boundary vectors",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:45Z",
+              "completed_at": "2026-10-19T01:23:49Z",
+              "execution_seconds": 4
+            },
+            {
+              "number": 6,
+              "name": "RB04 harness — the committed Daedalus-generated parsers against BNR's decode (vectors, a fixed-seed sample, TEETH)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:49Z",
+              "completed_at": "2026-10-19T01:24:13Z",
+              "execution_seconds": 24
+            },
+            {
+              "number": 12,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:13Z",
+              "completed_at": "2026-10-19T01:24:13Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 13,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:13Z",
+              "completed_at": "2026-10-19T01:24:13Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "5df816b4cbe083c4397a21f4e46c85442d4b22a5223693505ded09c65e911473"
+        },
+        {
+          "id": 117845823480,
+          "name": "rb03-budget",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-10-19T01:23:22Z",
+          "completed_at": "2026-10-19T01:23:21Z",
+          "execution_started": false,
+          "dispatch_to_start_seconds": null,
+          "execution_seconds": null,
+          "steps": []
+        },
+        {
+          "id": 117845823657,
+          "name": "rb02-aes",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-10-19T01:23:22Z",
+          "completed_at": "2026-10-19T01:23:21Z",
+          "execution_started": false,
+          "dispatch_to_start_seconds": null,
+          "execution_seconds": null,
+          "steps": []
+        },
+        {
+          "id": 117845823932,
+          "name": "rb04-daedalus",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-10-19T01:23:22Z",
+          "completed_at": "2026-10-19T01:23:21Z",
+          "execution_started": false,
+          "dispatch_to_start_seconds": null,
+          "execution_seconds": null,
+          "steps": []
+        },
+        {
+          "id": 117845824366,
+          "name": "rb01-psi",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-10-19T01:23:22Z",
+          "completed_at": "2026-10-19T01:23:21Z",
+          "execution_started": false,
+          "dispatch_to_start_seconds": null,
+          "execution_seconds": null,
+          "steps": []
+        }
+      ]
+    },
+    {
+      "id": 39185102192,
+      "name": "WB002 SAW equivalence",
+      "event": "push",
+      "attempt": 1,
+      "head": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-19T01:23:05Z",
+      "url": "https://github.com/beehive-nature/beehive-nature/actions/runs/39185102192",
+      "pull_requests": [],
+      "jobs": [
+        {
+          "id": 117845762052,
+          "name": "saw",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:23:24Z",
+          "completed_at": "2026-10-19T01:24:27Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 19,
+          "execution_seconds": 63,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:25Z",
+              "completed_at": "2026-10-19T01:23:26Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:26Z",
+              "completed_at": "2026-10-19T01:23:35Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 3,
+              "name": "Install pinned SAW 1.6 (with bundled solvers)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:35Z",
+              "completed_at": "2026-10-19T01:23:44Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 4,
+              "name": "Install the mir-json toolchain (nightly-2026-03-21)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:44Z",
+              "completed_at": "2026-10-19T01:24:03Z",
+              "execution_seconds": 19
+            },
+            {
+              "number": 5,
+              "name": "Restore mir-json build (keyed on its commit and toolchain)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:03Z",
+              "completed_at": "2026-10-19T01:24:06Z",
+              "execution_seconds": 3
+            },
+            {
+              "number": 6,
+              "name": "Build mir-json at SAW 1.6's pin",
+              "status": "completed",
+              "conclusion": "skipped",
+              "started_at": "2026-10-19T01:24:06Z",
+              "completed_at": "2026-10-19T01:24:06Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 7,
+              "name": "Expose mir-json",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:06Z",
+              "completed_at": "2026-10-19T01:24:06Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 8,
+              "name": "WB002 model core — unit tests",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:06Z",
+              "completed_at": "2026-10-19T01:24:17Z",
+              "execution_seconds": 11
+            },
+            {
+              "number": 9,
+              "name": "WB002 SAW — BUILD + EQUIVALENCE + TEETH",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:17Z",
+              "completed_at": "2026-10-19T01:24:24Z",
+              "execution_seconds": 7
+            },
+            {
+              "number": 17,
+              "name": "Post Restore mir-json build (keyed on its commit and toolchain)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:24Z",
+              "completed_at": "2026-10-19T01:24:24Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 18,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:24Z",
+              "completed_at": "2026-10-19T01:24:24Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 19,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:24Z",
+              "completed_at": "2026-10-19T01:24:24Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "aab9d66d01ef0d79e282b1919df1a827a7d8285e0ad34e649444b2c67d8e80df"
+        }
+      ]
+    },
+    {
+      "id": 39185102160,
+      "name": "secret-scan",
+      "event": "push",
+      "attempt": 1,
+      "head": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-19T01:23:05Z",
+      "url": "https://github.com/beehive-nature/beehive-nature/actions/runs/39185102160",
+      "pull_requests": [],
+      "jobs": [
+        {
+          "id": 117845761797,
+          "name": "scan",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:24:54Z",
+          "completed_at": "2026-10-19T01:25:17Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 109,
+          "execution_seconds": 23,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:54Z",
+              "completed_at": "2026-10-19T01:24:55Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:55Z",
+              "completed_at": "2026-10-19T01:25:05Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Scan tracked tree for secret-shaped material",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:05Z",
+              "completed_at": "2026-10-19T01:25:15Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 6,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:15Z",
+              "completed_at": "2026-10-19T01:25:16Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 7,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:16Z",
+              "completed_at": "2026-10-19T01:25:16Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "22f03f3b097cf5e19266f926455180527ec1b5551df8485691dcacad57248f99"
+        }
+      ]
+    },
+    {
+      "id": 39185102135,
+      "name": "BNROSE-ADAPTERS-REAL",
+      "event": "push",
+      "attempt": 1,
+      "head": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-19T01:23:05Z",
+      "url": "https://github.com/beehive-nature/beehive-nature/actions/runs/39185102135",
+      "pull_requests": [],
+      "jobs": [
+        {
+          "id": 117845761946,
+          "name": "lane",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:23:09Z",
+          "completed_at": "2026-10-19T01:25:40Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 4,
+          "execution_seconds": 151,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:09Z",
+              "completed_at": "2026-10-19T01:23:12Z",
+              "execution_seconds": 3
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:12Z",
+              "completed_at": "2026-10-19T01:23:21Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:21Z",
+              "completed_at": "2026-10-19T01:23:32Z",
+              "execution_seconds": 11
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:32Z",
+              "completed_at": "2026-10-19T01:23:43Z",
+              "execution_seconds": 11
+            },
+            {
+              "number": 5,
+              "name": "Install anvil (pinned foundry v1.8.5)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:43Z",
+              "completed_at": "2026-10-19T01:23:46Z",
+              "execution_seconds": 3
+            },
+            {
+              "number": 6,
+              "name": "Battery (unit vectors + wire-mock + the anvil devnet partition battery)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:46Z",
+              "completed_at": "2026-10-19T01:25:26Z",
+              "execution_seconds": 100
+            },
+            {
+              "number": 7,
+              "name": "Probe selftest (offline pin checks)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:26Z",
+              "completed_at": "2026-10-19T01:25:27Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 13,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:27Z",
+              "completed_at": "2026-10-19T01:25:38Z",
+              "execution_seconds": 11
+            },
+            {
+              "number": 14,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:38Z",
+              "completed_at": "2026-10-19T01:25:39Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 15,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:39Z",
+              "completed_at": "2026-10-19T01:25:39Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "a3cb629a8716147cac56b91363c04fd565ee5a32c0decfa5204c5981296a2f97"
+        }
+      ]
+    },
+    {
+      "id": 39185102086,
+      "name": "WB002 WASM corpus",
+      "event": "push",
+      "attempt": 1,
+      "head": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-19T01:23:05Z",
+      "url": "https://github.com/beehive-nature/beehive-nature/actions/runs/39185102086",
+      "pull_requests": [],
+      "jobs": [
+        {
+          "id": 117845761671,
+          "name": "wasm-corpus",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:23:08Z",
+          "completed_at": "2026-10-19T01:26:10Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 3,
+          "execution_seconds": 182,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:09Z",
+              "completed_at": "2026-10-19T01:23:11Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:11Z",
+              "completed_at": "2026-10-19T01:23:21Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:21Z",
+              "completed_at": "2026-10-19T01:23:22Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 4,
+              "name": "Install pinned Spring 1.2.2",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:22Z",
+              "completed_at": "2026-10-19T01:23:39Z",
+              "execution_seconds": 17
+            },
+            {
+              "number": 5,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:39Z",
+              "completed_at": "2026-10-19T01:23:50Z",
+              "execution_seconds": 11
+            },
+            {
+              "number": 6,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:50Z",
+              "completed_at": "2026-10-19T01:24:02Z",
+              "execution_seconds": 12
+            },
+            {
+              "number": 7,
+              "name": "Build the Rust corpus harness (the model is crates/btungsten-wb002)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:02Z",
+              "completed_at": "2026-10-19T01:24:17Z",
+              "execution_seconds": 15
+            },
+            {
+              "number": 8,
+              "name": "Compare the vendored WASM with the Rust model on three fresh chains",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:17Z",
+              "completed_at": "2026-10-19T01:26:00Z",
+              "execution_seconds": 103
+            },
+            {
+              "number": 9,
+              "name": "Preserve fresh corpus receipts",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:00Z",
+              "completed_at": "2026-10-19T01:26:00Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 16,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:00Z",
+              "completed_at": "2026-10-19T01:26:08Z",
+              "execution_seconds": 8
+            },
+            {
+              "number": 17,
+              "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:08Z",
+              "completed_at": "2026-10-19T01:26:08Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 18,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:08Z",
+              "completed_at": "2026-10-19T01:26:08Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 19,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:08Z",
+              "completed_at": "2026-10-19T01:26:08Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "19af8d74c01ce15bdc03cf3c7b93b94012e19154a00f48fe39dc993250c1edf5"
+        }
+      ]
+    },
+    {
+      "id": 39185102156,
+      "name": "BNROSE-RUST-001",
+      "event": "push",
+      "attempt": 1,
+      "head": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-19T01:23:05Z",
+      "url": "https://github.com/beehive-nature/beehive-nature/actions/runs/39185102156",
+      "pull_requests": [],
+      "jobs": [
+        {
+          "id": 117845761800,
+          "name": "lane",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:23:09Z",
+          "completed_at": "2026-10-19T01:28:44Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 4,
+          "execution_seconds": 335,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:09Z",
+              "completed_at": "2026-10-19T01:23:10Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:10Z",
+              "completed_at": "2026-10-19T01:23:20Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:20Z",
+              "completed_at": "2026-10-19T01:23:30Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:30Z",
+              "completed_at": "2026-10-19T01:23:40Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 5,
+              "name": "Ensure the wasm32 target is installed (the toolchain file outranks action inputs)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:40Z",
+              "completed_at": "2026-10-19T01:23:42Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 6,
+              "name": "Build the wasm worker (wasm32-unknown-unknown, release)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:42Z",
+              "completed_at": "2026-10-19T01:23:44Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 7,
+              "name": "Battery",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:44Z",
+              "completed_at": "2026-10-19T01:25:21Z",
+              "execution_seconds": 97
+            },
+            {
+              "number": 8,
+              "name": "Mutation controls (teeth)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:21Z",
+              "completed_at": "2026-10-19T01:25:30Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 9,
+              "name": "Build the CLI and bench (release)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:30Z",
+              "completed_at": "2026-10-19T01:28:03Z",
+              "execution_seconds": 153
+            },
+            {
+              "number": 10,
+              "name": "Recovery demonstration (separate processes, durable records only)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:03Z",
+              "completed_at": "2026-10-19T01:28:04Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 11,
+              "name": "Cross-node demonstration (independent processes, one enforcing destination)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:04Z",
+              "completed_at": "2026-10-19T01:28:04Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 12,
+              "name": "Network-partition gate (rootless netns; REAL iptables drops or a loud failure — simulated faults are never a substitute)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:04Z",
+              "completed_at": "2026-10-19T01:28:30Z",
+              "execution_seconds": 26
+            },
+            {
+              "number": 13,
+              "name": "Benchmarks (labeled workload + this runner)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:30Z",
+              "completed_at": "2026-10-19T01:28:31Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 14,
+              "name": "Preserve receipts",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:31Z",
+              "completed_at": "2026-10-19T01:28:32Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 27,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:32Z",
+              "completed_at": "2026-10-19T01:28:42Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 28,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:42Z",
+              "completed_at": "2026-10-19T01:28:42Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 29,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:42Z",
+              "completed_at": "2026-10-19T01:28:42Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "aed2850c7888b0ba44a9629d91fb07950ae7beb379c5f4445d1868169585eddc"
+        },
+        {
+          "id": 117845761976,
+          "name": "saw",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:23:30Z",
+          "completed_at": "2026-10-19T01:24:18Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 25,
+          "execution_seconds": 48,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:31Z",
+              "completed_at": "2026-10-19T01:23:32Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:32Z",
+              "completed_at": "2026-10-19T01:23:37Z",
+              "execution_seconds": 5
+            },
+            {
+              "number": 3,
+              "name": "Install pinned SAW 1.6 (with bundled solvers)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:37Z",
+              "completed_at": "2026-10-19T01:23:43Z",
+              "execution_seconds": 6
+            },
+            {
+              "number": 4,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:43Z",
+              "completed_at": "2026-10-19T01:23:55Z",
+              "execution_seconds": 12
+            },
+            {
+              "number": 5,
+              "name": "Install the mir-json toolchain (nightly-2026-03-21)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:23:55Z",
+              "completed_at": "2026-10-19T01:24:11Z",
+              "execution_seconds": 16
+            },
+            {
+              "number": 6,
+              "name": "Cache mir-json at SAW 1.6's pin",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:11Z",
+              "completed_at": "2026-10-19T01:24:12Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 7,
+              "name": "Build mir-json at SAW 1.6's pin",
+              "status": "completed",
+              "conclusion": "skipped",
+              "started_at": "2026-10-19T01:24:12Z",
+              "completed_at": "2026-10-19T01:24:12Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 8,
+              "name": "Expose mir-json",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:12Z",
+              "completed_at": "2026-10-19T01:24:13Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 9,
+              "name": "BNROSE SAW — classifier selftest (tool failures are never counterexamples)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:13Z",
+              "completed_at": "2026-10-19T01:24:13Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 10,
+              "name": "BNROSE SAW — correspondence (2 proofs + 2 teeth, explicit verdicts only)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:13Z",
+              "completed_at": "2026-10-19T01:24:15Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 19,
+              "name": "Post Cache mir-json at SAW 1.6's pin",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:15Z",
+              "completed_at": "2026-10-19T01:24:15Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 20,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:15Z",
+              "completed_at": "2026-10-19T01:24:15Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 21,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:15Z",
+              "completed_at": "2026-10-19T01:24:15Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "f808b888141951516173c07a3524dfb4f3e00faed25803166dd8af92196bd86f"
+        },
+        {
+          "id": 117845762005,
+          "name": "twin-grid",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:25:43Z",
+          "completed_at": "2026-10-19T01:26:30Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 158,
+          "execution_seconds": 47,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:43Z",
+              "completed_at": "2026-10-19T01:25:44Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:44Z",
+              "completed_at": "2026-10-19T01:25:54Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:54Z",
+              "completed_at": "2026-10-19T01:26:04Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:04Z",
+              "completed_at": "2026-10-19T01:26:18Z",
+              "execution_seconds": 14
+            },
+            {
+              "number": 5,
+              "name": "install cryptol 3.6.0 (pinned, with bundled solvers) and GNU time",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:18Z",
+              "completed_at": "2026-10-19T01:26:21Z",
+              "execution_seconds": 3
+            },
+            {
+              "number": 6,
+              "name": "Sampled-agreement grid (Rust <-> Cryptol, mechanically checked)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:21Z",
+              "completed_at": "2026-10-19T01:26:28Z",
+              "execution_seconds": 7
+            },
+            {
+              "number": 11,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:28Z",
+              "completed_at": "2026-10-19T01:26:28Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 12,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:28Z",
+              "completed_at": "2026-10-19T01:26:29Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 13,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:29Z",
+              "completed_at": "2026-10-19T01:26:29Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "fcbeda06f7eeac7d980dfb20d3a639fef0975ca0481843a87b83a687687970ea"
+        },
+        {
+          "id": 117845762119,
+          "name": "cryptol-twin",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:28:44Z",
+          "completed_at": "2026-10-19T01:29:04Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 339,
+          "execution_seconds": 20,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:45Z",
+              "completed_at": "2026-10-19T01:28:46Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:46Z",
+              "completed_at": "2026-10-19T01:28:56Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "install cryptol 3.6.0 (pinned, with bundled solvers) and GNU time",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:56Z",
+              "completed_at": "2026-10-19T01:29:00Z",
+              "execution_seconds": 4
+            },
+            {
+              "number": 4,
+              "name": "BNROSE Cryptol twin — 6 :prove obligations + 2 negative controls",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:00Z",
+              "completed_at": "2026-10-19T01:29:02Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 8,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:02Z",
+              "completed_at": "2026-10-19T01:29:03Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 9,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:03Z",
+              "completed_at": "2026-10-19T01:29:03Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "8522c2887af786625e26874ba62a29ee149b80ee2dc93575e6be012e64a6a38b"
+        }
+      ]
+    },
+    {
+      "id": 39185102164,
+      "name": "bTunGsTeN PQ",
+      "event": "push",
+      "attempt": 1,
+      "head": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-19T01:23:05Z",
+      "url": "https://github.com/beehive-nature/beehive-nature/actions/runs/39185102164",
+      "pull_requests": [],
+      "jobs": [
+        {
+          "id": 117845761912,
+          "name": "x0x-pq",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:24:17Z",
+          "completed_at": "2026-10-19T01:29:56Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 72,
+          "execution_seconds": 339,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:18Z",
+              "completed_at": "2026-10-19T01:24:19Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:19Z",
+              "completed_at": "2026-10-19T01:24:27Z",
+              "execution_seconds": 8
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:27Z",
+              "completed_at": "2026-10-19T01:24:36Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:36Z",
+              "completed_at": "2026-10-19T01:24:45Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 5,
+              "name": "Install the pinned audit tool",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:45Z",
+              "completed_at": "2026-10-19T01:27:45Z",
+              "execution_seconds": 180
+            },
+            {
+              "number": 6,
+              "name": "x0x pinned implementations — official vectors, differential checks, sabotage and audits",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:27:45Z",
+              "completed_at": "2026-10-19T01:29:35Z",
+              "execution_seconds": 110
+            },
+            {
+              "number": 7,
+              "name": "Prepared public-key comparator — assurance, sabotage, and measured speed",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:35Z",
+              "completed_at": "2026-10-19T01:29:48Z",
+              "execution_seconds": 13
+            },
+            {
+              "number": 8,
+              "name": "Retain x0x evidence, including failures",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:48Z",
+              "completed_at": "2026-10-19T01:29:48Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 15,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:48Z",
+              "completed_at": "2026-10-19T01:29:54Z",
+              "execution_seconds": 6
+            },
+            {
+              "number": 16,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:54Z",
+              "completed_at": "2026-10-19T01:29:54Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 17,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:54Z",
+              "completed_at": "2026-10-19T01:29:54Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "6e07619e42cccb0295871e17c4b32d7b67b0ea5fbf43c105f850fc6fd2c26c7f"
+        },
+        {
+          "id": 117845762101,
+          "name": "pq01-vectors",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:24:30Z",
+          "completed_at": "2026-10-19T01:25:38Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 85,
+          "execution_seconds": 68,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:30Z",
+              "completed_at": "2026-10-19T01:24:32Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:32Z",
+              "completed_at": "2026-10-19T01:24:41Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:41Z",
+              "completed_at": "2026-10-19T01:24:51Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:24:51Z",
+              "completed_at": "2026-10-19T01:25:05Z",
+              "execution_seconds": 14
+            },
+            {
+              "number": 5,
+              "name": "Restore ACVP vector files (keyed on the manifest; every file is re-verified on use)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:05Z",
+              "completed_at": "2026-10-19T01:25:06Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 6,
+              "name": "PQ01 battery unit tests (manifest pins, joins, the pq-kat.json agreement)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:06Z",
+              "completed_at": "2026-10-19T01:25:10Z",
+              "execution_seconds": 4
+            },
+            {
+              "number": 7,
+              "name": "PQ01 every ACVP case for ML-KEM-512/768/1024, ML-DSA-44/65/87, SLH-DSA-SHAKE-256f on two implementations",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:10Z",
+              "completed_at": "2026-10-19T01:25:36Z",
+              "execution_seconds": 26
+            },
+            {
+              "number": 12,
+              "name": "Post Restore ACVP vector files (keyed on the manifest; every file is re-verified on use)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:36Z",
+              "completed_at": "2026-10-19T01:25:36Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 13,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:36Z",
+              "completed_at": "2026-10-19T01:25:36Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 14,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:36Z",
+              "completed_at": "2026-10-19T01:25:36Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 15,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:36Z",
+              "completed_at": "2026-10-19T01:25:36Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "858edf6b542dccefe596a058cc6636b315d4d953656d22bc8940f49df7bda5bf"
+        },
+        {
+          "id": 117845762201,
+          "name": "pq12-taproot",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:27:06Z",
+          "completed_at": "2026-10-19T01:28:42Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 241,
+          "execution_seconds": 96,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:27:07Z",
+              "completed_at": "2026-10-19T01:27:08Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:27:08Z",
+              "completed_at": "2026-10-19T01:27:20Z",
+              "execution_seconds": 12
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:27:20Z",
+              "completed_at": "2026-10-19T01:27:33Z",
+              "execution_seconds": 13
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:27:33Z",
+              "completed_at": "2026-10-19T01:27:51Z",
+              "execution_seconds": 18
+            },
+            {
+              "number": 5,
+              "name": "Fetch the pinned BIP-341 vectors and BIP-174 / BIP-371 texts",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:27:51Z",
+              "completed_at": "2026-10-19T01:27:54Z",
+              "execution_seconds": 3
+            },
+            {
+              "number": 6,
+              "name": "PQ12 bsigner BIP-341 key path, and BIP-174 / BIP-371 PSBTs, on the official vectors",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:27:54Z",
+              "completed_at": "2026-10-19T01:28:05Z",
+              "execution_seconds": 11
+            },
+            {
+              "number": 7,
+              "name": "PQ12 bsigner FROST (2-of-3 ChillDKG signs an ML-DSA-authorized PSBT; every signature a valid key-path witness)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:05Z",
+              "completed_at": "2026-10-19T01:28:16Z",
+              "execution_seconds": 11
+            },
+            {
+              "number": 8,
+              "name": "PQ12 chilldkg-rs 0.5.0 upstream vectors (the .crate checked against Cargo.lock's checksum)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:16Z",
+              "completed_at": "2026-10-19T01:28:34Z",
+              "execution_seconds": 18
+            },
+            {
+              "number": 9,
+              "name": "PQ12 audit gate 1 (blocking) — chilldkg-rs is not in bsigner's default build",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:34Z",
+              "completed_at": "2026-10-19T01:28:35Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 10,
+              "name": "PQ12 audit gate 2 (recorded) — cargo audit of Cargo.lock, verbatim",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:35Z",
+              "completed_at": "2026-10-19T01:28:39Z",
+              "execution_seconds": 4
+            },
+            {
+              "number": 19,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:39Z",
+              "completed_at": "2026-10-19T01:28:39Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 20,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:39Z",
+              "completed_at": "2026-10-19T01:28:39Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 21,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:39Z",
+              "completed_at": "2026-10-19T01:28:39Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "3ee30c67ef93c86baf10c92e59eeb690ae2b912eac8be1ca6e2c86706e34bea9"
+        },
+        {
+          "id": 117845762208,
+          "name": "pq11-classic",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:25:41Z",
+          "completed_at": "2026-10-19T01:26:29Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 156,
+          "execution_seconds": 48,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:42Z",
+              "completed_at": "2026-10-19T01:25:44Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:44Z",
+              "completed_at": "2026-10-19T01:25:56Z",
+              "execution_seconds": 12
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:56Z",
+              "completed_at": "2026-10-19T01:26:04Z",
+              "execution_seconds": 8
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:04Z",
+              "completed_at": "2026-10-19T01:26:17Z",
+              "execution_seconds": 13
+            },
+            {
+              "number": 5,
+              "name": "Restore classical vector files (keyed on the manifest; every file is re-verified on use)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:17Z",
+              "completed_at": "2026-10-19T01:26:18Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 6,
+              "name": "PQ11 BIP-340, ECDSA secp256k1 and X25519 on the Rust implementations",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:18Z",
+              "completed_at": "2026-10-19T01:26:25Z",
+              "execution_seconds": 7
+            },
+            {
+              "number": 7,
+              "name": "PQ11 BIP-340 on the wallet's noble schnorr (the same pinned file)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:25Z",
+              "completed_at": "2026-10-19T01:26:25Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 12,
+              "name": "Post Restore classical vector files (keyed on the manifest; every file is re-verified on use)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:25Z",
+              "completed_at": "2026-10-19T01:26:26Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 13,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:26Z",
+              "completed_at": "2026-10-19T01:26:26Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 14,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:26Z",
+              "completed_at": "2026-10-19T01:26:26Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 15,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:26Z",
+              "completed_at": "2026-10-19T01:26:26Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "3ca8e2460e49464930e73b129f299c25eb3f3240bf834c15fc818c3bd73d23c4"
+        },
+        {
+          "id": 117845762218,
+          "name": "pq05-xwing",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:29:13Z",
+          "completed_at": "2026-10-19T01:30:10Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 368,
+          "execution_seconds": 57,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:14Z",
+              "completed_at": "2026-10-19T01:29:15Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:15Z",
+              "completed_at": "2026-10-19T01:29:30Z",
+              "execution_seconds": 15
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:30Z",
+              "completed_at": "2026-10-19T01:29:39Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:39Z",
+              "completed_at": "2026-10-19T01:29:57Z",
+              "execution_seconds": 18
+            },
+            {
+              "number": 5,
+              "name": "Fetch the pinned X-Wing draft",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:57Z",
+              "completed_at": "2026-10-19T01:29:57Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 6,
+              "name": "PQ05 browser X-Wing (bpq-lib, what bpq.js calls) on the draft vectors",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:57Z",
+              "completed_at": "2026-10-19T01:29:57Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 7,
+              "name": "PQ05 bsigner X-Wing on the same vectors",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:57Z",
+              "completed_at": "2026-10-19T01:30:08Z",
+              "execution_seconds": 11
+            },
+            {
+              "number": 13,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:08Z",
+              "completed_at": "2026-10-19T01:30:08Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 14,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:08Z",
+              "completed_at": "2026-10-19T01:30:08Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 15,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:08Z",
+              "completed_at": "2026-10-19T01:30:08Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "aa93c566b5a3374dd42d121343ea6b03a6599e94198ce864d9fc4f18c0917571"
+        },
+        {
+          "id": 117845762246,
+          "name": "pq10-plonky3",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:30:06Z",
+          "completed_at": "2026-10-19T01:31:53Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 421,
+          "execution_seconds": 107,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:07Z",
+              "completed_at": "2026-10-19T01:30:08Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:08Z",
+              "completed_at": "2026-10-19T01:30:17Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:17Z",
+              "completed_at": "2026-10-19T01:30:26Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:26Z",
+              "completed_at": "2026-10-19T01:30:35Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 5,
+              "name": "PQ10 model and AIR tests (the circuit's kept rule on all 128 leaf shapes, the asymmetric cohort, both true claims)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:35Z",
+              "completed_at": "2026-10-19T01:31:22Z",
+              "execution_seconds": 47
+            },
+            {
+              "number": 6,
+              "name": "PQ10 FORGERY battery at n = 64 (the honest control must verify, every mutation must be refused)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:22Z",
+              "completed_at": "2026-10-19T01:31:23Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 7,
+              "name": "PQ10 SCALE and security figure at n = 64, 1024, 16384",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:23Z",
+              "completed_at": "2026-10-19T01:31:52Z",
+              "execution_seconds": 29
+            },
+            {
+              "number": 13,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:52Z",
+              "completed_at": "2026-10-19T01:31:52Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 14,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:52Z",
+              "completed_at": "2026-10-19T01:31:52Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 15,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:52Z",
+              "completed_at": "2026-10-19T01:31:52Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "bbbdd5829397748a86c9f45434c499a96249b5f908fc9e3cf71e6bf854df2280"
+        },
+        {
+          "id": 117845762266,
+          "name": "pq00-teeth",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:30:13Z",
+          "completed_at": "2026-10-19T01:31:07Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 428,
+          "execution_seconds": 54,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:13Z",
+              "completed_at": "2026-10-19T01:30:14Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:14Z",
+              "completed_at": "2026-10-19T01:30:24Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:24Z",
+              "completed_at": "2026-10-19T01:30:33Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:33Z",
+              "completed_at": "2026-10-19T01:30:45Z",
+              "execution_seconds": 12
+            },
+            {
+              "number": 5,
+              "name": "PQ00 teeth library — positive controls and planted flaws",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:45Z",
+              "completed_at": "2026-10-19T01:30:46Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 6,
+              "name": "PQ00 teeth against the real Vortex defects (both must CONVICT)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:46Z",
+              "completed_at": "2026-10-19T01:31:05Z",
+              "execution_seconds": 19
+            },
+            {
+              "number": 11,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:05Z",
+              "completed_at": "2026-10-19T01:31:05Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 12,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:05Z",
+              "completed_at": "2026-10-19T01:31:05Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 13,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:05Z",
+              "completed_at": "2026-10-19T01:31:05Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "be62bde9d59bc35420d0a60086416f856dfc73460d43cc38c7377df5120ab54e"
+        }
+      ]
+    },
+    {
+      "id": 39185102106,
+      "name": "tests",
+      "event": "push",
+      "attempt": 1,
+      "head": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-19T01:23:05Z",
+      "url": "https://github.com/beehive-nature/beehive-nature/actions/runs/39185102106",
+      "pull_requests": [],
+      "jobs": [
+        {
+          "id": 117845761673,
+          "name": "eternal",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:25:20Z",
+          "completed_at": "2026-10-19T01:37:52Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 135,
+          "execution_seconds": 752,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:21Z",
+              "completed_at": "2026-10-19T01:25:22Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:22Z",
+              "completed_at": "2026-10-19T01:25:35Z",
+              "execution_seconds": 13
+            },
+            {
+              "number": 3,
+              "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:35Z",
+              "completed_at": "2026-10-19T01:25:36Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 4,
+              "name": "shared setup — install (exempt from always())",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:25:36Z",
+              "completed_at": "2026-10-19T01:26:01Z",
+              "execution_seconds": 25
+            },
+            {
+              "number": 5,
+              "name": "ETERNAL fronts — three products, one set of facts (bGENEaLOGy + the reading rooms)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:01Z",
+              "completed_at": "2026-10-19T01:34:29Z",
+              "execution_seconds": 508
+            },
+            {
+              "number": 6,
+              "name": "Genealogy — spatial tree privacy and branch navigation",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:34:29Z",
+              "completed_at": "2026-10-19T01:34:34Z",
+              "execution_seconds": 5
+            },
+            {
+              "number": 7,
+              "name": "Skaists — the design system is compiled, not hand-copied",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:34:34Z",
+              "completed_at": "2026-10-19T01:34:34Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 8,
+              "name": "Bottom half — every surface x three registers at 390 px (ratchet)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:34:34Z",
+              "completed_at": "2026-10-19T01:37:49Z",
+              "execution_seconds": 195
+            },
+            {
+              "number": 15,
+              "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:37:49Z",
+              "completed_at": "2026-10-19T01:37:49Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 16,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:37:49Z",
+              "completed_at": "2026-10-19T01:37:50Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 17,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:37:50Z",
+              "completed_at": "2026-10-19T01:37:50Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "d8f89435c079bb7233a2e8ed336ad7e7aa417081d15909b3ab0692b8eab39139"
+        },
+        {
+          "id": 117845761791,
+          "name": "node",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:26:13Z",
+          "completed_at": "2026-10-19T01:47:04Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 188,
+          "execution_seconds": 1251,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:14Z",
+              "completed_at": "2026-10-19T01:26:14Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:14Z",
+              "completed_at": "2026-10-19T01:26:26Z",
+              "execution_seconds": 12
+            },
+            {
+              "number": 3,
+              "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:26Z",
+              "completed_at": "2026-10-19T01:26:27Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 4,
+              "name": "Key-build engine unit tests (26, incl. pinned vector)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:27Z",
+              "completed_at": "2026-10-19T01:26:28Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 5,
+              "name": "shared setup — install (exempt from always())",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:28Z",
+              "completed_at": "2026-10-19T01:26:53Z",
+              "execution_seconds": 25
+            },
+            {
+              "number": 6,
+              "name": "W@tch + PLUR manifest adapters — read-only browser proofs",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:53Z",
+              "completed_at": "2026-10-19T01:27:07Z",
+              "execution_seconds": 14
+            },
+            {
+              "number": 7,
+              "name": "Reading rooms — first actions, view retention and translated layouts",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:27:07Z",
+              "completed_at": "2026-10-19T01:32:42Z",
+              "execution_seconds": 335
+            },
+            {
+              "number": 8,
+              "name": "Kandi — gift reliability and failure recovery",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:32:42Z",
+              "completed_at": "2026-10-19T01:33:06Z",
+              "execution_seconds": 24
+            },
+            {
+              "number": 9,
+              "name": "Kandi — arm placement and legacy migration",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:33:06Z",
+              "completed_at": "2026-10-19T01:33:13Z",
+              "execution_seconds": 7
+            },
+            {
+              "number": 10,
+              "name": "Kandi — two local handoffs",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:33:13Z",
+              "completed_at": "2026-10-19T01:33:20Z",
+              "execution_seconds": 7
+            },
+            {
+              "number": 11,
+              "name": "Kandi — preview and explicit keep",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:33:20Z",
+              "completed_at": "2026-10-19T01:33:26Z",
+              "execution_seconds": 6
+            },
+            {
+              "number": 12,
+              "name": "Kandi — bead composition",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:33:26Z",
+              "completed_at": "2026-10-19T01:33:29Z",
+              "execution_seconds": 3
+            },
+            {
+              "number": 13,
+              "name": "MY SPACE — storage adapter seam",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:33:29Z",
+              "completed_at": "2026-10-19T01:34:02Z",
+              "execution_seconds": 33
+            },
+            {
+              "number": 14,
+              "name": "MY SPACE — explorer (stale work, previews, isolation, honest outcomes)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:34:02Z",
+              "completed_at": "2026-10-19T01:34:46Z",
+              "execution_seconds": 44
+            },
+            {
+              "number": 15,
+              "name": "Doors — rendered at 390px, every listed link resolves",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:34:46Z",
+              "completed_at": "2026-10-19T01:35:12Z",
+              "execution_seconds": 26
+            },
+            {
+              "number": 16,
+              "name": "bPay Phase A gate — real invoice rendered, nothing spendable",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:35:12Z",
+              "completed_at": "2026-10-19T01:35:14Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 17,
+              "name": "bPay Phase B gate — the chooser (mock bridge; founder keeps the real acceptance)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:35:14Z",
+              "completed_at": "2026-10-19T01:35:19Z",
+              "execution_seconds": 5
+            },
+            {
+              "number": 18,
+              "name": "bData gate — My Data owns policy, bPay holds the economics",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:35:19Z",
+              "completed_at": "2026-10-19T01:35:40Z",
+              "execution_seconds": 21
+            },
+            {
+              "number": 19,
+              "name": "bData Phase E — pay-with-wallet + Add to manifest (mock bridge + mock signer)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:35:40Z",
+              "completed_at": "2026-10-19T01:35:46Z",
+              "execution_seconds": 6
+            },
+            {
+              "number": 20,
+              "name": "Onboarding e2e (Chromium + virtual authenticator w/ PRF)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:35:46Z",
+              "completed_at": "2026-10-19T01:35:46Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 21,
+              "name": "University smoke (browser suite — see Chromium note above)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:35:46Z",
+              "completed_at": "2026-10-19T01:35:54Z",
+              "execution_seconds": 8
+            },
+            {
+              "number": 22,
+              "name": "No page errors anywhere (the helper-missing gate — the T_ class)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:35:54Z",
+              "completed_at": "2026-10-19T01:36:54Z",
+              "execution_seconds": 60
+            },
+            {
+              "number": 23,
+              "name": "bUi daily art - manifest engine gate (24 cells + budgets)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:36:54Z",
+              "completed_at": "2026-10-19T01:37:12Z",
+              "execution_seconds": 18
+            },
+            {
+              "number": 24,
+              "name": "Language — coverage gate selftest (checker-silence law)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:37:12Z",
+              "completed_at": "2026-10-19T01:37:13Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 25,
+              "name": "Language — coverage measure on the arrival set, floors enforced",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:37:13Z",
+              "completed_at": "2026-10-19T01:38:49Z",
+              "execution_seconds": 96
+            },
+            {
+              "number": 26,
+              "name": "Profile — three-mode translation regression (rendered)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:38:49Z",
+              "completed_at": "2026-10-19T01:38:52Z",
+              "execution_seconds": 3
+            },
+            {
+              "number": 27,
+              "name": "Polish — five-door translation + one-click regression (rendered)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:38:52Z",
+              "completed_at": "2026-10-19T01:39:03Z",
+              "execution_seconds": 11
+            },
+            {
+              "number": 28,
+              "name": "Orb — mobile seat regression (no content covered)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:39:03Z",
+              "completed_at": "2026-10-19T01:39:23Z",
+              "execution_seconds": 20
+            },
+            {
+              "number": 29,
+              "name": "Tour bar — clearance regression (no page action row covered)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:39:23Z",
+              "completed_at": "2026-10-19T01:39:40Z",
+              "execution_seconds": 17
+            },
+            {
+              "number": 30,
+              "name": "Law of the Sea — first screen clears the tour bar",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:39:40Z",
+              "completed_at": "2026-10-19T01:39:42Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 31,
+              "name": "Watch from Autonomi — plays through today's door and an upgraded one (mocked door)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:39:42Z",
+              "completed_at": "2026-10-19T01:43:18Z",
+              "execution_seconds": 216
+            },
+            {
+              "number": 32,
+              "name": "bView direct MSE — early playback, retained-byte recovery and offline warm reload",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:43:18Z",
+              "completed_at": "2026-10-19T01:44:29Z",
+              "execution_seconds": 71
+            },
+            {
+              "number": 33,
+              "name": "bView adaptive video — decode, buffer eviction, seek, cancellation and outage budgets",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:44:29Z",
+              "completed_at": "2026-10-19T01:45:54Z",
+              "execution_seconds": 85
+            },
+            {
+              "number": 34,
+              "name": "bPay/bData — shared-policy field ownership (stale-tab repair)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:45:54Z",
+              "completed_at": "2026-10-19T01:46:03Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 35,
+              "name": "Comprehension — disclosure + touch regression (rendered)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:46:03Z",
+              "completed_at": "2026-10-19T01:46:48Z",
+              "execution_seconds": 45
+            },
+            {
+              "number": 36,
+              "name": "Engineflow — data-loop register inertness + evidence card (rendered)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:46:48Z",
+              "completed_at": "2026-10-19T01:46:59Z",
+              "execution_seconds": 11
+            },
+            {
+              "number": 37,
+              "name": "Fleet pixels — the art draws, not just loads",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:46:59Z",
+              "completed_at": "2026-10-19T01:47:01Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 38,
+              "name": "Fleet bus — the localStorage bus, both directions",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:47:01Z",
+              "completed_at": "2026-10-19T01:47:02Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 75,
+              "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:47:02Z",
+              "completed_at": "2026-10-19T01:47:02Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 76,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:47:02Z",
+              "completed_at": "2026-10-19T01:47:02Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 77,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:47:02Z",
+              "completed_at": "2026-10-19T01:47:02Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "5399bb9b889a212bdca39ffcd8d3e9509f51ed477a731b508a5c7c85c661da02"
+        },
+        {
+          "id": 117845761801,
+          "name": "test",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:26:32Z",
+          "completed_at": "2026-10-19T01:33:08Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 207,
+          "execution_seconds": 396,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:32Z",
+              "completed_at": "2026-10-19T01:26:33Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:33Z",
+              "completed_at": "2026-10-19T01:26:41Z",
+              "execution_seconds": 8
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:41Z",
+              "completed_at": "2026-10-19T01:26:54Z",
+              "execution_seconds": 13
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:54Z",
+              "completed_at": "2026-10-19T01:27:26Z",
+              "execution_seconds": 32
+            },
+            {
+              "number": 5,
+              "name": "Ensure the wasm32 target is installed (the toolchain file outranks action inputs)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:27:26Z",
+              "completed_at": "2026-10-19T01:27:29Z",
+              "execution_seconds": 3
+            },
+            {
+              "number": 6,
+              "name": "Build workspace",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:27:29Z",
+              "completed_at": "2026-10-19T01:27:58Z",
+              "execution_seconds": 29
+            },
+            {
+              "number": 7,
+              "name": "Build the bnrose-exec wasm worker",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:27:58Z",
+              "completed_at": "2026-10-19T01:27:59Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 8,
+              "name": "bnr-explorer wasm — the committed module is this tree's build",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:27:59Z",
+              "completed_at": "2026-10-19T01:28:00Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 9,
+              "name": "Install anvil (pinned foundry v1.8.5) for the adapters devnet battery",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:00Z",
+              "completed_at": "2026-10-19T01:28:02Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 10,
+              "name": "Test workspace",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:02Z",
+              "completed_at": "2026-10-19T01:31:33Z",
+              "execution_seconds": 211
+            },
+            {
+              "number": 11,
+              "name": "bPay SETTLE — Solana native carrier through the built settle-solana binary",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:33Z",
+              "completed_at": "2026-10-19T01:31:33Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 12,
+              "name": "bPay SETTLE — the signed-authorization nerve through the built bsigner organ",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:33Z",
+              "completed_at": "2026-10-19T01:31:34Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 13,
+              "name": "Law signatures — the built bsigner verifies every law file, current and pinned",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:34Z",
+              "completed_at": "2026-10-19T01:31:34Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 14,
+              "name": "Check formatting",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:34Z",
+              "completed_at": "2026-10-19T01:31:36Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 15,
+              "name": "Shell chain lint",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:36Z",
+              "completed_at": "2026-10-19T01:31:36Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 16,
+              "name": "R5 surface audit — no human gas asks",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:36Z",
+              "completed_at": "2026-10-19T01:31:36Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 17,
+              "name": "bSAFE host workspace (THP codec + Noise XX)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:36Z",
+              "completed_at": "2026-10-19T01:31:41Z",
+              "execution_seconds": 5
+            },
+            {
+              "number": 18,
+              "name": "x402 door (8-point acceptance contract + adversarial battery + live-wiring compile)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:41Z",
+              "completed_at": "2026-10-19T01:32:55Z",
+              "execution_seconds": 74
+            },
+            {
+              "number": 19,
+              "name": "ant-writedoor (contract battery; mock gateway, zero mainnet)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:32:55Z",
+              "completed_at": "2026-10-19T01:33:05Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 20,
+              "name": "bindexer keyless attestation (SPEC-BINDEXER-0)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:33:05Z",
+              "completed_at": "2026-10-19T01:33:07Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 39,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:33:07Z",
+              "completed_at": "2026-10-19T01:33:07Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 40,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:33:07Z",
+              "completed_at": "2026-10-19T01:33:07Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 41,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:33:07Z",
+              "completed_at": "2026-10-19T01:33:07Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "bcaa386a608d501e7f3e08fadc2acd85af112b85f8dd83603f05c17212b47259"
+        },
+        {
+          "id": 117845761833,
+          "name": "meter",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:29:07Z",
+          "completed_at": "2026-10-19T01:44:29Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 362,
+          "execution_seconds": 922,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:07Z",
+              "completed_at": "2026-10-19T01:29:08Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:08Z",
+              "completed_at": "2026-10-19T01:29:19Z",
+              "execution_seconds": 11
+            },
+            {
+              "number": 3,
+              "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:19Z",
+              "completed_at": "2026-10-19T01:29:19Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 4,
+              "name": "shared setup — install (exempt from always())",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:19Z",
+              "completed_at": "2026-10-19T01:29:45Z",
+              "execution_seconds": 26
+            },
+            {
+              "number": 5,
+              "name": "Skaists — the standards meter (three-UI fronts score 100%)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:45Z",
+              "completed_at": "2026-10-19T01:44:17Z",
+              "execution_seconds": 872
+            },
+            {
+              "number": 6,
+              "name": "Proof lights — every badge is exactly what its status document renders",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:44:17Z",
+              "completed_at": "2026-10-19T01:44:25Z",
+              "execution_seconds": 8
+            },
+            {
+              "number": 7,
+              "name": "Proof lights — the gate refuses every known forgery",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:44:25Z",
+              "completed_at": "2026-10-19T01:44:28Z",
+              "execution_seconds": 3
+            },
+            {
+              "number": 13,
+              "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:44:28Z",
+              "completed_at": "2026-10-19T01:44:28Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 14,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:44:28Z",
+              "completed_at": "2026-10-19T01:44:28Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 15,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:44:28Z",
+              "completed_at": "2026-10-19T01:44:28Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "1cf022b52dbc3760d43e492bf373f6eb1732b9523cd796c5b62985483ebdf01c"
+        },
+        {
+          "id": 117845761839,
+          "name": "formal",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:28:50Z",
+          "completed_at": "2026-10-19T01:31:35Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 345,
+          "execution_seconds": 165,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:51Z",
+              "completed_at": "2026-10-19T01:28:52Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:28:52Z",
+              "completed_at": "2026-10-19T01:29:02Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "shared setup — install cryptol 3.6.0 (pinned, with bundled solvers)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:02Z",
+              "completed_at": "2026-10-19T01:29:06Z",
+              "execution_seconds": 4
+            },
+            {
+              "number": 4,
+              "name": "WB002 formal — TYPECHECK + CHECK-SAMPLED + PROVE sovereignContinuity + TEETH",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:06Z",
+              "completed_at": "2026-10-19T01:29:07Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 5,
+              "name": "WB001 formal — TYPECHECK + CHECK-SAMPLED gate; PROVE attempt recorded",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:07Z",
+              "completed_at": "2026-10-19T01:31:33Z",
+              "execution_seconds": 146
+            },
+            {
+              "number": 10,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:33Z",
+              "completed_at": "2026-10-19T01:31:33Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 11,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:33Z",
+              "completed_at": "2026-10-19T01:31:33Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "4b708e5254afd0ed7c3076e67141873380e93a53e98bddb0eeaaa95b9ad96975"
+        },
+        {
+          "id": 117845761860,
+          "name": "formal-cryptol-leg",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:26:32Z",
+          "completed_at": "2026-10-19T01:31:57Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 207,
+          "execution_seconds": 325,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:33Z",
+              "completed_at": "2026-10-19T01:26:33Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:33Z",
+              "completed_at": "2026-10-19T01:26:39Z",
+              "execution_seconds": 6
+            },
+            {
+              "number": 3,
+              "name": "install cryptol 3.6.0 (pinned, with bundled solvers) and GNU time",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:39Z",
+              "completed_at": "2026-10-19T01:26:42Z",
+              "execution_seconds": 3
+            },
+            {
+              "number": 4,
+              "name": "WB001 Cryptol leg — 43 :prove obligations, 2 compositions, 7 negative controls",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:26:42Z",
+              "completed_at": "2026-10-19T01:31:55Z",
+              "execution_seconds": 313
+            },
+            {
+              "number": 8,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:55Z",
+              "completed_at": "2026-10-19T01:31:55Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 9,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:55Z",
+              "completed_at": "2026-10-19T01:31:55Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "7e5ec3631a40b3202a3c8b9af352d4c62b9b2bd52d4edaf794bb170de1223a90"
+        },
+        {
+          "id": 117845762007,
+          "name": "static",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:29:58Z",
+          "completed_at": "2026-10-19T01:31:55Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 413,
+          "execution_seconds": 117,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:59Z",
+              "completed_at": "2026-10-19T01:29:59Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:29:59Z",
+              "completed_at": "2026-10-19T01:30:11Z",
+              "execution_seconds": 12
+            },
+            {
+              "number": 3,
+              "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:11Z",
+              "completed_at": "2026-10-19T01:30:12Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 4,
+              "name": "PLUR voices — complete fixed audio and language-safe routing",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:12Z",
+              "completed_at": "2026-10-19T01:30:12Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 5,
+              "name": "Engine Room — every surface included",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:12Z",
+              "completed_at": "2026-10-19T01:30:12Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 6,
+              "name": "Post-quantum keys and sealed objects — shared vectors, two implementations",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:12Z",
+              "completed_at": "2026-10-19T01:30:22Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 7,
+              "name": "Wallet coins — full census, exact units, batch identity and read failures",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:22Z",
+              "completed_at": "2026-10-19T01:30:22Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 8,
+              "name": "Wallet Anchor link — signing requests against the published EEP-7 and wharfkit vectors",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:22Z",
+              "completed_at": "2026-10-19T01:30:22Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 9,
+              "name": "Arweave status — documented confirmations, malformed evidence and rate limits",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:22Z",
+              "completed_at": "2026-10-19T01:30:23Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 10,
+              "name": "Estate registry — counts computed, not written",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:23Z",
+              "completed_at": "2026-10-19T01:30:23Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 11,
+              "name": "Doors — three numbers, one truth",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:23Z",
+              "completed_at": "2026-10-19T01:30:23Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 12,
+              "name": "Doors — door-counts selftest (drifted fixtures, every push)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:23Z",
+              "completed_at": "2026-10-19T01:30:23Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 13,
+              "name": "Front door — search, source parity and accessible art",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:23Z",
+              "completed_at": "2026-10-19T01:30:29Z",
+              "execution_seconds": 6
+            },
+            {
+              "number": 14,
+              "name": "Genealogy — every suite in tools/genealogy (globbed, never listed)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:29Z",
+              "completed_at": "2026-10-19T01:30:50Z",
+              "execution_seconds": 21
+            },
+            {
+              "number": 15,
+              "name": "bTunGsTeN WB001 — intent-binding mutation matrix (globbed, never listed)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:50Z",
+              "completed_at": "2026-10-19T01:30:50Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 16,
+              "name": "bData local intake — real disk bytes, hash refusal and restart persistence",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:50Z",
+              "completed_at": "2026-10-19T01:30:54Z",
+              "execution_seconds": 4
+            },
+            {
+              "number": 17,
+              "name": "Forge room — pinned Yjs convergence, late join and usable fallback",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:54Z",
+              "completed_at": "2026-10-19T01:30:56Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 18,
+              "name": "Voice worker — bounded queue and child lifetime",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:56Z",
+              "completed_at": "2026-10-19T01:30:57Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 19,
+              "name": "Box tunnel — renewable lease and scoped shutdown",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:57Z",
+              "completed_at": "2026-10-19T01:31:10Z",
+              "execution_seconds": 13
+            },
+            {
+              "number": 20,
+              "name": "Connect Store channel — auth and process-loss recovery",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:10Z",
+              "completed_at": "2026-10-19T01:31:20Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 21,
+              "name": "doxx tungsten harness — no false success, no secret in a receipt",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:20Z",
+              "completed_at": "2026-10-19T01:31:20Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 22,
+              "name": "bPay SETTLE adapters — five kill conditions, sabotage battery, mutation proof",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:20Z",
+              "completed_at": "2026-10-19T01:31:30Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 23,
+              "name": "Recovery inventory — missing dependency + secret-free output",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:30Z",
+              "completed_at": "2026-10-19T01:31:30Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 24,
+              "name": "Autonomi observations — approved fields and secret canaries",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:30Z",
+              "completed_at": "2026-10-19T01:31:31Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 25,
+              "name": "Secret scanner — refused content stays out of logs",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:31Z",
+              "completed_at": "2026-10-19T01:31:31Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 26,
+              "name": "Identity — PR head range excludes GitHub merge identity",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:31Z",
+              "completed_at": "2026-10-19T01:31:31Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 27,
+              "name": "Voucher/escrow engine battery (moat ledger core)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:31Z",
+              "completed_at": "2026-10-19T01:31:31Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 28,
+              "name": "bMAILroom candidate battery (sink fix + single reader + draft-only seam)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:31Z",
+              "completed_at": "2026-10-19T01:31:32Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 29,
+              "name": "bMAILroom native notice adapter (pinned nostr-tools, disabled seam)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:32Z",
+              "completed_at": "2026-10-19T01:31:35Z",
+              "execution_seconds": 3
+            },
+            {
+              "number": 30,
+              "name": "x402 meter battery (x402-RAID-Z33)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:35Z",
+              "completed_at": "2026-10-19T01:31:35Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 31,
+              "name": "Hooks contract — the installer wires a pre-commit that REFUSES a key",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:35Z",
+              "completed_at": "2026-10-19T01:31:40Z",
+              "execution_seconds": 5
+            },
+            {
+              "number": 32,
+              "name": "AV-1 serve-bridge battery (crash/concurrency/hostile)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:40Z",
+              "completed_at": "2026-10-19T01:31:41Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 33,
+              "name": "AV-3 split-brain battery (meter vs delivery door)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:41Z",
+              "completed_at": "2026-10-19T01:31:41Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 34,
+              "name": "AV-6 retry-storm battery (failure-charge ceiling)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:41Z",
+              "completed_at": "2026-10-19T01:31:41Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 35,
+              "name": "AV-5 reorg drill (flag-not-credit)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:41Z",
+              "completed_at": "2026-10-19T01:31:42Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 36,
+              "name": "AV-4 handle unlinkability battery",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:42Z",
+              "completed_at": "2026-10-19T01:31:42Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 37,
+              "name": "AV-11 human-gas surface audit",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:42Z",
+              "completed_at": "2026-10-19T01:31:42Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 38,
+              "name": "INVOICE-1 bPay invoice battery (generic law vs reference consumer)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:42Z",
+              "completed_at": "2026-10-19T01:31:42Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 39,
+              "name": "INVOICE-1 builder proofs (generic implementation)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:42Z",
+              "completed_at": "2026-10-19T01:31:42Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 40,
+              "name": "INVOICE-1 oracle verifier (independent 13-attack)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:42Z",
+              "completed_at": "2026-10-19T01:31:42Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 41,
+              "name": "VOCAB-1 crosswalk battery (lossless outcome predicates)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:42Z",
+              "completed_at": "2026-10-19T01:31:42Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 42,
+              "name": "RECON-1 closure battery (derives, never upgrades evidence)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:42Z",
+              "completed_at": "2026-10-19T01:31:42Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 43,
+              "name": "RECON-1 primitive builder proof (vs frozen oracle)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:42Z",
+              "completed_at": "2026-10-19T01:31:42Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 44,
+              "name": "RECON-1 oracle independent verifier",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:42Z",
+              "completed_at": "2026-10-19T01:31:43Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 45,
+              "name": "RECON-1 oracle sabotage selftest (teeth)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:43Z",
+              "completed_at": "2026-10-19T01:31:43Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 46,
+              "name": "bPay Phase A — quote→invoice builder selftest (refusal gates)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:43Z",
+              "completed_at": "2026-10-19T01:31:43Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 47,
+              "name": "Funnel broadcast selftest (vectors + sign/recover)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:43Z",
+              "completed_at": "2026-10-19T01:31:43Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 48,
+              "name": "Vending upload door — owner is the public key, never the seed",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:43Z",
+              "completed_at": "2026-10-19T01:31:50Z",
+              "execution_seconds": 7
+            },
+            {
+              "number": 49,
+              "name": "Language — corpus integrity (estate-source)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:50Z",
+              "completed_at": "2026-10-19T01:31:50Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 50,
+              "name": "Dock claims — hero numbers re-derived from source",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:50Z",
+              "completed_at": "2026-10-19T01:31:50Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 51,
+              "name": "§7 hook selftest — every push",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:50Z",
+              "completed_at": "2026-10-19T01:31:51Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 52,
+              "name": "secret-scan selftest - four fixtures, every push",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:51Z",
+              "completed_at": "2026-10-19T01:31:51Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 53,
+              "name": "push-preflight selftest - P1-P11, every push",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:51Z",
+              "completed_at": "2026-10-19T01:31:52Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 54,
+              "name": "Sprint closing receipt — claims re-derived, not reported",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:52Z",
+              "completed_at": "2026-10-19T01:31:52Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 55,
+              "name": "x402 engine parity — tool and surface agree byte-for-byte",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:52Z",
+              "completed_at": "2026-10-19T01:31:52Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 56,
+              "name": "CI shape — every suite step carries if:always()",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:52Z",
+              "completed_at": "2026-10-19T01:31:52Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 57,
+              "name": "e2e shape — a control is enabled and clicked in one browser task",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:52Z",
+              "completed_at": "2026-10-19T01:31:52Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 58,
+              "name": "Forge freeze — orbit.html committed-blob sha256",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:52Z",
+              "completed_at": "2026-10-19T01:31:52Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 59,
+              "name": "§7 identity — author is the founder on the contributed range",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:52Z",
+              "completed_at": "2026-10-19T01:31:52Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 117,
+              "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:52Z",
+              "completed_at": "2026-10-19T01:31:53Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 118,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:53Z",
+              "completed_at": "2026-10-19T01:31:53Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 119,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:53Z",
+              "completed_at": "2026-10-19T01:31:53Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "2d9a02a182d6a95af857e4f31bf34f15368e9bce16e1f59bf358a57d924c5dd9"
+        },
+        {
+          "id": 117845762164,
+          "name": "wallet",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:30:51Z",
+          "completed_at": "2026-10-19T02:02:13Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 466,
+          "execution_seconds": 1882,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:52Z",
+              "completed_at": "2026-10-19T01:30:53Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:30:53Z",
+              "completed_at": "2026-10-19T01:31:03Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:03Z",
+              "completed_at": "2026-10-19T01:31:03Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 4,
+              "name": "shared setup — install (exempt from always())",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:03Z",
+              "completed_at": "2026-10-19T01:31:27Z",
+              "execution_seconds": 24
+            },
+            {
+              "number": 5,
+              "name": "Wallet batteries in cypherpunk (fund, vault, matrix, arweave, signer, adapter)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:31:27Z",
+              "completed_at": "2026-10-19T01:36:57Z",
+              "execution_seconds": 330
+            },
+            {
+              "number": 6,
+              "name": "Wallet batteries in new bee, the everything view (fund, vault, matrix, arweave, signer, adapter)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:36:57Z",
+              "completed_at": "2026-10-19T01:42:22Z",
+              "execution_seconds": 325
+            },
+            {
+              "number": 7,
+              "name": "Wallet batteries in raver, the everything view (fund, vault, matrix, arweave, signer, adapter)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:42:22Z",
+              "completed_at": "2026-10-19T01:47:58Z",
+              "execution_seconds": 336
+            },
+            {
+              "number": 8,
+              "name": "Wallet registers gate — three grammars, measured (dress contract, content, deep links, history)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:47:58Z",
+              "completed_at": "2026-10-19T01:50:32Z",
+              "execution_seconds": 154
+            },
+            {
+              "number": 9,
+              "name": "Wallet action sheet — one press composes and signs a .b action as the account the name points at",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:50:32Z",
+              "completed_at": "2026-10-19T01:54:13Z",
+              "execution_seconds": 221
+            },
+            {
+              "number": 10,
+              "name": "Arweave from your own keys — native secp256k1 address, keyless reads, a publish the network would attribute to you",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:54:13Z",
+              "completed_at": "2026-10-19T01:54:21Z",
+              "execution_seconds": 8
+            },
+            {
+              "number": 11,
+              "name": "Hive — one paste adds the account its active key controls; bytes and digest equal Hive's own library; one press sends",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:54:21Z",
+              "completed_at": "2026-10-19T01:54:56Z",
+              "execution_seconds": 35
+            },
+            {
+              "number": 12,
+              "name": "Wallet public accounts — persistence, following, read failures and signing isolation",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:54:56Z",
+              "completed_at": "2026-10-19T01:55:07Z",
+              "execution_seconds": 11
+            },
+            {
+              "number": 13,
+              "name": "Bridge and account forge — one paste never signs twice; the forge reads the name and says its price",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:55:07Z",
+              "completed_at": "2026-10-19T01:57:09Z",
+              "execution_seconds": 122
+            },
+            {
+              "number": 14,
+              "name": "Composer — what a link, a contract or a worker says is shown as text and never runs, in all three registers",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:57:09Z",
+              "completed_at": "2026-10-19T01:57:34Z",
+              "execution_seconds": 25
+            },
+            {
+              "number": 15,
+              "name": "Unified wallet — phone and desktop, public backup and storage navigation, no server",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:57:34Z",
+              "completed_at": "2026-10-19T01:57:48Z",
+              "execution_seconds": 14
+            },
+            {
+              "number": 16,
+              "name": "Hosted ANT purchasing — bounded invoice, cancel, receipt and retry (fixtures only)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:57:48Z",
+              "completed_at": "2026-10-19T01:58:06Z",
+              "execution_seconds": 18
+            },
+            {
+              "number": 17,
+              "name": "Isolated keychain — own origin, passkey-born root, decoded confirm, refusals, the hosted purchase paid from it, the Hive drop door, host-loss succession, the TEST BUILD keychain on the test network, network confinement, the named recovery cases, and the record importer",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:58:06Z",
+              "completed_at": "2026-10-19T02:00:37Z",
+              "execution_seconds": 151
+            },
+            {
+              "number": 18,
+              "name": "Wallet guided flow — identity confirmation and retained invoice inputs in all three styles",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T02:00:37Z",
+              "completed_at": "2026-10-19T02:01:26Z",
+              "execution_seconds": 49
+            },
+            {
+              "number": 19,
+              "name": "Wallet read budget — fifty accounts, shared concurrency and cancelled queued reads",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T02:01:26Z",
+              "completed_at": "2026-10-19T02:01:30Z",
+              "execution_seconds": 4
+            },
+            {
+              "number": 20,
+              "name": "Trezor public accounts — gesture, paths, cancellation and account balance binding",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T02:01:30Z",
+              "completed_at": "2026-10-19T02:01:34Z",
+              "execution_seconds": 4
+            },
+            {
+              "number": 21,
+              "name": "Forge pq public cards — ML-DSA-65 / ML-KEM-768 honest stub",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T02:01:34Z",
+              "completed_at": "2026-10-19T02:02:04Z",
+              "execution_seconds": 30
+            },
+            {
+              "number": 22,
+              "name": "Soul chrome truth — live bzDiD removes connect/create from rails footer",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T02:02:04Z",
+              "completed_at": "2026-10-19T02:02:11Z",
+              "execution_seconds": 7
+            },
+            {
+              "number": 43,
+              "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T02:02:11Z",
+              "completed_at": "2026-10-19T02:02:12Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 44,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T02:02:12Z",
+              "completed_at": "2026-10-19T02:02:12Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 45,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T02:02:12Z",
+              "completed_at": "2026-10-19T02:02:12Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "751e5aacb94eef991a6c316ab4d9941c0d4cf8f6",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "8d059dcae9629313596867a41c61ae4741d00c4c12f2b7ce05f355eb1feabe2d"
+        }
+      ]
+    }
+  ]
+}

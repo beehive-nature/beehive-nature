@@ -1,0 +1,423 @@
+{
+  "arithmetic": "UNESTABLISHED",
+  "binary_sha256": "sha256:3Tlx6bKeny-cYhaURwPIEbj0-uB-_yveraGcpWSFMi4",
+  "bindings": {
+    "base_commit": "a4296c8472c12ccde80077cc8c9238e30cb8c4d4",
+    "locked_packages": 136,
+    "source_sha256": {
+      "crates/btungsten-x0x-pq/Cargo.lock": "sha256:Z__dvZLG9X0w5Cbu1_QdJ-aH9mQYBK6-Ir_voK2vJxg",
+      "crates/btungsten-x0x-pq/inventory.json": "sha256:cvWXYtWEXkT3OH4NmGGA4xdokVwS-OVYm9492DN-nhM",
+      "crates/btungsten-x0x-pq/src/lib.rs": "sha256:YaDVzyatoYG0I3ci144hSdefx7blgCzK4J4NtYvisEY",
+      "fips204-0.4.6/Cargo.toml": "sha256:u46NocL8jAeAl3PNUc6CK4y8fdwyao6MGhJd0_UYvAk",
+      "fips204-0.4.6/benches/benchmark.rs": "sha256:nMvEbCMABgKnmcgy1rTA2ZbLo9mDHEXMcr6Prd_CEEY",
+      "fips204-0.4.6/deny.toml": "sha256:6ghcSiYt58Eyn0wGDGeEWoYQmXMiCE9A86siz79ROMM",
+      "fips204-0.4.6/rustfmt.toml": "sha256:BLgZPKs6eQI165ZaLCFAjDJPrgzDJrls2n5NrQtarMA",
+      "fips204-0.4.6/src/conversion.rs": "sha256:6ugI24gdbLYEjVF9NKOYe05tQCcPaCDY7mzojB4xGxk",
+      "fips204-0.4.6/src/encodings.rs": "sha256:-XmKETXXX8dWoX_hcDUU9y05d9NiNBUvqjIgfE1RCxQ",
+      "fips204-0.4.6/src/hashing.rs": "sha256:Myaeqh0FsSbMA6jELmFq76SowAG_kuoKSj7uqxi9Rc4",
+      "fips204-0.4.6/src/helpers.rs": "sha256:l794psjjYPuLIAKyf9F9Z_XcaaKhxNwuUkCwtuxT_bQ",
+      "fips204-0.4.6/src/high_low.rs": "sha256:OE_n1b5aaVFfXhoiYg3TclfMM5ZLfbfnPfHPPs8jtds",
+      "fips204-0.4.6/src/lib.rs": "sha256:-wc8AvOShEMcBytYfo-Xq-kwxLU_xA5HzTPy5MVx6g8",
+      "fips204-0.4.6/src/ml_dsa.rs": "sha256:jNR7JHviVfbrLqXhq5kosfo7J_D6-xsG-jZMUOlgE-g",
+      "fips204-0.4.6/src/ntt.rs": "sha256:k0_a9-G_P_urcxbeh-3mrWMCFb0cmzhtlrxuUepx12s",
+      "fips204-0.4.6/src/traits.rs": "sha256:HW_pn_vCEoYpt5ZbEGFFtjzB4BPZdlRfmn8J8yGpTx0",
+      "fips204-0.4.6/src/types.rs": "sha256:2BFRjvZNusd-CurW8z7d6K4eyJ72QTNLYjLSo1vRyxg",
+      "fips204-0.4.6/tests/integration.rs": "sha256:pukDHLtduOt3P5NFdp5rOfEGhp2v_6HueBsJtUfKIDg",
+      "fips204-0.4.6/tests/messages.rs": "sha256:d0Pn6GogXcL9DCH0ZMuR3qJcmZoI_ykoEoU1p6nfYHo",
+      "fips204-0.4.6/tests/nist_vectors/mod.rs": "sha256:tfRfzeg_4ABo9XkofqATVKg1hNdxJrnfi-BbRBvCzJI",
+      "proof/Boundary.cry": "sha256:IRikIVxi_1DIn2eTFUUlw-Kd0y0_Q1saP0amoWU1O-Q",
+      "proof/Cargo.lock": "sha256:Kq7_i8yv1Qv_fcPSClnODjntiNxwvOLkPDXEa__7Wew",
+      "proof/Cargo.toml": "sha256:21S_cINSD6n4OIIP8v0VHvm2zw7ySC23n4P53MYdzbI",
+      "proof/bindings.json": "sha256:OiblPZnhiWoGbELYYSeeLauR0ZPO82tsnCWIIpY-qbI",
+      "proof/common.saw": "sha256:Cil5Rmobr1CCU2c860KlUw6WFrg3g6ldtxfdVBR2j24",
+      "proof/src/binding.rs": "sha256:otvWQ2b7xPPTQEhrYWD_S2VifABuQAnze-c6sYkjx0M",
+      "proof/src/lib.rs": "sha256:fXTUPMoxvmXvsDtxUCjf75-X934Py1qI7K9GGjFqS5w",
+      "proof/src/main.rs": "sha256:uYofZnteKnpPZsJD-veHXZgIkQKicoij0XXLzrnFsG4",
+      "proof/src/names.rs": "sha256:1XaZgZfIfYZ8Sg8-_r-bNq4y1PTzk0TG-mOJOMwuKho",
+      "proof/src/native.rs": "sha256:nWrXpRieMuIUBGq8K8VIaWWSy8md_oUaccUJCMMmR-Q",
+      "proof/src/obligations.rs": "sha256:gOBnp41ZBFp3qmGNqSgfCkQErCQAg-uo-rV4lG1CMcw",
+      "proof/src/runner.rs": "sha256:ezJqWqbYdOnK8d1x-lV95K8Tsnqg0YUs_kxsq7ohAdw",
+      "saorsa-pqc-0.5.1/Cargo.toml": "sha256:3IrurxTf_POc33UwZe3IVrgGAnprlWXl8-CGuPqMd78",
+      "saorsa-pqc-0.5.1/benches/comprehensive_benchmarks.rs": "sha256:ziJ1dApopAsXWg4AELNY-kAYiSbKVC57qcI3WpwL6Pw",
+      "saorsa-pqc-0.5.1/benches/ct_verification.rs": "sha256:6Fp7VxBmYaBowxp7eEhrmpPa6Xt6mXHmw8jHT8OzkCo",
+      "saorsa-pqc-0.5.1/benches/ml_dsa_benchmarks.rs": "sha256:aL67GdngN25paJbXXlbzFfvWx0qpfPqIykdXHfMX3uw",
+      "saorsa-pqc-0.5.1/benches/ml_kem_benchmarks.rs": "sha256:KrdF6hmY4p8f64-vXEuyiJrlI6G-sYIdhzDQlSLbNQc",
+      "saorsa-pqc-0.5.1/deny.toml": "sha256:XRPPf4JlcoE_ug40EuRU_e2BT7Ff1H0LEjZtg_a1yW0",
+      "saorsa-pqc-0.5.1/examples/hkdf_key_derivation.rs": "sha256:lPd2hv1e-uZMq5JErPyHz27nBKvmO1QZt36q2nQHnPk",
+      "saorsa-pqc-0.5.1/examples/quantum_secure_communication.rs": "sha256:SCTIoy4e08iAo8ReoZNxeYhukSVWelJ8f_MVAlR6SUQ",
+      "saorsa-pqc-0.5.1/memory_pool_complete_fix.rs": "sha256:98jOsqsUUC0S7qbEIJhRvZnu_0VBa497qH-RoOHQjQ4",
+      "saorsa-pqc-0.5.1/mutants.toml": "sha256:hWECuZ0vrUOq_t7acyCVnQqGhUAAaNy2Adv04351u7M",
+      "saorsa-pqc-0.5.1/src/api/aead.rs": "sha256:CKh-aD8Edudbgzh8x9Pnt50Y302I0PbZ9FvqXGmIrKE",
+      "saorsa-pqc-0.5.1/src/api/errors.rs": "sha256:tZnK70M6Gkl6R5m4fMXzjygqU2OfkmLZWJ21X7zOmRo",
+      "saorsa-pqc-0.5.1/src/api/hash.rs": "sha256:6pbQnLU-ZFkMQFrptS3SrGfAkiMK1ufgamxFulblJco",
+      "saorsa-pqc-0.5.1/src/api/hmac.rs": "sha256:V9aaRo0y9TMkZet7Z5b78PbVmwFe1N1N5VBmPSPLfLM",
+      "saorsa-pqc-0.5.1/src/api/hpke.rs": "sha256:K7hH1qdk9hpKQ7RQVHoclLjYqvFUkwTbR3Ha1YOmeJg",
+      "saorsa-pqc-0.5.1/src/api/kdf.rs": "sha256:oKNpFSSaGp9QreYCdhP8nEWTW__n6mtqgOkppZCnnbU",
+      "saorsa-pqc-0.5.1/src/api/kem.rs": "sha256:xPCs2UrGiITUCHiXg4_P48MS6CPPvh--GtgIB3_Am_Q",
+      "saorsa-pqc-0.5.1/src/api/mod.rs": "sha256:yFf_lFoOH5IEe5SZOnyI6xdvAH3Th-T4arA6VayJlXg",
+      "saorsa-pqc-0.5.1/src/api/sig.rs": "sha256:07yjSrpE3wc5BpyZX2kohtjUPlOCe08SiUJv4aeQKsw",
+      "saorsa-pqc-0.5.1/src/api/slh.rs": "sha256:tZDjZ7tNT0cuYh0D6nayqE4DzJSRIIITNB6ZFgIRAck",
+      "saorsa-pqc-0.5.1/src/api/symmetric.rs": "sha256:gAwPfxsG3FJ-3M50mHM0A1VNIBUfPaqGfh4BG3YfB4E",
+      "saorsa-pqc-0.5.1/src/api/traits.rs": "sha256:jopga7zjOhrSyjrPWlKY9n3CacMXxOqWZ74gHQAiZOA",
+      "saorsa-pqc-0.5.1/src/lib.rs": "sha256:F47z0YQ8h9CEFMwtTDuG1J9iZpXGEVNY4-yhKZriXqU",
+      "saorsa-pqc-0.5.1/src/pqc/benchmarks.rs": "sha256:buHvPyauzUj3fJoNKGE6n3Mq73HjaAWW1_aqCaeCUQY",
+      "saorsa-pqc-0.5.1/src/pqc/combiners.rs": "sha256:1wez3W5MK9VgiwEFRxwa7-VJmf5Ft0d9kBKIM2LLv_Y",
+      "saorsa-pqc-0.5.1/src/pqc/config.rs": "sha256:eCA3bwjITutjJAtdhu9KIslLasld_0B2dMjhHTl6QpI",
+      "saorsa-pqc-0.5.1/src/pqc/constant_time.rs": "sha256:pvQUzgcx3ZrPp3yowIlP9CxlFtejHuEDs9JIITfWt1g",
+      "saorsa-pqc-0.5.1/src/pqc/ct_fips.rs": "sha256:DnXAWm1K8eqNokqFII7ErqozY_jagvtI5b6nGhXUzAg",
+      "saorsa-pqc-0.5.1/src/pqc/encryption.rs": "sha256:UWLawDjyS3C4W1M9T8tmdVrtqmKpG9RoRflD3RhEK7M",
+      "saorsa-pqc-0.5.1/src/pqc/fips_rng.rs": "sha256:Ibpa2OtnV-R7mepcZHcsPvQCt1GjTyZ1VPmWmCWPDV8",
+      "saorsa-pqc-0.5.1/src/pqc/kem_impl.rs": "sha256:9yuEsmsVlB1gDMxrprqpty1C0FlaDR95XzUi6hWtGlA",
+      "saorsa-pqc-0.5.1/src/pqc/memory_pool.rs": "sha256:mMOpQptVOMSlrjn5kvf0BMu388DweQk5O9tbvpftx1E",
+      "saorsa-pqc-0.5.1/src/pqc/ml_dsa.rs": "sha256:3lEf02eOpj6xsZ9HTxaeO6l6aF9ehZNoMVLOHJl8r9I",
+      "saorsa-pqc-0.5.1/src/pqc/ml_dsa_44.rs": "sha256:H3JyZ5pR-5CDJK544tJ8HaZ8a720LH0SCsp7lSReLRg",
+      "saorsa-pqc-0.5.1/src/pqc/ml_dsa_87.rs": "sha256:R8urosLROvqs-S13M5nJlfzDQ5WmYhw_KYbeir9Q8oA",
+      "saorsa-pqc-0.5.1/src/pqc/ml_kem.rs": "sha256:bOYjmqEsGqS0690t6aIeARusTPKFrWf0hk3RqDbxVOI",
+      "saorsa-pqc-0.5.1/src/pqc/ml_kem_1024.rs": "sha256:2KDOR2EROpLSnAUTrgW3BXx1BxLphOViu4PHS4dWZUQ",
+      "saorsa-pqc-0.5.1/src/pqc/ml_kem_512.rs": "sha256:MHU13wExPkwDCwHyZdK_4J56jrx5CxPSf9AV99TNxA4",
+      "saorsa-pqc-0.5.1/src/pqc/mod.rs": "sha256:Bzf0gfmWyO0eG5om4EvAF27m3YtAikMXVoSPlTNrpwQ",
+      "saorsa-pqc-0.5.1/src/pqc/parallel.rs": "sha256:8zUUmiIPRt1h9zkovfYrtlnE_4KfiaUhV6KMdOWcza4",
+      "saorsa-pqc-0.5.1/src/pqc/security_validation.rs": "sha256:v2v9ZeL-DZs1tk6r6rucRXQyXiOG_mMfsYuVLxXs-tU",
+      "saorsa-pqc-0.5.1/src/pqc/sig_impl.rs": "sha256:i_4DnTntlSwjd-u8TN1J64pyecxGaW6YEFmKtzGWr2Y",
+      "saorsa-pqc-0.5.1/src/pqc/traits.rs": "sha256:TqE0iJTiOYQwYPHg8znFySgKqWKpWb6VWunzZUKH8EU",
+      "saorsa-pqc-0.5.1/src/pqc/types.rs": "sha256:a0fYMkUJfO4SKhVi6zrk7Pjw0980upPRBJSR-tVl_G8",
+      "saorsa-pqc-0.5.1/src/symmetric.rs": "sha256:hf7C_14oAbfOIDY9zwaFhNTHuaau_BIp4N_XiAmOUMk",
+      "saorsa-pqc-0.5.1/test_fips_basic.rs": "sha256:kt9a2RxKBOVtYMg-LHKfra3oBTIAa44HmgBQAiwibik",
+      "saorsa-pqc-0.5.1/tests/api_comprehensive.rs": "sha256:C8N5JRmf74_Eg43ecwcMKqall_euJuZSCnytEuFumvk",
+      "saorsa-pqc-0.5.1/tests/basic_tests.rs": "sha256:BK5_1c6_mUPslw83qotSUFaZoJrybpYR4T-DC7XifX4",
+      "saorsa-pqc-0.5.1/tests/chacha20_poly1305_vectors.rs": "sha256:t1llr6__vS5QD3fni5VmLCbbeNBv64QfWGFjymnSrFA",
+      "saorsa-pqc-0.5.1/tests/common/mod.rs": "sha256:gwtrGFg3I39tccByBOq9Hr3UjtpHJ0bn4GeSblKEkuM",
+      "saorsa-pqc-0.5.1/tests/extended_crypto_vectors.rs": "sha256:luhAIIZuRGhNqaoEVdzfAB5IqIKlctdgkvVSxeYlLvg",
+      "saorsa-pqc-0.5.1/tests/fips_basic.rs": "sha256:JJ_BYX11VKXvfC6iiT5fCVS93kh95o2wIoDOw-MOxnc",
+      "saorsa-pqc-0.5.1/tests/fips_rng_compliance.rs": "sha256:omZh3lyVAj6tBwnIi8XHROcwjvfbzvYoNDj4JnTtyhU",
+      "saorsa-pqc-0.5.1/tests/hkdf_integration.rs": "sha256:5flwgYjdEhyn5ER1q2tq-jANcf7BRGGcfMOLICz3rzM",
+      "saorsa-pqc-0.5.1/tests/memory_stress_tests.rs": "sha256:iYK1HWzoWJDSeB_OnjJiELnlvBQM9_lC-PDOUOaWkxc",
+      "saorsa-pqc-0.5.1/tests/ml_dsa_tests.rs": "sha256:5I9Ty4IN6hnyNVCqjlJZWBy90_4zbLYEts6taXORTOA",
+      "saorsa-pqc-0.5.1/tests/ml_kem_tests.rs": "sha256:JD1FF1KBx4WLWGeLVnZs55V2_LL_BH-pjAjll0ARq5o",
+      "saorsa-pqc-0.5.1/tests/mutation_tests.rs": "sha256:hem7ppeIBuGqhD841TRZINQf4AAADrC-YolNSvuA2gc",
+      "saorsa-pqc-0.5.1/tests/nist_official_vectors.rs": "sha256:zJIom2X2yJhEaoeL2btpGyeJ36EhRw_BIKDFc9GythA",
+      "saorsa-pqc-0.5.1/tests/nist_test_vectors.rs": "sha256:bmIh7tFnM27EHGVwz-MYZnOBQfgtcRstPlMYruvc4l0",
+      "saorsa-pqc-0.5.1/tests/pqc_traits_tests.rs": "sha256:X0WJ1R1VxCs7MkseSOrPlnaMNZDKtd-pfdLSQih2eXo",
+      "saorsa-pqc-0.5.1/tests/property_tests.rs": "sha256:WRmxVND8rmizf-7Vv8Hb5tGqLj33_gj_CSk_9tzCKSM",
+      "saorsa-pqc-0.5.1/tests/security_enhancement_tests.rs": "sha256:P8moarcz__jK7cptmLRFXvKRM3XNRUF-hf3PsNKZhew",
+      "saorsa-pqc-0.5.1/tests/security_tests.rs": "sha256:bhSHJjl62v04od7hi18y2nClyaD7U3ZV7kcQOCoUNF8",
+      "zeroize-1.9.0/Cargo.toml": "sha256:2cNIJxMfA2fDwgnyyFjBQtNL6VEqnG-1kXnjaaHXwyo",
+      "zeroize-1.9.0/src/aarch64.rs": "sha256:JLGExsy9upVxPga28vVqdb7vM_DsJX8xVjuYu--6cVA",
+      "zeroize-1.9.0/src/barrier.rs": "sha256:UqLTXhmKvLCOx39AZ_wXp1mqTPKkhgDrf8SmZzI_d6Q",
+      "zeroize-1.9.0/src/lib.rs": "sha256:YQEmee89DMTim2-cnWxXLEuoEQ5woeHFJ9pr-vd0lO8",
+      "zeroize-1.9.0/src/stack.rs": "sha256:nvcwkeq0rrVi-HFHAI9mQR08cOpPmAdDeCioulD0ydU",
+      "zeroize-1.9.0/src/x86.rs": "sha256:kBKItw35VP5KYtgRoPzCJId2zqKO3-_ww166LRRGy60",
+      "zeroize-1.9.0/tests/alloc.rs": "sha256:YYpgiGR8pRxwhuvoDARYfCvaV_v1XtA2TTtUFbWHBEE",
+      "zeroize-1.9.0/tests/zeroize.rs": "sha256:VqafwDa8sO_Ms5OCjWTxYxGoGazEj6dT8tWDfbstyAc",
+      "zeroize-1.9.0/tests/zeroize_derive.rs": "sha256:Hauzof41efowEOevlKQ4_nb0GkzXduOV0A69cglHCko"
+    }
+  },
+  "completed_unix": 1792007448,
+  "files": {
+    "Boundary.cry": "sha256:IRikIVxi_1DIn2eTFUUlw-Kd0y0_Q1saP0amoWU1O-Q",
+    "common.saw": "sha256:Cil5Rmobr1CCU2c860KlUw6WFrg3g6ldtxfdVBR2j24",
+    "formal-accept.log": "sha256:bYgpDY9QdH-bWjOdeGhcsaAevbAcrlrxao48KpMBknU",
+    "formal-accept.saw": "sha256:47G-_amJVW_ldIQdCfAWkTFON932Zq1J3SU1LLjLBuM",
+    "formal-context.log": "sha256:KLi3bL4BoKged9Os5kvongsse48qsn5l2uSDlXNE1j0",
+    "formal-context.saw": "sha256:2eH649r6tKwzJjDLTex4NpMSktU71AMth1FgV8Rg2yY",
+    "formal-honest.log": "sha256:dC3QuKFfmL6e7LWeCAvcjnz_VmTJGBkjNhTjtC8SCKQ",
+    "formal-honest.saw": "sha256:41Fg-s5vQTrKM-QsL0JAdkZrcMexgyPOg5WZkejZNcI",
+    "formal-key.log": "sha256:m7q3vNgPhwPjjjW-pBiGU4scH8NVbxgbVcUKe7XDpPY",
+    "formal-key.saw": "sha256:neOgy1EWpIRCYETO8d9Pg2Iw3esmF_Ttnbun4OzHdtA",
+    "formal-message.log": "sha256:-k_pE6tVH8npX5QW1lb4KegN1AoowddQXlTtBbAGV5M",
+    "formal-message.saw": "sha256:z0yNCfhS7LWJFhAPlqAzAkaHhXXoNyANRaL5GdRQWcw",
+    "formal-reject.log": "sha256:87WJOw2DsoIA2HSJ99_ycNbyluSQVTVjwJ7jCpSM2F8",
+    "formal-reject.saw": "sha256:1Mw6GhQmFOYTFej6_Gj5VB9Alj0qKpk1QKDdz3LnfEQ",
+    "formal-reuse.log": "sha256:7nZduYx1v-gwnPmWnDS8poi220zf66oRiCq37OQ4CDs",
+    "formal-reuse.saw": "sha256:sI8ir8LKJuW708-9jBbVuyjHqw7vH6RmsStn_4N0V7M",
+    "formal-signature.log": "sha256:aDWA0qxEq8fH31Zyea2CQ4NT4o1UFw_dr1Zb5htAYkE",
+    "formal-signature.saw": "sha256:81RONIjgbGUnAMmGgsluf9ZNCyuvVRSOWISuWq3WBy0",
+    "gate-tests.log": "sha256:cyfr6yBfXFu_u0RWFVPqF8P_7ia4v7xEznq85k6jRK4",
+    "mir-build.log": "sha256:DO21epOR2HeTyGBEIgO4MEn1XyG_xHykPjp9pzvzMaQ",
+    "names.saw": "sha256:aotsoAO_C6EZ90M_K2r1uAfUU74GGUYJMMx1CcVPEXs",
+    "native-accept.json": "sha256:dcn9pmtLyL_aCmM4PKvik7WHtWjNzV_WprbxnH__ZP8",
+    "native-accept.log": "sha256:nBrS87sJTms3K-WzyIG-nHL_YMbGPzuxbhpgVJY5hLg",
+    "native-context.json": "sha256:Nqyf8vXh1WtUTnAqRCIgvSsq7uLEjN8eWQtKy82pSmA",
+    "native-context.log": "sha256:TDpCHPKNLg4YIZU8hSC-IfM8NBitOH6-6o2rvAYNok4",
+    "native-empty.json": "sha256:6BrUoghbVAYUmfNDU4fFShpoLsah7MNnLHF9nOJQLM0",
+    "native-empty.log": "sha256:KKWaRZ2sVTVv0P76BDQeMr7SQjz-1FzzHXNNGVFJzIQ",
+    "native-honest.json": "sha256:JcH6gogUlyzHXM6-ARRVE480Tro5ffRKw4inhxxWBuk",
+    "native-honest.log": "sha256:qv8kmG899JWHEzHoj55gAYexJUk2xfEE_Vf8-HFPu7Q",
+    "native-message.json": "sha256:l4DeUMN14wwFW9TkInJbAs8K8ITjG1Cca2q2fXBPomI",
+    "native-message.log": "sha256:yJDSPzqZWSzsrK_I6Do7pI4yzhKLJwQhM8vlbB0Q_00",
+    "native-reject.json": "sha256:J3psExXpF-tWu5roZCSaZOd_c0irk4wZU4nJidnFKHc",
+    "native-reject.log": "sha256:s1Tm2Sla3-dwPT-sElJwOhcH_RwsZ_0bqB3BtIPutZc",
+    "native-signature.json": "sha256:lnn8_aokqSl2oCkHgwo8IszlE51MPpjJ4s5GGavV5oE",
+    "native-signature.log": "sha256:NUMa1VWr74DpO2CgN3gNDKH7J7ZTti2LTQON_Hkm23c",
+    "proof.linked-mir.json": "sha256:Ig1H2-T54znh35hcn9lrIqcHGxWO0dsW28YMVyZdjbg",
+    "source-pins.json": "sha256:CydimjPrtxy5SvYNLSlocc4ohz08dPL_f7TvHl22fJs"
+  },
+  "formal": [
+    {
+      "name": "honest",
+      "obligations": [
+        "PREPARE PROVEN prepared m=0 s=3309 c=0",
+        "PREPARE PROVEN prepared m=1 s=3309 c=1",
+        "PREPARE PROVEN prepared m=257 s=3309 c=255",
+        "PREPARE PROVEN prepared m=4096 s=3309 c=254",
+        "PREPARE PROVEN prepared m=257 s=3309 c=256",
+        "PREPARE PROVEN prepared m=1 s=3309 c=257",
+        "PREPARE PROVEN prepared m=257 s=0 c=255",
+        "PREPARE PROVEN prepared m=257 s=1 c=255",
+        "PREPARE PROVEN prepared m=257 s=3308 c=255",
+        "PREPARE PROVEN prepared m=257 s=3310 c=255",
+        "PREPARE PROVEN prepared m=257 s=4096 c=255",
+        "PREPARE PROVEN prepared key-length=0",
+        "PREPARE PROVEN prepared key-length=1",
+        "PREPARE PROVEN prepared key-length=1951",
+        "PREPARE PROVEN prepared key-length=1953",
+        "PREPARE PROVEN modern m=0 s=3309 c=0",
+        "PREPARE PROVEN modern m=1 s=3309 c=1",
+        "PREPARE PROVEN modern m=257 s=3309 c=255",
+        "PREPARE PROVEN modern m=4096 s=3309 c=254",
+        "PREPARE PROVEN modern m=257 s=3309 c=256",
+        "PREPARE PROVEN modern m=1 s=3309 c=257",
+        "PREPARE PROVEN modern m=257 s=0 c=255",
+        "PREPARE PROVEN modern m=257 s=1 c=255",
+        "PREPARE PROVEN modern m=257 s=3308 c=255",
+        "PREPARE PROVEN modern m=257 s=3310 c=255",
+        "PREPARE PROVEN modern m=257 s=4096 c=255",
+        "PREPARE PROVEN modern key-length=0",
+        "PREPARE PROVEN modern key-length=1",
+        "PREPARE PROVEN modern key-length=1951",
+        "PREPARE PROVEN modern key-length=1953",
+        "PREPARE PROVEN legacy m=0 s=3309 c=0",
+        "PREPARE PROVEN legacy m=257 s=3309 c=0",
+        "PREPARE PROVEN legacy m=257 s=0 c=0",
+        "PREPARE PROVEN legacy m=257 s=3308 c=0",
+        "PREPARE PROVEN legacy m=257 s=3310 c=0",
+        "PREPARE PROVEN reuse independent operations"
+      ],
+      "result": "PROVEN-CONDITIONAL"
+    },
+    {
+      "name": "accept",
+      "obligations": [
+        "PREPARE CONTROL accept obligation"
+      ],
+      "result": "REFUTED"
+    },
+    {
+      "name": "reject",
+      "obligations": [
+        "PREPARE CONTROL reject obligation"
+      ],
+      "result": "REFUTED"
+    },
+    {
+      "name": "message",
+      "obligations": [
+        "PREPARE CONTROL message obligation"
+      ],
+      "result": "REFUTED"
+    },
+    {
+      "name": "context",
+      "obligations": [
+        "PREPARE CONTROL context obligation"
+      ],
+      "result": "REFUTED"
+    },
+    {
+      "name": "signature",
+      "obligations": [
+        "PREPARE CONTROL signature obligation"
+      ],
+      "result": "REFUTED"
+    },
+    {
+      "name": "key",
+      "obligations": [
+        "PREPARE CONTROL key obligation"
+      ],
+      "result": "REFUTED"
+    },
+    {
+      "name": "reuse",
+      "obligations": [
+        "PREPARE CONTROL reuse obligation"
+      ],
+      "result": "REFUTED"
+    }
+  ],
+  "formal_scope": "conditional wrapper equivalence on the enumerated slice lengths; all bytes symbolic",
+  "full_system_qualification": "UNESTABLISHED",
+  "mir_sha256": "sha256:Ig1H2-T54znh35hcn9lrIqcHGxWO0dsW28YMVyZdjbg",
+  "result": "PASS",
+  "runs": [
+    {
+      "exit_code": 0,
+      "expected_exit": 0,
+      "log": "gate-tests.log",
+      "name": "gate-tests",
+      "seconds": 0.402710404,
+      "sha256": "sha256:cyfr6yBfXFu_u0RWFVPqF8P_7ia4v7xEznq85k6jRK4"
+    },
+    {
+      "exit_code": 0,
+      "expected_exit": 0,
+      "log": "native-honest.log",
+      "name": "native-honest",
+      "seconds": 0.600956355,
+      "sha256": "sha256:qv8kmG899JWHEzHoj55gAYexJUk2xfEE_Vf8-HFPu7Q"
+    },
+    {
+      "exit_code": 1,
+      "expected_exit": 1,
+      "log": "native-accept.log",
+      "name": "native-accept",
+      "seconds": 0.50086987,
+      "sha256": "sha256:nBrS87sJTms3K-WzyIG-nHL_YMbGPzuxbhpgVJY5hLg"
+    },
+    {
+      "exit_code": 1,
+      "expected_exit": 1,
+      "log": "native-reject.log",
+      "name": "native-reject",
+      "seconds": 0.50094251,
+      "sha256": "sha256:s1Tm2Sla3-dwPT-sElJwOhcH_RwsZ_0bqB3BtIPutZc"
+    },
+    {
+      "exit_code": 1,
+      "expected_exit": 1,
+      "log": "native-message.log",
+      "name": "native-message",
+      "seconds": 0.601094579,
+      "sha256": "sha256:yJDSPzqZWSzsrK_I6Do7pI4yzhKLJwQhM8vlbB0Q_00"
+    },
+    {
+      "exit_code": 1,
+      "expected_exit": 1,
+      "log": "native-context.log",
+      "name": "native-context",
+      "seconds": 0.60113119,
+      "sha256": "sha256:TDpCHPKNLg4YIZU8hSC-IfM8NBitOH6-6o2rvAYNok4"
+    },
+    {
+      "exit_code": 1,
+      "expected_exit": 1,
+      "log": "native-signature.log",
+      "name": "native-signature",
+      "seconds": 0.601005474,
+      "sha256": "sha256:NUMa1VWr74DpO2CgN3gNDKH7J7ZTti2LTQON_Hkm23c"
+    },
+    {
+      "exit_code": 1,
+      "expected_exit": 1,
+      "log": "native-empty.log",
+      "name": "native-empty",
+      "seconds": 0.100460034,
+      "sha256": "sha256:KKWaRZ2sVTVv0P76BDQeMr7SQjz-1FzzHXNNGVFJzIQ"
+    },
+    {
+      "exit_code": 0,
+      "expected_exit": 0,
+      "log": "mir-build.log",
+      "name": "mir-build",
+      "seconds": 20.162882587,
+      "sha256": "sha256:DO21epOR2HeTyGBEIgO4MEn1XyG_xHykPjp9pzvzMaQ"
+    },
+    {
+      "exit_code": 0,
+      "expected_exit": 0,
+      "log": "formal-honest.log",
+      "name": "formal-honest",
+      "seconds": 136.269235161,
+      "sha256": "sha256:dC3QuKFfmL6e7LWeCAvcjnz_VmTJGBkjNhTjtC8SCKQ"
+    },
+    {
+      "exit_code": 2,
+      "expected_exit": 2,
+      "log": "formal-accept.log",
+      "name": "formal-accept",
+      "seconds": 9.111890055,
+      "sha256": "sha256:bYgpDY9QdH-bWjOdeGhcsaAevbAcrlrxao48KpMBknU"
+    },
+    {
+      "exit_code": 2,
+      "expected_exit": 2,
+      "log": "formal-reject.log",
+      "name": "formal-reject",
+      "seconds": 9.409715757,
+      "sha256": "sha256:87WJOw2DsoIA2HSJ99_ycNbyluSQVTVjwJ7jCpSM2F8"
+    },
+    {
+      "exit_code": 2,
+      "expected_exit": 2,
+      "log": "formal-message.log",
+      "name": "formal-message",
+      "seconds": 12.714354893,
+      "sha256": "sha256:-k_pE6tVH8npX5QW1lb4KegN1AoowddQXlTtBbAGV5M"
+    },
+    {
+      "exit_code": 2,
+      "expected_exit": 2,
+      "log": "formal-context.log",
+      "name": "formal-context",
+      "seconds": 12.715225466,
+      "sha256": "sha256:KLi3bL4BoKged9Os5kvongsse48qsn5l2uSDlXNE1j0"
+    },
+    {
+      "exit_code": 2,
+      "expected_exit": 2,
+      "log": "formal-signature.log",
+      "name": "formal-signature",
+      "seconds": 14.131805712,
+      "sha256": "sha256:aDWA0qxEq8fH31Zyea2CQ4NT4o1UFw_dr1Zb5htAYkE"
+    },
+    {
+      "exit_code": 2,
+      "expected_exit": 2,
+      "log": "formal-key.log",
+      "name": "formal-key",
+      "seconds": 13.316936109,
+      "sha256": "sha256:m7q3vNgPhwPjjjW-pBiGU4scH8NVbxgbVcUKe7XDpPY"
+    },
+    {
+      "exit_code": 2,
+      "expected_exit": 2,
+      "log": "formal-reuse.log",
+      "name": "formal-reuse",
+      "seconds": 13.318756833,
+      "sha256": "sha256:7nZduYx1v-gwnPmWnDS8poi220zf66oRiCq37OQ4CDs"
+    }
+  ],
+  "schema": "btungsten.prepared-proof-run/1",
+  "started_unix": 1792007202,
+  "symbols": {
+    "names": {
+      "barrier_i32_name": "zeroize::barrier::optimization_barrier::_inste4581d0a71164688",
+      "barrier_u8_name": "zeroize::barrier::optimization_barrier::_inst2efc261c2cb07b6c",
+      "expand_name": "fips204::ml_dsa::expand_public::_inst974ff8c13c288f3d",
+      "expanded_result_adt_name": "core/5d8ee733::result::Result::_adtf08609c5a8685a07[0]",
+      "internal_name": "fips204::ml_dsa::verify_internal::_inst40602703b9a2bc51",
+      "polynomial_adt_name": "fips204/df6bfcc8::types::T::_adtc5a5405abab57fd5[0]",
+      "public_key_adt_name": "fips204/df6bfcc8::types::PublicKey::_adt6aa2c6b1ccefd79d[0]"
+    },
+    "public_key_bytes": 6240,
+    "source": "compiled linked MIR; selected by types"
+  },
+  "tools": {
+    "mir-json": {
+      "binary_sha256": "sha256:fLOitdp0p6iMaNkM_qdhtevrB5B7nx-rdyqXlT6x0N0",
+      "version": "rustc 1.96.0-nightly (ac7f9ec7d 2026-03-20)\nmir-json 0.1.0 (JSON schema version 13)\nRust toolchain nightly-2026-03-21"
+    },
+    "rustc": {
+      "binary_sha256": "sha256:3acjQ2C39XjKiw3cuAFFZG-mGmfBcgpavHBRs1yfy3E",
+      "version": "rustc 1.98.1 (48a229cea 2026-09-01)"
+    },
+    "saw": {
+      "binary_sha256": "sha256:ygfaUcjx6pj5G2-vcj-ex5XZCL8skPY-_1fpfHwuciA",
+      "version": "1.6 (68eed5f release-1.6)"
+    },
+    "z3": {
+      "binary_sha256": "sha256:RU8lZghXmFWsBhoVgEHNnHQtFrY7stxZfSsg-ZzCLKY",
+      "version": "Z3 version 4.8.14 - 64 bit - build hashcode df8f9d7dcb8b9f9b3de1072017b7c2b7f63f0af8"
+    }
+  }
+}

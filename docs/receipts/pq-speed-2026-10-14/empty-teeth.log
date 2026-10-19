@@ -1,0 +1,15 @@
+PQ-SPEED MISSING official valid KAT [prepared-fips204-0.4.6]: expected 3, executed 0
+PQ-SPEED MISSING official invalid KAT [prepared-fips204-0.4.6]: expected 12, executed 0
+PQ-SPEED MISSING boundary DIFFERENTIAL [prepared-fips204-0.4.6]: expected 36, executed 0
+PQ-SPEED MISSING boundary DIFFERENTIAL [rustcrypto]: expected 36, executed 0
+PQ-SPEED MISSING boundary DIFFERENTIAL [libcrux]: expected 36, executed 0
+PQ-SPEED MISSING TEETH malformed public-key length [prepared-fips204-0.4.6]: expected 3, executed 0
+PQ-SPEED MISSING TEETH last message byte [prepared-fips204-0.4.6]: expected 36, executed 0
+PQ-SPEED MISSING TEETH last signature byte [prepared-fips204-0.4.6]: expected 36, executed 0
+PQ-SPEED MISSING TEETH last context byte [prepared-fips204-0.4.6]: expected 36, executed 0
+PQ-SPEED MISSING TEETH replaced identity key [prepared-fips204-0.4.6]: expected 36, executed 0
+PQ-SPEED MISSING TEETH empty signature [prepared-fips204-0.4.6]: expected 36, executed 0
+PQ-SPEED MISSING TEETH truncated signature [prepared-fips204-0.4.6]: expected 36, executed 0
+PQ-SPEED MISSING TEETH overlong signature [prepared-fips204-0.4.6]: expected 36, executed 0
+PQ-SPEED MISSING TEETH overlong context [prepared-fips204-0.4.6]: expected 36, executed 0
+PQ-SPEED assurance: 0/0; coverage complete=false; sabotage=false

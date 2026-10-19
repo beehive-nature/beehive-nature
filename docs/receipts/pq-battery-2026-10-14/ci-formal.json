@@ -1,0 +1,36 @@
+{
+  "schema": "btungsten.ci-formal-observation/1",
+  "run_id": 38598493065,
+  "commit": "e246b7954",
+  "result": "PASS",
+  "lanes": 12,
+  "jobs": [
+    {
+      "name": "saw-ntt",
+      "result": "success",
+      "url": "https://github.com/beehive-nature/beehive-nature/actions/runs/38598493065/job/115971298271"
+    },
+    {
+      "name": "saw",
+      "result": "success",
+      "url": "https://github.com/beehive-nature/beehive-nature/actions/runs/38598493065/job/115971298542"
+    },
+    {
+      "name": "saw-ntt-dsa",
+      "result": "success",
+      "url": "https://github.com/beehive-nature/beehive-nature/actions/runs/38598493065/job/115971298638"
+    }
+  ],
+  "transform_results": {
+    "ML-KEM": {
+      "equivalence_obligations": 8,
+      "teeth": 2
+    },
+    "ML-DSA": {
+      "equivalence_obligations": 15,
+      "teeth": 2,
+      "assumption": "Elem mul tied by the field lane\u2019s three links"
+    }
+  },
+  "scope": "BNR pinned RustCrypto and glue; no FIPS/Saorsa proof transfer"
+}

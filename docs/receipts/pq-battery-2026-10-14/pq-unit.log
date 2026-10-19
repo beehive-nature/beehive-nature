@@ -1,0 +1,265 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /workspace/wt-pq-battery/crates/bnr-keys/Cargo.toml
+workspace: /workspace/wt-pq-battery/Cargo.toml
+   Compiling syn v2.0.118
+   Compiling serde_core v1.0.228
+   Compiling hax-lib v0.3.7
+   Compiling opaque-debug v0.3.1
+   Compiling serde v1.0.228
+   Compiling thiserror v2.0.18
+   Compiling btungsten-wb001-core v0.1.0 (/workspace/wt-pq-battery/crates/btungsten-wb001-core)
+   Compiling bpq-core v0.1.0 (/workspace/wt-pq-battery/crates/bpq-core)
+   Compiling btungsten-teeth v0.1.0 (/workspace/wt-pq-battery/crates/btungsten-teeth)
+   Compiling bech32 v0.9.1
+   Compiling serde_json v1.0.150
+   Compiling zeroize_derive v1.5.0
+   Compiling curve25519-dalek-derive v0.1.1
+   Compiling zerocopy-derive v0.8.52
+   Compiling hax-lib-macros v0.3.7
+   Compiling zeroize v1.9.0
+   Compiling generic-array v0.14.7
+   Compiling hybrid-array v0.4.14
+   Compiling der v0.7.10
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling digest v0.10.7
+   Compiling hmac v0.12.1
+   Compiling der v0.8.1
+   Compiling crypto-common v0.2.2
+   Compiling block-buffer v0.12.1
+   Compiling sha3 v0.10.9
+   Compiling spki v0.7.3
+   Compiling pkcs8 v0.10.2
+   Compiling digest v0.11.3
+   Compiling spki v0.8.0
+   Compiling sec1 v0.7.3
+   Compiling crypto-bigint v0.5.5
+   Compiling pkcs8 v0.11.0
+   Compiling signature v3.0.0
+   Compiling sha3 v0.11.0
+   Compiling elliptic-curve v0.13.8
+   Compiling rfc6979 v0.4.0
+   Compiling module-lattice v0.2.3
+   Compiling signature v2.2.0
+   Compiling sha2 v0.10.9
+   Compiling shake v0.1.0
+   Compiling ecdsa v0.16.9
+   Compiling kem v0.3.0
+   Compiling curve25519-dalek v4.1.3
+   Compiling k256 v0.13.4
+   Compiling ml-kem v0.3.2
+   Compiling x25519-dalek v2.0.1
+   Compiling fips205 v0.4.1
+   Compiling ml-dsa v0.1.1
+   Compiling hmac v0.13.0
+   Compiling sha2 v0.11.0
+   Compiling zerocopy v0.8.52
+   Compiling libcrux-secrets v0.0.6
+   Compiling inout v0.1.4
+   Compiling libcrux-macros v0.0.3
+   Compiling libcrux-hacl-rs v0.0.5
+   Compiling cipher v0.4.4
+   Compiling libcrux-traits v0.0.8
+   Compiling universal-hash v0.5.1
+   Compiling polyval v0.6.2
+   Compiling ghash v0.5.1
+   Compiling ctr v0.9.2
+   Compiling aes v0.8.4
+   Compiling aead v0.5.2
+   Compiling thiserror-impl v2.0.18
+   Compiling serde_derive v1.0.228
+   Compiling slh-dsa v0.2.0-rc.5
+   Compiling btungsten-pq v0.1.0 (/workspace/wt-pq-battery/crates/btungsten-pq)
+   Compiling libcrux-sha2 v0.0.8
+   Compiling libcrux-ed25519 v0.0.9
+   Compiling btungsten-wb001 v0.1.0 (/workspace/wt-pq-battery/crates/btungsten-wb001)
+   Compiling aes-gcm v0.10.3
+   Compiling hkdf v0.12.4
+   Compiling bsigner v0.1.0 (/workspace/wt-pq-battery/crates/bsigner)
+warning: use of deprecated trait `ml_kem::ExpandedKeyEncoding`: use `DecapsulationKey::from_seed` instead
+  --> crates/bsigner/src/kat.rs:50:61
+   |
+50 |     Ciphertext, DecapsulationKey, ExpandedDecapsulationKey, ExpandedKeyEncoding, MlKem768,
+   |                                                             ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `ml_kem::ExpandedKeyEncoding::to_expanded_bytes`: use `DecapsulationKey::from_seed` instead
+   --> crates/bsigner/src/kat.rs:237:23
+    |
+237 |             b64u(&key.to_expanded_bytes()),
+    |                       ^^^^^^^^^^^^^^^^^
+
+warning: use of deprecated associated function `ml_kem::DecapsulationKey::<P>::from_expanded`: use `DecapsulationKey::from_seed` instead
+   --> crates/bsigner/src/kat.rs:273:43
+    |
+273 |             DecapsulationKey::<MlKem768>::from_expanded(&dk).expect("dk passes its H(ek) check");
+    |                                           ^^^^^^^^^^^^^
+
+warning: `bsigner` (bin "bsigner" test) generated 3 warnings
+    Finished `release` profile [optimized] target(s) in 31.13s
+     Running unittests src/lib.rs (target/release/deps/bpq_core-c05508604e312941)
+
+running 14 tests
+test bip39::tests::an_index_past_the_list_is_refused ... ok
+test layout::tests::segment_arithmetic ... ok
+test bip39::tests::packing_round_trips ... ok
+test layout::tests::nonce_is_flag_then_index_big_endian ... ok
+test layout::tests::the_domain_table_is_the_strings ... ok
+test layout::tests::validators_match_the_browser_patterns ... ok
+test tests::no_label_is_a_prefix_of_another ... ok
+test tests::padded_labels_agree_with_the_strings ... ok
+test tests::refusals ... ok
+test tests::info_is_label_then_context_then_counter ... ok
+test tests::the_collision_the_rule_closes ... ok
+test xwing::tests::combiner_input_is_the_concatenation ... ok
+test xwing::tests::the_label_is_the_drafts ... ok
+test xwing::tests::the_seed_splits_64_then_32 ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/release/deps/bsigner-399ab74cb36caa18)
+
+running 84 tests
+test alg::tests::ids_roundtrip ... ok
+test b64::tests::known_vectors ... ok
+test b64::tests::digest_stable ... ok
+test alg::tests::unknown_ids_are_hard_errors ... ok
+test bip39::tests::the_recovery_code_and_the_words_name_the_same_root ... ok
+test bip39::tests::the_list_is_the_browser_list ... ok
+test bip39::tests::phrases_round_trip_and_refuse_a_bad_checksum ... ok
+test bpq::tests::a_flipped_seal_byte_is_never_ok ... ok
+test bpq::tests::card_and_binding_verify_and_tampering_fails ... ok
+test bpq::tests::card_version_and_kind_are_refused ... ok
+test bpq::tests::contexts_outside_the_rule_derive_nothing ... ok
+test bpq::tests::binding_claim_stripping_version_kind_and_shape_are_refused ... ok
+test bpq::tests::crafted_objects_unknown_slots_numbers_and_seal_records ... ok
+test bpq::tests::derivation_matches_the_browser ... ok
+test bpq::tests::detached_signature_verifies_for_its_file_only ... ok
+test bpq::tests::every_derivation_label_matches_the_browser ... ok
+test bpq::tests::hkdf_sha256_passes_rfc5869_a1_to_a3 ... ok
+test bpq::tests::detached_at_version_and_kind_are_refused ... ok
+test bpq::tests::a_card_made_here_verifies_and_matches_the_vector_row ... ok
+test bpq::tests::recovery_code_decodes_to_the_root ... ok
+test bpq::tests::recovery_code_round_trips ... ok
+test bpq::tests::root_context_is_reserved_for_the_vault ... ok
+test bpq::tests::root_vault_matches_the_browser_and_opens_its_objects ... ok
+test bpq::tests::seal_self_round_trips_at_every_segment_edge_and_refuses_the_wrong_vault ... ok
+test bpq::tests::sealed_objects_open_for_their_readers_only ... ok
+test bpq::tests::signed_shared_object_tampering_in_every_region_never_passes ... ok
+test bpq::tests::intent_authorizations_verify_and_their_forgeries_do_not ... ok
+test bpq::tests::nostr_attestations_verify_and_their_forgeries_do_not ... ok
+test bpq::tests::the_pinned_rust_intent_authorization_is_reproduced ... ok
+test bpq::tests::the_pinned_rust_sealed_object_opens ... ok
+test bpq::tests::utc_timestamps_are_strict ... ok
+test bpq::tests::xwing_matches_the_draft_vectors ... ignored, needs BPQ_XWING_DRAFT, the draft text CI fetches
+test envelope::tests::envelope_names_its_algorithms_everywhere ... ok
+test bpq::tests::the_pinned_rust_nostr_attestation_is_reproduced ... ok
+test envelope::tests::hash_id_mismatch_is_refused ... ok
+test envelope::tests::future_algorithm_id_is_refused_not_defaulted ... ok
+test envelope::tests::roundtrip_and_tamper ... ok
+test envelope::tests::seed_never_appears_in_the_envelope ... ok
+test intent::tests::envelopes_are_refused_for_spends_the_rail_does_not_make ... ok
+test kat::kat_file_names_its_nist_source ... ok
+test kat::kat_ml_dsa_65_keygen_seed_to_public_key ... ok
+test kat::kat_ml_dsa_65_sigver_external_pure ... ok
+test kat::kat_ml_kem_768_decapsulation_expanded_key ... ok
+test kat::kat_ml_kem_768_keygen_seed_to_keys ... ok
+test keys::tests::a_legacy_file_with_a_swapped_seed_refuses_to_seal ... ok
+test keys::tests::a_plaintext_key_file_is_refused_until_resealed ... ok
+test keys::tests::kem_keygen_roundtrip_via_disk ... ok
+test keys::tests::keygen_output_carries_no_seed ... ok
+test keys::tests::listing_shows_no_secrets ... ok
+test keys::tests::no_seed_byte_reaches_disk ... ok
+test keys::tests::sign_with_generated_key_via_disk ... ok
+test keys::tests::the_wrong_words_or_a_tampered_file_open_nothing ... ok
+test pq::tests::dsa_cross_algorithm_is_rejected ... ok
+test bpq::tests::succession_keys_match_the_browser_on_every_vector_row ... ok
+test pq::tests::kem_roundtrip_all_levels ... ok
+test pq::tests::sizes_are_checked_not_trusted ... ok
+test psbt::tests::base64_is_read_only_in_its_canonical_form ... ok
+test psbt::tests::bip174_and_bip371_vectors ... ignored, needs the pinned BIP-174 and BIP-371 texts: BPQ_BIP174_TEXT, BPQ_BIP371_TEXT (CI job pq12-taproot)
+test pq::tests::dsa_sign_verify_roundtrip_all_levels ... ok
+test taproot::tests::addresses_follow_bip173_and_bip350 ... ok
+test psbt::tests::the_signer_reads_only_complete_spendable_psbts ... ok
+test taproot::tests::bip341_wallet_vectors ... ignored, needs the pinned BIP-341 vectors: BPQ_BIP341_VECTORS (CI job pq12-taproot)
+test taproot::tests::hash_types_and_indices_outside_bip341_build_no_message ... ok
+test taproot::tests::unsigned_transactions_outside_the_rule_parse_to_nothing ... ok
+test x402::tests::canonical_bytes_are_deterministic ... ok
+test x402::tests::default_cap_applies_when_policy_omits_it ... ok
+test x402::tests::asset_mismatch_refused ... ok
+test x402::tests::destination_not_allowlisted_refused_before_signing ... ok
+test x402::tests::expired_offer_refused ... ok
+test x402::tests::happy_path_signs_one_instruction_covering_the_split ... ok
+test x402::tests::lying_tithe_output_refused ... ok
+test x402::tests::over_per_signature_cap_refused_before_signing ... ok
+test x402::tests::over_remaining_budget_refused_before_signing ... ok
+test x402::tests::payer_as_output_refused ... ok
+test x402::tests::seed_never_appears_in_gate_output ... ok
+test x402::tests::split_not_summing_to_amount_refused ... ok
+test x402::tests::tampered_offer_body_fails_the_pinned_signature ... ok
+test x402::tests::stranger_seller_key_refused_even_for_allowlisted_destination ... ok
+test x402::tests::unsigned_offer_refused ... ok
+test x402::tests::unknown_third_destination_refused ... ok
+test x402::tests::verify_payment_catches_post_signature_tamper ... ok
+test x402::tests::zero_amount_and_zero_budget_refuse ... ok
+test intent::tests::the_signer_signs_only_the_spend_it_was_authorized ... ok
+test bpq::tests::a_handover_verifies_and_its_forgeries_do_not ... ok
+
+test result: ok. 81 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 1.41s
+
+     Running unittests src/lib.rs (target/release/deps/btungsten_pq-587e6c947cc0b467)
+
+running 4 tests
+test acvp::tests::cases_refuse_a_missing_answer ... ok
+test acvp::tests::manifest_names_a_full_commit_and_every_file_once ... ok
+test acvp::tests::sha256_tag_matches_the_existing_pq_kat_pin ... ok
+test acvp::tests::manifest_agrees_with_the_pq_kat_source_list ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/classic-kat.rs (target/release/deps/classic_kat-ec638bcaceca7c66)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/pq-kat.rs (target/release/deps/pq_kat-a92b0d01e1a95239)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/release/deps/btungsten_teeth-9e916ec3a7662f09)
+
+running 9 tests
+test tests::boundary_lengths_straddle_every_block_edge ... ok
+test tests::t_truncate_convicts_a_planted_prefix_hash ... ok
+test tests::accepts_unless_panic_reads_assert_as_refusal ... ok
+test tests::t_truncate_refuses_a_perturbation_that_changes_nothing ... ok
+test tests::t_vacuous_convicts_a_planted_count_free_verifier ... ok
+test tests::t_vacuous_passes_a_verifier_that_checks_the_count ... ok
+test tests::t_truncate_passes_shake256_96 ... ok
+test tests::t_vacuous_refuses_to_decide_without_its_controls ... ok
+test tests::t_truncate_passes_sha3_256 ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests bpq_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests btungsten_pq
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests btungsten_teeth
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

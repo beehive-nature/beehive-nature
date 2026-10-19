@@ -69,6 +69,8 @@ members = [
     "crates/bnrose-exec-host",
     "crates/bnrose-evolve",
     "crates/bnrose-anchor-vaulta",
+    "crates/bnrose-netpart",
+    "crates/bnrose-settle-adapters",
     "crates/btungsten-wb001-core",
     "crates/btungsten-wb001",
     "crates/btungsten-wb002-core",
@@ -82,6 +84,8 @@ members = [
     "crates/bpq-core",
     "crates/bheraldry",
     "crates/bpq-device-xcheck",
+    "crates/antelope-authority",
+    "crates/bindex-bnrose",
     "crates/bnr-explorer",
     "crates/bnr-explorer-wasm",
 ]
