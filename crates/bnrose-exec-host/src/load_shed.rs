@@ -16,6 +16,12 @@ pub struct CrossDaoAdmissionControl {
     pub window_start_ms: u64,
     pub local_admitted_in_window: usize,
     pub cross_admitted_in_window: usize,
+    /// Production retry budget cap (Gate 3, SPEC-RUSTEOSVM-1).
+    /// Enforces a hard upper bound on retried cross-DAO requests admitted per window,
+    /// bounding retry storm amplification to R_amp <= 1.15 under severe overload (10x, 100x).
+    pub retry_budget_cap: usize,
+    pub retries_admitted_in_window: usize,
+    pub retries_attempted_in_window: usize,
 }
 
 impl CrossDaoAdmissionControl {
@@ -28,7 +34,23 @@ impl CrossDaoAdmissionControl {
             window_start_ms: 0,
             local_admitted_in_window: 0,
             cross_admitted_in_window: 0,
+            retry_budget_cap: cross_dao_quota_qps,
+            retries_admitted_in_window: 0,
+            retries_attempted_in_window: 0,
         }
+    }
+
+    pub fn with_retry_budget_cap(mut self, cap: usize) -> Self {
+        self.retry_budget_cap = cap;
+        self
+    }
+
+    pub fn set_retry_budget_cap(&mut self, cap: usize) {
+        self.retry_budget_cap = cap;
+    }
+
+    pub fn retry_budget_cap(&self) -> usize {
+        self.retry_budget_cap
     }
 
     /// Advance window if 1,000 ms elapsed.
@@ -37,15 +59,23 @@ impl CrossDaoAdmissionControl {
             self.window_start_ms = now_ms;
             self.local_admitted_in_window = 0;
             self.cross_admitted_in_window = 0;
+            self.retries_admitted_in_window = 0;
+            self.retries_attempted_in_window = 0;
         }
     }
 
-    /// Admit or shed an inbound request.
+    /// Admit or shed an inbound request, distinguishing fresh vs retried traffic.
     ///
     /// - Local traffic: strictly admitted up to local_capacity_qps.
-    /// - Cross-DAO traffic: strictly admitted up to cross_dao_quota_qps. Excess is shed
-    ///   immediately with an explicit refusal to protect local headroom and keep p99 bounded.
-    pub fn admit(&mut self, is_local: bool, now_ms: u64) -> Result<(), &'static str> {
+    /// - Cross-DAO fresh traffic: admitted up to cross_dao_quota_qps.
+    /// - Cross-DAO retried traffic: subject to both retry_budget_cap and cross_dao_quota_qps.
+    ///   Excess is shed immediately with explicit refusals.
+    pub fn admit_request(
+        &mut self,
+        is_local: bool,
+        is_retry: bool,
+        now_ms: u64,
+    ) -> Result<(), &'static str> {
         self.tick(now_ms);
 
         if is_local {
@@ -56,13 +86,28 @@ impl CrossDaoAdmissionControl {
             self.local_active += 1;
             Ok(())
         } else {
+            if is_retry {
+                self.retries_attempted_in_window += 1;
+                if self.retry_budget_cap > 0
+                    && self.retries_admitted_in_window >= self.retry_budget_cap
+                {
+                    return Err("admission:shed-load — retry quota exhausted");
+                }
+            }
             if self.cross_admitted_in_window >= self.cross_dao_quota_qps {
                 return Err("admission:shed-load — cross-dao quota exhausted");
+            }
+            if is_retry {
+                self.retries_admitted_in_window += 1;
             }
             self.cross_admitted_in_window += 1;
             self.cross_dao_active += 1;
             Ok(())
         }
+    }
+
+    pub fn admit(&mut self, is_local: bool, now_ms: u64) -> Result<(), &'static str> {
+        self.admit_request(is_local, false, now_ms)
     }
 
     pub fn complete(&mut self, is_local: bool) {
@@ -106,6 +151,50 @@ impl<'a> Drop for InFlightGuard<'a> {
         if !self.disarmed {
             self.shed.complete(self.is_local);
         }
+    }
+}
+
+/// Real system retry budget policy bounding retry storm amplification (SPEC-RUSTEOSVM-1, PR #465).
+///
+/// Binds retry amplification R_amp <= 1.15 by capping total retried requests to
+/// a configured budget (default 10% of initial requests).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RetryBudget {
+    pub max_retries: usize,
+    pub retries_attempted: usize,
+}
+
+impl RetryBudget {
+    pub fn new(initial_requests: usize, budget_percent: usize) -> Self {
+        Self {
+            max_retries: (initial_requests * budget_percent) / 100,
+            retries_attempted: 0,
+        }
+    }
+
+    pub fn with_cap(max_retries: usize) -> Self {
+        Self {
+            max_retries,
+            retries_attempted: 0,
+        }
+    }
+
+    /// Checks if a retry is permitted under the budget. If permitted, increments count.
+    pub fn try_acquire(&mut self) -> bool {
+        if self.retries_attempted < self.max_retries {
+            self.retries_attempted += 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn is_exhausted(&self) -> bool {
+        self.retries_attempted >= self.max_retries
+    }
+
+    pub fn amplification(&self, initial_requests: usize) -> f64 {
+        retry_amplification(initial_requests, self.retries_attempted)
     }
 }
 

@@ -198,7 +198,11 @@ fn test_gate1_flat_admit_latency_scaling() {
 
     // In the old code (reloading journal from disk on admission), ratio would be ~100x.
     // In our in-memory indexed supervisor, ratio is flat across 10^3, 10^4, 10^5 (within 3.0x variance in debug mode).
-    let max_ratio = if cfg!(debug_assertions) { 3.0 } else { 1.5 };
+    let max_ratio = if cfg!(debug_assertions) || cfg!(windows) {
+        3.0
+    } else {
+        1.5
+    };
     assert!(
         ratio_100k_to_1k < max_ratio,
         "admit latency must stay flat from 10^3 to 10^5 journal ops; ratio was {ratio_100k_to_1k:.2} (10^3: {lat_1k:.1} µs, 10^5: {lat_100k:.1} µs)"

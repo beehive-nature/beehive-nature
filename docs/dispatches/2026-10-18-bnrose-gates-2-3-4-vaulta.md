@@ -413,3 +413,46 @@ Verification Receipts:
 - `cargo test -p bnrose-exec-host --test gate2_device_capacity --test gate3_load_shed` (ALL PASS in debug mode)
 - `cargo test --release -p bsigner -p bnr-keys` (ALL 103 TESTS PASS)
 - `cargo fmt --all --check` (CLEAN, 0 diffs)
+
+
+---
+
+## 9. Review Follow-up on 34d96d5f0 (2026-10-19)
+
+Resolves the two review findings on PR #465 ([issuecomment-6272429599](https://github.com/beehive-nature/beehive-nature/pull/465#issuecomment-6272429599) against commit `34d96d5f0`):
+
+1. **Signature Verification Precedes Admission Control (Zero Forged Lockout):**
+   - **Problem:** Commit `34d96d5f0` introduced a security regression by moving `load_shed.admit` before `verify_envelope` in `opexec.rs`. An unauthenticated attacker without a valid private key could flood forged requests, exhaust `cross_admitted_in_window` quota slots, and deny service to legitimate signed requests in that window.
+   - **Fix:**
+     * In `crates/bnrose-exec-host/src/opexec.rs`: Moved `btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig)` strictly **before** `self.load_shed.admit_request`.
+     * Forged requests fail immediately with `"wb001:binding-refused"` without touching admission counters or consuming quota slots.
+     * Added test `test_gate3_forged_requests_without_key_cannot_exhaust_quota_or_lockout_legitimate_requests` in `tests/gate3_load_shed.rs`: proves that 20 forged requests with corrupted signatures fail at the door, while all legitimate signed cross-DAO requests in the same window are admitted and receive receipts (zero quota lockout).
+     * The (quota + 1)-th legitimate request is shed only when valid quota is genuinely reached.
+
+2. **Real-System Retry Budget Cap & Server-Side Enforcement (Gate 3):**
+   - **Problem:** In commit `34d96d5f0`, the retry budget cap existed only as a client-side local variable and loop break in test code (`tests/gate3_load_shed.rs`), rather than being an integrated part of the real host admission system.
+   - **Fix:**
+     * In `crates/bnrose-exec-host/src/load_shed.rs`:
+       - Added `retry_budget_cap: usize`, `retries_admitted_in_window: usize`, and `retries_attempted_in_window: usize` to `CrossDaoAdmissionControl`.
+       - Added `admit_request(&mut self, is_local: bool, is_retry: bool, now_ms: u64) -> Result<(), &'static str>`. If `is_retry` is true and `retries_admitted_in_window >= retry_budget_cap`, rejects with `"admission:shed-load — retry quota exhausted"`.
+       - Implemented production `RetryBudget` struct with `new`, `with_cap`, `try_acquire`, `is_exhausted`, and `amplification`.
+     * In `crates/bnrose-exec-host/src/opexec.rs`:
+       - Added `shed_nonces: HashSet<([u8; 32], [u8; 32])>` to `Supervisor` to accurately track operations shed at Gate 3.
+       - Integrated retry identification: `let is_retry = allow_retry || self.shed_nonces.contains(&(intent.authority, decoded.nonce));`.
+       - On admission failure, tracks the shed nonce; on success, removes it.
+       - Exposed `retry(&mut self, ...)` and `set_retry_budget_cap(...)` on `Supervisor`.
+     * In `crates/bnrose-exec-host/tests/gate3_load_shed.rs`:
+       - Configured server with real system retry budget cap: `CrossDaoAdmissionControl::new(1_000, cross_dao_quota).with_retry_budget_cap(retry_budget_cap)`.
+       - Dispatched retries via `sup.retry(&intents[client_id], retry_epoch, &bounds)` using `RetryBudget::new(initial_requests, 10)`.
+       - Added server-side enforcement verification: retrying clients attempting to bypass budget are rejected by the server with `"admission:shed-load — retry quota exhausted"`.
+       - Measured R_amp = 1.100 <= 1.15 bound at real 10x overload.
+
+Verification Receipts:
+- `cargo fmt --all --check` (CLEAN, 0 diffs)
+- `cargo test --release -p bnrose-exec-host --test gate1_flat_admit --test gate2_device_capacity --test gate3_load_shed --test gate4_quantum_retry` (ALL 28 TESTS PASS)
+  - Gate 1: 9/9 ok (3.84s)
+  - Gate 2: 8/8 ok (0.41s)
+  - Gate 3: 5/5 ok (18.49s)
+  - Gate 4: 6/6 ok (0.12s)
+- `cargo test --release -p bnrose-exec-host --test gate5_worker_cleanup` (2/2 ok, 45.38s)
+- `cargo test -p bnrose-exec-host --test gate3_load_shed` (5/5 ok in debug mode, 74.50s)

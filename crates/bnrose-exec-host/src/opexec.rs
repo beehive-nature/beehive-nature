@@ -72,6 +72,8 @@ pub struct Supervisor {
     pub load_shed: CrossDaoAdmissionControl,
     pub device_id: [u8; 32],
     pub local_domain: String,
+    /// Nonces of unadmitted operations shed at Gate 3 load control.
+    pub shed_nonces: std::collections::HashSet<([u8; 32], [u8; 32])>,
     /// the exclusive authority over this state directory (see Claim)
     _claim: Claim,
 }
@@ -184,6 +186,14 @@ impl Default for StepOptions {
 impl Supervisor {
     pub fn set_load_shed(&mut self, ctrl: CrossDaoAdmissionControl) {
         self.load_shed = ctrl;
+    }
+
+    pub fn set_retry_budget_cap(&mut self, cap: usize) {
+        self.load_shed.set_retry_budget_cap(cap);
+    }
+
+    pub fn retry_budget_cap(&self) -> usize {
+        self.load_shed.retry_budget_cap()
     }
 
     pub fn issue_capacity_challenge(
@@ -406,6 +416,7 @@ impl Supervisor {
             load_shed,
             device_id,
             local_domain,
+            shed_nonces: std::collections::HashSet::new(),
             cached_receipts,
             _claim: claim,
         })
@@ -809,28 +820,36 @@ impl Supervisor {
             }
         }
 
-        // Gate 3: Cross-DAO Admission Control & Load Shedding
-        // Strict exact local domain match (r2: prevents local priority spoofing e.g. 'local-evil-dao')
-        // Shed overloaded cross-DAO traffic at the door before CPU-expensive signature verification.
-        let domain_str = String::from_utf8_lossy(&decoded.domain[..decoded.domain_len as usize]);
-        let is_local = domain_str == self.local_domain && !self.local_domain.is_empty();
-        let now_ms = clock * 1000;
-        if let Err(e) = self.load_shed.admit(is_local, now_ms) {
-            return RunOutcome {
-                refused: Some(e.into()),
-                ..none
-            };
-        }
-
         // 1b. the WB001 binding for fresh operations
+        // Cryptographic signature check MUST run BEFORE capacity admission check (PR #465 review).
+        // If an attacker without a valid key sends forged envelopes, they fail here
+        // as 'wb001:binding-refused' and NEVER consume cross-DAO quota slots or lock out legitimate requests.
         if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
-            self.load_shed.complete(is_local);
             return RunOutcome {
                 refused: Some("wb001:binding-refused".into()),
                 ..none
             };
         }
 
+        // Gate 3: Cross-DAO Admission Control & Load Shedding
+        // Strict exact local domain match (r2: prevents local priority spoofing e.g. 'local-evil-dao')
+        let domain_str = String::from_utf8_lossy(&decoded.domain[..decoded.domain_len as usize]);
+        let is_local = domain_str == self.local_domain && !self.local_domain.is_empty();
+        let now_ms = clock * 1000;
+        let is_retry = allow_retry
+            || self
+                .shed_nonces
+                .contains(&(intent.authority, decoded.nonce));
+
+        if let Err(e) = self.load_shed.admit_request(is_local, is_retry, now_ms) {
+            self.shed_nonces.insert((intent.authority, decoded.nonce));
+            return RunOutcome {
+                refused: Some(e.into()),
+                ..none
+            };
+        }
+
+        self.shed_nonces.remove(&(intent.authority, decoded.nonce));
         let outcome = self.run_inner_admitted(intent, clock, lose_response, bounds, &decoded, none);
         self.load_shed.complete(is_local);
         outcome
