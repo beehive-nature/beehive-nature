@@ -78,6 +78,11 @@ export async function collectReceipt(repo, head, runIds = []) {
         started_at: job.started_at, completed_at: job.completed_at,
         dispatch_to_start_seconds: seconds(run.created_at, job.started_at),
         execution_seconds: job.status === 'completed' ? seconds(job.started_at, job.completed_at) : null,
+        steps: (job.steps ?? []).map(step => ({
+          number: step.number, name: step.name, status: step.status, conclusion: step.conclusion,
+          started_at: step.started_at, completed_at: step.completed_at,
+          execution_seconds: step.status === 'completed' ? seconds(step.started_at, step.completed_at) : null,
+        })),
       };
       if (job.status === 'completed' && job.conclusion !== 'skipped') {
         try {
@@ -110,7 +115,7 @@ export async function collectReceipt(repo, head, runIds = []) {
     format: 'bnr.ci-observation.v1', provider: 'github', repository: repo, head,
     observed_at: new Date().toISOString(), attestation: 'unsigned API and job-log observations',
     coverage_note: 'Recorded runs only; compare against the required workflow/event plan before qualification.',
-    timing_note: 'Dispatch-to-start includes dependency waiting; it is not pure runner queue time.',
+    timing_note: 'Workflow creation to job start includes dependency and retry waiting; it is not pure runner queue time.',
     summary: summarizeRuns(runs), runs,
   };
 }

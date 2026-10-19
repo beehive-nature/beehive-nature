@@ -103,6 +103,19 @@ reported as pure runner queue time. This one-run observation is not full
 PR qualification. Receipts are unsigned observations, not attestations;
 required workflow/event coverage must be checked separately.
 
+The native-PQ baseline is retained in
+[`cache-baseline-main-pq.json`](../receipts/ci-throughput-2026-10-18/cache-baseline-main-pq.json):
+run `39175451733` on actual main merge `d472d198`, all seven jobs successful
+and bound to their checkout/tree, 737 total job-execution seconds. The
+x0x job used 336 seconds, including 177 seconds installing the audit tool,
+110 seconds for the native battery, 8 seconds restoring cache and 5 seconds
+in the cache post-step. Its
+[job log](https://github.com/beehive-nature/beehive-nature/actions/runs/39175451733/job/117817056679)
+explicitly lists the repeated `crates/btungsten-x0x-pq/` target path.
+The x0x crate and both native controllers compare byte-identical between
+this baseline and cache candidate `377674983`. These are baseline values;
+the corrected run and warm-cache effect remain to be measured.
+
 ## Stage-one hosting and the next phase
 
 GitHub currently supplies hosting, event scheduling, runners and check
