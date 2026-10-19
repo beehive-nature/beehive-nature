@@ -144,6 +144,7 @@ fn main() {
 }
 
 struct Opts {
+    authority: Option<String>,
     keydir: Option<std::path::PathBuf>,
     alg: Option<String>,
     key_id: Option<String>,
@@ -163,6 +164,7 @@ struct Opts {
 
 fn parse_opts(args: &[String]) -> Result<Opts, String> {
     let mut o = Opts {
+        authority: None,
         keydir: None,
         alg: None,
         key_id: None,
@@ -186,6 +188,7 @@ fn parse_opts(args: &[String]) -> Result<Opts, String> {
             .ok_or_else(|| format!("{} needs a value", args[i]))?
             .clone();
         match args[i].as_str() {
+            "--authority" | "-a" => o.authority = Some(val),
             "--keydir" => o.keydir = Some(val.into()),
             "--alg" => o.alg = Some(val),
             "--key-id" => o.key_id = Some(val),
@@ -1150,6 +1153,9 @@ fn cmd_vaulta_authorize(args: &[String]) -> i32 {
     let Some(file) = o.file.as_deref() else {
         return fail("vaulta-authorize needs --file PATH to transaction JSON".into());
     };
+    let Some(keydir) = o.keydir else {
+        return fail("vaulta-authorize needs --keydir PATH for nonce persistence".into());
+    };
     let text = match std::fs::read_to_string(file) {
         Ok(t) => t,
         Err(e) => return fail(format!("read {file}: {e}")),
@@ -1173,8 +1179,12 @@ fn cmd_vaulta_authorize(args: &[String]) -> i32 {
         _ => return fail("seed must be 32 bytes hex".into()),
     };
 
-    let authority = doc["authority"].as_str().unwrap_or("eosio");
-    let nonces_path = o.keydir.map(|d| d.join("vaulta_nonces.bin"));
+    // Pinned authority comes from CLI / signer config, NEVER from untrusted request JSON.
+    let authority = match o.authority.as_deref().or_else(|| o.context.as_deref()) {
+        Some(a) => a,
+        None => return fail("vaulta-authorize needs --authority AUTH (pinned signer authority)".into()),
+    };
+    let nonces_path = Some(keydir.join("vaulta_nonces.bin"));
     let mut authorizer = match vaulta::VaultaAuthorizer::open(seed_bytes, authority.into(), nonces_path) {
         Ok(a) => a,
         Err(e) => return fail(e),
@@ -1194,7 +1204,9 @@ fn cmd_vaulta_authorize(args: &[String]) -> i32 {
         Ok(action) => {
             let out_json = serde_json::to_string_pretty(&action).unwrap();
             if let Some(out) = o.out {
-                let _ = std::fs::write(&out, out_json.as_bytes());
+                if let Err(e) = std::fs::write(&out, out_json.as_bytes()) {
+                    return fail(format!("write {out}: {e}"));
+                }
             } else {
                 println!("{out_json}");
             }
@@ -1220,12 +1232,18 @@ fn cmd_vaulta_verify(args: &[String]) -> i32 {
         Ok(a) => a,
         Err(e) => return fail(format!("parse {file}: {e}")),
     };
-    let verified = vaulta::verify_vaulta_k1_action(pubkey, &action);
+    let mut verified = vaulta::verify_vaulta_k1_action(pubkey, &action);
+    if let Some(expected_auth) = o.authority.as_deref().or(o.context.as_deref()) {
+        if action.pq_attestation.authority_id != expected_auth {
+            verified = false;
+        }
+    }
     println!(
         "{}",
         json!({
             "verified": verified,
             "public_key": pubkey,
+            "authority_id": action.pq_attestation.authority_id,
             "action_digest": taproot::hex(&action.pq_attestation.action_digest),
             "k1_signature": action.k1_signature
         })

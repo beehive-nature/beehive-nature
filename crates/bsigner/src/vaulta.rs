@@ -317,7 +317,27 @@ pub fn verify_vaulta_k1_action(expected_k1_pubkey: &str, action: &VaultaAuthoriz
     let Ok(payload65) = bnr_keys::decode_sig_k1(&action.k1_signature) else {
         return false;
     };
-    bnr_keys::verify_digest65_pubkey(&pub33, &digest, &payload65)
+    if !bnr_keys::verify_digest65_pubkey(&pub33, &digest, &payload65) {
+        return false;
+    }
+
+    // Verify PQ attestation envelope & signature
+    let Ok(auth_val) = serde_json::from_str::<serde_json::Value>(&action.pq_attestation.intent_sig) else {
+        return false;
+    };
+    let Some((id, env_bytes)) = crate::bpq::verify_intent(&auth_val) else {
+        return false;
+    };
+    if id != action.pq_attestation.authority_id {
+        return false;
+    }
+    let Ok(decoded) = btungsten_wb001::decode(&env_bytes) else {
+        return false;
+    };
+    if decoded.action != digest {
+        return false;
+    }
+    true
 }
 
 #[cfg(test)]
