@@ -193,9 +193,22 @@ merged at 01:23:02 UTC as `751e5aacb94eef991a6c316ab4d9941c0d4cf8f6`.
 Before merging, the PR still had the qualified head and base, GitHub
 reported CLEAN, and the diff remained the one-line cache-path correction
 plus its dispatch. Fetch and ancestry checks confirm the actual merge on
-main, with the same tested tree. Its ten main code/proof workflows and
-separate Pages run are now being observed; their success and corrected
-cache seeding are not yet claimed.
+main, with the same tested tree. Its ten main code/proof workflows are
+still being observed. The separate
+[Pages run](https://github.com/beehive-nature/beehive-nature/actions/runs/39185101692)
+succeeded on this actual merge.
+
+The main x0x job completed successfully in 339 seconds and is bound to
+the actual merge in
+[`cache-main-seed.json`](../receipts/ci-throughput-2026-10-18/cache-main-seed.json).
+Its log reports no cache found, lists the corrected target path, evaluates
+`save-if: true`, and uploads all 323,960,925 bytes. The cache API confirms
+new main-scoped entry `9137203422` at 01:29:54 UTC. It shares the visible
+key with older entry `9134539875` but has a different cache version; a
+visible key match alone does not prove restoration of the corrected path.
+This is successful cold seeding, not a warm-restoration or whole-main
+qualification result. The throughput candidate will supply the next
+restoration observation.
 
 ## Throughput follow-up status
 
