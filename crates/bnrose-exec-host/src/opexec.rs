@@ -42,6 +42,14 @@ fn sha256_of(data: &[u8]) -> [u8; 32] {
 /// 1. Fresh-nonce re-sends of shed work match the original intent fingerprint (d11b, d11c).
 /// 2. Unrelated new requests from the same authority have distinct work fingerprints and are
 ///    never misbooked as retries (d13).
+/// Semantic intent work fingerprint (PR #465, d13, d11c, O5).
+/// Fingerprints the semantic work payload (domain, action, destination, capability,
+/// amount, payer, payload), strictly excluding nonce, epoch, and expiry.
+/// Nonce, epoch, and expiry are signing metadata; semantic work is the operation itself.
+/// This ensures:
+/// 1. Fresh-nonce re-sends and bumped-expiry re-sends match the original work fingerprint (d11b, d11c, d19).
+/// 2. Unrelated new requests from the same authority have distinct work fingerprints and are
+///    never misbooked as retries (d13, d13b).
 pub fn intent_work_fingerprint(decoded: &btungsten_wb001::core::Intent) -> [u8; 32] {
     use sha2::{Digest, Sha256};
     let mut h = Sha256::new();
@@ -54,7 +62,6 @@ pub fn intent_work_fingerprint(decoded: &btungsten_wb001::core::Intent) -> [u8; 
     let cap_len = (decoded.capability_len as usize).min(64);
     h.update(&decoded.capability[..cap_len]);
     h.update(&decoded.amount.to_le_bytes());
-    h.update(&decoded.expiry.to_le_bytes());
     let payer_len = (decoded.payer_len as usize).min(128);
     h.update(&decoded.payer[..payer_len]);
     let payload_len = (decoded.payload_len as usize).min(4096);
@@ -103,9 +110,8 @@ pub struct Supervisor {
     pub local_domain: String,
     /// Nonces of unadmitted operations shed at Gate 3 load control.
     pub shed_nonces: crate::load_shed::BoundedShedTracker,
-    /// Client-side retry budgets per authority for bounding retry amplification (PR #465, r9).
-    pub client_retry_budgets:
-        std::collections::HashMap<[u8; 32], crate::load_shed::ClientRetryBudget>,
+    /// Client-side retry budgets per authority for bounding retry amplification (PR #465, r9, O3).
+    pub client_retry_budgets: crate::load_shed::BoundedClientBudgets,
     /// the exclusive authority over this state directory (see Claim)
     _claim: Claim,
 }
@@ -220,12 +226,22 @@ impl Supervisor {
         self.load_shed = ctrl;
     }
 
-    pub fn record_client_request(&mut self, authority: &[u8; 32]) {
+    pub fn record_admitted_client_request(&mut self, authority: &[u8; 32], now_ms: u64) {
         let budget = self
             .client_retry_budgets
-            .entry(*authority)
-            .or_insert_with(|| crate::load_shed::ClientRetryBudget::new(0, 10));
-        budget.initial_requests += 1;
+            .entry_or_insert_with(*authority, || {
+                crate::load_shed::ClientRetryBudget::new(0, 10)
+            });
+        budget.record_admitted(now_ms);
+    }
+
+    pub fn try_acquire_client_retry(&mut self, authority: &[u8; 32], now_ms: u64) -> bool {
+        let budget = self
+            .client_retry_budgets
+            .entry_or_insert_with(*authority, || {
+                crate::load_shed::ClientRetryBudget::new(0, 10)
+            });
+        budget.try_acquire_at(now_ms)
     }
 
     pub fn set_client_retry_budget(
@@ -489,7 +505,7 @@ impl Supervisor {
             device_id,
             local_domain,
             shed_nonces: crate::load_shed::BoundedShedTracker::default(),
-            client_retry_budgets: std::collections::HashMap::new(),
+            client_retry_budgets: crate::load_shed::BoundedClientBudgets::default(),
             cached_receipts,
             _claim: claim,
         })
@@ -696,25 +712,6 @@ impl Supervisor {
             if self.is_nonce_admitted(&intent.authority, &decoded.nonce) {
                 return self.run_inner(intent, clock, false, bounds, true);
             }
-        }
-
-        // Client-side fail-fast retry budget:
-        // Enforce local client fail-fast behavior before network transmission (PR #465, r9).
-        // If client's retry budget is exhausted, return immediately without wire send.
-        let budget = self
-            .client_retry_budgets
-            .entry(intent.authority)
-            .or_insert_with(|| crate::load_shed::ClientRetryBudget::new(10, 10));
-
-        if !budget.try_acquire() {
-            return RunOutcome {
-                op: None,
-                refused: Some("client:retry-budget-exhausted".into()),
-                lost_response: false,
-                receipt: None,
-                receipt_path: None,
-                receipt_json: None,
-            };
         }
 
         self.run_inner(intent, clock, false, bounds, true)
@@ -931,10 +928,6 @@ impl Supervisor {
             };
         }
 
-        if !allow_retry {
-            self.record_client_request(&intent.authority);
-        }
-
         // Gate 3: Cross-DAO Admission Control & Load Shedding
         // Strict exact local domain match (r2: prevents local priority spoofing e.g. 'local-evil-dao')
         let domain_str = String::from_utf8_lossy(&decoded.domain[..decoded.domain_len as usize]);
@@ -946,6 +939,20 @@ impl Supervisor {
         let is_retry = allow_retry
             || self.shed_nonces.contains_nonce(&nonce_key)
             || self.shed_nonces.contains_intent(&intent_key);
+
+        // Enforce per-authority client retry budget for all retries (PR #465, O1 & O2).
+        // Runs AFTER verify_envelope and allowed_authorities, so forged or unauthorized requests
+        // never deplete a victim's budget (d16).
+        // Enforced in run_inner for every request matching a prior work fingerprint or nonce,
+        // ensuring clients sending via run() cannot bypass the budget (r8, r10).
+        if is_retry {
+            if !self.try_acquire_client_retry(&intent.authority, now_ms) {
+                return RunOutcome {
+                    refused: Some("client:retry-budget-exhausted".into()),
+                    ..none
+                };
+            }
+        }
 
         if let Err(e) = self
             .load_shed
@@ -959,7 +966,15 @@ impl Supervisor {
         }
 
         self.shed_nonces.remove(&nonce_key, &intent_key);
-        let outcome = self.run_inner_admitted(intent, clock, lose_response, bounds, &decoded, none);
+        let outcome = self.run_inner_admitted(
+            intent,
+            clock,
+            lose_response,
+            bounds,
+            &decoded,
+            is_retry,
+            none,
+        );
         self.load_shed.complete(is_local);
         outcome
     }
@@ -971,6 +986,7 @@ impl Supervisor {
         lose_response: bool,
         bounds: &Bounds,
         decoded: &btungsten_wb001::core::Intent,
+        is_retry: bool,
         none: RunOutcome,
     ) -> RunOutcome {
         // 3. worker admission verdict
@@ -1008,6 +1024,12 @@ impl Supervisor {
                 refused: Some("worker:identity-mismatch".into()),
                 ..none
             };
+        }
+
+        // Record initial request toward client's retry budget only upon successful admission (PR #465, O4).
+        // Shed requests and retries never earn retry credits, preventing lifetime banking and artificial storms (d18).
+        if !is_retry {
+            self.record_admitted_client_request(&intent.authority, clock * 1000);
         }
         let mut payload = Vec::with_capacity(intent.env.len() + 140);
         payload.extend_from_slice(&intent.authority);

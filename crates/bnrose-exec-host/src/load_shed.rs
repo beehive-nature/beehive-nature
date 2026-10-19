@@ -221,10 +221,7 @@ impl BoundedShedTracker {
     }
 
     pub fn insert(&mut self, nonce_key: ([u8; 32], [u8; 32]), intent_key: ([u8; 32], [u8; 32])) {
-        if self.nonce_set.contains(&nonce_key) {
-            self.nonce_queue.retain(|k| k != &nonce_key);
-            self.nonce_queue.push_back(nonce_key);
-        } else {
+        if !self.nonce_set.contains(&nonce_key) {
             while self.nonce_queue.len() >= self.max_entries {
                 if let Some(oldest) = self.nonce_queue.pop_front() {
                     self.nonce_set.remove(&oldest);
@@ -234,10 +231,7 @@ impl BoundedShedTracker {
             self.nonce_queue.push_back(nonce_key);
         }
 
-        if self.intent_set.contains(&intent_key) {
-            self.intent_queue.retain(|k| k != &intent_key);
-            self.intent_queue.push_back(intent_key);
-        } else {
+        if !self.intent_set.contains(&intent_key) {
             while self.intent_queue.len() >= self.max_entries {
                 if let Some(oldest) = self.intent_queue.pop_front() {
                     self.intent_set.remove(&oldest);
@@ -257,10 +251,12 @@ impl BoundedShedTracker {
     }
 
     pub fn remove(&mut self, nonce_key: &([u8; 32], [u8; 32]), intent_key: &([u8; 32], [u8; 32])) {
-        self.nonce_set.remove(nonce_key);
-        self.nonce_queue.retain(|k| k != nonce_key);
-        self.intent_set.remove(intent_key);
-        self.intent_queue.retain(|k| k != intent_key);
+        if self.nonce_set.remove(nonce_key) {
+            self.nonce_queue.retain(|k| k != nonce_key);
+        }
+        if self.intent_set.remove(intent_key) {
+            self.intent_queue.retain(|k| k != intent_key);
+        }
     }
 
     pub fn len(&self) -> usize {
@@ -288,15 +284,27 @@ pub struct ClientRetryBudget {
     pub initial_requests: usize,
     pub retries_attempted: usize,
     pub budget_pct: usize,
+    pub window_ms: u64,
+    pub window_start_ms: u64,
 }
 
 impl ClientRetryBudget {
+    pub const DEFAULT_WINDOW_MS: u64 = 10_000;
+    pub const DEFAULT_BUDGET_PCT: usize = 10;
+
     pub fn new(initial_requests: usize, budget_pct: usize) -> Self {
         Self {
             initial_requests,
             retries_attempted: 0,
             budget_pct,
+            window_ms: Self::DEFAULT_WINDOW_MS,
+            window_start_ms: 0,
         }
+    }
+
+    pub fn with_window(mut self, window_ms: u64) -> Self {
+        self.window_ms = window_ms;
+        self
     }
 
     pub fn with_cap(max_retries: usize) -> Self {
@@ -304,7 +312,29 @@ impl ClientRetryBudget {
             initial_requests: max_retries * 10,
             retries_attempted: 0,
             budget_pct: 10,
+            window_ms: Self::DEFAULT_WINDOW_MS,
+            window_start_ms: 0,
         }
+    }
+
+    pub fn roll_window(&mut self, now_ms: u64) {
+        if now_ms == 0 {
+            return;
+        }
+        if self.window_start_ms == 0 {
+            self.window_start_ms = now_ms;
+            return;
+        }
+        if now_ms >= self.window_start_ms.saturating_add(self.window_ms) {
+            self.initial_requests = 0;
+            self.retries_attempted = 0;
+            self.window_start_ms = now_ms;
+        }
+    }
+
+    pub fn record_admitted(&mut self, now_ms: u64) {
+        self.roll_window(now_ms);
+        self.initial_requests = self.initial_requests.saturating_add(1);
     }
 
     pub fn max_retries(&self) -> usize {
@@ -316,6 +346,11 @@ impl ClientRetryBudget {
     /// Returns false if budget is exhausted, causing the client to fail fast locally
     /// without sending any network request.
     pub fn try_acquire(&mut self) -> bool {
+        self.try_acquire_at(0)
+    }
+
+    pub fn try_acquire_at(&mut self, now_ms: u64) -> bool {
+        self.roll_window(now_ms);
         if self.retries_attempted < self.max_retries() {
             self.retries_attempted += 1;
             true
@@ -330,6 +365,85 @@ impl ClientRetryBudget {
 
     pub fn amplification(&self) -> f64 {
         retry_amplification(self.initial_requests, self.retries_attempted)
+    }
+}
+
+/// Bounded LRU/FIFO map for verified client retry budgets (PR #465, O3).
+/// Max capacity bounded at 2048 entries to prevent unbounded memory growth.
+/// Only cryptographically verified authorities with valid signatures are ever inserted.
+#[derive(Debug, Clone)]
+pub struct BoundedClientBudgets {
+    max_entries: usize,
+    queue: std::collections::VecDeque<[u8; 32]>,
+    budgets: std::collections::HashMap<[u8; 32], ClientRetryBudget>,
+}
+
+impl BoundedClientBudgets {
+    pub const DEFAULT_MAX: usize = 2048;
+
+    pub fn new(max_entries: usize) -> Self {
+        Self {
+            max_entries,
+            queue: std::collections::VecDeque::with_capacity(max_entries),
+            budgets: std::collections::HashMap::with_capacity(max_entries),
+        }
+    }
+
+    pub fn get(&self, authority: &[u8; 32]) -> Option<&ClientRetryBudget> {
+        self.budgets.get(authority)
+    }
+
+    pub fn get_mut(&mut self, authority: &[u8; 32]) -> Option<&mut ClientRetryBudget> {
+        self.budgets.get_mut(authority)
+    }
+
+    pub fn contains_key(&self, authority: &[u8; 32]) -> bool {
+        self.budgets.contains_key(authority)
+    }
+
+    pub fn insert(&mut self, authority: [u8; 32], budget: ClientRetryBudget) {
+        if self.budgets.contains_key(&authority) {
+            self.budgets.insert(authority, budget);
+        } else {
+            while self.queue.len() >= self.max_entries {
+                if let Some(oldest) = self.queue.pop_front() {
+                    self.budgets.remove(&oldest);
+                }
+            }
+            self.budgets.insert(authority, budget);
+            self.queue.push_back(authority);
+        }
+    }
+
+    pub fn entry_or_insert_with<F>(&mut self, authority: [u8; 32], f: F) -> &mut ClientRetryBudget
+    where
+        F: FnOnce() -> ClientRetryBudget,
+    {
+        if !self.budgets.contains_key(&authority) {
+            while self.queue.len() >= self.max_entries {
+                if let Some(oldest) = self.queue.pop_front() {
+                    self.budgets.remove(&oldest);
+                }
+            }
+            let b = f();
+            self.budgets.insert(authority, b);
+            self.queue.push_back(authority);
+        }
+        self.budgets.get_mut(&authority).unwrap()
+    }
+
+    pub fn len(&self) -> usize {
+        self.budgets.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.budgets.is_empty()
+    }
+}
+
+impl Default for BoundedClientBudgets {
+    fn default() -> Self {
+        Self::new(Self::DEFAULT_MAX)
     }
 }
 

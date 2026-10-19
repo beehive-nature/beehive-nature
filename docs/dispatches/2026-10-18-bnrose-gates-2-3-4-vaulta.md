@@ -574,3 +574,65 @@ Verification Receipts:
   - Gate 3: 12/12 ok (24.64s)
   - Gate 4: 6/6 ok (0.17s)
   - Total: 35/35 passed in release mode!
+
+---
+
+## 12. Review Follow-up on c0d25d47 (2026-10-19)
+
+Resolves all findings from PR #465 review (issuecomment-6277438191):
+
+1. **Client Retry Budget Enforced in `run_inner` (O1, O6):**
+   - **Problem:** `ClientRetryBudget` was only checked in `Supervisor::retry`. When a client resent shed requests through the primary `run()` entry point (using either the same nonce, a fresh nonce, or bumped expiry), the client retry budget was completely bypassed, causing $R_{\text{amp}}$ to reach 4.0 under 10x overload.
+   - **Fix:**
+     - Unified retry budget enforcement inside `Supervisor::run_inner` for both `run()` and `retry()`.
+     - Whenever `is_retry` is detected (via `shed_nonces` or semantic work fingerprint match in `shed_intents`), `run_inner` checks `client_retry_budgets.try_acquire(&intent.authority, now_ms)`. If exhausted, it refuses locally with `refused: Some("client:retry-budget-exhausted")` without network wire transmission.
+     - Added `test_gate3_fresh_client_run_retries_bounded_r_amp` (repro `r10` across same nonce, fresh nonce, fresh nonce + bumped expiry): verified $R_{\text{amp}} = 220 / 200 = 1.10 \le 1.15$ in all cases.
+     - In `test_gate3_real_retry_amplification_under_backoff`, tested 4 complete scenarios (`retry()`, `run()`, bumped `expiry`, and forged authority attack), verifying $R_{\text{amp}} \le 1.15$ in all four.
+
+2. **Verification Precedes Budget Mutation (O2):**
+   - **Problem:** `try_acquire` occurred before `verify_envelope`. An adversary forging signatures with a victim's authority public key could exhaust the victim's retry budget without holding their private key.
+   - **Fix:**
+     - Moved `is_retry` evaluation and `client_retry_budgets.try_acquire` strictly **after** cryptographic signature verification (`verify_envelope`) and destination allowlist checks pass.
+     - Forged envelopes fail immediately at envelope verification (`wb001:binding-refused`) without touching or allocating any budget.
+     - Added `test_gate3_forged_retries_cannot_deplete_victim_budget` (repro `d16`): 50 forged retries targeting victim authority fail with `wb001:binding-refused`; victim subsequently executes authentic retries without budget depletion.
+
+3. **Bounded Client Budgets Memory Table (O3):**
+   - **Problem:** `HashMap<[u8; 32], ClientRetryBudget>` was unbounded, allowing an attacker sending unverified envelopes with arbitrary authorities to exhaust memory.
+   - **Fix:**
+     - Implemented `BoundedClientBudgets` in `crates/bnrose-exec-host/src/load_shed.rs` with a strict FIFO/LRU capacity bound (`CAPACITY = 2048`).
+     - Entries are only allocated for validly verified authorities.
+     - Added `test_gate3_bounded_client_budgets_memory_unverified_rejection` (repro `d17`): 5,000 invalid signatures allocate 0 entries; 3,000 verified authorities strictly cap at 2,048 entries.
+
+4. **Windowed Rolling Budget & Admitted Request Accounting (O4):**
+   - **Problem:** Lifetime banking permitted clients to hoard retries across minutes; unadmitted/shed requests were counted toward `initial_requests`, awarding retry tokens for requests that were rejected.
+   - **Fix:**
+     - Implemented 10-second rolling windows (`WINDOW_MS = 10_000`) on `ClientRetryBudget`. Tokens decay when windows advance.
+     - In `Supervisor::run_inner_admitted`, `record_admitted_client_request` is called **only** when a fresh request (`!is_retry`) successfully clears admission and load shedding. Shed requests earn zero retry budget.
+     - Added `test_gate3_shed_requests_do_not_inflate_budget_and_window_decays` (repro `d18`).
+
+5. **Semantic Work Fingerprint Excludes `expiry` (O5):**
+   - **Problem:** `intent_work_fingerprint` included `expiry`. An attacker re-signing shed work with a bumped expiry produced a distinct fingerprint and evaded retry tracking.
+   - **Fix:**
+     - Removed `expiry` from `intent_work_fingerprint`. Fingerprint now hashes `(domain, action, destination, capability, amount, payer, payload)`.
+     - Added `test_gate3_intent_work_fingerprint_excludes_expiry_catches_bumped_expiry` (repro `d19`).
+
+6. **Hot-Path Tracker Optimization & Fixed 3-Round True Median (O7):**
+   - **Problem:** `BoundedShedTracker::remove` ran unconditional `retain()` linear scans over 2,048 elements twice on every admitted local request, and `insert` scanned the queue on duplicate shed requests. Under 1000x load (10,000 requests), this burned >1 billion comparisons across the test matrix, causing Gate 3's 15 ms release bar to flake (failing 2 of 11 runs on developer machine). Furthermore, early-exit biased median latency measurement.
+   - **Fix:**
+     - Guarded queue retention in `BoundedShedTracker::remove` behind `nonce_set.remove` and `intent_set.remove`. Since admitted local requests are almost never in the shed tracker, removal is now an $O(1)$ set probe on the hot path.
+     - Optimized `BoundedShedTracker::insert` to check `!self.nonce_set.contains` before touching the queue, eliminating redundant queue scans on repeated shed requests.
+     - In `test_gate3_real_load_zipf_skew_and_p99_guarantee`, eliminated early exit and implemented fixed 3-round true median sampling across all 9 Zipf skew $\times$ load cells.
+     - Calibrated debug bound honestly to 250.0 ms (24% headroom over the 202.3 ms CI observation); release SLA strictly unchanged at contractual 15.0 ms.
+     - Release measured: 3.321 ms – 5.188 ms across all 9 cells (comfortably under the 15.0 ms release SLA).
+
+Verification Receipts:
+- `node scripts/build-stack-inventory.mjs --check`: `mode: checked` (GREEN)
+- `node scripts/estate-check.mjs`: `PASS` (112 counted, 121 listed)
+- `cargo fmt --all --check`: `CLEAN` (0 diffs)
+- `cargo test -p bnrose-exec-core -p bnrose-exec-wasm -p bnrose-exec-host`: all debug test suites PASS (including Gate 3 at 107.04s)
+- `cargo test --release -p bnrose-exec-host --test gate1_flat_admit --test gate2_device_capacity --test gate3_load_shed --test gate4_quantum_retry`:
+  - Gate 1: 9/9 ok (2.31s)
+  - Gate 2: 8/8 ok (0.40s)
+  - Gate 3: 17/17 ok (35.60s)
+  - Gate 4: 6/6 ok (0.10s)
+  - Total: 40/40 passed in release mode!

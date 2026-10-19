@@ -28,6 +28,7 @@ pub mod journal;
 pub mod keys;
 pub mod ledger;
 pub mod opexec;
+pub use opexec::intent_work_fingerprint;
 pub mod receipt;
 pub mod worker;
 
