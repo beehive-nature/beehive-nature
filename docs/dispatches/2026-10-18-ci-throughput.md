@@ -1,0 +1,114 @@
+# Commit-to-qualified-PR throughput — 2026-10-18
+
+The founder clarified this lane's goal: improve commit/PR GitHub time,
+performance and tests, with GitHub serving as stage-one hosting and
+execution before repository hosting and qualification can move to other
+providers. This continuation implements the bounded scheduling work left
+in [the October 17 CI-speedup dispatch](2026-10-17-ci-speedup.md).
+
+## Measured cause and change
+
+The initial PR #468 head `3776749837e2ca8b73eed440b67446362b639ccc`
+created 18 workflow executions: ten PR runs and eight feature-push runs.
+Five specialized workflows still qualified the candidate twice. They now
+run on PRs, main pushes and manual dispatches, matching the two PQ
+workflows' existing policy:
+
+- WB001 SAW proofs
+- WB002 SAW equivalence
+- WB002 WASM corpus
+- BNROSE-RUST-001
+- BNROSE-ADAPTERS-REAL
+
+For the same event and path set, this removes five executions, reducing
+18 to 13 (28%). This is a trigger-count calculation, not a measured 28%
+reduction in elapsed time. Each of the five workflows' complete `jobs:`
+body is unchanged. PR qualification and actual-main-merge verification
+remain distinct; manual dispatch remains available for a standalone
+branch. Main and manual runs retain their unique concurrency group.
+
+A measured duplicate illustrates the runner cost: on PR #466 head
+`8ce097e0`, WB001 SAW push run
+[39166986891](https://github.com/beehive-nature/beehive-nature/actions/runs/39166986891)
+executed from 21:17:39 to 21:41:56 UTC (24m17s), while PR run
+[39167003391](https://github.com/beehive-nature/beehive-nature/actions/runs/39167003391)
+executed from 21:25:32 to 21:53:20 UTC (27m48s): 52m05s combined.
+Removing the feature-push execution would eliminate its 24m17s of runner
+work for this example. A PR's synthetic merge checkout can differ from
+the pushed head; the PR result is not relabeled as a push result.
+
+The full `tests.yml` and `secret-scan.yml` workflows still run on every
+push and PR, without workflow-level cancellation. The RB workflow and
+path-filtered keychain/release workflows retain their existing policy.
+In particular, push identity coverage is not replaced by PR identity
+coverage. The earlier report demonstrated that these can disagree.
+
+## Cache correction
+
+The pinned Rust cache action joins each target path to its workspace.
+The same repeated-directory defect corrected for x0x in PR #468 also
+exists in the bSAFE, x402, ant-writedoor and Plonky3 mappings. Change those
+four right-hand paths to `target`. Root caching and the x0x correction
+remain intact; action pins, cache-save policy and every workload command
+are preserved.
+
+The October 17 dispatch's cache-hit observations are historical evidence
+of matching keys, not proof that these four compiled-target directories
+were restored. Its claim that the workspace mapping mechanically worked
+is not supported by the pinned action's `CacheConfig.new()` path join.
+This correction does not erase those measured job timings or infer new
+speedups. Corrected target restoration and net timing require fresh
+hosted evidence. GitHub also versions caches using their paths, so a new
+target path can require a fresh cache even when the visible key matches.
+
+Sources: [pinned cache implementation](https://github.com/Swatinem/rust-cache/blob/6323deb102c322ba6fcbdcafc7e3dddab59af2b6/src/config.ts),
+[GitHub cache matching and versioning](https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching#cache-key-matching).
+
+## Regression checks
+
+The static job gains a dependency-free policy gate. It checks the
+repository's canonical event/concurrency blocks and six explicit cache
+workspace mappings. Unsupported policy syntax fails for deliberate
+review; this is not a general YAML parser.
+
+`node --test e2e/ci-throughput.test.mjs` passes 24 tests, including
+mutations that restore duplicate branch qualification, remove main/PR/
+manual coverage, allow cancellation of main/manual runs, restrict push
+audits, or break/drop a cache path. The original configuration fails
+five scheduling and two cache-policy checks; the candidate passes.
+`node scripts/lint-ci-shape.mjs` reports 141/141 guarded suite steps.
+`git diff --check` passes. A direct comparison confirms that the five
+specialized workflow job bodies are unchanged.
+
+These checks do not claim to validate solver outcomes, all YAML syntax,
+hosted cache hits, or realized elapsed-time savings. The candidate's own
+CI and its actual merge checks must supply those results.
+
+## Stage-one hosting and the next phase
+
+GitHub currently supplies hosting, event scheduling, runners and check
+status. The portable contract needs explicit source identity (commit and
+tree), authority for a proposed head update, pinned build/test inputs,
+artifact digests, and verifiable qualification results with their scope
+and assumptions. For GitHub PR evidence, record actual checkout/tree,
+head, base, event, run and attempt; a PR head alone does not identify the
+tested tree. GitHub documents the synthetic merge behavior in its
+[PR event reference](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request).
+
+The decentralized phase must separate transport/discovery, durable blob
+storage, head-update authority and ordering, CPU/RAM/network execution,
+and metering/settlement. The founder's x0x/ANT/AR/Hive and other providers
+are integration candidates for those roles. Their adapters must reuse
+existing estate boundaries and prove retrieval integrity, availability,
+authorization, replay handling and qualification independently. A stored
+Git repository or a successful CI run alone does not implement those
+contracts. No decentralized backend, signed execution attestation, new
+identity, payment, or production deployment is added by this CI patch.
+
+## Landing status at preparation
+
+Prepared separately while PR #468 preserves its exact head and hosted
+queue position. This follow-up is not yet published or qualified. The
+cache PR's merge and verification precede publishing this scheduling
+change. End-to-end elapsed time and runner time remain separate metrics;
+queue pressure from other lanes is not attributed to this patch.

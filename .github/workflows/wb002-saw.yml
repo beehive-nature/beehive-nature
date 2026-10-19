@@ -9,13 +9,14 @@ name: WB002 SAW equivalence
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
-# SUPERSEDED RUNS (2026-10-15): a newer push to the same branch, or a newer
-# head on the same pull request, cancels this workflow's run for the older
-# commit, whose result could never gate a merge again (measured that day: 89
-# of 192 queued runs repo-wide were for commits no longer any branch's head).
+# One expensive qualification per PR candidate; main verifies the actual merge.
+# Branch pushes still receive tests.yml identity and secret-scan.yml audits.
+
+# A newer head on the same PR cancels the superseded candidate run.
 # Main and manual dispatches each get a group of their own, so they are never
 # cancelled or folded into another run; the exact head always gets a full run.
 # tests.yml and secret-scan.yml are deliberately left out: the §7 identity

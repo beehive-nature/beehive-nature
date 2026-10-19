@@ -10,8 +10,12 @@ name: BNROSE-ADAPTERS-REAL
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
+
+# One expensive qualification per PR candidate; main verifies the actual merge.
+# Branch pushes still receive tests.yml identity and secret-scan.yml audits.
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && github.run_id || github.ref }}

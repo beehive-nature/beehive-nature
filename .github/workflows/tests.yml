@@ -35,9 +35,9 @@ jobs:
         with:
           workspaces: |
             . -> target
-            rust/bsafe-host -> rust/bsafe-host/target
-            ops/x402-door -> ops/x402-door/target
-            ops/ant-writedoor -> ops/ant-writedoor/target
+            rust/bsafe-host -> target
+            ops/x402-door -> target
+            ops/ant-writedoor -> target
       - name: Ensure the wasm32 target is installed (the toolchain file outranks action inputs)
         if: always()
         run: rustup target add wasm32-unknown-unknown
@@ -598,6 +598,9 @@ jobs:
       - name: CI shape — every suite step carries if:always()
         if: always()
         run: node scripts/lint-ci-shape.mjs
+      - name: CI throughput — qualification triggers, push audits and workspace cache paths
+        if: always()
+        run: node --test e2e/ci-throughput.test.mjs
       # NO ENABLE-THEN-CLICK ACROSS TWO STEPS (2026-10-03): the wallet check
       # went red on unrelated commits because a test enabled a control and
       # clicked it in separate Playwright steps while the page re-disabled it
