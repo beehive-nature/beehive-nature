@@ -34,7 +34,8 @@ fn test_gate5_1000_workers_cleanup_threads_and_memory() {
 
     // In unoptimized debug mode, 100 sequential worker drops prove zero leak in ~1.5s;
     // in release mode (or with BNROSE_FULL_1000=1), runs the full 1,000 iterations.
-    let iterations: usize = if std::env::var("BNROSE_FULL_1000").is_ok() || !cfg!(debug_assertions) {
+    let iterations: usize = if std::env::var("BNROSE_FULL_1000").is_ok() || !cfg!(debug_assertions)
+    {
         1_000
     } else {
         100

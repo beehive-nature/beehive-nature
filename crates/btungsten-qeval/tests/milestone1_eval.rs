@@ -23,7 +23,8 @@ fn test_approach1_fermat_baseline_exhaustive() {
 #[test]
 fn test_approach2_itoh_tsujii_exhaustive() {
     let circ = build_itoh_tsujii_circuit();
-    let stats = evaluate_gf16_exhaustive(&circ).expect("Itoh-Tsujii circuit must pass all 256 shots");
+    let stats =
+        evaluate_gf16_exhaustive(&circ).expect("Itoh-Tsujii circuit must pass all 256 shots");
 
     assert_eq!(stats.shots_evaluated, 256);
     println!("Approach 2 (Itoh-Tsujii):");
@@ -68,13 +69,31 @@ fn test_comparative_table() {
     println!("\n==========================================================================");
     println!("REVERSIBLE GF(16) INVERSION COMPARATIVE BENCHMARK (EXHAUSTIVE 256 DOMAIN)");
     println!("==========================================================================");
-    println!("{:<28} | {:<8} | {:<10} | {:<12} | {:<8}", "Approach", "Toffolis", "Cliffords", "Peak Qubits", "Total Ops");
+    println!(
+        "{:<28} | {:<8} | {:<10} | {:<12} | {:<8}",
+        "Approach", "Toffolis", "Cliffords", "Peak Qubits", "Total Ops"
+    );
     println!("--------------------------------------------------------------------------");
-    println!("{:<28} | {:<8} | {:<10} | {:<12} | {:<8}", c1.name, s1.toffoli_count, s1.clifford_count, s1.peak_qubits, s1.total_gates);
-    println!("{:<28} | {:<8} | {:<10} | {:<12} | {:<8}", c2.name, s2.toffoli_count, s2.clifford_count, s2.peak_qubits, s2.total_gates);
-    println!("{:<28} | {:<8} | {:<10} | {:<12} | {:<8}", c3.name, s3.toffoli_count, s3.clifford_count, s3.peak_qubits, s3.total_gates);
+    println!(
+        "{:<28} | {:<8} | {:<10} | {:<12} | {:<8}",
+        c1.name, s1.toffoli_count, s1.clifford_count, s1.peak_qubits, s1.total_gates
+    );
+    println!(
+        "{:<28} | {:<8} | {:<10} | {:<12} | {:<8}",
+        c2.name, s2.toffoli_count, s2.clifford_count, s2.peak_qubits, s2.total_gates
+    );
+    println!(
+        "{:<28} | {:<8} | {:<10} | {:<12} | {:<8}",
+        c3.name, s3.toffoli_count, s3.clifford_count, s3.peak_qubits, s3.total_gates
+    );
     println!("==========================================================================\n");
 
-    assert!(s3.toffoli_count < s1.toffoli_count, "Tower BMP should achieve lowest Toffoli count");
-    assert!(s3.peak_qubits < s1.peak_qubits, "Tower BMP should achieve lowest peak qubits");
+    assert!(
+        s3.toffoli_count < s1.toffoli_count,
+        "Tower BMP should achieve lowest Toffoli count"
+    );
+    assert!(
+        s3.peak_qubits < s1.peak_qubits,
+        "Tower BMP should achieve lowest peak qubits"
+    );
 }

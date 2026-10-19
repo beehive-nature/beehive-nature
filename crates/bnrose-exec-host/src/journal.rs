@@ -168,7 +168,9 @@ impl Journal {
     }
 
     pub fn sync(&self) -> Result<(), JournalError> {
-        self.file.sync_data().map_err(|e| JournalError::Io(e.to_string()))
+        self.file
+            .sync_data()
+            .map_err(|e| JournalError::Io(e.to_string()))
     }
 
     /// Append one record: body, tag, length prefix — then fsync. The
@@ -344,10 +346,14 @@ impl ReplicatedJournal {
         }
         let sync_worker = if replicas.len() > 1 {
             if let Ok(file_clone) = replicas[1].file.try_clone() {
-                let (tx, rx) = std::sync::mpsc::sync_channel::<std::sync::mpsc::SyncSender<Result<(), JournalError>>>(1);
+                let (tx, rx) = std::sync::mpsc::sync_channel::<
+                    std::sync::mpsc::SyncSender<Result<(), JournalError>>,
+                >(1);
                 let handle = std::thread::spawn(move || {
                     while let Ok(ack_tx) = rx.recv() {
-                        let res = file_clone.sync_data().map_err(|e| JournalError::Io(e.to_string()));
+                        let res = file_clone
+                            .sync_data()
+                            .map_err(|e| JournalError::Io(e.to_string()));
                         let _ = ack_tx.send(res);
                     }
                 });
@@ -400,7 +406,8 @@ impl ReplicatedJournal {
     pub fn sync(&self) -> Result<(), JournalError> {
         if let Some((ref tx, _)) = self.sync_worker {
             let (ack_tx, ack_rx) = std::sync::mpsc::sync_channel(1);
-            tx.send(ack_tx).map_err(|e| JournalError::Io(e.to_string()))?;
+            tx.send(ack_tx)
+                .map_err(|e| JournalError::Io(e.to_string()))?;
             let r0_res = self.replicas[0].sync();
             let r1_res = ack_rx.recv().map_err(|e| JournalError::Io(e.to_string()))?;
             r0_res?;

@@ -19,7 +19,10 @@
 //! 8. Planted flaw: index omission is caught and fails the test.
 
 use bnrose_exec_core::{policy_digest, E_ADMITTED, E_DISPATCH, E_RESERVE};
-use bnrose_exec_host::fixtures::{fixture, read_intent, test_policy, IntentFile, TEST_ACTION_LABEL, TEST_CAPABILITY, TEST_DESTINATION, TEST_DOMAIN, TEST_PAYER};
+use bnrose_exec_host::fixtures::{
+    fixture, read_intent, test_policy, IntentFile, TEST_ACTION_LABEL, TEST_CAPABILITY,
+    TEST_DESTINATION, TEST_DOMAIN, TEST_PAYER,
+};
 use bnrose_exec_host::journal::{self, ReplicatedJournal};
 use bnrose_exec_host::opexec::{replica_paths, Supervisor};
 use bnrose_exec_host::worker::{Bounds, NativeWorker};
@@ -75,7 +78,11 @@ fn generate_bulk_journal(count: usize, key: &[u8; 32], policy_wire: &[u8]) -> Ve
         .enumerate()
         .filter_map(|(idx, w)| if w == [0u8; 32] { Some(idx) } else { None })
         .collect();
-    assert_eq!(zero_runs.len(), 1, "nonce position in canonical envelope must be uniquely identifiable");
+    assert_eq!(
+        zero_runs.len(),
+        1,
+        "nonce position in canonical envelope must be uniquely identifiable"
+    );
     let nonce_pos = zero_runs[0];
 
     for i in 0..count {
@@ -142,7 +149,8 @@ fn test_gate1_flat_admit_latency_scaling() {
         std::fs::write(&paths[1], &journal_bytes).unwrap();
 
         // Open supervisor (loads startup index in a single pass)
-        let mut sup = Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
+        let mut sup =
+            Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
         assert_eq!(sup.admitted_count(), count);
 
         // Warm-up 3 ops to ensure process / OS file cache readiness
@@ -215,8 +223,7 @@ fn test_gate1_startup_index_equals_journal_replay() {
     }
 
     // Reopen supervisor anew: startup index must equal complete journal replay
-    let reopened =
-        Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
+    let reopened = Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
     let replayed = reopened.replay_journal_nonces().unwrap();
 
     assert_eq!(
@@ -259,7 +266,13 @@ fn test_gate1_property_crash_mid_append() {
         // Reopen journal directly to append partial operation records up to crash_stage
         {
             let paths = replica_paths(&state);
-            let mut journal = ReplicatedJournal::open(&paths, &bnrose_exec_host::keys::SupervisorKeys::load(&state).unwrap().journal_mac).unwrap();
+            let mut journal = ReplicatedJournal::open(
+                &paths,
+                &bnrose_exec_host::keys::SupervisorKeys::load(&state)
+                    .unwrap()
+                    .journal_mac,
+            )
+            .unwrap();
 
             // Construct valid E_ADMITTED record wire payload
             let mut payload = Vec::with_capacity(crashed_intent.env.len() + 140);
@@ -286,7 +299,8 @@ fn test_gate1_property_crash_mid_append() {
         }
 
         // Restart supervisor after crash mid-append
-        let mut reopened = Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
+        let mut reopened =
+            Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
 
         // 1. Prove: in-memory startup index EQUALS full journal replay byte-for-byte
         let replayed = reopened.replay_journal_nonces().unwrap();
@@ -342,7 +356,8 @@ fn test_gate1_property_crash_mid_append() {
     {
         for p in &paths {
             let mut f = OpenOptions::new().append(true).open(p).expect("open");
-            f.write_all(b"corrupt-tampered-data-fails-closed").expect("write");
+            f.write_all(b"corrupt-tampered-data-fails-closed")
+                .expect("write");
             f.flush().expect("flush");
         }
     }
@@ -352,7 +367,9 @@ fn test_gate1_property_crash_mid_append() {
         "when replicas have corrupt/tampered chains, supervisor must fail closed"
     );
 
-    println!("gate1: PASS - property test crash mid-append verified across all stages and recovery");
+    println!(
+        "gate1: PASS - property test crash mid-append verified across all stages and recovery"
+    );
 }
 
 #[test]
@@ -372,7 +389,11 @@ fn test_gate1_run_steps_zero_disk_reloads() {
             &bounds,
             &[("propose", false), ("approve", false), ("execute", false)],
         );
-        assert!(outcome.refused.is_none(), "run_steps failed: {:?}", outcome.refused);
+        assert!(
+            outcome.refused.is_none(),
+            "run_steps failed: {:?}",
+            outcome.refused
+        );
     }
 
     // Subsequent re-invocation completes without disk reload
@@ -424,7 +445,8 @@ fn test_gate1_replay_flood_zero_disk_io() {
     assert_eq!(records_before, 4); // 4 events: admit, reserve, dispatch, response
 
     // 2. Measure supervisor run replay flood (rejections via sup.run)
-    let flood_count: usize = if std::env::var("BNROSE_FULL_5000").is_ok() || !cfg!(debug_assertions) {
+    let flood_count: usize = if std::env::var("BNROSE_FULL_5000").is_ok() || !cfg!(debug_assertions)
+    {
         5_000
     } else {
         200
@@ -448,15 +470,19 @@ fn test_gate1_replay_flood_zero_disk_io() {
     );
 
     // Verify zero new rows in ledger
-    let rows = bnrose_exec_host::ledger::load(&state.join("effects.bin"), &sup.keys.ledger_mac)
-        .unwrap();
+    let rows =
+        bnrose_exec_host::ledger::load(&state.join("effects.bin"), &sup.keys.ledger_mac).unwrap();
     assert_eq!(rows.len(), 1, "replay flood must add ZERO ledger rows");
 
     println!(
         "gate1: {flood_count} replays completed in {:?} ({:.2} µs/replay), 0 journal writes, 0 fsyncs",
         elapsed, us_per_replay
     );
-    let max_allowed_us = if cfg!(debug_assertions) { 6_000.0 } else { 50.0 };
+    let max_allowed_us = if cfg!(debug_assertions) {
+        6_000.0
+    } else {
+        50.0
+    };
     assert!(
         us_per_replay < max_allowed_us,
         "replay rejection must cost < {max_allowed_us} µs (measured {us_per_replay:.2} µs)"
@@ -478,11 +504,18 @@ fn test_gate1_production_authorities_file_auto_loads_deny_unknown() {
     // containing ONLY the f_allowed authority public key (32 bytes binary).
     std::fs::create_dir_all(&state).unwrap();
     bnrose_exec_host::keys::SupervisorKeys::init(&state, &[0x44; 32]).unwrap();
-    std::fs::write(state.join("allowed_authorities.bin"), intent_allowed.authority).unwrap();
+    std::fs::write(
+        state.join("allowed_authorities.bin"),
+        intent_allowed.authority,
+    )
+    .unwrap();
 
     // Open supervisor normally — it MUST auto-load allowed_authorities.bin and enforce deny-unknown
     let mut sup = Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
-    assert!(sup.allowed_authorities.is_some(), "allowed_authorities must be auto-loaded from state file");
+    assert!(
+        sup.allowed_authorities.is_some(),
+        "allowed_authorities must be auto-loaded from state file"
+    );
 
     // 1. Unauthorized authority is refused at the gate
     let outcome_unauthorized = sup.run(&intent_unauthorized, NOW, false, &bounds);
@@ -500,7 +533,9 @@ fn test_gate1_production_authorities_file_auto_loads_deny_unknown() {
         outcome_allowed.refused
     );
     assert_eq!(sup.admitted_count(), 1);
-    println!("gate1: PASS - production allowed_authorities.bin auto-loads and enforces deny-unknown");
+    println!(
+        "gate1: PASS - production allowed_authorities.bin auto-loads and enforces deny-unknown"
+    );
 }
 
 #[test]
@@ -597,11 +632,16 @@ fn test_gate1_production_mode_refuses_without_authorities_file() {
 
     // In production mode, opening without allowed_authorities.bin/.json MUST refuse to start open
     let res = Supervisor::open_production(&state, Box::new(NativeWorker::new()), test_policy());
-    assert!(res.is_err(), "open_production without authorities file must fail");
+    assert!(
+        res.is_err(),
+        "open_production without authorities file must fail"
+    );
     let err = res.err().unwrap();
     assert!(
         err.contains("allowed_authorities file missing in production mode"),
         "unexpected error message: {err}"
     );
-    println!("gate1: PASS - production mode strictly refuses to start open without allowed_authorities");
+    println!(
+        "gate1: PASS - production mode strictly refuses to start open without allowed_authorities"
+    );
 }

@@ -159,15 +159,7 @@ mod tests {
 
     #[test]
     fn test_convict_double_alloc() {
-        let circ = Circuit::with_gates(
-            "double_alloc",
-            4,
-            4,
-            vec![
-                Gate::Alloc(8),
-                Gate::Alloc(8),
-            ],
-        );
+        let circ = Circuit::with_gates("double_alloc", 4, 4, vec![Gate::Alloc(8), Gate::Alloc(8)]);
         let res = evaluate_gf16_exhaustive(&circ);
         assert!(
             matches!(res, Err(EvaluatorError::DoubleAlloc { wire: 8 })),
@@ -177,14 +169,7 @@ mod tests {
 
     #[test]
     fn test_convict_free_unallocated() {
-        let circ = Circuit::with_gates(
-            "free_unallocated",
-            4,
-            4,
-            vec![
-                Gate::Free(12),
-            ],
-        );
+        let circ = Circuit::with_gates("free_unallocated", 4, 4, vec![Gate::Free(12)]);
         let res = evaluate_gf16_exhaustive(&circ);
         assert!(
             matches!(res, Err(EvaluatorError::FreeUnallocated { wire: 12 })),
@@ -200,7 +185,10 @@ mod tests {
             4,
             vec![
                 Gate::Alloc(8),
-                Gate::HMR { qubit: 8, outcome: 0 },
+                Gate::HMR {
+                    qubit: 8,
+                    outcome: 0,
+                },
             ],
         );
         let res = evaluate_gf16_exhaustive(&circ);

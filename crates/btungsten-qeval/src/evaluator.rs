@@ -92,7 +92,10 @@ impl std::fmt::Display for EvaluatorError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::MeasurementRejectedInitially { gate } => {
-                write!(f, "Measurement gate {gate:?} rejected by initial model policy")
+                write!(
+                    f,
+                    "Measurement gate {gate:?} rejected by initial model policy"
+                )
             }
             Self::AliasedOperands { gate, reason } => {
                 write!(f, "Aliased operands in {gate:?}: {reason}")
@@ -101,7 +104,10 @@ impl std::fmt::Display for EvaluatorError {
                 write!(f, "Wire {wire} accessed in {gate:?} before allocation")
             }
             Self::UseAfterFree { wire, gate } => {
-                write!(f, "Use-after-free: wire {wire} accessed in {gate:?} after being freed")
+                write!(
+                    f,
+                    "Use-after-free: wire {wire} accessed in {gate:?} after being freed"
+                )
             }
             Self::DoubleAlloc { wire } => {
                 write!(f, "Double allocation: wire {wire} is already allocated")
@@ -110,19 +116,36 @@ impl std::fmt::Display for EvaluatorError {
                 write!(f, "Free of unallocated wire {wire}")
             }
             Self::DirtyFree { wire } => {
-                write!(f, "Dirty free: wire {wire} was freed while in state |1>, must be |0>")
+                write!(
+                    f,
+                    "Dirty free: wire {wire} was freed while in state |1>, must be |0>"
+                )
             }
             Self::UnfreedAncilla { wire } => {
-                write!(f, "Unfreed ancilla: wire {wire} remained allocated at circuit end")
+                write!(
+                    f,
+                    "Unfreed ancilla: wire {wire} remained allocated at circuit end"
+                )
             }
             Self::AncillaNotRestored { wire, x, y } => {
-                write!(f, "Ancilla wire {wire} not restored to |0> for input x={x}, y={y}")
+                write!(
+                    f,
+                    "Ancilla wire {wire} not restored to |0> for input x={x}, y={y}"
+                )
             }
-            Self::OutputMismatch { x, initial_y, expected_y, actual_y } => {
+            Self::OutputMismatch {
+                x,
+                initial_y,
+                expected_y,
+                actual_y,
+            } => {
                 write!(f, "Output mismatch for x={x}, y={initial_y}: expected {expected_y}, got {actual_y}")
             }
             Self::InputCorrupted { initial_x, final_x } => {
-                write!(f, "Input register x corrupted: started as {initial_x}, ended as {final_x}")
+                write!(
+                    f,
+                    "Input register x corrupted: started as {initial_x}, ended as {final_x}"
+                )
             }
             Self::PhaseNonZero { x, y, phase } => {
                 write!(f, "Non-zero global phase {phase} on input x={x}, y={y}")
@@ -232,14 +255,16 @@ pub fn compute_circuit_stats(circuit: &Circuit) -> CircuitStats {
 }
 
 /// Evaluates one single shot on the frozen circuit with exact state simulation.
-pub fn evaluate_shot(
-    circuit: &Circuit,
-    x: u8,
-    y: u8,
-) -> Result<(), EvaluatorError> {
+pub fn evaluate_shot(circuit: &Circuit, x: u8, y: u8) -> Result<(), EvaluatorError> {
     let reg_qubits = circuit.input_qubits + circuit.target_qubits;
-    assert_eq!(circuit.input_qubits, 4, "GF(16) input register must be 4 qubits");
-    assert_eq!(circuit.target_qubits, 4, "GF(16) target register must be 4 qubits");
+    assert_eq!(
+        circuit.input_qubits, 4,
+        "GF(16) input register must be 4 qubits"
+    );
+    assert_eq!(
+        circuit.target_qubits, 4,
+        "GF(16) target register must be 4 qubits"
+    );
 
     // Discover maximum wire index referenced
     let mut max_wire = reg_qubits;
@@ -248,7 +273,13 @@ pub fn evaluate_shot(
             Gate::Alloc(q) | Gate::Free(q) | Gate::X(q) | Gate::Z(q) | Gate::Reset(q) => {
                 max_wire = max_wire.max(q + 1);
             }
-            Gate::CX(a, b) | Gate::SWAP(a, b) | Gate::CZ(a, b) | Gate::HMR { qubit: a, outcome: b } => {
+            Gate::CX(a, b)
+            | Gate::SWAP(a, b)
+            | Gate::CZ(a, b)
+            | Gate::HMR {
+                qubit: a,
+                outcome: b,
+            } => {
                 max_wire = max_wire.max(a.max(b) + 1);
             }
             Gate::CCX(a, b, c) | Gate::CCZ(a, b, c) => {

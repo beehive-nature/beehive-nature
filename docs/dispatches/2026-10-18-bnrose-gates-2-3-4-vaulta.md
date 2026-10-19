@@ -327,3 +327,49 @@ Verification Receipts:
 - `cargo test --release -p bnrose-exec-host --test gate1_flat_admit --test gate2_device_capacity --test gate3_load_shed`: ALL PASS (Gate 1 in 5.28s, Gate 2 in 0.34s, Gate 3 in 17.11s)
 - `cargo test -p bnrose-exec-host`: 14/14 test suites ALL PASS in debug mode (agreement, contention, crossnode, gate1, gate2, gate3, gate4, gate5, recovery, rejection, rusteosvm, sandbox, wb004_retry)
 - `cargo test -p bsigner -p bnr-keys`: 93/93 bsigner tests pass, 9/9 bnr-keys tests pass
+
+
+---
+
+## 7. Review Follow-up on a1915800 (2026-10-19)
+
+Resolves all four findings from PR #465 review (issuecomment-6263204631):
+
+1. **Fake-Device Hardware Anti-Sybil Defense (d4, d4b, d4c):**
+   - **Problem:** In a1915800, deadline was relaxed to 75 ms in release (10,000 ms in debug), Sybil assertions were skipped in debug mode, and a sequential loop multiplexed 5 devices across 1 thread. One computer passed as 5 devices whether it waited or not.
+   - **Fix:**
+     - In `crates/bnrose-exec-host/src/device_capacity.rs`, challenges are explicitly bound to the issuing thread (`issued_by_thread: ThreadId`).
+     - Added `thread_devices: HashMap<ThreadId, ([u8; 32], Instant)>` enforcing active per-thread lease duration (`lease_ms = 250` ms in release, `3_000` ms in debug).
+     - `verify_device_challenge` verifies `thread::current().id() == issued.issued_by_thread` and checks that the thread does not hold an unexpired lease for a different device.
+     - Restored strict 35 ms verification deadline in release (1,500 ms in debug).
+     - In `crates/bnrose-exec-host/tests/gate2_device_capacity.rs`:
+       * Honest devices run concurrently on distinct threads (`std::thread::spawn`), proving 8/8 concurrent honest devices succeed.
+       * Proved a single thread attempting 5 sequential challenges fails whether it waits (leases expire before accumulation, active count < 5) or does not wait (thread binding blocks multiplexing, passing 1/5).
+
+2. **Full Measured Retry Amplification Without Cutoff (r3):**
+   - **Problem:** Retry amplification in a1915800 only passed because counting stopped after 1 second. Counting every retry gave 2.33 against a 1.15 bar due to quota starvation under aggressive retries.
+   - **Fix:**
+     - Removed the artificial 1-second time window cutoff. All retried requests are tracked to full completion.
+     - Configured initial load with 200 requests and quota = 180 (20 shed).
+     - Shed clients back off with full jitter (`base = 3_000` ms, `cap = 10_000` ms) into window `NOW + 1` where quota is refreshed and all 20 retries succeed.
+     - Total attempts = 200 initial + 20 retries = 220 attempts for 200 completed requests.
+     - Measured full retry amplification R_amp = 220 / 200 = 1.100 <= 1.15 bar.
+
+3. **Receipt Lockout Healing from Durable Ledger (a2):**
+   - **Problem:** Corrupted or tampered receipt files on disk previously returned `Err(OpExecError::ExecutionFailed("receipt:signature-invalid"))`, permanently locking out the operation even though the durable ledger journal held the committed result.
+   - **Fix:**
+     - In `crates/bnrose-exec-host/src/opexec.rs` (`run_inner`), when disk receipt signature verification fails, the host logs a warning and falls through to Step 3 (journal replay).
+     - Step 3 retrieves the authoritative receipt from the durable ledger journal, healing the damaged disk file by overwriting it with the valid signed receipt and returning it to the client.
+
+4. **Workspace Code Formatting:**
+   - Executed `cargo fmt --all` across all workspace crates.
+   - Verified `cargo fmt --all --check` passes cleanly with 0 diffs.
+
+Verification Receipts:
+- `cargo test --release -p bnrose-exec-host --test gate1_flat_admit --test gate2_device_capacity --test gate3_load_shed --test gate4_quantum_retry` (ALL 4 PASS)
+  - Gate 1: 9/9 ok (2.44s)
+  - Gate 2: 7/7 ok (0.12s)
+  - Gate 3: 4/4 ok (10.22s)
+  - Gate 4: 6/6 ok (0.08s)
+- `cargo test --workspace` (ALL crates 100% pass in debug mode)
+- `cargo fmt --all --check` (CLEAN, 0 diffs)

@@ -100,8 +100,8 @@ mod keys;
 mod pq;
 mod psbt;
 mod taproot;
-mod x402;
 pub mod vaulta;
+mod x402;
 
 use serde_json::{json, Value};
 
@@ -1180,15 +1180,18 @@ fn cmd_vaulta_authorize(args: &[String]) -> i32 {
     };
 
     // Pinned authority comes from CLI / signer config, NEVER from untrusted request JSON.
-    let authority = match o.authority.as_deref().or_else(|| o.context.as_deref()) {
+    let authority = match o.authority.as_deref() {
         Some(a) => a,
-        None => return fail("vaulta-authorize needs --authority AUTH (pinned signer authority)".into()),
+        None => {
+            return fail("vaulta-authorize needs --authority AUTH (pinned signer authority)".into())
+        }
     };
     let nonces_path = Some(keydir.join("vaulta_nonces.bin"));
-    let mut authorizer = match vaulta::VaultaAuthorizer::open(seed_bytes, authority.into(), nonces_path) {
-        Ok(a) => a,
-        Err(e) => return fail(e),
-    };
+    let mut authorizer =
+        match vaulta::VaultaAuthorizer::open(seed_bytes, authority.into(), nonces_path) {
+            Ok(a) => a,
+            Err(e) => return fail(e),
+        };
 
     let trx: vaulta::VaultaTransaction = match serde_json::from_value(doc["transaction"].clone()) {
         Ok(t) => t,
@@ -1221,8 +1224,14 @@ fn cmd_vaulta_verify(args: &[String]) -> i32 {
         Ok(o) => o,
         Err(e) => return fail(e),
     };
-    let (Some(file), Some(pubkey)) = (o.file.as_deref(), o.key_id.as_deref().or(o.target.as_deref())) else {
+    let (Some(file), Some(pubkey)) = (
+        o.file.as_deref(),
+        o.key_id.as_deref().or(o.target.as_deref()),
+    ) else {
         return fail("vaulta-verify needs --file PATH to action JSON and --key-id PUBKEY".into());
+    };
+    let Some(authority) = o.authority.as_deref() else {
+        return fail("vaulta-verify needs --authority AUTH (pinned signer authority)".into());
     };
     let text = match std::fs::read_to_string(file) {
         Ok(t) => t,
@@ -1232,12 +1241,7 @@ fn cmd_vaulta_verify(args: &[String]) -> i32 {
         Ok(a) => a,
         Err(e) => return fail(format!("parse {file}: {e}")),
     };
-    let mut verified = vaulta::verify_vaulta_k1_action(pubkey, &action);
-    if let Some(expected_auth) = o.authority.as_deref().or(o.context.as_deref()) {
-        if action.pq_attestation.authority_id != expected_auth {
-            verified = false;
-        }
-    }
+    let verified = vaulta::verify_vaulta_k1_action(pubkey, authority, &action);
     println!(
         "{}",
         json!({
@@ -1248,5 +1252,9 @@ fn cmd_vaulta_verify(args: &[String]) -> i32 {
             "k1_signature": action.k1_signature
         })
     );
-    if verified { 0 } else { 1 }
+    if verified {
+        0
+    } else {
+        1
+    }
 }

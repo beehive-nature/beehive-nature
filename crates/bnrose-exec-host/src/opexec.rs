@@ -1,4 +1,3 @@
-
 //! The supervisor engine (BNROSE-RUST-001): run one operation end to end,
 //! and recover everything from the durable records alone.
 //!
@@ -19,13 +18,13 @@
 //! fresh nonce. Leftover `Admitted`/`Reserved` operations are reported
 //! stale and left alone — recovery does not invent terminal states.
 
+use crate::device_capacity::{DeviceCapacityLedger, DeviceLimits, ResourceBudget};
 use crate::journal::{self, ReplicatedJournal, ReplicationState};
 use crate::keys::SupervisorKeys;
 use crate::ledger::{self, EffectLedger};
+use crate::load_shed::CrossDaoAdmissionControl;
 use crate::receipt::{state_word, Receipt};
 use crate::worker::{Bounds, Worker};
-use crate::device_capacity::{DeviceCapacityLedger, DeviceLimits, ResourceBudget};
-use crate::load_shed::CrossDaoAdmissionControl;
 
 fn sha256_of(data: &[u8]) -> [u8; 32] {
     use sha2::{Digest, Sha256};
@@ -35,7 +34,6 @@ fn sha256_of(data: &[u8]) -> [u8; 32] {
     out.copy_from_slice(&h.finalize());
     out
 }
-
 
 use crate::{
     admit_request, hex, parse_admit_verdict, parse_step_verdict, step_request, AdmitVerdict,
@@ -193,7 +191,8 @@ impl Supervisor {
         device_id: [u8; 32],
         claimed_capacity_qps: u64,
     ) -> Result<[u8; 32], &'static str> {
-        self.capacity_ledger.issue_challenge(device_id, claimed_capacity_qps)
+        self.capacity_ledger
+            .issue_challenge(device_id, claimed_capacity_qps)
     }
 
     pub fn verify_device_challenge(
@@ -201,7 +200,8 @@ impl Supervisor {
         challenge_seed: &[u8; 32],
         nonce: u64,
     ) -> Result<bool, &'static str> {
-        self.capacity_ledger.verify_device_challenge(challenge_seed, nonce)
+        self.capacity_ledger
+            .verify_device_challenge(challenge_seed, nonce)
     }
 
     pub fn open(
@@ -284,8 +284,16 @@ impl Supervisor {
         capacity_ledger.register_device(
             device_id,
             DeviceLimits {
-                capacity: ResourceBudget { fuel: 100_000_000_000, memory_pages: 1_000_000, wall_secs: 86400 },
-                reserve: ResourceBudget { fuel: 100_000, memory_pages: 100, wall_secs: 10 },
+                capacity: ResourceBudget {
+                    fuel: 100_000_000_000,
+                    memory_pages: 1_000_000,
+                    wall_secs: 86400,
+                },
+                reserve: ResourceBudget {
+                    fuel: 100_000,
+                    memory_pages: 100,
+                    wall_secs: 10,
+                },
             },
         );
 
@@ -375,7 +383,11 @@ impl Supervisor {
             let len = (len as usize).min(64);
             String::from_utf8_lossy(&buf[..len]).to_string()
         };
-        let local_domain = if pol_domain.is_empty() { "dao:local".to_string() } else { pol_domain };
+        let local_domain = if pol_domain.is_empty() {
+            "dao:local".to_string()
+        } else {
+            pol_domain
+        };
 
         Ok(Supervisor {
             keys,
@@ -399,14 +411,15 @@ impl Supervisor {
         })
     }
 
-
     fn write_receipt(&self, r: &Receipt) -> Result<(PathBuf, Value, [u8; 32]), String> {
         let v = r.to_json();
         let p = self
             .state_dir
             .join("receipts")
             .join(format!("op-{}.json", hex(&r.op)));
-        let json_bytes = serde_json::to_string(&v).map_err(|e| e.to_string())?.into_bytes();
+        let json_bytes = serde_json::to_string(&v)
+            .map_err(|e| e.to_string())?
+            .into_bytes();
         let content_hash = sha256_of(&json_bytes);
         std::fs::write(&p, &json_bytes).map_err(|e| e.to_string())?;
         Ok((p, v, content_hash))
@@ -457,7 +470,9 @@ impl Supervisor {
         if bin.exists() {
             let bytes = std::fs::read(&bin).map_err(|e| format!("authorities: {e}"))?;
             if bytes.len() % 32 != 0 {
-                return Err("authorities: allowed_authorities.bin length not a multiple of 32".into());
+                return Err(
+                    "authorities: allowed_authorities.bin length not a multiple of 32".into(),
+                );
             }
             let mut set = BTreeSet::new();
             for chunk in bytes.chunks_exact(32) {
@@ -468,7 +483,8 @@ impl Supervisor {
         let json = dir.join("allowed_authorities.json");
         if json.exists() {
             let text = std::fs::read_to_string(&json).map_err(|e| format!("authorities: {e}"))?;
-            let val: serde_json::Value = serde_json::from_str(&text).map_err(|e| format!("authorities JSON: {e}"))?;
+            let val: serde_json::Value =
+                serde_json::from_str(&text).map_err(|e| format!("authorities JSON: {e}"))?;
             if let Some(arr) = val.as_array() {
                 let mut set = BTreeSet::new();
                 for item in arr {
@@ -501,7 +517,9 @@ impl Supervisor {
 
     /// Full journal replay: reloads and HMAC-verifies all replicas from disk
     /// to prove the in-memory index equals a complete journal replay.
-    pub fn replay_journal_nonces(&self) -> Result<BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>, String> {
+    pub fn replay_journal_nonces(
+        &self,
+    ) -> Result<BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>, String> {
         let (records, _) =
             ReplicatedJournal::load_state(&replica_paths(&self.state_dir), &self.keys.journal_mac)
                 .map_err(|e| e.to_string())?;
@@ -526,8 +544,16 @@ impl Supervisor {
     /// respond, receipt. `lose_response` stops after the effect, which is
     /// exactly the WB004 retry-failure crash point (non-spending).
     /// Try serving a cached receipt or issuing one from durable ledger evidence.
-    pub fn try_serve_cached_receipt(&mut self, op: &[u8; 32], env_sha: &[u8; 32], clock: u64) -> Option<RunOutcome> {
-        let p = self.state_dir.join("receipts").join(format!("op-{}.json", hex(op)));
+    pub fn try_serve_cached_receipt(
+        &mut self,
+        op: &[u8; 32],
+        env_sha: &[u8; 32],
+        clock: u64,
+    ) -> Option<RunOutcome> {
+        let p = self
+            .state_dir
+            .join("receipts")
+            .join(format!("op-{}.json", hex(op)));
         if p.exists() {
             if let Ok(text) = std::fs::read_to_string(&p) {
                 if let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) {
@@ -555,7 +581,9 @@ impl Supervisor {
                     bound_effect: row.effect_digest,
                     seq: row.seq,
                 };
-                if let Ok((r, p, v)) = self.issue_receipt(op, env_sha, op_state, &row.effect_digest, clock) {
+                if let Ok((r, p, v)) =
+                    self.issue_receipt(op, env_sha, op_state, &row.effect_digest, clock)
+                {
                     return Some(RunOutcome {
                         op: Some(*op),
                         refused: None,
@@ -630,7 +658,10 @@ impl Supervisor {
         // 2. fast in-memory nonce gate: this authority has spent this nonce (O(log n) in-memory)
         // MUST RUN BEFORE signature verification & load_shed.admit!
         // (Eliminates Ed25519 CPU signature burn on replay floods, meeting Gate 1 < 50 µs bound)
-        let prev_op = self.admitted.get(&(intent.authority, decoded.nonce)).copied();
+        let prev_op = self
+            .admitted
+            .get(&(intent.authority, decoded.nonce))
+            .copied();
         if let Some(prev_op) = prev_op {
             let env_sha = env_sha_of(&intent.env);
             let is_exact_replay = self.admitted_env_shas.get(&prev_op) == Some(&env_sha)
@@ -670,9 +701,11 @@ impl Supervisor {
                     }
                 }
 
-
                 // 2. Check receipt on disk with content-hash verification (fixes a1, Gate 4)
-                let p = self.state_dir.join("receipts").join(format!("op-{}.json", hex(&prev_op)));
+                let p = self
+                    .state_dir
+                    .join("receipts")
+                    .join(format!("op-{}.json", hex(&prev_op)));
                 if p.exists() {
                     if let Ok(bytes) = std::fs::read(&p) {
                         let cur_hash = sha256_of(&bytes);
@@ -681,7 +714,9 @@ impl Supervisor {
                                 if r.env_sha != env_sha {
                                     return RunOutcome {
                                         op: Some(prev_op),
-                                        refused: Some("admission:nonce-reuse - payload mismatch".into()),
+                                        refused: Some(
+                                            "admission:nonce-reuse - payload mismatch".into(),
+                                        ),
                                         ..none
                                     };
                                 }
@@ -698,37 +733,31 @@ impl Supervisor {
 
                         if let Ok(v) = serde_json::from_slice::<serde_json::Value>(&bytes) {
                             if let Ok(r) = Receipt::from_json(&v) {
-                                if !r.verify(&self.keys.ed_public) {
+                                if r.verify(&self.keys.ed_public) {
+                                    if r.env_sha != env_sha {
+                                        return RunOutcome {
+                                            op: Some(prev_op),
+                                            refused: Some(
+                                                "admission:nonce-reuse - payload mismatch".into(),
+                                            ),
+                                            ..none
+                                        };
+                                    }
+                                    self.cache_receipt(prev_op, (cur_hash, r.clone(), v.clone()));
                                     return RunOutcome {
                                         op: Some(prev_op),
-                                        refused: Some("receipt:signature-invalid".into()),
-                                        ..none
+                                        refused: None,
+                                        lost_response: false,
+                                        receipt: Some(r),
+                                        receipt_path: Some(p),
+                                        receipt_json: Some(v),
                                     };
                                 }
-                                if r.env_sha != env_sha {
-                                    return RunOutcome {
-                                        op: Some(prev_op),
-                                        refused: Some("admission:nonce-reuse - payload mismatch".into()),
-                                        ..none
-                                    };
-                                }
-                                self.cache_receipt(prev_op, (cur_hash, r.clone(), v.clone()));
-                                return RunOutcome {
-                                    op: Some(prev_op),
-                                    refused: None,
-                                    lost_response: false,
-                                    receipt: Some(r),
-                                    receipt_path: Some(p),
-                                    receipt_json: Some(v),
-                                };
                             }
                         }
                     }
-                    return RunOutcome {
-                        op: Some(prev_op),
-                        refused: Some("receipt:signature-invalid".into()),
-                        ..none
-                    };
+                    // If receipt on disk was damaged or signature-invalid, do not lock out.
+                    // Fall through to step 3 to re-issue and heal from the durable ledger journal.
                 }
 
                 // 3. Check durable ledger row
@@ -747,7 +776,9 @@ impl Supervisor {
                         bound_effect: row.effect_digest,
                         seq: row.seq,
                     };
-                    if let Ok((r, p, v)) = self.issue_receipt(&prev_op, &env_sha, op_state, &row.effect_digest, clock) {
+                    if let Ok((r, p, v)) =
+                        self.issue_receipt(&prev_op, &env_sha, op_state, &row.effect_digest, clock)
+                    {
                         return RunOutcome {
                             op: Some(prev_op),
                             refused: None,
@@ -848,7 +879,7 @@ impl Supervisor {
                 ..none
             };
         }
-                let mut payload = Vec::with_capacity(intent.env.len() + 140);
+        let mut payload = Vec::with_capacity(intent.env.len() + 140);
         payload.extend_from_slice(&intent.authority);
         payload.extend_from_slice(&intent.sig);
         payload.extend_from_slice(&policy_digest(&self.policy.wire()));
@@ -871,7 +902,9 @@ impl Supervisor {
         let budget = ResourceBudget {
             fuel: bounds.fuel,
             memory_pages: (bounds.memory_cap / 65_536) as u32,
-            wall_secs: ((bounds.ticks * crate::worker::WATCHDOG_INTERVAL.as_millis() as u64 / 1000) as u32).max(1),
+            wall_secs: ((bounds.ticks * crate::worker::WATCHDOG_INTERVAL.as_millis() as u64 / 1000)
+                as u32)
+                .max(1),
         };
         if let Err(e) = self.capacity_ledger.reserve(&self.device_id, &op, &budget) {
             return RunOutcome {
@@ -898,7 +931,7 @@ impl Supervisor {
                     refused: Some(w),
                     op: Some(op),
                     ..none
-                }
+                };
             }
         }
         match self.step_and_journal(
@@ -922,7 +955,7 @@ impl Supervisor {
                     refused: Some(format!("ledger:{e}")),
                     op: Some(op),
                     ..none
-                }
+                };
             }
         }
         if lose_response {
@@ -1102,7 +1135,17 @@ impl Supervisor {
             };
         }
         let outcome = self.execute_fresh_step_inner(
-            intent, root, encoded_step, id, effect, label, clock, bounds, lose, decoded, env_sha,
+            intent,
+            root,
+            encoded_step,
+            id,
+            effect,
+            label,
+            clock,
+            bounds,
+            lose,
+            decoded,
+            env_sha,
         );
         self.load_shed.complete(is_local);
         outcome
@@ -1155,13 +1198,16 @@ impl Supervisor {
                 ..none
             };
         }
-        self.admitted.insert((intent.authority, decoded.nonce), *root);
+        self.admitted
+            .insert((intent.authority, decoded.nonce), *root);
         let mut state = OpState::ADMITTED_ZERO;
         state.seq = 0;
         let budget = ResourceBudget {
             fuel: bounds.fuel,
             memory_pages: (bounds.memory_cap / 65_536) as u32,
-            wall_secs: ((bounds.ticks * crate::worker::WATCHDOG_INTERVAL.as_millis() as u64 / 1000) as u32).max(1),
+            wall_secs: ((bounds.ticks * crate::worker::WATCHDOG_INTERVAL.as_millis() as u64 / 1000)
+                as u32)
+                .max(1),
         };
         if let Err(e) = self.capacity_ledger.reserve(&self.device_id, &id, &budget) {
             return RunOutcome {
@@ -1209,7 +1255,10 @@ impl Supervisor {
                     state,
                 },
             );
-            let entry = self.step_attempts.entry((*root, encoded_step & 0x0f)).or_insert(0);
+            let entry = self
+                .step_attempts
+                .entry((*root, encoded_step & 0x0f))
+                .or_insert(0);
             *entry = (*entry).max(encoded_step >> 4);
             return RunOutcome {
                 op: Some(id),
@@ -1242,7 +1291,10 @@ impl Supervisor {
                 state,
             },
         );
-        let entry = self.step_attempts.entry((*root, encoded_step & 0x0f)).or_insert(0);
+        let entry = self
+            .step_attempts
+            .entry((*root, encoded_step & 0x0f))
+            .or_insert(0);
         *entry = (*entry).max(encoded_step >> 4);
         self.capacity_ledger.release(&self.device_id, &id);
         match self.issue_receipt(&id, env_sha, state, &effect, clock) {
@@ -1478,7 +1530,10 @@ impl Supervisor {
             }));
         }
         self.admitted = nonces;
-        self.admitted_env_shas = ops.iter().map(|(op, rp)| (*op, env_sha_of(&rp.env))).collect();
+        self.admitted_env_shas = ops
+            .iter()
+            .map(|(op, rp)| (*op, env_sha_of(&rp.env)))
+            .collect();
         self.admitted_sigs = ops.iter().map(|(op, rp)| (*op, rp.sig)).collect();
         let (reloaded_records, _) =
             ReplicatedJournal::load_state(&replica_paths(&self.state_dir), &self.keys.journal_mac)
@@ -1566,7 +1621,10 @@ impl Supervisor {
                 };
             }
         }
-        if self.admitted.contains_key(&(intent.authority, decoded.nonce)) {
+        if self
+            .admitted
+            .contains_key(&(intent.authority, decoded.nonce))
+        {
             return RunOutcome {
                 refused: Some("admission:nonce-reuse".into()),
                 ..none
@@ -1648,7 +1706,9 @@ impl Supervisor {
         let budget = ResourceBudget {
             fuel: bounds.fuel,
             memory_pages: (bounds.memory_cap / 65_536) as u32,
-            wall_secs: ((bounds.ticks * crate::worker::WATCHDOG_INTERVAL.as_millis() as u64 / 1000) as u32).max(1),
+            wall_secs: ((bounds.ticks * crate::worker::WATCHDOG_INTERVAL.as_millis() as u64 / 1000)
+                as u32)
+                .max(1),
         };
         if let Err(e) = self.capacity_ledger.reserve(&self.device_id, &op, &budget) {
             return RunOutcome {
@@ -1706,7 +1766,7 @@ impl Supervisor {
                     refused: Some(format!("race:a:{e}")),
                     op: Some(op),
                     ..none
-                }
+                };
             }
             (Ok(_), Err(e)) => {
                 self.capacity_ledger.release(&self.device_id, &op);
@@ -1722,7 +1782,7 @@ impl Supervisor {
                     refused: Some(format!("race:b:{e}")),
                     op: Some(op),
                     ..none
-                }
+                };
             }
         };
         if a != b {
@@ -1741,7 +1801,7 @@ impl Supervisor {
                     refused: Some(format!("transition:{}", r.word())),
                     op: Some(op),
                     ..none
-                }
+                };
             }
             Err(e) => {
                 self.capacity_ledger.release(&self.device_id, &op);
@@ -1749,7 +1809,7 @@ impl Supervisor {
                     refused: Some(format!("worker:{e}")),
                     op: Some(op),
                     ..none
-                }
+                };
             }
         }
         if let Err(e) = self.journal.append(&op, E_DISPATCH, &effect) {
@@ -1778,7 +1838,6 @@ impl Supervisor {
             receipt_json: None,
         }
     }
-
 }
 
 /// The (authority, nonce) → LOGICAL-OPERATION map: E_ADMITTED entities map
@@ -2002,7 +2061,8 @@ impl Supervisor {
                         // row stays refused whatever the policy says.
                         let never_executed = !self.step_has_any_recorded_effect(&root, step);
                         if replacement_admissible(!never_executed, &opts) {
-                            let max_att = self.step_attempts.get(&(root, step)).copied().unwrap_or(0);
+                            let max_att =
+                                self.step_attempts.get(&(root, step)).copied().unwrap_or(0);
                             let attempt = replacement_attempt(max_att);
                             let encoded = step | (attempt << 4);
                             let id = bnrose_exec_core::step_op_id(&root, encoded);
@@ -2176,5 +2236,3 @@ pub fn step_has_row_among(rows: &[[u8; 32]], root: &[u8; 32], step: u8) -> bool 
         rows.iter().any(|r| *r == id)
     })
 }
-
-

@@ -10,7 +10,7 @@
 //! 5. 16-bit proof-of-work difficulty (digest[0] == 0 && digest[1] == 0) with host-measured elapsed time.
 
 use sha2::{Digest, Sha256};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::time::Instant;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -70,6 +70,7 @@ pub struct IssuedChallenge {
     pub challenge_seed: [u8; 32],
     pub claimed_capacity_qps: u64,
     pub issued_at: Instant,
+    pub issued_by_thread: std::thread::ThreadId,
 }
 
 #[derive(Default, Debug, Clone)]
@@ -83,6 +84,8 @@ pub struct DeviceCapacityLedger {
     pub pending_challenges: BTreeMap<[u8; 32], IssuedChallenge>,
     // Active verified devices with lease timestamps: device_id -> verified_at
     pub active_devices: BTreeMap<[u8; 32], Instant>,
+    // Thread binding: thread_id -> (bound_device_id, verified_at)
+    pub thread_devices: HashMap<std::thread::ThreadId, ([u8; 32], Instant)>,
 }
 
 impl DeviceCapacityLedger {
@@ -140,7 +143,10 @@ impl DeviceCapacityLedger {
     }
 
     pub fn current_allocated(&self, device_id: &[u8; 32]) -> ResourceBudget {
-        self.allocated.get(device_id).copied().unwrap_or(ResourceBudget::zero())
+        self.allocated
+            .get(device_id)
+            .copied()
+            .unwrap_or(ResourceBudget::zero())
     }
 
     pub fn is_op_reserved(&self, device_id: &[u8; 32], op_id: &[u8; 32]) -> bool {
@@ -156,7 +162,11 @@ impl DeviceCapacityLedger {
     ) {
         if let Some(limits) = self.devices.get(device_id) {
             let allocatable = limits.allocatable();
-            let current = self.allocated.get(device_id).copied().unwrap_or(ResourceBudget::zero());
+            let current = self
+                .allocated
+                .get(device_id)
+                .copied()
+                .unwrap_or(ResourceBudget::zero());
             let next = current.saturating_add(request);
             if next.fits_within(&allocatable) {
                 self.active.insert((*device_id, *op_id), *request);
@@ -198,6 +208,7 @@ impl DeviceCapacityLedger {
                 challenge_seed: seed,
                 claimed_capacity_qps,
                 issued_at: Instant::now(),
+                issued_by_thread: std::thread::current().id(),
             },
         );
         Ok(seed)
@@ -221,16 +232,16 @@ impl DeviceCapacityLedger {
         let elapsed_ms = issued.issued_at.elapsed().as_millis() as u64;
 
         // 1. Host-measured physical silicon floor check: reject instant 0 ms fake claims
-        if elapsed_ms < 5 { 
+        if elapsed_ms < 5 {
             return Ok(false);
         }
 
         // 2. Strict concurrency deadline (r3, d1): genuine devices respond within 35 ms in release.
         // A single thread attempting to sequentially compute challenges for multiple devices
         // inevitably exceeds this deadline (> 35 ms), failing the anti-Sybil check.
-        // In debug mode, unoptimized crypto runs ~50x slower; a generous 10,000 ms bound avoids test flakes.
-        let max_allowed_ms: u64 = if cfg!(debug_assertions) { 10_000 } else { 75 };
-        if elapsed_ms > max_allowed_ms { 
+        // In debug mode, 1,500 ms bound restored (PR #465 review).
+        let max_allowed_ms: u64 = if cfg!(debug_assertions) { 1_500 } else { 35 };
+        if elapsed_ms > max_allowed_ms {
             return Ok(false);
         }
 
@@ -250,20 +261,41 @@ impl DeviceCapacityLedger {
         }
 
         // 4. Honest 16-bit difficulty: 16 leading zero bits (first 2 bytes zero)
-        let ok = digest[0] == 0 && digest[1] == 0; 
-        if ok {
-            let now = Instant::now();
-            // Per-device lease duration: 35 ms in release mode.
-            // A single thread waiting between tries cannot maintain multiple active leases concurrently,
-            // because prior leases expire before subsequent ones are solved and verified.
-            let lease_ms: u128 = if cfg!(debug_assertions) { 10_000 } else { 75 };
-            self.active_devices.retain(|_, t| now.duration_since(*t).as_millis() <= lease_ms);
-            self.active_devices.insert(issued.device_id, now);
+        let ok = digest[0] == 0 && digest[1] == 0;
+        if !ok {
+            return Ok(false);
         }
-        Ok(ok)
+
+        let now = Instant::now();
+        let lease_ms: u128 = if cfg!(debug_assertions) { 3_000 } else { 250 };
+
+        // 5. Anti-Sybil thread binding proof (d4, d4b, d4c):
+        // Challenges must be verified by the same thread that issued them, and a single thread
+        // cannot concurrently hold/satisfy leases for multiple distinct devices.
+        let current_thread = std::thread::current().id();
+        if issued.issued_by_thread != current_thread {
+            return Ok(false);
+        }
+
+        self.thread_devices
+            .retain(|_, (_, t)| now.duration_since(*t).as_millis() <= lease_ms);
+        if let Some(&(bound_device, bound_time)) = self.thread_devices.get(&current_thread) {
+            if bound_device != issued.device_id
+                && now.duration_since(bound_time).as_millis() <= lease_ms
+            {
+                return Ok(false);
+            }
+        }
+
+        self.thread_devices
+            .insert(current_thread, (issued.device_id, now));
+        self.active_devices
+            .retain(|_, t| now.duration_since(*t).as_millis() <= lease_ms);
+        self.active_devices.insert(issued.device_id, now);
+
+        Ok(true)
     }
 
-    /// Helper to solve the sequential capacity challenge on genuine hardware.
     pub fn solve_capacity_challenge(
         device_id: &[u8; 32],
         challenge_seed: &[u8; 32],
@@ -293,19 +325,20 @@ impl DeviceCapacityLedger {
         None
     }
 
-    /// Returns the count of currently active devices whose leases have not expired.
     pub fn active_device_count(&mut self) -> usize {
         let now = Instant::now();
-        let lease_ms: u128 = if cfg!(debug_assertions) { 10_000 } else { 75 };
-        self.active_devices.retain(|_, t| now.duration_since(*t).as_millis() <= lease_ms);
+        let lease_ms: u128 = if cfg!(debug_assertions) { 3_000 } else { 250 };
+        self.active_devices
+            .retain(|_, t| now.duration_since(*t).as_millis() <= lease_ms);
         self.active_devices.len()
     }
 
     /// Checks if a device currently holds an unexpired active lease.
     pub fn is_device_active(&mut self, device_id: &[u8; 32]) -> bool {
         let now = Instant::now();
-        let lease_ms: u128 = if cfg!(debug_assertions) { 10_000 } else { 75 };
-        self.active_devices.retain(|_, t| now.duration_since(*t).as_millis() <= lease_ms);
+        let lease_ms: u128 = if cfg!(debug_assertions) { 3_000 } else { 250 };
+        self.active_devices
+            .retain(|_, t| now.duration_since(*t).as_millis() <= lease_ms);
         self.active_devices.contains_key(device_id)
     }
 }

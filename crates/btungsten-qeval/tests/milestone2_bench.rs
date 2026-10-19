@@ -1,8 +1,8 @@
-﻿//! Milestone 2: Benchmarking the WB001 Canonical Intent Decoder bottleneck.
+//! Milestone 2: Benchmarking the WB001 Canonical Intent Decoder bottleneck.
 //! Measures latency distributions, throughput, and hostile-input rejection costs.
 
-use std::time::{Duration, Instant};
 use btungsten_wb001::{canonical, decode, IntentIn, Refusal, Text};
+use std::time::{Duration, Instant};
 
 fn t(s: &str) -> Text {
     Text::Str(s.to_string())
@@ -74,7 +74,8 @@ where
     let sum: Duration = samples.iter().sum();
     let mean = sum / (samples.len() as u32);
     let ops_per_sec = (iters as f64) / total_elapsed.as_secs_f64();
-    let mb_per_sec = (iters as f64 * bytes_len as f64) / (total_elapsed.as_secs_f64() * 1_048_576.0);
+    let mb_per_sec =
+        (iters as f64 * bytes_len as f64) / (total_elapsed.as_secs_f64() * 1_048_576.0);
 
     Stats {
         min,
@@ -97,7 +98,12 @@ fn test_benchmark_baseline_decode() {
     println!("\n=======================================================");
     println!("  WB001 DECODER BENCHMARK: WORKLOAD PROFILING");
     println!("=======================================================");
-    println!("Envelope sizes: min={} B, med={} B, full={} B", env_min.len(), env_med.len(), env_full.len());
+    println!(
+        "Envelope sizes: min={} B, med={} B, full={} B",
+        env_min.len(),
+        env_med.len(),
+        env_full.len()
+    );
 
     // 1. Valid minimal
     let s_min = measure_fn(env_min.len(), 5_000, || {
@@ -105,9 +111,14 @@ fn test_benchmark_baseline_decode() {
         assert!(res.is_ok());
     });
     println!("\n[1] Valid Minimal (len = {} B):", env_min.len());
-    println!("    Throughput: {:.1} ops/sec ({:.2} MB/s)", s_min.ops_per_sec, s_min.mb_per_sec);
-    println!("    Latency: p50={:?}, p90={:?}, p99={:?}, mean={:?}, min={:?}, max={:?}",
-             s_min.p50, s_min.p90, s_min.p99, s_min.mean, s_min.min, s_min.max);
+    println!(
+        "    Throughput: {:.1} ops/sec ({:.2} MB/s)",
+        s_min.ops_per_sec, s_min.mb_per_sec
+    );
+    println!(
+        "    Latency: p50={:?}, p90={:?}, p99={:?}, mean={:?}, min={:?}, max={:?}",
+        s_min.p50, s_min.p90, s_min.p99, s_min.mean, s_min.min, s_min.max
+    );
 
     // 2. Valid medium
     let s_med = measure_fn(env_med.len(), 5_000, || {
@@ -115,9 +126,14 @@ fn test_benchmark_baseline_decode() {
         assert!(res.is_ok());
     });
     println!("\n[2] Valid Medium (len = {} B):", env_med.len());
-    println!("    Throughput: {:.1} ops/sec ({:.2} MB/s)", s_med.ops_per_sec, s_med.mb_per_sec);
-    println!("    Latency: p50={:?}, p90={:?}, p99={:?}, mean={:?}, min={:?}, max={:?}",
-             s_med.p50, s_med.p90, s_med.p99, s_med.mean, s_med.min, s_med.max);
+    println!(
+        "    Throughput: {:.1} ops/sec ({:.2} MB/s)",
+        s_med.ops_per_sec, s_med.mb_per_sec
+    );
+    println!(
+        "    Latency: p50={:?}, p90={:?}, p99={:?}, mean={:?}, min={:?}, max={:?}",
+        s_med.p50, s_med.p90, s_med.p99, s_med.mean, s_med.min, s_med.max
+    );
 
     // 3. Valid full
     let s_full = measure_fn(env_full.len(), 5_000, || {
@@ -125,9 +141,14 @@ fn test_benchmark_baseline_decode() {
         assert!(res.is_ok());
     });
     println!("\n[3] Valid Full 4KB (len = {} B):", env_full.len());
-    println!("    Throughput: {:.1} ops/sec ({:.2} MB/s)", s_full.ops_per_sec, s_full.mb_per_sec);
-    println!("    Latency: p50={:?}, p90={:?}, p99={:?}, mean={:?}, min={:?}, max={:?}",
-             s_full.p50, s_full.p90, s_full.p99, s_full.mean, s_full.min, s_full.max);
+    println!(
+        "    Throughput: {:.1} ops/sec ({:.2} MB/s)",
+        s_full.ops_per_sec, s_full.mb_per_sec
+    );
+    println!(
+        "    Latency: p50={:?}, p90={:?}, p99={:?}, mean={:?}, min={:?}, max={:?}",
+        s_full.p50, s_full.p90, s_full.p99, s_full.mean, s_full.min, s_full.max
+    );
 
     // Hostile / Rejection Battery
     println!("\n--- Hostile Input Rejection Suite ---");
@@ -137,7 +158,10 @@ fn test_benchmark_baseline_decode() {
     let s_short = measure_fn(h_short.len(), 5_000, || {
         assert_eq!(decode(h_short).err(), Some(Refusal::Short));
     });
-    println!("  [H1: Short]      Throughput: {:.1} ops/sec | p50={:?}, mean={:?}", s_short.ops_per_sec, s_short.p50, s_short.mean);
+    println!(
+        "  [H1: Short]      Throughput: {:.1} ops/sec | p50={:?}, mean={:?}",
+        s_short.ops_per_sec, s_short.p50, s_short.mean
+    );
 
     // H2: Bad Magic
     let mut h_magic = env_min.clone();
@@ -145,7 +169,10 @@ fn test_benchmark_baseline_decode() {
     let s_magic = measure_fn(h_magic.len(), 5_000, || {
         assert_eq!(decode(&h_magic).err(), Some(Refusal::Magic));
     });
-    println!("  [H2: Bad Magic]  Throughput: {:.1} ops/sec | p50={:?}, mean={:?}", s_magic.ops_per_sec, s_magic.p50, s_magic.mean);
+    println!(
+        "  [H2: Bad Magic]  Throughput: {:.1} ops/sec | p50={:?}, mean={:?}",
+        s_magic.ops_per_sec, s_magic.p50, s_magic.mean
+    );
 
     // H3: Bad Version
     let mut h_ver = env_min.clone();
@@ -153,7 +180,10 @@ fn test_benchmark_baseline_decode() {
     let s_ver = measure_fn(h_ver.len(), 5_000, || {
         assert_eq!(decode(&h_ver).err(), Some(Refusal::Version));
     });
-    println!("  [H3: Bad Version] Throughput: {:.1} ops/sec | p50={:?}, mean={:?}", s_ver.ops_per_sec, s_ver.p50, s_ver.mean);
+    println!(
+        "  [H3: Bad Version] Throughput: {:.1} ops/sec | p50={:?}, mean={:?}",
+        s_ver.ops_per_sec, s_ver.p50, s_ver.mean
+    );
 
     // H4: Bad Tag Order
     let mut h_tag = env_min.clone();
@@ -161,7 +191,10 @@ fn test_benchmark_baseline_decode() {
     let s_tag = measure_fn(h_tag.len(), 5_000, || {
         assert_eq!(decode(&h_tag).err(), Some(Refusal::TagOrder));
     });
-    println!("  [H4: Tag Order]  Throughput: {:.1} ops/sec | p50={:?}, mean={:?}", s_tag.ops_per_sec, s_tag.p50, s_tag.mean);
+    println!(
+        "  [H4: Tag Order]  Throughput: {:.1} ops/sec | p50={:?}, mean={:?}",
+        s_tag.ops_per_sec, s_tag.p50, s_tag.mean
+    );
 
     // H5: Length bounds violation (domain len = 70 > 64)
     let mut h_len = env_min.clone();
@@ -169,7 +202,10 @@ fn test_benchmark_baseline_decode() {
     let s_len = measure_fn(h_len.len(), 5_000, || {
         assert_eq!(decode(&h_len).err(), Some(Refusal::Length));
     });
-    println!("  [H5: Bad Length] Throughput: {:.1} ops/sec | p50={:?}, mean={:?}", s_len.ops_per_sec, s_len.p50, s_len.mean);
+    println!(
+        "  [H5: Bad Length] Throughput: {:.1} ops/sec | p50={:?}, mean={:?}",
+        s_len.ops_per_sec, s_len.p50, s_len.mean
+    );
 
     // H6: Invalid UTF-8 (CESU-8 surrogate 0xED 0xA0 0x80)
     let mut h_utf8 = env_min.clone();
@@ -179,7 +215,10 @@ fn test_benchmark_baseline_decode() {
     let s_utf8 = measure_fn(h_utf8.len(), 5_000, || {
         assert_eq!(decode(&h_utf8).err(), Some(Refusal::Utf8));
     });
-    println!("  [H6: CESU-8 Utf8] Throughput: {:.1} ops/sec | p50={:?}, mean={:?}", s_utf8.ops_per_sec, s_utf8.p50, s_utf8.mean);
+    println!(
+        "  [H6: CESU-8 Utf8] Throughput: {:.1} ops/sec | p50={:?}, mean={:?}",
+        s_utf8.ops_per_sec, s_utf8.p50, s_utf8.mean
+    );
 
     // H7: Trailing bytes
     let mut h_trail = env_min.clone();
@@ -187,7 +226,10 @@ fn test_benchmark_baseline_decode() {
     let s_trail = measure_fn(h_trail.len(), 5_000, || {
         assert_eq!(decode(&h_trail).err(), Some(Refusal::Trailing));
     });
-    println!("  [H7: Trailing]   Throughput: {:.1} ops/sec | p50={:?}, mean={:?}", s_trail.ops_per_sec, s_trail.p50, s_trail.mean);
+    println!(
+        "  [H7: Trailing]   Throughput: {:.1} ops/sec | p50={:?}, mean={:?}",
+        s_trail.ops_per_sec, s_trail.p50, s_trail.mean
+    );
 }
 
 #[test]
@@ -199,9 +241,19 @@ fn test_differential_equivalence_against_saw_core() {
         let env = make_intent(pld_len);
         let fast_res = decode(&env);
         let ref_res = decode_reference(&env);
-        assert!(fast_res.is_ok(), "fast decode failed on valid intent pld_len={pld_len}");
-        assert!(ref_res.is_ok(), "ref decode failed on valid intent pld_len={pld_len}");
-        assert_eq!(*fast_res.unwrap(), *ref_res.unwrap(), "fast and ref decoded intent mismatch at pld_len={pld_len}");
+        assert!(
+            fast_res.is_ok(),
+            "fast decode failed on valid intent pld_len={pld_len}"
+        );
+        assert!(
+            ref_res.is_ok(),
+            "ref decode failed on valid intent pld_len={pld_len}"
+        );
+        assert_eq!(
+            *fast_res.unwrap(),
+            *ref_res.unwrap(),
+            "fast and ref decoded intent mismatch at pld_len={pld_len}"
+        );
     }
 
     // 2. All 7 refusal categories
@@ -209,14 +261,21 @@ fn test_differential_equivalence_against_saw_core() {
 
     // Truncated (every length from 0 to 7)
     for k in 0..8 {
-        assert_eq!(decode(&base_env[..k]).err(), decode_reference(&base_env[..k]).err());
+        assert_eq!(
+            decode(&base_env[..k]).err(),
+            decode_reference(&base_env[..k]).err()
+        );
     }
 
     // Corrupted magic
     for b in 0..7 {
         let mut m = base_env.clone();
         m[b] ^= 0xff;
-        assert_eq!(decode(&m).err(), decode_reference(&m).err(), "magic corrupt mismatch at byte {b}");
+        assert_eq!(
+            decode(&m).err(),
+            decode_reference(&m).err(),
+            "magic corrupt mismatch at byte {b}"
+        );
     }
 
     // Corrupted version
@@ -229,7 +288,11 @@ fn test_differential_equivalence_against_saw_core() {
         if tag_idx < base_env.len() {
             let mut t = base_env.clone();
             t[tag_idx] ^= 0x55;
-            assert_eq!(decode(&t).err(), decode_reference(&t).err(), "tag corrupt mismatch at {tag_idx}");
+            assert_eq!(
+                decode(&t).err(),
+                decode_reference(&t).err(),
+                "tag corrupt mismatch at {tag_idx}"
+            );
         }
     }
 
@@ -258,7 +321,10 @@ fn test_differential_equivalence_against_saw_core() {
             m[i] ^= 1 << bit;
             let fast_err = decode(&m).err();
             let ref_err = decode_reference(&m).err();
-            assert_eq!(fast_err, ref_err, "bit flip mismatch at byte {i} bit {bit}: fast={fast_err:?}, ref={ref_err:?}");
+            assert_eq!(
+                fast_err, ref_err,
+                "bit flip mismatch at byte {i} bit {bit}: fast={fast_err:?}, ref={ref_err:?}"
+            );
             count += 1;
         }
     }
