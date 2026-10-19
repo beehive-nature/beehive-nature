@@ -169,10 +169,37 @@ Git repository or a successful CI run alone does not implement those
 contracts. No decentralized backend, signed execution attestation, new
 identity, payment, or production deployment is added by this CI patch.
 
-## Landing status at preparation
+## Cache PR qualification and actual merge
 
-Prepared separately while PR #468 preserves its exact head and hosted
-queue position. This follow-up is not yet published or qualified. The
-cache PR's merge and verification precede publishing this scheduling
+The complete cache-candidate receipt is
+[`cache-pr-qualified.json`](../receipts/ci-throughput-2026-10-18/cache-pr-qualified.json).
+Its event/name coverage was checked against the expected ten PR and eight
+push workflows: all 18 succeeded. All 48 executed jobs have checkout/tree
+bindings and usable timing; eight path-filtered RB jobs were skipped.
+Every executed job tested tree `74a3877d534252bba32801ce8bb310551e333cd8`,
+including the push checkout and PR synthetic merge. This equality is
+specific to this candidate and base.
+
+Total job execution was 23,946 seconds (6h39m06s). The first workflow was
+created at 00:08:30 UTC on October 19; the final job completed at 01:19:30,
+a 71-minute interval. This is workflow-creation-to-last-job time, not a
+measurement from local commit creation or a promise for future runs.
+The five duplicate workflows account for 2,776 seconds (11.6%) of this
+candidate's summed job execution; removing five of 18 workflow executions
+does not imply the same percentage reduction in time.
+
+[PR #468](https://github.com/beehive-nature/beehive-nature/pull/468)
+merged at 01:23:02 UTC as `751e5aacb94eef991a6c316ab4d9941c0d4cf8f6`.
+Before merging, the PR still had the qualified head and base, GitHub
+reported CLEAN, and the diff remained the one-line cache-path correction
+plus its dispatch. Fetch and ancestry checks confirm the actual merge on
+main, with the same tested tree. Its ten main code/proof workflows and
+separate Pages run are now being observed; their success and corrected
+cache seeding are not yet claimed.
+
+## Throughput follow-up status
+
+This follow-up is committed locally, not yet published or qualified. The
+cache PR's actual-main verification precedes publishing this scheduling
 change. End-to-end elapsed time and runner time remain separate metrics;
 queue pressure from other lanes is not attributed to this patch.
