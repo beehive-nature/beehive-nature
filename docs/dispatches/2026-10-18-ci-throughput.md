@@ -193,8 +193,16 @@ merged at 01:23:02 UTC as `751e5aacb94eef991a6c316ab4d9941c0d4cf8f6`.
 Before merging, the PR still had the qualified head and base, GitHub
 reported CLEAN, and the diff remained the one-line cache-path correction
 plus its dispatch. Fetch and ancestry checks confirm the actual merge on
-main, with the same tested tree. Its ten main code/proof workflows are
-still being observed. The separate
+main, with the same tested tree. All ten actual-main code/proof workflows
+succeeded. Their complete receipt is
+[`cache-main-qualified.json`](../receipts/ci-throughput-2026-10-18/cache-main-qualified.json):
+the expected ten push workflow names are present, all 29 executed jobs
+bind to actual merge `751e5aacb` and the qualified tree, four path-filtered
+RB jobs are skipped, and no executed-job timing is missing. Summed job
+execution is 14,200 seconds (3h56m40s); the first workflow was created at
+01:23:05 UTC and the last job completed at 02:02:13, a 39m08s interval.
+This main event set differs from the candidate's combined PR/push set, so
+their elapsed intervals are not a cache-speedup comparison. The separate
 [Pages run](https://github.com/beehive-nature/beehive-nature/actions/runs/39185101692)
 succeeded on this actual merge.
 
@@ -210,9 +218,32 @@ This is successful cold seeding, not a warm-restoration or whole-main
 qualification result. The throughput candidate will supply the next
 restoration observation.
 
-## Throughput follow-up status
+## Throughput follow-up at publication
 
-This follow-up is committed locally, not yet published or qualified. The
-cache PR's actual-main verification precedes publishing this scheduling
-change. End-to-end elapsed time and runner time remain separate metrics;
-queue pressure from other lanes is not attributed to this patch.
+The cache PR's exact-head qualification, actual-main verification and
+corrected cache seeding are complete before publishing this scheduling
+change. This dispatch records the implementation, validation and baselines
+at publication; the follow-up's own candidate and actual-merge results
+must be earned next and recorded in the pull request's verification
+updates and captured receipt files. End-to-end elapsed time and runner
+time remain separate metrics; queue pressure from other lanes is not
+attributed to this patch.
+
+Landing acceptance retains the full scope:
+
+- Verify the published candidate schedules ten PR workflows and only
+  three feature-push workflows (`tests`, `secret-scan`, `bTunGsTeN RB`).
+  Compare workflow names and events, not only a total or green badge.
+- Require successful candidate outcomes while retaining the existing
+  path-filtered RB skip scope. Bind every executed code/proof job to its
+  checkout and tree, with head, base, event, run and attempt recorded.
+- Inspect the corrected x0x cache restoration and report job/step timing
+  against the cold main seed. Keep cache restoration, fresh test/proof
+  execution, summed job time and elapsed qualification time distinct.
+- Merge the qualified head, fetch and verify its actual main ancestry,
+  then require all ten main code/proof workflows on that actual merge.
+  Record Pages separately and confirm the other corrected cache paths in
+  their hosted job logs.
+- Retain the final source-bound receipts and report measured results,
+  including variation or missing evidence, without turning the expected
+  five fewer workflow executions into an unmeasured time-saving claim.
