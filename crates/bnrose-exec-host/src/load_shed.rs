@@ -30,7 +30,7 @@ pub struct CrossDaoAdmissionControl {
 impl CrossDaoAdmissionControl {
     pub fn new(local_capacity_qps: usize, cross_dao_quota_qps: usize) -> Self {
         let retry_budget_cap = (cross_dao_quota_qps / 10).max(1);
-        let per_source_retry_allowance = retry_budget_cap.max(1);
+        let per_source_retry_allowance = (retry_budget_cap / 10).max(1);
         Self {
             local_capacity_qps,
             cross_dao_quota_qps,
@@ -49,11 +49,13 @@ impl CrossDaoAdmissionControl {
 
     pub fn with_retry_budget_cap(mut self, cap: usize) -> Self {
         self.retry_budget_cap = cap;
+        self.per_source_retry_allowance = self.per_source_retry_allowance.min(cap);
         self
     }
 
     pub fn set_retry_budget_cap(&mut self, cap: usize) {
         self.retry_budget_cap = cap;
+        self.per_source_retry_allowance = self.per_source_retry_allowance.min(cap);
     }
 
     pub fn retry_budget_cap(&self) -> usize {
@@ -126,10 +128,10 @@ impl CrossDaoAdmissionControl {
                     return Err("admission:shed-load — retry quota exhausted");
                 }
 
-                // Global retry cap check when quota is not entirely reserved
+                // Global retry cap check: hard ceiling on total retries admitted in window (PR #465, d14).
+                // Retries exceeding retry_budget_cap are refused even if general cross quota has free slots.
                 if self.retry_budget_cap > 0
                     && self.retries_admitted_in_window >= self.retry_budget_cap
-                    && self.cross_admitted_in_window + 1 >= self.cross_dao_quota_qps
                 {
                     return Err("admission:shed-load — retry quota exhausted");
                 }
@@ -219,7 +221,10 @@ impl BoundedShedTracker {
     }
 
     pub fn insert(&mut self, nonce_key: ([u8; 32], [u8; 32]), intent_key: ([u8; 32], [u8; 32])) {
-        if !self.nonce_set.contains(&nonce_key) {
+        if self.nonce_set.contains(&nonce_key) {
+            self.nonce_queue.retain(|k| k != &nonce_key);
+            self.nonce_queue.push_back(nonce_key);
+        } else {
             while self.nonce_queue.len() >= self.max_entries {
                 if let Some(oldest) = self.nonce_queue.pop_front() {
                     self.nonce_set.remove(&oldest);
@@ -229,7 +234,10 @@ impl BoundedShedTracker {
             self.nonce_queue.push_back(nonce_key);
         }
 
-        if !self.intent_set.contains(&intent_key) {
+        if self.intent_set.contains(&intent_key) {
+            self.intent_queue.retain(|k| k != &intent_key);
+            self.intent_queue.push_back(intent_key);
+        } else {
             while self.intent_queue.len() >= self.max_entries {
                 if let Some(oldest) = self.intent_queue.pop_front() {
                     self.intent_set.remove(&oldest);
@@ -250,7 +258,9 @@ impl BoundedShedTracker {
 
     pub fn remove(&mut self, nonce_key: &([u8; 32], [u8; 32]), intent_key: &([u8; 32], [u8; 32])) {
         self.nonce_set.remove(nonce_key);
+        self.nonce_queue.retain(|k| k != nonce_key);
         self.intent_set.remove(intent_key);
+        self.intent_queue.retain(|k| k != intent_key);
     }
 
     pub fn len(&self) -> usize {
