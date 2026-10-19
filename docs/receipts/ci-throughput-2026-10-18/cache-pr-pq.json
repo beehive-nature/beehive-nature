@@ -1,0 +1,875 @@
+{
+  "format": "bnr.ci-observation.v1",
+  "provider": "github",
+  "repository": "beehive-nature/beehive-nature",
+  "head": "3776749837e2ca8b73eed440b67446362b639ccc",
+  "observed_at": "2026-10-19T01:08:57.110Z",
+  "attestation": "unsigned API and job-log observations",
+  "coverage_note": "Recorded runs only; compare against the required workflow/event plan before qualification.",
+  "timing_note": "Workflow creation to job start includes dependency and retry waiting; it is not pure runner queue time.",
+  "summary": {
+    "workflow_executions": 1,
+    "completed_successfully": 1,
+    "incomplete": 0,
+    "non_success": [],
+    "all_recorded_runs_successful": true,
+    "executed_jobs": 7,
+    "completed_jobs_without_start_evidence": [],
+    "jobs_with_checkout_binding": 7,
+    "completed_job_execution_seconds": 701,
+    "timing_missing_job_ids": [],
+    "dispatch_to_job_start_seconds": [
+      {
+        "id": 117828851018,
+        "seconds": 731
+      },
+      {
+        "id": 117828851190,
+        "seconds": 1783
+      },
+      {
+        "id": 117828851296,
+        "seconds": 2870
+      },
+      {
+        "id": 117828851297,
+        "seconds": 1986
+      },
+      {
+        "id": 117828851318,
+        "seconds": 2912
+      },
+      {
+        "id": 117828851366,
+        "seconds": 3381
+      },
+      {
+        "id": 117828851391,
+        "seconds": 3453
+      }
+    ]
+  },
+  "runs": [
+    {
+      "id": 39179441927,
+      "name": "bTunGsTeN PQ",
+      "event": "pull_request",
+      "attempt": 1,
+      "head": "3776749837e2ca8b73eed440b67446362b639ccc",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-19T00:08:44Z",
+      "url": "https://github.com/beehive-nature/beehive-nature/actions/runs/39179441927",
+      "pull_requests": [
+        {
+          "number": 468,
+          "head": "3776749837e2ca8b73eed440b67446362b639ccc",
+          "base": "6e7f01bcba46f5a753715ad6818165487c2b07dd"
+        }
+      ],
+      "jobs": [
+        {
+          "id": 117828851018,
+          "name": "pq11-classic",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T00:20:55Z",
+          "completed_at": "2026-10-19T00:21:41Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 731,
+          "execution_seconds": 46,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:20:56Z",
+              "completed_at": "2026-10-19T00:20:57Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:20:57Z",
+              "completed_at": "2026-10-19T00:21:07Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:21:07Z",
+              "completed_at": "2026-10-19T00:21:18Z",
+              "execution_seconds": 11
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:21:18Z",
+              "completed_at": "2026-10-19T00:21:29Z",
+              "execution_seconds": 11
+            },
+            {
+              "number": 5,
+              "name": "Restore classical vector files (keyed on the manifest; every file is re-verified on use)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:21:29Z",
+              "completed_at": "2026-10-19T00:21:29Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 6,
+              "name": "PQ11 BIP-340, ECDSA secp256k1 and X25519 on the Rust implementations",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:21:29Z",
+              "completed_at": "2026-10-19T00:21:36Z",
+              "execution_seconds": 7
+            },
+            {
+              "number": 7,
+              "name": "PQ11 BIP-340 on the wallet's noble schnorr (the same pinned file)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:21:36Z",
+              "completed_at": "2026-10-19T00:21:39Z",
+              "execution_seconds": 3
+            },
+            {
+              "number": 12,
+              "name": "Post Restore classical vector files (keyed on the manifest; every file is re-verified on use)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:21:39Z",
+              "completed_at": "2026-10-19T00:21:39Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 13,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:21:39Z",
+              "completed_at": "2026-10-19T00:21:39Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 14,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:21:39Z",
+              "completed_at": "2026-10-19T00:21:39Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 15,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:21:39Z",
+              "completed_at": "2026-10-19T00:21:39Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "94ced41034e6c4734e5e45ca9e846334308a6755",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "20e4a8003ead8cf47a5c7afea7eb422bf8083f8e1add93154e01c13f9fd9ea5a"
+        },
+        {
+          "id": 117828851190,
+          "name": "pq05-xwing",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T00:38:27Z",
+          "completed_at": "2026-10-19T00:39:25Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 1783,
+          "execution_seconds": 58,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:38:28Z",
+              "completed_at": "2026-10-19T00:38:30Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:38:30Z",
+              "completed_at": "2026-10-19T00:38:48Z",
+              "execution_seconds": 18
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:38:48Z",
+              "completed_at": "2026-10-19T00:38:57Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:38:57Z",
+              "completed_at": "2026-10-19T00:39:11Z",
+              "execution_seconds": 14
+            },
+            {
+              "number": 5,
+              "name": "Fetch the pinned X-Wing draft",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:39:11Z",
+              "completed_at": "2026-10-19T00:39:12Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 6,
+              "name": "PQ05 browser X-Wing (bpq-lib, what bpq.js calls) on the draft vectors",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:39:12Z",
+              "completed_at": "2026-10-19T00:39:12Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 7,
+              "name": "PQ05 bsigner X-Wing on the same vectors",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:39:12Z",
+              "completed_at": "2026-10-19T00:39:22Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 13,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:39:22Z",
+              "completed_at": "2026-10-19T00:39:22Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 14,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:39:22Z",
+              "completed_at": "2026-10-19T00:39:22Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 15,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:39:22Z",
+              "completed_at": "2026-10-19T00:39:22Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "94ced41034e6c4734e5e45ca9e846334308a6755",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "61bf4aa1550394cc95ccbd3aac74bcc720734437bbcb336849e914e6aa534e61"
+        },
+        {
+          "id": 117828851296,
+          "name": "pq00-teeth",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T00:56:34Z",
+          "completed_at": "2026-10-19T00:57:23Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 2870,
+          "execution_seconds": 49,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:56:35Z",
+              "completed_at": "2026-10-19T00:56:36Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:56:36Z",
+              "completed_at": "2026-10-19T00:56:45Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:56:45Z",
+              "completed_at": "2026-10-19T00:56:53Z",
+              "execution_seconds": 8
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:56:53Z",
+              "completed_at": "2026-10-19T00:57:03Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 5,
+              "name": "PQ00 teeth library — positive controls and planted flaws",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:57:03Z",
+              "completed_at": "2026-10-19T00:57:03Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 6,
+              "name": "PQ00 teeth against the real Vortex defects (both must CONVICT)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:57:03Z",
+              "completed_at": "2026-10-19T00:57:21Z",
+              "execution_seconds": 18
+            },
+            {
+              "number": 11,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:57:21Z",
+              "completed_at": "2026-10-19T00:57:21Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 12,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:57:21Z",
+              "completed_at": "2026-10-19T00:57:21Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 13,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:57:21Z",
+              "completed_at": "2026-10-19T00:57:21Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "94ced41034e6c4734e5e45ca9e846334308a6755",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "d236e02656050e1d9f6a2f338442e5d3b4c79975c81c9ef3b73f2ca60d8ac41e"
+        },
+        {
+          "id": 117828851297,
+          "name": "x0x-pq",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T00:41:50Z",
+          "completed_at": "2026-10-19T00:47:02Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 1986,
+          "execution_seconds": 312,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:41:51Z",
+              "completed_at": "2026-10-19T00:41:52Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:41:52Z",
+              "completed_at": "2026-10-19T00:42:02Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:42:02Z",
+              "completed_at": "2026-10-19T00:42:12Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:42:12Z",
+              "completed_at": "2026-10-19T00:42:20Z",
+              "execution_seconds": 8
+            },
+            {
+              "number": 5,
+              "name": "Install the pinned audit tool",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:42:20Z",
+              "completed_at": "2026-10-19T00:45:03Z",
+              "execution_seconds": 163
+            },
+            {
+              "number": 6,
+              "name": "x0x pinned implementations — official vectors, differential checks, sabotage and audits",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:45:03Z",
+              "completed_at": "2026-10-19T00:46:46Z",
+              "execution_seconds": 103
+            },
+            {
+              "number": 7,
+              "name": "Prepared public-key comparator — assurance, sabotage, and measured speed",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:46:46Z",
+              "completed_at": "2026-10-19T00:46:59Z",
+              "execution_seconds": 13
+            },
+            {
+              "number": 8,
+              "name": "Retain x0x evidence, including failures",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:46:59Z",
+              "completed_at": "2026-10-19T00:47:00Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 15,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:47:00Z",
+              "completed_at": "2026-10-19T00:47:01Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 16,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:47:01Z",
+              "completed_at": "2026-10-19T00:47:01Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 17,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:47:01Z",
+              "completed_at": "2026-10-19T00:47:01Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "94ced41034e6c4734e5e45ca9e846334308a6755",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "a87d698b06d8e9621ba878b70cb92b8d40289b0a999464b94526ede6bc4b2b3e"
+        },
+        {
+          "id": 117828851318,
+          "name": "pq10-plonky3",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T00:57:16Z",
+          "completed_at": "2026-10-19T00:58:35Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 2912,
+          "execution_seconds": 79,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:57:17Z",
+              "completed_at": "2026-10-19T00:57:18Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:57:18Z",
+              "completed_at": "2026-10-19T00:57:28Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:57:28Z",
+              "completed_at": "2026-10-19T00:57:35Z",
+              "execution_seconds": 7
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:57:35Z",
+              "completed_at": "2026-10-19T00:57:44Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 5,
+              "name": "PQ10 model and AIR tests (the circuit's kept rule on all 128 leaf shapes, the asymmetric cohort, both true claims)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:57:44Z",
+              "completed_at": "2026-10-19T00:58:15Z",
+              "execution_seconds": 31
+            },
+            {
+              "number": 6,
+              "name": "PQ10 FORGERY battery at n = 64 (the honest control must verify, every mutation must be refused)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:58:15Z",
+              "completed_at": "2026-10-19T00:58:16Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 7,
+              "name": "PQ10 SCALE and security figure at n = 64, 1024, 16384",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:58:16Z",
+              "completed_at": "2026-10-19T00:58:33Z",
+              "execution_seconds": 17
+            },
+            {
+              "number": 13,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:58:33Z",
+              "completed_at": "2026-10-19T00:58:33Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 14,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:58:33Z",
+              "completed_at": "2026-10-19T00:58:33Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 15,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:58:33Z",
+              "completed_at": "2026-10-19T00:58:33Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "94ced41034e6c4734e5e45ca9e846334308a6755",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "7978e3dc4d5a84a8d539ecdca5b466a17133bcc667a4f2c1324328a5f6a390cf"
+        },
+        {
+          "id": 117828851366,
+          "name": "pq01-vectors",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:05:05Z",
+          "completed_at": "2026-10-19T01:06:14Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 3381,
+          "execution_seconds": 69,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:05:05Z",
+              "completed_at": "2026-10-19T01:05:06Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:05:06Z",
+              "completed_at": "2026-10-19T01:05:16Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:05:16Z",
+              "completed_at": "2026-10-19T01:05:25Z",
+              "execution_seconds": 9
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:05:25Z",
+              "completed_at": "2026-10-19T01:05:38Z",
+              "execution_seconds": 13
+            },
+            {
+              "number": 5,
+              "name": "Restore ACVP vector files (keyed on the manifest; every file is re-verified on use)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:05:38Z",
+              "completed_at": "2026-10-19T01:05:39Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 6,
+              "name": "PQ01 battery unit tests (manifest pins, joins, the pq-kat.json agreement)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:05:39Z",
+              "completed_at": "2026-10-19T01:05:43Z",
+              "execution_seconds": 4
+            },
+            {
+              "number": 7,
+              "name": "PQ01 every ACVP case for ML-KEM-512/768/1024, ML-DSA-44/65/87, SLH-DSA-SHAKE-256f on two implementations",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:05:43Z",
+              "completed_at": "2026-10-19T01:06:12Z",
+              "execution_seconds": 29
+            },
+            {
+              "number": 12,
+              "name": "Post Restore ACVP vector files (keyed on the manifest; every file is re-verified on use)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:06:12Z",
+              "completed_at": "2026-10-19T01:06:12Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 13,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:06:12Z",
+              "completed_at": "2026-10-19T01:06:13Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 14,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:06:13Z",
+              "completed_at": "2026-10-19T01:06:13Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 15,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:06:13Z",
+              "completed_at": "2026-10-19T01:06:13Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "94ced41034e6c4734e5e45ca9e846334308a6755",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "ba8eaa19613cd48e1cde50474718b49735032a242e299e4f55139248c96b402b"
+        },
+        {
+          "id": 117828851391,
+          "name": "pq12-taproot",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T01:06:17Z",
+          "completed_at": "2026-10-19T01:07:45Z",
+          "execution_started": true,
+          "dispatch_to_start_seconds": 3453,
+          "execution_seconds": 88,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:06:18Z",
+              "completed_at": "2026-10-19T01:06:19Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:06:19Z",
+              "completed_at": "2026-10-19T01:06:31Z",
+              "execution_seconds": 12
+            },
+            {
+              "number": 3,
+              "name": "Run dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:06:31Z",
+              "completed_at": "2026-10-19T01:06:41Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 4,
+              "name": "Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:06:41Z",
+              "completed_at": "2026-10-19T01:06:59Z",
+              "execution_seconds": 18
+            },
+            {
+              "number": 5,
+              "name": "Fetch the pinned BIP-341 vectors and BIP-174 / BIP-371 texts",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:06:59Z",
+              "completed_at": "2026-10-19T01:07:00Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 6,
+              "name": "PQ12 bsigner BIP-341 key path, and BIP-174 / BIP-371 PSBTs, on the official vectors",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:07:00Z",
+              "completed_at": "2026-10-19T01:07:10Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 7,
+              "name": "PQ12 bsigner FROST (2-of-3 ChillDKG signs an ML-DSA-authorized PSBT; every signature a valid key-path witness)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:07:10Z",
+              "completed_at": "2026-10-19T01:07:20Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 8,
+              "name": "PQ12 chilldkg-rs 0.5.0 upstream vectors (the .crate checked against Cargo.lock's checksum)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:07:20Z",
+              "completed_at": "2026-10-19T01:07:38Z",
+              "execution_seconds": 18
+            },
+            {
+              "number": 9,
+              "name": "PQ12 audit gate 1 (blocking) — chilldkg-rs is not in bsigner's default build",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:07:38Z",
+              "completed_at": "2026-10-19T01:07:38Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 10,
+              "name": "PQ12 audit gate 2 (recorded) — cargo audit of Cargo.lock, verbatim",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:07:38Z",
+              "completed_at": "2026-10-19T01:07:42Z",
+              "execution_seconds": 4
+            },
+            {
+              "number": 19,
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:07:42Z",
+              "completed_at": "2026-10-19T01:07:42Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 20,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:07:42Z",
+              "completed_at": "2026-10-19T01:07:42Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 21,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T01:07:42Z",
+              "completed_at": "2026-10-19T01:07:42Z",
+              "execution_seconds": 0
+            }
+          ],
+          "checkout": {
+            "commit": "94ced41034e6c4734e5e45ca9e846334308a6755",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "ccf9fc9af1a28f22aa65406537a40fc8df0cf1f8b8ee544767df906bcea96ba2"
+        }
+      ]
+    }
+  ]
+}

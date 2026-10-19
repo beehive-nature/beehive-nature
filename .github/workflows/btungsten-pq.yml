@@ -225,7 +225,7 @@ jobs:
       # own workspace only
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
-          workspaces: crates/btungsten-p3count -> crates/btungsten-p3count/target
+          workspaces: crates/btungsten-p3count -> target
           save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: PQ10 model and AIR tests (the circuit's kept rule on all 128 leaf shapes, the asymmetric cohort, both true claims)
         if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
