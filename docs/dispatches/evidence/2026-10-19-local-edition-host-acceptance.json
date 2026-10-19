@@ -1,0 +1,24 @@
+{
+ "schema": "skaists.local-edition-acceptance/1",
+ "generated": "2026-10-19T06:43:10.772Z",
+ "seat": "zCode seat (order-28 session, local host wake)",
+ "host": {
+  "files": 23276,
+  "totalBytes": 363300913,
+  "startupVerificationMs": 17539,
+  "startupVerificationNote": "every declared file re-hashed from bytes against the package manifest before the first request; any mismatch refuses to serve"
+ },
+ "page": {
+  "stampedAttribute": "../assets/profile-archive/lineage/local-evidence/",
+  "walkedChain": ["Harrison Edgar Davis", "Zilphia Ann Williams"],
+  "gestures": "orbit person -> story card -> parent link (couple view) -> hop node -> person view",
+  "evidenceStateLineSeen": true,
+  "receiptLine": "Saved bytes match the receipt. This verifies the copy, not the historical claim.",
+  "imagesOpenedAfterVerify": 1,
+  "imageFromBlobUrl": true,
+  "imageLoadedNaturalPixels": true,
+  "pageErrors": []
+ },
+ "note": "The full private working edition (363,300,913 bytes, 23,276 declared files) served from retained bytes on loopback; zero requests left the host. Persons whose shards hold images: 135; this walk used the shortest tree-reachable chain. The 192,963-byte 1885 Nebraska census page was digest-verified by the reader before it opened. Windows local paths omitted; the private package stays on the private tier.",
+ "verdict": "ACCEPTANCE PASS"
+}
