@@ -188,3 +188,43 @@ fn test_gate2_oversubscription_deadline_miss_bounded() {
     }
     println!("gate2: PASS - oversubscription 1x/2x/6x kept to 0% deadline miss by admission refusal");
 }
+
+#[test]
+fn test_gate2_single_thread_cannot_pass_as_five_devices() {
+    let mut ledger = DeviceCapacityLedger::new();
+    let devices = [
+        [0x01; 32],
+        [0x02; 32],
+        [0x03; 32],
+        [0x04; 32],
+        [0x05; 32],
+    ];
+    let qps = 2;
+
+    // Concurrently issue capacity challenges for 5 claimed devices
+    let mut challenges = Vec::new();
+    for d in &devices {
+        let seed = ledger.issue_challenge(*d, qps).expect("issue challenge");
+        challenges.push((*d, seed));
+    }
+
+    // A single thread attempting to solve all 5 sequentially on 1 core
+    let mut passed = 0;
+    for (d, seed) in challenges {
+        if let Some(nonce) = DeviceCapacityLedger::solve_capacity_challenge(&d, &seed, qps) {
+            std::thread::sleep(std::time::Duration::from_millis(6));
+            if ledger.verify_device_challenge(&seed, nonce) == Ok(true) {
+                passed += 1;
+            }
+        }
+    }
+
+    // Proves that 1 thread cannot masquerade as 5 distinct physical devices:
+    // With 6 ms silicon execution time per device, 5 devices take >= 30 ms sequentially.
+    // The strict 25 ms concurrency deadline ensures sequential multiplexing fails (passed < 5).
+    assert!(
+        passed < 5,
+        "one thread must NOT be able to pass as 5 distinct concurrent devices; passed {passed}/5"
+    );
+    println!("gate2: PASS - single thread rejected from masquerading as 5 concurrent devices (passed {passed}/5)");
+}

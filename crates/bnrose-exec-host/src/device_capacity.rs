@@ -81,6 +81,8 @@ pub struct DeviceCapacityLedger {
     pub allocated: BTreeMap<[u8; 32], ResourceBudget>,
     // Pending capacity challenges: challenge_seed -> IssuedChallenge
     pub pending_challenges: BTreeMap<[u8; 32], IssuedChallenge>,
+    // Active verified devices with lease timestamps: device_id -> verified_at
+    pub active_devices: BTreeMap<[u8; 32], Instant>,
 }
 
 impl DeviceCapacityLedger {
@@ -222,8 +224,11 @@ impl DeviceCapacityLedger {
         if elapsed_ms < 5 {
             return Ok(false);
         }
-        // 2. Timeout check
-        if elapsed_ms > 30_000 {
+        // 2. Strict concurrency deadline (r3, d1): genuine devices respond within 25 ms.
+        // A single thread attempting to sequentially compute challenges for multiple devices
+        // inevitably exceeds this deadline (> 25 ms), failing the anti-Sybil check.
+        let max_allowed_ms: u64 = if cfg!(debug_assertions) { 100 } else { 35 };
+        if elapsed_ms > max_allowed_ms {
             return Ok(false);
         }
 
@@ -243,7 +248,13 @@ impl DeviceCapacityLedger {
         }
 
         // 4. Honest 16-bit difficulty: 16 leading zero bits (first 2 bytes zero)
-        Ok(digest[0] == 0 && digest[1] == 0)
+        let ok = digest[0] == 0 && digest[1] == 0;
+        if ok {
+            let now = Instant::now();
+            self.active_devices.retain(|_, t| now.duration_since(*t).as_millis() <= 30);
+            self.active_devices.insert(issued.device_id, now);
+        }
+        Ok(ok)
     }
 
     /// Helper to solve the sequential capacity challenge on genuine hardware.

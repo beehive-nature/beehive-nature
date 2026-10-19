@@ -140,7 +140,7 @@ impl Journal {
 
     /// Append one record: body, tag, length prefix — then fsync. The
     /// fsync is the durability line the effect door stands behind.
-    pub fn append(
+    pub fn append_uncommitted(
         &mut self,
         op_id: &[u8; 32],
         event: u8,
@@ -154,7 +154,6 @@ impl Journal {
         frame.extend_from_slice(&tag);
         self.file
             .write_all(&frame)
-            .and_then(|_| self.file.sync_data())
             .map_err(|e| JournalError::Io(e.to_string()))?;
         let rec = Record {
             seq: self.seq,
@@ -165,6 +164,23 @@ impl Journal {
         };
         self.head = tag;
         self.seq += 1;
+        Ok(rec)
+    }
+
+    pub fn sync(&self) -> Result<(), JournalError> {
+        self.file.sync_data().map_err(|e| JournalError::Io(e.to_string()))
+    }
+
+    /// Append one record: body, tag, length prefix — then fsync. The
+    /// fsync is the durability line the effect door stands behind.
+    pub fn append(
+        &mut self,
+        op_id: &[u8; 32],
+        event: u8,
+        payload: &[u8],
+    ) -> Result<Record, JournalError> {
+        let rec = self.append_uncommitted(op_id, event, payload)?;
+        self.sync()?;
         Ok(rec)
     }
 }
@@ -356,10 +372,13 @@ impl ReplicatedJournal {
     ) -> Result<Record, JournalError> {
         let mut first: Option<Record> = None;
         for r in self.replicas.iter_mut() {
-            let rec = r.append(op_id, event, payload)?;
+            let rec = r.append_uncommitted(op_id, event, payload)?;
             if first.is_none() {
                 first = Some(rec);
             }
+        }
+        for r in self.replicas.iter_mut() {
+            r.sync()?;
         }
         Ok(first.expect("at least one replica by construction"))
     }

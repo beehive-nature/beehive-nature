@@ -10,7 +10,8 @@
 //! Every byte law here is proven byte-identical against the vendored eosjs/noble lane;
 //! the pinned vectors in the tests are receipts from that cross-derivation.
 
-use k256::ecdsa::{signature::hazmat::PrehashSigner, RecoveryId, SigningKey};
+use k256::ecdsa::SigningKey;
+#[allow(unused_imports)]
 use k256::elliptic_curve::sec1::ToEncodedPoint;
 use sha2::{Digest, Sha256};
 
@@ -66,6 +67,24 @@ pub fn base58_decode(s: &str) -> Result<Vec<u8>, &'static str> {
 
 /// Decode a SIG_K1_ string: verifies "SIG_K1_" prefix, base58 decodes 69 bytes,
 /// verifies the ripemd160(65B + "K1")[0..4] checksum, and returns the 65-byte payload.
+
+/// Decode a PUB_K1_ string: verifies "PUB_K1_" prefix, base58 decodes 37 bytes,
+/// verifies the ripemd160(33B + "K1")[0..4] checksum, and returns the 33-byte compressed public key.
+pub fn decode_pub_k1(s: &str) -> Result<[u8; 33], &'static str> {
+    let stripped = s.strip_prefix("PUB_K1_").ok_or("missing PUB_K1_ prefix")?;
+    let decoded = base58_decode(stripped)?;
+    if decoded.len() != 37 {
+        return Err("invalid pub_k1 length");
+    }
+    let expected_ck = ripemd160_suffix4(&decoded[..33], "K1");
+    if decoded[33..37] != expected_ck {
+        return Err("pub_k1 checksum mismatch");
+    }
+    let mut out = [0u8; 33];
+    out.copy_from_slice(&decoded[..33]);
+    Ok(out)
+}
+
 pub fn decode_sig_k1(s: &str) -> Result<[u8; 65], &'static str> {
     let stripped = s.strip_prefix("SIG_K1_").ok_or("missing SIG_K1_ prefix")?;
     let decoded = base58_decode(stripped)?;
@@ -211,16 +230,30 @@ pub fn sig_k1_string(payload65: &[u8; 65]) -> String {
 /// Verify a 65-byte eosjs-style payload ([31+recid ‖ r ‖ s]) over a digest for a seed's pubkey.
 /// The interop law: elliptic (eosjs) and k256 (us) derive different deterministic nonces, so
 /// signatures differ BYTES but must agree on VALIDITY — this is the cross-check.
-pub fn verify_digest65(seed: &[u8; 32], digest: &[u8; 32], payload65: &[u8]) -> bool {
+/// Verify a 65-byte eosjs-style payload ([31+recid ‖ r ‖ s]) over a digest using ONLY the 33-byte public key.
+/// Zero private key material held or required (agents never hold private keys).
+pub fn verify_digest65_pubkey(pub33: &[u8; 33], digest: &[u8; 32], payload65: &[u8]) -> bool {
     use k256::ecdsa::{signature::hazmat::PrehashVerifier, Signature, VerifyingKey};
-    let Ok(sk) = SigningKey::from_slice(seed) else {
+    let Ok(vk) = VerifyingKey::from_sec1_bytes(pub33) else {
         return false;
     };
-    let vk = VerifyingKey::from(&sk);
+    if payload65.len() != 65 {
+        return false;
+    }
     let Ok(sig) = Signature::from_slice(&payload65[1..65]) else {
         return false;
     };
     vk.verify_prehash(digest, &sig).is_ok()
+}
+
+pub fn verify_digest65(seed: &[u8; 32], digest: &[u8; 32], payload65: &[u8]) -> bool {
+    let Ok(sk) = SigningKey::from_slice(seed) else {
+        return false;
+    };
+    let pub33 = sk.verifying_key().to_encoded_point(true);
+    let mut arr = [0u8; 33];
+    arr.copy_from_slice(pub33.as_bytes());
+    verify_digest65_pubkey(&arr, digest, payload65)
 }
 
 /// EOSIO account-name → u64 (the 13-char packing over the alphabet
@@ -307,6 +340,23 @@ pub fn pack_transaction(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn test_pub_k1_decode_and_pubkey_verify() {
+        let seed = test_seed();
+        let pub_str = pub_k1_string(&seed).unwrap();
+        assert!(pub_str.starts_with("PUB_K1_"));
+        let pub33 = decode_pub_k1(&pub_str).unwrap();
+
+        let d = sha256_of(b"public key verify test");
+        let sig65 = sign_digest65(&seed, &d).unwrap();
+
+        assert!(verify_digest65_pubkey(&pub33, &d, &sig65));
+
+        // Forged digest fails
+        let bad_d = sha256_of(b"wrong digest");
+        assert!(!verify_digest65_pubkey(&pub33, &bad_d, &sig65));
+    }
+
     use super::*;
 
     fn test_seed() -> [u8; 32] {
@@ -391,7 +441,6 @@ mod tests {
         assert!(account_name_u64("bad_name!").is_err());
     }
 
-    #[test]
     #[test]
     fn test_base58_decode_and_sig_k1() {
         let payload = decode_sig_k1(TEST_SIG_VECTOR).unwrap();

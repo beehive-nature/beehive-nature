@@ -300,22 +300,23 @@ impl VaultaAuthorizer {
 
 
 
-/// Verifies that an authorized action has a valid K1 signature matching the given seed and canonical digest.
-pub fn verify_vaulta_k1_action(k1_seed: &[u8; 32], action: &VaultaAuthorizedAction) -> bool {
+/// Verifies that an authorized action has a valid K1 signature matching the given expected public key and canonical digest.
+/// Estate law (FOUNDER RULING): Agents never hold private keys; verification strictly requires only the public key.
+pub fn verify_vaulta_k1_action(expected_k1_pubkey: &str, action: &VaultaAuthorizedAction) -> bool {
     let digest = action.transaction.digest();
     if action.pq_attestation.action_digest != digest {
         return false;
     }
-    let Ok(expected_pub) = bnr_keys::pub_k1_string(k1_seed) else {
-        return false;
-    };
-    if action.k1_public_key != expected_pub {
+    if action.k1_public_key != expected_k1_pubkey {
         return false;
     }
+    let Ok(pub33) = bnr_keys::decode_pub_k1(expected_k1_pubkey) else {
+        return false;
+    };
     let Ok(payload65) = bnr_keys::decode_sig_k1(&action.k1_signature) else {
         return false;
     };
-    bnr_keys::verify_digest65(k1_seed, &digest, &payload65)
+    bnr_keys::verify_digest65_pubkey(&pub33, &digest, &payload65)
 }
 
 #[cfg(test)]
@@ -504,7 +505,8 @@ mod tests {
         assert!(auth_action.k1_signature.starts_with("SIG_K1_"));
         assert!(auth_action.k1_public_key.starts_with("PUB_K1_"));
 
-        assert!(verify_vaulta_k1_action(&TEST_K1_SEED, &auth_action), "secp256k1 signature must verify over canonical Antelope digest");
+        let pub_k1 = bnr_keys::pub_k1_string(&TEST_K1_SEED).unwrap();
+        assert!(verify_vaulta_k1_action(&pub_k1, &auth_action), "secp256k1 signature must verify over canonical Antelope digest");
 
         println!("vaulta: PASS - positive test confirmed: valid K1 signature and PQ attestation produced");
     }
@@ -632,11 +634,12 @@ mod tests {
             &mut seen_nonces,
         ).unwrap();
 
-        assert!(verify_vaulta_k1_action(&TEST_K1_SEED, &action), "genuine signature must verify");
+        let pub_k1 = bnr_keys::pub_k1_string(&TEST_K1_SEED).unwrap();
+        assert!(verify_vaulta_k1_action(&pub_k1, &action), "genuine signature must verify");
 
         // Repro g5: forged garbage signature must be rejected
         action.k1_signature = "SIG_K1_forgedforgedforged".into();
-        assert!(!verify_vaulta_k1_action(&TEST_K1_SEED, &action), "forged signature must be refused");
+        assert!(!verify_vaulta_k1_action(&pub_k1, &action), "forged signature must be refused");
     }
 
     #[test]
@@ -653,7 +656,8 @@ mod tests {
         {
             let mut authorizer = VaultaAuthorizer::open(TEST_K1_SEED, auth_id.clone(), Some(nonces_path.clone())).unwrap();
             let action = authorizer.authorize(&trx, Some(&attestation_str), 1_700_000_000).unwrap();
-            assert!(verify_vaulta_k1_action(&TEST_K1_SEED, &action));
+            let pub_k1 = bnr_keys::pub_k1_string(&TEST_K1_SEED).unwrap();
+            assert!(verify_vaulta_k1_action(&pub_k1, &action));
         }
 
         // Instance 2 (Node restart): Re-opens from disk and proves spent nonce survives

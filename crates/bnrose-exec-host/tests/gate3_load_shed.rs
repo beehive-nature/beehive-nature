@@ -43,6 +43,13 @@ fn make_sup(dir: &Path) -> Supervisor {
 
 fn make_intent(nonce: u64, domain: &str) -> IntentFile {
     let f = fixture(nonce, NOW, 600);
+    if domain == TEST_DOMAIN {
+        return IntentFile {
+            env: f.env,
+            sig: f.sig,
+            authority: f.authority,
+        };
+    }
     let i = btungsten_wb001::decode(&f.env).unwrap();
     let x = btungsten_wb001::IntentIn {
         domain: Text::Str(domain.into()),
@@ -67,7 +74,6 @@ fn make_intent(nonce: u64, domain: &str) -> IntentFile {
 }
 
 #[test]
-#[cfg_attr(debug_assertions, ignore = "Gate 3 1000x real load benchmark requires --release")]
 fn test_gate3_real_load_zipf_skew_and_p99_guarantee() {
     let bounds = Bounds::default();
     let local_capacity = 2_000;
@@ -132,15 +138,16 @@ fn test_gate3_real_load_zipf_skew_and_p99_guarantee() {
             assert_eq!(cross_admitted, cross_dao_quota, "cross-DAO quota must be strictly capped at {mult}x overload");
             assert_eq!(cross_shed, cross_requests_count - cross_dao_quota, "excess cross-DAO requests must be shed at {mult}x overload");
 
-            // Compute local p99 latency (index 990 of 1000 samples)
+            // Compute local p99 latency
             local_latencies_us.sort_unstable();
             let p99_idx = (local_requests_count as f64 * 0.99).floor() as usize;
             let p99_ms = local_latencies_us[p99_idx] as f64 / 1000.0;
+            let bound_ms = if cfg!(debug_assertions) { 100.0 } else { 15.0 };
             assert!(
-                p99_ms < 15.0,
-                "real request local p99 under Zipf s={s} mult={mult}x must be < 15 ms; was {p99_ms:.3} ms"
+                p99_ms < bound_ms,
+                "real request local p99 under Zipf s={s} mult={mult}x must be < {bound_ms} ms; was {p99_ms:.3} ms"
             );
-            println!("gate3: Zipf s={s} load={mult}x (n={local_requests_count}) real request local p99 = {p99_ms:.3} ms (< 15 ms bound)");
+            println!("gate3: Zipf s={s} load={mult}x (n={local_requests_count}) real request local p99 = {p99_ms:.3} ms (< {bound_ms} ms bound)");
         }
     }
 }

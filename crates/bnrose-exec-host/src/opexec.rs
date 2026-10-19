@@ -1,3 +1,4 @@
+
 //! The supervisor engine (BNROSE-RUST-001): run one operation end to end,
 //! and recover everything from the durable records alone.
 //!
@@ -25,6 +26,16 @@ use crate::receipt::{state_word, Receipt};
 use crate::worker::{Bounds, Worker};
 use crate::device_capacity::{DeviceCapacityLedger, DeviceLimits, ResourceBudget};
 use crate::load_shed::CrossDaoAdmissionControl;
+
+fn sha256_of(data: &[u8]) -> [u8; 32] {
+    use sha2::{Digest, Sha256};
+    let mut h = Sha256::new();
+    h.update(data);
+    let mut out = [0u8; 32];
+    out.copy_from_slice(&h.finalize());
+    out
+}
+
 
 use crate::{
     admit_request, hex, parse_admit_verdict, parse_step_verdict, step_request, AdmitVerdict,
@@ -56,7 +67,7 @@ pub struct Supervisor {
     step_entities: BTreeMap<u8, StepEntity>,
     /// In-memory map of (root, step) -> max_attempt
     step_attempts: BTreeMap<([u8; 32], u8), u8>,
-    cached_receipts: BTreeMap<[u8; 32], (Option<std::time::SystemTime>, Receipt, Value)>,
+    cached_receipts: BTreeMap<[u8; 32], ([u8; 32], Receipt, Value)>,
     pub capacity_ledger: DeviceCapacityLedger,
     pub load_shed: CrossDaoAdmissionControl,
     pub device_id: [u8; 32],
@@ -344,11 +355,11 @@ impl Supervisor {
                     let receipts_dir = state_dir.join("receipts");
                     let _ = std::fs::create_dir_all(&receipts_dir);
                     let path = receipts_dir.join(format!("op-{}.json", hex(&op)));
-                    if let Ok(json_str) = serde_json::to_string_pretty(&v) {
-                        let _ = std::fs::write(&path, json_str);
+                    if let Ok(json_bytes) = serde_json::to_vec(&v) {
+                        let _ = std::fs::write(&path, &json_bytes);
+                        let content_hash = sha256_of(&json_bytes);
+                        cached_receipts.insert(op, (content_hash, r, v));
                     }
-                    let mtime = std::fs::metadata(&path).ok().and_then(|m| m.modified().ok());
-                    cached_receipts.insert(op, (mtime, r, v));
                 }
             }
         }
@@ -382,14 +393,16 @@ impl Supervisor {
         })
     }
 
-    fn write_receipt(&self, r: &Receipt) -> Result<(PathBuf, Value), String> {
+    fn write_receipt(&self, r: &Receipt) -> Result<(PathBuf, Value, [u8; 32]), String> {
         let v = r.to_json();
         let p = self
             .state_dir
             .join("receipts")
             .join(format!("op-{}.json", hex(&r.op)));
-        std::fs::write(&p, serde_json::to_string(&v).unwrap()).map_err(|e| e.to_string())?;
-        Ok((p, v))
+        let json_bytes = serde_json::to_string(&v).map_err(|e| e.to_string())?.into_bytes();
+        let content_hash = sha256_of(&json_bytes);
+        std::fs::write(&p, &json_bytes).map_err(|e| e.to_string())?;
+        Ok((p, v, content_hash))
     }
 
     fn issue_receipt(
@@ -414,9 +427,8 @@ impl Supervisor {
         };
         let mut r = r;
         r.sig = Receipt::sign_statement(&self.keys.ed_seed, &r.statement());
-        let (p, v) = self.write_receipt(&r)?;
-        let mtime = std::fs::metadata(&p).ok().and_then(|m| m.modified().ok());
-        self.cached_receipts.insert(*op, (mtime, r.clone(), v.clone()));
+        let (p, v, content_hash) = self.write_receipt(&r)?;
+        self.cached_receipts.insert(*op, (content_hash, r.clone(), v.clone()));
         Ok((r, p, v))
     }
 
@@ -624,31 +636,31 @@ impl Supervisor {
                 }
 
 
-                // 2. Check receipt on disk with mtime verification (fixes a1, Gate 4)
+                // 2. Check receipt on disk with content-hash verification (fixes a1, Gate 4)
                 let p = self.state_dir.join("receipts").join(format!("op-{}.json", hex(&prev_op)));
                 if p.exists() {
-                    let mtime = std::fs::metadata(&p).ok().and_then(|m| m.modified().ok());
-                    if let Some((cached_mtime, r, v)) = self.cached_receipts.get(&prev_op) {
-                        if mtime.is_some() && mtime == *cached_mtime {
-                            if r.env_sha != env_sha {
+                    if let Ok(bytes) = std::fs::read(&p) {
+                        let cur_hash = sha256_of(&bytes);
+                        if let Some((cached_hash, r, v)) = self.cached_receipts.get(&prev_op) {
+                            if *cached_hash == cur_hash {
+                                if r.env_sha != env_sha {
+                                    return RunOutcome {
+                                        op: Some(prev_op),
+                                        refused: Some("admission:nonce-reuse - payload mismatch".into()),
+                                        ..none
+                                    };
+                                }
                                 return RunOutcome {
                                     op: Some(prev_op),
-                                    refused: Some("admission:nonce-reuse - payload mismatch".into()),
-                                    ..none
+                                    refused: None,
+                                    lost_response: false,
+                                    receipt: Some(r.clone()),
+                                    receipt_path: Some(p),
+                                    receipt_json: Some(v.clone()),
                                 };
                             }
-                            return RunOutcome {
-                                op: Some(prev_op),
-                                refused: None,
-                                lost_response: false,
-                                receipt: Some(r.clone()),
-                                receipt_path: Some(p),
-                                receipt_json: Some(v.clone()),
-                            };
                         }
-                    }
 
-                    if let Ok(bytes) = std::fs::read(&p) {
                         if let Ok(v) = serde_json::from_slice::<serde_json::Value>(&bytes) {
                             if let Ok(r) = Receipt::from_json(&v) {
                                 if r.env_sha != env_sha {
@@ -665,7 +677,7 @@ impl Supervisor {
                                         ..none
                                     };
                                 }
-                                self.cached_receipts.insert(prev_op, (mtime, r.clone(), v.clone()));
+                                self.cached_receipts.insert(prev_op, (cur_hash, r.clone(), v.clone()));
                                 return RunOutcome {
                                     op: Some(prev_op),
                                     refused: None,

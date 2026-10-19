@@ -68,16 +68,19 @@ fn generate_bulk_journal(count: usize, key: &[u8; 32], policy_wire: &[u8]) -> Ve
         payload: Vec::new(),
     };
 
+    let template_built = template_intent.build().expect("valid intent");
+    let template_env = btungsten_wb001::canonical(&template_built).expect("canonical env");
+    let nonce_pos = template_env
+        .windows(32)
+        .position(|w| w == [0u8; 32])
+        .expect("nonce position in canonical envelope");
+
     for i in 0..count {
         let seq = i as u64;
         let op_id = [((i + 1) & 0xff) as u8; 32];
 
-        let mut intent = template_intent.clone();
-        let mut nonce = [0u8; 32];
-        nonce[..8].copy_from_slice(&(i as u64 + 1).to_le_bytes());
-        intent.nonce = nonce.to_vec();
-        let built = intent.build().expect("valid intent");
-        let env = btungsten_wb001::canonical(&built).expect("canonical env");
+        let mut env = template_env.clone();
+        env[nonce_pos..nonce_pos + 8].copy_from_slice(&(i as u64 + 1).to_le_bytes());
 
         let mut payload = Vec::with_capacity(env.len() + 140);
         let mut authority = [0x99; 32];
@@ -114,7 +117,6 @@ fn generate_bulk_journal(count: usize, key: &[u8; 32], policy_wire: &[u8]) -> Ve
 }
 
 #[test]
-#[cfg_attr(debug_assertions, ignore = "Gate 1 100k-op latency scaling requires --release")]
 fn test_gate1_flat_admit_latency_scaling() {
     let bounds = Bounds::default();
     let checkpoints = [1_000usize, 10_000usize, 100_000usize];

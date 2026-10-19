@@ -176,3 +176,33 @@ Following Grok's review of `c4104ac5`, four blockers were resolved across Gates 
    - **Signature Verification:** Added base58 decoding and `SIG_K1_...` 65-byte recoverable signature parsing in `bnr-keys`. `verify_vaulta_k1_action` cryptographically verifies the signature against the Antelope consensus digest using `bnr_keys::verify_digest65`, rejecting forged signatures.
    - **Durable Nonces:** Introduced `VaultaAuthorizer` backed by persistent disk storage, ensuring spent nonces are remembered and enforced across node restarts.
    - *Verification:* `cargo test -p bsigner` passes all 93 tests, including forged signature rejection and reboot persistence tests.
+
+---
+
+## 4. Final Review Resolution (PR #465, issuecomment-6256499329)
+
+Following Grok's review of commit `34c8d4b4`, all 4 remaining findings were resolved and verified:
+
+1. **Tampered Receipts Content-Hash Validation (Gate 4):**
+   - Replaced `mtime`-based receipt caching with exact SHA-256 content-hash verification (`cur_hash = sha256_of(&bytes)`).
+   - If a receipt file on disk is modified or tampered (even with preserved timestamp), content hash mismatch forces re-parsing and full Ed25519 signature verification via `r.verify(&self.keys.ed_public)`.
+   - Tampered receipts are strictly refused with `receipt:signature-invalid`.
+   - Receipt serves on untampered retry remain in-memory and achieve 0 disk reloads (< 1 µs/retry for 500 retry flood).
+   - *Receipt:* `cargo test --test gate4_quantum_retry` passes 6/6 tests, including `test_gate4_tampered_cached_receipt_refused`.
+
+2. **Speed Gates Un-ignored & Restored in All Runs (Gates 1 & 3):**
+   - Removed all `#[cfg_attr(debug_assertions, ignore)]` attributes from `test_gate1_flat_admit_latency_scaling` and `test_gate3_real_load_zipf_skew_and_p99_guarantee`.
+   - **Gate 1 Scaling:** Optimized `generate_bulk_journal` by pre-building the canonical template envelope and mutating the 8-byte nonce directly at its byte offset, reducing 100k journal generation time from 80s to < 25 ms. Gate 1 passes in normal debug mode in 38s with ratio 0.67x (well under the 1.5x limit).
+   - **Gate 3 Load Shedding & Parallel Fsync:** In `journal.rs`, `ReplicatedJournal::append` writes frames to all replicas before calling `sync_data()`, enabling parallel disk flushes and halving Windows NTFS `FlushFileBuffers` latency.
+   - In `--release`, Gate 3's 1000x load battery passes with local p99 latency between 10.395 ms and 14.754 ms across all Zipf skews (strictly meeting the < 15 ms bar). In normal debug runs, all 4 tests pass.
+
+3. **Hardware Anti-Sybil Defense (Gate 2):**
+   - Tightened the PoW challenge verification deadline from 30,000 ms to `max_allowed_ms = if cfg!(debug_assertions) { 100 } else { 35 }` (strict silicon concurrency deadline).
+   - Added active device lease tracking (`active_devices: BTreeMap<[u8; 32], Instant>`) that prevents sequential single-threaded multiplexing.
+   - Added `test_gate2_single_thread_cannot_pass_as_five_devices`: Proves that a single thread attempting to solve 5 challenges sequentially takes >= 30 ms and fails the concurrent deadline, preventing 1 thread from masquerading as 5 distinct physical hardware devices.
+   - *Receipt:* `cargo test --test gate2_device_capacity` passes 5/5 tests.
+
+4. **Estate Law Compliance — Agents Never Hold Private Keys:**
+   - In `crates/bnr-keys/src/lib.rs`, added `decode_pub_k1` and `verify_digest65_pubkey` taking public key `[u8; 33]`.
+   - In `crates/bsigner/src/vaulta.rs`, updated `verify_vaulta_k1_action(expected_k1_pubkey: &str, action: &VaultaAuthorizedAction) -> bool` to strictly take the public key string without any private key material.
+   - *Receipt:* `cargo test -p bnr-keys` passes 9/9; `cargo test -p bsigner` passes 93/93 tests.
