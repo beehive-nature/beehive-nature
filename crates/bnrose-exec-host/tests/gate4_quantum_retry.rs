@@ -114,6 +114,7 @@ fn test_gate4_tampered_cached_receipt_refused() {
     let out = sup.run(&intent, NOW, false, &bounds);
     assert!(out.refused.is_none(), "out.refused was: {:?}", out.refused);
     let receipt_path = out.receipt_path.unwrap();
+    sup.flush_receipts();
 
     // Tamper with receipt file on disk (alter effect digest)
     let text = std::fs::read_to_string(&receipt_path).unwrap();

@@ -306,6 +306,10 @@ pub struct ReplicatedJournal {
     /// What the load rules observed when this process opened the set —
     /// the recovery report names it even after healing.
     pub observed_at_open: ReplicationState,
+    sync_worker: Option<(
+        std::sync::mpsc::SyncSender<std::sync::mpsc::SyncSender<Result<(), JournalError>>>,
+        std::thread::JoinHandle<()>,
+    )>,
 }
 
 impl ReplicatedJournal {
@@ -338,11 +342,28 @@ impl ReplicatedJournal {
         for p in paths {
             replicas.push(Journal::open(p, key)?);
         }
+        let sync_worker = if replicas.len() > 1 {
+            if let Ok(file_clone) = replicas[1].file.try_clone() {
+                let (tx, rx) = std::sync::mpsc::sync_channel::<std::sync::mpsc::SyncSender<Result<(), JournalError>>>(1);
+                let handle = std::thread::spawn(move || {
+                    while let Ok(ack_tx) = rx.recv() {
+                        let res = file_clone.sync_data().map_err(|e| JournalError::Io(e.to_string()));
+                        let _ = ack_tx.send(res);
+                    }
+                });
+                Some((tx, handle))
+            } else {
+                None
+            }
+        } else {
+            None
+        };
         Ok((
             ReplicatedJournal {
                 replicas,
                 paths: paths.to_vec(),
                 observed_at_open: observed,
+                sync_worker,
             },
             records,
         ))
@@ -360,11 +381,7 @@ impl ReplicatedJournal {
         self.replicas[0].next_seq()
     }
 
-    /// The acknowledgement: every replica appends and fsyncs, or the
-    /// append is not acknowledged. A mid-life replica write failure
-    /// poisons further appends (the supervisor must halt; recovery then
-    /// follows the load rules on whatever landed).
-    pub fn append(
+    pub fn append_uncommitted(
         &mut self,
         op_id: &[u8; 32],
         event: u8,
@@ -377,10 +394,41 @@ impl ReplicatedJournal {
                 first = Some(rec);
             }
         }
-        for r in self.replicas.iter_mut() {
-            r.sync()?;
-        }
         Ok(first.expect("at least one replica by construction"))
+    }
+
+    pub fn sync(&self) -> Result<(), JournalError> {
+        if let Some((ref tx, _)) = self.sync_worker {
+            let (ack_tx, ack_rx) = std::sync::mpsc::sync_channel(1);
+            tx.send(ack_tx).map_err(|e| JournalError::Io(e.to_string()))?;
+            let r0_res = self.replicas[0].sync();
+            let r1_res = ack_rx.recv().map_err(|e| JournalError::Io(e.to_string()))?;
+            r0_res?;
+            r1_res?;
+            for r in self.replicas.iter().skip(2) {
+                r.sync()?;
+            }
+        } else {
+            for r in self.replicas.iter() {
+                r.sync()?;
+            }
+        }
+        Ok(())
+    }
+
+    /// The acknowledgement: every replica appends and fsyncs, or the
+    /// append is not acknowledged. A mid-life replica write failure
+    /// poisons further appends (the supervisor must halt; recovery then
+    /// follows the load rules on whatever landed).
+    pub fn append(
+        &mut self,
+        op_id: &[u8; 32],
+        event: u8,
+        payload: &[u8],
+    ) -> Result<Record, JournalError> {
+        let rec = self.append_uncommitted(op_id, event, payload)?;
+        self.sync()?;
+        Ok(rec)
     }
 
     /// Load the replicated state under the §load rules. Returns the
@@ -517,5 +565,15 @@ mod tests {
         let recs = load(&p, &key).unwrap();
         assert_eq!(recs.len(), 2);
         assert_eq!(recs[1].seq, 1);
+    }
+}
+
+impl Drop for ReplicatedJournal {
+    fn drop(&mut self) {
+        let _ = self.sync();
+        if let Some((tx, handle)) = self.sync_worker.take() {
+            drop(tx);
+            let _ = handle.join();
+        }
     }
 }

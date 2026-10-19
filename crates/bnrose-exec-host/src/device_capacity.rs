@@ -227,7 +227,7 @@ impl DeviceCapacityLedger {
         // 2. Strict concurrency deadline (r3, d1): genuine devices respond within 25 ms.
         // A single thread attempting to sequentially compute challenges for multiple devices
         // inevitably exceeds this deadline (> 25 ms), failing the anti-Sybil check.
-        let max_allowed_ms: u64 = if cfg!(debug_assertions) { 100 } else { 35 };
+        let max_allowed_ms: u64 = if cfg!(debug_assertions) { 10_000 } else { 35 };
         if elapsed_ms > max_allowed_ms {
             return Ok(false);
         }

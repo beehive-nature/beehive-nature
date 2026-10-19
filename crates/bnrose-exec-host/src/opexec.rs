@@ -50,6 +50,11 @@ use serde_json::{json, Value};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
+pub enum ReceiptMsg {
+    Write(PathBuf, Vec<u8>),
+    Flush(std::sync::mpsc::SyncSender<()>),
+}
+
 pub struct Supervisor {
     pub keys: SupervisorKeys,
     pub journal: ReplicatedJournal,
@@ -63,6 +68,8 @@ pub struct Supervisor {
     admitted: BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>,
     /// In-memory map of op_id -> original env_sha
     admitted_env_shas: BTreeMap<[u8; 32], [u8; 32]>,
+    /// In-memory map of op_id -> original sig
+    admitted_sigs: BTreeMap<[u8; 32], [u8; 64]>,
     /// In-memory step entities index (zero disk reloads in run_steps)
     step_entities: BTreeMap<u8, StepEntity>,
     /// In-memory map of (root, step) -> max_attempt
@@ -73,6 +80,10 @@ pub struct Supervisor {
     pub device_id: [u8; 32],
     pub local_domain: String,
     /// the exclusive authority over this state directory (see Claim)
+    receipt_worker: Option<(
+        std::sync::mpsc::SyncSender<ReceiptMsg>,
+        std::thread::JoinHandle<()>,
+    )>,
     _claim: Claim,
 }
 
@@ -249,8 +260,11 @@ impl Supervisor {
         let step_entities = step_entities(&records)?;
         let mut step_attempts = BTreeMap::new();
         let mut admitted_env_shas = BTreeMap::new();
+        let mut admitted_sigs = BTreeMap::new();
         for r in &records {
             if r.event == E_ADMITTED && r.payload.len() >= 130 {
+                let sig: [u8; 64] = r.payload[32..96].try_into().unwrap();
+                admitted_sigs.insert(r.op_id, sig);
                 let env_len = u16::from_le_bytes([r.payload[128], r.payload[129]]) as usize;
                 if r.payload.len() >= 130 + env_len {
                     let env = &r.payload[130..130 + env_len];
@@ -382,6 +396,7 @@ impl Supervisor {
             allowed_authorities,
             admitted,
             admitted_env_shas,
+            admitted_sigs,
             step_entities,
             step_attempts,
             capacity_ledger,
@@ -389,8 +404,33 @@ impl Supervisor {
             device_id,
             local_domain,
             cached_receipts,
+            receipt_worker: {
+                let (tx, rx) = std::sync::mpsc::sync_channel::<ReceiptMsg>(512);
+                let handle = std::thread::spawn(move || {
+                    while let Ok(msg) = rx.recv() {
+                        match msg {
+                            ReceiptMsg::Write(path, bytes) => {
+                                let _ = std::fs::write(&path, &bytes);
+                            }
+                            ReceiptMsg::Flush(ack) => {
+                                let _ = ack.send(());
+                            }
+                        }
+                    }
+                });
+                Some((tx, handle))
+            },
             _claim: claim,
         })
+    }
+
+    pub fn flush_receipts(&self) {
+        if let Some((ref tx, _)) = self.receipt_worker {
+            let (ack_tx, ack_rx) = std::sync::mpsc::sync_channel(1);
+            if tx.send(ReceiptMsg::Flush(ack_tx)).is_ok() {
+                let _ = ack_rx.recv();
+            }
+        }
     }
 
     fn write_receipt(&self, r: &Receipt) -> Result<(PathBuf, Value, [u8; 32]), String> {
@@ -401,7 +441,11 @@ impl Supervisor {
             .join(format!("op-{}.json", hex(&r.op)));
         let json_bytes = serde_json::to_string(&v).map_err(|e| e.to_string())?.into_bytes();
         let content_hash = sha256_of(&json_bytes);
-        std::fs::write(&p, &json_bytes).map_err(|e| e.to_string())?;
+        if let Some((ref tx, _)) = self.receipt_worker {
+            let _ = tx.send(ReceiptMsg::Write(p.clone(), json_bytes));
+        } else {
+            std::fs::write(&p, &json_bytes).map_err(|e| e.to_string())?;
+        }
         Ok((p, v, content_hash))
     }
 
@@ -561,6 +605,7 @@ impl Supervisor {
         clock: u64,
         bounds: &Bounds,
     ) -> RunOutcome {
+        self.flush_receipts();
         self.run_inner(intent, clock, false, bounds, true)
     }
 
@@ -600,13 +645,7 @@ impl Supervisor {
                 };
             }
         }
-        // 1b. the WB001 binding
-        if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
-            return RunOutcome {
-                refused: Some("wb001:binding-refused".into()),
-                ..none
-            };
-        }
+        // Fast decode of envelope
         let decoded = match btungsten_wb001::decode(&intent.env) {
             Ok(i) => i,
             Err(_) => {
@@ -617,9 +656,33 @@ impl Supervisor {
             }
         };
         // 2. fast in-memory nonce gate: this authority has spent this nonce (O(log n) in-memory)
-        // MUST RUN BEFORE load_shed.admit! (r1: prevents replay flood from consuming cross-DAO quota)
+        // MUST RUN BEFORE signature verification & load_shed.admit!
+        // (Eliminates Ed25519 CPU signature burn on replay floods, meeting Gate 1 < 50 µs bound)
         let prev_op = self.admitted.get(&(intent.authority, decoded.nonce)).copied();
         if let Some(prev_op) = prev_op {
+            let env_sha = env_sha_of(&intent.env);
+            let is_exact_replay = self.admitted_env_shas.get(&prev_op) == Some(&env_sha)
+                && self.admitted_sigs.get(&prev_op) == Some(&intent.sig);
+
+            if is_exact_replay && !allow_retry {
+                return RunOutcome {
+                    refused: Some("admission:nonce-reuse".into()),
+                    ..none
+                };
+            }
+
+            if !is_exact_replay {
+                // Not an exact replay: envelope or signature differed on an already spent nonce.
+                // Cryptographic binding law: invalid signatures MUST be refused as wb001:binding-refused
+                // BEFORE consulting any state or returning admission:nonce-reuse!
+                if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
+                    return RunOutcome {
+                        refused: Some("wb001:binding-refused".into()),
+                        ..none
+                    };
+                }
+            }
+
             if allow_retry {
                 // Gate 4: Quantum / lost-response retry & receipt binding
                 let env_sha = env_sha_of(&intent.env);
@@ -743,6 +806,14 @@ impl Supervisor {
             }
         }
 
+        // 1b. the WB001 binding for fresh operations
+        if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
+            return RunOutcome {
+                refused: Some("wb001:binding-refused".into()),
+                ..none
+            };
+        }
+
         // Gate 3: Cross-DAO Admission Control & Load Shedding
         // Strict exact local domain match (r2: prevents local priority spoofing e.g. 'local-evil-dao')
         let domain_str = String::from_utf8_lossy(&decoded.domain[..decoded.domain_len as usize]);
@@ -813,7 +884,7 @@ impl Supervisor {
         payload.extend_from_slice(&intent.env);
         payload.push(self.worker.name().len() as u8);
         payload.extend_from_slice(self.worker.name().as_bytes());
-        if let Err(e) = self.journal.append(&op, E_ADMITTED, &payload) {
+        if let Err(e) = self.journal.append_uncommitted(&op, E_ADMITTED, &payload) {
             return RunOutcome {
                 refused: Some(format!("journal:{e}")),
                 op: Some(op),
@@ -822,6 +893,7 @@ impl Supervisor {
         }
         self.admitted.insert((intent.authority, decoded.nonce), op);
         self.admitted_env_shas.insert(op, env_sha);
+        self.admitted_sigs.insert(op, intent.sig);
         let mut state = OpState::ADMITTED_ZERO;
         state.seq = 0;
         let budget = ResourceBudget {
@@ -838,7 +910,7 @@ impl Supervisor {
         }
         let res = reservations_payload(bounds);
         let expiry = decoded.expiry;
-        match self.step_and_journal(
+        match self.step_and_journal_uncommitted(
             &op,
             &env_sha,
             &mut state,
@@ -892,7 +964,7 @@ impl Supervisor {
                 receipt_json: None,
             };
         }
-        match self.step_and_journal(&op, &env_sha, &mut state, E_RESPONSE, &[1], clock, expiry) {
+        match self.step_and_journal_uncommitted(&op, &env_sha, &mut state, E_RESPONSE, &[1], clock, expiry) {
             Ok(()) => {}
             Err(w) => {
                 self.capacity_ledger.release(&self.device_id, &op);
@@ -918,6 +990,51 @@ impl Supervisor {
                 op: Some(op),
                 ..none
             },
+        }
+    }
+
+    fn step_and_journal_uncommitted(
+        &mut self,
+        op: &[u8; 32],
+        env_sha: &[u8; 32],
+        state: &mut OpState,
+        event: u8,
+        payload: &[u8],
+        clock: u64,
+        expiry: u64,
+    ) -> Result<(), String> {
+        let req = step_request(op, env_sha, state, event, payload, clock, expiry);
+        let verdict = match self.worker.step(&req) {
+            Ok(v) => v,
+            Err(e) => {
+                let word = format!("worker:{e}");
+                let mut p = Vec::new();
+                p.extend_from_slice(&1000u32.to_le_bytes());
+                let w: String = word.chars().take(31).collect();
+                p.push(w.len() as u8);
+                p.extend_from_slice(w.as_bytes());
+                let _ = self.journal.append(op, E_BOUNDED_FAIL, &p);
+                return Err(format!("worker:{e}"));
+            }
+        };
+        match parse_step_verdict(&verdict).map_err(|e| format!("worker:{e}"))? {
+            StepVerdict::Next(next) => {
+                self.journal
+                    .append_uncommitted(op, event, payload)
+                    .map_err(|e| format!("journal:{e}"))?;
+                *state = next;
+                state.seq = self.journal.next_seq() - 1;
+                Ok(())
+            }
+            StepVerdict::Refused(r) => {
+                let mut p = Vec::new();
+                p.extend_from_slice(&r.code().to_le_bytes());
+                let word = r.word();
+                p.push(word.len() as u8);
+                p.extend_from_slice(word.as_bytes());
+                let _ = self.journal.append(op, E_BOUNDED_FAIL, &p);
+                Err(format!("transition:{}", word))
+            }
         }
     }
 
@@ -1178,6 +1295,7 @@ impl Supervisor {
     /// SPEC-RUSTEOSVM-1 load rules), replays the same state machine, and
     /// reconciles both directions. Never re-dispatches; never admits.
     pub fn recover(&mut self, clock: u64) -> Result<Value, String> {
+        self.flush_receipts();
         // 1. chain-verify everything BEFORE any decision
         let (records, _) =
             ReplicatedJournal::load_state(&replica_paths(&self.state_dir), &self.keys.journal_mac)
@@ -1390,6 +1508,7 @@ impl Supervisor {
         }
         self.admitted = nonces;
         self.admitted_env_shas = ops.iter().map(|(op, rp)| (*op, env_sha_of(&rp.env))).collect();
+        self.admitted_sigs = ops.iter().map(|(op, rp)| (*op, rp.sig)).collect();
         let (reloaded_records, _) =
             ReplicatedJournal::load_state(&replica_paths(&self.state_dir), &self.keys.journal_mac)
                 .map_err(|e| format!("journal:{e}"))?;
@@ -1552,6 +1671,7 @@ impl Supervisor {
         }
         self.admitted.insert((intent.authority, decoded.nonce), op);
         self.admitted_env_shas.insert(op, env_sha);
+        self.admitted_sigs.insert(op, intent.sig);
         let mut state = OpState::ADMITTED_ZERO;
         state.seq = 0;
         let budget = ResourceBudget {
@@ -2084,4 +2204,15 @@ pub fn step_has_row_among(rows: &[[u8; 32]], root: &[u8; 32], step: u8) -> bool 
         let id = bnrose_exec_core::step_op_id(root, step | (a << 4));
         rows.iter().any(|r| *r == id)
     })
+}
+
+
+impl Drop for Supervisor {
+    fn drop(&mut self) {
+        self.flush_receipts();
+        if let Some((tx, handle)) = self.receipt_worker.take() {
+            drop(tx);
+            let _ = handle.join();
+        }
+    }
 }

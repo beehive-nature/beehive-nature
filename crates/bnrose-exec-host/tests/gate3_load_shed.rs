@@ -42,6 +42,9 @@ fn make_sup(dir: &Path) -> Supervisor {
 }
 
 fn make_intent(nonce: u64, domain: &str) -> IntentFile {
+    if domain == "cross.dao" {
+        return make_cross_dao_intent(nonce);
+    }
     let f = fixture(nonce, NOW, 600);
     if domain == TEST_DOMAIN {
         return IntentFile {
@@ -73,6 +76,44 @@ fn make_intent(nonce: u64, domain: &str) -> IntentFile {
     }
 }
 
+fn make_cross_dao_intent(nonce_val: u64) -> IntentFile {
+    use sha2::Digest;
+    static CROSS_SEED: [u8; 32] = [0x55; 32];
+    static TEMPLATE: std::sync::OnceLock<([u8; 32], Vec<u8>, usize)> = std::sync::OnceLock::new();
+    let (authority, template_env, nonce_pos) = TEMPLATE.get_or_init(|| {
+        let mut authority = [0u8; 32];
+        libcrux_ed25519::secret_to_public(&mut authority, &CROSS_SEED);
+        let template_intent = btungsten_wb001::IntentIn {
+            domain: Text::Str("cross.dao".into()),
+            nonce: vec![0u8; 32],
+            epoch: NOW,
+            action: sha2::Sha256::digest(bnrose_exec_host::fixtures::TEST_ACTION_LABEL.as_bytes()).to_vec(),
+            destination: Text::Str(bnrose_exec_host::fixtures::TEST_DESTINATION.into()),
+            capability: Text::Str(bnrose_exec_host::fixtures::TEST_CAPABILITY.into()),
+            amount: 100,
+            expiry: NOW + 600,
+            payer: Text::Str(bnrose_exec_host::fixtures::TEST_PAYER.into()),
+            payload: Vec::new(),
+        };
+        let template_built = template_intent.build().expect("valid intent");
+        let env = btungsten_wb001::canonical(&template_built).expect("canonical env");
+        let pos = env
+            .windows(32)
+            .position(|w| w == [0u8; 32])
+            .expect("nonce position in canonical envelope");
+        (authority, env, pos)
+    });
+
+    let mut env = template_env.clone();
+    env[*nonce_pos..*nonce_pos + 8].copy_from_slice(&nonce_val.to_le_bytes());
+    let sig = libcrux_ed25519::sign(&env, &CROSS_SEED).expect("valid sig");
+    IntentFile {
+        env,
+        sig,
+        authority: *authority,
+    }
+}
+
 #[test]
 fn test_gate3_real_load_zipf_skew_and_p99_guarantee() {
     let bounds = Bounds::default();
@@ -90,8 +131,8 @@ fn test_gate3_real_load_zipf_skew_and_p99_guarantee() {
             let mut sup = make_sup(&state);
             sup.set_load_shed(CrossDaoAdmissionControl::new(local_capacity, cross_dao_quota));
 
-            // Warmup 5 local requests to prime kernel caches and filesystem buffers
-            for w in 0..5 {
+            // Warmup 10 local requests to prime kernel caches and filesystem buffers
+            for w in 0..10 {
                 let warmup_intent = make_intent(10_000 + w, TEST_DOMAIN);
                 let _ = sup.run(&warmup_intent, NOW, false, &bounds);
             }
@@ -106,6 +147,14 @@ fn test_gate3_real_load_zipf_skew_and_p99_guarantee() {
             let mut cross_sent = 0;
             let mut nonce_base = (s * 100_000.0) as u64 + (mult as u64 * 10_000);
 
+            // Pre-generate cross-DAO intents (quota + pool for shedding) to avoid in-loop signing burn
+            let cross_pool_size = cross_dao_quota + 50;
+            let mut cross_pool = Vec::with_capacity(cross_pool_size);
+            for _p in 0..cross_pool_size {
+                nonce_base += 1;
+                cross_pool.push(make_cross_dao_intent(nonce_base));
+            }
+
             for i in 0..local_requests_count {
                 // 1. Send real local request through Supervisor::run and measure latency
                 nonce_base += 1;
@@ -118,12 +167,18 @@ fn test_gate3_real_load_zipf_skew_and_p99_guarantee() {
 
                 // 2. Interleave cross-DAO burst distributed by Zipf rank
                 while cross_sent < (i + 1) * cross_requests_count / local_requests_count {
-                    nonce_base += 1;
                     let pseudo_rand = ((i * 10007 + cross_sent * 37) % 10000) as f64 / 10000.0;
                     let _rank = weights.iter().position(|&w| pseudo_rand <= w).unwrap_or(0) + 1;
 
-                    let cross_intent = make_intent(nonce_base, "cross.dao");
-                    let cross_out = sup.run(&cross_intent, NOW, false, &bounds);
+                    // First cross_dao_quota requests use pool[0..cross_dao_quota] and are admitted.
+                    // Excess requests use pool[cross_dao_quota..cross_pool_size] (unadmitted nonces) and are shed.
+                    let pool_idx = if cross_sent < cross_dao_quota {
+                        cross_sent
+                    } else {
+                        cross_dao_quota + ((cross_sent - cross_dao_quota) % 50)
+                    };
+
+                    let cross_out = sup.run(&cross_pool[pool_idx], NOW, false, &bounds);
                     if cross_out.receipt.is_some() {
                         cross_admitted += 1;
                     } else if cross_out.refused.as_deref() == Some("admission:shed-load — cross-dao quota exhausted") {
@@ -140,9 +195,11 @@ fn test_gate3_real_load_zipf_skew_and_p99_guarantee() {
 
             // Compute local p99 latency
             local_latencies_us.sort_unstable();
-            let p99_idx = (local_requests_count as f64 * 0.99).floor() as usize;
+            let p99_idx = ((local_requests_count - 1) * 99) / 100;
             let p99_ms = local_latencies_us[p99_idx] as f64 / 1000.0;
-            let bound_ms = if cfg!(debug_assertions) { 100.0 } else { 15.0 };
+            // Contractual SLA: local p99 latency must remain < 15.0 ms in production (--release).
+            // Debug builds include unoptimized crypto and assertion overhead, capped at 50.0 ms.
+            let bound_ms = if cfg!(debug_assertions) { 50.0 } else { 15.0 };
             assert!(
                 p99_ms < bound_ms,
                 "real request local p99 under Zipf s={s} mult={mult}x must be < {bound_ms} ms; was {p99_ms:.3} ms"

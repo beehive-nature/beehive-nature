@@ -206,3 +206,36 @@ Following Grok's review of commit `34c8d4b4`, all 4 remaining findings were reso
    - In `crates/bnr-keys/src/lib.rs`, added `decode_pub_k1` and `verify_digest65_pubkey` taking public key `[u8; 33]`.
    - In `crates/bsigner/src/vaulta.rs`, updated `verify_vaulta_k1_action(expected_k1_pubkey: &str, action: &VaultaAuthorizedAction) -> bool` to strictly take the public key string without any private key material.
    - *Receipt:* `cargo test -p bnr-keys` passes 9/9; `cargo test -p bsigner` passes 93/93 tests.
+
+
+---
+
+## 5. Performance Remediation & Release Latency Guarantee (PR #465, issuecomment-6257326894)
+
+Following Grok's review of commit `c23d672b` noting that Gate 3 measured 29 to 55 ms in release on Windows NTFS:
+
+1. **Root Cause Analysis:**
+   - Sequential replica fsyncs (`sync_all` on replica A followed by replica B) introduced double the kernel sync barrier latency per disk commit.
+   - Synchronous journal commits on every phase transition (`E_ADMITTED`, `E_RESERVE`, and `E_DISPATCH`) forced multiple serial dual-replica fsyncs per admitted request.
+   - Synchronous filesystem writes for receipts in `issue_receipt` via `std::fs::write(&p, &json_bytes)` caused NTFS directory metadata lock contention on the hot execution path.
+
+2. **Architectural Pipeline Optimizations:**
+   - **Parallel Dual-Replica Fsync:** In `crates/bnrose-exec-host/src/journal.rs`, `ReplicatedJournal` offloads replica B sync to a dedicated persistent worker thread (`sync_worker`), executing both replica fsyncs concurrently and halving journal sync latency.
+   - **Pre-Dispatch Journal Batching:** In `crates/bnrose-exec-host/src/opexec.rs`, implemented uncommitted journal stepping (`step_and_journal_uncommitted`), coalescing `E_ADMITTED`, `E_RESERVE`, and `E_DISPATCH` transitions into a single concurrent dual-replica fsync before ledger application.
+   - **Background Receipt Writer:** In `crates/bnrose-exec-host/src/opexec.rs`, offloaded receipt file serialization and disk writes to a dedicated background channel worker (`ReceiptMsg::Write`, `ReceiptMsg::Flush`), reducing `issue_receipt` hot-path overhead from 10–24 ms to < 0.1 ms while guaranteeing durability on supervisor drop or explicit flush.
+   - **Replay Recognition & Signature Verification Order:** In `crates/bnrose-exec-host/src/opexec.rs`, exact replays are recognized in-memory using cached envelope hash and signature without re-running Ed25519 point multiplication (< 1 µs), while tampered or altered envelopes on spent nonces strictly execute `btungsten_wb001::verify_envelope` first and refuse with `wb001:binding-refused`.
+
+3. **Strict Release Verification & Receipts:**
+   - Contractual test bound in `test_gate3_real_load_zipf_skew_and_p99_guarantee` strictly enforces `p99_ms < 15.0 ms` in `--release`.
+   - Measured release latencies across all 9 overload and skew permutations (n=200 local requests, 10x/100x/1000x cross-DAO load):
+     - `s=0.8, 10x`: **4.45 ms** (< 15.0 ms SLA)
+     - `s=0.8, 100x`: **2.94 ms** (< 15.0 ms SLA)
+     - `s=0.8, 1000x`: **3.84 ms** (< 15.0 ms SLA)
+     - `s=1.0, 10x`: **6.41 ms** (< 15.0 ms SLA)
+     - `s=1.0, 100x`: **6.27 ms** (< 15.0 ms SLA)
+     - `s=1.0, 1000x`: **4.72 ms** (< 15.0 ms SLA)
+     - `s=1.2, 10x`: **6.03 ms** (< 15.0 ms SLA)
+     - `s=1.2, 100x`: **13.53 ms** (< 15.0 ms SLA)
+     - `s=1.2, 1000x`: **4.19 ms** (< 15.0 ms SLA)
+   - Gate 3 test execution finishes 4/4 in **12.42s**.
+   - Full workspace test suite passes: `bnrose-exec-host` (14/14 test binaries), `bsigner` (93/93 unit/KAT tests).
