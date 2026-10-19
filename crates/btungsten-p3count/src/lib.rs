@@ -13,6 +13,7 @@
 pub mod air;
 pub mod config;
 pub mod leak;
+pub mod repository;
 pub mod security;
 pub mod statement;
 pub mod trace;

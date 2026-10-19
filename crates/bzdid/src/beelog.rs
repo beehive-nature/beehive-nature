@@ -82,6 +82,158 @@ fn node_hash(l: &[u8; 32], r: &[u8; 32]) -> [u8; 32] {
     h.finalize().into()
 }
 
+/// Compact append state over the SAME stored-byte tree as `BeeLog`.
+/// A set bit in size owns exactly one complete subtree; no history scan.
+/// The root still needs an external trust pin. A frontier cannot create authority.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Frontier {
+    pub size: u64,
+    pub peaks: [Option<[u8; 32]>; 64],
+}
+
+#[derive(Debug, Clone)]
+pub struct AppendEvidence {
+    pub previous: Head,
+    pub next: Head,
+    pub inclusion: Vec<[u8; 32]>,
+    pub consistency: Vec<[u8; 32]>,
+}
+
+impl Default for Frontier {
+    fn default() -> Self {
+        Self {
+            size: 0,
+            peaks: [None; 64],
+        }
+    }
+}
+
+impl Frontier {
+    pub fn head(&self) -> Result<Head, String> {
+        let mut acc = None;
+        for bit in 0..64 {
+            if self.peaks[bit].is_some() != (self.size & (1u64 << bit) != 0) {
+                return Err("frontier shape does not match its size".into());
+            }
+            if let Some(peak) = self.peaks[bit] {
+                acc = Some(match acc {
+                    Some(right) => node_hash(&peak, &right),
+                    None => peak,
+                });
+            }
+        }
+        Ok(Head {
+            size: self.size,
+            root: acc.unwrap_or(Head::empty().root),
+        })
+    }
+
+    /// One append, 64 peak slots and logarithmic hash paths, with independently checkable
+    /// inclusion and consistency paths. Overflow refuses before mutation.
+    pub fn append(&mut self, bytes: &[u8]) -> Result<AppendEvidence, String> {
+        let previous = self.head()?;
+        let next_size = self.size.checked_add(1).ok_or("frontier size overflow")?;
+        let mut segments = Vec::new();
+        let mut start = 0;
+        for bit in (0..64).rev() {
+            if let Some(root) = self.peaks[bit] {
+                let len = 1u64 << bit;
+                segments.push((start, len, root));
+                start += len;
+            }
+        }
+        let leaf = leaf_hash(bytes);
+        segments.push((self.size, 1, leaf));
+        fn root(parts: &[(u64, u64, [u8; 32])], lo: u64, n: u64) -> Result<[u8; 32], String> {
+            if let Some(p) = parts.iter().find(|p| p.0 == lo && p.1 == n) {
+                return Ok(p.2);
+            }
+            if n < 2 {
+                return Err("frontier has no requested subtree".into());
+            }
+            let k = split_point(n);
+            Ok(node_hash(
+                &root(parts, lo, k)?,
+                &root(parts, lo + k, n - k)?,
+            ))
+        }
+        fn inclusion(
+            parts: &[(u64, u64, [u8; 32])],
+            lo: u64,
+            n: u64,
+            m: u64,
+            out: &mut Vec<[u8; 32]>,
+        ) -> Result<(), String> {
+            if n == 1 {
+                return Ok(());
+            }
+            let k = split_point(n);
+            if m < k {
+                inclusion(parts, lo, k, m, out)?;
+                out.push(root(parts, lo + k, n - k)?);
+            } else {
+                inclusion(parts, lo + k, n - k, m - k, out)?;
+                out.push(root(parts, lo, k)?);
+            }
+            Ok(())
+        }
+        fn consistency(
+            parts: &[(u64, u64, [u8; 32])],
+            lo: u64,
+            m: u64,
+            n: u64,
+            original: bool,
+            out: &mut Vec<[u8; 32]>,
+        ) -> Result<(), String> {
+            if m == n {
+                if !original {
+                    out.push(root(parts, lo, n)?);
+                }
+                return Ok(());
+            }
+            let k = split_point(n);
+            if m <= k {
+                consistency(parts, lo, m, k, original, out)?;
+                out.push(root(parts, lo + k, n - k)?);
+            } else {
+                consistency(parts, lo + k, m - k, n - k, false, out)?;
+                out.push(root(parts, lo, k)?);
+            }
+            Ok(())
+        }
+        let mut inc = Vec::new();
+        let mut con = Vec::new();
+        inclusion(&segments, 0, next_size, self.size, &mut inc)?;
+        if self.size != 0 {
+            consistency(&segments, 0, self.size, next_size, true, &mut con)?;
+        }
+        let mut updated = self.clone();
+        let mut carry = leaf;
+        let mut bit = 0;
+        while self.size & (1u64 << bit) != 0 {
+            carry = node_hash(
+                &updated.peaks[bit].take().ok_or("missing frontier peak")?,
+                &carry,
+            );
+            bit += 1;
+        }
+        updated.peaks[bit] = Some(carry);
+        updated.size = next_size;
+        let next = updated.head()?;
+        verify_inclusion(bytes, previous.size, &next, &inc)?;
+        if previous.size != 0 {
+            verify_consistency(&previous, &next, &con)?;
+        }
+        *self = updated;
+        Ok(AppendEvidence {
+            previous,
+            next,
+            inclusion: inc,
+            consistency: con,
+        })
+    }
+}
+
 /// The largest power of two strictly less than `n` (n >= 2).
 fn split_point(n: u64) -> u64 {
     debug_assert!(n >= 2);

@@ -11,12 +11,15 @@ import { retrieveBundle, notice } from './storage.mjs';
 import { hiveOperation, syncHiveBlock } from './hive.mjs';
 import { nativeReader, verifyOwner } from './providers.mjs';
 import { repositoryPrivacy } from './privacy.mjs';
+import { repositoryProofEngine } from './proof-engine.mjs';
+import { DEFAULT_BATCH_MAX_BYTES, retrievePrivateBatch, verifiedPrivateBatch, verifyOpaqueReceipt } from './private-batch.mjs';
 
 export async function main(args) {
   const { values: v, positionals } = parseArgs({ args, allowPositionals: true, options: Object.fromEntries(
-    ['database', 'bootstrap', 'package', 'packet', 'checkpoint', 'pointer', 'readers', 'out', 'account', 'owner', 'policy', 'vault-env', 'topic'].map(k => [k, { type: 'string' }])) });
+    ['database', 'bootstrap', 'package', 'packet', 'checkpoint', 'pointer', 'readers', 'out', 'account', 'owner', 'policy', 'vault-env', 'topic', 'proof-binary', 'previous-batch', 'receipt'].map(k => [k, { type: 'string' }])) });
   need(positionals.length === 1, 'USAGE');
   if (positionals[0] === 'owner') return verifyOwner({ ...readDocument(v.owner), policy: readDocument(v.policy) });
+  if (positionals[0] === 'batch-verify') return verifyOpaqueReceipt({ engine: repositoryProofEngine({ binary: v['proof-binary'] }), receipt: readDocument(v.receipt), previous: readDocument(v['previous-batch']) });
   need(v.database && v.bootstrap, 'UNTRUSTED_STATE', 'A peer-local database and independently trusted bootstrap file are required');
   const store = new CheckpointStore(v.database, readDocument(v.bootstrap));
   try {
@@ -49,9 +52,22 @@ export async function main(args) {
         for (const [id, bytes] of payloads) writeFileSync(join(out, 'objects', id.slice(7)), bytes, { flag: 'wx' });
         return { out, manifest_digest: commitment('manifest', candidate.manifest), authority: 'retrieval only; checkpoint unchanged' };
       }
-      case 'sync-hive': return syncHiveBlock({ store, rails: rails(), maxBytes: DEFAULT_MAX_BYTES, privacy: privacy() });
+      case 'batch-apply': case 'batch-receipt': {
+        let previousBatch;
+        if (positionals[0] === 'batch-apply') {
+          need(v.checkpoint && v['previous-batch'], 'UNTRUSTED_STATE'); previousBatch = readDocument(v['previous-batch']);
+          const current = store.current(); need(current.digest === v.checkpoint && current.batch && canonicalDocument(current.batch.pin).equals(canonicalDocument(previousBatch)), 'CAS_CONFLICT');
+        }
+        const engine = repositoryProofEngine({ binary: v['proof-binary'] });
+        const capability = await retrievePrivateBatch(readDocument(v.pointer), { store, rails: rails(), maxBytes: DEFAULT_BATCH_MAX_BYTES, privacy: privacy(), engine });
+        if (positionals[0] === 'batch-receipt') return verifiedPrivateBatch(capability).receipt;
+        return store.applyPrivateBatch({ capability, expected: v.checkpoint, previousBatch });
+      }
+      case 'sync-hive': return syncHiveBlock({ store, rails: rails(), maxBytes: store.bootstrap.ordering.mode === 'hive-batch-shadow' ? DEFAULT_BATCH_MAX_BYTES : DEFAULT_MAX_BYTES, privacy: privacy(),
+        ...(store.bootstrap.ordering.mode === 'hive-batch-shadow' ? { engine: repositoryProofEngine({ binary: v['proof-binary'] }) } : {}) });
       case 'hive-op': {
         const n = notice({ topic: v.topic, bundle: readDocument(v.pointer) });
+        if (store.bootstrap.ordering.mode === 'hive-batch-shadow') n.schema = 'bnr.repository-checkpoint/3';
         return { operation: hiveOperation(v.account, n), signed: false, submitted: false };
       }
       default: need(false, 'USAGE', 'Commands: init, status, apply, fetch, sync-hive, hive-op, owner. See STORAGE.md.');

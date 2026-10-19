@@ -220,6 +220,9 @@ jobs:
         working-directory: crates/btungsten-p3count
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
       # this job never builds the root workspace; the map covers Plonky3's
       # own workspace only
@@ -230,6 +233,13 @@ jobs:
       - name: PQ10 model and AIR tests (the circuit's kept rule on all 128 leaf shapes, the asymmetric cohort, both true claims)
         if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         run: cargo test --locked --release
+      - name: Private repository — native hiding proof and batch atomicity
+        if: ${{ !cancelled() }}
+        env:
+          REPOSITORY_PROOF_BIN: ${{ github.workspace }}/crates/btungsten-p3count/target/release/repository-proof
+        run: |
+          test -x "$REPOSITORY_PROOF_BIN" || { echo "repository proof organ missing; cannot skip"; exit 1; }
+          node --test ../../tools/repository-contract/private-batch.test.mjs
       - name: PQ10 FORGERY battery at n = 64 (the honest control must verify, every mutation must be refused)
         if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
         run: cargo run --locked --release --bin p3count -- forgery

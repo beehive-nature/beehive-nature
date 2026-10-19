@@ -4,14 +4,18 @@ import { DatabaseSync } from 'node:sqlite';
 import { acceptUpdate, commitment, validateState, canonicalDocument, parseDocument, bytesDigest, need, record, hash, integer, text, oid } from './contract.mjs';
 import { packet, payloadEntries, checkBytes, location } from './storage.mjs';
 import { normalizeNodes } from '../keychain-release/anchor.mjs';
+import { validateBatchBootstrap, validateBatchPin, verifiedPrivateBatch } from './private-batch.mjs';
 
 export function validateBootstrap(b) {
   record(b, ['state', 'trusted_state_digest', 'ordering']); validateState(b.state); hash(b.trusted_state_digest);
   need(commitment('state', b.state) === b.trusted_state_digest, 'UNTRUSTED_STATE');
   const o = b.ordering;
   if (o.mode === 'local-shadow') record(o, ['mode']);
+  else if (o.mode === 'local-batch-shadow') { record(o, ['mode', 'batch']); validateBatchBootstrap(o.batch); }
   else {
-    record(o, ['mode', 'account', 'nodes', 'cursor', 'topic']); need(o.mode === 'hive-shadow', 'ORDERING'); hash(o.topic);
+    need(['hive-shadow', 'hive-batch-shadow'].includes(o.mode), 'ORDERING');
+    record(o, ['mode', 'account', 'nodes', 'cursor', 'topic', ...(o.mode === 'hive-batch-shadow' ? ['batch'] : [])]); hash(o.topic);
+    if (o.mode === 'hive-batch-shadow') validateBatchBootstrap(o.batch);
     need(typeof o.account === 'string' && /^[a-z][a-z0-9.-]{2,15}$/.test(o.account), 'HIVE_ACCOUNT');
     need(Array.isArray(o.nodes) && o.nodes.length >= 2 && o.nodes.length <= 8, 'ORACLES');
     need(normalizeNodes(o.nodes).length === o.nodes.length, 'ORACLES');
@@ -34,7 +38,9 @@ export class CheckpointStore {
         CREATE TABLE IF NOT EXISTS publications(digest TEXT NOT NULL, rail TEXT NOT NULL, status TEXT NOT NULL, location BLOB, PRIMARY KEY(digest,rail));
         CREATE TABLE IF NOT EXISTS decisions(position TEXT PRIMARY KEY, result BLOB NOT NULL);
         CREATE TABLE IF NOT EXISTS blocks(height INTEGER PRIMARY KEY, block_id TEXT NOT NULL, receipt BLOB NOT NULL);
-        CREATE TABLE IF NOT EXISTS inbox(sender TEXT NOT NULL, logical_id TEXT NOT NULL, digest TEXT NOT NULL, PRIMARY KEY(sender,logical_id));`);
+        CREATE TABLE IF NOT EXISTS inbox(sender TEXT NOT NULL, logical_id TEXT NOT NULL, digest TEXT NOT NULL, PRIMARY KEY(sender,logical_id));
+        CREATE TABLE IF NOT EXISTS batch_checkpoint(id INTEGER PRIMARY KEY CHECK(id=1), pin BLOB NOT NULL, frontier BLOB NOT NULL);
+        CREATE TABLE IF NOT EXISTS private_plans(id TEXT PRIMARY KEY, data BLOB NOT NULL, digest TEXT NOT NULL);`);
       this.#transaction(() => {
         const stored = this.#db.prepare('SELECT bootstrap FROM settings WHERE id=1').get();
         const bytes = canonicalDocument(bootstrap);
@@ -43,6 +49,7 @@ export class CheckpointStore {
           this.#db.prepare('INSERT INTO settings VALUES(1,?)').run(bytes);
           this.#db.prepare('INSERT INTO checkpoint VALUES(1,?,?,?)').run(canonicalDocument(bootstrap.state), bootstrap.trusted_state_digest,
             bootstrap.ordering.cursor ? canonicalDocument(bootstrap.ordering.cursor) : null);
+          if (bootstrap.ordering.batch) this.#db.prepare('INSERT INTO batch_checkpoint VALUES(1,?,?)').run(canonicalDocument(bootstrap.ordering.batch.pin), canonicalDocument(bootstrap.ordering.batch.frontier));
         }
       });
       this.bootstrap = structuredClone(bootstrap);
@@ -59,7 +66,24 @@ export class CheckpointStore {
     const row = this.#db.prepare('SELECT * FROM checkpoint WHERE id=1').get(); need(row, 'CHECKPOINT_MISSING');
     const state = parseDocument(row.state); validateState(state);
     need(commitment('state', state) === row.digest, 'CHECKPOINT_CORRUPT');
-    return { state, digest: row.digest, cursor: row.cursor ? parseDocument(row.cursor) : null, mode: this.bootstrap?.ordering.mode };
+    const result = { state, digest: row.digest, cursor: row.cursor ? parseDocument(row.cursor) : null, mode: this.bootstrap?.ordering.mode };
+    if (this.bootstrap?.ordering.batch) {
+      const batch = this.#db.prepare('SELECT pin,frontier FROM batch_checkpoint WHERE id=1').get(); need(batch, 'CHECKPOINT_MISSING');
+      result.batch = { pin: parseDocument(batch.pin), frontier: parseDocument(batch.frontier) };
+      validateBatchBootstrap(result.batch);
+    }
+    return result;
+  }
+  privatePlan(id) {
+    hash(id); const r = this.#db.prepare('SELECT data,digest FROM private_plans WHERE id=?').get(id);
+    if (!r) return null; need(bytesDigest(r.data) === r.digest, 'STORAGE_CORRUPT'); return Buffer.from(r.data);
+  }
+  reservePrivatePlan(id, bytes) {
+    hash(id); need(bytes instanceof Uint8Array && bytes.length <= 10 * 1024 * 1024, 'RESOURCE_LIMIT');
+    return this.#transaction(() => {
+      this.#db.prepare('INSERT OR IGNORE INTO private_plans VALUES(?,?,?)').run(id, bytes, bytesDigest(bytes));
+      return this.privatePlan(id);
+    });
   }
   get(id) {
     hash(id); const row = this.#db.prepare('SELECT data FROM objects WHERE digest=?').get(id);
@@ -136,11 +160,32 @@ export class CheckpointStore {
       return this.#apply(candidate, payloads, position);
     });
   }
+  #applyPrivate(capability, position) {
+    const v = verifiedPrivateBatch(capability), c = this.current();
+    need(c.batch && c.digest === commitment('state', v.state), 'STALE_BATCH');
+    need(canonicalDocument(c.batch.pin).equals(canonicalDocument(v.previous)), 'STALE_BATCH');
+    const results = v.captured.map((u, i) => {
+      const r = this.#apply(u.candidate, u.payloads, `${position}:${i}`);
+      need(r.accepted, 'BATCH_ACCEPTANCE', r.code ?? 'Private batch refused'); return r;
+    });
+    need(this.current().digest === commitment('state', v.next), 'BATCH_BINDING');
+    this.put(canonicalDocument(v.document));
+    const changed = this.#db.prepare('UPDATE batch_checkpoint SET pin=?,frontier=? WHERE id=1 AND pin=?').run(canonicalDocument(v.pin), canonicalDocument(v.frontier), canonicalDocument(c.batch.pin));
+    need(changed.changes === 1, 'CAS_CONFLICT');
+    return { accepted: true, results, checkpoint: this.current(), mode: 'private-batch-shadow' };
+  }
+  applyPrivateBatch({ capability, expected, previousBatch }) {
+    need(this.bootstrap.ordering.mode === 'local-batch-shadow', 'ORDERING'); hash(expected); validateBatchPin(previousBatch);
+    return this.#transaction(() => {
+      const c = this.current(); need(c.digest === expected && canonicalDocument(c.batch.pin).equals(canonicalDocument(previousBatch)), 'CAS_CONFLICT');
+      return this.#applyPrivate(capability, `private:${capability?.digest}`);
+    });
+  }
   // Only the Hive synchronizer calls this after fetching every ordered bundle.
   // Caller-supplied receipts are trusted RPC observations, not consensus proofs.
   // The transaction rechecks the cursor after all asynchronous I/O.
   applyHiveBlock({ expectedCursor, block, prepared, receipt }) {
-    need(this.bootstrap.ordering.mode === 'hive-shadow', 'ORDERING');
+    need(['hive-shadow', 'hive-batch-shadow'].includes(this.bootstrap.ordering.mode), 'ORDERING');
     return this.#transaction(() => {
       const c = this.current();
       need(canonicalDocument(c.cursor).equals(canonicalDocument(expectedCursor)), 'CAS_CONFLICT');
@@ -151,7 +196,17 @@ export class CheckpointStore {
         if (item.refusal) {
           const result = { accepted: false, code: item.refusal };
           this.#db.prepare('INSERT INTO decisions VALUES(?,?)').run(position, canonicalDocument(result)); results.push(result);
-        } else results.push(this.#apply(item.candidate, item.payloads, position));
+        } else if (item.privateBatch) {
+          need(this.bootstrap.ordering.mode === 'hive-batch-shadow', 'ORDERING');
+          const v = verifiedPrivateBatch(item.privateBatch), current = this.current();
+          if (current.digest !== commitment('state', v.state) || !canonicalDocument(current.batch.pin).equals(canonicalDocument(v.previous))) {
+            const result = { accepted: false, code: 'STALE_BATCH' };
+            this.#db.prepare('INSERT INTO decisions VALUES(?,?)').run(position, canonicalDocument(result)); results.push(result);
+          } else results.push(this.#applyPrivate(item.privateBatch, position));
+        } else {
+          need(this.bootstrap.ordering.mode === 'hive-shadow', 'PRIVATE_VERIFICATION_REQUIRED');
+          results.push(this.#apply(item.candidate, item.payloads, position));
+        }
       }
       this.#db.prepare('INSERT INTO blocks VALUES(?,?,?)').run(block.height, block.block_id, canonicalDocument(receipt));
       this.#db.prepare('UPDATE checkpoint SET cursor=? WHERE id=1').run(canonicalDocument({ height: block.height, block_id: block.block_id }));

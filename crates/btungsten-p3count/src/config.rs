@@ -102,8 +102,7 @@ pub fn os_rng() -> StdRng {
 
 fn hiding_with(
     p: Params,
-    n: usize,
-    members: usize,
+    instance_label: Vec<u8>,
     mut seed: impl FnMut() -> StdRng,
 ) -> HidingConfig {
     let (fh, c) = hashes();
@@ -112,19 +111,34 @@ fn hiding_with(
     let pcs = HidingPcs::new(Dft::default(), mmcs, fri, RANDOM_CODEWORDS, seed());
     HidingConfig::new(
         pcs,
-        Challenger::from_hasher(label(n, members), Keccak256Hash {}),
+        Challenger::from_hasher(instance_label, Keccak256Hash {}),
     )
 }
 
 /// The config every real proof uses.
 pub fn hiding(p: Params, n: usize, members: usize) -> HidingConfig {
-    hiding_with(p, n, members, os_rng)
+    hiding_with(p, label(n, members), os_rng)
+}
+
+/// A separately domain-separated consumer of the SAME hiding composition.
+pub fn hiding_labeled(p: Params, instance_label: Vec<u8>) -> HidingConfig {
+    hiding_with(p, instance_label, os_rng)
+}
+
+/// Reproducible commitment to PUBLIC preprocessed rows only. Never use this
+/// config to prove a private witness; main-trace blinding must use OS entropy.
+pub fn public_preprocessing(p: Params, instance_label: Vec<u8>) -> HidingConfig {
+    let mut counter = 0u64;
+    hiding_with(p, instance_label, move || {
+        counter += 1;
+        StdRng::seed_from_u64(counter)
+    })
 }
 
 /// A reproducible hiding config, for tests that must replay a proof.
 pub fn seeded_for_tests(p: Params, n: usize, members: usize, seed: u64) -> HidingConfig {
     let mut s = seed;
-    hiding_with(p, n, members, move || {
+    hiding_with(p, label(n, members), move || {
         s += 1;
         StdRng::seed_from_u64(s)
     })

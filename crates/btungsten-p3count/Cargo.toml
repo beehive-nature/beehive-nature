@@ -15,6 +15,7 @@ publish = false
 [workspace]
 
 [dependencies]
+bzdid = { path = "../bzdid" }
 p3-air = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
 p3-challenger = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }
 p3-commit = { git = "https://github.com/Plonky3/Plonky3", rev = "eab7f0e3662500cde47cb0b6dad61afc99e3deac" }

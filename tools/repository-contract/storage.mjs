@@ -37,6 +37,32 @@ export function payloadEntries(candidate, payloads) {
   return [...entries.values()].sort((a, b) => a.digest.localeCompare(b.digest));
 }
 
+// Shared wallet-owned publication boundary for update roots and batch roots.
+// The publisher must perform its complete semantic preflight before calling.
+export async function publishPrivateBytes({ store, bytes: plain, rails, privacy }) {
+  requirePrivacy(privacy);
+  need(plain instanceof Uint8Array && plain.length <= 256 * 1024 * 1024, 'RESOURCE_LIMIT');
+  need(Array.isArray(rails) && rails.length > 0 && rails.length <= 8, 'RAILS');
+  need(new Set(rails.map(r => r.id)).size === rails.length, 'DUPLICATE');
+  need(rails.every(r => typeof r.put === 'function' && typeof r.get === 'function'), 'USER_FUNDED_WRITER_REQUIRED');
+  need(rails.every(r => typeof r.id === 'string' && r.id.length > 0 && ['ant', 'ar'].includes(r.scheme)), 'RAIL');
+  const plainId = bytesDigest(plain);
+  const bytes = store.sealed(plainId, privacy.audience) ?? store.keepSealed(plainId, privacy.audience, await privacy.seal(plain));
+  const desc = descriptor(bytes); store.put(bytes); const locations = [];
+  for (const rail of rails) {
+    const previous = store.publication(desc.digest, rail.id); let loc;
+    if (previous?.status === 'verified') { loc = previous.location; location(loc); need(loc.scheme === rail.scheme, 'RAIL'); }
+    else {
+      need(!previous, 'PUBLICATION_UNKNOWN', 'Reconcile the reserved put with an exact readback; do not repeat payment');
+      store.reservePublication(desc.digest, rail.id);
+      loc = { scheme: rail.scheme, address: await rail.put(Buffer.from(bytes)) }; location(loc);
+    }
+    checkBytes(desc, await rail.get(loc.address, desc.bytes)); store.confirmPublication(desc.digest, rail.id, loc);
+    if (!locations.some(x => x.scheme === loc.scheme && x.address === loc.address)) locations.push(loc);
+  }
+  return { ...desc, locations };
+}
+
 // The caller explicitly supplies funded/authorized rails. This function neither
 // selects a wallet nor invokes bPay. Atmirror still owns each put/get contract.
 // Persist the reservation BEFORE calling put: an interrupted/ambiguous paid put
@@ -51,30 +77,7 @@ export async function publishBundle({ store, state, trustedStateDigest, candidat
   const entries = payloadEntries(candidate, payloads);
   const limit = candidate.policy.max_bytes;
   need(entries.reduce((n, e) => n + e.bytes, 0) <= limit, 'RESOURCE_LIMIT');
-  const publish = async plain => {
-    const plainId = bytesDigest(plain);
-    const bytes = store.sealed(plainId, privacy.audience) ?? store.keepSealed(plainId, privacy.audience, await privacy.seal(plain));
-    const desc = descriptor(bytes); store.put(bytes); const locations = [];
-    for (const rail of rails) {
-      need(typeof rail.id === 'string' && rail.id.length > 0 && ['ant', 'ar'].includes(rail.scheme), 'RAIL');
-      const previous = store.publication(desc.digest, rail.id);
-      let loc;
-      if (previous?.status === 'verified') {
-        loc = previous.location; location(loc); need(loc.scheme === rail.scheme, 'RAIL');
-      } else {
-        need(!previous, 'PUBLICATION_UNKNOWN', 'Reconcile the reserved put with an exact readback; do not repeat payment');
-        store.reservePublication(desc.digest, rail.id);
-        loc = { scheme: rail.scheme, address: await rail.put(Buffer.from(bytes)) };
-        location(loc);
-      }
-      // A successful upload response is not retrieval. Cached receipts also
-      // get a fresh byte read before another publication receipt is returned.
-      checkBytes(desc, await rail.get(loc.address, desc.bytes));
-      store.confirmPublication(desc.digest, rail.id, loc);
-      if (!locations.some(x => x.scheme === loc.scheme && x.address === loc.address)) locations.push(loc);
-    }
-    return { ...desc, locations };
-  };
+  const publish = bytes => publishPrivateBytes({ store, bytes, rails, privacy });
   const objects = [];
   for (const e of entries) objects.push({ ...e, sealed: await publish(checkBytes(e, payloads.get(e.digest))) });
   const root = { schema: 'bnr.repository-storage/1', candidate, objects };
