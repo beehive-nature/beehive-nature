@@ -1,5 +1,5 @@
 $ sh scripts/bnrose-evolve/teeth.sh
-# tree: merge 62bc51891 (anchor 308489608 + base 4f75e1292); Linux 6.18.33.2-microsoft-standard-WSL2 x86_64; 8 cpu; 2026-10-17T00:36:30Z
+# tree: merge e28b27229 (anchor 8b90bffdc + main 6b75851d9); Linux 6.18.33.2-microsoft-standard-WSL2 x86_64; 8 cpu; 2026-10-19T04:01:59Z
 control: the unmutated copy runs the whole battery
 control: GREEN
 TEETH missing-evidence-is-pass: CONVICTED by adversarial::forged_success_report_is_only_a_claim

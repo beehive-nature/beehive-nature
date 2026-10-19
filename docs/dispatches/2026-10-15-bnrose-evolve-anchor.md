@@ -159,6 +159,20 @@ convicted, 0 escaped`; `node e2e/dock-claims.mjs` 8 passed, 0 failed
 (`dock-claims-anchor-local.txt`: the held-test count of 8 and its named
 blocker survived the merge).
 
+**Reconciled with main after #435 landed (2026-10-18).** #435 merged as
+`38d540aa2`; this PR's base is main. Main `6b75851d9` merged in at
+`e28b27229`. Conflicts: `Cargo.toml` (both sides added workspace members;
+all three kept) and the generated `surfaces/stack.html` (main's side taken
+and regenerated, 84 workspace crates; both stack `--check`s and lint-ci-shape
+141/141 green). `scripts/identity-check.sh` and `.github/workflows/tests.yml`
+are byte-identical to main, so the contribution-range fix (#453) and the
+selftest-isolation fix (#464) are carried as main has them. The push run that
+failed §7 on `8b90bffdc` (run 38987709158) stays recorded as failed. Rerun on
+`e28b27229`, every receipt overwritten: `cargo metadata --locked` ok;
+`cargo fmt --all -- --check` exit 0; battery 10 unit + 28 rows ok; carrier
+5 + 1 unit ok; `TEETH: 17 convicted, 0 escaped`; carrier `TEETH: 4
+convicted, 0 escaped`; `node e2e/dock-claims.mjs` 8 passed, 0 failed.
+
 CI (`bnrose-evolve.yml`, `tests.yml`) on the pushed head is the receipt that
 counts. Its verdict is recorded in the PR, not predicted here.
 

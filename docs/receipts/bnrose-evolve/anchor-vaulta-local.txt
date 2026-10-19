@@ -1,15 +1,12 @@
 $ cargo test -p bnrose-anchor-vaulta --locked
-# tree: merge 62bc51891 (anchor 308489608 + base 4f75e1292); Linux 6.18.33.2-microsoft-standard-WSL2 x86_64; 8 cpu; 2026-10-17T00:36:21Z
-   Compiling adapter-store v0.1.0 (/mnt/c/Users/travi/wt-bevanchor/crates/adapter-store)
-   Compiling bnrose-evolve v0.1.0 (/mnt/c/Users/travi/wt-bevanchor/crates/bnrose-evolve)
-   Compiling bnrose-anchor-vaulta v0.1.0 (/mnt/c/Users/travi/wt-bevanchor/crates/bnrose-anchor-vaulta)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.69s
+# tree: merge e28b27229 (anchor 8b90bffdc + main 6b75851d9); Linux 6.18.33.2-microsoft-standard-WSL2 x86_64; 8 cpu; 2026-10-19T04:01:56Z
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.29s
      Running unittests src/lib.rs (/home/travi/tgt-bevanchor/debug/deps/bnrose_anchor_vaulta-2a2e2beb4cc8cbb5)
 
 running 1 test
 test tests::hex_roundtrips_and_refuses_odd_or_foreign ... ok
 
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
 
      Running unittests src/bin/bnrose-anchor-vaulta.rs (/home/travi/tgt-bevanchor/debug/deps/bnrose_anchor_vaulta-4d11e4460defcb0b)
 
@@ -21,8 +18,8 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
 running 6 tests
 test live_jungle4_read ... ignored, live read of Jungle4; waits on the evanchor contract being deployed and anchored by the signer lane
-test only_a_wrong_chain_is_refused_by_the_chain_check ... ok
 test endpoints_must_all_answer_and_all_agree ... ok
+test only_a_wrong_chain_is_refused_by_the_chain_check ... ok
 test the_unsigned_action_carries_the_statement_and_nothing_else ... ok
 test a_row_that_does_not_carry_its_statement_is_refused ... ok
 test the_carrier_reads_and_never_signs ... ok

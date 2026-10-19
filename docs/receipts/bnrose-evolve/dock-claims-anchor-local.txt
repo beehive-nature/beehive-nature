@@ -1,5 +1,5 @@
 $ node e2e/dock-claims.mjs
-# tree: merge 62bc51891 (anchor 308489608 + base 4f75e1292); 2026-10-17T00:34:54Z
+# tree: merge e28b27229 (anchor 8b90bffdc + main 6b75851d9); 2026-10-19T04:00:26Z
   page prints: 35 · 8 · 2
   PASS the page prints exactly three hero numbers — 3 found
   PASS CLAIM 35s · the timed crate is unchanged since measurement — chain-zano tree 6a56c1ba
