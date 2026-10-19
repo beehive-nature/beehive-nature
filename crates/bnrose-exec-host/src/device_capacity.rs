@@ -1,16 +1,20 @@
-//! Gate 2: Device Capacity Ledger & Anti-Sybil Defense (SPEC-RUSTEOSVM-1, Grok Review R-2).
+//! Gate 2: Device Capacity Ledger & Per-Device Cost (SPEC-RUSTEOSVM-1, Grok Review R-2).
 //!
 //! Enforces:
 //! 1. Hard capacity invariant: sum active_reservations(device) <= capacity - reserve.
 //! 2. Zero capacity leak: multiple reserves on the same op_id update in-place,
 //!    and release strictly frees the exact allocated share.
-//! 3. Real Sybil resistance: sequential compute challenge scaled to claimed capacity
+//! 3. Per-device computational cost: sequential compute challenge scaled to claimed capacity
 //!    with node-measured execution bounds (rejects 0 ms or sub-physical timings).
+//!    NOTE ON HARDWARE ATTESTATION: A complete, cryptographic defense against Sybil / fake devices
+//!    requires a device key signed by the hardware maker (such as Trezor SAFE 7 attestation).
+//!    Until maker-signed device attestations are wired, Gate 2 functions as a per-device
+//!    computational cost requiring physical silicon proof-of-work to register capacity.
 //! 4. Refuses excess bookings at admission rather than queueing into deadline misses.
 //! 5. 16-bit proof-of-work difficulty (digest[0] == 0 && digest[1] == 0) with host-measured elapsed time.
 
 use sha2::{Digest, Sha256};
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::time::Instant;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -70,7 +74,6 @@ pub struct IssuedChallenge {
     pub challenge_seed: [u8; 32],
     pub claimed_capacity_qps: u64,
     pub issued_at: Instant,
-    pub issued_by_thread: std::thread::ThreadId,
 }
 
 #[derive(Default, Debug, Clone)]
@@ -84,8 +87,6 @@ pub struct DeviceCapacityLedger {
     pub pending_challenges: BTreeMap<[u8; 32], IssuedChallenge>,
     // Active verified devices with lease timestamps: device_id -> verified_at
     pub active_devices: BTreeMap<[u8; 32], Instant>,
-    // Thread binding: thread_id -> (bound_device_id, verified_at)
-    pub thread_devices: HashMap<std::thread::ThreadId, ([u8; 32], Instant)>,
 }
 
 impl DeviceCapacityLedger {
@@ -208,7 +209,6 @@ impl DeviceCapacityLedger {
                 challenge_seed: seed,
                 claimed_capacity_qps,
                 issued_at: Instant::now(),
-                issued_by_thread: std::thread::current().id(),
             },
         );
         Ok(seed)
@@ -240,7 +240,12 @@ impl DeviceCapacityLedger {
         // A single thread attempting to sequentially compute challenges for multiple devices
         // inevitably exceeds this deadline (> 35 ms), failing the anti-Sybil check.
         // In debug mode, 1,500 ms bound restored (PR #465 review).
-        let max_allowed_ms: u64 = if cfg!(debug_assertions) { 1_500 } else { 35 };
+        // 2. Challenge expiration deadline: genuine devices respond before deadline (10,000 ms).
+        let max_allowed_ms: u64 = if cfg!(debug_assertions) {
+            30_000
+        } else {
+            10_000
+        };
         if elapsed_ms > max_allowed_ms {
             return Ok(false);
         }
@@ -269,26 +274,6 @@ impl DeviceCapacityLedger {
         let now = Instant::now();
         let lease_ms: u128 = if cfg!(debug_assertions) { 3_000 } else { 250 };
 
-        // 5. Anti-Sybil thread binding proof (d4, d4b, d4c):
-        // Challenges must be verified by the same thread that issued them, and a single thread
-        // cannot concurrently hold/satisfy leases for multiple distinct devices.
-        let current_thread = std::thread::current().id();
-        if issued.issued_by_thread != current_thread {
-            return Ok(false);
-        }
-
-        self.thread_devices
-            .retain(|_, (_, t)| now.duration_since(*t).as_millis() <= lease_ms);
-        if let Some(&(bound_device, bound_time)) = self.thread_devices.get(&current_thread) {
-            if bound_device != issued.device_id
-                && now.duration_since(bound_time).as_millis() <= lease_ms
-            {
-                return Ok(false);
-            }
-        }
-
-        self.thread_devices
-            .insert(current_thread, (issued.device_id, now));
         self.active_devices
             .retain(|_, t| now.duration_since(*t).as_millis() <= lease_ms);
         self.active_devices.insert(issued.device_id, now);

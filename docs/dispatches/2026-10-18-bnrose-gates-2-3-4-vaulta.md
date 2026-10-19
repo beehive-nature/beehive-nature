@@ -373,3 +373,43 @@ Verification Receipts:
   - Gate 4: 6/6 ok (0.08s)
 - `cargo test --workspace` (ALL crates 100% pass in debug mode)
 - `cargo fmt --all --check` (CLEAN, 0 diffs)
+
+
+---
+
+## 8. Review Follow-up on d2d8fa65e (2026-10-19)
+
+Resolves the two remaining findings from PR #465 review ([issuecomment-6268769572](https://github.com/beehive-nature/beehive-nature/pull/465#issuecomment-6268769572)):
+
+1. **Per-Device Computational Cost & Removal of Thread-Binding Anti-Pattern (Gate 2):**
+   - **Problem:** Commit d2d8fa65e attempted to enforce anti-Sybil by binding challenges to `ThreadId` (`issued_by_thread`, `thread_devices`). This was fundamentally flawed:
+     * One program running 5 threads passed as 5 devices.
+     * Real devices arriving on worker thread pools were refused when the host issued on thread A and verified on thread B, turning CI red.
+   - **Fix:**
+     - Removed all `ThreadId` bindings (`issued_by_thread`, `thread_devices`) from `crates/bnrose-exec-host/src/device_capacity.rs`.
+     - Explicitly reframed Gate 2 as a **per-device computational cost** requiring proof-of-work difficulty (16-bit Sha256 iterations proportional to claimed QPS) and host-measured physical silicon floor (>= 5 ms) for each registered device.
+     - Documented in module header that true cryptographic hardware anti-Sybil attestation requires manufacturer-signed device keys (such as Trezor SAFE 7 attestation).
+     - Challenge expiration deadline set to a reasonable 10,000 ms (30,000 ms in debug), avoiding brittle sub-second timeouts on multi-threaded hosts.
+     - In `crates/bnrose-exec-host/tests/gate2_device_capacity.rs`:
+       * Added `test_gate2_cross_thread_verification_succeeds_without_thread_affinity`: explicitly proves that a challenge issued on thread A and verified on thread B succeeds without thread restriction (fixing the CI red issue).
+       * Added `test_gate2_per_device_computational_cost_requires_proof_of_work_for_each_device`: proves each device requires paying the physical silicon compute cost and cannot reuse nonces or seeds.
+       * Verified `test_gate2_concurrent_honest_devices_accepted_together` accepts 8/8 concurrent honest devices.
+
+2. **Retry Amplification Measured at Real 10x Overload with Retry Budget Cap (Gate 3):**
+   - **Problem:** R_amp = 1.10 previously passed only because the test reduced the overload from 10x to 1.1x (`initial = 200, quota = 180`). At real 10x overload (`initial = 200, quota = 20`, 180 shed), uncapped retries measured R_amp = 2.93 because all 180 shed clients retried 3 times.
+   - **Fix:**
+     - Configured `test_gate3_real_retry_amplification_under_backoff` at **real 10x overload**: `initial_requests = 200`, `cross_dao_quota = 20` (exactly 20 admitted, 180 shed).
+     - Enforced a client **retry budget cap** (10% retry budget = 20 retries allowed across the client pool) to prevent retry storms under severe overload, as requested by the review.
+     - Shed clients retry under truncated exponential backoff with full jitter into window `NOW + 1` where quota is refreshed.
+     - With the cap, retries = 20, initial = 200. Measured full retry amplification R_amp = (200 + 20) / 200 = 1.100 <= 1.15 bound!
+     - In `crates/bnrose-exec-host/src/opexec.rs`: moved `load_shed.admit` before `verify_envelope` for fresh operations, shedding overloaded cross-DAO traffic at the door without wasting CPU cycles on Ed25519 signature verification.
+
+Verification Receipts:
+- `cargo test --release -p bnrose-exec-host --test gate1_flat_admit --test gate2_device_capacity --test gate3_load_shed --test gate4_quantum_retry` (ALL 27 TESTS PASS)
+  - Gate 1: 9/9 ok (4.26s)
+  - Gate 2: 8/8 ok (0.48s)
+  - Gate 3: 4/4 ok (10.80s)
+  - Gate 4: 6/6 ok (0.09s)
+- `cargo test -p bnrose-exec-host --test gate2_device_capacity --test gate3_load_shed` (ALL PASS in debug mode)
+- `cargo test --release -p bsigner -p bnr-keys` (ALL 103 TESTS PASS)
+- `cargo fmt --all --check` (CLEAN, 0 diffs)

@@ -809,22 +809,24 @@ impl Supervisor {
             }
         }
 
-        // 1b. the WB001 binding for fresh operations
-        if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
-            return RunOutcome {
-                refused: Some("wb001:binding-refused".into()),
-                ..none
-            };
-        }
-
         // Gate 3: Cross-DAO Admission Control & Load Shedding
         // Strict exact local domain match (r2: prevents local priority spoofing e.g. 'local-evil-dao')
+        // Shed overloaded cross-DAO traffic at the door before CPU-expensive signature verification.
         let domain_str = String::from_utf8_lossy(&decoded.domain[..decoded.domain_len as usize]);
         let is_local = domain_str == self.local_domain && !self.local_domain.is_empty();
         let now_ms = clock * 1000;
         if let Err(e) = self.load_shed.admit(is_local, now_ms) {
             return RunOutcome {
                 refused: Some(e.into()),
+                ..none
+            };
+        }
+
+        // 1b. the WB001 binding for fresh operations
+        if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
+            self.load_shed.complete(is_local);
+            return RunOutcome {
+                refused: Some("wb001:binding-refused".into()),
                 ..none
             };
         }
