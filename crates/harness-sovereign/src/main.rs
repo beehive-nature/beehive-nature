@@ -66,7 +66,13 @@ async fn main() {
     // Identity: F4 boot gate — the signer proves itself before the demo.
     let keys_dir = workdir.join("keys");
     std::fs::create_dir_all(&keys_dir).expect("keys dir");
-    let identity = IdentityHook::genesis(&keys_dir).expect("genesis");
+    let vault = harness_sovereign::identity::Vault::from_env("HARNESS_VAULT_REC").unwrap_or_else(
+        |error| {
+            eprintln!("vault: {error} — set HARNESS_VAULT_REC to the demo recovery code; refusing to start");
+            std::process::exit(1);
+        },
+    );
+    let identity = IdentityHook::genesis(&keys_dir, vault).expect("genesis");
     if !identity.selftest() {
         eprintln!("F4 boot gate: bsigner selftest failed — refusing to start");
         std::process::exit(1);

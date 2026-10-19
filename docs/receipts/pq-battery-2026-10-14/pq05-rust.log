@@ -1,0 +1,64 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /workspace/wt-pq-battery/crates/bnr-keys/Cargo.toml
+workspace: /workspace/wt-pq-battery/Cargo.toml
+   Compiling crypto-common v0.1.7
+   Compiling crypto-common v0.2.2
+   Compiling crypto-bigint v0.5.5
+   Compiling x25519-dalek v2.0.1
+   Compiling digest v0.10.7
+   Compiling cipher v0.4.4
+   Compiling hmac v0.12.1
+   Compiling universal-hash v0.5.1
+   Compiling rfc6979 v0.4.0
+   Compiling digest v0.11.3
+   Compiling polyval v0.6.2
+   Compiling signature v2.2.0
+   Compiling sha2 v0.10.9
+   Compiling signature v3.0.0
+   Compiling shake v0.1.0
+   Compiling sha3 v0.11.0
+   Compiling ghash v0.5.1
+   Compiling kem v0.3.0
+   Compiling aes v0.8.4
+   Compiling ctr v0.9.2
+   Compiling elliptic-curve v0.13.8
+   Compiling ecdsa v0.16.9
+   Compiling sha3 v0.10.9
+   Compiling aead v0.5.2
+   Compiling fips205 v0.4.1
+   Compiling aes-gcm v0.10.3
+   Compiling ml-kem v0.3.2
+   Compiling k256 v0.13.4
+   Compiling ml-dsa v0.1.1
+   Compiling hkdf v0.12.4
+   Compiling bsigner v0.1.0 (/workspace/wt-pq-battery/crates/bsigner)
+warning: use of deprecated trait `ml_kem::ExpandedKeyEncoding`: use `DecapsulationKey::from_seed` instead
+  --> crates/bsigner/src/kat.rs:50:61
+   |
+50 |     Ciphertext, DecapsulationKey, ExpandedDecapsulationKey, ExpandedKeyEncoding, MlKem768,
+   |                                                             ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `ml_kem::ExpandedKeyEncoding::to_expanded_bytes`: use `DecapsulationKey::from_seed` instead
+   --> crates/bsigner/src/kat.rs:237:23
+    |
+237 |             b64u(&key.to_expanded_bytes()),
+    |                       ^^^^^^^^^^^^^^^^^
+
+warning: use of deprecated associated function `ml_kem::DecapsulationKey::<P>::from_expanded`: use `DecapsulationKey::from_seed` instead
+   --> crates/bsigner/src/kat.rs:273:43
+    |
+273 |             DecapsulationKey::<MlKem768>::from_expanded(&dk).expect("dk passes its H(ek) check");
+    |                                           ^^^^^^^^^^^^^
+
+warning: `bsigner` (bin "bsigner" test) generated 3 warnings
+    Finished `release` profile [optimized] target(s) in 1m 10s
+     Running unittests src/main.rs (target/release/deps/bsigner-b90a14b6b320c518)
+
+running 1 test
+PQ05-XWING bsigner: 3 of 3 vectors pass (keygen, decapsulate, one changed ciphertext refused)
+test bpq::tests::xwing_matches_the_draft_vectors ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 83 filtered out; finished in 0.00s
+

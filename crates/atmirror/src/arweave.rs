@@ -56,6 +56,7 @@ pub struct ArweaveRail {
     /// tier, non-zero = credits were spent. Callers that must not silently
     /// start paying can assert on this.
     pub last_winc: Option<String>,
+    read_limit: u64,
 }
 
 /// What to do about an upload response. Pure, so the whole policy is testable
@@ -160,6 +161,7 @@ impl ArweaveRail {
             ephemeral: false,
             paid_by: None,
             last_winc: None,
+            read_limit: 2 * 1024 * 1024 * 1024,
         }
     }
 
@@ -178,6 +180,12 @@ impl ArweaveRail {
     /// [`crate::epoch_funding`]) can read who pays each item without guessing.
     pub fn delegate(&self) -> Option<&str> {
         self.paid_by.as_deref()
+    }
+
+    /// Consumer-selected cap, enforced while streaming rather than after allocation.
+    pub fn with_read_limit(mut self, bytes: u64) -> Self {
+        self.read_limit = bytes.min(2 * 1024 * 1024 * 1024);
+        self
     }
 
     fn from_key(
@@ -210,6 +218,7 @@ impl ArweaveRail {
             ephemeral,
             paid_by: None,
             last_winc: None,
+            read_limit: 2 * 1024 * 1024 * 1024,
         })
     }
 
@@ -389,14 +398,22 @@ impl Rail for ArweaveRail {
             let gw = gw.trim_end_matches('/');
             for path in [format!("{gw}/{address}"), format!("{gw}/raw/{address}")] {
                 match self.agent.get(&path).call() {
-                    Ok(resp) => {
+                    Ok(resp) if resp.status() == 200 => {
                         let mut buf = Vec::new();
-                        let cap: u64 = 2 * 1024 * 1024 * 1024;
-                        match resp.into_reader().take(cap).read_to_end(&mut buf) {
-                            Ok(_) if !buf.is_empty() => return Ok(buf),
-                            Ok(_) => last = RailError::Missing(format!("{path}: empty body")),
+                        match resp
+                            .into_reader()
+                            .take(self.read_limit + 1)
+                            .read_to_end(&mut buf)
+                        {
+                            Ok(_) if buf.len() as u64 > self.read_limit => {
+                                last = RailError::Local("read exceeds consumer byte limit".into())
+                            }
+                            Ok(_) => return Ok(buf),
                             Err(e) => last = RailError::Transport(format!("{path}: {e}")),
                         }
+                    }
+                    Ok(resp) => {
+                        last = RailError::Missing(format!("{path}: HTTP {}", resp.status()));
                     }
                     Err(ureq::Error::Status(status, _)) => {
                         last = RailError::Missing(format!("{path}: HTTP {status}"));

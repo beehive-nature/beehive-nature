@@ -1,0 +1,737 @@
+{
+  "class": "NATIVE DIFFERENTIAL/TEETH; not a universal proof or official KAT",
+  "control": "signature",
+  "executed": 4245,
+  "failures": [
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 0,
+        "expected": false,
+        "legacy": false,
+        "message_bytes": 0,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 1,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 1,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 0,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 2,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 254,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 0,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 3,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 255,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 0,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 4,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 0,
+        "expected": false,
+        "legacy": false,
+        "message_bytes": 1,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 5,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 1,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 1,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 6,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 254,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 1,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 7,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 255,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 1,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 8,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 0,
+        "expected": false,
+        "legacy": false,
+        "message_bytes": 63,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 9,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 1,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 63,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 10,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 254,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 63,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 11,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 255,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 63,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 12,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 0,
+        "expected": false,
+        "legacy": false,
+        "message_bytes": 64,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 13,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 1,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 64,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 14,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 254,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 64,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 15,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 255,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 64,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 16,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 0,
+        "expected": false,
+        "legacy": false,
+        "message_bytes": 65,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 17,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 1,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 65,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 18,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 254,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 65,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 19,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 255,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 65,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 20,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 0,
+        "expected": false,
+        "legacy": false,
+        "message_bytes": 135,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 21,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 1,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 135,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 22,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 254,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 135,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 23,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 255,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 135,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 24,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 0,
+        "expected": false,
+        "legacy": false,
+        "message_bytes": 136,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 25,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 1,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 136,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 26,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 254,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 136,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 27,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 255,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 136,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 28,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 0,
+        "expected": false,
+        "legacy": false,
+        "message_bytes": 137,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 29,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 1,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 137,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 30,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 254,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 137,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 31,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 255,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 137,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 32,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 0,
+        "expected": false,
+        "legacy": false,
+        "message_bytes": 255,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 33,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 1,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 255,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 34,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 254,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 255,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 35,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 255,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 255,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 36,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 0,
+        "expected": false,
+        "legacy": false,
+        "message_bytes": 256,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 37,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 1,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 256,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 38,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 254,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 256,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 39,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 255,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 256,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 40,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 0,
+        "expected": false,
+        "legacy": false,
+        "message_bytes": 257,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 41,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 1,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 257,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 42,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 254,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 257,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 43,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 255,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 257,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 44,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 0,
+        "expected": false,
+        "legacy": false,
+        "message_bytes": 4096,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 45,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 1,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 4096,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 46,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 254,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 4096,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 47,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 255,
+        "expected": false,
+        "legacy": null,
+        "message_bytes": 4096,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 48,
+      "row": "long-signature"
+    },
+    {
+      "details": {
+        "candidate": true,
+        "context_bytes": 0,
+        "expected": false,
+        "legacy": false,
+        "message_bytes": 257,
+        "modern": false,
+        "signature_bytes": 3310
+      },
+      "index": 1,
+      "row": "ignored-signature-suffix"
+    }
+  ],
+  "legacy_checks": 3456,
+  "missing": [],
+  "passed": 4196,
+  "required_rows": 21,
+  "result": "FAIL",
+  "rows": {
+    "challenge": [
+      48,
+      48
+    ],
+    "context-256": [
+      48,
+      48
+    ],
+    "context-tail": [
+      48,
+      48
+    ],
+    "empty-signature": [
+      48,
+      48
+    ],
+    "every-legal-context-length": [
+      256,
+      256
+    ],
+    "every-short-length": [
+      3309,
+      3309
+    ],
+    "hint-decrease": [
+      48,
+      48
+    ],
+    "hint-duplicate": [
+      48,
+      48
+    ],
+    "hint-overflow": [
+      48,
+      48
+    ],
+    "hint-padding": [
+      48,
+      48
+    ],
+    "ignored-context": [
+      1,
+      1
+    ],
+    "ignored-message-suffix": [
+      1,
+      1
+    ],
+    "ignored-signature-suffix": [
+      1,
+      0
+    ],
+    "key-length": [
+      4,
+      4
+    ],
+    "long-signature": [
+      48,
+      0
+    ],
+    "message-tail": [
+      48,
+      48
+    ],
+    "owned-key-bytes": [
+      1,
+      1
+    ],
+    "short-signature": [
+      48,
+      48
+    ],
+    "valid": [
+      48,
+      48
+    ],
+    "wrong-key": [
+      48,
+      48
+    ],
+    "z-norm": [
+      48,
+      48
+    ]
+  },
+  "schema": "btungsten.prepared-native/1",
+  "unexpected": []
+}

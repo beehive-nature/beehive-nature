@@ -17,6 +17,8 @@ import sys
 root = pathlib.Path(sys.argv[1]).resolve()
 manifest_path = root / "manifest.json"
 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+if manifest.get("schema") != "skaists.preservation/1":
+    raise SystemExit("FAILED: public eternalization requires a public preservation edition, not a local working copy")
 files = manifest.get("files")
 if not isinstance(files, dict):
     raise SystemExit("FAILED: manifest files must be an object")

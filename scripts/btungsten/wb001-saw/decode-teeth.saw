@@ -1,0 +1,34 @@
+// TEETH for decode.saw: the Rust block_code asked to equal blockCode with
+// two refusals in the other order (the value-fits check before the length
+// bounds). A length word past the bound whose value would also overrun the
+// input refuses bt-wb01:length in Rust and bt-wb01:short in the swapped
+// spec, so this MUST fail with a solver counterexample; if it proves, the
+// decoder's refusal order is not what decode.saw pins.
+
+enable_experimental;
+cryptol_add_path "../wb001-cryptol";
+import "../wb001-cryptol/BTungstenWB001.cry";
+import "../wb001-cryptol/WB001Decode.cry";
+
+m <- mir_load_module "../../../target/saw-wb001/btungsten_wb001_core.linked-mir.json";
+
+print "WB001-SAW-TEETH obligation: block_code == blockCode with length and fit swapped";
+mir_verify m "btungsten_wb001_core::block_code" [] false (do {
+  s <- mir_fresh_var "s" (mir_array 4626 mir_u8);
+  rs <- mir_alloc (mir_array 4626 mir_u8);
+  mir_points_to rs (mir_term s);
+  n <- mir_fresh_var "n" mir_u64;
+  at <- mir_fresh_var "at" mir_u32;
+  tag <- mir_fresh_var "tag" mir_u8;
+  lo <- mir_fresh_var "lo" mir_u32;
+  hi <- mir_fresh_var "hi" mir_u32;
+  mir_precond {{ at <= 4621 }};
+  mir_execute_func [rs, mir_term n, mir_term at, mir_term tag, mir_term lo, mir_term hi];
+  mir_return (mir_term {{
+    if (zext at : [64]) + 5 > n then dShort
+    else if byteAtPos s at != tag then dTagOrder
+    else if (zext at : [64]) + 5 + zext (be32From s (at + 1)) > n then dShort
+    else if (be32From s (at + 1) < lo) || (be32From s (at + 1) > hi) then dLength
+    else dOk }});
+}) (w4_unint_bitwuzla []);
+print "WB001-SAW-TEETH UNEXPECTED-PROVEN";

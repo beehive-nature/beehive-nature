@@ -7,6 +7,7 @@
 <title>the value deck · skaists vending</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230c1412'/%3E%3Cpath d='M16 5l9.5 5.5v11L16 27l-9.5-5.5v-11Z' fill='none' stroke='%23e8b54b' stroke-width='2'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="skaists.css">
 <style>
 /* THE VALUE DECK — what a minted agent carries, card by card (laya's shape:
    a local-first stack of cards, each one a source the page just asked).
@@ -19,46 +20,76 @@
 @font-face{font-family:skaists;src:url(fonts/skaists.woff2) format("woff2");font-display:swap}
 @font-face{font-family:burti;src:url(fonts/burti.woff2) format("woff2");font-display:swap}
 *{box-sizing:border-box}[hidden]{display:none!important}
-body{margin:0;min-height:100dvh;font:1rem/1.6 system-ui,-apple-system,'Segoe UI',sans-serif;
- --bg:#fbf7f0;--card:#fff;--well:#efe9dd;--line:#e6dfd2;--edge:#857d70;--ink:#0c1412;--quiet:#4a5f55;--dim:#6a736e;
- --accent:#6e3fb8;--primary:#a8238c;--on-primary:#fff;--focus:#0c1412;--sov:#6e3fb8;--you:#a8238c;--ai:#0f6f82;--info:#4d759b;
- --guard:#4a3aa8;--guard-wash:#ece8fa;--ok:#2e6b1e;--ok-wash:#e4f1df;--r:14px;--r-lg:16px;--r-pill:999px;
- background:var(--bg);color:var(--ink)}
-body[data-reg="raver"]{--bg:#06110c;--card:#0c1412;--well:#0c1412;--line:#1e2b26;--edge:#648176;--ink:#e9f2ec;--quiet:#8fa79c;--dim:#648176;
- --accent:#9c6fd6;--primary:#d655bb;--on-primary:#06110c;--focus:#e9f2ec;--sov:#9c6fd6;--you:#d655bb;--ai:#45c2dc;--info:#6fa9e0;
- --guard:#b7a8f7;--guard-wash:#12102a;--ok:#86cc72;--ok-wash:#0c1412;--r:22px;--r-lg:999px}
-body[data-reg="cypherpunk"]{--bg:#06110c;--card:#0c1412;--well:#0c1412;--line:#1e2b26;--edge:#648176;--ink:#e9f2ec;--quiet:#8fa79c;--dim:#648176;
- --accent:#45c2dc;--primary:#45c2dc;--on-primary:#06110c;--focus:#e9f2ec;--sov:#9c6fd6;--you:#d655bb;--ai:#45c2dc;--info:#6fa9e0;
- --guard:#b7a8f7;--guard-wash:#06110c;--ok:#86cc72;--ok-wash:#0c1412;--r:4px;--r-lg:4px;--r-pill:4px;
- font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;font-size:.9375rem}
+/* THE CHOSEN DRESS (the founder's chosen UI, his My Space screens 2026-10-04; surfaces/myspace.html;
+   standing order 2026-10-05 "just follow the rules for each of the three seperate ui/ux's"). One DOM,
+   three registers, as built: the page's own variables are mapped per register onto skaists tokens
+   (skaists.css, compiled from docs/design/skaists/tokens.json), every size sits on that register's type
+   scale and every corner is a radius token. The entity colours (you magenta, ai teal, sovereign purple)
+   stay on each card's edge and glyph in every register: they are the card's identity, not its dress.
+   The brief, the seven cards in their order, the chips, the rows, the door, the facts (open for
+   cypherpunk, one tap away for new bee and raver) and the foot stay as built.
+   NEW BEE: paper, ink, bold system sans, white cards with soft large corners, forest green for the one
+   filled pill (white label) and for a card whose facts are open, outlined pills for every second press;
+   the guard well stays lavender (guard, never red). */
+body{margin:0;min-height:100dvh;color-scheme:light;
+ --bg:var(--sk-bg);--card:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);--edge:rgba(106,115,110,.4);--field:var(--sk-ink-dim);
+ --ink:var(--sk-ink);--quiet:var(--sk-ink-mut);--lede:var(--sk-ink-mut);--dim:var(--sk-ink-dim);
+ --accent:var(--sk-forest);--primary:var(--sk-forest);--on-primary:var(--sk-on-primary);--glow:none;--sel:var(--sk-forest);--focus:var(--sk-focus);
+ --sov:var(--sk-sovereign);--you:var(--sk-you);--ai:var(--sk-ai);--info:var(--sk-info);
+ --guard:var(--sk-guard);--guard-wash:var(--sk-guard-wash);--ok:var(--sk-verified);--ok-wash:var(--sk-verified-wash);
+ --font:var(--sk-font-ui);--r:var(--sk-radius-md);--r-card:var(--sk-radius-xl);--r-btn:var(--sk-radius-pill);--r-pill:var(--sk-radius-pill);--r-code:var(--sk-radius-sm);
+ background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--font)}
+/* RAVER: the same deck after dark. The night purple ground (the sovereign wash into the tint), plain
+   white bold titles, lavender for the quiet words, round everything, the cards in the wash with a
+   lavender line, the magenta pill with its soft glow and a dark label for the one way on, magenta
+   outlined pills for every second press. The sk tokens switch on body[data-reg], so the entity and
+   guard colours above resolve to raver's own values here. */
+body[data-reg="raver"]{color-scheme:dark;
+ --bg:var(--sk-sovereign-tint);--card:var(--sk-sovereign-wash);--well:var(--sk-sovereign-tint);--line:rgba(156,111,214,.34);--edge:rgba(214,85,187,.6);--field:var(--sk-sovereign-soft);
+ --quiet:var(--sk-sovereign-soft);--lede:var(--sk-sovereign-strong);
+ --accent:var(--sk-link);--primary:var(--sk-primary);--glow:0 0 28px rgba(214,85,187,.38);--sel:var(--sk-you);
+ --r:var(--sk-radius-xl);
+ font-size:15px;
+ background-color:var(--sk-sovereign-tint);
+ background-image:radial-gradient(120% 55% at 0% 100%,rgba(111,169,224,.09),transparent 60%),linear-gradient(180deg,var(--sk-sovereign-wash),var(--sk-sovereign-tint) 42%);
+ background-attachment:fixed}
+/* CYPHERPUNK: the instrument. Near-black ground, IBM Plex Mono throughout, dense, thin grey borders,
+   6px corners, the cyan primary with a dark label. */
+body[data-reg="cypherpunk"]{color-scheme:dark;
+ --bg:var(--sk-bg);--card:var(--sk-bg-card);--well:var(--sk-bg);--line:var(--sk-line);--edge:rgba(100,129,118,.7);--field:rgba(100,129,118,.7);
+ --accent:var(--sk-link);--primary:var(--sk-primary);--sel:var(--sk-ai);
+ --font:var(--sk-font-mono);--r:var(--sk-radius-sm);--r-card:var(--sk-radius-sm);--r-btn:var(--sk-radius-sm);--r-pill:var(--sk-radius-sm);
+ font-size:13px;line-height:1.55}
 a{color:var(--accent);text-underline-offset:.2em}button,input{font:inherit;color:inherit}
 :is(a,button,input,summary,[tabindex]):focus-visible{outline:2px solid var(--focus);outline-offset:3px}
-button{cursor:pointer;min-height:44px;padding:6px 18px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--card)}
-button.primary,a.primary{display:inline-flex;align-items:center;justify-content:center;min-height:54px;padding:6px 26px;border-radius:var(--r-lg);background:var(--primary);border:1.5px solid var(--primary);color:var(--on-primary);font-weight:600;text-decoration:none}
-input{min-height:46px;padding:10px 14px;border:1px solid var(--edge);border-radius:var(--r);background:var(--card);min-width:0;width:100%}
-label{font-size:.9375rem;color:var(--quiet);display:grid;gap:6px;min-width:0}
+button{cursor:pointer;min-height:44px;padding:6px 18px;border:1.5px solid var(--edge);border-radius:var(--r-btn);background:transparent;color:var(--ink);font-weight:700;line-height:1.2}
+button:hover{border-color:var(--sel)}
+button.primary,a.primary{display:inline-flex;align-items:center;justify-content:center;min-height:var(--sk-control-primary);padding:6px 26px;border-radius:var(--r-btn);background:var(--primary);border:0;color:var(--on-primary);font-weight:700;font-size:17px;line-height:1.2;text-decoration:none;box-shadow:var(--glow)}
+input{min-height:46px;padding:10px 14px;border:1.5px solid var(--field);border-radius:var(--r);background:var(--card);color:var(--ink);font-size:16px;min-width:0;width:100%}
+input:focus{border-color:var(--sel)}
+label{font-size:15px;color:var(--quiet);display:grid;gap:6px;min-width:0}
 p,h1,h2,h3,dl,dd,dt,ol,ul{margin:0}ol,ul{padding:0;list-style:none}
 .shell{max-width:920px;margin-inline:auto;padding:0 clamp(16px,4vw,48px) 56px}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding-block:14px}
-.brand{display:flex;align-items:center;gap:10px;min-height:44px;text-decoration:none;color:var(--ink);font-family:skaists,burti,system-ui,sans-serif;font-size:1.35rem}
+.brand{display:flex;align-items:center;gap:10px;min-height:44px;text-decoration:none;color:var(--ink);font:400 22px/1.2 skaists,burti,system-ui,sans-serif}
 .brand svg{width:30px;height:30px}
-.crumbs{display:flex;gap:8px;flex-wrap:wrap;font-size:.9375rem;color:var(--quiet);padding-block:6px}
-h1{font:400 clamp(2rem,6vw,3.2rem)/1.05 skaists,burti,system-ui,sans-serif;margin-top:18px}
-.lead{margin-top:12px;max-width:62ch;color:var(--quiet)}
-.brief{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:24px;padding:18px;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
-.brief .words{flex:1 1 260px;display:grid;gap:4px}.brief .clock{color:var(--quiet);font-size:.9375rem}
-.brief .acts{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-.deck{display:grid;gap:18px;margin-top:24px}
-.card{display:grid;grid-template-columns:56px 1fr;gap:6px 18px;padding:18px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);border-inline-start:6px solid var(--c)}
+.crumbs{display:flex;align-items:center;gap:0 8px;flex-wrap:wrap;font-size:15px;color:var(--quiet)}
+.crumbs a{display:inline-flex;align-items:center;min-height:44px}
+h1{font:700 32px/1.12 var(--font);letter-spacing:-.025em;color:var(--ink);margin-top:14px}
+.lead{margin-top:10px;max-width:62ch;color:var(--lede)}
+.brief{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:22px;padding:18px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--card)}
+.brief .words{flex:1 1 260px;display:grid;gap:4px}#brief-h{font-weight:700;font-size:17px}.brief .clock{color:var(--quiet);font-size:15px}
+.brief .acts{display:flex;gap:12px;flex-wrap:wrap;align-items:center;flex:1 1 auto}.brief .acts>*{flex:1 1 auto}
+.deck{display:grid;gap:14px;margin-top:22px}
+.card{display:grid;grid-template-columns:56px 1fr;gap:6px 18px;padding:18px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--card);border-inline-start:6px solid var(--c)}
 .card[data-entity="you"]{--c:var(--you)}.card[data-entity="ai"]{--c:var(--ai)}.card[data-entity="sovereign"]{--c:var(--sov)}
-.glyph{grid-row:1/span 3;width:56px;height:56px;display:grid;place-items:center;border:1.5px solid var(--c);border-radius:50%;color:var(--c);font:400 1.4rem/1 skaists,burti,system-ui,sans-serif}
+.glyph{grid-row:1/span 3;width:56px;height:56px;display:grid;place-items:center;border:1.5px solid var(--c);border-radius:50%;color:var(--c);font:400 22px/1 skaists,burti,system-ui,sans-serif}
 body[data-reg="raver"] .glyph{box-shadow:0 0 18px color-mix(in srgb,var(--c) 45%,transparent)}
-body[data-reg="cypherpunk"] .glyph{border-radius:4px}
-.card h2{font:600 1.25rem/1.3 system-ui,-apple-system,'Segoe UI',sans-serif}body[data-reg="cypherpunk"] .card h2{font-family:inherit}
-body[data-reg="raver"] .card h2{font-size:1.4rem;letter-spacing:.01em}
+body[data-reg="cypherpunk"] .glyph{border-radius:var(--sk-radius-sm);font-family:var(--font);font-weight:600}
+.card h2{font:700 18px/1.3 var(--font);letter-spacing:-.01em;color:var(--ink)}
 .card .v{color:var(--quiet)}
-.st{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:.9375rem}
-.chip{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:4px 14px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--well)}
+.st{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:15px}
+.chip{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:4px 14px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--well);font-weight:600}
 .chip.answered{color:var(--ok);background:var(--ok-wash);border-color:var(--ok)}
 .chip.asking{color:var(--ai);border-color:var(--ai)}
 .chip.declined,.chip.notyet{color:var(--guard);border-color:var(--guard);border-style:dashed;background:var(--guard-wash)}
@@ -68,20 +99,45 @@ body[data-reg="raver"] .card h2{font-size:1.4rem;letter-spacing:.01em}
 .rows{grid-column:2;display:grid;gap:8px;margin-top:8px}
 .rows p{padding:10px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--bg);overflow-wrap:anywhere}
 .rows p.guard{border:1.5px dashed var(--guard);background:var(--guard-wash)}.rows p.guard b{color:var(--guard)}
-.rows p b{font-weight:600}.rows p time,.rows p .who{color:var(--quiet);font-size:.9375rem}
+.rows p b{font-weight:700}.rows p time,.rows p .who{color:var(--quiet);font-size:15px}
+.rows p a{display:inline-flex;align-items:center;min-height:44px;margin-block:-10px;font-weight:700}/* a 44px press that keeps the row's own line height: the box reaches into the row's padding */
 .rows .msg{display:grid;gap:2px}.rows .msg .body{white-space:pre-wrap}
-.rows code{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;font-size:.9375rem;padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:var(--card)}
+.rows code{font:400 14px/1.45 var(--sk-font-mono);padding:2px 6px;border:1px solid var(--line);border-radius:var(--r-code);background:var(--card)}
+details.facts code{font:400 14px/1.45 var(--sk-font-mono)}
 .door{grid-column:2;display:grid;gap:10px;margin-top:8px}.door .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.door .row>label{flex:1 1 200px}
 .acts{grid-column:2;display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
-.card a.act{display:inline-flex;align-items:center;min-height:44px;padding:6px 18px;border:1.5px solid var(--ink);border-radius:var(--r);text-decoration:none;color:var(--ink)}
+.card a.act{display:inline-flex;align-items:center;min-height:44px;padding:6px 18px;border:1.5px solid var(--edge);border-radius:var(--r-btn);text-decoration:none;color:var(--ink);font-weight:700;line-height:1.2}
+.card a.act:hover{border-color:var(--sel)}
 details.facts{grid-column:2;margin-top:10px;border-top:1px solid var(--line);padding-top:6px}
 details.facts summary{color:var(--quiet)}
-details.facts dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin-top:8px;font-size:.9375rem;overflow-wrap:anywhere}
+body:not([data-reg="cypherpunk"]) details.facts[open]>summary{color:var(--sel);font-weight:700}
+details.facts dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin-top:8px;font-size:15px;overflow-wrap:anywhere}
 details.facts dt{color:var(--quiet)}
-.foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:.9375rem;color:var(--quiet);display:grid;gap:8px}
+.foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:14px;color:var(--quiet);display:grid;gap:8px}
+.foot a{display:inline-flex;align-items:center;min-height:44px}
 [data-tour-host]{margin-top:18px;padding-block:14px;border-top:1px solid var(--line);max-inline-size:100%;overflow-x:clip}
 #blangsel{min-height:44px!important}
-@media (max-width:520px){.card{grid-template-columns:44px 1fr;padding:14px}.glyph{width:44px;height:44px;font-size:1.15rem}}
+@media (max-width:520px){.card{grid-template-columns:44px 1fr;padding:14px}.glyph{width:44px;height:44px;font-size:18px}}
+
+/* RAVER sizes and shapes: on raver's type scale (15 body, 14 small, 18 and 22 and 30 for titles) */
+body[data-reg="raver"] h1{font-size:30px;letter-spacing:-.03em}
+body[data-reg="raver"] .card h2{font-size:22px}
+body[data-reg="raver"] :is(label,.st,.rows p time,.rows p .who,.brief .clock,details.facts dl,.foot,.crumbs){font-size:14px}
+body[data-reg="raver"] .rows code{border-radius:var(--sk-radius-pill)}
+body[data-reg="raver"] #brief-h{font-size:18px}
+body[data-reg="raver"] :is(button.primary,a.primary){font-size:18px}
+body[data-reg="raver"] input{border-radius:var(--sk-radius-pill);padding-inline:18px;font-size:15px}
+
+/* CYPHERPUNK sizes and shapes: dense, on cypherpunk's scale (13 body, 12 small, 15 titles and presses) */
+body[data-reg="cypherpunk"] .brand{font:600 18px/1.2 var(--font)}
+body[data-reg="cypherpunk"] h1{font:600 22px/1.3 var(--font);letter-spacing:0}
+body[data-reg="cypherpunk"] .card h2{font:600 15px/1.45 var(--font);letter-spacing:0}
+body[data-reg="cypherpunk"] #brief-h{font-size:15px;font-weight:600}
+body[data-reg="cypherpunk"] :is(label,.st,.rows p time,.rows p .who,.brief .clock,details.facts dl,.foot,.crumbs,.rows code,details.facts code){font-size:12px}
+body[data-reg="cypherpunk"] :is(button,.card a.act){border-width:1px;font-size:15px;font-weight:600}
+body[data-reg="cypherpunk"] :is(button.primary,a.primary){min-height:var(--sk-control-row);font-size:14px;font-weight:600}
+body[data-reg="cypherpunk"] :is(.rows p a,.chip){font-weight:600}
+body[data-reg="cypherpunk"] input{border-width:1px;background:var(--sk-bg);font-size:13px}
 </style>
 </head>
 <body data-experience="vending-deck" data-bee-theme="custom" data-reg="bee">

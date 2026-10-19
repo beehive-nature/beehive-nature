@@ -46,9 +46,12 @@ async function open(reg) {
   return { ctx, p, errs, out };
 }
 const shown = p => p.evaluate(() => ['.et-b', '.et-r', '.et-c'].filter(s => getComputedStyle(document.querySelector('#eternal>' + s)).display !== 'none'));
+// the founder's chosen UI (2026-10-05): new bee is paper with bold system sans titles and a forest
+// green action; raver is night purple (the sovereign tint) with plain bold sans titles and its
+// magenta pill; cypherpunk is unchanged. Each value is asserted exactly.
 const WANT = {
-  bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, action: 'rgb(168, 35, 140)' },
-  raver: { front: '.et-r', bg: 'rgb(6, 17, 12)', title: /Unbounded/, action: 'rgb(214, 85, 187)' },
+  bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /^ui-sans-serif, system-ui/, action: 'rgb(38, 77, 54)' },
+  raver: { front: '.et-r', bg: 'rgb(18, 14, 30)', title: /^ui-sans-serif, system-ui/, action: 'rgb(214, 85, 187)' },
   cypherpunk: { front: '.et-c', bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, action: 'rgb(69, 194, 220)' },
 };
 // the page's own flat plate (flattened by the page's own tap, then put back) and every front's code
@@ -85,6 +88,7 @@ test('each register: its own front and dress, the laws, and the same facts', asy
   for (const [reg, w] of Object.entries(WANT)) {
     const { ctx, p, errs, out } = await open(reg);
     assert.deepEqual(await shown(p), [w.front], reg + ': exactly its own front');
+    await p.waitForSelector('#bregctl button[aria-pressed="true"]');
     const d = await p.evaluate(f => {
       const fr = document.querySelector('#eternal>' + f), bad = [];
       const title = fr.querySelector('.et-b-h,.et-r-h,.et-c-path'), act = fr.querySelector('.et-b-primary,.et-r-pill,.et-c-primary');
@@ -98,13 +102,16 @@ test('each register: its own front and dress, the laws, and the same facts', asy
       }
       const S = window.__qrtree.state, q = S.qr, D = window.__eternal.data; let dark = 0;
       for (let y = 0; y < q.size; y++) for (let x = 0; x < q.size; x++) if (q.getModule(x, y)) dark++;
-      return { bg: getComputedStyle(document.body).backgroundColor, title: getComputedStyle(title).fontFamily, action: getComputedStyle(act).backgroundColor, wide: document.documentElement.scrollWidth, vw: innerWidth, bad,
+      const chosen = document.querySelector('#bregctl button[aria-pressed="true"]');
+      return { bg: getComputedStyle(document.body).backgroundColor, title: getComputedStyle(title).fontFamily, action: getComputedStyle(act).backgroundColor, chosen: getComputedStyle(chosen).backgroundColor, wide: document.documentElement.scrollWidth, vw: innerWidth, bad,
         page: { url: S.url, v: q.version, n: q.size, dark, flat: S.flat }, data: { url: D.url, v: D.version, n: D.n, dark: D.dark, flat: D.flat },
         pageFacts: document.getElementById('facts').textContent, bee: document.querySelector('.et-b [data-et="url"]').textContent,
         bars: document.querySelectorAll('#etTrSky line').length, mid: document.getElementById('etTrMid').textContent, rcode: document.getElementById('etTrRCode').textContent,
         cyPay: [...document.querySelectorAll('#etTrReceipt tr')].find(r => r.cells[0].textContent === 'payload').cells[1].textContent, cyPath: document.getElementById('etTrPath').textContent };
     }, w.front);
     assert.equal(d.bg, w.bg, reg + ' ground'); assert.match(d.title, w.title, reg + ' title face'); assert.equal(d.action, w.action, reg + ' action colour');
+    // the shared look switcher keeps register.js's own dress: the page's archive buttons never reach it
+    assert.equal(d.chosen, w.action, reg + ' look switcher: the chosen look is a filled pill');
     assert.ok(d.wide <= 390 && d.vw <= 390, reg + ': no sideways page at 390 px');
     assert.deepEqual(d.bad, [], reg + ' laws');
     assert.deepEqual(d.data, d.page, reg + ': the data layer is the page\'s own state');

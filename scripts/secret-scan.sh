@@ -48,6 +48,59 @@
 #     only; the 64-hex pattern stays armed everywhere else), on the
 #     docs/audits basis, founder-approved 2026-09-16 (Astra disposition:
 #     "DC-1 merge after normal CI"; banking commit a1bb4f8e).
+#   - scripts/btungsten/wb002-specimen/simpleassets-e6a042f/: the bTunGsTeN
+#     Workbench 002 extinct-infrastructure specimen — a byte-verbatim copy of
+#     CryptoLions/SimpleAssets at e6a042f (2021, LGPL-2.1), preserved
+#     untouched by founder order 2026-10-07 ("preserve SimpleAssets upstream
+#     untouched"), pinned by the sha256 file hashes in its sibling
+#     PROVENANCE.md (which stays SCANNED and marker-governed). A same-line
+#     marker is impossible without breaking verbatim preservation. Its 64-hex
+#     runs are upstream's own public CMake icon-URI hashes and doc pins,
+#     never key material. Path-scoped (this verbatim subtree only; the
+#     64-hex pattern stays armed everywhere else), on the
+#     docs/handoffs/silentpay-v2 basis, 2026-10-07 (WB002 lane dispatch).
+#   - scripts/btungsten/wb001-bridge.json: the bTunGsTeN WB001 formal-wire
+#     bridge corpus (founder review B1, 2026-10-07) — the 8 constructed
+#     terms' canonical() envelopes, derived FROM THE PUBLIC RUST MODEL by
+#     crates/btungsten-wb001/tests/wb001/pin.rs and re-derived byte-for-byte
+#     by its cargo test drift gate on every CI run. Pretty-printed JSON cannot carry a same-line marker;
+#     the identical bytes are pinned in wb001-cryptol/BTungstenWB001.cry constants
+#     that DO carry same-line PUBLIC-CONSTANT markers. The hex is envelope
+#     data (magic 'bT-WB01' TLV), never key material. Path-scoped (this
+#     one generator-owned file; the hex pattern stays armed everywhere
+#     else), on the wb002-specimen basis, 2026-10-07 (WB001 B1 dispatch).
+#   - surfaces/bheraldry-records.json: the bHERALDRY records artifact,
+#     deterministically generated FROM THE PUBLIC RUST SPECIMEN by
+#     crates/bheraldry (specimen -- --export-json) and pinned byte-for-byte
+#     by crates/bheraldry/tests/artifact.rs on every CI run (a drifted
+#     artifact fails cargo test). Pretty-printed JSON cannot carry a same-line
+#     marker; the identical digest constants DO carry same-line PUBLIC-CONSTANT
+#     markers in crates/bheraldry/tests/specimen_vector.rs. The hex is sha256
+#     digests of published record canon and its supersedes links — provenance
+#     data, never key material. Path-scoped (this one generator-owned file;
+#     the hex pattern stays armed everywhere else), on the wb001-bridge.json
+#     generated-JSON basis, 2026-10-10 (bHERALDRY r2 dispatch).
+#   - surfaces/onboarding/vendor/hive-tx.min.js: the bDroP drop desk's
+#     vendored signing library, VERBATIM from unpkg hive-tx@6.1.0 (MIT) — a
+#     one-line minified bundle where a same-line marker would break verbatim
+#     preservation (sha256 pinned in its BUILD-NOTES entry). Its six 48+-hex
+#     runs are PUBLIC constants, verified by inspection at vendoring: the
+#     Hive mainnet chain id, secp256k1's curve prime P and group order N,
+#     and the generator point's x/y coordinates — textbook public
+#     parameters, never key material. File-scoped (this one vendor file
+#     only; the hex pattern stays armed everywhere else, including every
+#     other file under vendor/), on the wb002-specimen verbatim basis,
+#     2026-10-09 (bDroP lane dispatch).
+#   - scripts/btungsten/wb004-live/*.json: the WB004 live-lane run journal
+#     (state.json), final receipt (receipt-wb004-live.json) and probe state —
+#     generator-owned JSON written by scripts/btungsten/wb004-live/run-lifecycle.mjs,
+#     whose 48+-hex runs are PUBLIC Jungle4 chain data (on-chain transaction
+#     ids, block ids, sha256 digests of packed public transactions) verified
+#     by cold-recover.mjs against the chain itself; pretty-printed JSON
+#     cannot carry a same-line marker. Path-scoped (this glob's JSON only;
+#     the .mjs companions and the hex pattern stay armed everywhere else),
+#     on the wb001-bridge.json generated-JSON basis, 2026-10-12 (WB004
+#     jungle-live dispatch).
 #   - lines carrying a same-line TESTNET-ONLY marker — the sanctioned way to
 #     commit a throwaway testnet vector for the compat tests, e.g.:
 #       let s: [u8; 32] = hex!("...");  // TESTNET-ONLY throwaway compat vector
@@ -192,7 +245,7 @@ diff)
     # decompose to A+D, the destination's full content is inspected, and the
     # clean line's count is over exactly what was scanned.
     names=$(git diff --cached --name-only --diff-filter=ACMR --no-renames | grep -Ei "$NAME_RE")
-    added=$(git diff --cached --diff-filter=ACMR --no-renames -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' |
+    added=$(git diff --cached --diff-filter=ACMR --no-renames -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' ':(exclude)scripts/btungsten/wb002-specimen/simpleassets-e6a042f/' ':(exclude)scripts/btungsten/wb001-bridge.json' ':(exclude)surfaces/bheraldry-records.json' ':(exclude)scripts/btungsten/wb004-live/*.json' ':(exclude)surfaces/onboarding/vendor/hive-tx.min.js' |
         grep '^+' | grep -v '^+++')
     hex=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE" | grep -nE "$HEX_RE")
     pem=$(printf '%s\n' "$added" | grep -nE "$PEM_RE")
@@ -210,9 +263,9 @@ diff)
     ;;
 tree)
     names=$(git ls-files | grep -Ei "$NAME_RE")
-    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE")
+    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' ':(exclude)scripts/btungsten/wb002-specimen/simpleassets-e6a042f/' ':(exclude)scripts/btungsten/wb001-bridge.json' ':(exclude)surfaces/bheraldry-records.json' ':(exclude)scripts/btungsten/wb004-live/*.json' ':(exclude)surfaces/onboarding/vendor/hive-tx.min.js' | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE")
     pem=$(git grep -InE "$PEM_RE")
-    wif=$(git grep -InE "$WIF_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' | grep -vF -e "$MARK" -e "$MARK2" | while IFS= read -r thit; do
+    wif=$(git grep -InE "$WIF_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' ':(exclude)scripts/btungsten/wb002-specimen/simpleassets-e6a042f/' ':(exclude)scripts/btungsten/wb001-bridge.json' ':(exclude)surfaces/bheraldry-records.json' ':(exclude)scripts/btungsten/wb004-live/*.json' ':(exclude)surfaces/onboarding/vendor/hive-tx.min.js' | grep -vF -e "$MARK" -e "$MARK2" | while IFS= read -r thit; do
         tf=${thit%%:*}; trest=${thit#*:}; tln=${trest%%:*}; tcontent=${trest#*:}
         for tok in $(printf '%s\n' "$tcontent" | grep -oE "$WIF_RE"); do
           cls=$(keyshape classify "$tok")

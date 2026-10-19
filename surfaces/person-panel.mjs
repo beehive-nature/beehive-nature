@@ -58,6 +58,8 @@
        it adds no names, ids, or URLs of its own; it logs nothing
 */
 
+import { mountLocalEvidence } from '../tools/genealogy/local-evidence.mjs';
+
 export const PP_VERSION = 'person-panel/1.3';
 
 /* v1.1 — curiosity-first (founder guidance 2026-09-18: "the graph is not the
@@ -138,6 +140,14 @@ export function grandparentBranches (archive, founder, person) {
     return { grandparent, relationship, direct: person === id ||
       relationship.blood?.mode === 'ancestor-of-root' };
   });
+}
+
+export function grandparentPathHtml (branch, person, chainHtml = () => '') {
+  const g = branch?.grandparent;
+  if (!g || !person) return '';
+  if (branch.relationship?.kind === 'self' || g.id === person.id)
+    return '<p class="pp-branch-self">This person is the head of this grandparent branch.</p>';
+  return '<details><summary>Show the parent-to-child line from ' + esc(g.name) + ' to ' + esc(person.name) + '</summary>' + chainHtml(branch.relationship) + '</details>';
 }
 
 export function wikipediaLink (person) {
@@ -284,6 +294,7 @@ export function mountPersonPanel (host, archive, opts) {
     onnavigate: null,
     openPersonPage: null,
     langText: null,
+    localEvidence: null, // optional package reader; never a provider fallback
     scrollContainer: null,
     searchPlaceholder: 'search the archive — a name (the panel will not pick for you)'
   }, opts || {});
@@ -298,6 +309,7 @@ export function mountPersonPanel (host, archive, opts) {
   let searchHi = -1;
   let searchRows = [];
   let searchDup = false;
+  let disposeLocalEvidence = null;
 
   host.classList.add('pp');
   host.setAttribute('data-pp', PP_VERSION);
@@ -552,7 +564,7 @@ export function mountPersonPanel (host, archive, opts) {
         const g = b.grandparent;
         const title = /^F/i.test(g.gender || '') ? 'Grandma ' : /^M/i.test(g.gender || '') ? 'Grandpa ' : '';
         h += '<p class="pp-branch"><strong>Through ' + title + esc(g.name) + '</strong></p>';
-        h += '<details><summary>Show the parent-to-child line from ' + esc(g.name) + ' to ' + esc(p.name) + '</summary>' + relChainsHtml(b.relationship) + '</details>';
+        h += grandparentPathHtml(b, p, relChainsHtml);
       }
     } else h += '<p>No direct ancestral path through the four grandparents is recorded for this person yet.</p>';
     h += '<details><summary>Check all four grandparent branches</summary>';
@@ -635,7 +647,8 @@ export function mountPersonPanel (host, archive, opts) {
       h += '<div class="pp-layer" data-kind="records"><div class="pp-layer-lab">① ' + esc(T('pp.layer.records', 'documentary record')) + '</div>' +
         '<div class="pp-layer-att">' + esc(L.records.provider) + ' · ' + esc(L.records.providerRef) +
         (L.records.retrieved ? ' · ' + esc(T('pp.retrieved', 'retrieved')) + ' ' + esc(L.records.retrieved.slice(0, 10)) : '') + '</div>' +
-        '<a class="pp-layer-link" href="' + esc(L.records.recordUrl) + '" target="_blank" rel="noopener">' + esc(T('pp.openrecord', 'open the provider record ↗')) + '</a></div>';
+        '<a class="pp-layer-link" href="' + esc(L.records.recordUrl) + '" target="_blank" rel="noopener noreferrer">' +
+        esc(o.localEvidence ? T('pp.openprovenance', 'optional provider tree reference ↗') : T('pp.openrecord', 'open the provider record ↗')) + '</a></div>';
     }
     if (L.correction) {
       any = true;
@@ -802,7 +815,9 @@ export function mountPersonPanel (host, archive, opts) {
     h += relToRootHtml(p);
     h += familyHtml(p);
     h += frontierHtml(p);
-    h += '<details class="pp-sec"><summary>Sources and research notes</summary><div class="pp-chips">' + chipsHtml(p) + '</div>' + layersHtml(p) + teasersHtml(p) + '</details>';
+    h += '<details class="pp-sec"><summary>Sources and research notes</summary>' +
+      (o.localEvidence && !p.living ? '<section class="pp-sec" data-pp-local-evidence></section>' : '') +
+      '<div class="pp-chips">' + chipsHtml(p) + '</div>' + layersHtml(p) + teasersHtml(p) + '</details>';
     h += '<section class="pp-sec"><h3 class="pp-h">' + esc(T('pp.bnr', 'blood address')) + '</h3>' +
       '<div class="pp-bnr">' + esc(p.bnr) + '</div></section>';
     h += '</article>';
@@ -847,6 +862,7 @@ export function mountPersonPanel (host, archive, opts) {
 
   /* ── render + events ───────────────────────────────────────────────────── */
   function render () {
+    if (disposeLocalEvidence) { disposeLocalEvidence(); disposeLocalEvidence = null; }
     backbar.hidden = stack.length === 0;
     if (view.type === 'person') viewEl.innerHTML = personHtml(view.id);
     else if (view.type === 'relationship') viewEl.innerHTML = relationshipHtml(view.a, view.b);
@@ -873,6 +889,8 @@ export function mountPersonPanel (host, archive, opts) {
     } else {
       viewEl.innerHTML = discoveriesHtml();
     }
+    const localSlot = o.localEvidence && view.type === 'person' ? viewEl.querySelector('[data-pp-local-evidence]') : null;
+    if (localSlot) disposeLocalEvidence = mountLocalEvidence(localSlot, o.localEvidence, view.id);
   }
 
   function onHostClick (e) {
@@ -954,6 +972,7 @@ export function mountPersonPanel (host, archive, opts) {
     state: publicState,
     get root () { return curRoot; },
     destroy () {
+      if (disposeLocalEvidence) { disposeLocalEvidence(); disposeLocalEvidence = null; }
       qEl.removeEventListener('input', onQInput);
       qEl.removeEventListener('keydown', onQKeydown);
       host.removeEventListener('click', onHostClick);

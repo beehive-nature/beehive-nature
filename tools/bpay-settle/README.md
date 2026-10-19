@@ -75,7 +75,7 @@ At settle time the kernel does three things:
 
 - It rebuilds the intent from the invoice and the adapter, and rechecks both expiries.
 - It refuses a second settlement under the same authority, even through a freshly built intent. The outbox claim is put-if-absent, so two concurrent runs pay once.
-- It refuses an authority whose hash is not the signed one. The signing itself belongs to the signed-authorization lane.
+- It refuses an authority whose hash is not the signed one. The signing itself belongs to the signed-authorization lane — wired: [`bsigner-authority.mjs`](bsigner-authority.mjs), the bSigner organ signing the domain-separated authority bytes (ML-DSA, `bheart.signature/1` envelope) and the organ's own verification gating `settle()` before any adapter verb. Payload signing stays the rail vault's job; ML-DSA authorizes, the chain's own curves transact.
 
 Receipt digests are unkeyed. A forger who recomputes them is caught by re-reading the chain (`rebuiltRecords`) or by an anchor (`expectedDigest`).
 
@@ -95,4 +95,5 @@ Each kill condition has a sabotage test that makes it go red. `node prove.mjs` d
 - `node --test bpay-settle.test.mjs` runs 53 tests against the fake chain (CI static job).
 - `node prove.mjs` runs the mutation proof (CI static job).
 - `SETTLE_SOLANA_BIN=target/debug/settle-solana node --test solana-native.test.mjs` runs 7 tests against the real binary (CI test job, after the workspace build).
+- `SETTLE_BSIGNER_BIN=target/debug/bsigner node --test bsigner-nerve.test.mjs` runs 7 tests of the signed-authorization nerve against the real organ (CI test job, after the workspace build).
 - A live run on Base Sepolia needs two founder steps: a Base Account passkey, and test USDC in it. Nothing in this directory moves money on its own.

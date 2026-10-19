@@ -1,0 +1,13 @@
+   Compiling hax-lib v0.3.7
+   Compiling rand_core v0.10.1
+   Compiling btungsten-wb001-core v0.1.0 (/home/runner/work/beehive-nature/beehive-nature/crates/btungsten-wb001-core)
+   Compiling hax-lib-macros v0.3.7
+   Compiling rand v0.10.2
+   Compiling libcrux-macros v0.0.3
+   Compiling libcrux-hacl-rs v0.0.5
+   Compiling libcrux-secrets v0.0.6
+   Compiling libcrux-traits v0.0.8
+   Compiling libcrux-sha2 v0.0.8
+   Compiling libcrux-ed25519 v0.0.9
+   Compiling btungsten-wb001 v0.1.0 (/home/runner/work/beehive-nature/beehive-nature/crates/btungsten-wb001)
+    Finished `release` profile [optimized] target(s) in 6.62s

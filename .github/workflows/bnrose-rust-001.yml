@@ -1,0 +1,205 @@
+name: BNROSE-RUST-001
+
+# The BNRoSe L2 execution-core lane: battery (acceptance, rejection,
+# agreement, recovery, sandbox, WB004 end-to-end), mutation controls
+# (teeth), the recovery demonstration, and benchmarks — every push.
+# The wasm module is built first: a missing module is an ERROR, not a skip
+# (a skipped agreement suite is not a pass).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# One expensive qualification per PR candidate; main verifies the actual merge.
+# Branch pushes still receive tests.yml identity and secret-scan.yml audits.
+
+# A newer head on the same PR cancels the superseded candidate run.
+# Main and manual dispatches each get a group of their own, so they are never
+# cancelled or folded into another run; the exact head always gets a full run.
+# tests.yml and secret-scan.yml are deliberately left out: the §7 identity
+# check reads only the commits a push added, so a cancelled push run there
+# would let those commits skip detection.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && github.run_id || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lane:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Ensure the wasm32 target is installed (the toolchain file outranks action inputs)
+        run: rustup target add wasm32-unknown-unknown
+      - name: Build the wasm worker (wasm32-unknown-unknown, release)
+        run: cargo build -p bnrose-exec-wasm --target wasm32-unknown-unknown --release --locked
+      - name: Battery
+        env:
+          BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm
+        run: cargo test -p bnrose-exec-core -p bnrose-exec-wasm -p bnrose-exec-host --locked
+      - name: Mutation controls (teeth)
+        run: sh scripts/bnrose-rust-001/teeth.sh
+      - name: Build the CLI and bench (release)
+        run: cargo build --release -p bnrose-exec-host --locked
+      - name: Recovery demonstration (separate processes, durable records only)
+        env:
+          BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm
+        run: sh scripts/bnrose-rust-001/recovery-demo.sh target/release/bnrose-exec-host docs/receipts/bnrose-rust-001/recovery-demo-ci.txt
+      - name: Cross-node demonstration (independent processes, one enforcing destination)
+        env:
+          BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm
+        run: sh scripts/bnrose-rust-001/crossnode-demo.sh target/release/bnrose-exec-host docs/receipts/bnrose-rust-001/crossnode-demo-ci.txt
+      - name: Network-partition gate (rootless netns; REAL iptables drops or a loud failure — simulated faults are never a substitute)
+        run: |
+          command -v unshare >/dev/null 2>&1 || { echo "FAIL CLOSED: unshare is missing; the netpart gate requires real namespaces"; exit 1; }
+          command -v iptables >/dev/null 2>&1 || { echo "FAIL CLOSED: iptables is missing; the netpart gate requires real packet drops"; exit 1; }
+          unshare -Urn sh scripts/bnrose-rust-001/netpart-control.sh || exit 1
+          unshare -Urn sh scripts/bnrose-rust-001/netpart-demo.sh target/release/bnrose-exec-host docs/receipts/bnrose-rust-001/netpart-demo-ci.txt docs/receipts/bnrose-rust-001/netpart-metrics-ci.json
+      - name: "Benchmarks (labeled workload + this runner)"
+        env:
+          BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm
+          BNROSE_BENCH_HW: github-actions ubuntu-22.04 runner (2 vCPU)
+        run: target/release/bnrose-bench docs/receipts/bnrose-rust-001/bench-ci.json
+      - name: Preserve receipts
+        if: always()  # preservation: runs on cancel and on a timeout, so the evidence survives
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: bnrose-rust-001-${{ github.run_id }}-${{ github.run_attempt }}
+          path: docs/receipts/bnrose-rust-001/*
+          if-no-files-found: error
+          retention-days: 14
+
+  # The mechanically checked Rust↔Cryptol SAMPLED-AGREEMENT GRID (founder
+  # order 2026-10-14). Own job on ubuntu-latest (24.04): the pinned cryptol
+  # 3.6.0 tarball is built for 24.04 and its bundled solvers die on the
+  # 22.04 lane runner ("Missing response from solver" — measured, run
+  # 38522200519). Needs both toolchains: rust to build the grid binary,
+  # cryptol to prove the generated agreement.
+  twin-grid:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
+      # caches the bnrose-grid-agreement release build's target dir; saved
+      # only from successful main pushes so PR runs restore main's warm
+      # cache instead of churning per-PR entries (ci-speedup, 2026-10-17)
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - name: install cryptol 3.6.0 (pinned, with bundled solvers) and GNU time
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
+        timeout-minutes: 8
+        run: |
+          set -eu
+          cd "$HOME"
+          curl -fsSL -o cryptol.tar.gz https://github.com/GaloisInc/cryptol/releases/download/3.6.0/cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz
+          echo "cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz sha256: $(sha256sum cryptol.tar.gz | cut -d' ' -f1)"
+          mkdir -p cryptol && tar -xzf cryptol.tar.gz -C cryptol --strip-components=1
+          echo "$HOME/cryptol/bin" >> "$GITHUB_PATH"
+          [ -x /usr/bin/time ] || { sudo apt-get update -qq && sudo apt-get install -y -qq time; }
+          ./cryptol/bin/cryptol --version
+      - name: Sampled-agreement grid (Rust <-> Cryptol, mechanically checked)
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
+        timeout-minutes: 15
+        run: |
+          cargo build --release -p bnrose-exec-host --bin bnrose-grid-agreement --locked
+          sh scripts/bnrose-rust-001/sampled-agreement-check.sh "$HOME/cryptol/bin/cryptol" target/release/bnrose-grid-agreement
+
+  # The formal Cryptol TWIN of BNROSE-RUST-002's exact replacement law
+  # (founder order 2026-10-13/14: "proceed to the formal Cryptol twin once
+  # qualified"). Its own job, so it runs beside `lane`, not after it. The
+  # classes law is the script's own: Q.E.D. → PROVEN; timeout/memory death →
+  # NOT-PROVEN, recorded and green (the formal ladder's law — an open
+  # obligation is a recorded state, never a wedge); a counterexample on an
+  # obligation, or a negative control without its counterexample, is red.
+  cryptol-twin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: install cryptol 3.6.0 (pinned, with bundled solvers) and GNU time
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
+        timeout-minutes: 8
+        run: |
+          set -eu
+          cd "$HOME"
+          curl -fsSL -o cryptol.tar.gz https://github.com/GaloisInc/cryptol/releases/download/3.6.0/cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz
+          echo "cryptol-3.6.0-ubuntu-24.04-X64-with-solvers.tar.gz sha256: $(sha256sum cryptol.tar.gz | cut -d' ' -f1)"
+          mkdir -p cryptol && tar -xzf cryptol.tar.gz -C cryptol --strip-components=1
+          echo "$HOME/cryptol/bin" >> "$GITHUB_PATH"
+          [ -x /usr/bin/time ] || { sudo apt-get update -qq && sudo apt-get install -y -qq time; }
+          ./cryptol/bin/cryptol --version
+      - name: BNROSE Cryptol twin — 6 :prove obligations + 2 negative controls
+        if: ${{ !cancelled() }}  # proof work: still runs after a failure, stops on cancel
+        timeout-minutes: 15
+        run: sh scripts/bnrose-rust-001/cryptol-twin-check.sh "$HOME/cryptol/bin/cryptol"
+
+  # BNROSE-SAW-001 — the implementation-correspondence leg: the compiled
+  # Rust replacement core (linked through the standalone saw-harness at
+  # the estate's pinned mir-json + nightly) proven equal to the Cryptol
+  # twin's terms, with teeth that must fail. ubuntu-24.04: both the saw
+  # and mir-json pins are built for it.
+  saw:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      MIR_JSON_REV: 8cbf9af1821075ef47cf784fef78d2650827730d # PUBLIC-CONSTANT: GaloisInc/saw-script v1.6 deps/mir-json submodule commit
+      MIR_JSON_TOOLCHAIN: nightly-2026-03-21
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install pinned SAW 1.6 (with bundled solvers)
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 -o /tmp/saw.tar.gz https://github.com/GaloisInc/saw-script/releases/download/v1.6/saw-1.6-ubuntu-24.04-X64-with-solvers.tar.gz
+          echo '0b25c8b32db8b4a7ec32d6700024af60bb2a0398ee350b630dd84ff377c938f7  /tmp/saw.tar.gz' | sha256sum --check # PUBLIC-CONSTANT: upstream release asset digest
+          mkdir -p "$HOME/saw" && tar -xzf /tmp/saw.tar.gz -C "$HOME/saw" --strip-components=1
+          echo "$HOME/saw/bin" >> "$GITHUB_PATH"
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
+      - name: Install the mir-json toolchain (${{ env.MIR_JSON_TOOLCHAIN }})
+        run: rustup toolchain install "$MIR_JSON_TOOLCHAIN" --profile minimal --component rustc-dev,rust-src,llvm-tools-preview
+      - name: Cache mir-json at SAW 1.6's pin
+        id: mirjson-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: |
+            ~/mir-json-inst
+            ~/mir-json/rlibs
+            ~/mir-json/rlibs_real
+          key: mir-json-v2-${{ env.MIR_JSON_REV }}-${{ env.MIR_JSON_TOOLCHAIN }}-ubuntu-24.04
+      - name: Build mir-json at SAW 1.6's pin
+        if: steps.mirjson-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --quiet https://github.com/GaloisInc/mir-json.git "$HOME/mir-json"
+          cd "$HOME/mir-json"
+          git checkout --quiet "$MIR_JSON_REV"
+          cargo "+$MIR_JSON_TOOLCHAIN" install --path . --locked --root "$HOME/mir-json-inst"
+          PATH="$HOME/mir-json-inst/bin:$PATH" mir-json-translate-libs
+      - name: Expose mir-json
+        shell: bash
+        run: |
+          set -euo pipefail
+          [ -f "$HOME/mir-json/rlibs/libstd.rlib" ] || {
+            echo "mir-json rlibs missing the translated std after build/restore:"; ls -la "$HOME/mir-json/rlibs" || true; exit 1; }
+          echo "$HOME/mir-json-inst/bin" >> "$GITHUB_PATH"
+          echo "SAW_RUST_LIBRARY_PATH=$HOME/mir-json/rlibs" >> "$GITHUB_ENV"
+          "$HOME/mir-json-inst/bin/mir-json" --version
+      - name: BNROSE SAW — classifier selftest (tool failures are never counterexamples)
+        if: always()
+        run: sh scripts/bnrose-rust-001/saw-check.sh --selftest
+      - name: BNROSE SAW — correspondence (2 proofs + 2 teeth, explicit verdicts only)
+        if: always()
+        timeout-minutes: 15
+        run: sh scripts/bnrose-rust-001/saw-check.sh "$HOME/saw/bin/saw"

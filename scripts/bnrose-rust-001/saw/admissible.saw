@@ -1,0 +1,25 @@
+// BNROSE-SAW-001 — implementation correspondence, THE GATE.
+// The compiled `bnrose_saw_harness::saw_admissible` (which constructs
+// the real StepOptions and calls replacement_admissible — the same MIR
+// body the host's run path calls) equals the twin's gateAt for EVERY
+// pair of inputs. gateAt is the twin's own `gate` at a witnessing rows
+// mask; gateDependsOnlyOnAnyRow (Q.E.D. in BnroseReplacement.cry) proves
+// the witness loses nothing, so the compiled gate matches the law
+// exactly: admissible only under the flag AND no recorded effect.
+//
+// usage (from this directory): saw admissible.saw
+
+enable_experimental;
+import "../cryptol/BnroseReplacement.cry";
+
+m <- mir_load_module "../../../target/saw-bnrose/bnrose_replacement_law.linked-mir.json";
+
+let admissible_spec = do {
+  ar <- mir_fresh_var "ar" mir_bool;
+  o <- mir_fresh_var "o" mir_bool;
+  mir_execute_func [mir_term ar, mir_term o];
+  mir_return (mir_term {{ gateAt o ar }});
+};
+
+mir_verify m "bnrose_saw_harness::saw_admissible" [] false admissible_spec (w4_unint_yices []);
+print "BNROSE-SAW PROVEN admissible: compiled replacement_admissible == gateAt for every flag pair";

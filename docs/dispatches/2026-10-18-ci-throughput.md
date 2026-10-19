@@ -1,0 +1,249 @@
+# Commit-to-qualified-PR throughput — 2026-10-18
+
+The founder clarified this lane's goal: improve commit/PR GitHub time,
+performance and tests, with GitHub serving as stage-one hosting and
+execution before repository hosting and qualification can move to other
+providers. This continuation implements the bounded scheduling work left
+in [the October 17 CI-speedup dispatch](2026-10-17-ci-speedup.md).
+
+## Measured cause and change
+
+The initial PR #468 head `3776749837e2ca8b73eed440b67446362b639ccc`
+created 18 workflow executions: ten PR runs and eight feature-push runs.
+Five specialized workflows still qualified the candidate twice. They now
+run on PRs, main pushes and manual dispatches, matching the two PQ
+workflows' existing policy:
+
+- WB001 SAW proofs
+- WB002 SAW equivalence
+- WB002 WASM corpus
+- BNROSE-RUST-001
+- BNROSE-ADAPTERS-REAL
+
+For the same event and path set, this removes five executions, reducing
+18 to 13 (28%). This is a trigger-count calculation, not a measured 28%
+reduction in elapsed time. Each of the five workflows' complete `jobs:`
+body is unchanged. PR qualification and actual-main-merge verification
+remain distinct; manual dispatch remains available for a standalone
+branch. Main and manual runs retain their unique concurrency group.
+
+A measured duplicate illustrates the runner cost: on PR #466 head
+`8ce097e0`, WB001 SAW push run
+[39166986891](https://github.com/beehive-nature/beehive-nature/actions/runs/39166986891)
+executed from 21:17:39 to 21:41:56 UTC (24m17s), while PR run
+[39167003391](https://github.com/beehive-nature/beehive-nature/actions/runs/39167003391)
+executed from 21:25:32 to 21:53:20 UTC (27m48s): 52m05s combined.
+Removing the feature-push execution would eliminate its 24m17s of runner
+work for this example. A PR's synthetic merge checkout can differ from
+the pushed head; the PR result is not relabeled as a push result.
+
+On the cache candidate itself, the five completed duplicate push
+workflows consumed 2,776 seconds (46m16s) across eight jobs:
+
+| Workflow | Push run | Job-execution seconds |
+| --- | --- | ---: |
+| WB001 SAW | 39179422708 | 1,798 |
+| WB002 SAW | 39179422712 | 50 |
+| WB002 WASM | 39179422723 | 202 |
+| BNROSE-RUST-001 | 39179422737 | 561 |
+| BNROSE-ADAPTERS-REAL | 39179422744 | 165 |
+
+These are summed job durations from completed GitHub jobs, not billed
+minutes or elapsed PR time. They quantify the duplicate work targeted by
+the scheduling change; its own hosted event set still needs verification.
+
+The full `tests.yml` and `secret-scan.yml` workflows still run on every
+push and PR, without workflow-level cancellation. The RB workflow and
+path-filtered keychain/release workflows retain their existing policy.
+In particular, push identity coverage is not replaced by PR identity
+coverage. The earlier report demonstrated that these can disagree.
+
+## Cache correction
+
+The pinned Rust cache action joins each target path to its workspace.
+The same repeated-directory defect corrected for x0x in PR #468 also
+exists in the bSAFE, x402, ant-writedoor and Plonky3 mappings. Change those
+four right-hand paths to `target`. Root caching and the x0x correction
+remain intact; action pins, cache-save policy and every workload command
+are preserved.
+
+The October 17 dispatch's cache-hit observations are historical evidence
+of matching keys, not proof that these four compiled-target directories
+were restored. Its claim that the workspace mapping mechanically worked
+is not supported by the pinned action's `CacheConfig.new()` path join.
+This correction does not erase those measured job timings or infer new
+speedups. Corrected target restoration and net timing require fresh
+hosted evidence. GitHub also versions caches using their paths, so a new
+target path can require a fresh cache even when the visible key matches.
+
+Sources: [pinned cache implementation](https://github.com/Swatinem/rust-cache/blob/6323deb102c322ba6fcbdcafc7e3dddab59af2b6/src/config.ts),
+[GitHub cache matching and versioning](https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching#cache-key-matching).
+
+## Regression checks
+
+The static job gains a dependency-free policy gate. It checks the
+repository's canonical event/concurrency blocks and six explicit cache
+workspace mappings. Unsupported policy syntax fails for deliberate
+review; this is not a general YAML parser.
+
+`node --test e2e/ci-throughput.test.mjs` passes 24 tests, including
+mutations that restore duplicate branch qualification, remove main/PR/
+manual coverage, allow cancellation of main/manual runs, restrict push
+audits, or break/drop a cache path. The original configuration fails
+five scheduling and two cache-policy checks; the candidate passes.
+`node scripts/lint-ci-shape.mjs` reports 141/141 guarded suite steps.
+`git diff --check` passes. A direct comparison confirms that the five
+specialized workflow job bodies are unchanged.
+
+These checks do not claim to validate solver outcomes, all YAML syntax,
+hosted cache hits, or realized elapsed-time savings. The candidate's own
+CI and its actual merge checks must supply those results.
+
+The read-only `scripts/ci-run-receipt.mjs` collector captures GitHub run,
+event and attempt identity, job outcomes/timestamps, and the actual full
+checkout SHA from each completed job's checkout log. It resolves that
+commit's tree and retains the log digest without copying raw logs or
+credentials. Missing or ambiguous checkout evidence stays unbound; it
+never substitutes the run's PR head for the tested checkout. Six more
+tests cover that boundary and prevent queued, failed, cancelled, skipped
+or empty observations from becoming successful-run claims (30 tests total).
+The live jobs API supplied `started_at` equal to workflow creation for
+queued jobs with no steps. The collector therefore requires actual step
+activity before timing execution or start delay; queued placeholders and
+cancellation before execution remain unknown, rather than zero seconds.
+
+The first live capture is
+[`cache-pr-first-observation.json`](../receipts/ci-throughput-2026-10-18/cache-pr-first-observation.json).
+It covers only WB002 SAW run `39179441710`, attempt 1: the head is
+`377674983`, while the actual checkout is synthetic merge `94ced410`.
+Its job took 58 seconds, with 179 seconds from workflow creation to job
+start. Dispatch-to-start can include dependency waiting and is not
+reported as pure runner queue time. This one-run observation is not full
+PR qualification. Receipts are unsigned observations, not attestations;
+required workflow/event coverage must be checked separately.
+
+The native-PQ baseline is retained in
+[`cache-baseline-main-pq.json`](../receipts/ci-throughput-2026-10-18/cache-baseline-main-pq.json):
+run `39175451733` on actual main merge `d472d198`, all seven jobs successful
+and bound to their checkout/tree, 737 total job-execution seconds. The
+x0x job used 336 seconds, including 177 seconds installing the audit tool,
+110 seconds for the native battery, 8 seconds restoring cache and 5 seconds
+in the cache post-step. Its
+[job log](https://github.com/beehive-nature/beehive-nature/actions/runs/39175451733/job/117817056679)
+explicitly lists the repeated `crates/btungsten-x0x-pq/` target path.
+The x0x crate and both native controllers compare byte-identical between
+this baseline and cache candidate `377674983`.
+
+The completed candidate native-PQ run is retained in
+[`cache-pr-pq.json`](../receipts/ci-throughput-2026-10-18/cache-pr-pq.json):
+run `39179441927`, all seven jobs successful and bound to synthetic merge
+`94ced410`, 701 total job-execution seconds. The corrected x0x job took
+312 seconds, including 163 seconds installing the audit tool and 103
+seconds for the native battery. Its log explicitly lists
+`crates/btungsten-x0x-pq/target` at the repository root, confirming the path
+correction. The job started 1,986 seconds (33m06s) after workflow creation;
+the final native job started after 3,453 seconds (57m33s). These observed
+start delays substantially exceed the short native workloads. The
+336-to-312-second x0x comparison is not attributed to the cache correction:
+this candidate still installed the audit tool, and warm-cache restoration
+must be measured after main seeds the corrected target.
+
+## Stage-one hosting and the next phase
+
+GitHub currently supplies hosting, event scheduling, runners and check
+status. The portable contract needs explicit source identity (commit and
+tree), authority for a proposed head update, pinned build/test inputs,
+artifact digests, and verifiable qualification results with their scope
+and assumptions. For GitHub PR evidence, record actual checkout/tree,
+head, base, event, run and attempt; a PR head alone does not identify the
+tested tree. GitHub documents the synthetic merge behavior in its
+[PR event reference](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request).
+
+The decentralized phase must separate transport/discovery, durable blob
+storage, head-update authority and ordering, CPU/RAM/network execution,
+and metering/settlement. The founder's x0x/ANT/AR/Hive and other providers
+are integration candidates for those roles. Their adapters must reuse
+existing estate boundaries and prove retrieval integrity, availability,
+authorization, replay handling and qualification independently. A stored
+Git repository or a successful CI run alone does not implement those
+contracts. No decentralized backend, signed execution attestation, new
+identity, payment, or production deployment is added by this CI patch.
+
+## Cache PR qualification and actual merge
+
+The complete cache-candidate receipt is
+[`cache-pr-qualified.json`](../receipts/ci-throughput-2026-10-18/cache-pr-qualified.json).
+Its event/name coverage was checked against the expected ten PR and eight
+push workflows: all 18 succeeded. All 48 executed jobs have checkout/tree
+bindings and usable timing; eight path-filtered RB jobs were skipped.
+Every executed job tested tree `74a3877d534252bba32801ce8bb310551e333cd8`,
+including the push checkout and PR synthetic merge. This equality is
+specific to this candidate and base.
+
+Total job execution was 23,946 seconds (6h39m06s). The first workflow was
+created at 00:08:30 UTC on October 19; the final job completed at 01:19:30,
+a 71-minute interval. This is workflow-creation-to-last-job time, not a
+measurement from local commit creation or a promise for future runs.
+The five duplicate workflows account for 2,776 seconds (11.6%) of this
+candidate's summed job execution; removing five of 18 workflow executions
+does not imply the same percentage reduction in time.
+
+[PR #468](https://github.com/beehive-nature/beehive-nature/pull/468)
+merged at 01:23:02 UTC as `751e5aacb94eef991a6c316ab4d9941c0d4cf8f6`.
+Before merging, the PR still had the qualified head and base, GitHub
+reported CLEAN, and the diff remained the one-line cache-path correction
+plus its dispatch. Fetch and ancestry checks confirm the actual merge on
+main, with the same tested tree. All ten actual-main code/proof workflows
+succeeded. Their complete receipt is
+[`cache-main-qualified.json`](../receipts/ci-throughput-2026-10-18/cache-main-qualified.json):
+the expected ten push workflow names are present, all 29 executed jobs
+bind to actual merge `751e5aacb` and the qualified tree, four path-filtered
+RB jobs are skipped, and no executed-job timing is missing. Summed job
+execution is 14,200 seconds (3h56m40s); the first workflow was created at
+01:23:05 UTC and the last job completed at 02:02:13, a 39m08s interval.
+This main event set differs from the candidate's combined PR/push set, so
+their elapsed intervals are not a cache-speedup comparison. The separate
+[Pages run](https://github.com/beehive-nature/beehive-nature/actions/runs/39185101692)
+succeeded on this actual merge.
+
+The main x0x job completed successfully in 339 seconds and is bound to
+the actual merge in
+[`cache-main-seed.json`](../receipts/ci-throughput-2026-10-18/cache-main-seed.json).
+Its log reports no cache found, lists the corrected target path, evaluates
+`save-if: true`, and uploads all 323,960,925 bytes. The cache API confirms
+new main-scoped entry `9137203422` at 01:29:54 UTC. It shares the visible
+key with older entry `9134539875` but has a different cache version; a
+visible key match alone does not prove restoration of the corrected path.
+This is successful cold seeding, not a warm-restoration or whole-main
+qualification result. The throughput candidate will supply the next
+restoration observation.
+
+## Throughput follow-up at publication
+
+The cache PR's exact-head qualification, actual-main verification and
+corrected cache seeding are complete before publishing this scheduling
+change. This dispatch records the implementation, validation and baselines
+at publication; the follow-up's own candidate and actual-merge results
+must be earned next and recorded in the pull request's verification
+updates and captured receipt files. End-to-end elapsed time and runner
+time remain separate metrics; queue pressure from other lanes is not
+attributed to this patch.
+
+Landing acceptance retains the full scope:
+
+- Verify the published candidate schedules ten PR workflows and only
+  three feature-push workflows (`tests`, `secret-scan`, `bTunGsTeN RB`).
+  Compare workflow names and events, not only a total or green badge.
+- Require successful candidate outcomes while retaining the existing
+  path-filtered RB skip scope. Bind every executed code/proof job to its
+  checkout and tree, with head, base, event, run and attempt recorded.
+- Inspect the corrected x0x cache restoration and report job/step timing
+  against the cold main seed. Keep cache restoration, fresh test/proof
+  execution, summed job time and elapsed qualification time distinct.
+- Merge the qualified head, fetch and verify its actual main ancestry,
+  then require all ten main code/proof workflows on that actual merge.
+  Record Pages separately and confirm the other corrected cache paths in
+  their hosted job logs.
+- Retain the final source-bound receipts and report measured results,
+  including variation or missing evidence, without turning the expected
+  five fewer workflow executions into an unmeasured time-saving claim.

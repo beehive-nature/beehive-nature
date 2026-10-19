@@ -27,7 +27,9 @@
     "surfaces/tree-of-life.mjs",
     "surfaces/archive-core.mjs",
     "tools/genealogy/model.mjs",
+    "tools/genealogy/local-evidence.mjs",
     "tools/genealogy/lifespan.mjs",
+    "tools/genealogy/consent.mjs",
     "surfaces/rails-badge.js",
     "surfaces/fonts/eternal-fonts.css",
     "assets/seals/house-crest-von-zutphen-DESIGN.svg",
@@ -59,6 +61,7 @@
     "surfaces/fonts/eternal/ibm-plex-mono-vietnamese-400.woff2",
     "surfaces/fonts/eternal/ibm-plex-mono-vietnamese-500.woff2",
     "surfaces/fonts/eternal/ibm-plex-mono-vietnamese-600.woff2",
-    "surfaces/fonts/burti.woff2"
+    "surfaces/fonts/burti.woff2",
+    "surfaces/fonts/skaists.woff2"
   ]
 }

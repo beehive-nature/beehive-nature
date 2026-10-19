@@ -372,3 +372,80 @@ test('the context "root" is reserved: keys() and successionKeys() refuse it, roo
   assert.throws(() => B.successionKeys(prk, 'root'), e => e.code === 'context_reserved');
   assert.equal(B.keys(prk, 'pq:root').context, 'pq:root');   // a persona named root is still a pq: context
 });
+
+test('contexts outside the bpq-core rule (1 to 64 printable ASCII) derive nothing, here and in the K1 derivation', () => {
+  const prk = rootOf(V.keys[0].rootFrom);
+  const vm = require('node:vm');
+  vm.runInThisContext(readFileSync(join(ROOT, 'surfaces', 'onboarding', 'bzdid-key.js'), 'utf8') + '\n;globalThis.BZDIDKEY = BZDIDKEY;');
+  const K = globalThis.BZDIDKEY;
+  for (const bad of ['pq:\x01', 'pq:\x7f', 'pq:pé', 'x'.repeat(65)]) {
+    assert.throws(() => B.keys(prk, bad), e => e.code === 'context_rule', JSON.stringify(bad));
+    assert.throws(() => B.successionKeys(prk, bad), e => e.code === 'context_rule', JSON.stringify(bad));
+    assert.throws(() => K.deriveK1Key(prk, bad), e => e.code === 'context_rule', JSON.stringify(bad));
+  }
+  // the pair the rule closes: context "a" at counter 1 would be context "a\x01" at counter 0
+  assert.throws(() => K.deriveK1Key(prk, 'a\x01'), e => e.code === 'context_rule');
+  assert.equal(B.keys(prk, 'x'.repeat(64)).context.length, 64);
+  assert.equal(K.deriveK1Key(prk, 'nostr:bnr-devices').seed.length, 32);
+});
+
+test('an object sealed by the Rust sealer (crates/bsigner bpq::seal_self) opens in bpq.js and only for its vault', async () => {
+  const R = JSON.parse(readFileSync(join(ROOT, 'surfaces', 'bpq-rust-sealed.json'), 'utf8'));
+  const obj = new Uint8Array(Buffer.from(R.object_b64u, 'base64url'));
+  const o = await B.open(obj, { self: rootOf(R.vaultFrom) });
+  assert.equal(B.b64u(o.bytes), R.plain_b64u);
+  assert.equal(o.meta, null);
+  await assert.rejects(B.open(obj, { self: rootOf('another vault') }));
+});
+
+test('Nostr event attestations (SPEC-BPQ-1 section 5b): one verifies, every forgery is refused, the committed vector verifies', () => {
+  const k = keysOf('A');
+  const event = 'ab'.repeat(32);
+  const a = JSON.parse(JSON.stringify(B.attestNostr(k, event)));
+  assert.deepEqual(B.verifyNostr(a), { ok: true, id: k.id, event });
+  const bent = edit => { const x = JSON.parse(JSON.stringify(a)); edit(x); return B.verifyNostr(x).ok; };
+  assert.equal(bent(x => { x.event = 'ac'.repeat(32); }), false, 'another event');
+  assert.equal(bent(x => { x.event = 'AB'.repeat(32); }), false, 'uppercase hex');
+  assert.equal(bent(x => { x.kind = 'binding'; }), false, 'another kind');
+  assert.equal(bent(x => { x.id = keysOf('B').id; }), false, 'another id');
+  const other = B.attestNostr(keysOf('B'), event);
+  assert.equal(bent(x => { x.sig = other.sig; }), false, "another key's signature");
+  assert.throws(() => B.attestNostr(k, 'zz'), e => e.code === 'event');
+  const v = JSON.parse(readFileSync(join(ROOT, 'surfaces', 'bpq-nostr-vector.json'), 'utf8'));
+  const r = B.verifyNostr(v.attestation);
+  assert.equal(r.ok, true);
+  assert.equal(r.event, createHash('sha256').update(v.eventFrom, 'utf8').digest('hex'));
+});
+
+test('intent authorizations (SPEC-BPQ-1 section 5c): one verifies, every forgery is refused, both committed vectors verify', () => {
+  const k = keysOf('A');
+  const wb = JSON.parse(readFileSync(join(ROOT, 'scripts', 'btungsten', 'wb001-vectors.json'), 'utf8'));
+  const env = Uint8Array.from(Buffer.from(wb.positives.find(p => p.name === 'base').envelope, 'hex'));
+  const a = JSON.parse(JSON.stringify(B.attestIntent(k, env)));
+  const r = B.verifyIntent(a);
+  assert.equal(r.ok, true);
+  assert.equal(r.id, k.id);
+  assert.equal(r.intent.destination, 'vault:0xBEEF');
+  const bent = edit => { const x = JSON.parse(JSON.stringify(a)); edit(x); return B.verifyIntent(x).ok; };
+  const other = Uint8Array.from(env); other[20] ^= 1;
+  assert.equal(bent(x => { x.envelope = B.b64u(other); }), false, 'another envelope');
+  assert.equal(bent(x => { x.envelope = B.b64u(Uint8Array.of(...env, 0)); }), false, 'a trailing byte');
+  assert.equal(bent(x => { x.kind = 'nostr-event'; }), false, 'another kind');
+  assert.equal(bent(x => { x.id = keysOf('B').id; }), false, 'another id');
+  assert.equal(bent(x => { x.sig = B.attestIntent(keysOf('B'), env).sig; }), false, "another key's signature");
+  assert.throws(() => B.attestIntent(k, Uint8Array.of(...env, 0)), e => e.code === 'bt-wb01:trailing');
+  for (const f of ['bpq-intent-vector.json', 'bpq-intent-rust.json']) {
+    const v = JSON.parse(readFileSync(join(ROOT, 'surfaces', f), 'utf8'));
+    const w = B.verifyIntent(v.authorization);
+    assert.equal(w.ok, true, f);
+    assert.equal(w.id, k.id, f);
+  }
+});
+
+test('a Nostr event attestation made by crates/bsigner verifies in bpq.js', () => {
+  const v = JSON.parse(readFileSync(join(ROOT, 'surfaces', 'bpq-nostr-rust.json'), 'utf8'));
+  const r = B.verifyNostr(v.attestation);
+  assert.equal(r.ok, true);
+  assert.equal(r.id, keysOf('A').id);
+  assert.equal(r.event, createHash('sha256').update(v.eventFrom, 'utf8').digest('hex'));
+});

@@ -65,6 +65,7 @@
     if (n < 1024 * 1024) return Math.round(n / 1024) + ' KB';
     return (n / (1024 * 1024)).toFixed(1) + ' MB';
   }
+  async function sha256hex(bytes) { return hex(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))); }
 
   /* ---------- identity: one key, generated once in this browser, never sent ----------
      The estate's bzdid-key.js mints an identity from a passkey or a recovery phrase — both
@@ -129,6 +130,7 @@
   }
 
   function allRows() { return tx('files', 'readonly', function (s) { return s.getAll(); }); }
+  function getRow(id) { return tx('files', 'readonly', function (s) { return s.get(id); }); }
   function putRow(row) { return tx('files', 'readwrite', function (s) { return s.put(row); }); }
   function dropRow(id) { return tx('files', 'readwrite', function (s) { return s.delete(id); }); }
   function putKey(id, key) { return tx('keys', 'readwrite', function (s) { return s.put(key, id); }); }
@@ -195,6 +197,29 @@
     var a = adapters[scheme];
     return !!(a && a.caps && (a.caps.networks || []).length);
   }
+
+  /* Where a rail is in answering `describe`. ASKING IS NOT DOWN. Every rail starts
+     in its own worker and answers when its script has loaded, so for the first
+     moments of a visit some have answered and some have not. Until this slice the
+     page waited for the slowest before it drew a single file, and anything drawn
+     before that (a register switch fires early) told every row "the rail that
+     holds this is not answering" — measured 2026-10-15 with one adapter script
+     held back 3 s: both rows said it, the kept one included, for three seconds.
+     The two states are different sentences and each row now says its own. */
+  function railPhase(scheme) {
+    var a = scheme && adapters[scheme];
+    if (!a) return 'down';
+    if (a.attached) return 'up';
+    return a.state === 'spawning' ? 'asking' : 'down';
+  }
+
+  /* Resolves once `scheme` has answered or failed — never rejects. */
+  function settled(scheme) {
+    var a = scheme && adapters[scheme];
+    return a && a.ready ? a.ready.then(function () {}, function () {}) : Promise.resolve();
+  }
+  function anyAsking() { return RAILS.some(function (r) { return railPhase(r.scheme) === 'asking'; }); }
+  function allSettled() { return Promise.all(RAILS.map(function (r) { return settled(r.scheme); })); }
 
   /* ---------- purposes ----------
      The visitor picks one of these; the shell picks the rail. A purpose is a
@@ -273,13 +298,38 @@
     return hex(await s.sign(fromHex(digest), SK));
   }
 
+  /* WHAT A FAILED PUT SAYS ABOUT THE BYTES. Once a file has been handed to a rail
+     that speaks to the world, a failure is one of two different facts, and until
+     this slice the page said a third, false one for both: "Nothing left this
+     phone." A rail that ANSWERED with a refusal had the bytes in hand to refuse
+     (sent, not kept). A call that timed out, a worker that died, a network that
+     dropped mid-request — those lost the ANSWER, not necessarily the act, so the
+     file may well be out there (Strata's provider protocol draws the same line:
+     a lost reply is not proof nothing happened). Only the refusals an adapter
+     raises before it sends (`NOTHING_SENT`) may still say nothing left. */
+  /* The codes that mean the rail ANSWERED NO. After hand-off, every other failure
+     — a timeout (-32011), a dead worker (-32010), a dropped network (-32001), an
+     adapter's catch-all (-32000, which also fires on a garbled reply to an upload
+     that succeeded) — is unknown, because unknown is the only thing the page knows. */
+  var RAIL_SAID_NO = [MEMBERSHIP_REQUIRED, -32022, NOT_PERMITTED];
+
+  function putFailure(scheme, e) {
+    if (!speaksToTheWorld(scheme) || e.sent || NOTHING_SENT.indexOf(e.code) >= 0) return e;
+    e.sent = 'rail';
+    if (RAIL_SAID_NO.indexOf(e.code) < 0) e.unknown = true;
+    return e;
+  }
+
   async function railOp(scheme, verb, params) {
     var a = rail(scheme);
     await a.ready;
     var p = params || {};
 
     var single = 'x.' + verb;
-    if (a.can(single)) return a.ops[single](p);
+    if (a.can(single)) {
+      if (verb !== 'put') return a.ops[single](p);
+      try { return await a.ops[single](p); } catch (e) { throw putFailure(scheme, e); }
+    }
 
     /* The third shape: the rail PRICES, a payment is made, the rail STORES.
        Read from the declaration like the other two. */
@@ -296,11 +346,12 @@
     try {
       return await a.ops[submit]({ intent_id: intent.intent_id, sig: sig });
     } catch (e) {
-      if (e.code !== MEMBERSHIP_REQUIRED || verb === 'join' || !a.can('x.beginJoin')) throw e;
+      if (e.code !== MEMBERSHIP_REQUIRED || verb === 'join' || !a.can('x.beginJoin')) throw verb === 'put' ? putFailure(scheme, e) : e;
       await joinRail(scheme);
       /* The IDENTICAL intent and the IDENTICAL signature. The shell resubmits; it
          never re-signs and never builds a second intent (§6). */
-      return a.ops[submit]({ intent_id: intent.intent_id, sig: sig });
+      try { return await a.ops[submit]({ intent_id: intent.intent_id, sig: sig }); }
+      catch (e2) { throw verb === 'put' ? putFailure(scheme, e2) : e2; }
     }
   }
 
@@ -345,7 +396,7 @@
     try {
       prep = await a.ops['x.preparePut']({ bytes: bytes }, 180000);
     } catch (e) {
-      if (NOTHING_SENT.indexOf(e.code) < 0) e.sent = true;
+      if (NOTHING_SENT.indexOf(e.code) < 0) e.sent = 'door';
       throw e;
     }
     var txs = null;
@@ -354,18 +405,21 @@
       setStatus(t('working'), false, true);
       return await a.ops['x.finalizePut']({ intent_id: prep.intent_id, txs: txs }, 180000);
     } catch (e) {
-      e.sent = true;
+      e.sent = 'door';
       if (txs) e.paid = txs.map(function (x) { return x.tx_hash; });
       throw e;
     }
   }
 
-  /* What left the phone, said after a paid act fails. Paid-and-not-stored is
-     the stranded-payment case (SPEC-AUTONOMI-TREZOR-1 §4), and the hashes are
-     the visitor's receipt for it, so they are printed, not summarised. */
+  /* What left the phone, said after an act fails. Paid-and-not-stored is the
+     stranded-payment case (SPEC-AUTONOMI-TREZOR-1 §4), and the hashes are the
+     visitor's receipt for it, so they are printed, not summarised. An empty
+     answer means the bytes never left, and only then may a caller say so. */
   function leftSaying(e) {
     if (e.paid) return ' You paid (' + e.paid.join(', ') + ') and the file was not confirmed as stored; keep those payment ids.';
-    if (e.sent) return ' The estate\'s door saw the file to price it; nothing was stored and nothing was paid.';
+    if (e.sent === 'door') return ' The estate\'s door saw the file to price it; nothing was stored and nothing was paid.';
+    if (e.unknown) return ' The file was already on its way when the answer was lost, so this page cannot tell whether it was kept out there. Treat it as possibly shared.';
+    if (e.sent) return ' The file reached the rail and the rail refused to keep it.';
     return '';
   }
 
@@ -434,6 +488,10 @@
       'flip-keep': 'Leave it as it is',
       swept: function (n) { return n === 1 ? 'One file was only for that visit, and it is gone.' : n + ' files were only for that visit, and they are gone.'; },
       law: 'Your list stays on this phone. A new phone starts empty.',
+      asking: 'Still asking where this file lives.',
+      look: 'Preview', 'look-close': 'Close', 'look-save': 'Save to this phone',
+      reading: 'Reading it…',
+      checked: function (first) { return first ? 'First look: what this file holds is recorded now, so every later look is checked against it.' : 'Checked: these are exactly the bytes you added.'; },
       'count-label': 'On this phone:',
       count: function (n) { return n === 1 ? '1 file' : n + ' files'; }
     },
@@ -466,6 +524,10 @@
       'flip-keep': 'Leave it',
       swept: function (n) { return n === 1 ? 'One file was just for that visit. Gone.' : n + ' files were just for that visit. Gone.'; },
       law: 'This device is the index. Another phone is another room.',
+      asking: 'Checking where it lives…',
+      look: 'Peek', 'look-close': 'Close', 'look-save': 'Save it',
+      reading: 'Pulling it up…',
+      checked: function (first) { return first ? 'First peek. Its fingerprint is saved now.' : 'Verified. Same bytes you dropped.'; },
       'count-label': 'On this phone:',
       count: function (n) { return n === 1 ? '1 file' : n + ' files'; }
     },
@@ -493,6 +555,10 @@
       'flip-keep': 'abort',
       swept: function (n) { return n + ' row(s) named a rail that does not survive a reload — swept.'; },
       law: 'rail per purpose, chosen by declared terms · a refused PUT falls back to this device · no login',
+      asking: 'describe() pending · terms not declared yet',
+      look: 'inspect', 'look-close': 'close', 'look-save': 'READ -> device',
+      reading: 'reading from rail · verifying…',
+      checked: function (first, sha) { return (first ? 'sha256 recorded now (row had none) · ' : 'sha256 == index record · ') + sha.slice(0, 16) + '…'; },
       'count-label': 'On this phone:',
       count: function (n) { return n === 1 ? '1 file' : n + ' files'; }
     }
@@ -765,12 +831,18 @@
      moves to the first that survives — never silently to a purpose that sends
      bytes further than the one they chose, because `PURPOSES` is ordered from
      the most private outward and the first survivor is therefore never a
-     widening. */
+     widening.
+
+     NOT WHILE A RAIL IS STILL ASKING. Rails answer one by one now, so the
+     visitor's purpose may simply not have arrived yet; moving the selection to
+     whatever answered first would make a stranger's first file "just for now"
+     because that rail's script was the smallest. Until every rail has answered
+     or failed, a selection with no rail yet is held, not replaced. */
   function renderPurposes() {
     var box = $('modes');
     var open = availablePurposes();
     box.textContent = '';
-    if (!open.some(function (p) { return p.id === pendingPurpose; })) {
+    if (!anyAsking() && !open.some(function (p) { return p.id === pendingPurpose; })) {
       pendingPurpose = open.length ? open[0].id : null;
     }
     open.forEach(function (p) {
@@ -813,10 +885,94 @@
     renderPurposes();
   }
 
-  async function render() {
-    var rows = await loadRows();
-    rows.sort(function (a, b) { return b.ts - a.ts; });
-    document.body.setAttribute('data-state', rows.length ? 'file' : 'empty');
+  /* THE LIST IS DRAWN IN SLICES, AND ONLY THE LATEST DRAW MAY FINISH.
+
+     Measured 2026-10-15 (e2e/myspace-explorer.mjs, five cold runs on one
+     machine): with 20,000 rows the page built every row in one go and the main
+     thread was held 4.5 to 5.3 seconds; with 2,000, about 300 ms. A tap in that
+     window waits for all of it. Now the rows are read once and sorted; the first
+     `BATCH` are on screen at once, the rest are built in slices of `SLICE_MS`
+     with the event loop given back between them (so a tap, or a rail's answer,
+     is served between any two), and they land together.
+
+     The draw spans many tasks, so two draws can overlap (a register switch, a
+     rail answering, a sheet closing). Every draw takes a ticket; a draw whose
+     ticket is no longer the newest stops at its next slice and paints nothing
+     more, so an older read of the index can never land on top of a newer one.
+     Every caller of `render()` waits for the NEWEST draw to finish, not its own:
+     "the list is drawn" means the list as it is now.
+
+     `applyCopy()` still runs last, after the final slice: the register walk in
+     e2e/myspace-seam.mjs waits on `#modes` changing as its sign that the whole
+     page has the new words. */
+  var BATCH = 128;
+  var SLICE_MS = 12;      // after the first screen, each slice works this long, then gives the page back
+  var drawTicket = 0;
+  var drawDone = null;
+
+  /* A yield that is not clamped (nested setTimeout(0) waits at least 4 ms after
+     five levels) and not privileged: scheduler.yield() resumes AHEAD of every
+     other task, which measured 2026-10-15 at 20,000 rows starved the rails' own
+     describe answers until the whole list was drawn (they landed at ~3 s) and
+     packed eight slices into each frame. A MessageChannel task waits its turn
+     like a rail's answer does. */
+  var yieldPort = null;
+  function yieldToPage() {
+    if (!yieldPort) {
+      var ch = new MessageChannel();
+      var waiting = [];
+      ch.port1.onmessage = function () { var r = waiting.shift(); if (r) r(); };
+      yieldPort = { post: function (r) { waiting.push(r); ch.port2.postMessage(0); } };
+    }
+    return new Promise(function (r) { yieldPort.post(r); });
+  }
+
+  function render(given) {
+    var mine = ++drawTicket;
+    if (!drawDone) {
+      var settle = {};
+      drawDone = new Promise(function (res, rej) { settle.res = res; settle.rej = rej; });
+      drawDone.settle = settle;
+    }
+    var waiting = drawDone;
+    draw(mine, given).then(function (current) {
+      if (current && mine === drawTicket && drawDone === waiting) { drawDone = null; waiting.settle.res(); }
+    }, function (e) {
+      if (drawDone === waiting && mine === drawTicket) { drawDone = null; waiting.settle.rej(e); }
+    });
+    return waiting;
+  }
+
+  /* A RAIL ANSWERING CHANGES THE WORDS, NOT THE INDEX. Re-reading the index for
+     it cost a whole read each time: measured at 20,000 rows, four rails answering
+     during the first read pushed the first row from 0.96 s to 1.24 s (median of
+     five), because each answer superseded the read in flight. So an answer
+     redraws from the rows already read, and an answer that lands DURING a read
+     waits for it: the slices still to come read the new terms live, and the ones
+     already drawn are redrawn once the read's draw is done. Anything that writes
+     the index (an act, a sweep, a register switch) still calls `render()` and
+     reads afresh. */
+  var reading = false;
+  var lastRows = null;
+  var termsDirty = false;
+
+  function repaint() {
+    if (reading || !lastRows) { termsDirty = true; return drawDone || Promise.resolve(); }
+    return render(lastRows);
+  }
+
+  async function draw(mine, given) {
+    var rows = given;
+    if (!rows) {
+      reading = true;
+      try { rows = await loadRows(); } finally { reading = false; }
+      if (mine !== drawTicket) return false;
+      rows.sort(function (a, b) { return b.ts - a.ts; });
+      lastRows = rows;
+    }
+    /* A sheet that is open stays open: a rail answering mid-sentence redraws the
+       list behind it, never the sheet out from under the visitor. */
+    if (!sheetRow) document.body.setAttribute('data-state', rows.length ? 'file' : 'empty');
     /* "On this phone: N files" — the device index is on this phone, and that is
        what it counts, in every state including zero. */
     var countEl = $('count');
@@ -824,131 +980,228 @@
     countEl.querySelector('.n').textContent = COPY[reg()].count(rows.length);
 
     var list = $('list');
-    list.textContent = '';
-    rows.forEach(function (row) {
-      var art = document.createElement('article');
-      art.className = 'file';
+    list.setAttribute('data-draw', String(mine));
+    /* The first slice is the first screen: exactly BATCH rows, at once. After
+       that a slice is however many rows fit in SLICE_MS, at least BATCH, so a long
+       list is laid out tens of times rather than once per hundred rows.
 
-      /* The head: a plain tile (decoration, no preview is made), the name, the
-         size and where the bytes are, and the purpose as a chip. */
-      var head = document.createElement('div');
-      head.className = 'head';
-      var thumb = document.createElement('i');
-      thumb.className = 'thumb';
-      thumb.setAttribute('aria-hidden', 'true');
-      head.appendChild(thumb);
-      var who = document.createElement('div');
+       A REDRAW REPLACES ROWS WHERE THEY STAND. It never empties the list first:
+       an emptied list collapses the page under a visitor who has scrolled, and
+       every rail that answers redraws. Slice by slice the new rows take the old
+       rows' places, and whatever is left past the end goes last. */
+    /* THE FIRST SCREEN GOES IN AT ONCE, IN PLACE: the first BATCH new rows take
+       the first BATCH old rows' places (a walking cursor, not `list.children[i]`,
+       which re-walks the list after every removal and was quadratic over 20,000
+       rows). THE REST IS BUILT OFF-SCREEN and swapped in with one operation.
+       Appending slice by slice to a long on-screen list re-laid out the whole
+       list every frame — measured at 20,000 rows: frames of 160 to 300 ms all the
+       way down. A detached fragment costs no layout while it grows; the one swap
+       costs one. Until it lands, the old rows past the first screen stay where
+       they were, so a redraw never collapses the page under a scrolled visitor. */
+    var old = list.firstElementChild;
+    var head = Math.min(rows.length, BATCH);
+    var screen = document.createDocumentFragment();
+    for (var k = 0; k < head; k++) screen.appendChild(rowEl(rows[k]));
+    for (var gone = 0; gone < head && old; gone++) { var dead = old; old = old.nextElementSibling; dead.remove(); }
+    list.insertBefore(screen, old);
 
-      var name = document.createElement('div');
-      name.className = 'name';
-      name.textContent = row.name;
-      who.appendChild(name);
-
-      /* Where the bytes are is the rail's declaration, not the purpose's name: a
-         rail that speaks to the world holds them out there, and only the index
-         row is on this phone. */
-      var meta = document.createElement('div');
-      meta.className = 'meta';
-      meta.textContent = kb(row.size) + ' · ' + t(speaksToTheWorld(schemeOf(row)) ? 'meta-out' : 'meta-here');
-      who.appendChild(meta);
-
-      var badge = document.createElement('span');
-      badge.className = 'chip' + (speaksToTheWorld(schemeOf(row)) ? ' pub' : '');
-      badge.textContent = t(row.purpose + '-chip') || purposeTitle(row.purpose) || row.purpose;
-      who.appendChild(badge);
-      head.appendChild(who);
-      art.appendChild(head);
-
-      /* The why line. NOT a register's opinion about a store — the rail's own
-         declared answer, rendered in this register's voice. It sits under the
-         row's buttons, where the chosen UI puts the one-line note. */
-      var why = document.createElement('p');
-      why.className = 'why';
-      why.textContent = termsLine(schemeOf(row)) ||
-        'The rail that holds this is not answering, so this page will not tell you who can read it.';
-
-      var h = document.createElement('p');
-      h.className = 'hash';
-      var prov = document.createElement('span');
-      prov.className = 'prov';
-      var tm = terms(schemeOf(row));
-      prov.textContent = (row.addr ? (row.addr.scheme + ' address\n' + row.addr.address) : 'no rail record — these bytes are only here') +
-        '\n' + (row.keyref ? 'AES-GCM on · key on this device (' + row.keyref + ')' : 'AES-GCM off (plaintext)') +
-        (tm ? ('\n' + word('deletable', tm.deletable ? 'yes' : 'no') + ' · ' + word('payer', tm.payer)) : '') +
-        '\nts ' + new Date(row.ts).toISOString().replace(/\.\d+Z$/, 'Z');
-      h.appendChild(prov);
-      /* This one is never a register's choice. A copy the visitor cannot pull back is said
-         in every register, in words, next to the file it belongs to. */
-      if (row.oldAddr) {
-        var left = document.createElement('span');
-        left.className = 'left';
-        left.textContent = 'An open copy you shared earlier is still out there at ' + row.oldAddr.scheme + ':' + row.oldAddr.address.slice(0, 12) + '…';
-        h.appendChild(left);
-      }
-      art.appendChild(h);
-
-      var actions = document.createElement('div');
-      actions.className = 'actions';
-
-      /* Offered only when there is something to read. A row whose bytes are on
-         no rail and not on this phone would fail on tap, and a control that
-         fails on tap is the thing `availablePurposes` exists to avoid one level
-         up. The id is the handle two gates drive this row by — a class would be
-         an anchor on incidental structure, and this button being added is
-         exactly what broke the previous `.ghost` first-match anchor. */
-      if (addrOf(row) || row.local) {
-        var openBtn = document.createElement('button');
-        openBtn.type = 'button';
-        openBtn.className = 'ghost';
-        openBtn.id = 'open-' + row.id;
-        openBtn.textContent = t('open');
-        openBtn.onclick = function () { doOpen(row); };
-        actions.appendChild(openBtn);
-      }
-
-      if (addrOf(row) && row.purpose === 'share') {
-        var share = document.createElement('button');
-        share.type = 'button';
-        share.className = 'ghost';
-        share.textContent = t('copy');
-        share.onclick = function () {
-          /* `f` carries a bare address and means the share rail, because every
-             link ever minted from this page was minted against it. It is not
-             widened here: a second SHARE rail needs a scheme in the link, and
-             inventing that parameter before one exists would be a guess at its
-             shape. Named, not built. */
-          var link = location.origin + location.pathname + '?f=' + addrOf(row) + '&n=' + encodeURIComponent(row.name);
-          navigator.clipboard.writeText(link).then(function () {
-            setStatus('Link copied. Whoever opens it joins the hive to read it, then the file opens.');
-          }, function () { setStatus('Link: ' + link); });
-        };
-        actions.appendChild(share);
-      }
-
-      var move = document.createElement('button');
-      move.type = 'button';
-      move.className = 'ghost';
-      move.id = 'move-' + row.id;
-      move.textContent = t('move');
-      move.onclick = function () { openSheet('flip', row); };
-      actions.appendChild(move);
-
-      var del = document.createElement('button');
-      del.type = 'button';
-      del.className = 'danger';
-      del.id = 'del-' + row.id;
-      del.textContent = t('remove');
-      del.onclick = function () { openSheet('delete', row); };
-      actions.appendChild(del);
-
-      art.appendChild(actions);
-      art.appendChild(why);
-      list.appendChild(art);
-    });
+    var rest = document.createDocumentFragment();
+    var i = head;
+    while (i < rows.length) {
+      await yieldToPage();
+      if (mine !== drawTicket) return false;
+      var t0 = performance.now();
+      while (i < rows.length && (i % 16 !== 0 || performance.now() - t0 < SLICE_MS)) rest.appendChild(rowEl(rows[i++]));
+    }
+    if (old) {
+      var tail = document.createRange();
+      tail.setStartBefore(old);
+      tail.setEndAfter(list.lastChild);
+      tail.deleteContents();
+    }
+    list.appendChild(rest);
     applyCopy();
+    /* a rail answered while this draw was reading: redraw from these rows once,
+       and let that draw be the one the waiters wait for */
+    if (termsDirty && mine === drawTicket) { termsDirty = false; render(rows); }
+    return true;
+  }
+
+  /* One file's row. */
+  function rowEl(row) {
+    var art = document.createElement('article');
+    art.className = 'file';
+    art.setAttribute('data-row', row.id);
+
+    /* The head: a plain tile (decoration; the preview is behind its own button,
+       never made just because a row was drawn), the name, the size and where the
+       bytes are, and the purpose as a chip. */
+    var head = document.createElement('div');
+    head.className = 'head';
+    var thumb = document.createElement('i');
+    thumb.className = 'thumb';
+    thumb.setAttribute('aria-hidden', 'true');
+    head.appendChild(thumb);
+    var who = document.createElement('div');
+
+    var name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = row.name;
+    who.appendChild(name);
+
+    /* Where the bytes are is the rail's declaration, not the purpose's name: a
+       rail that speaks to the world holds them out there, and only the index
+       row is on this phone. */
+    var meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.textContent = kb(row.size) + ' · ' + t(speaksToTheWorld(schemeOf(row)) ? 'meta-out' : 'meta-here');
+    who.appendChild(meta);
+
+    var badge = document.createElement('span');
+    badge.className = 'chip' + (speaksToTheWorld(schemeOf(row)) ? ' pub' : '');
+    badge.textContent = t(row.purpose + '-chip') || purposeTitle(row.purpose) || row.purpose;
+    who.appendChild(badge);
+    head.appendChild(who);
+    art.appendChild(head);
+
+    /* The why line. NOT a register's opinion about a store — the rail's own
+       declared answer, rendered in this register's voice. It sits under the
+       row's buttons, where the chosen UI puts the one-line note. A rail that has
+       not answered YET says so, in words that are not the ones for a rail that
+       will not answer. */
+    var why = document.createElement('p');
+    why.className = 'why';
+    var phase = railPhase(schemeOf(row));
+    why.textContent = termsLine(schemeOf(row)) || (phase === 'asking' ? t('asking') :
+      'The rail that holds this is not answering, so this page will not tell you who can read it.');
+
+    var h = document.createElement('p');
+    h.className = 'hash';
+    var prov = document.createElement('span');
+    prov.className = 'prov';
+    var tm = terms(schemeOf(row));
+    prov.textContent = (row.addr ? (row.addr.scheme + ' address\n' + row.addr.address) : 'no rail record — these bytes are only here') +
+      '\n' + (row.keyref ? 'AES-GCM on · key on this device (' + row.keyref + ')' : 'AES-GCM off (plaintext)') +
+      (tm ? ('\n' + word('deletable', tm.deletable ? 'yes' : 'no') + ' · ' + word('payer', tm.payer)) : '') +
+      '\nts ' + new Date(row.ts).toISOString().replace(/\.\d+Z$/, 'Z');
+    h.appendChild(prov);
+    /* This one is never a register's choice. A copy the visitor cannot pull back is said
+       in every register, in words, next to the file it belongs to. */
+    if (row.oldAddr) {
+      var left = document.createElement('span');
+      left.className = 'left';
+      left.textContent = 'An open copy you shared earlier is still out there at ' + row.oldAddr.scheme + ':' + row.oldAddr.address.slice(0, 12) + '…';
+      h.appendChild(left);
+    }
+    art.appendChild(h);
+
+    var actions = document.createElement('div');
+    actions.className = 'actions';
+
+    /* Offered only when there is something to read. A row whose bytes are on
+       no rail and not on this phone would fail on tap, and a control that
+       fails on tap is the thing `availablePurposes` exists to avoid one level
+       up. The id is the handle two gates drive this row by — a class would be
+       an anchor on incidental structure, and this button being added is
+       exactly what broke the previous `.ghost` first-match anchor. */
+    if (addrOf(row) || row.local) {
+      var openBtn = document.createElement('button');
+      openBtn.type = 'button';
+      openBtn.className = 'ghost';
+      openBtn.id = 'open-' + row.id;
+      openBtn.textContent = t('open');
+      openBtn.onclick = function () { doOpen(row); };
+      actions.appendChild(openBtn);
+
+      var look = document.createElement('button');
+      look.type = 'button';
+      look.className = 'ghost';
+      look.id = 'look-' + row.id;
+      look.textContent = t('look');
+      look.onclick = function () { doLook(row); };
+      actions.appendChild(look);
+    }
+
+    if (addrOf(row) && row.purpose === 'share') {
+      var share = document.createElement('button');
+      share.type = 'button';
+      share.className = 'ghost';
+      share.textContent = t('copy');
+      share.onclick = function () {
+        /* `f` carries a bare address and means the share rail, because every
+           link ever minted from this page was minted against it. It is not
+           widened here: a second SHARE rail needs a scheme in the link, and
+           inventing that parameter before one exists would be a guess at its
+           shape. Named, not built. */
+        var link = location.origin + location.pathname + '?f=' + addrOf(row) + '&n=' + encodeURIComponent(row.name);
+        navigator.clipboard.writeText(link).then(function () {
+          setStatus('Link copied. Whoever opens it joins the hive to read it, then the file opens.');
+        }, function () { setStatus('Link: ' + link); });
+      };
+      actions.appendChild(share);
+    }
+
+    var move = document.createElement('button');
+    move.type = 'button';
+    move.className = 'ghost';
+    move.id = 'move-' + row.id;
+    move.textContent = t('move');
+    move.onclick = function () { openSheet('flip', row); };
+    actions.appendChild(move);
+
+    var del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'danger';
+    del.id = 'del-' + row.id;
+    del.textContent = t('remove');
+    del.onclick = function () { openSheet('delete', row); };
+    actions.appendChild(del);
+
+    art.appendChild(actions);
+    art.appendChild(why);
+    return art;
+  }
+
+  /* A ROW ON SCREEN IS A CLAIM ABOUT THE PAST. What the visitor tapped was drawn
+     from the index as it was then; acting on it means acting on the index as it
+     is now. So every act re-reads its row first and refuses, by name, when the
+     row is gone or no longer says the same thing about where the bytes are —
+     the list is redrawn and the visitor taps again on what is true. (Strata's
+     provider rule, taken as pattern: "a menu is not authorization".) The
+     comparison is the kernel's `open::revalidate`, held to the same three
+     fields: which bytes (the recorded digest), where (the address), and under
+     which terms (the purpose). */
+  async function fresh(row) {
+    var now = await getRow(row.id);
+    if (!now) throw Object.assign(new Error('That file is no longer in your list.'), { stale: true });
+    migrateRow(now);
+    /* Two changes are the index LEARNING, not the row moving, and neither refuses:
+       a digest recorded where the drawn row had none (a first look), and a
+       pre-slice-03 row whose bytes moved onto the local rail on first read. */
+    var legacy = row.local && !row.addr;
+    var same = JSON.stringify([legacy ? null : now.addr, now.purpose, row.sha256 ? (now.sha256 || null) : null, now.oldAddr || null]) ===
+      JSON.stringify([legacy ? null : row.addr, row.purpose, row.sha256 || null, row.oldAddr || null]);
+    if (!same) throw Object.assign(new Error('That file changed since this list was drawn. The list is up to date now; tap it again.'), { stale: true });
+    return now;
+  }
+
+  function staleSaid(e) {
+    if (!e || !e.stale) return false;
+    setStatus(e.message, true);
+    sheetRow = null;
+    render();
+    return true;
   }
 
   function openSheet(kind, row) {
+    /* The sheets' sentences are built from the row's rail terms. A rail still
+       answering has none yet, and "not answering" would be the wrong sentence
+       read at the moment of choosing, so the sheet waits for that one rail. */
+    var s = schemeOf(row);
+    if (railPhase(s) === 'asking') {
+      setStatus(t('asking'), false, true);
+      return settled(s).then(function () { setStatus(''); openSheet(kind, row); });
+    }
     sheetRow = row;
     if (kind === 'delete') {
       $('del-title').textContent = t('del-title')(row);
@@ -1016,11 +1269,6 @@
 
   async function addFile(file) {
     var want = pendingPurpose;
-    var scheme = railFor(want);
-    if (!scheme) {
-      setStatus('No rail on this page can do that right now, so nothing was written. Your file is still yours — try another choice.', true);
-      return;
-    }
 
     /* SAID BEFORE THE FIRST `await`, AND THAT ORDERING IS THE POINT. Reading the
        file's bytes is already work the visitor is waiting through, so the line
@@ -1032,12 +1280,25 @@
        an act is under way. */
     setStatus(t('working'), false, true);
 
+    /* The choice is read at the tap (above); which rail can keep it is asked once
+       every rail has answered, so a file chosen in the first moments of a visit
+       is not refused as "no rail can do that" by rails that are only starting. */
+    if (anyAsking()) await allSettled();
+    var scheme = railFor(want);
+    if (!scheme) {
+      setStatus('No rail on this page can do that right now, so nothing was written. Your file is still yours — try another choice.', true);
+      return;
+    }
+
     var id = 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
     var plain = new Uint8Array(await file.arrayBuffer());
 
+    /* `sha256` is what the visitor put in, recorded on this phone at the moment
+       they put it in. Every later preview checks the bytes that come back from
+       ANY rail — sealed or open, hive or door — against it, end to end. */
     var row = {
       id: id, name: file.name || 'file', size: plain.length, type: file.type || '',
-      purpose: want, ts: Date.now(), addr: null, keyref: null
+      purpose: want, ts: Date.now(), addr: null, keyref: null, sha256: await sha256hex(plain)
     };
 
     try {
@@ -1090,51 +1351,90 @@
     var toScheme = railFor(toId);
     if (!toScheme) { setStatus('That is not available right now, so nothing changed.', true); return closeSheet(); }
     setStatus(t('flipping'), false, true);
+    try { row = await fresh(row); } catch (e) { if (staleSaid(e)) return; throw e; }
+    var from = schemeOf(row);
+    var fromT = from && terms(from);
+    var oldAddr = row.addr;
+
+    var addr;
     try {
       var bytes = await plainBytes(row);
-      var from = schemeOf(row);
-      var fromT = from && terms(from);
-
-      var addr = await storeBytes(row.id, toScheme, bytes);
-
-      /* The old copy goes ONLY where the rail says it can go. Where it cannot,
-         the row remembers it and every register says so next to the file — the
-         one sentence that is never a register's choice. */
-      if (from && fromT && fromT.deletable) {
-        await railDrop(from, addrOf(row));
-        delete row.oldAddr;
-      } else if (from && addrOf(row)) {
-        row.oldAddr = row.addr;
-      }
-      if (row.local) { await dropLegacy(row.id); delete row.local; }
-
-      row.addr = addr;
-      row.purpose = toId;
-      row.keyref = encryptsFor(toScheme) ? 'device:aes-gcm:v1' : null;
-      if (!encryptsFor(toScheme)) await dropKey(row.id);
-      await putRow(row);
-      setStatus(moveSentence(row, toId));
+      addr = await storeBytes(row.id, toScheme, bytes);
     } catch (e) {
-      setStatus('Nothing changed — ' + (e.message || 'that did not work') + '.' + leftSaying(e), true);
+      /* Nothing in the index changed. Whether anything LEFT the phone is the
+         error's to say, never assumed: "Nothing changed" used to be printed after
+         a share PUT that timed out, when the file may already have been out. */
+      var left = leftSaying(e);
+      setStatus(left
+        ? 'The move did not finish (' + (e.message || 'that did not work') + '). Your list still has the file where it was.' + left
+        : 'Nothing changed — ' + (e.message || 'that did not work') + '.', true);
+      return closeSheet();
     }
+
+    /* FROM HERE THE NEW COPY EXISTS, so the index says so before anything else
+       can fail. The old order cleared the old copy first and wrote the row last;
+       a failed clear then reported "Nothing changed" while the new copy was out
+       there — and, between two sealed rails, while the row still named the old
+       ciphertext under a key that had just been replaced, which no longer opened
+       anything. Now the row moves first, and a failed clear is named for what it
+       leaves behind. */
+    var undeletable = !!(from && oldAddr && !(fromT && fromT.deletable));
+    if (row.local) { await dropLegacy(row.id); delete row.local; }
+    row.addr = addr;
+    row.purpose = toId;
+    row.keyref = encryptsFor(toScheme) ? 'device:aes-gcm:v1' : null;
+    if (undeletable) row.oldAddr = oldAddr;
+    else delete row.oldAddr;
+    if (!encryptsFor(toScheme)) await dropKey(row.id);
+    await putRow(row);
+
+    /* The old copy goes ONLY where the rail says it can go. Where it cannot,
+       the row remembers it and every register says so next to the file — the
+       one sentence that is never a register's choice. */
+    var cleared = '';
+    if (!undeletable && from && oldAddr) {
+      try {
+        await railDrop(from, oldAddr.address);
+      } catch (e) {
+        if (encryptsFor(from)) {
+          /* its key was replaced (sealed destination) or dropped (open one) above */
+          cleared = ' The old sealed copy could not be cleared (' + (e.message || 'error') + '); its key is gone, so nothing can open it.';
+        } else {
+          row.oldAddr = oldAddr;
+          await putRow(row);
+          cleared = ' The old copy could not be removed (' + (e.message || 'error') + ') and is still at ' + oldAddr.scheme + ':' + oldAddr.address.slice(0, 12) + '….';
+        }
+      }
+    }
+    setStatus(moveSentence(row, toId) + cleared, !!cleared);
     closeSheet();
   }
 
   async function doDelete(row) {
+    try { row = await fresh(row); } catch (e) { if (staleSaid(e)) return; throw e; }
     var s = schemeOf(row);
     var tm = s && terms(s);
     var reallyGone = false;
+    var dropErr = null;
     if (s && tm && tm.deletable && addrOf(row)) {
-      try { reallyGone = (await railDrop(s, addrOf(row))).dropped; } catch (e) { reallyGone = false; }
+      try { reallyGone = (await railDrop(s, addrOf(row))).dropped; } catch (e) { dropErr = e; }
     }
     if (row.local) await dropLegacy(row.id);
     await dropKey(row.id);
     await dropRow(row.id);
     /* Two acts, two sentences, and which one is said is decided by what the rail
-       actually did — not by a guess made before the call. */
-    setStatus(reallyGone
-      ? ('Gone. The bytes and the key were both here, and this file existed nowhere else.' + leftBehind(row))
-      : ('Gone from this phone. The copy out there stays where it is.' + leftBehind(row)));
+       actually did — not by a guess made before the call. A delete the rail
+       FAILED is a third sentence: it used to be swallowed and reported as "the
+       copy out there stays", which is false of a sealed copy on this phone. */
+    if (dropErr) {
+      setStatus((encryptsFor(s)
+        ? 'Gone from your list. Clearing its sealed bytes failed (' + (dropErr.message || 'error') + '); the key went with the row, so nothing can open them.'
+        : 'Gone from your list, but the rail did not confirm the delete (' + (dropErr.message || 'error') + '), so a copy may still be out there.') + leftBehind(row), true);
+    } else {
+      setStatus(reallyGone
+        ? ('Gone. The bytes and the key were both here, and this file existed nowhere else.' + leftBehind(row))
+        : ('Gone from this phone. The copy out there stays where it is.' + leftBehind(row)));
+    }
     closeSheet();
   }
 
@@ -1152,6 +1452,23 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
   }
 
+  /* The bytes a rail handed back, checked against what the visitor put in. A row
+     added before the digest was recorded gets it now, from the first bytes that
+     come back, and says so: that first check has nothing earlier to compare to. */
+  async function checkedBytes(row) {
+    var bytes = await plainBytes(row);
+    var sha = await sha256hex(bytes);
+    if (!row.sha256) {
+      row.sha256 = sha;
+      await putRow(row);
+      return { bytes: bytes, first: true };
+    }
+    if (sha !== row.sha256) {
+      throw Object.assign(new Error('the bytes that came back are not the ones you added, so they were not used'), { identity: true });
+    }
+    return { bytes: bytes, first: false };
+  }
+
   /* A kept file could be put away and never taken back out: every row carried
      Move it and Remove, and nothing that opened it (slice 01 through 03; named
      in #168 and measured on the live page by the eye seat 2026-09-20 22:51Z).
@@ -1162,11 +1479,279 @@
   async function doOpen(row) {
     setStatus(t('opening'), false, true);
     try {
-      var bytes = await plainBytes(row);
-      handToDevice(bytes, row.name, row.type);
+      row = await fresh(row);
+      var got = await checkedBytes(row);
+      handToDevice(got.bytes, row.name, row.type);
       setStatus(t('done'));
     } catch (e) {
+      if (staleSaid(e)) return;
       setStatus('Could not open ' + row.name + ' (' + (e.message || 'error') + ').', true);
+    }
+  }
+
+  /* ---------- a look before saving ----------
+     The preview is crates/bnr-explorer's, compiled to surfaces/bnr-explorer.wasm
+     and run in its own worker (bnr-explorer-worker.js). Three things hold it:
+
+       · THE MODULE CAN NAME NOTHING OUTSIDE ITSELF. It has no imports, so the
+         code that reads a stranger's bytes has no network, key, store or clock
+         to reach. Before it runs, this page checks the module's sha256 against
+         the pin below and its import list against empty; either check failing
+         turns previews OFF, said in words, and the file's bytes are never read.
+         There is no second, weaker way to preview. A missing isolation is a
+         missing preview, never a quieter one.
+       · IT IS HANDED ONE OBJECT. The worker receives the bytes of the file being
+         looked at and the digest they must have — no key, no rail, no index.
+       · IDENTITY BEFORE PARSING, UNDER A BUDGET THE PAGE CANNOT LOOSEN. The module
+         hashes the bytes against the digest recorded when the file was added and
+         refuses before it parses anything that is not those bytes; then 32 MB in,
+         64 KB of text out, 50 million pixels. A picture is drawn by the browser
+         only after its header passed, from the checked bytes, as the type the
+         content says it is (never the name's), and an SVG is shown as text.
+
+     Each look takes a ticket like the list does: a look the visitor has left
+     (closed, or looked at another file) never paints. A look that runs past its
+     deadline stops the worker, and the next look starts a new one. */
+  var PREVIEW_MODULE = 'bnr-explorer.wasm';
+  var PREVIEW_SHA256 = 'ed106c550547b42877a5ec7f13322fa716bc0b417c28366e0eac3449d392cc73'; // PUBLIC-CONSTANT sha256 of surfaces/bnr-explorer.wasm (scripts/bnr-explorer/build-wasm.sh --check)
+  var PREVIEW_MAX = 32 * 1024 * 1024;
+  var PREVIEW_DEADLINE = 5000;
+  var PREVIEW_RECYCLE = 8 * 1024 * 1024;   // after a look this large, the worker is retired so its memory goes back
+
+  var LOOK = { ready: null, worker: null, pending: new Map(), seq: 0, held: null, url: null, last: null, pages: 0, off: null };
+  var lookTicket = 0;
+
+  var OFF_WHY = {
+    wasm: 'this browser does not run WebAssembly',
+    worker: 'this browser cannot start a worker',
+    crypto: 'this browser has no SHA-256 for a worker',
+    fetch: 'the preview module did not arrive',
+    pin: 'the preview module that arrived is not the one this page was built with',
+    compile: 'the preview module did not compile',
+    imports: 'the preview module asks for outside access, and a preview must have none',
+    start: 'the preview worker did not start'
+  };
+
+  function lookErr(kind, why) { return Object.assign(new Error(kind), { look: kind, why: why || null }); }
+
+  function previewer() {
+    if (LOOK.off) return Promise.reject(lookErr('off', LOOK.off));
+    if (LOOK.ready) return LOOK.ready;
+    LOOK.ready = startWorker();
+    LOOK.ready.catch(function () { LOOK.ready = null; });
+    return LOOK.ready;
+  }
+
+  /* The worker loads the module itself (this file reaches no network at all —
+     e2e/myspace-seam.mjs §13 holds the shell to that), checks it against the pin
+     sent here, and says the digest it saw; the page checks that digest again. A
+     wrong pin or a module with imports is STRUCTURAL: previews stay off for the
+     life of this page rather than being retried into a pass. */
+  function startWorker() {
+    return new Promise(function (res, rej) {
+      if (typeof WebAssembly !== 'object' || typeof WebAssembly.compile !== 'function') return rej(lookErr('off', 'wasm'));
+      if (typeof Worker !== 'function') return rej(lookErr('off', 'worker'));
+      var w;
+      try { w = new Worker('bnr-explorer-worker.js'); } catch (e) { return rej(lookErr('off', 'worker')); }
+      var timer = setTimeout(function () { w.terminate(); rej(lookErr('off', 'start')); }, PREVIEW_DEADLINE);
+      w.onerror = function () { clearTimeout(timer); w.terminate(); rej(lookErr('off', 'start')); };
+      w.onmessage = function (ev) {
+        var m = ev.data || {};
+        if (m.op === 'off') {
+          clearTimeout(timer);
+          w.terminate();
+          var why = OFF_WHY[m.why] ? m.why : 'start';
+          if (why === 'pin' || why === 'imports' || why === 'compile') LOOK.off = why;
+          return rej(lookErr('off', why));
+        }
+        if (m.op !== 'ready') return;
+        clearTimeout(timer);
+        if (m.sha !== PREVIEW_SHA256 || m.imports !== 0) {
+          w.terminate();
+          LOOK.off = 'pin';
+          return rej(lookErr('off', 'pin'));
+        }
+        LOOK.worker = w;
+        LOOK.pages = m.pages;
+        w.onerror = function () { retire('crash'); };
+        w.onmessage = function (ev2) {
+          var v = ev2.data || {};
+          var p = v.op === 'verdict' && LOOK.pending.get(v.id);
+          if (!p) return;
+          clearTimeout(p.timer);
+          LOOK.pending.delete(v.id);
+          LOOK.pages = v.pages || LOOK.pages;
+          if (v.refused) p.rej(lookErr('crash', v.refused)); else p.res(v.bytes);
+        };
+        res(w);
+      };
+      /* the version in the URL is the pin's, so a cached older module is never
+         offered to a page that pins a newer one */
+      w.postMessage({ op: 'init', url: PREVIEW_MODULE + '?v=' + PREVIEW_SHA256.slice(0, 12), pin: PREVIEW_SHA256 });
+    });
+  }
+
+  /* Stop the worker and fail whatever it was doing; the next look starts a new one
+     from the module already checked. */
+  function retire(kind) {
+    if (LOOK.worker) LOOK.worker.terminate();
+    LOOK.worker = null;
+    LOOK.ready = null;
+    LOOK.pages = 0;
+    LOOK.pending.forEach(function (p) { clearTimeout(p.timer); p.rej(lookErr(kind)); });
+    LOOK.pending.clear();
+  }
+
+  function lookCall(digest, bytes) {
+    return previewer().then(function (w) {
+      return new Promise(function (res, rej) {
+        var id = ++LOOK.seq;
+        var timer = setTimeout(function () { LOOK.pending.delete(id); rej(lookErr('deadline')); retire('crash'); }, PREVIEW_DEADLINE);
+        LOOK.pending.set(id, { res: res, rej: rej, timer: timer });
+        w.postMessage({ op: 'preview', id: id, digest: digest, bytes: bytes });
+      });
+    });
+  }
+
+  var FORMATS = { 1: { name: 'PNG', mime: 'image/png' }, 2: { name: 'JPEG', mime: 'image/jpeg' }, 3: { name: 'GIF', mime: 'image/gif' }, 4: { name: 'WebP', mime: 'image/webp' } };
+
+  /* The verdict wire (crates/bnr-explorer/src/wire.rs), read with every length
+     checked; anything that does not parse exactly is a verdict of its own. */
+  function readVerdict(b) {
+    if (!(b instanceof Uint8Array) || b.length < 6 || b[0] !== 0x42 || b[1] !== 0x58 || b[2] !== 0x50 || b[3] !== 0x56 || b[4] !== 1) return { kind: 'bad' };
+    var dv = new DataView(b.buffer, b.byteOffset, b.byteLength);
+    if (b[5] === 1 && b.length >= 15 && 15 + dv.getUint32(11, true) === b.length) {
+      try {
+        return { kind: 'text', truncated: b[6] === 1, lines: dv.getUint32(7, true), text: new TextDecoder('utf-8', { fatal: true }).decode(b.subarray(15)) };
+      } catch (e) { return { kind: 'bad' }; }
+    }
+    if (b[5] === 2 && b.length === 15 && FORMATS[b[6]]) return { kind: 'image', format: FORMATS[b[6]], width: dv.getUint32(7, true), height: dv.getUint32(11, true) };
+    if (b[5] === 3 && b.length === 8) return { kind: 'none', reason: b[6], detail: b[7] };
+    return { kind: 'bad' };
+  }
+
+  function lookReason(v) {
+    var f = FORMATS[v.detail];
+    switch (v.reason) {
+      case 1: return 'This file is larger than the 32 MB a preview reads, so no preview was made. Save it to see it.';
+      case 2: return 'The bytes that came back are not the ones you added, so they were not shown.';
+      case 3: return 'This file is empty.';
+      case 4: return (f ? 'This looks like a ' + f.name + ' picture, but its structure is broken' : 'Its structure is broken') + ', so it was not drawn.';
+      case 5: return 'This ' + (f ? f.name + ' ' : '') + 'picture says it has more pixels than a preview draws (50 million), so it was not drawn.';
+      case 6: return 'This is not text or a picture a preview can show. Save it to open it with an app.';
+      case 7: return ({ 1: 'PDFs are not previewed here.', 2: 'Sound and video are not previewed here.', 3: 'Archives are not opened here.', 4: 'This kind of picture (HEIC or AVIF) is not drawn here.' }[v.detail] || 'This kind of file is not previewed here.') + ' Save it to open it with an app.';
+    }
+    return 'The preview could not be made.';
+  }
+
+  function lookFailure(e) {
+    if (e && e.look === 'off') return 'Previews are off on this device: ' + (OFF_WHY[e.why] || 'the preview could not start') + '. Nothing was read.';
+    if (e && e.look === 'deadline') return 'The preview took longer than ' + (PREVIEW_DEADLINE / 1000) + ' seconds and was stopped.';
+    if (e && e.look === 'crash') return 'The preview stopped before it finished.';
+    return 'Could not read it (' + ((e && e.message) || 'error') + ').';
+  }
+
+  function lookRelease() {
+    if (LOOK.url) URL.revokeObjectURL(LOOK.url);
+    LOOK.url = null;
+    LOOK.held = null;
+    var view = $('look-view');
+    view.textContent = '';
+    view.removeAttribute('data-kind');
+    view.removeAttribute('data-reason');
+  }
+
+  /* What the sheet shows, and what the gates read (`data-kind`, `data-reason`). */
+  function lookSay(kind, sentence, reason) {
+    var view = $('look-view');
+    view.setAttribute('data-kind', kind);
+    if (reason != null) view.setAttribute('data-reason', String(reason));
+    $('look-body').textContent = sentence;
+    LOOK.last = { kind: kind, reason: reason == null ? null : reason, said: sentence };
+  }
+
+  async function doLook(row) {
+    var mine = ++lookTicket;
+    setStatus('');
+    try { row = await fresh(row); } catch (e) { if (staleSaid(e)) return; throw e; }
+    if (mine !== lookTicket) return;
+    lookRelease();
+    sheetRow = row;
+    $('look-title').textContent = row.name;
+    lookSay('reading', t('reading'));
+    document.body.setAttribute('data-state', 'look');
+    try {
+      /* the size is known from the index: an object over the budget is not read at all */
+      if (row.size > PREVIEW_MAX) return lookSay('none', lookReason({ reason: 1 }), 1);
+      /* isolation first: if there is no preview, there is no reason to read the file */
+      await previewer();
+      if (mine !== lookTicket) return;
+      var got = await checkedBytes(row);
+      if (mine !== lookTicket) return;
+      var v = readVerdict(await lookCall(row.sha256, got.bytes));
+      if (got.bytes.length > PREVIEW_RECYCLE) retire('recycled');
+      if (mine !== lookTicket) return;
+      LOOK.held = { id: row.id, bytes: got.bytes };
+      var checked = COPY[reg()].checked(got.first, row.sha256);
+      if (v.kind === 'text') {
+        var pre = document.createElement('pre');
+        pre.textContent = v.text;
+        $('look-view').appendChild(pre);
+        lookSay('text', checked + (v.truncated ? ' Showing the start: ' + v.lines + (v.lines === 1 ? ' line.' : ' lines.') : ''));
+      } else if (v.kind === 'image') {
+        var img = document.createElement('img');
+        img.alt = row.name;
+        img.width = v.width;
+        img.height = v.height;
+        LOOK.url = URL.createObjectURL(new Blob([got.bytes], { type: v.format.mime }));
+        img.src = LOOK.url;
+        $('look-view').appendChild(img);
+        lookSay('image', checked + ' ' + v.format.name + ' · ' + v.width + ' × ' + v.height + '.');
+        img.decode().then(null, function () {
+          if (mine !== lookTicket) return;
+          $('look-view').textContent = '';
+          lookSay('none', 'The header was sound but this picture could not be drawn.', 0);
+        });
+      } else if (v.kind === 'none') {
+        lookSay('none', lookReason(v), v.reason);
+      } else {
+        lookSay('none', 'The preview could not be made.', 0);
+      }
+    } catch (e) {
+      if (mine !== lookTicket) return;
+      if (staleSaid(e)) return;
+      if (e && e.identity) return lookSay('none', lookReason({ reason: 2 }), 2);
+      lookSay(e && e.look === 'off' ? 'off' : 'none', lookFailure(e), e && e.look === 'off' ? e.why : 0);
+    }
+  }
+
+  /* CLOSING A LOOK ENDS ITS WORKER. The module zeroes the object's bytes and
+     the verdict as soon as each call is done, but the worker's own JavaScript
+     heap held a copy too, and nothing can force that to be collected; ending
+     the worker releases all of it. The next look starts a new one from the
+     same pinned module (a cold start costs about a tenth of a second). The
+     file itself is untouched: a this-visit-only file stays until the visit
+     ends, as the visitor chose. */
+  function closeLook() {
+    ++lookTicket;
+    lookRelease();
+    retire('closed');
+    closeSheet();
+  }
+
+  /* Saving from a look hands over the bytes the look already checked; there is
+     no second read. A look that never read bytes (too large, previews off)
+     saves the way Open does. */
+  function saveLook() {
+    var row = sheetRow;
+    var held = LOOK.held;
+    closeLook();
+    if (!row) return;
+    if (held && held.id === row.id) {
+      handToDevice(held.bytes, row.name, row.type);
+      setStatus(t('done'));
+    } else {
+      doOpen(row);
     }
   }
 
@@ -1210,6 +1795,8 @@
     };
     $('delKeep').onclick = closeSheet;
     $('delConfirm').onclick = function () { if (sheetRow) doDelete(sheetRow); };
+    $('lookClose').onclick = closeLook;
+    $('lookSave').onclick = saveLook;
 
     /* register.js (mounted by tour.js) owns the switch; this page only re-renders its
        own words when the switch fires. No second switch is built here. */
@@ -1222,17 +1809,41 @@
     /* Every rail is spawned at load, not at first use, so the page knows which
        purposes it can honestly offer before the visitor picks one. This touches
        no network: `describe` is answered inside each worker, and two of the three
-       workers contain no network primitive at all. */
-    var ready = RAILS.map(function (r) {
-      try { return rail(r.scheme).ready.catch(function () {}); }
-      catch (e) { return Promise.resolve(); }
-    });
+       workers contain no network primitive at all.
 
-    Promise.all(ready).then(async function () {
+       THE LIST DOES NOT WAIT FOR THE SLOWEST RAIL. The device index is this
+       phone's own, so it is drawn at once, each row saying whether its rail has
+       answered yet; each rail's answer lands on its own rows the moment it
+       arrives (a this-visit-only rail's rows are swept then, by its own word).
+       Until this slice nothing reliable was on screen until every rail had
+       answered: measured with one adapter script held back 3 s, the true words
+       for a file kept on this phone arrived after 3.15 s. */
+    var swept = 0;
+    var sweeping = Promise.resolve();
+    RAILS.forEach(function (r) {
+      try { rail(r.scheme); } catch (e) { return; }
+      settled(r.scheme).then(function () {
+        sweeping = sweeping.then(async function () {
+          var tm = terms(r.scheme);
+          if (!(tm && tm.survives_reload === false)) return 0;
+          var n = await sweepEphemeral(await loadRows());
+          swept += n;
+          return n;
+        });
+        return sweeping;
+      }).then(function (n) {
+        /* the cards are cheap and the visitor chooses from them: they follow each
+           answer at once, not the end of a long list's draw */
+        renderPurposes();
+        return n ? render() : repaint();
+      });
+    });
+    render();
+
+    allSettled().then(function () { return sweeping; }).then(async function () {
       if (!availablePurposes().length) {
         setStatus('This page could not load any storage adapter, so there is nothing it can honestly offer to do with a file.', true);
       }
-      var swept = await sweepEphemeral(await loadRows());
       await render();
       if (swept) setStatus(COPY[reg()].swept(swept));
       var q = new URLSearchParams(location.search);
@@ -1255,6 +1866,8 @@
     purposes: function () { return availablePurposes().map(function (p) { return p.id; }); },
     devicePubkey: devicePubkey,
     rows: loadRows,
-    render: render
+    render: render,
+    phase: railPhase,
+    look: function () { return { last: LOOK.last, pages: LOOK.pages, off: LOOK.off, worker: !!LOOK.worker }; }
   };
 })();

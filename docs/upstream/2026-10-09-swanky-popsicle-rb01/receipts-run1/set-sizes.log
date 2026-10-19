@@ -1,0 +1,12 @@
+$ ~/rb01-upstream/target/release/examples/repro_set_sizes
+|B| = 256; 20 sessions per |A|; expected cardinality 128 in every row
+|A| =  128: correct 20, wrong  0, error  0, panic  0
+|A| =  256: correct 20, wrong  0, error  0, panic  0
+|A| =  288: correct 20, wrong  0, error  0, panic  0
+|A| =  320: correct 20, wrong  0, error  0, panic  0
+|A| =  352: correct 19, wrong  0, error  0, panic  1  first: thread 'main' at edge/oprf-kmprt/src/lib.rs:211: assertion failed: points.len() <= npoints
+|A| =  384: correct 15, wrong  0, error  0, panic  5  first: thread 'main' at edge/oprf-kmprt/src/lib.rs:211: assertion failed: points.len() <= npoints
+|A| =  448: correct  0, wrong  0, error  0, panic 20  first: thread 'main' at edge/oprf-kmprt/src/lib.rs:211: assertion failed: points.len() <= npoints
+|A| =  512: correct  0, wrong  0, error  0, panic 20  first: thread 'main' at edge/oprf-kmprt/src/lib.rs:211: assertion failed: points.len() <= npoints
+|A| = 1024: correct  0, wrong  0, error  0, panic 20  first: thread 'main' at edge/oprf-kmprt/src/lib.rs:211: assertion failed: points.len() <= npoints
+exit=0

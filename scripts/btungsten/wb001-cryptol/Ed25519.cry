@@ -1,0 +1,281 @@
+// bTunGsTeN WB001 — Ed25519 (RFC 8032 §5.1) as an executable Cryptol spec.
+//
+// WHY THIS FILE: the algorithm WB001 signs with had no formal artifact.
+// Galois's cryptol-specs carries ECDSA (P-224..P-521) and Curve25519
+// field code, but no EdDSA; NSA's Foundation repo carries ECDSA Cryptol and
+// no SAW artifact for any signature. This is the spec the model's signer
+// (libcrux-ed25519, HACL*-verified) and OpenSSL are both checked against.
+//
+// Written from the RFC text, nothing transcribed that can be derived: the
+// SHA-512 round constants and initial hash are COMPUTED here as the
+// FIPS 180-4 definitions say (first 64 bits of the fractional parts of
+// cube / square roots of the first primes), so no 80-constant table can
+// carry a typo. The checks at the bottom pin the result to the RFC's own
+// test vectors and to the OpenSSL oracle rows.
+//
+// Result class: an EXECUTABLE SPEC checked on closed terms (the RFC 8032
+// §7.1 vectors, SHA-512("abc"), and envelope signatures from
+// wb001-ed25519-oracle.json). It is not a proof about libcrux; libcrux's
+// own proof is HACL*'s F* development.
+
+module Ed25519 where
+
+//////////////////////////////////////////////////////////////////////////////
+// SHA-512 (FIPS 180-4)
+//////////////////////////////////////////////////////////////////////////////
+
+isPrime : Integer -> Bit
+isPrime n = (n >= 2) && and [ (q * q > n) || (n % q != 0) | q <- [2 .. 30] : [29]Integer ]
+
+nextPrime : Integer -> Integer
+nextPrime q = if isPrime (q + 1) then q + 1 else nextPrime (q + 1)
+
+primes80 : [80]Integer
+primes80 = take`{80} ps
+  where ps = [2] # [ nextPrime q | q <- ps ]
+
+// floor of the k-th root of x, baseY bisection on Integer
+iroot : Integer -> Integer -> Integer
+iroot k x = go 0 (x + 1)
+  where
+    go lo hi = if hi - lo <= 1 then lo
+               else (if (mid ^^ k) <= x then go mid hi else go lo mid)
+      where mid = (lo + hi) / 2
+
+frac64 : Integer -> Integer -> [64]
+frac64 k q = fromInteger ((iroot k (q * 2 ^^ (64 * k))) % (2 ^^ 64))
+
+K512 : [80][64]
+K512 = [ frac64 3 q | q <- primes80 ]
+
+H512 : [8][64]
+H512 = [ frac64 2 q | q <- take`{8} primes80 ]
+
+S0, S1, s0, s1 : [64] -> [64]
+S0 x = (x >>> 28) ^ (x >>> 34) ^ (x >>> 39)
+S1 x = (x >>> 14) ^ (x >>> 18) ^ (x >>> 41)
+s0 x = (x >>> 1) ^ (x >>> 8) ^ (x >> 7)
+s1 x = (x >>> 19) ^ (x >>> 61) ^ (x >> 6)
+
+Ch, Maj : [64] -> [64] -> [64] -> [64]
+Ch x y z = (x && y) ^ (~x && z)
+Maj x y z = (x && y) ^ (x && z) ^ (y && z)
+
+schedule : [16][64] -> [80][64]
+schedule m = w
+  where w = m # [ s1 (w @ (t - 2)) + (w @ (t - 7)) + s0 (w @ (t - 15)) + (w @ (t - 16)) | t <- [16 .. 79] : [64][8] ]
+
+compress : [8][64] -> [16][64] -> [8][64]
+compress h m = [ x + y | x <- h | y <- final ]
+  where
+    w = schedule m
+    rounds = [h] # [ sround r (K512 @ t) (w @ t) | r <- rounds | t <- [0 .. 79] : [80][8] ]
+    final = rounds @ (80 : [8])
+
+sround : [8][64] -> [64] -> [64] -> [8][64]
+sround [a, b, c, dv, e, f, g, h] k w = [t1 + t2, a, b, c, dv + t1, e, f, g]
+  where
+    t1 = h + S1 e + Ch e f g + k + w
+    t2 = S0 a + Maj a b c
+
+type Padded n = ((8 * n + 129) /^ 1024) * 1024
+
+sha512 : {n} (fin n, 128 >= width (8 * n)) => [n][8] -> [64][8]
+sha512 msg = split (join (foldl compress H512 blocks))
+  where
+    padded = join msg # [True] # zero # (`(8 * n) : [128]) : [Padded n]
+    blocks = [ split blk | blk <- split padded ] : [Padded n / 1024][16][64]
+
+//////////////////////////////////////////////////////////////////////////////
+// The edwards25519 group (RFC 8032 §5.1), extended coordinates, Integer mod p
+//////////////////////////////////////////////////////////////////////////////
+
+p : Integer
+p = 2 ^^ 255 - 19
+
+L : Integer
+L = 2 ^^ 252 + 27742317777372353535851937790883648493
+
+md : Integer -> Integer
+md x = x % p
+
+inv : Integer -> Integer
+inv x = powmod x (p - 2)
+
+powmod : Integer -> Integer -> Integer
+powmod b e = if e == 0 then 1
+             else (if e % 2 == 0 then sq else md (sq * b))
+  where
+    half = powmod b (e / 2)
+    sq = md (half * half)
+
+d : Integer
+d = md (0 - 121665 * inv 121666)
+
+sqrtm1 : Integer
+sqrtm1 = powmod 2 ((p - 1) / 4)
+
+type Point = (Integer, Integer, Integer, Integer)   // (X, Y, Z, T), x = X/Z, y = Y/Z, xy = T/Z
+
+identity : Point
+identity = (0, 1, 1, 0)
+
+padd : Point -> Point -> Point
+padd (x1, y1, z1, t1) (x2, y2, z2, t2) = (md (e * f), md (g * h), md (f * g), md (e * h))
+  where
+    a = md ((y1 - x1) * (y2 - x2))
+    b = md ((y1 + x1) * (y2 + x2))
+    c = md (2 * t1 * t2 * d)
+    dd = md (2 * z1 * z2)
+    e = b - a
+    f = dd - c
+    g = dd + c
+    h = b + a
+
+// [k]P, k < 2^256, most significant bit first
+smul : Integer -> Point -> Point
+smul k pt = foldl step identity bits
+  where
+    bits = reverse (take`{256} [ (k / 2 ^^ i) % 2 == 1 | i <- [0 ...] : [inf]Integer ])
+    step acc b = if b then padd (padd acc acc) pt else padd acc acc
+
+recoverX : Integer -> Bit -> (Bit, Integer)
+recoverX y sgnBit =
+  if y >= p then (False, 0)
+  else if x2 == 0 then (~sgnBit, 0)
+  else if md (x1 * x1 - x2) == 0 then (True, fixSign x1)
+  else if md (x1 * x1 + x2) == 0 then (True, fixSign (md (x1 * sqrtm1)))
+  else (False, 0)
+  where
+    x2 = md ((y * y - 1) * inv (d * y * y + 1))
+    x1 = powmod x2 ((p + 3) / 8)
+    fixSign x = if (x % 2 == 1) != sgnBit then md (p - x) else x
+
+base : Point
+base = (baseX, baseY, 1, md (baseX * baseY))
+  where
+    baseY = md (4 * inv 5)
+    baseX = (recoverX baseY False).1
+
+leInt : {n} (fin n) => [n][8] -> Integer
+leInt bs = toInteger (join (reverse bs))
+
+intLe : {n} (fin n, n >= 1) => Integer -> [n][8]
+intLe x = reverse (split (fromInteger x))
+
+encode : Point -> [32][8]
+encode (x, y, z, _) = intLe`{32} (yy + (if xx % 2 == 1 then 2 ^^ 255 else 0))
+  where
+    zi = inv z
+    xx = md (x * zi)
+    yy = md (y * zi)
+
+decode : [32][8] -> (Bit, Point)
+decode bs = (ok, (x, y, 1, md (x * y)))
+  where
+    n = leInt bs
+    y = n % 2 ^^ 255
+    sgn = n / 2 ^^ 255 == 1
+    (ok, x) = recoverX y sgn
+
+pointEq : Point -> Point -> Bit
+pointEq (x1, y1, z1, _) (x2, y2, z2, _) = (md (x1 * z2 - x2 * z1) == 0) && (md (y1 * z2 - y2 * z1) == 0)
+
+//////////////////////////////////////////////////////////////////////////////
+// Ed25519 (RFC 8032 §5.1.5 keys, §5.1.6 sign, §5.1.7 verify)
+//////////////////////////////////////////////////////////////////////////////
+
+expand : [32][8] -> (Integer, [32][8])
+expand sk = (s, drop`{32} h)
+  where
+    h = sha512 sk
+    lo = take`{32} h
+    clamped = [ (lo @ 0) && 0xf8 ] # (take`{30} (drop`{1} lo)) # [ ((lo @ 31) && 0x7f) || 0x40 ]
+    s = leInt clamped
+
+publicKey : [32][8] -> [32][8]
+publicKey sk = encode (smul (expand sk).0 base)
+
+sign : {n} (fin n, 128 >= width (8 * (32 + n)), 128 >= width (8 * (64 + n))) => [32][8] -> [n][8] -> [64][8]
+sign sk msg = encode rP # intLe`{32} sS
+  where
+    (s, prefix) = expand sk
+    aBytes = encode (smul s base)
+    r = leInt (sha512 (prefix # msg)) % L
+    rP = smul r base
+    k = leInt (sha512 (encode rP # aBytes # msg)) % L
+    sS = (r + k * s) % L
+
+verify : {n} (fin n, 128 >= width (8 * (64 + n))) => [32][8] -> [n][8] -> [64][8] -> Bit
+verify pk msg sig = okA && okR && (sS < L) && pointEq (smul 8 (smul sS base)) (smul 8 (padd rP (smul k aP)))
+  where
+    (okA, aP) = decode pk
+    (okR, rP) = decode (take`{32} sig)
+    sS = leInt (drop`{32} sig)
+    k = leInt (sha512 (take`{32} sig # pk # msg)) % L
+
+//////////////////////////////////////////////////////////////////////////////
+// Closed-term checks: the RFC 8032 §7.1 vectors, SHA-512("abc") (which is
+// the TEST SHA(abc) message), and OpenSSL-oracle envelope rows.
+//////////////////////////////////////////////////////////////////////////////
+
+sha512Abc : Bit
+property sha512Abc = sha512 "abc" == split 0xddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f // PUBLIC-CONSTANT: FIPS 180-2 SHA-512("abc")
+
+sk1, pk1, sk2, pk2, sk3, pk3, skA, pkA : [32][8]
+sk1 = split 0x9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60 // PUBLIC-CONSTANT: RFC 8032 TEST 1
+pk1 = split 0xd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a // PUBLIC-CONSTANT: RFC 8032 TEST 1
+sk2 = split 0x4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb // PUBLIC-CONSTANT: RFC 8032 TEST 2
+pk2 = split 0x3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c // PUBLIC-CONSTANT: RFC 8032 TEST 2
+sk3 = split 0xc5aa8df43f9f837bedb7442f31dcb7b166d38535076f094b85ce3a2e0b4458f7 // PUBLIC-CONSTANT: RFC 8032 TEST 3
+pk3 = split 0xfc51cd8e6218a1a38da47ed00230f0580816ed13ba3303ac5deb911548908025 // PUBLIC-CONSTANT: RFC 8032 TEST 3
+skA = split 0x833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42 // PUBLIC-CONSTANT: RFC 8032 TEST SHA(abc)
+pkA = split 0xec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf // PUBLIC-CONSTANT: RFC 8032 TEST SHA(abc)
+
+sig1, sig2, sig3, sigA : [64][8]
+sig1 = split 0xe5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901555fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b // PUBLIC-CONSTANT: RFC 8032 TEST 1
+sig2 = split 0x92a009a9f0d4cab8720e820b5f642540a2b27b5416503f8fb3762223ebdb69da085ac1e43e15996e458f3613d0f11d8c387b2eaeb4302aeeb00d291612bb0c00 // PUBLIC-CONSTANT: RFC 8032 TEST 2
+sig3 = split 0x6291d657deec24024827e69c3abe01a30ce548a284743a445e3680d7db5ac3ac18ff9b538d16f290ae67f760984dc6594a7c15e9716ed28dc027beceea1ec40a // PUBLIC-CONSTANT: RFC 8032 TEST 3
+sigA = split 0xdc2a4459e7369633a52b1bf277839a00201009a3efbf3ecb69bea2186c26b58909351fc9ac90b3ecfdfbc7c66431e0303dca179c138ac17ad9bef1177331a704 // PUBLIC-CONSTANT: RFC 8032 TEST SHA(abc)
+
+msgA : [64][8]
+msgA = sha512 "abc"
+
+rfcTest1 : Bit
+property rfcTest1 = (publicKey sk1 == pk1) && (sign sk1 ([] : [0][8]) == sig1) && verify pk1 ([] : [0][8]) sig1
+
+rfcTest2 : Bit
+property rfcTest2 = (publicKey sk2 == pk2) && (sign sk2 [0x72] == sig2) && verify pk2 [0x72] sig2
+
+rfcTest3 : Bit
+property rfcTest3 = (publicKey sk3 == pk3) && (sign sk3 [0xaf, 0x82] == sig3) && verify pk3 [0xaf, 0x82] sig3
+
+rfcTestAbc : Bit
+property rfcTestAbc = (publicKey skA == pkA) && (sign skA msgA == sigA) && verify pkA msgA sigA
+
+// the verifier has teeth: one flipped bit in the signature, the message or
+// the key, and it refuses
+verifyRefusesFlips : Bit
+property verifyRefusesFlips =
+     ~(verify pk2 [0x72] (update sig2 0 ((sig2 @ 0) ^ 1)))
+  && ~(verify pk2 [0x73] sig2)
+  && ~(verify pk3 [0x72] sig2)
+
+// OpenSSL-oracle rows (wb001-ed25519-oracle.json): the model's own envelopes,
+// signed by node:crypto; the spec must produce the identical signature.
+
+envBaseMsg : [205][8]
+envBaseMsg = split 0x62542d5742303101010000000e736b61697374732e627061792f3102000000206e6f6e63652d7762303031000000000000000000000000000000000000000000030000000800000000000000010400000020616374696f6e2d686173682d3031000000000000000000000000000000000000050000000c7661756c743a3078424545460600000003706179070000000800000000000f42400800000008000000006ab13b80090000000a736561743a6246557a5a0a000000147b2275706c6f61645f6964223a2275702d31227d // PUBLIC-CONSTANT: WB001 envelope (base under RFC8032 TEST 1 seed)
+envBaseSig : [64][8]
+envBaseSig = split 0x4fbbd10df6c07866ae4b3b2dd0b26c53f7b32a7aed27d420755e3bbbf288b351a05ff8b6d17e958cabf4e08a8ab9949b5b81feaf350553ee391bf84a1c8fd403 // PUBLIC-CONSTANT: OpenSSL Ed25519 over it
+
+oracleEnvBase : Bit
+property oracleEnvBase = (sign sk1 envBaseMsg == envBaseSig) && verify pk1 envBaseMsg envBaseSig
+
+envNestedMsg : [390][8]
+envNestedMsg = split 0x62542d5742303101010000000e736b61697374732e627061792f3102000000206e6f6e63652d7762303031000000000000000000000000000000000000000000030000000800000000000000010400000020616374696f6e2d686173682d3031000000000000000000000000000000000000050000000c7661756c743a3078424545460600000003706179070000000800000000000f42400800000008000000006ab13b80090000000a736561743a6246557a5a0a000000cd62542d5742303101010000000e736b61697374732e627061792f3102000000206e6f6e63652d7762303031000000000000000000000000000000000000000000030000000800000000000000010400000020616374696f6e2d686173682d3031000000000000000000000000000000000000050000000c7661756c743a3078424545460600000003706179070000000800000000000f42400800000008000000006ab13b80090000000a736561743a6246557a5a0a000000147b2275706c6f61645f6964223a2275702d31227d // PUBLIC-CONSTANT: WB001 envelope (nested envelope payload under RFC8032 TEST 3 seed)
+envNestedSig : [64][8]
+envNestedSig = split 0x45bc7f9adbb6765205861732ec375c6764f56c5a992f6d13aaf6bf18f563d4059ed1a194c866fecd9dea438005b1801a06dec9aa6ffda1451546f7e02f0ce805 // PUBLIC-CONSTANT: OpenSSL Ed25519 over it
+
+oracleEnvNested : Bit
+property oracleEnvNested = (sign sk3 envNestedMsg == envNestedSig) && verify pk3 envNestedMsg envNestedSig

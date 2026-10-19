@@ -1,0 +1,995 @@
+{
+  "lane": "wb004-jungle-live-2026-10-12",
+  "account": "bzcodejungle",
+  "delegated_permission": "wbfoursignr",
+  "chain_id": "73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d",
+  "endpoints": {
+    "primary": "https://jungle4.cryptolions.io",
+    "secondary": "https://jungle4.greymass.com"
+  },
+  "K2_pub": {
+    "legacy": "EOS7szL5LvfVCaFGb7pRouDvEjpsHcXfGUfVx1tAFyBNv3qBiRtVq",
+    "k1": "PUB_K1_7szL5LvfVCaFGb7pRouDvEjpsHcXfGUfVx1tAFyBNv3qBQeQNS"
+  },
+  "K3_pub": {
+    "legacy": "EOS5DpSGHd76X2owF57aAcpNEUPiuW1jummu1mPVtTT9FLb7gc2v3",
+    "k1": "PUB_K1_5DpSGHd76X2owF57aAcpNEUPiuW1jummu1mPVtTT9FLb9c7ReD"
+  },
+  "proposals": {
+    "p1": "wb4qjddz",
+    "p2": "wb4xoqbu",
+    "p3": "wb4hufys",
+    "p4": "wb4onuwc",
+    "p5": "wb4xhdsg",
+    "p6": "wb45mhs5"
+  },
+  "msig_app_urls": [
+    "https://msig.app/jungle/bzcodejungle/wb4qjddz",
+    "https://msig.app/jungle/bzcodejungle/wb4xoqbu",
+    "https://msig.app/jungle/bzcodejungle/wb4hufys",
+    "https://msig.app/jungle/bzcodejungle/wb4xhdsg",
+    "https://msig.app/jungle/bzcodejungle/wb45mhs5"
+  ],
+  "exec_txids": {
+    "p1": "30b68fdf8a178d3ace2ef3fdf64d04c791c23c10749001a3f272113f806dffb3",
+    "p2": "7c532e3906212f70e70d35a819854c3a225ea23409045178ca50ef2a37f91ff6",
+    "p3": "e18ad0c1e9a62e8b954ebbfb008c33ef19710d64d967496d1c7b698ac040519b"
+  },
+  "steps": [
+    {
+      "t": "2026-10-12T20:53:55.168Z",
+      "action": "preflight/chain",
+      "deployed_msig_code_hash": "afbc51b5fd8a63c7a9938b7ef953c55259d3224d7460f22808a04e09d9250eed",
+      "deployed_msig_actions": "approve,cancel,exec,invalidate,propose,unapprove",
+      "approve_fields": "proposer:name,proposal_name:name,level:permission_level,proposal_hash:checksum256$"
+    },
+    {
+      "t": "2026-10-12T20:54:10.959Z",
+      "action": "preflight/txid-convention",
+      "probe_blocks": [
+        291731758,
+        291731745,
+        291731732,
+        291731719,
+        291731706,
+        291731693,
+        291731680,
+        291731667,
+        291731654,
+        291731641,
+        291731628,
+        291731615,
+        291731602,
+        291731589,
+        291731576,
+        291731563,
+        291731550,
+        291731537,
+        291731524,
+        291731511,
+        291731498,
+        291731485,
+        291731472,
+        291731459,
+        291731446,
+        291731433,
+        291731420,
+        291731407,
+        291731394,
+        291731381,
+        291731368,
+        291731355,
+        291731342,
+        291731329,
+        291731316,
+        291731303,
+        291731290,
+        291731277,
+        291731264,
+        291731251,
+        291731238,
+        291731225,
+        291731212,
+        291731199,
+        291731186,
+        291731173,
+        291731160,
+        291731147,
+        291731134,
+        291731121,
+        291731108,
+        291731095,
+        291731082,
+        291731069,
+        291731056,
+        291731043,
+        291731030,
+        291731017,
+        291731004,
+        291730991,
+        291730978,
+        291730965,
+        291730952,
+        291730939,
+        291730926,
+        291730913,
+        291730900,
+        291730887,
+        291730874,
+        291730861,
+        291730848,
+        291730835,
+        291730822,
+        291730809,
+        291730796,
+        291730783,
+        291730770,
+        291730757,
+        291730744,
+        291730731,
+        291730718,
+        291730705,
+        291730692,
+        291730679,
+        291730666,
+        291730653,
+        291730640,
+        291730627,
+        291730614,
+        291730601,
+        291730588,
+        291730575,
+        291730562,
+        291730549,
+        291730536,
+        291730523,
+        291730510
+      ],
+      "historical_txs_checked": 6,
+      "historical_txid_matches": 6,
+      "abi_json_to_bin": "disabled on cryptolions and greymass (404) — named, live txid echo arbitrates instead"
+    },
+    {
+      "t": "2026-10-12T20:54:30.487Z",
+      "action": "preflight/chain",
+      "deployed_msig_code_hash": "afbc51b5fd8a63c7a9938b7ef953c55259d3224d7460f22808a04e09d9250eed",
+      "deployed_msig_actions": "approve,cancel,exec,invalidate,propose,unapprove",
+      "approve_fields": "proposer:name,proposal_name:name,level:permission_level,proposal_hash:checksum256$"
+    },
+    {
+      "t": "2026-10-12T20:54:40.885Z",
+      "action": "preflight/txid-convention",
+      "probe_blocks": [
+        291731829,
+        291731816,
+        291731803,
+        291731790,
+        291731777,
+        291731764,
+        291731751,
+        291731738,
+        291731725,
+        291731712,
+        291731699,
+        291731686,
+        291731673,
+        291731660,
+        291731647,
+        291731634,
+        291731621,
+        291731608,
+        291731595,
+        291731582,
+        291731569,
+        291731556,
+        291731543,
+        291731530,
+        291731517,
+        291731504,
+        291731491,
+        291731478,
+        291731465,
+        291731452,
+        291731439,
+        291731426,
+        291731413,
+        291731400,
+        291731387,
+        291731374,
+        291731361,
+        291731348,
+        291731335,
+        291731322,
+        291731309,
+        291731296,
+        291731283,
+        291731270,
+        291731257,
+        291731244,
+        291731231,
+        291731218,
+        291731205,
+        291731192,
+        291731179,
+        291731166,
+        291731153,
+        291731140,
+        291731127,
+        291731114,
+        291731101,
+        291731088,
+        291731075,
+        291731062,
+        291731049,
+        291731036,
+        291731023
+      ],
+      "historical_txs_checked": 5,
+      "historical_txid_matches": 5,
+      "abi_json_to_bin": "disabled on cryptolions and greymass (404) — named, live txid echo arbitrates instead"
+    },
+    {
+      "t": "2026-10-12T20:55:06.771Z",
+      "action": "resources/before",
+      "cpu_available_us": 2866,
+      "net_available": 15415,
+      "ram_free": 2049,
+      "core_balance": "300.0000 EOS"
+    },
+    {
+      "t": "2026-10-12T20:56:32.592Z",
+      "action": "resources/before",
+      "cpu_available_us": 2866,
+      "net_available": 15415,
+      "ram_free": 2049,
+      "core_balance": "300.0000 EOS"
+    },
+    {
+      "t": "2026-10-12T20:58:14.641Z",
+      "action": "resources/before",
+      "cpu_available_us": 2866,
+      "net_available": 15415,
+      "ram_free": 2049,
+      "core_balance": "300.0000 EOS"
+    },
+    {
+      "t": "2026-10-12T21:05:30.295Z",
+      "action": "resources/before",
+      "cpu_available_us": 2866,
+      "net_available": 15415,
+      "ram_free": 2049,
+      "core_balance": "300.0000 EOS"
+    },
+    {
+      "t": "2026-10-12T21:06:33.783Z",
+      "action": "resources/before",
+      "cpu_available_us": 2866,
+      "net_available": 15415,
+      "ram_free": 2049,
+      "core_balance": "300.0000 EOS"
+    },
+    {
+      "t": "2026-10-12T21:06:34.543Z",
+      "action": "eosio::delegatebw",
+      "txid": "c29cfb73dc501b9fab2b1344d2c29832eb0c72af414618a7e21eef15f477cd49",
+      "blockNum": 291733287,
+      "txidEchoMatch": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:06:34.710Z",
+      "action": "resources/after",
+      "cpu_available_us": 2866,
+      "net_available": 15415
+    },
+    {
+      "t": "2026-10-12T21:07:21.452Z",
+      "action": "eosio::updateauth",
+      "txid": "e5057eb5bfbbd9c77aca62896eb0bdd664101896a8fd19413d83df2dc6845e52",
+      "blockNum": 291733381,
+      "txidEchoMatch": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:07:21.787Z",
+      "action": "eosio::linkauth",
+      "txid": "b54f51faadd1af43f4ec83ce6231a60babcea6063680db70a7a07854c0faee00",
+      "blockNum": 291733382,
+      "txidEchoMatch": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:07:21.941Z",
+      "action": "setup/wbfoursignr",
+      "permission_present": true,
+      "parent": "active",
+      "key": "EOS7szL5LvfVCaFGb7pRouDvEjpsHcXfGUfVx1tAFyBNv3qBiRtVq",
+      "linked": ""
+    },
+    {
+      "t": "2026-10-12T21:07:34.601Z",
+      "action": "p1/inner-packed",
+      "proposal": "wb4d5oqf",
+      "packed_sha256": "c2a302b21ea5fc364374647cdec9cd251db08b76070becee0158c8fad2682b57",
+      "packed_len": 102
+    },
+    {
+      "t": "2026-10-12T21:08:43.820Z",
+      "action": "eosio::linkauth",
+      "txid": "536d17115b47291ad14e3f1889f15a70f0cc58019b89a83f93aa16fb27cdcaff",
+      "blockNum": 291733546,
+      "txidEchoMatch": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:08:43.994Z",
+      "action": "setup/wbfoursignr",
+      "permission_present": true,
+      "parent": "active",
+      "key": "EOS7szL5LvfVCaFGb7pRouDvEjpsHcXfGUfVx1tAFyBNv3qBiRtVq",
+      "linked": "eosio.msig::undefined"
+    },
+    {
+      "t": "2026-10-12T21:08:50.323Z",
+      "action": "p1/inner-packed",
+      "proposal": "wb4d5oqf",
+      "packed_sha256": "da869b7be585678dca009d0cf90d3e04e889c493e6dc5a9cd816979133ecdb87",
+      "packed_len": 102
+    },
+    {
+      "t": "2026-10-12T21:08:51.069Z",
+      "action": "eosio.msig::propose",
+      "txid": "e2ab2965a01cf808b73a3c1a908dab6acd4509678c7154fcf266943e9d4859ac",
+      "blockNum": 291733561,
+      "txidEchoMatch": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:09:49.356Z",
+      "action": "p1/stored-bytes",
+      "proposal": "wb4d5oqf",
+      "stored_packed_sha256": "da869b7be585678dca009d0cf90d3e04e889c493e6dc5a9cd816979133ecdb87",
+      "equals_local": true
+    },
+    {
+      "t": "2026-10-12T21:09:49.525Z",
+      "action": "p1/approvals-shape",
+      "requested": [
+        {
+          "level": {
+            "actor": "bzcodejungle",
+            "permission": "wbfoursignr"
+          },
+          "time": "1970-01-01T00:00:00.000"
+        }
+      ],
+      "provided": []
+    },
+    {
+      "t": "2026-10-12T21:09:49.891Z",
+      "action": "eosio.msig::approve",
+      "txid": "d3df9263f77e37d46b4f9d0830a1cb8caa4be85d117b969637490c76264c713c",
+      "blockNum": null,
+      "txidEchoMatch": null,
+      "expected": "refused ~ hash",
+      "outcome": "refused",
+      "chainMessage": "hash mismatch"
+    },
+    {
+      "t": "2026-10-12T21:09:50.224Z",
+      "action": "eosio.msig::approve",
+      "txid": "715a7bcf1de1bbd2abd6edda9eca76e3cf1384c12b47336ed47d16b643a80940",
+      "blockNum": 291733679,
+      "txidEchoMatch": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:10:15.036Z",
+      "action": "eosio::linkauth",
+      "txid": "79d43ef54bceeea3eda2720eae246da5a7b4807232a4c0f5824b199a4ea3a751",
+      "blockNum": 291733729,
+      "txidEchoMatch": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:10:15.193Z",
+      "action": "setup/wbfoursignr",
+      "permission_present": true,
+      "parent": "active",
+      "key": "EOS7szL5LvfVCaFGb7pRouDvEjpsHcXfGUfVx1tAFyBNv3qBiRtVq",
+      "linked": "eosio.msig::undefined,eosio.token::undefined"
+    },
+    {
+      "t": "2026-10-12T21:10:21.864Z",
+      "action": "p1/stored-bytes",
+      "proposal": "wb4d5oqf",
+      "stored_packed_sha256": "da869b7be585678dca009d0cf90d3e04e889c493e6dc5a9cd816979133ecdb87",
+      "equals_local": true,
+      "resumed": true
+    },
+    {
+      "t": "2026-10-12T21:10:22.025Z",
+      "action": "p1/approvals-shape",
+      "requested": [],
+      "provided": [
+        {
+          "level": {
+            "actor": "bzcodejungle",
+            "permission": "wbfoursignr"
+          },
+          "time": "2026-10-12T21:09:41.000"
+        }
+      ]
+    },
+    {
+      "t": "2026-10-12T21:10:22.363Z",
+      "action": "eosio.msig::unapprove",
+      "txid": "fab147f24819875fe6d4ccf797b7f1dee70d8d0bd29defc7485dbffca5d7790e",
+      "blockNum": 291733743,
+      "txidEchoMatch": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:12:41.986Z",
+      "action": "resources/before",
+      "cpu_available_us": 156656,
+      "net_available": 322280,
+      "ram_free": 173,
+      "core_balance": "180.0000 EOS"
+    },
+    {
+      "t": "2026-10-12T21:12:42.880Z",
+      "action": "eosio::buyrambytes",
+      "txid": "c541057e5a559c4d652df9e35aca786e4d41cbdf9f310dae902457d5d7af8865",
+      "blockNum": 291734023,
+      "txidEchoMatch": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:12:43.046Z",
+      "action": "resources/ram",
+      "ram_quota": 5495,
+      "ram_usage": 5322,
+      "core_balance": "180.0000 EOS"
+    },
+    {
+      "t": "2026-10-12T21:12:43.381Z",
+      "action": "eosio::delegatebw",
+      "txid": "65bbf3f81e57a0ff52c631abb36f367796bbfa556b2a0a0d1e49462b49f6fa56",
+      "blockNum": 291734024,
+      "txidEchoMatch": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:12:43.536Z",
+      "action": "resources/after",
+      "cpu_available_us": 151759,
+      "net_available": 322168
+    },
+    {
+      "t": "2026-10-12T21:15:00.256Z",
+      "action": "p1/inner-packed",
+      "proposal": "wb4qjddz",
+      "packed_sha256": "f7567d32c823a015bba5b3cb4a7fab00592329530ba35993114312a8c7d86ed8",
+      "packed_len": 102
+    },
+    {
+      "t": "2026-10-12T21:15:00.926Z",
+      "action": "eosio.msig::propose",
+      "txid": "713a7ebfac619030fb9672374234d0802fde59a609770f068589fee421fc0f03",
+      "blockNum": 291734299,
+      "txidEchoMatch": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:15:01.858Z",
+      "action": "p1/stored-bytes",
+      "proposal": "wb4qjddz",
+      "stored_packed_sha256": "f7567d32c823a015bba5b3cb4a7fab00592329530ba35993114312a8c7d86ed8",
+      "equals_local": true,
+      "resumed": false
+    },
+    {
+      "t": "2026-10-12T21:15:02.040Z",
+      "action": "p1/approvals-shape",
+      "requested": [
+        {
+          "level": {
+            "actor": "bzcodejungle",
+            "permission": "wbfoursignr"
+          },
+          "time": "1970-01-01T00:00:00.000"
+        }
+      ],
+      "provided": []
+    },
+    {
+      "t": "2026-10-12T21:15:02.407Z",
+      "action": "eosio.msig::approve",
+      "txid": "53a624ccbb064aa8d0e2fbbe9207c0f27a1def811837d517599ee303be0be459",
+      "blockNum": null,
+      "txidEchoMatch": null,
+      "expected": "refused ~ hash",
+      "outcome": "refused",
+      "chainMessage": "hash mismatch"
+    },
+    {
+      "t": "2026-10-12T21:15:39.418Z",
+      "action": "p1/stored-bytes",
+      "proposal": "wb4qjddz",
+      "stored_packed_sha256": "f7567d32c823a015bba5b3cb4a7fab00592329530ba35993114312a8c7d86ed8",
+      "equals_local": true,
+      "resumed": true
+    },
+    {
+      "t": "2026-10-12T21:15:39.580Z",
+      "action": "p1/approvals-shape",
+      "requested": [
+        {
+          "level": {
+            "actor": "bzcodejungle",
+            "permission": "wbfoursignr"
+          },
+          "time": "1970-01-01T00:00:00.000"
+        }
+      ],
+      "provided": []
+    },
+    {
+      "t": "2026-10-12T21:15:39.903Z",
+      "action": "eosio.msig::approve",
+      "txid": "39494a3411da079b6a4efb59b6b632df5ad9af74d49a03deb7486e95f0f51cca",
+      "blockNum": null,
+      "txidEchoMatch": null,
+      "expected": "refused ~ hash",
+      "outcome": "refused",
+      "chainMessage": "hash mismatch"
+    },
+    {
+      "t": "2026-10-12T21:15:40.250Z",
+      "action": "eosio.msig::approve",
+      "txid": "4716c10cb24d53d4fe7486ffde96d246029631762165cebf0ddacc9293d1383b",
+      "blockNum": 291734378,
+      "txidEchoMatch": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:16:27.442Z",
+      "action": "p1/stored-bytes",
+      "proposal": "wb4qjddz",
+      "stored_packed_sha256": "f7567d32c823a015bba5b3cb4a7fab00592329530ba35993114312a8c7d86ed8",
+      "equals_local": true,
+      "resumed": true
+    },
+    {
+      "t": "2026-10-12T21:16:27.605Z",
+      "action": "p1/approvals-shape",
+      "requested": [],
+      "provided": [
+        {
+          "level": {
+            "actor": "bzcodejungle",
+            "permission": "wbfoursignr"
+          },
+          "time": "2026-10-12T21:15:31.000"
+        }
+      ]
+    },
+    {
+      "t": "2026-10-12T21:16:27.929Z",
+      "action": "eosio.msig::unapprove",
+      "txid": "76f22de1591dfd21596074a13687a58b1a0abb16735b2c045fbe302df121ac9c",
+      "blockNum": 291734473,
+      "txidEchoMatch": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:16:29.187Z",
+      "action": "eosio.msig::exec",
+      "txid": "61e6f63707ed1b10bedc71de5dd8b62498bd03be5d80ff48c4208b6618a0668e",
+      "blockNum": null,
+      "txidEchoMatch": null,
+      "expected": "refused ~ transaction authorization failed",
+      "outcome": "refused",
+      "chainMessage": "transaction authorization failed"
+    },
+    {
+      "t": "2026-10-12T21:16:30.531Z",
+      "action": "eosio.msig::approve",
+      "txid": "91d9f2e0e3bc0cb13422f59f3bdbfbb6e6338d6c1dc444b230dc89ae9598a1cd",
+      "blockNum": 291734478,
+      "txidEchoMatch": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:16:32.838Z",
+      "action": "eosio.msig::exec",
+      "txid": "30b68fdf8a178d3ace2ef3fdf64d04c791c23c10749001a3f272113f806dffb3",
+      "blockNum": 291734483,
+      "txidEchoMatch": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:17:50.342Z",
+      "action": "p1/inner-packed",
+      "proposal": "wb4qjddz",
+      "packed_sha256": "ad9c13642c8de0a120f4241c9e5cc1c38ca4d0ff245efdedecafeb66234c2e52",
+      "packed_len": 102
+    },
+    {
+      "t": "2026-10-12T21:18:18.293Z",
+      "action": "p1/stored-bytes",
+      "proposal": "wb4qjddz",
+      "stored_packed_sha256": "ad9c13642c8de0a120f4241c9e5cc1c38ca4d0ff245efdedecafeb66234c2e52",
+      "equals_local": true,
+      "resumed": true
+    },
+    {
+      "t": "2026-10-12T21:18:18.451Z",
+      "action": "p1/approvals-shape",
+      "requested": [
+        {
+          "level": {
+            "actor": "bzcodejungle",
+            "permission": "wbfoursignr"
+          },
+          "time": "1970-01-01T00:00:00.000"
+        }
+      ],
+      "provided": []
+    },
+    {
+      "t": "2026-10-12T21:18:19.824Z",
+      "action": "eosio.msig::approve",
+      "txid": "1c8e2cd0f9d6f708b021e973c53e48b7b20e0c8b37804391e34ecd6219e201ee",
+      "blockNum": null,
+      "txidEchoMatch": null,
+      "blockInclusionVerified": null,
+      "expected": "refused ~ hash",
+      "outcome": "refused",
+      "chainMessage": "hash mismatch"
+    },
+    {
+      "t": "2026-10-12T21:19:07.585Z",
+      "action": "eosio.msig::exec",
+      "txid": "5f958f944013080ec711e76c46e3cca5aadb01ac6f144012513dacb7fc820083",
+      "blockNum": null,
+      "txidEchoMatch": null,
+      "blockInclusionVerified": null,
+      "expected": "refused ~ /proposal not found|transaction authorization failed/",
+      "outcome": "refused",
+      "chainMessage": "transaction authorization failed"
+    },
+    {
+      "t": "2026-10-12T21:19:07.587Z",
+      "action": "p1/complete",
+      "exec_txid": "30b68fdf8a178d3ace2ef3fdf64d04c791c23c10749001a3f272113f806dffb3",
+      "exec_block": 291734484
+    },
+    {
+      "t": "2026-10-12T21:20:00.637Z",
+      "action": "eosio.msig::propose",
+      "txid": "a28e74d37ad66f39b64bdcbe51ace6f42f09831b8410d793d9ba3d1b824c70ea",
+      "blockNum": 291734896,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:20:02.911Z",
+      "action": "eosio.msig::approve",
+      "txid": "958c7c769a363a352e464bc2f66a59e3f620a8abe3a5af965068082318c128d3",
+      "blockNum": 291734902,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:20:03.592Z",
+      "action": "eosio.msig::exec",
+      "txid": "00ad688425aad436b1f97cd948cef09d18aaf0a57cf30cdcd16fb61251a8811c",
+      "blockNum": null,
+      "txidEchoMatch": null,
+      "blockInclusionVerified": null,
+      "expected": "refused ~ too early to execute",
+      "outcome": "refused",
+      "chainMessage": "too early to execute"
+    },
+    {
+      "t": "2026-10-12T21:21:07.284Z",
+      "action": "eosio.msig::exec",
+      "txid": "7c532e3906212f70e70d35a819854c3a225ea23409045178ca50ef2a37f91ff6",
+      "blockNum": 291735030,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:21:25.101Z",
+      "action": "eosio.msig::propose",
+      "txid": "0ca052334d83699a70d6c42837f2e0e6eb6abf288925561191ba9da0d7cb1044",
+      "blockNum": 291735067,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:21:25.936Z",
+      "action": "eosio.msig::approve",
+      "txid": "e4bc44f12286618a1d5b56ab3404abf56f6612cae02936787285dea13596599a",
+      "blockNum": 291735068,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:21:31.259Z",
+      "action": "eosio::updateauth",
+      "txid": "f9d8fec541c0136e01e08dca4bcfadf8f7cec775ea0fea8117d72b81ef2c6678",
+      "blockNum": 291735079,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:21:31.579Z",
+      "action": "eosio.msig::approve",
+      "txid": "7122dfb25ba6c02982d18e2631a4a1dd26373bcf0381ac38ca7e05ded98c67d4",
+      "blockNum": null,
+      "txidEchoMatch": null,
+      "blockInclusionVerified": null,
+      "expected": "refused ~ /signatur|authority/i",
+      "outcome": "refused",
+      "chainMessage": "transaction declares authority '{\"actor\":\"bzcodejungle\",\"permission\":\"wbfoursignr\"}', but does not have signatures for it under a provided delay of 0 ms, provided permissions [], provided keys [\"EOS7szL5LvfVCaFGb7pRouDvEjpsHcXfGUfVx1tAFyBNv3qBiRtVq\"], and a delay max limit of 3888000000 ms"
+    },
+    {
+      "t": "2026-10-12T21:21:32.565Z",
+      "action": "eosio.msig::exec",
+      "txid": "e18ad0c1e9a62e8b954ebbfb008c33ef19710d64d967496d1c7b698ac040519b",
+      "blockNum": 291735081,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:21:32.566Z",
+      "action": "p3/finding",
+      "finding": "key rotation of the approving permission did NOT withdraw the stored approval; exec succeeded post-rotation. The reference remedy is invalidate(), exercised in P4."
+    },
+    {
+      "t": "2026-10-12T21:21:36.197Z",
+      "action": "eosio.msig::propose",
+      "txid": "a3fb961ab8f5a9f2c20cda35175fff7ab8706c74d345ff3804964ac1a22b2ee9",
+      "blockNum": 291735084,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:21:37.219Z",
+      "action": "eosio.msig::approve",
+      "txid": "40896e6aaf08ec5bd3c4cbe42e93d64f42c20d1f2cfc05865d03b25567cfbd7c",
+      "blockNum": 291735090,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:21:38.102Z",
+      "action": "eosio.msig::invalidate",
+      "txid": "8fa01a7abc72e969b934688925278ee445f40993f6b487547d9595d98e87ccd1",
+      "blockNum": 291735093,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:21:38.484Z",
+      "action": "eosio.msig::exec",
+      "txid": "84290e30ecc271ac7e37eed99dbb413e0940124417a415a258211a9bf3c766dc",
+      "blockNum": null,
+      "txidEchoMatch": null,
+      "blockInclusionVerified": null,
+      "expected": "refused ~ transaction authorization failed",
+      "outcome": "refused",
+      "chainMessage": "transaction authorization failed"
+    },
+    {
+      "t": "2026-10-12T21:21:39.323Z",
+      "action": "eosio.msig::cancel",
+      "txid": "51ad13e56ed7db413cbd8bd93ffb89c59e1ca3215f4dbd270acd74cf4e13c82d",
+      "blockNum": 291735095,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:21:55.497Z",
+      "action": "eosio.msig::propose",
+      "txid": "d11b7a09b7c07245961adb5c4e2aae722f11609b952712cb8dbe8114bf6b0f0b",
+      "blockNum": null,
+      "txidEchoMatch": null,
+      "blockInclusionVerified": null,
+      "expected": "refused ~ transaction expired",
+      "outcome": "refused",
+      "chainMessage": "transaction expired"
+    },
+    {
+      "t": "2026-10-12T21:21:56.506Z",
+      "action": "eosio.msig::propose",
+      "txid": "9eb88f95f271be1ba280b4568b48f68e2cfbd85c8f90cc11c52b213940bf7b1c",
+      "blockNum": 291735130,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:21:56.828Z",
+      "action": "eosio.msig::approve",
+      "txid": "a8f7955ff909cced2e429bae6d03b769c58334fd08ca405c50997c588122bfd1",
+      "blockNum": null,
+      "txidEchoMatch": null,
+      "blockInclusionVerified": null,
+      "expected": "refused ~ approval is not on the list of requested approvals",
+      "outcome": "refused",
+      "chainMessage": "approval is not on the list of requested approvals"
+    },
+    {
+      "t": "2026-10-12T21:22:00.215Z",
+      "action": "eosio.msig::approve",
+      "txid": "41f404524c87f6bc31a829491a18e11aeea87c6f612a0b9311d0a5bf0669dc04",
+      "blockNum": 291735132,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:22:00.762Z",
+      "action": "eosio.msig::propose",
+      "txid": "44d023a082f273d83050b9be6ba603ba0c677b7c659403dac864020f0b1c4901",
+      "blockNum": null,
+      "txidEchoMatch": null,
+      "blockInclusionVerified": null,
+      "expected": "refused ~ transaction authorization failed",
+      "outcome": "refused",
+      "chainMessage": "transaction authorization failed"
+    },
+    {
+      "t": "2026-10-12T21:22:51.951Z",
+      "action": "eosio.msig::exec",
+      "txid": "3f9a6df2d4328a24d190fe380fd35308f8dfbb00d1b6db14d539676197d37223",
+      "blockNum": null,
+      "txidEchoMatch": null,
+      "blockInclusionVerified": null,
+      "expected": "refused ~ transaction expired",
+      "outcome": "refused",
+      "chainMessage": "transaction expired"
+    },
+    {
+      "t": "2026-10-12T21:22:55.729Z",
+      "action": "eosio.msig::cancel",
+      "txid": "41bda13d3cf2e63d1126e8c8ade1f42c0d931281069da15c6a5f70737622404d",
+      "blockNum": 291735241,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:23:18.097Z",
+      "action": "eosio.msig::propose",
+      "txid": "6869d5ba9de2849a31de9bfe20815949b350577ebd98c28d41d9c982e486d8bf",
+      "blockNum": 291735287,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:24:07.689Z",
+      "action": "p6/duplicate-push",
+      "txid": "e911d348b12f600b391c617c916262d9a185773586d6fd08df67a0cc4461305f",
+      "first": "accepted",
+      "second": "refused",
+      "second_message": "duplicate transaction e911d348b12f600b391c617c916262d9a185773586d6fd08df67a0cc4461305f"
+    },
+    {
+      "t": "2026-10-12T21:24:07.849Z",
+      "action": "p6/reconcile",
+      "txid": "e911d348b12f600b391c617c916262d9a185773586d6fd08df67a0cc4461305f",
+      "found_once": false,
+      "status": "lookup-failed"
+    },
+    {
+      "t": "2026-10-12T21:24:08.683Z",
+      "action": "eosio.msig::cancel",
+      "txid": "126b0350b0ed4d36a8848cf53bdeca5c0fa446135debbaad280252ff15db8856",
+      "blockNum": 291735394,
+      "txidEchoMatch": true,
+      "blockInclusionVerified": true,
+      "expected": "accepted",
+      "outcome": "accepted"
+    },
+    {
+      "t": "2026-10-12T21:24:24.902Z",
+      "action": "finality/primary",
+      "exec_block": 291734484,
+      "lib": 291735424,
+      "irreversible": true
+    },
+    {
+      "t": "2026-10-12T21:24:25.217Z",
+      "action": "finality/secondary",
+      "endpoint": "https://jungle4.greymass.com",
+      "txid": "30b68fdf8a178d3ace2ef3fdf64d04c791c23c10749001a3f272113f806dffb3",
+      "found": false,
+      "block_num": null,
+      "agrees_with_primary": false
+    },
+    {
+      "t": "2026-10-12T21:24:47.685Z",
+      "action": "finality/primary",
+      "exec_block": 291734484,
+      "lib": 291735469,
+      "irreversible": true
+    },
+    {
+      "t": "2026-10-12T21:24:48.160Z",
+      "action": "finality/secondary",
+      "endpoint": "https://jungle4.greymass.com",
+      "txid": "30b68fdf8a178d3ace2ef3fdf64d04c791c23c10749001a3f272113f806dffb3",
+      "block": 291734484,
+      "secondary_block_id": "116383d46d25d93bbc525da258b97dc9da08137b5efa6156344472228a5be462",
+      "agrees_with_primary": true,
+      "detail": "block-id EQUAL, tx EXECUTED in greymass copy"
+    },
+    {
+      "t": "2026-10-12T21:24:48.791Z",
+      "action": "finality/cleanup-check",
+      "leftover_proposals": [
+        "wb4authnr",
+        "wb4qjddz",
+        "wb4vtwmg"
+      ]
+    }
+  ],
+  "stages_completed": {
+    "preflight": "done",
+    "permission": "done",
+    "resources": "done",
+    "p1": "done",
+    "p2": "done",
+    "p3": "done",
+    "p5": "done",
+    "p6": "done",
+    "finality": "done"
+  }
+}

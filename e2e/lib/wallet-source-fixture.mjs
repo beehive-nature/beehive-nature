@@ -5,24 +5,32 @@ import {resolve,extname,sep} from 'node:path';
 export const WALLET_ORIGIN='https://skaists.dev';
 export async function installWalletFixture(browser,root){
   root=resolve(root);
-  const html=await readFile(resolve(root,'surfaces/wallet.html'),'utf8'),cache=new Map();
+  const html=await readFile(resolve(root,'surfaces/wallet.html'),'utf8');
   const create=browser.newContext.bind(browser);
   browser.newContext=async function(options){
     const context=await create({...options,serviceWorkers:'block'});
-    await context.route('**/*',async route=>{
-      const url=new URL(route.request().url());
-      if(url.origin!==WALLET_ORIGIN)return route.abort();
-      let path=decodeURIComponent(url.pathname);
-      // /vendor/ is served from the site root, as on skaists.dev (the Autonomi browser kit).
-      if(!/^\/(surfaces|docs|wasm|forge|vendor)\//.test(path))path='/surfaces'+path;
-      const file=resolve(root,'.'+path);
-      if(!file.startsWith(root+sep))return route.abort();
-      try{
-        if(!cache.has(file))cache.set(file,path==='/surfaces/wallet.html'?html:await readFile(file));
-        return route.fulfill({body:cache.get(file),contentType:({'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.wasm':'application/wasm','.svg':'image/svg+xml','.png':'image/png'})[extname(file)]||'application/octet-stream'});
-      }catch{return route.fulfill({status:404,body:'source fixture not found'});}
-    });
+    await routeWalletSource(context,root,html);
     return context;
   };
   return html;
+}
+// The same default-deny source routing on a context made elsewhere (a persistent context for a
+// process-kill test): everything off the wallet origin is aborted, the rest is served from the tree.
+export async function routeWalletSource(context,root,html){
+  root=resolve(root);
+  if(html===undefined)html=await readFile(resolve(root,'surfaces/wallet.html'),'utf8');
+  const cache=new Map();
+  await context.route('**/*',async route=>{
+    const url=new URL(route.request().url());
+    if(url.origin!==WALLET_ORIGIN)return route.abort();
+    let path=decodeURIComponent(url.pathname);
+    // /vendor/ is served from the site root, as on skaists.dev (the Autonomi browser kit).
+    if(!/^\/(surfaces|docs|wasm|forge|vendor|tools|assets)\//.test(path))path='/surfaces'+path;
+    const file=resolve(root,'.'+path);
+    if(!file.startsWith(root+sep))return route.abort();
+    try{
+      if(!cache.has(file))cache.set(file,path==='/surfaces/wallet.html'?html:await readFile(file));
+      return route.fulfill({body:cache.get(file),contentType:({'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.json':'application/json','.wasm':'application/wasm','.svg':'image/svg+xml','.png':'image/png'})[extname(file)]||'application/octet-stream'});
+    }catch{return route.fulfill({status:404,body:'source fixture not found'});}
+  });
 }

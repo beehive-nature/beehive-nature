@@ -1,0 +1,19 @@
+    Blocking waiting for file lock on artifact directory
+    Finished `release` profile [optimized] target(s) in 7m 23s
+     Running unittests src/lib.rs (target/release/deps/x0x-2854d0aacfc48165)
+
+running 11 tests
+test upgrade::signature::tests::test_malformed_signature_rejected ... ok
+test upgrade::signature::tests::test_invalid_signature_rejected ... ok
+test upgrade::signature::tests::test_nonexistent_file ... ok
+test upgrade::signature::tests::test_modified_binary_rejected ... ok
+test upgrade::signature::tests::test_public_key_size_constant ... ok
+test upgrade::signature::tests::test_signing_context_domain_separation ... ok
+test upgrade::signature::tests::test_verify_from_detached_sig_file ... ok
+test upgrade::signature::tests::test_empty_file_handling ... ok
+test upgrade::signature::tests::test_valid_signature_verification ... ok
+test upgrade::signature::tests::test_wrong_key_rejected ... ok
+test upgrade::signature::tests::test_large_binary_verification ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 4536 filtered out; finished in 0.01s
+

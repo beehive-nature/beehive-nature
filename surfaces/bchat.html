@@ -104,12 +104,29 @@ a{color:var(--cyan)}
 .hexpl{font-size:12px;color:var(--dim);overflow-wrap:anywhere}
 footer{max-width:1060px;margin:var(--s6) auto;padding:0 var(--s4) calc(var(--s6) + 76px);color:var(--dim);font-size:12px} /* footer-audit floors: 12px + AA ink, never faint */
 details[data-reg-disclose]>summary{color:var(--dim)}
+/* connection health: glanceable lights first, evidence one tap deeper */
+.cockpit{display:flex;flex-wrap:wrap;gap:var(--s2);margin:0 0 var(--s2)}
+.light{min-height:32px;padding:2px var(--s2);border-radius:var(--r-pill);border:1px dashed var(--line-hi);background:var(--bg0);color:var(--dim)}
+.light b{color:var(--ink);font-weight:600}
+.light[data-tone="ok"]{border-style:solid;border-color:var(--ok);color:var(--leaf)}
+.light[data-tone="bad"]{border-style:solid;border-color:var(--amber);color:var(--amber)}
+.light[data-tone="alt"]{border-style:dotted;border-color:var(--cyan);color:var(--cyan)}
+.conninfo dl{display:grid;grid-template-columns:max-content 1fr;gap:2px var(--s3);margin:var(--s2) 0 0;font-size:12px}
+.conninfo dt{color:var(--dim)}
+.conninfo dd{margin:0;overflow-wrap:anywhere}
 </style>
 </head>
 <body data-no-request-on-load>
 <main>
   <h1>bChat</h1>
   <p class="sub">one conversation surface · three trust lanes — the lane is payload, not decoration</p>
+  <div class="cockpit" id="cockpit" role="status" aria-label="connection health"></div>
+  <details class="card conninfo" id="conninfo" style="margin-bottom:var(--s4)">
+    <summary>connection info — every light, and the receipt behind it</summary>
+    <dl id="conninfo-dl"></dl>
+    <div class="law" style="margin-top:var(--s2)">Every row is folded from the receipts below; a light turns green only on
+    its receipt. Times are named application events, not network ping.</div>
+  </details>
 
   <details class="card" id="posture" data-reg-disclose style="margin-bottom:var(--s4)">
     <summary><b>this page renders from local state alone</b> — connect is a click</summary>
@@ -264,6 +281,7 @@ details[data-reg-disclose]>summary{color:var(--dim)}
 <script src="bchat-core.js?v=1"></script>
 <script src="bchat-nip44.js?v=1"></script>
 <script src="bchat-wire.js?v=2"></script>
+<script src="bchat-cockpit.js?v=1"></script>
 <script src="tour.js?v=42"></script>
 <script>
 (function(){
@@ -296,16 +314,17 @@ $('checkroom').onclick=function(){
   $('roomprobe').textContent='probing reachability… (no-cors — we learn that something answered, never read a byte)';
   var ctrl=(typeof AbortSignal!=='undefined'&&AbortSignal.timeout)?AbortSignal.timeout(4500):null;
   fetch(ROOM.web,{mode:'no-cors',signal:ctrl}).then(function(){
-    roadMemory('primary'); $('joincode').textContent=activeWss();
+    roadMemory('primary'); addReceipt('road-probe',ROOM.web,{road:'primary'}); $('joincode').textContent=activeWss();
     $('roomprobe').textContent='answering ✓ via '+ROOM.name+' — the primary road stands on this network';
   },function(){
     var fb=ROOM.fallback?ROOM.fallback.replace('wss://','https://'):null;
-    if(!fb){ $('roomprobe').textContent='not answering right now — probed just now'; return; }
+    if(!fb){ addReceipt('road-probe',ROOM.web,{road:'none'}); $('roomprobe').textContent='not answering right now — probed just now'; return; }
     var c2=(typeof AbortSignal!=='undefined'&&AbortSignal.timeout)?AbortSignal.timeout(4500):null;
     fetch(fb,{mode:'no-cors',signal:c2}).then(function(){
-      roadMemory('fallback'); $('joincode').textContent=activeWss();
+      roadMemory('fallback'); addReceipt('road-probe',fb,{road:'fallback'}); $('joincode').textContent=activeWss();
       $('roomprobe').textContent='answering ✓ via the fallback road — this network filters the '+ROOM.name+' name; remembered for next time';
     },function(){
+      addReceipt('road-probe',fb,{road:'none'});
       $('roomprobe').textContent='neither road answered — probed just now; the surface stays fully usable offline';
     });
   });
@@ -328,6 +347,7 @@ function armKey(fresh){
   try{ localStorage.setItem('bchat.sec',SEC); }catch(e){}
   $('nokey').hidden=true; $('haskey').hidden=false;
   $('pubview').textContent=PUB;
+  addReceipt('key-armed',PUB.slice(0,8),{});
   $('whoami').textContent=PUB.slice(0,8)+'…';
 }
 $('genkey').onclick=function(){
@@ -341,7 +361,7 @@ $('useimp').onclick=function(){
 };
 $('wipekey').onclick=function(){
   try{ localStorage.removeItem('bchat.sec'); }catch(e){}
-  SEC=null;PUB=''; $('nokey').hidden=false; $('haskey').hidden=true;
+  SEC=null;PUB=''; addReceipt('key-forgotten','local',{}); $('nokey').hidden=false; $('haskey').hidden=true;
   $('whoami').textContent='…'; render();
 };
 
@@ -387,6 +407,21 @@ function addReceipt(event,ref,meta){
     return '<div>'+new Date(r.ts).toISOString().slice(11,19)+'Z · <b>'+esc(r.event)+'</b>'+
       (r.ref?' · '+String(r.ref).slice(0,16):'')+(r.kind?' · kind '+r.kind:'')+'</div>';
   }).join('')||'<div>no receipts yet</div>';
+  paintCockpit();
+}
+/* ─── the cockpit: a projection of the receipts above, never its own truth ─── */
+var cockpitTick=null;
+function paintCockpit(){
+  var c=BCHATCOCKPIT.project(receipts,Date.now());
+  $('cockpit').innerHTML=c.lights.map(function(l){
+    return '<button type="button" class="light" data-light="'+l.key+'" data-tone="'+l.tone+'" aria-controls="conninfo"><b>'+l.key+'</b> '+esc(l.word)+'</button>';
+  }).join('');
+  Array.prototype.forEach.call($('cockpit').querySelectorAll('.light'),function(b){
+    b.onclick=function(){ $('conninfo').open=true; $('conninfo').scrollIntoView({block:'nearest'}); };
+  });
+  $('conninfo-dl').innerHTML=c.info.map(function(x){ return '<dt>'+esc(x[0])+'</dt><dd>'+esc(x[1])+'</dd>'; }).join('');
+  if(c.live&&!cockpitTick) cockpitTick=setInterval(paintCockpit,1000);
+  if(!c.live&&cockpitTick){ clearInterval(cockpitTick); cockpitTick=null; }
 }
 
 /* ─── threads ─── */
@@ -456,6 +491,7 @@ function note(t){ $('sendstate').textContent=t; }
 /* ─── prove-the-encryptor panel ─── */
 $('runvec').onclick=function(){
   var r=BCHATNIP44.selftest();
+  addReceipt('vectors-run','nip44',{passed:r.filter(function(t){return t.ok;}).length,total:r.length});
   $('vecout').innerHTML=r.map(function(t){
     return '<div class="'+(t.ok?'ok':'bad')+'">'+(t.ok?'✓':'✗')+' '+esc(t.name)+(t.ok?'':(' — '+esc(t.err)))+'</div>';
   }).join('')+'<div class="law" style="margin-top:6px">full battery (all official vectors + RFC 5869 + RFC 8439): e2e/bchat-core.test.mjs — 18/18 green at genesis, receipts in the dispatch.</div>';
@@ -478,7 +514,8 @@ $('connect').onclick=function(){
   if(sock){ try{sock.close();}catch(e){} }
   var url=activeWss();
   $('relaystate').textContent='dialing '+url+' …';
-  try{ sock=new WebSocket(url); }catch(e){ $('relaystate').textContent='ws unavailable: '+e.message; return; }
+  addReceipt('relay-dial',url,{road:url===ROOM.wss?'primary':'fallback'});
+  try{ sock=new WebSocket(url); }catch(e){ addReceipt('relay-error',url,{}); $('relaystate').textContent='ws unavailable: '+e.message; return; }
   sock.onopen=function(){
     connected=true;
     wire('→',['REQ','bchat_'+BCHATWIRE.nowSec(),{kinds:[1059],'#p':[PUB],limit:50}]);
@@ -490,11 +527,20 @@ $('connect').onclick=function(){
     var m; try{ m=JSON.parse(ev.data); }catch(e){ return; }
     wire('←',m);
     if(m[0]==='AUTH'&&m[1]){
+      addReceipt('nip42-challenge',url,{});
       /* NIP-42: the relay gates ingest behind a signed kind 22242 */
       var auth=BCHATWIRE.finishEvent({pubkey:PUB,created_at:BCHATWIRE.nowSec(),kind:22242,tags:[['relay',url],['challenge',m[1]]],content:''},SEC);
       sock.send(JSON.stringify(['AUTH',auth]));
       wire('→',['AUTH',auth.id]);
+      authIds[auth.id]=1;
       addReceipt('nip42-auth',auth.id,{kind:22242});
+      return;
+    }
+    if(m[0]==='OK'&&authIds[m[1]]){
+      /* the relay's answer to our AUTH, in its own words */
+      delete authIds[m[1]];
+      addReceipt('nip42-verdict',m[1],{ok:m[2]===true,note:String(m[3]||'').slice(0,160)});
+      if(m[2]!==true) $('relaystate').textContent='relay answered AUTH: '+String(m[3]||'no reason given')+' — shown verbatim';
       return;
     }
     if(m[0]==='EVENT'&&m[2]&&m[2].kind===1059){
@@ -519,19 +565,19 @@ $('connect').onclick=function(){
         note('published · event '+m[1].slice(0,16)+'… — proof by relay OK true, not by prose');
       }else{
         p.msg.state='rejected'; p.msg.verdict=String(m[3]||'unspecified');
-        addReceipt('dm-rejected',m[1],{note:String(m[3]||'').slice(0,40)});
+        addReceipt('dm-rejected',m[1],{note:String(m[3]||'unspecified').slice(0,160)});
         note('relay said NO: '+p.msg.verdict);
       }
       delete pending[m[1]];
       saveStore(); render();
       return;
     }
-    if(m[0]==='CLOSED'){ $('relaystate').textContent='relay CLOSED the subscription: '+String(m[2]||'')+' — shown verbatim, never paraphrased'; }
+    if(m[0]==='CLOSED'){ addReceipt('sub-closed',String(m[1]||''),{note:String(m[2]||'').slice(0,160)}); $('relaystate').textContent='relay CLOSED the subscription: '+String(m[2]||'')+' — shown verbatim, never paraphrased'; }
   };
-  sock.onclose=function(){ connected=false; $('relaystate').textContent='relay connection closed — the surface stays fully usable offline'; };
-  sock.onerror=function(){ $('relaystate').textContent='relay error — the surface stays fully usable offline'; };
+  sock.onclose=function(){ connected=false; addReceipt('relay-closed',url,{}); $('relaystate').textContent='relay connection closed — the surface stays fully usable offline'; };
+  sock.onerror=function(){ addReceipt('relay-error',url,{}); $('relaystate').textContent='relay error — the surface stays fully usable offline'; };
 };
-var pending={};
+var pending={},authIds={};
 
 /* ─── compose ─── */
 function npubToHex(v){
@@ -594,6 +640,7 @@ function send(){
   try{
     var gift=BCHATWIRE.buildDM(SEC,PUB,rcpt,BCHAT.wireEncode(built.env));
     pending[gift.id]={msg:msg};
+    addReceipt('dm-offered',gift.id,{kind:1059});
     wire('→',['EVENT',gift.id+'…']);
     sock.send(JSON.stringify(['EVENT',gift]));
     note('sealed + gift-wrapped, offering to the relay…');
@@ -610,6 +657,9 @@ $('draft').addEventListener('keydown',function(e){ if(e.key==='Enter'&&(e.ctrlKe
 loadKey();
 loadStore();
 addReceipt('surface-open','local-state-only',{});
+addReceipt('road-remembered',activeWss(),{road:roadMemory()});
+addEventListener('offline',function(){ addReceipt('net-offline','browser',{}); });
+addEventListener('online',function(){ addReceipt('net-online','browser',{}); });
 render();
 })();
 </script>

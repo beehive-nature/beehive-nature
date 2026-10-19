@@ -84,6 +84,7 @@ await page.waitForTimeout(1200);
 const sec = () => page.$('#bpay-sec');
 
 check('chooser renders (Choose how this is shared)', !!(await sec()) && (await (await sec()).innerText()).includes('Public'));
+await page.getByText('Private sharing · not available yet',{exact:true}).click();
 const unavail = await page.$$eval('#bpay-sec [data-bpay-unavailable]', els => els.map(e => ({ id: e.dataset.bpayUnavailable, tag: e.tagName, cursor: getComputedStyle(e).cursor, struck: getComputedStyle(e).textDecorationLine.includes('line-through'), aria: e.getAttribute('aria-disabled'), text: e.innerText.replace(/\s+/g, ' ') })));
 check('unavailable audience modes are PLAIN ROWS — never buttons, never struck (dead affordances are banned)',
   unavail.length === 2 && unavail.every(u => u.tag !== 'BUTTON' && u.cursor !== 'pointer' && !u.struck && u.aria === 'true' && ['only-me', 'selected-people'].includes(u.id)),
@@ -111,6 +112,7 @@ check('resolved policy recorded in localStorage', !!lsPolicy && JSON.parse(lsPol
 
 // the quote-service now points at the mock (seeded pre-boot); expose it in cypherpunk view
 await page.click('#breg-cypherpunk');
+await page.locator('#ant-quote-only > summary').click();
 const bridgeVisible = await page.$eval('#bpay-bridge', e => e.value);
 check('cypherpunk sees the chosen-at time', /chosen at/i.test(await (await sec()).innerText()));
 check('quote-service field visible in cypherpunk view', bridgeVisible.includes('/mock-bridge'), bridgeVisible);
@@ -130,7 +132,7 @@ check('audience unchanged after cypherpunk toggle + fresh quote', /You chose/i.t
 check('no numeric confirmation count', !/\d+\s+confirmation/i.test(bodyText));
 
 const fullHtml = await page.content();
-check('no authorization route strings (A9c law)', !/Review & Pay|review-pay|bpay-invoice-review-pay/i.test(fullHtml));
+check('no obsolete reference-invoice authorization route', !/Review & Pay|review-pay|bpay-invoice-review-pay/i.test(fullHtml));
 // page errors ATTRIBUTABLE TO THE bPAY SURFACE gate this suite; foreign wallet
 // findings are REPORTED (detail line) and docketed for their owning lane —
 // the CI-headless BZDIDKEY race (wallet keychain, pre-existing, 15s-local-probe
@@ -147,5 +149,5 @@ await browser.close();
 const failed = results.filter(r => !r.ok);
 console.log(failed.length
   ? `\nbPay PHASE-B GATE: ${failed.length} FAILED of ${results.length}`
-  : `\nbPay PHASE-B GATE: GREEN — ${results.length}/${results.length} (chooser gesture → resolved policy → fresh quote; nothing spendable; A9c held) — MOCK service, real acceptance belongs to the founder`);
+  : `\nbPay PHASE-B GATE: GREEN — ${results.length}/${results.length} (chooser gesture → resolved policy → fresh quote; reference quote grants no spending authority) — MOCK service, real acceptance belongs to the founder`);
 process.exit(failed.length ? 1 : 0);

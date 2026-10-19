@@ -1,0 +1,7197 @@
+{
+  "schema": "btmd-scale9-study-1",
+  "generated": "2026-10-14T02:26:54.020Z",
+  "gate": "per-op deadline 10s from publish (the trial op deadline; stricter than the 30s budget gate — any LATE row fails the gate)",
+  "observation_window_ms": 180000,
+  "legs": {
+    "baseline": {
+      "trials": 10,
+      "fully_within_gate": 10,
+      "with_late": 0,
+      "with_never": 0,
+      "trial_rows": [
+        "s9study-r1-baseline: 20/20 (late 0, never 0)",
+        "s9study-r10-baseline: 20/20 (late 0, never 0)",
+        "s9study-r2-baseline: 20/20 (late 0, never 0)",
+        "s9study-r3-baseline: 20/20 (late 0, never 0)",
+        "s9study-r4-baseline: 20/20 (late 0, never 0)",
+        "s9study-r5-baseline: 20/20 (late 0, never 0)",
+        "s9study-r6-baseline: 20/20 (late 0, never 0)",
+        "s9study-r7-baseline: 20/20 (late 0, never 0)",
+        "s9study-r8-baseline: 20/20 (late 0, never 0)",
+        "s9study-r9-baseline: 20/20 (late 0, never 0)"
+      ]
+    },
+    "shed": {
+      "trials": 10,
+      "fully_within_gate": 1,
+      "with_late": 7,
+      "with_never": 2,
+      "trial_rows": [
+        "s9study-r1-shed: 0/20 (late 0, never 20)",
+        "s9study-r10-shed: 20/20 (late 0, never 0)",
+        "s9study-r2-shed: 10/20 (late 10, never 0)",
+        "s9study-r3-shed: 11/20 (late 9, never 0)",
+        "s9study-r4-shed: 4/20 (late 16, never 0)",
+        "s9study-r5-shed: 10/20 (late 10, never 0)",
+        "s9study-r6-shed: 4/20 (late 16, never 0)",
+        "s9study-r7-shed: 9/20 (late 11, never 0)",
+        "s9study-r8-shed: 10/20 (late 0, never 10)",
+        "s9study-r9-shed: 2/20 (late 18, never 0)"
+      ]
+    },
+    "shedhi": {
+      "trials": 10,
+      "fully_within_gate": 10,
+      "with_late": 0,
+      "with_never": 0,
+      "trial_rows": [
+        "s9study-r1-shedhi: 20/20 (late 0, never 0)",
+        "s9study-r10-shedhi: 20/20 (late 0, never 0)",
+        "s9study-r2-shedhi: 20/20 (late 0, never 0)",
+        "s9study-r3-shedhi: 20/20 (late 0, never 0)",
+        "s9study-r4-shedhi: 20/20 (late 0, never 0)",
+        "s9study-r5-shedhi: 20/20 (late 0, never 0)",
+        "s9study-r6-shedhi: 20/20 (late 0, never 0)",
+        "s9study-r7-shedhi: 20/20 (late 0, never 0)",
+        "s9study-r8-shedhi: 20/20 (late 0, never 0)",
+        "s9study-r9-shedhi: 20/20 (late 0, never 0)"
+      ]
+    }
+  },
+  "trials": [
+    {
+      "run": "s9study-r1-baseline",
+      "leg": "baseline",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…8f6972»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3176,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8f6972»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3178,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…689bb1»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2865,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…689bb1»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2865,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a698a2»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2547,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a698a2»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2547,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…67e5c5»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2232,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…67e5c5»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2232,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6e5f00»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1922,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6e5f00»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1923,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…86bcfa»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1606,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…86bcfa»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1607,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…bc33c4»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1295,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…bc33c4»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1296,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…4abdc7»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 982,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…4abdc7»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 983,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e8d379»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 669,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e8d379»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 670,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…041138»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 355,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…041138»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 356,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r1-shed",
+      "leg": "shed",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "0/20",
+      "sync_outcome_counts": {
+        "within": 0,
+        "late": 0,
+        "never": 20
+      },
+      "failures": [
+        {
+          "op": "«hex64…16eded»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…16eded»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ad46b7»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ad46b7»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c4554c»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c4554c»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…164703»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…164703»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f5ace1»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f5ace1»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…374337»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…374337»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3ba62d»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3ba62d»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…065ce5»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…065ce5»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0e204b»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0e204b»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0c053b»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0c053b»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        }
+      ],
+      "per_op": [
+        {
+          "op": "«hex64…16eded»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…16eded»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ad46b7»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ad46b7»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c4554c»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c4554c»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…164703»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…164703»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f5ace1»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f5ace1»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…374337»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…374337»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3ba62d»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3ba62d»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…065ce5»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…065ce5»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0e204b»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0e204b»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0c053b»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0c053b»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r1-shedhi",
+      "leg": "shedhi",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal",
+        "leaf_egress_burst_bytes": 41943040,
+        "leaf_egress_hard_bytes_per_sec": 1310720,
+        "leaf_egress_soft_bytes_per_sec": 655360
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…256984»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3220,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…256984»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3221,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…470b4f»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2903,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…470b4f»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2905,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…97ef24»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2598,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…97ef24»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2600,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…71ee43»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2288,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…71ee43»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2290,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…301dfe»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1976,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…301dfe»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1977,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a95dcd»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1657,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a95dcd»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1658,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7b398f»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1346,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7b398f»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1351,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…733180»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1037,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…733180»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1038,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9b9b55»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 724,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9b9b55»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 725,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c20f72»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 410,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c20f72»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 411,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r10-baseline",
+      "leg": "baseline",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…7c8ff9»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3325,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7c8ff9»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3330,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…4a7fe6»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3017,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…4a7fe6»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3018,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9125f7»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2711,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9125f7»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2712,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0fa1d2»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2398,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0fa1d2»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2399,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7c35c2»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2086,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7c35c2»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2087,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…05c840»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1777,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…05c840»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1781,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…30c090»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1465,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…30c090»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1467,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…af9df8»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1154,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…af9df8»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1155,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…4cf6e2»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 847,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…4cf6e2»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 848,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0962b3»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 413,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0962b3»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 414,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r10-shed",
+      "leg": "shed",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…3cc91a»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3202,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3cc91a»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3202,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…338e09»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2887,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…338e09»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2888,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…b99129»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2569,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…b99129»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2569,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…88c59a»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2257,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…88c59a»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2258,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…df52d6»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1937,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…df52d6»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1938,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0aa84a»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1624,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0aa84a»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1625,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…4dc0d6»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1308,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…4dc0d6»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1309,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e41660»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 994,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e41660»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 995,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d0d604»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 681,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d0d604»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 682,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6ea963»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 368,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6ea963»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 369,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": true,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r10-shedhi",
+      "leg": "shedhi",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal",
+        "leaf_egress_burst_bytes": 41943040,
+        "leaf_egress_hard_bytes_per_sec": 1310720,
+        "leaf_egress_soft_bytes_per_sec": 655360
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…9c49e3»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3174,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9c49e3»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3175,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3bc781»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2863,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3bc781»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2864,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…23f87e»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2553,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…23f87e»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2554,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f563a4»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2241,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f563a4»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2242,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…24c8d6»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1929,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…24c8d6»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1930,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…394574»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1619,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…394574»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1620,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…71cf7f»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1308,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…71cf7f»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1308,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…33c123»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 998,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…33c123»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 999,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9e6627»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 685,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9e6627»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 686,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ba2df2»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 372,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ba2df2»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 373,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r2-baseline",
+      "leg": "baseline",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…388980»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3942,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…388980»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3944,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…fed1d7»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3500,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…fed1d7»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3501,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…b2ca0e»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3140,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…b2ca0e»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3142,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0a6482»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2798,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0a6482»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2799,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…337f5b»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2467,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…337f5b»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2468,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…47b78e»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2150,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…47b78e»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2152,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c19408»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1839,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c19408»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1841,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6471e9»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1505,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6471e9»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1507,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…389504»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1144,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…389504»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1146,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…bb5eba»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 765,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…bb5eba»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 766,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r2-shed",
+      "leg": "shed",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 523,
+          "delayed": 21,
+          "lost": 16,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "10/20",
+      "sync_outcome_counts": {
+        "within": 10,
+        "late": 10,
+        "never": 0
+      },
+      "failures": [
+        {
+          "op": "«hex64…558248»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 55192,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…237917»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54874,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ca6bd0»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54558,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8ecaed»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54242,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…47e5af»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53930,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7a31a0»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53618,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e02d45»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53307,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7badba»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52992,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c98d60»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52681,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3814d0»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52367,
+          "duplicates": 0
+        }
+      ],
+      "per_op": [
+        {
+          "op": "«hex64…558248»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3198,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…558248»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 55192,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…237917»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2880,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…237917»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54874,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ca6bd0»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2566,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ca6bd0»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54558,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8ecaed»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2250,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8ecaed»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54242,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…47e5af»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1938,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…47e5af»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53930,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7a31a0»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1627,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7a31a0»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53618,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e02d45»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1317,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e02d45»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53307,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7badba»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1002,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7badba»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52992,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c98d60»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 692,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c98d60»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52681,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3814d0»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 379,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3814d0»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52367,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r2-shedhi",
+      "leg": "shedhi",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal",
+        "leaf_egress_burst_bytes": 41943040,
+        "leaf_egress_hard_bytes_per_sec": 1310720,
+        "leaf_egress_soft_bytes_per_sec": 655360
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…db5313»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 4732,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…db5313»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 4733,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…482227»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 4083,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…482227»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 4085,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3d0447»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3575,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3d0447»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3577,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8d71c9»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2819,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8d71c9»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2829,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2b0dcf»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2499,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2b0dcf»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2501,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…36d45d»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2124,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…36d45d»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2125,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…74d258»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1539,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…74d258»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1540,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…25276c»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1172,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…25276c»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1175,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…457a1d»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 817,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…457a1d»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 819,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f96f48»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 477,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f96f48»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 478,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r3-baseline",
+      "leg": "baseline",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…d495c7»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3176,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d495c7»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3177,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a14279»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2858,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a14279»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2859,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5e9b58»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2548,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5e9b58»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2548,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c14a5c»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2233,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c14a5c»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2234,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…11d848»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1920,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…11d848»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1920,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…38d0b0»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1607,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…38d0b0»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1608,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…46aa18»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1294,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…46aa18»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1294,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0fb83f»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 981,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0fb83f»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 982,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…148a16»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 672,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…148a16»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 673,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…bbd87d»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 360,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…bbd87d»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 360,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r3-shed",
+      "leg": "shed",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "11/20",
+      "sync_outcome_counts": {
+        "within": 11,
+        "late": 9,
+        "never": 0
+      },
+      "failures": [
+        {
+          "op": "«hex64…29f2b2»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54615,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…09e71f»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54299,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…929bc2»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53981,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…cf9e56»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53661,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3553e2»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53345,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…480eec»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53029,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…91b285»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52716,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c7467d»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52402,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…62d498»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52088,
+          "duplicates": 0
+        }
+      ],
+      "per_op": [
+        {
+          "op": "«hex64…12fd80»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3262,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…12fd80»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3264,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…29f2b2»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2889,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…29f2b2»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54615,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…09e71f»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2574,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…09e71f»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54299,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…929bc2»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2256,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…929bc2»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53981,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…cf9e56»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1938,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…cf9e56»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53661,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3553e2»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1624,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3553e2»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53345,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…480eec»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1310,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…480eec»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53029,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…91b285»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 998,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…91b285»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52716,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c7467d»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 685,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c7467d»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52402,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…62d498»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 371,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…62d498»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52088,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r3-shedhi",
+      "leg": "shedhi",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal",
+        "leaf_egress_burst_bytes": 41943040,
+        "leaf_egress_hard_bytes_per_sec": 1310720,
+        "leaf_egress_soft_bytes_per_sec": 655360
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…7c017f»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3235,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7c017f»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3237,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3db919»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2918,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3db919»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2922,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c0abef»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2603,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c0abef»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2605,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…4578e2»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2293,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…4578e2»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2294,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…727785»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1977,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…727785»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1978,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…95f130»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1665,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…95f130»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1666,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f8319f»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1354,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f8319f»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1355,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…84935a»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1041,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…84935a»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1042,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…67cb8b»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 734,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…67cb8b»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 735,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3902a1»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 392,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3902a1»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 393,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r4-baseline",
+      "leg": "baseline",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…24f7a6»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3207,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…24f7a6»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3209,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…057c4e»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2898,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…057c4e»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2899,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ccdeae»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2577,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ccdeae»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2578,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c6f52d»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2266,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c6f52d»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2269,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…76de02»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1960,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…76de02»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1962,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…730bc0»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1645,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…730bc0»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1646,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…af5a48»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1334,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…af5a48»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1335,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c7d74d»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1023,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c7d74d»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1024,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…745fa5»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 710,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…745fa5»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 712,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9854b3»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 389,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9854b3»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 390,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r4-shed",
+      "leg": "shed",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "4/20",
+      "sync_outcome_counts": {
+        "within": 4,
+        "late": 16,
+        "never": 0
+      },
+      "failures": [
+        {
+          "op": "«hex64…ab3e91»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 63868,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…91c8c3»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 63555,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d7fc47»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 63237,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2e9dec»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 62919,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…60c49a»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 62607,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…60c49a»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 62608,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…4118c5»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 62294,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…4118c5»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 62295,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c6ae51»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61978,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c6ae51»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61979,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9d2d44»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61672,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9d2d44»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61673,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…edbb26»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61357,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…edbb26»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61357,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5d5be5»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61042,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5d5be5»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61043,
+          "duplicates": 0
+        }
+      ],
+      "per_op": [
+        {
+          "op": "«hex64…ab3e91»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 63868,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ab3e91»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3196,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…91c8c3»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 63555,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…91c8c3»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2886,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d7fc47»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 63237,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d7fc47»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2568,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2e9dec»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 62919,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2e9dec»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2250,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…60c49a»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 62607,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…60c49a»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 62608,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…4118c5»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 62294,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…4118c5»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 62295,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c6ae51»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61978,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c6ae51»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61979,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9d2d44»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61672,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9d2d44»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61673,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…edbb26»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61357,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…edbb26»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61357,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5d5be5»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61042,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5d5be5»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 61043,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r4-shedhi",
+      "leg": "shedhi",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal",
+        "leaf_egress_burst_bytes": 41943040,
+        "leaf_egress_hard_bytes_per_sec": 1310720,
+        "leaf_egress_soft_bytes_per_sec": 655360
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…3d73ba»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3169,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3d73ba»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3170,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3b4e75»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2856,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3b4e75»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2857,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…36841e»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2547,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…36841e»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2548,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d203ad»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2237,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d203ad»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2238,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…57f0ee»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1926,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…57f0ee»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1927,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…bccd5f»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1613,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…bccd5f»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1613,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a82948»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1301,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a82948»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1303,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3ffce1»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 991,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3ffce1»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 992,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…49a1a8»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 677,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…49a1a8»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 677,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f8bd31»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 364,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f8bd31»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 364,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r5-baseline",
+      "leg": "baseline",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…0daff8»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3214,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0daff8»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3215,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…1b56b1»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2895,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…1b56b1»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2896,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e4ad33»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2576,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e4ad33»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2577,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a9659e»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2260,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a9659e»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2261,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2c09cd»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1938,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2c09cd»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1939,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…789c8d»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1629,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…789c8d»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1630,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d1bcdb»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1313,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d1bcdb»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1314,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…82fd96»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1003,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…82fd96»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1004,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…efd86e»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 689,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…efd86e»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 690,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d527bd»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 376,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d527bd»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 377,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r5-shed",
+      "leg": "shed",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "10/20",
+      "sync_outcome_counts": {
+        "within": 10,
+        "late": 10,
+        "never": 0
+      },
+      "failures": [
+        {
+          "op": "«hex64…2b27f8»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51671,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5305cb»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51353,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…01e039»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51036,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…613010»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50721,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c42b82»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50397,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…43bc32»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50081,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…afdfa3»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 49767,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6ee0e3»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 49452,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7b76e1»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 49137,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9cc455»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 48824,
+          "duplicates": 0
+        }
+      ],
+      "per_op": [
+        {
+          "op": "«hex64…2b27f8»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51671,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2b27f8»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3204,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5305cb»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51353,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5305cb»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2886,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…01e039»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51036,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…01e039»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2569,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…613010»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50721,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…613010»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2255,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c42b82»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50397,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c42b82»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1932,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…43bc32»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50081,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…43bc32»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1617,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…afdfa3»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 49767,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…afdfa3»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1306,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6ee0e3»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 49452,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6ee0e3»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 991,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7b76e1»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 49137,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7b76e1»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 677,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9cc455»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 48824,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9cc455»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 365,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r5-shedhi",
+      "leg": "shedhi",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal",
+        "leaf_egress_burst_bytes": 41943040,
+        "leaf_egress_hard_bytes_per_sec": 1310720,
+        "leaf_egress_soft_bytes_per_sec": 655360
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…5f86ca»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3249,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5f86ca»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3249,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…164510»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2936,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…164510»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2937,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…723fd3»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2617,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…723fd3»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2618,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2d76ff»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2305,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2d76ff»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2306,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9583da»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1991,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9583da»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1992,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f4733e»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1675,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f4733e»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1676,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3e5f95»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1356,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3e5f95»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1357,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…384d4f»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1009,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…384d4f»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1010,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2803e2»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 697,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2803e2»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 697,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5c6b25»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 384,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5c6b25»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 384,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r6-baseline",
+      "leg": "baseline",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…bc2919»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3232,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…bc2919»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3233,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f6f68b»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2917,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f6f68b»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2918,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…82168b»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2608,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…82168b»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2609,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f38b94»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2292,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f38b94»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2292,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ba51a9»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1976,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ba51a9»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1977,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0d0b0c»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1661,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0d0b0c»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1662,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8159e8»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1351,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8159e8»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1351,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3e356d»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1033,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3e356d»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1034,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0a5dd7»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 719,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0a5dd7»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 720,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…63a096»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 405,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…63a096»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 406,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r6-shed",
+      "leg": "shed",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "4/20",
+      "sync_outcome_counts": {
+        "within": 4,
+        "late": 16,
+        "never": 0
+      },
+      "failures": [
+        {
+          "op": "«hex64…366622»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54845,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…366622»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54847,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e4f0ea»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54538,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e4f0ea»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54540,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…238354»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54228,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…238354»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54229,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d1405e»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53919,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d1405e»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53920,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…52288a»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53607,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…52288a»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53608,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…bb04b3»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53296,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…bb04b3»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53296,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…fc3d06»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52981,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…fc3d06»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52982,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…1c43a8»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52667,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…1c43a8»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52668,
+          "duplicates": 0
+        }
+      ],
+      "per_op": [
+        {
+          "op": "«hex64…58538f»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3205,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…58538f»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3206,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a9f459»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2889,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a9f459»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2890,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…366622»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54845,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…366622»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54847,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e4f0ea»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54538,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e4f0ea»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54540,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…238354»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54228,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…238354»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54229,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d1405e»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53919,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d1405e»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53920,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…52288a»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53607,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…52288a»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53608,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…bb04b3»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53296,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…bb04b3»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53296,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…fc3d06»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52981,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…fc3d06»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52982,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…1c43a8»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52667,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…1c43a8»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52668,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r6-shedhi",
+      "leg": "shedhi",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal",
+        "leaf_egress_burst_bytes": 41943040,
+        "leaf_egress_hard_bytes_per_sec": 1310720,
+        "leaf_egress_soft_bytes_per_sec": 655360
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…e6e3bf»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3279,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e6e3bf»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3279,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…379b66»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2962,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…379b66»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2963,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3af203»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2646,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3af203»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2646,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…b80ad9»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2331,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…b80ad9»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2332,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…38fe9c»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2016,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…38fe9c»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2018,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…915001»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1620,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…915001»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1622,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…86fc2e»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1310,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…86fc2e»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1311,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6e997b»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 999,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6e997b»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1000,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d658cd»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 683,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d658cd»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 685,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3364e1»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 371,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3364e1»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 371,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r7-baseline",
+      "leg": "baseline",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…92750c»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3204,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…92750c»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3205,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…b7117b»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2888,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…b7117b»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2889,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6375e7»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2576,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6375e7»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2577,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6a44af»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2261,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6a44af»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2262,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5572d9»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1949,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5572d9»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1950,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d77f63»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1637,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d77f63»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1638,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7a9299»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1324,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7a9299»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1325,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…de800e»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1010,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…de800e»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1011,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…73e0f2»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 694,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…73e0f2»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 695,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5c6e83»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 370,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…5c6e83»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 371,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r7-shed",
+      "leg": "shed",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "9/20",
+      "sync_outcome_counts": {
+        "within": 9,
+        "late": 11,
+        "never": 0
+      },
+      "failures": [
+        {
+          "op": "«hex64…91a0e8»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54382,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…91a0e8»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51346,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2738c9»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54061,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2738c9»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51026,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…42fa9e»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50709,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…83f5f0»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50401,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…58d047»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50086,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…37ad94»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 49758,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e3919d»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 49447,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ed8650»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52166,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ed8650»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 49136,
+          "duplicates": 0
+        }
+      ],
+      "per_op": [
+        {
+          "op": "«hex64…07a134»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3227,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…07a134»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3228,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…de61ec»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2909,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…de61ec»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2910,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…91a0e8»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54382,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…91a0e8»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51346,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2738c9»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 54061,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2738c9»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51026,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…42fa9e»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1958,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…42fa9e»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50709,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…83f5f0»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1651,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…83f5f0»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50401,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…58d047»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1336,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…58d047»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50086,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…37ad94»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1008,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…37ad94»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 49758,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e3919d»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3855,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e3919d»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 49447,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ed8650»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52166,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ed8650»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 49136,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r7-shedhi",
+      "leg": "shedhi",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal",
+        "leaf_egress_burst_bytes": 41943040,
+        "leaf_egress_hard_bytes_per_sec": 1310720,
+        "leaf_egress_soft_bytes_per_sec": 655360
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…737e1b»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3216,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…737e1b»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3217,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ede731»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2900,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ede731»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2905,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c48435»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2597,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c48435»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2599,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7aaf2f»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2282,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7aaf2f»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2283,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…df556f»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1971,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…df556f»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1972,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c07074»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1657,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c07074»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1659,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…1aaab5»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1342,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…1aaab5»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1345,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…1af259»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1015,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…1af259»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1023,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0eba79»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 713,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0eba79»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 715,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…306797»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 401,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…306797»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 403,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r8-baseline",
+      "leg": "baseline",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…3ac43c»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3196,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3ac43c»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3197,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…329fa0»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2878,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…329fa0»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2879,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6ca73f»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2565,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…6ca73f»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2566,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…bfb070»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2254,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…bfb070»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2255,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8c6386»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1939,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8c6386»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1940,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e02989»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1624,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e02989»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1625,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3af536»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1306,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3af536»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1307,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ceb535»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 992,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…ceb535»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 993,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f0d770»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 682,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f0d770»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 683,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2de514»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 369,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…2de514»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 370,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r8-shed",
+      "leg": "shed",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "10/20",
+      "sync_outcome_counts": {
+        "within": 10,
+        "late": 0,
+        "never": 10
+      },
+      "failures": [
+        {
+          "op": "«hex64…53221f»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…be6aa6»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a56f3c»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…25bce0»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…dce13c»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…383b86»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…1621db»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…85d938»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…b3590f»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e9ca81»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        }
+      ],
+      "per_op": [
+        {
+          "op": "«hex64…53221f»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3342,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…53221f»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…be6aa6»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3010,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…be6aa6»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a56f3c»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2681,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a56f3c»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…25bce0»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2369,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…25bce0»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…dce13c»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2054,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…dce13c»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…383b86»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1722,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…383b86»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…1621db»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1419,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…1621db»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…85d938»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1103,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…85d938»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…b3590f»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 784,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…b3590f»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e9ca81»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 465,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e9ca81»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "NEVER",
+          "latency_ms": null,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r8-shedhi",
+      "leg": "shedhi",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal",
+        "leaf_egress_burst_bytes": 41943040,
+        "leaf_egress_hard_bytes_per_sec": 1310720,
+        "leaf_egress_soft_bytes_per_sec": 655360
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…941983»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 7429,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…941983»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 7430,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f3f1d6»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 6968,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f3f1d6»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 6969,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3304d1»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 6334,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3304d1»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 6336,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3b06c9»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 5405,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3b06c9»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 5406,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…034a72»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 4345,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…034a72»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 4346,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3e3515»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3822,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3e3515»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3823,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d75600»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3423,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…d75600»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3424,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e3c118»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2736,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e3c118»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2736,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e573d9»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2031,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e573d9»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2031,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a26d8c»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1254,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a26d8c»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1254,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": true,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r9-baseline",
+      "leg": "baseline",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…f996fd»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3186,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f996fd»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3186,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c61755»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2870,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c61755»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2871,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f3e43d»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2551,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…f3e43d»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2552,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0f5950»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2237,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…0f5950»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2238,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7f1221»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1922,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7f1221»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1923,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…962819»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1602,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…962819»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1603,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7d8cdf»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1293,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…7d8cdf»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1294,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a3ba23»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 984,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…a3ba23»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 985,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…cf242d»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 669,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…cf242d»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 670,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…588a94»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 353,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…588a94»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 353,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r9-shed",
+      "leg": "shed",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "2/20",
+      "sync_outcome_counts": {
+        "within": 2,
+        "late": 18,
+        "never": 0
+      },
+      "failures": [
+        {
+          "op": "«hex64…13511b»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53092,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e27542»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52772,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3b5135»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52465,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3b5135»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52466,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…93e842»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52148,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…93e842»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52150,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e15e7e»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51814,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e15e7e»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51815,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c85078»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51472,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c85078»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51473,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…211b4a»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51149,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…211b4a»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51151,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8bbad2»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50821,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8bbad2»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50822,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9a7892»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50507,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9a7892»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50508,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e64071»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50176,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e64071»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50177,
+          "duplicates": 0
+        }
+      ],
+      "per_op": [
+        {
+          "op": "«hex64…13511b»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3392,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…13511b»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 53092,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e27542»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3073,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e27542»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52772,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3b5135»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52465,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…3b5135»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52466,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…93e842»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52148,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…93e842»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 52150,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e15e7e»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51814,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e15e7e»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51815,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c85078»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51472,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…c85078»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51473,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…211b4a»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51149,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…211b4a»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 51151,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8bbad2»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50821,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8bbad2»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50822,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9a7892»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50507,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9a7892»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50508,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e64071»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50176,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e64071»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "LATE-RECOVERED",
+          "latency_ms": 50177,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    },
+    {
+      "run": "s9study-r9-shedhi",
+      "leg": "shedhi",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal",
+        "leaf_egress_burst_bytes": 41943040,
+        "leaf_egress_hard_bytes_per_sec": 1310720,
+        "leaf_egress_soft_bytes_per_sec": 655360
+      },
+      "scale": 9,
+      "budget_sha256_ref": "«hex64…d2e47e»",
+      "workload": {
+        "dm": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "group": {
+          "total": 12,
+          "delivered": 12,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "probe": {
+          "total": 560,
+          "delivered": 560,
+          "delayed": 0,
+          "lost": 0,
+          "unknown": 0
+        },
+        "sync_total_pairs": 20
+      },
+      "sync_within_gate": "20/20",
+      "sync_outcome_counts": {
+        "within": 20,
+        "late": 0,
+        "never": 0
+      },
+      "failures": [],
+      "per_op": [
+        {
+          "op": "«hex64…634e1c»",
+          "key": "k0",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3202,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…634e1c»",
+          "key": "k0",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 3203,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…17331c»",
+          "key": "k1",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2885,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…17331c»",
+          "key": "k1",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2886,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…664813»",
+          "key": "k2",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2564,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…664813»",
+          "key": "k2",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2565,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e9f251»",
+          "key": "k3",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2250,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…e9f251»",
+          "key": "k3",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 2251,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…b23479»",
+          "key": "k4",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1934,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…b23479»",
+          "key": "k4",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1934,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8962e8»",
+          "key": "k5",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1619,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…8962e8»",
+          "key": "k5",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1620,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…b90dbc»",
+          "key": "k6",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1304,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…b90dbc»",
+          "key": "k6",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 1305,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…fec330»",
+          "key": "k7",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 992,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…fec330»",
+          "key": "k7",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 993,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…fe9730»",
+          "key": "k8",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 680,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…fe9730»",
+          "key": "k8",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 681,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9ecb6a»",
+          "key": "k9",
+          "node": "n1",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 369,
+          "duplicates": 0
+        },
+        {
+          "op": "«hex64…9ecb6a»",
+          "key": "k9",
+          "node": "n2",
+          "outcome": "WITHIN-GATE",
+          "latency_ms": 370,
+          "duplicates": 0
+        }
+      ],
+      "verdicts_pass": false,
+      "unsafe_retries": 0
+    }
+  ],
+  "milestone_observations_remain_separate": [
+    "run02-p2-s9-r0-shed_normal: 10/20 within the 45s sweep window (FAIL)",
+    "run03-s9shed-long (180s window): 20/20 within gate (characterization, not a pass conversion)"
+  ]
+}

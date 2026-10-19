@@ -1,0 +1,17 @@
+[package]
+name = "btungsten-meshdep"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "bTunGsTeN mesh transport dependability battery (BT-MESH-DEPENDABILITY-001): Rust-driven rig, OS-level accounting, workload engine, message-identity ledger, budget verdicts, recovery and continuity drills against pinned x0x release binaries."
+publish = false
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+btungsten-wb001-core = { path = "../btungsten-wb001-core" }
+
+[[bin]]
+name = "btmd"
+path = "src/bin/btmd.rs"

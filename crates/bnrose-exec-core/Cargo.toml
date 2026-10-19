@@ -1,0 +1,11 @@
+[package]
+name = "bnrose-exec-core"
+version = "0.1.0"
+edition.workspace = true
+license = "Apache-2.0"
+description = "BNRoSe L2 execution core: admission, the operation state machine, and the digest bindings — the ONE authority both the native and the wasm worker run. no_std, fixed arrays."
+publish = false
+
+[dependencies]
+btungsten-wb001-core = { path = "../btungsten-wb001-core" }
+sha2 = { version = "0.10", default-features = false }

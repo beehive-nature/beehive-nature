@@ -1,0 +1,145 @@
+$ cargo test -p adapter-store --locked --test skv1_crash_recovery   # NEGATIVE CONTROL: committed_prefix .max() -> .max().or(Some(0)) · 2026-10-15T12:38:16Z · Linux 6.18.33.2-microsoft-standard-WSL2 x86_64 · 8 cpu · WSL2, shared box
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /mnt/c/Users/travi/wt-skv1-repair/crates/bnr-keys/Cargo.toml
+workspace: /mnt/c/Users/travi/wt-skv1-repair/Cargo.toml
+   Compiling libc v0.2.186
+   Compiling typenum v1.20.1
+   Compiling cfg-if v1.0.4
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.46
+   Compiling zeroize v1.9.0
+   Compiling unicode-ident v1.0.24
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.9
+   Compiling pkg-config v0.3.33
+   Compiling cmov v0.5.4
+   Compiling getrandom v0.3.4
+   Compiling zerocopy v0.8.52
+   Compiling cpufeatures v0.3.0
+   Compiling ctutils v0.4.2
+   Compiling version_check v0.9.5
+   Compiling once_cell v1.21.4
+   Compiling crossbeam-utils v0.8.22
+   Compiling thiserror v2.0.18
+   Compiling ahash v0.8.12
+   Compiling smallvec v1.15.2
+   Compiling crossbeam-epoch v0.9.20
+   Compiling parking_lot_core v0.9.12
+   Compiling syn v2.0.118
+   Compiling hybrid-array v0.4.14
+   Compiling rustversion v1.0.23
+   Compiling snap v1.1.2
+   Compiling cpubits v0.1.1
+   Compiling zstd-safe v7.3.0
+   Compiling scopeguard v1.2.0
+   Compiling crypto-common v0.2.2
+   Compiling jobserver v0.1.35
+   Compiling block-buffer v0.12.1
+   Compiling inout v0.2.2
+   Compiling lock_api v0.4.14
+   Compiling cc v1.4.0
+   Compiling crc32fast v1.5.0
+   Compiling rustix v1.1.4
+   Compiling crossbeam-deque v0.8.7
+   Compiling cipher v0.5.2
+   Compiling universal-hash v0.6.1
+   Compiling digest v0.11.3
+   Compiling bitflags v2.13.0
+   Compiling vcpkg v0.2.15
+   Compiling twox-hash v2.1.5
+   Compiling polyval v0.7.3
+   Compiling lz4_flex v0.12.2
+   Compiling aead v0.6.1
+   Compiling parking_lot v0.12.5
+   Compiling rand_core v0.9.5
+   Compiling bytes v1.12.0
+   Compiling pin-project-lite v0.2.17
+   Compiling linux-raw-sys v0.12.1
+   Compiling getrandom v0.4.3
+   Compiling ghash v0.6.0
+   Compiling zstd-sys v2.1.1+zstd.1.5.7
+   Compiling libsqlite3-sys v0.30.1
+   Compiling arc-swap v1.9.2
+   Compiling byteslice v0.2.0
+   Compiling aes v0.9.3
+   Compiling ctr v0.10.1
+   Compiling chacha20 v0.10.1
+   Compiling hmac v0.13.0
+   Compiling poly1305 v0.9.1
+   Compiling num_cpus v1.17.0
+   Compiling tracing-core v0.1.36
+   Compiling equivalent v1.0.2
+   Compiling async-task v4.7.1
+   Compiling hashbrown v0.16.1
+   Compiling xxhash-rust v0.8.19
+   Compiling ppv-lite86 v0.2.21
+   Compiling aes-gcm v0.11.1
+   Compiling chacha20poly1305 v0.11.0
+   Compiling hkdf v0.13.0
+   Compiling hashbrown v0.14.5
+   Compiling artmap v0.6.0
+   Compiling rand_chacha v0.9.0
+   Compiling quick_cache v0.6.24
+   Compiling rand v0.9.4
+   Compiling thiserror-impl v2.0.18
+   Compiling tokio-macros v2.7.0
+   Compiling tracing-attributes v0.1.31
+   Compiling hashlink v0.9.1
+   Compiling sha2 v0.11.0
+   Compiling fallible-iterator v0.3.0
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling adapter-store v0.1.0 (/mnt/c/Users/travi/wt-skv1-repair/crates/adapter-store)
+   Compiling tokio v1.52.3
+   Compiling surrealkv-compat-indxdb v0.1.0
+   Compiling affinitypool v0.8.0
+   Compiling tracing v0.1.44
+   Compiling surrealkv-compat-v1 v0.1.0
+   Compiling zstd v0.13.3
+   Compiling surrealkv-compat-rocksdb v0.1.0
+   Compiling surrealkv v1.0.0
+   Compiling rusqlite v0.32.1
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 57.67s
+     Running tests/skv1_crash_recovery.rs (/home/travi/tgt/skv1/debug/deps/skv1_crash_recovery-f970e24738cb66ee)
+
+running 8 tests
+test oracle_corrupted_value_fails ... ok
+test oracle_empty_history_expects_an_empty_store ... FAILED
+test oracle_missing_interior_key_fails ... ok
+test oracle_op0_acknowledged_but_missing_fails ... ok
+test oracle_op0_recovered_without_ack_is_accepted ... ok
+test oracle_unacked_committed_tail_with_tombstone_replays_exactly ... ok
+test skv1_sqlite_crash_recovery ... FAILED
+test skv1_surrealkv_crash_recovery ... FAILED
+
+failures:
+
+---- oracle_empty_history_expects_an_empty_store stdout ----
+
+thread 'oracle_empty_history_expects_an_empty_store' (2316696) panicked at crates/adapter-store/tests/skv1_crash_recovery.rs:294:5:
+assertion `left == right` failed: no operation is invented
+  left: Some(0)
+ right: None
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- skv1_sqlite_crash_recovery stdout ----
+SKV1-RECEIPT engine=sqlite kill=BeforeFirstCommit child_exit=signal: 9 (SIGKILL) acked=0 committed_prefix=0 recovery=post-commit present=0 expected=1 torn=0 missing=1 exact=false integrity=ok verdict=FAIL
+
+thread 'skv1_sqlite_crash_recovery' (2316701) panicked at crates/adapter-store/tests/skv1_crash_recovery.rs:240:13:
+the held child committed nothing, yet the store shows a history
+
+---- skv1_surrealkv_crash_recovery stdout ----
+SKV1-RECEIPT engine=surrealkv kill=BeforeFirstCommit child_exit=signal: 9 (SIGKILL) acked=0 committed_prefix=0 recovery=post-commit present=0 expected=1 torn=0 missing=1 exact=false integrity=ok verdict=FAIL
+
+thread 'skv1_surrealkv_crash_recovery' (2316703) panicked at crates/adapter-store/tests/skv1_crash_recovery.rs:240:13:
+the held child committed nothing, yet the store shows a history
+
+
+failures:
+    oracle_empty_history_expects_an_empty_store
+    skv1_sqlite_crash_recovery
+    skv1_surrealkv_crash_recovery
+
+test result: FAILED. 5 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+error: test failed, to rerun pass `-p adapter-store --test skv1_crash_recovery`
+exit=101

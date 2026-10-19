@@ -1,0 +1,7 @@
+let barrier_i32_name = "zeroize::barrier::optimization_barrier::_inste4581d0a71164688";
+let barrier_u8_name = "zeroize::barrier::optimization_barrier::_inst2efc261c2cb07b6c";
+let expand_name = "fips204::ml_dsa::expand_public::_inst974ff8c13c288f3d";
+let expanded_result_adt_name = "core/5d8ee733::result::Result::_adtf08609c5a8685a07[0]";
+let internal_name = "fips204::ml_dsa::verify_internal::_inst40602703b9a2bc51";
+let polynomial_adt_name = "fips204/df6bfcc8::types::T::_adtc5a5405abab57fd5[0]";
+let public_key_adt_name = "fips204/df6bfcc8::types::PublicKey::_adt6aa2c6b1ccefd79d[0]";

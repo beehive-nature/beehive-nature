@@ -970,7 +970,8 @@ mod tests {
         std::fs::write(sandbox.join("a.txt"), b"alpha-network-data\n").expect("fixture file");
         let keys = root.join("keys");
         std::fs::create_dir_all(&keys).expect("keys dir");
-        let identity = IdentityHook::genesis(&keys).expect("genesis");
+        let identity =
+            IdentityHook::genesis(&keys, IdentityHook::test_vault()).expect("genesis");
         let bus = EventBus::new(64);
         let publisher = BusPublisher::new(bus, identity.did());
         let goal = serde_json::json!({"objective": "fetch the data", "task_id": "T-001"});
@@ -1099,7 +1100,8 @@ mod tests {
         let toolset = Toolset::new(&sandbox).expect("sandbox");
         let keys = root.join("keys");
         std::fs::create_dir_all(&keys).expect("keys dir");
-        let identity = IdentityHook::genesis(&keys).expect("genesis");
+        let identity =
+            IdentityHook::genesis(&keys, IdentityHook::test_vault()).expect("genesis");
         let goal = serde_json::json!({"objective": "fetch", "task_id": "T-7"});
 
         let bus = EventBus::new(128);

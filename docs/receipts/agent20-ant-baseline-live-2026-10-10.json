@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-10T23:51:01.937Z",
+  "url": "https://skaists.dev/surfaces/wallet.html",
+  "kind": "live-keyless-quote-only",
+  "paymentAuthorized": false,
+  "fundsSpent": false,
+  "purchasePanel": false,
+  "quoteStatus": "Asking Autonomi storage nodes for a price…",
+  "timedOut": true,
+  "horizontalOverflow": false
+}

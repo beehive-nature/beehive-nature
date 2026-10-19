@@ -16,6 +16,8 @@ use std::path::{Path, PathBuf};
 use bsigner::alg::SigAlg;
 use sha2::{Digest, Sha256};
 
+pub use bsigner::keys::Vault;
+
 /// A signed checkpoint: the bytes, who signed, and with what.
 #[derive(Debug, Clone)]
 pub struct SignedCheckpoint {
@@ -26,25 +28,30 @@ pub struct SignedCheckpoint {
 }
 
 /// Self-certifying harness identity bound to one ML-DSA-65 keyset.
-#[derive(Debug, Clone)]
+/// Keysets seal at rest under the owner's vault; the hook holds the
+/// vault behind `Arc` (`Vault` is deliberately not `Clone`).
+#[derive(Clone)]
 pub struct IdentityHook {
     did: String,
     key_id: String,
     keys_dir: PathBuf,
+    vault: std::sync::Arc<Vault>,
 }
 
 impl IdentityHook {
-    /// Generate a fresh ML-DSA-65 keyset under `keys_dir` and derive the
-    /// `did:b:` identity from the canonical genesis op. Returns public
-    /// material only alongside the hook (key id, DID, key length).
-    pub fn genesis(keys_dir: &Path) -> Result<Self, String> {
-        let info = bsigner::keys::keygen_dsa(SigAlg::MlDsa65, Some(keys_dir.to_path_buf()))?;
+    /// Generate a fresh ML-DSA-65 keyset under `keys_dir` (sealed under
+    /// `vault`) and derive the `did:b:` identity from the canonical
+    /// genesis op. The DID needs public material only.
+    pub fn genesis(keys_dir: &Path, vault: Vault) -> Result<Self, String> {
+        let info =
+            bsigner::keys::keygen_dsa(SigAlg::MlDsa65, Some(keys_dir.to_path_buf()), &vault)?;
         let key_id = info
             .get("key_id")
             .and_then(|v| v.as_str())
             .ok_or("bsigner keygen returned no key_id")?
             .to_string();
-        let (_, _, verifying_key) = bsigner::keys::load_dsa(&key_id, Some(keys_dir.to_path_buf()))?;
+        let (_, verifying_key) =
+            bsigner::keys::load_dsa_public(&key_id, Some(keys_dir.to_path_buf()))?;
         let genesis_op = serde_json::json!({
             "type": "b:genesis",
             "alg": SigAlg::MlDsa65.id(),
@@ -58,7 +65,16 @@ impl IdentityHook {
             did,
             key_id,
             keys_dir: keys_dir.to_path_buf(),
+            vault: std::sync::Arc::new(vault),
         })
+    }
+
+    /// Test vault from the public BIP-39 all-zero vector (23×"abandon" +
+    /// "art"). No live secret; test-only helper.
+    #[cfg(test)]
+    pub fn test_vault() -> Vault {
+        let phrase = format!("{}art", "abandon ".repeat(23));
+        Vault::from_recovery_code(&phrase).expect("test vault")
     }
 
     pub fn did(&self) -> &str {
@@ -88,8 +104,11 @@ impl IdentityHook {
     /// Sign checkpoint bytes (e.g. a transcript sha256). Returns the
     /// signature for the checkpoint CanonicalEvent.
     pub fn checkpoint(&self, bytes: &[u8]) -> Result<SignedCheckpoint, String> {
-        let (alg, seed, verifying_key) =
-            bsigner::keys::load_dsa(&self.key_id, Some(self.keys_dir.clone()))?;
+        let (alg, seed, verifying_key) = bsigner::keys::load_dsa(
+            &self.key_id,
+            Some(self.keys_dir.clone()),
+            &self.vault,
+        )?;
         let sig = bsigner::pq::dsa_sign(alg, &seed, bytes)?;
         Ok(SignedCheckpoint {
             did: self.did.clone(),
@@ -150,7 +169,7 @@ mod tests {
     #[test]
     fn genesis_checkpoint_verify_roundtrip() {
         let dir = temp_keys_dir("roundtrip");
-        let hook = IdentityHook::genesis(&dir).expect("genesis");
+        let hook = IdentityHook::genesis(&dir, IdentityHook::test_vault()).expect("genesis");
         assert!(
             hook.did().starts_with("did:b:"),
             "DID shape: {}",
@@ -173,7 +192,7 @@ mod tests {
     #[test]
     fn tampered_checkpoint_is_refused() {
         let dir = temp_keys_dir("tamper");
-        let hook = IdentityHook::genesis(&dir).expect("genesis");
+        let hook = IdentityHook::genesis(&dir, IdentityHook::test_vault()).expect("genesis");
         let pre = hook.checkpoint(b"transcript-prefix").expect("pre sign");
         let mut bad_post = hook
             .checkpoint(b"transcript-prefix-continued")
@@ -187,8 +206,8 @@ mod tests {
     fn different_actor_is_refused() {
         let dir_a = temp_keys_dir("actor-a");
         let dir_b = temp_keys_dir("actor-b");
-        let hook_a = IdentityHook::genesis(&dir_a).expect("genesis a");
-        let hook_b = IdentityHook::genesis(&dir_b).expect("genesis b");
+        let hook_a = IdentityHook::genesis(&dir_a, IdentityHook::test_vault()).expect("genesis a");
+        let hook_b = IdentityHook::genesis(&dir_b, IdentityHook::test_vault()).expect("genesis b");
         let pre = hook_a.checkpoint(b"shared-prefix").expect("pre sign");
         let post = hook_b.checkpoint(b"shared-prefix-more").expect("post sign");
         assert!(!IdentityHook::verify_continuity(&pre, &post));
@@ -199,7 +218,7 @@ mod tests {
     #[test]
     fn non_prefix_post_is_refused() {
         let dir = temp_keys_dir("prefix");
-        let hook = IdentityHook::genesis(&dir).expect("genesis");
+        let hook = IdentityHook::genesis(&dir, IdentityHook::test_vault()).expect("genesis");
         let pre = hook.checkpoint(b"transcript-prefix").expect("pre sign");
         let post = hook.checkpoint(b"unrelated-divergence").expect("post sign");
         assert!(!IdentityHook::verify_continuity(&pre, &post));

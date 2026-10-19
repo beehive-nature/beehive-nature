@@ -1,0 +1,4 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /workspace/wt-pq-battery/crates/bnr-keys/Cargo.toml
+workspace: /workspace/wt-pq-battery/Cargo.toml
+error: package ID specification `chilldkg-rs` did not match any packages

@@ -1,0 +1,21 @@
+[package]
+name = "bnr-solana-tungsten"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-only"
+publish = false
+
+# Isolated experiment: no dependency or lockfile change to the BNR kernel.
+[workspace]
+
+[dependencies]
+ark-bn254 = "=0.6.0"
+ark-ff = "=0.6.0"
+ark-groth16 = "=0.6.0"
+ark-relations = "=0.6.0"
+rand = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+solana-groth16-verify = { git = "https://github.com/solana-program/groth16-verifier-program", rev = "8bd06b4fb07f636c1872993a99f1a296b23b69fa" }
+groth16-convert = { git = "https://github.com/solana-program/groth16-verifier-program", rev = "8bd06b4fb07f636c1872993a99f1a296b23b69fa" }

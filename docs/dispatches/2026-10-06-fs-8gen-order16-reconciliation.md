@@ -90,3 +90,50 @@ ceremony, no re-audit, no repeated try-now:
 
 NEXT OWNER: the next authed wake (founder sign-in in the pane) — the veins
 above; the codex seat owns the ANT gate (#336/#346/#347).
+
+---
+
+## Addendum (same day, after the founder signed in mid-wake)
+
+Founder signed in inside the staged pane ("logged back in"). Oracle: the tab
+bounced ident→control viewer = AUTHED; wire-side health: v8 person details
+for KWCT-391 returned 200 with the known profile. Veins executed
+verification-only; **zero FamilySearch mutations by this session this wake.**
+
+1. **Person-scoped hint wires: EMPTY ×6** (KWCT-391, PNC6-GJQ, PNCX-S8Q,
+   PNCP-RDN, PNC5-R9G, L21W-9ZT — record-matches wire 200/0 entries each;
+   banked behavior: that wire and the tasks rail are different systems).
+2. **Tasks hub fresh-day recheck: rail renders EMPTY at this hour**
+   (chrome + "Hints" heading render; zero cards after wait + scroll;
+   wire-auth proven seconds earlier — observed-empty, never proof of
+   no hints).
+3. **Hadlock vein CLOSED — the dispatch line above was STALE.** The Source
+   Linker oracle (linker?ark=1:1:62XG-3FTR&id=KWCT-391&aihint=) rendered
+   full rows, every one carrying the DETACH chip: Mary A Hadlock →
+   Mary Ann Hadlock KWCT-391, Dwight → Walter Dwight Dow LCZ5-8QV,
+   Walter Dow → Walter John Dow KWJZ-YG2. The record was attached ×3 on
+   2026-10-04; the order-14/15 open-vein lists kept carrying it as
+   "pending healthy render" — corrected here.
+4. **New persons — no new hints; foreign activity observed.** Sources
+   counts read from the person pages: PNC6-GJQ (1), PNCX-S8Q (1),
+   PNCP-RDN (3), PNC5-R9G (3); zero hint rails rendered. Jim +2 and
+   Daniel +1 since the 10-04 receipt, all created **October 6 (today)
+   under the founder's account, not by this session**: a **1950 US
+   Census** source attached to Jim Briggs PNCP-RDN (record person indexed
+   `<Unknown>` — a real record, plausibly the assistant-hint child
+   evidence), plus duplicate GenealogyBank obit citations on Jim and
+   Daniel (same-event re-index class — our law skips attaching these;
+   we do not detach others' work). Attribution unconfirmed (founder
+   manual vs another seat) — recorded, not inferred.
+5. **Portal digest: shell through reloads** (degraded-SPA phase; new-tab
+   creation flapped "browser guest not attached" mid-wake while the
+   original tab stayed controllable). The Chester Arthur Briggs assistant
+   hint (L21W-9ZT, "Possible child of…", Sources (15) on his page) stays
+   OPEN for a healthier pane.
+6. Webview notes for the next wake: goto timeouts can land anyway (verify
+   by URL/title, not by throw); living-person pages render Sources (0)
+   mid-hydration before the true count — re-read after settle.
+
+Session net effect: one stale vein line corrected (Hadlock), the fresh-day
+surfaces all honestly empty, and the tree grew today under another hand.
+

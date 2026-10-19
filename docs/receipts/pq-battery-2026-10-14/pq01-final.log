@@ -1,0 +1,382 @@
+PQ01 ACVP-Server commit 975de31eb83d87039ec88934fdc47d8c312b892d (vectors cached in /workspace/pq-artifacts/vectors)
+PQ01 ML-KEM-keyGen-FIPS203: 75 cases in the file
+PQ01 ML-KEM-encapDecap-FIPS203: 165 cases in the file
+PQ01 ML-KEM-encapDecap-FIPS203-tr1: 195 cases in the file
+PQ01 ML-DSA-keyGen-FIPS204: 75 cases in the file
+PQ01 ML-DSA-sigGen-FIPS204: 360 cases in the file
+PQ01 ML-DSA-sigGen-FIPS204-tr1: 720 cases in the file
+PQ01 ML-DSA-sigVer-FIPS204: 180 cases in the file
+PQ01 SLH-DSA-keyGen-FIPS205: 120 cases in the file
+PQ01 SLH-DSA-sigGen-FIPS205: 624 cases in the file
+PQ01 SLH-DSA-sigVer-FIPS205: 504 cases in the file
+PQ01 ML-DSA-44 keyGen (FIPS204) [libcrux]: executed 25 of 25, passed 25
+PQ01 ML-DSA-44 keyGen (FIPS204) [rustcrypto]: executed 25 of 25, passed 25
+PQ01 ML-DSA-44 keyGen (FIPS204) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 keyGen (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen ext-pure det (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen ext-pure det (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen ext-pure det (FIPS204) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen ext-pure det (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen ext-pure det (FIPS204-tr1, expanded) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen ext-pure det (FIPS204-tr1, expanded) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen ext-pure det (FIPS204-tr1, expanded) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen ext-pure det (FIPS204-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen ext-pure det (FIPS204-tr1, seed) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen ext-pure det (FIPS204-tr1, seed) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen ext-pure det (FIPS204-tr1, seed) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen ext-pure det (FIPS204-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen ext-pure hedged (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen ext-pure hedged (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen ext-pure hedged (FIPS204) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen ext-pure hedged (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen ext-pure hedged (FIPS204-tr1, expanded) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen ext-pure hedged (FIPS204-tr1, expanded) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen ext-pure hedged (FIPS204-tr1, expanded) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen ext-pure hedged (FIPS204-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen ext-pure hedged (FIPS204-tr1, seed) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen ext-pure hedged (FIPS204-tr1, seed) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen ext-pure hedged (FIPS204-tr1, seed) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen ext-pure hedged (FIPS204-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen internal det (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen internal det (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen internal det (FIPS204) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen internal det (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen internal det (FIPS204-tr1, expanded) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen internal det (FIPS204-tr1, expanded) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen internal det (FIPS204-tr1, expanded) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen internal det (FIPS204-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen internal det (FIPS204-tr1, seed) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen internal det (FIPS204-tr1, seed) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen internal det (FIPS204-tr1, seed) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen internal det (FIPS204-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen internal hedged (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen internal hedged (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen internal hedged (FIPS204) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen internal hedged (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen internal hedged (FIPS204-tr1, expanded) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen internal hedged (FIPS204-tr1, expanded) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen internal hedged (FIPS204-tr1, expanded) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen internal hedged (FIPS204-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen internal hedged (FIPS204-tr1, seed) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen internal hedged (FIPS204-tr1, seed) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen internal hedged (FIPS204-tr1, seed) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen internal hedged (FIPS204-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen internal-mu det (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen internal-mu det (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen internal-mu det (FIPS204-tr1, expanded) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen internal-mu det (FIPS204-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigGen internal-mu det (FIPS204-tr1, seed) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigGen internal-mu det (FIPS204-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-44 sigVer ext-pure (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigVer ext-pure (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigVer internal (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigVer internal (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigVer internal-mu (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-44 sigVer internal-mu (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 keyGen (FIPS204) [libcrux]: executed 25 of 25, passed 25
+PQ01 ML-DSA-65 keyGen (FIPS204) [rustcrypto]: executed 25 of 25, passed 25
+PQ01 ML-DSA-65 keyGen (FIPS204) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 keyGen (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen ext-pure det (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen ext-pure det (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen ext-pure det (FIPS204) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen ext-pure det (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, expanded) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, expanded) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, expanded) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, seed) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, seed) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, seed) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen ext-pure hedged (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen ext-pure hedged (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen ext-pure hedged (FIPS204) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen ext-pure hedged (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, expanded) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, expanded) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, expanded) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, seed) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, seed) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, seed) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen internal det (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen internal det (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen internal det (FIPS204) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen internal det (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen internal det (FIPS204-tr1, expanded) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen internal det (FIPS204-tr1, expanded) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen internal det (FIPS204-tr1, expanded) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen internal det (FIPS204-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen internal det (FIPS204-tr1, seed) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen internal det (FIPS204-tr1, seed) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen internal det (FIPS204-tr1, seed) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen internal det (FIPS204-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen internal hedged (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen internal hedged (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen internal hedged (FIPS204) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen internal hedged (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen internal hedged (FIPS204-tr1, expanded) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen internal hedged (FIPS204-tr1, expanded) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen internal hedged (FIPS204-tr1, expanded) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen internal hedged (FIPS204-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen internal hedged (FIPS204-tr1, seed) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen internal hedged (FIPS204-tr1, seed) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen internal hedged (FIPS204-tr1, seed) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen internal hedged (FIPS204-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen internal-mu det (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen internal-mu det (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen internal-mu det (FIPS204-tr1, expanded) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen internal-mu det (FIPS204-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigGen internal-mu det (FIPS204-tr1, seed) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigGen internal-mu det (FIPS204-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-65 sigVer ext-pure (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigVer ext-pure (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigVer internal (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigVer internal (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigVer internal-mu (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-65 sigVer internal-mu (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 keyGen (FIPS204) [libcrux]: executed 25 of 25, passed 25
+PQ01 ML-DSA-87 keyGen (FIPS204) [rustcrypto]: executed 25 of 25, passed 25
+PQ01 ML-DSA-87 keyGen (FIPS204) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 keyGen (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen ext-pure det (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen ext-pure det (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen ext-pure det (FIPS204) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen ext-pure det (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen ext-pure det (FIPS204-tr1, expanded) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen ext-pure det (FIPS204-tr1, expanded) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen ext-pure det (FIPS204-tr1, expanded) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen ext-pure det (FIPS204-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen ext-pure det (FIPS204-tr1, seed) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen ext-pure det (FIPS204-tr1, seed) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen ext-pure det (FIPS204-tr1, seed) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen ext-pure det (FIPS204-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen ext-pure hedged (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen ext-pure hedged (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen ext-pure hedged (FIPS204) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen ext-pure hedged (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen ext-pure hedged (FIPS204-tr1, expanded) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen ext-pure hedged (FIPS204-tr1, expanded) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen ext-pure hedged (FIPS204-tr1, expanded) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen ext-pure hedged (FIPS204-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen ext-pure hedged (FIPS204-tr1, seed) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen ext-pure hedged (FIPS204-tr1, seed) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen ext-pure hedged (FIPS204-tr1, seed) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen ext-pure hedged (FIPS204-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen internal det (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen internal det (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen internal det (FIPS204) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen internal det (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen internal det (FIPS204-tr1, expanded) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen internal det (FIPS204-tr1, expanded) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen internal det (FIPS204-tr1, expanded) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen internal det (FIPS204-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen internal det (FIPS204-tr1, seed) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen internal det (FIPS204-tr1, seed) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen internal det (FIPS204-tr1, seed) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen internal det (FIPS204-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen internal hedged (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen internal hedged (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen internal hedged (FIPS204) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen internal hedged (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen internal hedged (FIPS204-tr1, expanded) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen internal hedged (FIPS204-tr1, expanded) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen internal hedged (FIPS204-tr1, expanded) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen internal hedged (FIPS204-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen internal hedged (FIPS204-tr1, seed) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen internal hedged (FIPS204-tr1, seed) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen internal hedged (FIPS204-tr1, seed) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen internal hedged (FIPS204-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen internal-mu det (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen internal-mu det (FIPS204) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen internal-mu det (FIPS204-tr1, expanded) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen internal-mu det (FIPS204-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigGen internal-mu det (FIPS204-tr1, seed) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigGen internal-mu det (FIPS204-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-DSA-87 sigVer ext-pure (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigVer ext-pure (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigVer internal (FIPS204) [libcrux]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigVer internal (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-DSA-87 sigVer internal-mu (FIPS204) [rustcrypto]: executed 15 of 15, passed 15
+PQ01 ML-KEM-1024 decapsulation (FIPS203) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-1024 decapsulation (FIPS203) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-1024 decapsulation (FIPS203) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-1024 decapsulation (FIPS203) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-1024 decapsulation (FIPS203-tr1, expanded) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-1024 decapsulation (FIPS203-tr1, expanded) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-1024 decapsulation (FIPS203-tr1, expanded) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-1024 decapsulation (FIPS203-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-1024 decapsulation (FIPS203-tr1, seed) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-1024 decapsulation (FIPS203-tr1, seed) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-1024 decapsulation (FIPS203-tr1, seed) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-1024 decapsulation (FIPS203-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-1024 decapsulationKeyCheck (FIPS203) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-1024 decapsulationKeyCheck (FIPS203) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-1024 decapsulationKeyCheck (FIPS203-tr1, expanded) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-1024 decapsulationKeyCheck (FIPS203-tr1, expanded) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-1024 encapsulation (FIPS203) [libcrux]: executed 25 of 25, passed 25
+PQ01 ML-KEM-1024 encapsulation (FIPS203) [rustcrypto]: executed 25 of 25, passed 25
+PQ01 ML-KEM-1024 encapsulation (FIPS203) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-1024 encapsulation (FIPS203) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-1024 encapsulation (FIPS203-tr1) [libcrux]: executed 25 of 25, passed 25
+PQ01 ML-KEM-1024 encapsulation (FIPS203-tr1) [rustcrypto]: executed 25 of 25, passed 25
+PQ01 ML-KEM-1024 encapsulation (FIPS203-tr1) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-1024 encapsulation (FIPS203-tr1) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-1024 encapsulationKeyCheck (FIPS203) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-1024 encapsulationKeyCheck (FIPS203) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-1024 encapsulationKeyCheck (FIPS203-tr1) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-1024 encapsulationKeyCheck (FIPS203-tr1) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-1024 keyGen (FIPS203) [libcrux]: executed 25 of 25, passed 25
+PQ01 ML-KEM-1024 keyGen (FIPS203) [rustcrypto]: executed 25 of 25, passed 25
+PQ01 ML-KEM-1024 keyGen (FIPS203) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-1024 keyGen (FIPS203) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-512 decapsulation (FIPS203) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-512 decapsulation (FIPS203) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-512 decapsulation (FIPS203) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-512 decapsulation (FIPS203) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-512 decapsulation (FIPS203-tr1, expanded) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-512 decapsulation (FIPS203-tr1, expanded) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-512 decapsulation (FIPS203-tr1, expanded) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-512 decapsulation (FIPS203-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-512 decapsulation (FIPS203-tr1, seed) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-512 decapsulation (FIPS203-tr1, seed) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-512 decapsulation (FIPS203-tr1, seed) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-512 decapsulation (FIPS203-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-512 decapsulationKeyCheck (FIPS203) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-512 decapsulationKeyCheck (FIPS203) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-512 decapsulationKeyCheck (FIPS203-tr1, expanded) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-512 decapsulationKeyCheck (FIPS203-tr1, expanded) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-512 encapsulation (FIPS203) [libcrux]: executed 25 of 25, passed 25
+PQ01 ML-KEM-512 encapsulation (FIPS203) [rustcrypto]: executed 25 of 25, passed 25
+PQ01 ML-KEM-512 encapsulation (FIPS203) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-512 encapsulation (FIPS203) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-512 encapsulation (FIPS203-tr1) [libcrux]: executed 25 of 25, passed 25
+PQ01 ML-KEM-512 encapsulation (FIPS203-tr1) [rustcrypto]: executed 25 of 25, passed 25
+PQ01 ML-KEM-512 encapsulation (FIPS203-tr1) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-512 encapsulation (FIPS203-tr1) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-512 encapsulationKeyCheck (FIPS203) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-512 encapsulationKeyCheck (FIPS203) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-512 encapsulationKeyCheck (FIPS203-tr1) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-512 encapsulationKeyCheck (FIPS203-tr1) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-512 keyGen (FIPS203) [libcrux]: executed 25 of 25, passed 25
+PQ01 ML-KEM-512 keyGen (FIPS203) [rustcrypto]: executed 25 of 25, passed 25
+PQ01 ML-KEM-512 keyGen (FIPS203) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-512 keyGen (FIPS203) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-768 decapsulation (FIPS203) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-768 decapsulation (FIPS203) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-768 decapsulation (FIPS203) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-768 decapsulation (FIPS203) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-768 decapsulation (FIPS203-tr1, expanded) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-768 decapsulation (FIPS203-tr1, expanded) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-768 decapsulation (FIPS203-tr1, expanded) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-768 decapsulation (FIPS203-tr1, expanded) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-768 decapsulation (FIPS203-tr1, seed) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-768 decapsulation (FIPS203-tr1, seed) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-768 decapsulation (FIPS203-tr1, seed) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-768 decapsulation (FIPS203-tr1, seed) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-768 decapsulationKeyCheck (FIPS203) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-768 decapsulationKeyCheck (FIPS203) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-768 decapsulationKeyCheck (FIPS203-tr1, expanded) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-768 decapsulationKeyCheck (FIPS203-tr1, expanded) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-768 encapsulation (FIPS203) [libcrux]: executed 25 of 25, passed 25
+PQ01 ML-KEM-768 encapsulation (FIPS203) [rustcrypto]: executed 25 of 25, passed 25
+PQ01 ML-KEM-768 encapsulation (FIPS203) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-768 encapsulation (FIPS203) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-768 encapsulation (FIPS203-tr1) [libcrux]: executed 25 of 25, passed 25
+PQ01 ML-KEM-768 encapsulation (FIPS203-tr1) [rustcrypto]: executed 25 of 25, passed 25
+PQ01 ML-KEM-768 encapsulation (FIPS203-tr1) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-768 encapsulation (FIPS203-tr1) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 ML-KEM-768 encapsulationKeyCheck (FIPS203) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-768 encapsulationKeyCheck (FIPS203) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-768 encapsulationKeyCheck (FIPS203-tr1) [libcrux]: executed 10 of 10, passed 10
+PQ01 ML-KEM-768 encapsulationKeyCheck (FIPS203-tr1) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 ML-KEM-768 keyGen (FIPS203) [libcrux]: executed 25 of 25, passed 25
+PQ01 ML-KEM-768 keyGen (FIPS203) [rustcrypto]: executed 25 of 25, passed 25
+PQ01 ML-KEM-768 keyGen (FIPS203) TEETH one input byte flipped [libcrux]: executed 1 of 1, passed 1
+PQ01 ML-KEM-768 keyGen (FIPS203) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 SLH-DSA-SHAKE-256f keyGen (FIPS205) [fips205]: executed 10 of 10, passed 10
+PQ01 SLH-DSA-SHAKE-256f keyGen (FIPS205) [rustcrypto]: executed 10 of 10, passed 10
+PQ01 SLH-DSA-SHAKE-256f keyGen (FIPS205) TEETH one input byte flipped [fips205]: executed 1 of 1, passed 1
+PQ01 SLH-DSA-SHAKE-256f keyGen (FIPS205) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 SLH-DSA-SHAKE-256f sigGen ext-pure det (FIPS205) [fips205]: executed 7 of 7, passed 7
+PQ01 SLH-DSA-SHAKE-256f sigGen ext-pure det (FIPS205) [rustcrypto]: executed 7 of 7, passed 7
+PQ01 SLH-DSA-SHAKE-256f sigGen ext-pure det (FIPS205) TEETH one input byte flipped [fips205]: executed 1 of 1, passed 1
+PQ01 SLH-DSA-SHAKE-256f sigGen ext-pure det (FIPS205) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 SLH-DSA-SHAKE-256f sigGen ext-pure hedged (FIPS205) [fips205]: executed 7 of 7, passed 7
+PQ01 SLH-DSA-SHAKE-256f sigGen ext-pure hedged (FIPS205) [rustcrypto]: executed 7 of 7, passed 7
+PQ01 SLH-DSA-SHAKE-256f sigGen ext-pure hedged (FIPS205) TEETH one input byte flipped [fips205]: executed 1 of 1, passed 1
+PQ01 SLH-DSA-SHAKE-256f sigGen ext-pure hedged (FIPS205) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 SLH-DSA-SHAKE-256f sigGen internal det (FIPS205) [fips205]: executed 7 of 7, passed 7
+PQ01 SLH-DSA-SHAKE-256f sigGen internal det (FIPS205) [rustcrypto]: executed 7 of 7, passed 7
+PQ01 SLH-DSA-SHAKE-256f sigGen internal det (FIPS205) TEETH one input byte flipped [fips205]: executed 1 of 1, passed 1
+PQ01 SLH-DSA-SHAKE-256f sigGen internal det (FIPS205) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 SLH-DSA-SHAKE-256f sigGen internal hedged (FIPS205) [fips205]: executed 7 of 7, passed 7
+PQ01 SLH-DSA-SHAKE-256f sigGen internal hedged (FIPS205) [rustcrypto]: executed 7 of 7, passed 7
+PQ01 SLH-DSA-SHAKE-256f sigGen internal hedged (FIPS205) TEETH one input byte flipped [fips205]: executed 1 of 1, passed 1
+PQ01 SLH-DSA-SHAKE-256f sigGen internal hedged (FIPS205) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 SLH-DSA-SHAKE-256f sigVer ext-pure (FIPS205) [fips205]: executed 14 of 14, passed 14
+PQ01 SLH-DSA-SHAKE-256f sigVer ext-pure (FIPS205) [rustcrypto]: executed 14 of 14, passed 14
+PQ01 SLH-DSA-SHAKE-256f sigVer internal (FIPS205) [fips205]: executed 14 of 14, passed 14
+PQ01 SLH-DSA-SHAKE-256f sigVer internal (FIPS205) [rustcrypto]: executed 14 of 14, passed 14
+PQ01 SLH-DSA-SHAKE-256f sigVer internal (FIPS205) TEETH one input byte flipped [fips205]: executed 1 of 1, passed 1
+PQ01 SLH-DSA-SHAKE-256f sigVer internal (FIPS205) TEETH one input byte flipped [rustcrypto]: executed 1 of 1, passed 1
+PQ01 NOT RUN ML-DSA-44 sigGen ext-prehash det (FIPS204): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-44 sigGen ext-prehash det (FIPS204-tr1, expanded): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-44 sigGen ext-prehash det (FIPS204-tr1, seed): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-44 sigGen ext-prehash hedged (FIPS204): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-44 sigGen ext-prehash hedged (FIPS204-tr1, expanded): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-44 sigGen ext-prehash hedged (FIPS204-tr1, seed): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-44 sigGen internal-mu det (FIPS204) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-44 sigGen internal-mu det (FIPS204-tr1, expanded) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-44 sigGen internal-mu det (FIPS204-tr1, seed) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-44 sigGen internal-mu hedged (FIPS204) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-44 sigGen internal-mu hedged (FIPS204) [rustcrypto]: this implementation takes μ-signing randomness only from an RNG, not as supplied bytes; the estate never signs μ
+PQ01 NOT RUN ML-DSA-44 sigGen internal-mu hedged (FIPS204-tr1, expanded) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-44 sigGen internal-mu hedged (FIPS204-tr1, expanded) [rustcrypto]: this implementation takes μ-signing randomness only from an RNG, not as supplied bytes; the estate never signs μ
+PQ01 NOT RUN ML-DSA-44 sigGen internal-mu hedged (FIPS204-tr1, seed) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-44 sigGen internal-mu hedged (FIPS204-tr1, seed) [rustcrypto]: this implementation takes μ-signing randomness only from an RNG, not as supplied bytes; the estate never signs μ
+PQ01 NOT RUN ML-DSA-44 sigVer ext-prehash (FIPS204): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-44 sigVer internal-mu (FIPS204) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-65 sigGen ext-prehash det (FIPS204): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-65 sigGen ext-prehash det (FIPS204-tr1, expanded): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-65 sigGen ext-prehash det (FIPS204-tr1, seed): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-65 sigGen ext-prehash hedged (FIPS204): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-65 sigGen ext-prehash hedged (FIPS204-tr1, expanded): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-65 sigGen ext-prehash hedged (FIPS204-tr1, seed): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-65 sigGen internal-mu det (FIPS204) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-65 sigGen internal-mu det (FIPS204-tr1, expanded) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-65 sigGen internal-mu det (FIPS204-tr1, seed) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-65 sigGen internal-mu hedged (FIPS204) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-65 sigGen internal-mu hedged (FIPS204) [rustcrypto]: this implementation takes μ-signing randomness only from an RNG, not as supplied bytes; the estate never signs μ
+PQ01 NOT RUN ML-DSA-65 sigGen internal-mu hedged (FIPS204-tr1, expanded) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-65 sigGen internal-mu hedged (FIPS204-tr1, expanded) [rustcrypto]: this implementation takes μ-signing randomness only from an RNG, not as supplied bytes; the estate never signs μ
+PQ01 NOT RUN ML-DSA-65 sigGen internal-mu hedged (FIPS204-tr1, seed) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-65 sigGen internal-mu hedged (FIPS204-tr1, seed) [rustcrypto]: this implementation takes μ-signing randomness only from an RNG, not as supplied bytes; the estate never signs μ
+PQ01 NOT RUN ML-DSA-65 sigVer ext-prehash (FIPS204): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-65 sigVer internal-mu (FIPS204) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-87 sigGen ext-prehash det (FIPS204): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-87 sigGen ext-prehash det (FIPS204-tr1, expanded): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-87 sigGen ext-prehash det (FIPS204-tr1, seed): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-87 sigGen ext-prehash hedged (FIPS204): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-87 sigGen ext-prehash hedged (FIPS204-tr1, expanded): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-87 sigGen ext-prehash hedged (FIPS204-tr1, seed): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-87 sigGen internal-mu det (FIPS204) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-87 sigGen internal-mu det (FIPS204-tr1, expanded) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-87 sigGen internal-mu det (FIPS204-tr1, seed) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-87 sigGen internal-mu hedged (FIPS204) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-87 sigGen internal-mu hedged (FIPS204) [rustcrypto]: this implementation takes μ-signing randomness only from an RNG, not as supplied bytes; the estate never signs μ
+PQ01 NOT RUN ML-DSA-87 sigGen internal-mu hedged (FIPS204-tr1, expanded) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-87 sigGen internal-mu hedged (FIPS204-tr1, expanded) [rustcrypto]: this implementation takes μ-signing randomness only from an RNG, not as supplied bytes; the estate never signs μ
+PQ01 NOT RUN ML-DSA-87 sigGen internal-mu hedged (FIPS204-tr1, seed) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN ML-DSA-87 sigGen internal-mu hedged (FIPS204-tr1, seed) [rustcrypto]: this implementation takes μ-signing randomness only from an RNG, not as supplied bytes; the estate never signs μ
+PQ01 NOT RUN ML-DSA-87 sigVer ext-prehash (FIPS204): HashML-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN ML-DSA-87 sigVer internal-mu (FIPS204) [libcrux]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+PQ01 NOT RUN SLH-DSA keyGen (FIPS205) other parameter sets: not used by the estate: SLH-DSA-SHA2-128f, SLH-DSA-SHA2-128s, SLH-DSA-SHA2-192f, SLH-DSA-SHA2-192s, SLH-DSA-SHA2-256f, SLH-DSA-SHA2-256s, SLH-DSA-SHAKE-128f, SLH-DSA-SHAKE-128s, SLH-DSA-SHAKE-192f, SLH-DSA-SHAKE-192s, SLH-DSA-SHAKE-256s
+PQ01 NOT RUN SLH-DSA sigGen (FIPS205) other parameter sets: not used by the estate: SLH-DSA-SHA2-128f, SLH-DSA-SHA2-128s, SLH-DSA-SHA2-192f, SLH-DSA-SHA2-192s, SLH-DSA-SHA2-256f, SLH-DSA-SHA2-256s, SLH-DSA-SHAKE-128f, SLH-DSA-SHAKE-128s, SLH-DSA-SHAKE-192f, SLH-DSA-SHAKE-192s, SLH-DSA-SHAKE-256s
+PQ01 NOT RUN SLH-DSA sigVer (FIPS205) other parameter sets: not used by the estate: SLH-DSA-SHA2-128f, SLH-DSA-SHA2-128s, SLH-DSA-SHA2-192f, SLH-DSA-SHA2-192s, SLH-DSA-SHA2-256f, SLH-DSA-SHA2-256s, SLH-DSA-SHAKE-128f, SLH-DSA-SHAKE-128s, SLH-DSA-SHAKE-192f, SLH-DSA-SHAKE-192s, SLH-DSA-SHAKE-256s
+PQ01 NOT RUN SLH-DSA-SHAKE-256f sigGen ext-prehash det (FIPS205): HashSLH-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN SLH-DSA-SHAKE-256f sigGen ext-prehash hedged (FIPS205): HashSLH-DSA (pre-hash) is not used anywhere in the estate
+PQ01 NOT RUN SLH-DSA-SHAKE-256f sigVer ext-prehash (FIPS205): HashSLH-DSA (pre-hash) is not used anywhere in the estate
+PQ01 SUMMARY: 2729 executed, 2729 passed, 0 failed; 86 required rows, 0 missing; 0 load errors

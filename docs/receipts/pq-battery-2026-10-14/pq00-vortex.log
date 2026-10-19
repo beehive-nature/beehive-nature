@@ -1,0 +1,20 @@
+== PQ00: toolchain ==
+cargo 1.98.1 (797e8a9bc 2026-08-05)
+rustc 1.98.1 (48a229cea 2026-09-01)
+PQ00: target has no avx512f (vortex takes its portable hash path)
+== PQ00: build copy of vortex-rs at 3c0affd9320a85f34a5999aba77a378c43538fe1 ==
+PQ00: overlay = one appended test module, the dev-dependency on the templates, an empty [workspace]; vortex source otherwise as pinned
+ Cargo.toml | 6 +++++-
+ src/lib.rs | 4 ++++
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+== PQ00: run the templates against vortex ==
+test pq00_teeth::t_truncate_convicts_vortex_rsis_hash ... PQ00 T-TRUNCATE convicts vortex RSis::hash: true (two inputs of length 257 differing only at position 256 gave the same output)
+PQ00 colliding pair: len 257 differ only at position 256: a[256] = 2027277, b[256] = 2027278
+test pq00_teeth::t_vacuous_convicts_vortex_verify ... PQ00 T-VACUOUS convicts vortex verify: true (the verifier accepted the degenerate shape `zero openings`)
+PQ00 T-VACUOUS convicts vortex verify: true (the verifier accepted the degenerate shape `zero openings with a FALSE evaluation claim`)
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.03s
+== PQ00: audit gate 1 — vortex absent from the beehive-nature build ==
+error: package ID specification `vortex` did not match any packages
+PQ00 vortex in the default build: absent
+== PQ00: verdict ==
+T-VACUOUS: CONVICTS vortex verify (2 of 2 degenerate shapes) | T-TRUNCATE: CONVICTS vortex RSis::hash (len 257, pos 256) | vortex absent from the workspace | scope: the templates are proven able to see these two flaw classes; our own code is held to them lane by lane

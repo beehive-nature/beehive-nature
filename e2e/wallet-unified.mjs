@@ -11,6 +11,12 @@ const shots=resolve(root,'e2e/shots-wallet-unified'); await mkdir(shots,{recursi
 const origin='https://skaists.dev';
 const mime={'.html':'text/html','.js':'text/javascript','.json':'application/json','.css':'text/css','.wasm':'application/wasm','.svg':'image/svg+xml','.png':'image/png'};
 const browser=await chromium.launch(); let checks=0;
+// Poll via evaluate rather than page-context eval: keep the product CSP intact.
+async function waitForCondition(page,predicate,arg,options={}){
+ const until=Date.now()+(options.timeout||15000);
+ while(Date.now()<until){if(await page.evaluate(predicate,arg))return;await new Promise(r=>setTimeout(r,50));}
+ throw new Error('Wallet condition timed out');
+}
 function check(label,value){assert.ok(value,label);console.log('PASS '+(++checks)+': '+label);}
 // A stand-in for the Autonomi browser kit's index.js (vendor/ant-browser-sdk/0.1.1).
 // It mirrors the kit's manual payment flow: the upload pauses at the payment step
@@ -65,7 +71,7 @@ try {
    });
    const page=await ctx.newPage();page.on('pageerror',e=>errors.push(e.message));
    await page.goto(origin+'/surfaces/wallet.html');
-   await page.waitForFunction(()=>window.BNRWALLET&&document.querySelector('#bpay-card').textContent.includes('Choose'),null,{timeout:15000});
+   await waitForCondition(page,()=>window.BNRWALLET&&document.querySelector('#bpay-card').textContent.includes('Choose'),null,{timeout:15000});
    check(label+' form controls have explicit accessible names',await page.evaluate(()=>[...document.querySelectorAll('input:not([type=hidden]),select,textarea')].every(e=>e.labels?.length||e.getAttribute('aria-label')||e.getAttribute('aria-labelledby')||e.title)));
    check(label+' exact wallet identity',await page.locator('.wallet-brand').innerText()==='skaists heART WALLet');
    check(label+' one global presentation selector',await page.locator('[data-inspection]').count()===0);
@@ -75,15 +81,15 @@ try {
    check(label+' account action reveals account book',await page.locator('#wallet-accounts').isVisible());
    const publicRows=[{chain:'vaulta',address:'alice',label:'Savings',kind:'mine'},{chain:'hive',address:'alice',label:'Creator',kind:'following'}];
    const upload=entries=>page.locator('#wa-import-file').setInputFiles({name:'accounts.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({v:1,entries}))});
-   await upload(publicRows);await page.waitForFunction(()=>document.querySelector('#wa-status').textContent.startsWith('added 2 accounts.'));
+   await upload(publicRows);await waitForCondition(page,()=>document.querySelector('#wa-status').textContent.startsWith('added 2 accounts.'));
    check(label+' public backup imports both lists',await page.locator('.wa-card').count()===2);
    await page.locator('#wa-search').fill('hive');
    check(label+' network search preserves following distinction',await page.locator('#wa-mine .wa-card').count()===0&&await page.locator('#wa-following .wa-card').count()===1);
    await page.locator('#wa-search').fill('');
    await upload([...publicRows,{chain:'base',address:'private key is invalid',label:'bad',kind:'mine'}]);
-   await page.waitForFunction(()=>document.querySelector('#wa-status').textContent.startsWith('that file could not be imported'));
+   await waitForCondition(page,()=>document.querySelector('#wa-status').textContent.startsWith('that file could not be imported'));
    check(label+' malformed import is atomic',await page.locator('.wa-card').count()===2);
-   await upload(publicRows);await page.waitForFunction(()=>document.querySelector('#wa-status').textContent.startsWith('those accounts are already in your list'));
+   await upload(publicRows);await waitForCondition(page,()=>document.querySelector('#wa-status').textContent.startsWith('those accounts are already in your list'));
    check(label+' reimport does not duplicate accounts',await page.locator('.wa-card').count()===2);
    const downloading=page.waitForEvent('download');await page.locator('#wa-export').click();const download=await downloading;
    const backup=JSON.parse(await readFile(await download.path(),'utf8'));
@@ -96,9 +102,10 @@ try {
     const ant=()=>page.evaluate(()=>({...window.__ant}));
     const status=()=>page.locator('#ant-quote-status').innerText();
     const mode=m=>page.evaluate(m=>{window.__ant.mode=m;},m);
-    const quote=async()=>{await page.locator('#ant-quote-go').click();await page.waitForFunction(()=>!document.querySelector('#ant-quote-go').disabled);};
+    const quote=async()=>{await page.locator('#ant-quote-go').click();await waitForCondition(page,()=>!document.querySelector('#ant-quote-go').disabled);};
     const idle=async()=>await page.locator('#ant-quote-go').isEnabled()&&await page.locator('#ant-quote-file').isEnabled()&&await page.locator('#ant-quote-cancel').isHidden();
     await page.locator('[data-audience="public"]').click();
+    await page.locator('#ant-quote-only > summary').click();
     const fileLabel=await page.locator('label[for="ant-quote-file"]').innerText();
     check(label+' file limit comes from the Autonomi browser kit '+JSON.stringify(fileLabel),fileLabel.includes('3 bytes to 1 GB')&&fileLabel.includes("the Autonomi browser kit's limits")&&!/MiB/.test(fileLabel));
     check(label+' quote words name only addresses and sizes leaving',(await page.locator('#bpay-card').innerText()).includes('asks Autonomi storage nodes for a price using only addresses and sizes'));
@@ -127,17 +134,18 @@ try {
     seen=await ant();
     check(label+' one Autonomi connection serves every quote after the failed one',seen.connects===2&&seen.cancels===3&&seen.pays===0&&seen.stored===0);
     await mode('hang');await page.locator('#ant-quote-go').click();
-    await page.waitForFunction(n=>window.__ant.uploads>n,seen.uploads);
+    await waitForCondition(page,n=>window.__ant.uploads>n,seen.uploads);
     await page.locator('#ant-quote-cancel').click();
     check(label+' stop aborts the Autonomi request',(await status())==='Request stopped. Nothing was paid.'&&(await ant()).aborted===1&&await idle());
     check(label+' no request reaches the Autonomi relay upload door',relayUploads===0);
     kitMissing=true;
     const bare=await ctx.newPage();bare.on('pageerror',e=>errors.push(e.message));
     await bare.goto(origin+'/surfaces/wallet.html');
-    await bare.waitForFunction(()=>window.BNRWALLET&&document.querySelector('#ant-quote-file'),null,{timeout:15000});
+    await waitForCondition(bare,()=>window.BNRWALLET&&document.querySelector('#ant-quote-file'),null,{timeout:15000});
     await bare.locator('[data-wallet-store]').click();await bare.locator('#wallet-storage a[href="#bpay-sec"]').click();
+    await bare.locator('#ant-quote-only > summary').click();
     await bare.locator('#ant-quote-file').setInputFiles({name:'public-fixture.txt',mimeType:'text/plain',buffer:Buffer.from('fixture')});
-    await bare.locator('#ant-quote-go').click();await bare.waitForFunction(()=>!document.querySelector('#ant-quote-go').disabled);
+    await bare.locator('#ant-quote-go').click();await waitForCondition(bare,()=>!document.querySelector('#ant-quote-go').disabled);
     check(label+' a kit that does not load restores the controls',(await bare.locator('#ant-quote-status').innerText())==='Quote unavailable: the Autonomi browser kit did not load. Reload and try again.'&&await bare.locator('#ant-quote-file').isEnabled());
     await bare.close();kitMissing=false;
    }

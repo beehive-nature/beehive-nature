@@ -1,0 +1,94 @@
+// bTunGsTeN WB001 — PROVE-UNIVERSAL wireInjective, by the lemma ladder in
+// WB001Injective.cry. Every "WB001-SAW PROVEN <name>" line prints only after
+// its prove_print returned a Theorem; wb001-saw-check.sh requires each one.
+//
+// run from this directory: saw injective.saw
+
+enable_experimental;
+cryptol_add_path "../wb001-cryptol";
+import "WB001Injective.cry";
+import "../wb001-cryptol/BTungstenWB001.cry";
+
+let proven name = print (str_concat "WB001-SAW PROVEN " name);
+let bw = w4_unint_bitwuzla [];
+
+vib <- prove_print bw {{ validImpliesBounded }};
+proven "validImpliesBounded";
+vip <- prove_print bw {{ validImpliesPadded }};
+proven "validImpliesPadded";
+
+fd01 <- prove_print bw {{ fd01 }}; proven "fd01 (domain)";
+fd02 <- prove_print bw {{ fd02 }}; proven "fd02 (nonce)";
+fd03 <- prove_print bw {{ fd03 }}; proven "fd03 (epoch)";
+fd04 <- prove_print bw {{ fd04 }}; proven "fd04 (action)";
+fd05 <- prove_print bw {{ fd05 }}; proven "fd05 (destination)";
+fd06 <- prove_print bw {{ fd06 }}; proven "fd06 (capability)";
+fd07 <- prove_print bw {{ fd07 }}; proven "fd07 (amount)";
+fd08 <- prove_print bw {{ fd08 }}; proven "fd08 (expiry)";
+fd09 <- prove_print bw {{ fd09 }}; proven "fd09 (payer)";
+fd10len <- prove_print bw {{ fd10len }}; proven "fd10len (payload length word)";
+fdIdx <- prove_print bw {{ fdIdx }}; proven "fdIdx (first-difference index)";
+fdInLen <- prove_print bw {{ fdInLen }}; proven "fdInLen (difference inside the length)";
+fd10at <- prove_print bw {{ fd10at }}; proven "fd10at (payload byte at any differing index)";
+fd10 <- prove_print (do {
+    a <- goal_intro "a";
+    b <- goal_intro "b";
+    goal_insert_and_specialize fd10len [a, b];
+    goal_insert_and_specialize fdIdx [{{ a.payload.bytes }}, {{ b.payload.bytes }}];
+    goal_insert_and_specialize fdInLen [{{ a.payload.len }}, {{ a.payload.bytes }}, {{ b.payload.bytes }}];
+    goal_insert_and_specialize fd10at [a, b, {{ firstDiff a.payload.bytes b.payload.bytes }}];
+    w4_unint_bitwuzla ["firstDiff", "byteAt", "canonicalPad", "lensBounded"];
+  }) {{ fd10 }};
+proven "fd10 (payload)";
+
+// the ten cases cover every pair that differs in some field: the first
+// differing field selects one case. Every field equality is an opaque
+// name here, so this is propositional logic, not a record comparison.
+let eqs = ["eqDom", "eqNon", "eqEpo", "eqAct", "eqDst", "eqCap", "eqAmt", "eqExp", "eqPay", "eqPld"];
+cover <- prove_print (do {
+    a <- goal_intro "a";
+    b <- goal_intro "b";
+    for [fd01, fd02, fd03, fd04, fd05, fd06, fd07, fd08, fd09, fd10]
+        (\t -> goal_insert_and_specialize t [a, b]);
+    w4_unint_bitwuzla (concat ["pre", "concl"] eqs);
+  }) {{ casesCover }};
+proven "casesCover";
+
+// record extensionality: equal in every field is equal
+ext <- prove_print bw {{ recordExt }};
+proven "recordExt";
+
+fdAll <- prove_print (do {
+    a <- goal_intro "a";
+    b <- goal_intro "b";
+    goal_insert_and_specialize cover [a, b];
+    goal_insert_and_specialize ext [a, b];
+    w4_unint_bitwuzla ["pre", "concl", "allEq"];
+  }) {{ firstDifference }};
+proven "firstDifference";
+
+// the wire's element p is byteAt p: definitional, closed by rewriting with
+// byteAt opaque (the symbolic-index form that ran out of memory in the
+// formal job builds the whole wire; this does not)
+wid <- prove_print (do {
+    unfolding ["wireIndexDef", "wire"];
+    simplify (cryptol_ss ());
+    w4_unint_z3 ["byteAt"];
+  }) {{ wireIndexDef }};
+proven "wireIndexDef";
+
+inj <- prove_print (do {
+    a <- goal_intro "a";
+    b <- goal_intro "b";
+    goal_insert_and_specialize fdAll [a, b];
+    goal_insert_and_specialize vib [a];
+    goal_insert_and_specialize vib [b];
+    goal_insert_and_specialize vip [a];
+    goal_insert_and_specialize vip [b];
+    goal_insert_and_specialize wid [a, {{ kStar a b }}];
+    goal_insert_and_specialize wid [b, {{ kStar a b }}];
+    w4_unint_z3 ["byteAt", "kStar", "validIntent", "lensBounded", "padded"];
+  }) {{ wireInjective }};
+proven "wireInjective";
+
+print "WB001-SAW INJECTIVE ALL-PROVEN";

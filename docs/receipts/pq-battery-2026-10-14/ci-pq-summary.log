@@ -1,0 +1,6 @@
+pq01-vectors	PQ01 every ACVP case for ML-KEM-512/768/1024, ML-DSA-44/65/87, SLH-DSA-SHAKE-256f on two implementations	2026-10-14T17:03:15.2420449Z PQ01 SUMMARY: 2729 executed, 2729 passed, 0 failed; 86 required rows, 0 missing; 0 load errors
+x0x-pq	x0x pinned implementations — official vectors, differential checks, sabotage and audits	2026-10-14T17:05:51.3884476Z X0X-PQ RESULT honest: PASS; 752 executed, 752 passed, 0 failed; 37 required rows, 0 missing; classes {"DIFFERENTIAL": 164, "KAT": 515, "TEETH": 73}
+x0x-pq	x0x pinned implementations — official vectors, differential checks, sabotage and audits	2026-10-14T17:05:51.8540272Z X0X-PQ RESULT expected-byte-teeth: FAIL; 752 executed, 750 passed, 2 failed; 37 required rows, 0 missing; classes {"DIFFERENTIAL": 164, "KAT": 515, "TEETH": 73}
+x0x-pq	x0x pinned implementations — official vectors, differential checks, sabotage and audits	2026-10-14T17:05:51.8557457Z X0X-PQ RESULT empty-vectors-teeth: FAIL; 0 executed, 0 passed, 0 failed; 37 required rows, 37 missing; classes {}
+pq11-classic	PQ11 BIP-340, ECDSA secp256k1 and X25519 on the Rust implementations	2026-10-14T17:01:59.5130498Z PQ11 SUMMARY: 1485 executed, 1485 passed, 0 failed; 6 required rows, 0 missing
+pq11-classic	PQ11 BIP-340 on the wallet's noble schnorr (the same pinned file)	2026-10-14T17:01:59.8148874Z PQ11 SUMMARY noble: 27 of 27 passed

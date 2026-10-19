@@ -1,10 +1,47 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,readFile,readdir,writeFile,rm} from 'node:fs/promises';
+import {mkdtemp,readFile,readdir,writeFile,rm,stat} from 'node:fs/promises';
+import {createReadStream} from 'node:fs';
+import {Readable} from 'node:stream';
+import {runInNewContext} from 'node:vm';
 import {tmpdir} from 'node:os';
 import {join,dirname,basename,resolve} from 'node:path';
 import {createHash} from 'node:crypto';
-import {createIntakeServer} from './intake-server.mjs';
+import {createIntakeServer,MAX_BYTES} from './intake-server.mjs';
+
+test('local ceiling is configured independently and malformed limits refuse startup',()=>{
+  assert.equal(MAX_BYTES,1024*1024*1024);
+  for(const maxBytes of [0,-1,NaN,Infinity,1.5,Number.MAX_SAFE_INTEGER+1]){
+    assert.throws(()=>createIntakeServer({stateDir:tmpdir(),maxBytes}),/positive safe integer/);
+  }
+});
+
+test('a file above the Autonomi wave limit stays locally usable after restart without payment',async()=>{
+  const bytes=59*4190208+1,chunk=Buffer.alloc(64*1024,0x5a);
+  function* parts(){for(let left=bytes;left>0;left-=chunk.length)yield chunk.subarray(0,Math.min(left,chunk.length));}
+  const hash=createHash('sha256');for(const part of parts())hash.update(part);const sha=hash.digest('hex');
+  const root=await mkdtemp(join(tmpdir(),'bdata-intake-large-'));let server;
+  const start=async()=>{server=createIntakeServer({stateDir:root});await new Promise(r=>server.listen(0,'127.0.0.1',r));return 'http://127.0.0.1:'+server.address().port;};
+  const stop=async()=>{server.closeIdleConnections();await new Promise(r=>server.close(r));};
+  let url=await start();
+  const send=()=>fetch(url+'/v1/intake',{method:'POST',headers:{Origin:'https://skaists.dev','Content-Type':'application/octet-stream','Content-Length':String(bytes),'X-BData-Name':'large.bin','X-BData-Sha256':sha},body:Readable.from(parts()),duplex:'half'});
+  try{
+    let r=await send();assert.equal(r.status,200);assert.deepEqual(await r.json(),{sha256:sha,bytes,name:'large.bin'});
+    await stop();url=await start();
+    const pins=JSON.parse(await readFile(join(root,'artifacts.json'),'utf8'));assert.equal(pins.length,1);assert.equal(pins[0].bytes,bytes);
+    assert.equal((await stat(pins[0].path)).size,bytes);
+    const recovered=createHash('sha256');for await(const part of createReadStream(pins[0].path))recovered.update(part);
+    assert.equal(recovered.digest('hex'),sha,'restart must recover the real bytes, not only a receipt');
+    r=await send();assert.equal(r.status,200);assert.equal((await r.json()).duplicate,true,'restart duplicate must independently rehash the existing bytes');
+
+    // Exercise the unchanged shipped payer, not a surrogate payment guard.
+    const context={module:{exports:{}}};runInNewContext(await readFile(new URL('../../surfaces/ant-pay.js',import.meta.url),'utf8'),context);
+    let network=0,signer=0,confirmed=0;
+    const payer=context.module.exports.create({fetch:async()=>{network++;throw Error('network must not be reached');},signer:{address:async()=>{signer++;},send:async()=>{signer++;}}});
+    await assert.rejects(payer.pay({prepare:{upload_id:'large-local-proof',payment_type:'merkle'},authorization:{state:'authorized-for-signing'},confirmPlan:async()=>{confirmed++;return true;}}),e=>e.refusal==='merkle-not-built');
+    assert.deepEqual({network,signer,confirmed},{network:0,signer:0,confirmed:0});
+  }finally{await stop();assert.equal(dirname(root),resolve(tmpdir()));assert.match(basename(root),/^bdata-intake-large-/);await rm(root,{recursive:true,force:true});}
+});
 
 test('real intake persists independently hashed bytes, refuses bad requests, and survives restart',async()=>{
   const root=await mkdtemp(join(tmpdir(),'bdata-intake-'));let server;

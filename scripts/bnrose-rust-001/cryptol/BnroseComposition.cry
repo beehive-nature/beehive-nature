@@ -1,0 +1,93 @@
+// BNROSE-SAW-001 — the COMPOSITION module: the replacement law joined to
+// #425's destination-idempotency model (founder order 2026-10-14:
+// "Connect the replacement law to #425's destination idempotency model.
+// Verify that two independent sovereign nodes may dispatch an identical
+// authorized intent without producing two destination effects, including
+// partition/reconciliation cases. Treat the destination's enforcement as
+// an explicit assumption until a real adapter is verified.").
+//
+// THE EXPLICIT ASSUMPTION, not a claim of this module: the destination
+// behaves like `apply` below — op-keyed exactly-once: a dispatch against
+// an id it does not hold produces exactly one durable effect and holds
+// the id; a dispatch against a held id produces none (EffectLedger::apply /
+// ApplyOutcome::Already in the Rust is the local instance). A real
+// Arbitrum/Hive adapter is NOT verified here; a locally generated
+// operation id alone cannot guarantee external idempotency. Every
+// obligation below is a fact ABOUT THE MODEL; the model ≡ destination
+// equation stays an assumption until an adapter is qualified.
+//
+// The model, one operation identity at a time (abstract `id`; every
+// function below is implicitly per-id):
+//   applied    — the destination holds the id (has applied its effect)
+//   apply      — the destination's transition on a dispatch
+//   effectOf   — how many effects a dispatch produces (0 or 1)
+//   nodeDispatch — the replacement law's gate over a node's OWN ledger
+//   view, which may be STALE (the partition shape: the destination
+//   applied, the node has not reconciled the row yet).
+//
+// What is NOT claimed: whole-system correctness, global ordering, any
+// property of an unverified external destination, cross-node consensus.
+
+module BnroseComposition where
+
+import BnroseReplacement (gate)
+
+// ---- the destination model (the assumption's shape) ------------------------
+
+destApply : Bit -> Bit -> Bit
+destApply applied dispatch = applied || dispatch
+
+effectOf : Bit -> Bit -> [1]
+effectOf applied dispatch = if (applied == False) && dispatch then 1 else 0
+
+// a node's dispatch decision: the gate over its own (possibly stale) view
+nodeDispatch : Bit -> Bit -> Bit
+nodeDispatch optIn seenRow = gate optIn (if seenRow then 0x0001 else 0x0000)
+
+// ---- the obligations -------------------------------------------------------
+
+// the model's dedup shape: applying a held id changes nothing
+applyIdempotent : Bit -> Bit -> Bit
+applyIdempotent applied dispatch =
+  destApply (destApply applied dispatch) dispatch == destApply applied dispatch
+
+// TWO sovereigns, one id, arbitrary dispatches: at most one effect
+twoDispatchesAtMostOneEffect : Bit -> Bit -> Bit -> Bit
+twoDispatchesAtMostOneEffect applied dA dB =
+  (((zext (effectOf applied dA)) + (zext (effectOf (destApply applied dA) dB))) : [2]) <= 1
+
+// …and exactly one when the destination was fresh and someone dispatched
+oneEffectWhenFreshAndDispatched : Bit -> Bit -> Bit -> Bit
+oneEffectWhenFreshAndDispatched applied dA dB =
+  ((applied == False) && (dA || dB)) ==> ((((zext (effectOf applied dA)) + (zext (effectOf (destApply applied dA) dB))) : [2]) == 1)
+
+// the partition shape named: both views stale, both gates free to stand
+// open, both dispatch — still at most one effect
+staleViewsStillOneEffect : Bit -> Bit -> Bit -> Bit
+staleViewsStillOneEffect applied optA optB =
+  twoDispatchesAtMostOneEffect applied (nodeDispatch optA False) (nodeDispatch optB False)
+
+// the slot-15 saturation reuse: the original attempt and the replacement
+// carry the SAME op identity (identical encoding ⇒ identical id by
+// construction of step_op_id), so the destination holds them to one
+// effect — the reuse cannot create an additional effect
+saturationReuseSingleEffect : Bit -> Bit
+saturationReuseSingleEffect applied =
+  twoDispatchesAtMostOneEffect applied True True
+
+// the durable-history condition: once the row is reconciled into a
+// node's view, its gate closes — no re-dispatch, whatever the policy
+reconciledGateCloses : Bit -> Bit
+reconciledGateCloses optIn = nodeDispatch optIn True == False
+
+// ---- the load-bearing control (must REFUTE) --------------------------------
+// A NAIVE destination — one that does not dedup (every dispatch counts
+// its effect, the held bit ignored) — lets two sovereigns produce two
+// effects. The enforcement is necessary, not decorative: this obligation
+// is expected to be FALSE and the check script requires its counterexample.
+naiveEffectOf : Bit -> Bit -> [1]
+naiveEffectOf applied dispatch = if dispatch then 1 else 0
+
+naiveDestinationDuplicates : Bit -> Bit -> Bit -> Bit
+naiveDestinationDuplicates applied dA dB =
+  (((zext (naiveEffectOf applied dA)) + (zext (naiveEffectOf (destApply applied dA) dB))) : [2]) <= 1

@@ -1,0 +1,20 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/bnr-keys/Cargo.toml
+workspace: /mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/Cargo.toml
+rustls v0.23.45
+├── hyper-rustls v0.27.9
+│   └── reqwest v0.12.28
+│       └── adapter-pixellab v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/adapter-pixellab)
+├── reqwest v0.12.28 (*)
+├── tokio-rustls v0.26.4
+│   ├── hyper-rustls v0.27.9 (*)
+│   └── reqwest v0.12.28 (*)
+└── ureq v2.12.1
+    ├── atmirror v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/atmirror)
+    │   ├── royalreview v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/royalreview)
+    │   └── wallet-relay v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/wallet-relay)
+    ├── banchor v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/banchor)
+    ├── bindexer v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/bindexer)
+    ├── wallet-relay v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/wallet-relay)
+    └── zano-watcher v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/zano-watcher)
+        └── composition v0.1.0 (/mnt/c/Users/travi/beehive-nature/.claude/worktrees/goofy-pike-4d5a22/crates/composition)
