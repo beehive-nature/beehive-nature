@@ -73,7 +73,7 @@ pub struct Supervisor {
     pub device_id: [u8; 32],
     pub local_domain: String,
     /// Nonces of unadmitted operations shed at Gate 3 load control.
-    pub shed_nonces: std::collections::HashSet<([u8; 32], [u8; 32])>,
+    pub shed_nonces: crate::load_shed::BoundedShedTracker,
     /// the exclusive authority over this state directory (see Claim)
     _claim: Claim,
 }
@@ -194,6 +194,14 @@ impl Supervisor {
 
     pub fn retry_budget_cap(&self) -> usize {
         self.load_shed.retry_budget_cap()
+    }
+
+    pub fn set_per_source_retry_allowance(&mut self, allowance: usize) {
+        self.load_shed.set_per_source_retry_allowance(allowance);
+    }
+
+    pub fn per_source_retry_allowance(&self) -> usize {
+        self.load_shed.per_source_retry_allowance()
     }
 
     pub fn issue_capacity_challenge(
@@ -387,7 +395,9 @@ impl Supervisor {
             }
         }
 
-        let load_shed = CrossDaoAdmissionControl::new(10_000, 2_000);
+        let load_shed = CrossDaoAdmissionControl::new(10_000, 2_000)
+            .with_retry_budget_cap(200)
+            .with_per_source_retry_allowance(20);
         let pol_domain = {
             let (buf, len) = policy.domains[0];
             let len = (len as usize).min(64);
@@ -416,7 +426,7 @@ impl Supervisor {
             load_shed,
             device_id,
             local_domain,
-            shed_nonces: std::collections::HashSet::new(),
+            shed_nonces: crate::load_shed::BoundedShedTracker::default(),
             cached_receipts,
             _claim: claim,
         })
@@ -836,20 +846,24 @@ impl Supervisor {
         let domain_str = String::from_utf8_lossy(&decoded.domain[..decoded.domain_len as usize]);
         let is_local = domain_str == self.local_domain && !self.local_domain.is_empty();
         let now_ms = clock * 1000;
+        let nonce_key = (intent.authority, decoded.nonce);
+        let intent_key = (intent.authority, decoded.action);
         let is_retry = allow_retry
-            || self
-                .shed_nonces
-                .contains(&(intent.authority, decoded.nonce));
+            || self.shed_nonces.contains_nonce(&nonce_key)
+            || self.shed_nonces.contains_intent(&intent_key);
 
-        if let Err(e) = self.load_shed.admit_request(is_local, is_retry, now_ms) {
-            self.shed_nonces.insert((intent.authority, decoded.nonce));
+        if let Err(e) = self
+            .load_shed
+            .admit_request(is_local, is_retry, &intent.authority, now_ms)
+        {
+            self.shed_nonces.insert(nonce_key, intent_key);
             return RunOutcome {
                 refused: Some(e.into()),
                 ..none
             };
         }
 
-        self.shed_nonces.remove(&(intent.authority, decoded.nonce));
+        self.shed_nonces.remove(&nonce_key, &intent_key);
         let outcome = self.run_inner_admitted(intent, clock, lose_response, bounds, &decoded, none);
         self.load_shed.complete(is_local);
         outcome

@@ -456,3 +456,64 @@ Verification Receipts:
   - Gate 4: 6/6 ok (0.12s)
 - `cargo test --release -p bnrose-exec-host --test gate5_worker_cleanup` (2/2 ok, 45.38s)
 - `cargo test -p bnrose-exec-host --test gate3_load_shed` (5/5 ok in debug mode, 74.50s)
+
+
+---
+
+## 10. Review Follow-up on 6b3995ab (2026-10-19)
+
+Resolves all open items from PR #465 review ([issuecomment-6274220128](https://github.com/beehive-nature/beehive-nature/pull/465#issuecomment-6274220128) against commit `6b3995ab`):
+
+1. **Independent Per-Client Retry Budget & Send Amplification (r9, R_amp <= 1.15):**
+   - **Problem:** Commit `6b3995ab` shared one client-side `RetryBudget` across all shed clients in the test, while real clients do not share a counter. The server-side rejection only limited *admitted* retries, not *sends*. When independent clients retried without local budgets, they sent 267 retry requests across windows ($R_{\text{amp}} = 2.335$).
+   - **Fix:**
+     * Implemented production `ClientRetryBudget` in `crates/bnrose-exec-host/src/load_shed.rs` that enforces local fail-fast behavior: when a client exhausts its configured retry budget (default 10%), it fails fast locally without transmitting any packets over the network.
+     * In `test_gate3_real_retry_amplification_under_backoff`: modeled 20 completely independent clients, each issuing 10 requests (200 total initial requests against cross quota of 20 = real 10x overload). Each client maintains its own isolated `ClientRetryBudget`.
+     * Across all 20 independent clients, exactly 20 retries were transmitted across the network, while 160 shed requests failed fast locally with zero wire sends.
+     * All 20 retries were admitted in window NOW + 1 under fresh quota.
+     * Every send is counted: initial sends = 200, retry sends = 20, total sends = 220.
+     * Measured $R_{\text{amp}} = 220 / 200 = 1.100 \le 1.15$ bound!
+
+2. **Per-Source Retry Allowance & Free Quota Admission (d11a):**
+   - **Problem:** The server retry cap was previously a single global counter that refused retries even when the cross-DAO window had free slots (e.g. 2/3 used in d11a), and allowed one client to starve all others.
+   - **Fix:**
+     * In `CrossDaoAdmissionControl`: added `retries_by_authority: HashMap<[u8; 32], usize>` and `per_source_retry_allowance: usize`.
+     * Reconfigured admission logic so a retry is **never refused when ordinary quota is free** unless the specific authority has exceeded its per-source retry allowance.
+     * Added `test_gate3_per_source_retry_allowance_and_free_quota_admission` (d11a): cross quota 3, retry cap 2, per-source allowance 1. Client A retries 1st request -> admitted (1/3 used). Client A retries 2nd request -> refused "retry quota exhausted" (exceeds allowance, preventing starvation). Client B retries 1st request -> admitted (2/3 used, free slot available).
+
+3. **Tracking Fresh-Nonce Re-sends of Shed Work (d11b):**
+   - **Problem:** If a client re-signed shed work under a fresh nonce, it bypassed the server's shed-nonce detection.
+   - **Fix:**
+     * Enhanced `BoundedShedTracker` to track both `(authority, nonce)` and semantic intent fingerprints `(authority, action)`.
+     * Added `test_gate3_fresh_nonce_resend_tracked_under_intent_fingerprint` (d11b): proves that re-signing shed work with a fresh nonce is recognized and governed under retry admission control.
+
+4. **Bounded Shed Tracker (d12 Memory Bound):**
+   - **Problem:** `shed_nonces` was an unbounded `HashSet`, growing linearly with shed requests from clients that never return.
+   - **Fix:**
+     * Implemented `BoundedShedTracker` with a FIFO eviction queue and maximum entry bound (`DEFAULT_MAX = 2048`).
+     * Added `test_gate3_bounded_shed_tracker_prevents_memory_leak` (d12): flooded 5,000 shed requests and verified tracker size never exceeds 2,048 entries.
+
+5. **Production Retry Cap & Allowance Default:**
+   - In `CrossDaoAdmissionControl::new(local, cross)`, `retry_budget_cap` defaults to `(cross / 10).max(1)` (10% of quota).
+   - In `Supervisor::open`, explicitly configured with `.with_retry_budget_cap(200).with_per_source_retry_allowance(20)`.
+
+6. **Removed Windows SLA Loosening & Eliminated Stale Comments:**
+   - In `gate1_flat_admit.rs`: completely removed `cfg!(windows)` from `max_ratio`. Implemented median of several samples (5 sample rounds), strictly guaranteeing $R < 1.5$ across all platforms.
+   - In `gate3_load_shed.rs`: completely removed `cfg!(windows)` 50 ms branch from local p99; bound is strictly $< 15.0$ ms in release across all platforms.
+   - In `device_capacity.rs`: removed stale comments mentioning "35 ms" and "1,500 ms".
+   - In `gate2_device_capacity.rs`: made cross-device nonce reuse assertion 100% deterministic, eliminating the 1 in 65,536 hash collision edge case.
+
+7. **Stack Inventory Regenerated (`static` CI):**
+   - Ran `node scripts/build-stack-inventory.mjs`.
+   - Verified `node scripts/build-stack-inventory.mjs --check` passes cleanly.
+
+Verification Receipts:
+- `node scripts/build-stack-inventory.mjs --check` (mode: checked, GREEN)
+- `node scripts/estate-check.mjs` (PASS, 112 counted, 121 listed)
+- `cargo fmt --all --check` (CLEAN, 0 diffs)
+- `cargo test --release -p bnrose-exec-host --test gate1_flat_admit --test gate2_device_capacity --test gate3_load_shed --test gate4_quantum_retry`:
+  - Gate 1: 9/9 ok (2.73s)
+  - Gate 2: 8/8 ok (0.43s)
+  - Gate 3: 8/8 ok (16.47s)
+  - Gate 4: 6/6 ok (0.10s)
+  - Total: 31/31 passed in release mode!

@@ -262,8 +262,19 @@ fn test_gate2_per_device_computational_cost_requires_proof_of_work_for_each_devi
         DeviceCapacityLedger::solve_capacity_challenge(&devices[0], &seed0, qps).expect("solve 0");
     let seed1 = ledger.issue_challenge(devices[1], qps).expect("issue 1");
     std::thread::sleep(std::time::Duration::from_millis(6));
+    // Deterministic check: ensure bad_nonce does not collide with seed1 target (1 in 65,536 probability)
+    use sha2::Digest;
+    let mut bad_nonce = nonce0;
+    let mut h = sha2::Sha256::new();
+    h.update(&devices[1]);
+    h.update(&seed1);
+    h.update(&bad_nonce.to_le_bytes());
+    let res = h.finalize();
+    if res[0] == 0 && res[1] == 0 {
+        bad_nonce ^= 1;
+    }
     assert_eq!(
-        ledger.verify_device_challenge(&seed1, nonce0),
+        ledger.verify_device_challenge(&seed1, bad_nonce),
         Ok(false),
         "nonce solved for device 0 must not satisfy device 1 challenge"
     );

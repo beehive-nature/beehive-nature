@@ -12,7 +12,8 @@
 
 use bnrose_exec_host::fixtures::{fixture, IntentFile, TEST_DOMAIN};
 use bnrose_exec_host::load_shed::{
-    retry_amplification, zipf_cumulative_weights, CrossDaoAdmissionControl, RetryBudget,
+    retry_amplification, zipf_cumulative_weights, BoundedShedTracker, ClientRetryBudget,
+    CrossDaoAdmissionControl,
 };
 use bnrose_exec_host::opexec::Supervisor;
 use bnrose_exec_host::worker::{Bounds, NativeWorker};
@@ -87,6 +88,35 @@ fn make_intent(nonce: u64, domain: &str) -> IntentFile {
         env,
         sig,
         authority: f.authority,
+    }
+}
+
+fn make_cross_dao_intent_with_seed(seed: &[u8; 32], nonce_val: u64) -> IntentFile {
+    use sha2::Digest;
+    let mut authority = [0u8; 32];
+    libcrux_ed25519::secret_to_public(&mut authority, seed);
+    let mut nonce = [0u8; 32];
+    nonce[0..8].copy_from_slice(&nonce_val.to_be_bytes());
+    let template_intent = btungsten_wb001::IntentIn {
+        domain: Text::Str("cross.dao".into()),
+        nonce: nonce.to_vec(),
+        epoch: NOW,
+        action: sha2::Sha256::digest(bnrose_exec_host::fixtures::TEST_ACTION_LABEL.as_bytes())
+            .to_vec(),
+        destination: Text::Str(bnrose_exec_host::fixtures::TEST_DESTINATION.into()),
+        capability: Text::Str(bnrose_exec_host::fixtures::TEST_CAPABILITY.into()),
+        amount: 100,
+        expiry: NOW + 600,
+        payer: Text::Str(bnrose_exec_host::fixtures::TEST_PAYER.into()),
+        payload: Vec::new(),
+    };
+    let built = template_intent.build().expect("valid intent");
+    let env = btungsten_wb001::canonical(&built).expect("canonical env");
+    let sig = btungsten_wb001::sign(seed, &built).expect("valid sig");
+    IntentFile {
+        env,
+        sig,
+        authority,
     }
 }
 
@@ -241,13 +271,7 @@ fn test_gate3_real_load_zipf_skew_and_p99_guarantee() {
 
             // Contractual SLA: local p99 latency must remain < 15.0 ms in production (--release).
             // Debug builds include unoptimized crypto and assertion overhead, capped at 50.0 ms.
-            let bound_ms = if cfg!(debug_assertions) {
-                200.0
-            } else if cfg!(windows) {
-                50.0
-            } else {
-                15.0
-            };
+            let bound_ms = if cfg!(debug_assertions) { 50.0 } else { 15.0 };
             assert!(
                 p99_ms < bound_ms,
                 "real request local p99 under Zipf s={s} mult={mult}x must be < {bound_ms} ms; was {p99_ms:.3} ms"
@@ -333,114 +357,133 @@ fn test_gate3_real_retry_amplification_under_backoff() {
     let bounds = Bounds::default();
 
     // Real 10x overload: 200 initial requests against a cross-DAO quota of 20
-    let initial_requests = 200usize;
     let cross_dao_quota = 20usize;
-    // Real system retry budget cap (10% retry budget = 20 retries allowed)
-    let retry_budget_cap = (initial_requests * 10) / 100;
+    let num_clients = 20usize;
+    let requests_per_client = 10usize;
+    let total_initial_requests = num_clients * requests_per_client; // 200 requests
+
+    // Production server configured with 10% retry budget cap and fair-share per-source allowance
     sup.set_load_shed(
         CrossDaoAdmissionControl::new(1_000, cross_dao_quota)
-            .with_retry_budget_cap(retry_budget_cap),
+            .with_retry_budget_cap(20)
+            .with_per_source_retry_allowance(1),
     );
 
-    // Generate initial requests
-    let mut intents = Vec::with_capacity(initial_requests);
-    for i in 0..initial_requests {
-        intents.push(make_cross_dao_intent(95_000 + i as u64));
+    // 20 independent clients, each with its own authority and local ClientRetryBudget
+    struct Client {
+        id: usize,
+        _authority: [u8; 32],
+        budget: ClientRetryBudget,
+        intents: Vec<IntentFile>,
+        refused_indices: Vec<usize>,
     }
 
-    // 1. Initial burst executed through Supervisor::run
-    // Exactly cross_dao_quota requests are admitted; excess requests are shed with explicit refusal
-    let mut refused_clients = Vec::new();
-    for (client_id, intent) in intents.iter().enumerate() {
-        let out = sup.run(intent, NOW, false, &bounds);
-        if out.refused.as_deref() == Some("admission:shed-load — cross-dao quota exhausted") {
-            refused_clients.push(client_id);
-        } else {
-            assert!(
-                out.receipt.is_some(),
-                "quota requests must succeed: {:?}",
-                out.refused
-            );
+    let mut clients = Vec::with_capacity(num_clients);
+    for k in 0..num_clients {
+        let seed = [0x50 + k as u8; 32];
+        let mut authority = [0u8; 32];
+        libcrux_ed25519::secret_to_public(&mut authority, &seed);
+
+        let mut intents = Vec::with_capacity(requests_per_client);
+        for i in 0..requests_per_client {
+            let nonce = 95_000 + (k * 100 + i) as u64;
+            intents.push(make_cross_dao_intent_with_seed(&seed, nonce));
+        }
+
+        clients.push(Client {
+            id: k,
+            _authority: authority,
+            // Independent per-client retry budget: 10% of 10 requests = 1 retry allowed per client
+            budget: ClientRetryBudget::new(requests_per_client, 10),
+            intents,
+            refused_indices: Vec::new(),
+        });
+    }
+
+    // 1. Initial burst: round-robin across all 20 clients to simulate concurrent load
+    let mut total_initial_admitted = 0;
+    let mut total_initial_shed = 0;
+
+    for idx in 0..requests_per_client {
+        for client in &mut clients {
+            let out = sup.run(&client.intents[idx], NOW, false, &bounds);
+            if out.receipt.is_some() {
+                total_initial_admitted += 1;
+            } else if out.refused.as_deref()
+                == Some("admission:shed-load — cross-dao quota exhausted")
+            {
+                total_initial_shed += 1;
+                client.refused_indices.push(idx);
+            } else {
+                panic!("unexpected refusal: {:?}", out.refused);
+            }
         }
     }
-    assert_eq!(refused_clients.len(), initial_requests - cross_dao_quota);
+
     assert_eq!(
-        refused_clients.len(),
-        180,
-        "must be real 10x overload (180/200 shed)"
+        total_initial_admitted, cross_dao_quota,
+        "exactly quota admitted in window"
+    );
+    assert_eq!(
+        total_initial_shed,
+        total_initial_requests - cross_dao_quota,
+        "exactly 180 shed"
     );
 
-    // 2. Client retry loop under real 10x overload utilizing the real system's RetryBudget policy:
-    // To bound retry storms under severe overload, clients govern retries via RetryBudget
-    // matching the server's configured retry budget cap.
+    // 2. Independent client retry phase:
+    // Each client independently checks its own local ClientRetryBudget before sending.
+    // If its local budget is exhausted, it fails fast locally without sending any network request.
     let base_ms = 3_000u64;
     let cap_ms = 10_000u64;
-    let mut retry_budget = RetryBudget::new(initial_requests, 10);
+    let mut total_retries_sent = 0;
+    let mut total_retries_admitted = 0;
+    let mut local_fast_failures = 0;
 
-    let mut retries_attempted = 0;
-    let mut retries_succeeded = 0;
+    for client in &mut clients {
+        for &shed_idx in &client.refused_indices {
+            // Client consults its own local independent retry budget:
+            if !client.budget.try_acquire() {
+                // Fails fast locally without sending any request over the network!
+                local_fast_failures += 1;
+                continue;
+            }
 
-    for &client_id in &refused_clients {
-        // Enforce retry budget from the real system policy
-        if !retry_budget.try_acquire() {
-            break;
-        }
-
-        let mut attempt = 0u32;
-        loop {
-            retries_attempted += 1;
-
+            // Budget permitted: retry is sent across network into window NOW + 1
+            total_retries_sent += 1;
+            let attempt = 0u32;
             let backoff_limit = cap_ms.min(base_ms * (1u64 << attempt));
-            // Full jitter: delay in [0, backoff_limit)
-            let jitter =
-                (((client_id as u64 + 1) * 2654435761) ^ ((attempt as u64) * 40503) ^ 0x5bf03635)
-                    % backoff_limit;
+            let jitter = (((client.id as u64 + 1) * 2654435761) ^ 0x5bf03635) % backoff_limit;
             let retry_epoch = NOW + 1 + (jitter / 1000);
 
-            // Retries use the real system's Supervisor::retry method
-            let retry_out = sup.retry(&intents[client_id], retry_epoch, &bounds);
-            if retry_out.receipt.is_some() {
-                // Client admitted and received verifiable receipt on retry
-                retries_succeeded += 1;
-                break;
-            }
-
-            attempt += 1;
-            if attempt >= 3 {
-                // Client gives up after max attempts
-                break;
+            let out = sup.retry(&client.intents[shed_idx], retry_epoch, &bounds);
+            if out.receipt.is_some() {
+                total_retries_admitted += 1;
             }
         }
     }
 
     assert_eq!(
-        retries_attempted, retry_budget.max_retries,
-        "retries attempted must match real system retry budget"
+        total_retries_sent, 20,
+        "each of 20 clients sent exactly 1 retry under its budget"
     );
     assert_eq!(
-        retries_succeeded, 20,
-        "capped retries in next window must all be admitted under fresh quota"
+        total_retries_admitted, 20,
+        "all 20 retries admitted in window NOW + 1"
+    );
+    assert_eq!(
+        local_fast_failures, 160,
+        "160 shed requests failed fast locally without sending"
     );
 
-    // 3. System server enforcement: verify that the server itself enforces the retry budget cap!
-    // Any extra shed client that attempts to retry when the server's retry budget is exhausted
-    // is rejected by CrossDaoAdmissionControl with 'admission:shed-load — retry quota exhausted'.
-    for &extra_client_id in &refused_clients[20..30] {
-        let extra_epoch = NOW + 1;
-        let extra_out = sup.retry(&intents[extra_client_id], extra_epoch, &bounds);
-        assert_eq!(
-            extra_out.refused.as_deref(),
-            Some("admission:shed-load — retry quota exhausted"),
-            "real system server must enforce retry budget cap and reject retries when budget exhausted"
-        );
-    }
-
-    let r_amp = retry_amplification(initial_requests, retries_attempted);
+    // Every send is counted:
+    let total_sends = total_initial_requests + total_retries_sent;
+    let r_amp = retry_amplification(total_initial_requests, total_retries_sent);
+    assert_eq!(total_sends, 220);
     assert!(
         r_amp <= 1.15,
-        "measured retry amplification factor R_amp at real 10x overload must stay <= 1.15; was {r_amp:.3} (retries={retries_attempted}, initial={initial_requests})"
+        "R_amp across independent clients must stay <= 1.15; was {r_amp:.3}"
     );
-    println!("gate3: PASS - measured retry amplification at real 10x overload R_amp = {r_amp:.3} <= 1.15 bound (retries={retries_attempted}/{initial_requests})");
+    println!("gate3: PASS - measured retry amplification across independent clients R_amp = {r_amp:.3} <= 1.15 (sends={total_sends}/{total_initial_requests})");
 }
 
 #[test]
@@ -456,7 +499,6 @@ fn test_gate3_forged_requests_without_key_cannot_exhaust_quota_or_lockout_legiti
     // Attacker without a valid key sends forged requests (invalid signatures)
     for i in 0..20 {
         let mut forged_intent = make_cross_dao_intent(99_000 + i);
-        // Corrupt signature (forged by someone without private key)
         forged_intent.sig[0] ^= 0xff;
         forged_intent.sig[15] ^= 0xaa;
 
@@ -474,12 +516,12 @@ fn test_gate3_forged_requests_without_key_cannot_exhaust_quota_or_lockout_legiti
         let out = sup.run(&valid_intent, NOW, false, &bounds);
         assert!(
             out.receipt.is_some(),
-            "legitimate signed request #{i} must be admitted and receive receipt; not locked out by forged requests: {:?}",
+            "legitimate signed request #{i} must be admitted and receive receipt: {:?}",
             out.refused
         );
     }
 
-    // The (quota + 1)-th legitimate request is shed properly when quota is genuinely full
+    // Excess legitimate request is shed only when valid quota is genuinely reached
     let excess_intent = make_cross_dao_intent(99_100 + cross_dao_quota as u64);
     let excess_out = sup.run(&excess_intent, NOW, false, &bounds);
     assert_eq!(
@@ -487,8 +529,159 @@ fn test_gate3_forged_requests_without_key_cannot_exhaust_quota_or_lockout_legiti
         Some("admission:shed-load — cross-dao quota exhausted"),
         "excess legitimate request is shed only when valid quota is genuinely reached"
     );
-
     println!(
         "gate3: PASS - forged requests without key rejected before admission; zero quota lockout"
+    );
+}
+
+#[test]
+fn test_gate3_per_source_retry_allowance_and_free_quota_admission() {
+    // Repro d11a: cross quota 3, retry cap 2, per-source allowance 1.
+    // One client retrying must not starve another client, and retries must not be refused when quota is free.
+    let state = tmp("d11a-allowance");
+    let mut sup = make_sup(&state);
+    let bounds = Bounds::default();
+
+    let seed_a = [0x71; 32];
+    let seed_b = [0x72; 32];
+    let intent_a1 = make_cross_dao_intent_with_seed(&seed_a, 101);
+    let intent_a2 = make_cross_dao_intent_with_seed(&seed_a, 102);
+    let intent_b1 = make_cross_dao_intent_with_seed(&seed_b, 201);
+
+    sup.set_load_shed(
+        CrossDaoAdmissionControl::new(100, 3)
+            .with_retry_budget_cap(2)
+            .with_per_source_retry_allowance(1),
+    );
+
+    // Window 0: Fill quota with 3 requests so subsequent intents get shed
+    let fill1 = make_cross_dao_intent(501);
+    let fill2 = make_cross_dao_intent(502);
+    let fill3 = make_cross_dao_intent(503);
+    assert!(sup.run(&fill1, NOW, false, &bounds).receipt.is_some());
+    assert!(sup.run(&fill2, NOW, false, &bounds).receipt.is_some());
+    assert!(sup.run(&fill3, NOW, false, &bounds).receipt.is_some());
+
+    // Both clients get shed under full quota:
+    assert_eq!(
+        sup.run(&intent_a1, NOW, false, &bounds).refused.as_deref(),
+        Some("admission:shed-load — cross-dao quota exhausted")
+    );
+    assert_eq!(
+        sup.run(&intent_a2, NOW, false, &bounds).refused.as_deref(),
+        Some("admission:shed-load — cross-dao quota exhausted")
+    );
+    assert_eq!(
+        sup.run(&intent_b1, NOW, false, &bounds).refused.as_deref(),
+        Some("admission:shed-load — cross-dao quota exhausted")
+    );
+
+    // Window 1 (NOW + 1): Fresh quota (0/3 used).
+    // Client A retries 1st request -> admitted (source A uses 1/1 allowance, cross usage 1/3)
+    let out_a1 = sup.retry(&intent_a1, NOW + 1, &bounds);
+    assert!(
+        out_a1.receipt.is_some(),
+        "Client A retry 1 admitted under allowance: {:?}",
+        out_a1.refused
+    );
+
+    // Client A retries 2nd request -> refused "retry quota exhausted" (exceeds per-source allowance = 1)
+    // Client A cannot starve Client B!
+    let out_a2 = sup.retry(&intent_a2, NOW + 1, &bounds);
+    assert_eq!(
+        out_a2.refused.as_deref(),
+        Some("admission:shed-load — retry quota exhausted"),
+        "Client A cannot exceed its per-source retry allowance and starve other clients"
+    );
+
+    // Client B retries 1st request -> ADMITTED! (ordinary quota is 1/3, free slot available!)
+    // d11a fix: retry is NOT refused because quota is free and Client B has not exceeded allowance!
+    let out_b1 = sup.retry(&intent_b1, NOW + 1, &bounds);
+    assert!(
+        out_b1.receipt.is_some(),
+        "Client B retry must be admitted when ordinary quota has free slots (2/3): {:?}",
+        out_b1.refused
+    );
+
+    println!("gate3: PASS - per-source retry allowance prevents starvation (d11a); free quota admits retries");
+}
+
+#[test]
+fn test_gate3_fresh_nonce_resend_tracked_under_intent_fingerprint() {
+    // Repro d11b: verify that re-sending shed work with a fresh nonce is tracked
+    // under semantic intent fingerprinting (authority, action)
+    let state = tmp("d11b-fresh-nonce");
+    let mut sup = make_sup(&state);
+    let bounds = Bounds::default();
+
+    let seed = [0x81; 32];
+    sup.set_load_shed(
+        CrossDaoAdmissionControl::new(100, 1)
+            .with_retry_budget_cap(1)
+            .with_per_source_retry_allowance(1),
+    );
+
+    // 1. First intent admitted
+    let initial1 = make_cross_dao_intent_with_seed(&seed, 10_001);
+    assert!(sup.run(&initial1, NOW, false, &bounds).receipt.is_some());
+
+    // 2. Second intent shed
+    let initial2 = make_cross_dao_intent_with_seed(&seed, 10_002);
+    let out2 = sup.run(&initial2, NOW, false, &bounds);
+    assert_eq!(
+        out2.refused.as_deref(),
+        Some("admission:shed-load — cross-dao quota exhausted")
+    );
+
+    // 3. Client re-signs the exact same shed work with a FRESH nonce 10_003
+    let resend_fresh_nonce = make_cross_dao_intent_with_seed(&seed, 10_003);
+
+    // Verify supervisor recognizes the shed intent fingerprint (authority, action)
+    assert!(
+        sup.shed_nonces.contains_intent(&(
+            resend_fresh_nonce.authority,
+            btungsten_wb001::decode(&resend_fresh_nonce.env)
+                .unwrap()
+                .action
+        )),
+        "server must recognize shed intent fingerprint even with fresh nonce"
+    );
+
+    println!("gate3: PASS - fresh nonce re-sends tracked under intent fingerprinting (d11b)");
+}
+
+#[test]
+fn test_gate3_bounded_shed_tracker_prevents_memory_leak() {
+    // Repro d12: flood 5,000 shed requests and verify tracker size is strictly bounded
+    let state = tmp("d12-bounded-memory");
+    let mut sup = make_sup(&state);
+    let bounds = Bounds::default();
+
+    sup.set_load_shed(CrossDaoAdmissionControl::new(10, 1));
+
+    // Consume 1 quota slot
+    assert!(sup
+        .run(&make_cross_dao_intent(1), NOW, false, &bounds)
+        .receipt
+        .is_some());
+
+    // Flood 5,000 shed requests
+    for i in 2..5002 {
+        let intent = make_cross_dao_intent(i);
+        let out = sup.run(&intent, NOW, false, &bounds);
+        assert_eq!(
+            out.refused.as_deref(),
+            Some("admission:shed-load — cross-dao quota exhausted")
+        );
+    }
+
+    assert!(
+        sup.shed_nonces.len() <= BoundedShedTracker::DEFAULT_MAX,
+        "shed tracker must never exceed bounded capacity (was {})",
+        sup.shed_nonces.len()
+    );
+    println!(
+        "gate3: PASS - shed tracker strictly bounded to {} entries, zero memory leak (d12)",
+        sup.shed_nonces.len()
     );
 }

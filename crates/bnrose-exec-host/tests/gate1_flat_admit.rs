@@ -126,86 +126,88 @@ fn generate_bulk_journal(count: usize, key: &[u8; 32], policy_wire: &[u8]) -> Ve
     buf
 }
 
+fn make_scaled_supervisor(state: &Path, count: usize) -> Supervisor {
+    bnrose_exec_host::keys::SupervisorKeys::init(state, &[0x44; 32]).unwrap();
+    let keys = bnrose_exec_host::keys::SupervisorKeys::load(state).unwrap();
+    let journal_bytes = generate_bulk_journal(count, &keys.journal_mac, &test_policy().wire());
+    let paths = replica_paths(state);
+    if let Some(parent) = paths[1].parent() {
+        std::fs::create_dir_all(parent).unwrap();
+    }
+    std::fs::write(&paths[0], &journal_bytes).unwrap();
+    std::fs::write(&paths[1], &journal_bytes).unwrap();
+    let sup = Supervisor::open(state, Box::new(NativeWorker::new()), test_policy()).unwrap();
+    assert_eq!(sup.admitted_count(), count);
+    sup
+}
+
 #[test]
 fn test_gate1_flat_admit_latency_scaling() {
-    let bounds = Bounds::default();
-    let checkpoints = [1_000usize, 10_000usize, 100_000usize];
-    let mut checkpoint_latencies_us = Vec::new();
-
     println!("gate1: measuring admission latency scaling across 10^3, 10^4, 10^5 journal ops...");
 
-    for &count in &checkpoints {
-        let state = tmp(&format!("scaling-{count}"));
-        bnrose_exec_host::keys::SupervisorKeys::init(&state, &[0x44; 32]).unwrap();
-        let keys = bnrose_exec_host::keys::SupervisorKeys::load(&state).unwrap();
+    let state_1k = tmp("gate1-scale-1000");
+    let state_100k = tmp("gate1-scale-100000");
 
-        // Preseed journal to exact checkpoint depth
-        let journal_bytes = generate_bulk_journal(count, &keys.journal_mac, &test_policy().wire());
-        let paths = replica_paths(&state);
-        if let Some(parent) = paths[1].parent() {
-            std::fs::create_dir_all(parent).unwrap();
-        }
-        std::fs::write(&paths[0], &journal_bytes).unwrap();
-        std::fs::write(&paths[1], &journal_bytes).unwrap();
+    let mut sup_1k = make_scaled_supervisor(&state_1k, 1_000);
+    let mut sup_100k = make_scaled_supervisor(&state_100k, 100_000);
 
-        // Open supervisor (loads startup index in a single pass)
-        let mut sup =
-            Supervisor::open(&state, Box::new(NativeWorker::new()), test_policy()).unwrap();
-        assert_eq!(sup.admitted_count(), count);
+    let bounds = Bounds::default();
 
-        // Warm-up 3 ops to ensure process / OS file cache readiness
-        for w in 0..3 {
-            let f = fixture(count as u64 + 400_000 + w as u64, NOW, 600);
-            let intent = read_intent(&f.to_json()).unwrap();
-            let _ = sup.run(&intent, NOW, false, &bounds);
-        }
-
-        // Measure a sample of sequential fresh admissions
-        const SAMPLE_OPS: usize = 20;
-        let mut sample_us = Vec::with_capacity(SAMPLE_OPS);
-        for i in 0..SAMPLE_OPS {
-            let f = fixture(count as u64 + 500_000 + i as u64, NOW, 600);
-            let intent = read_intent(&f.to_json()).unwrap();
-
-            let t0 = Instant::now();
-            let outcome = sup.run(&intent, NOW, false, &bounds);
-            let elapsed = t0.elapsed();
-
-            assert!(
-                outcome.refused.is_none(),
-                "at checkpoint {count}, op {i} unexpectedly refused: {:?}",
-                outcome.refused
-            );
-            sample_us.push(elapsed.as_micros());
-        }
-
-        let avg_lat = sample_us.iter().copied().sum::<u128>() as f64 / sample_us.len() as f64;
-        checkpoint_latencies_us.push((count, avg_lat));
-        println!("gate1: checkpoint {count} ops in journal -> avg admit latency: {avg_lat:.2} µs");
+    // Warm-up to ensure file cache and supervisor index readiness
+    for w in 0..5 {
+        let f = fixture(400_000 + w as u64, NOW, 600);
+        let intent = read_intent(&f.to_json()).unwrap();
+        let _ = sup_1k.run(&intent, NOW, false, &bounds);
+        let _ = sup_100k.run(&intent, NOW, false, &bounds);
     }
 
-    let lat_1k = checkpoint_latencies_us[0].1;
-    let lat_10k = checkpoint_latencies_us[1].1;
-    let lat_100k = checkpoint_latencies_us[2].1;
+    // Take median of several samples (PR #465, Grok review) to eliminate single-sample jitter
+    const NUM_ROUNDS: usize = 5;
+    const SAMPLE_OPS: usize = 20;
+    let mut ratio_samples = Vec::with_capacity(NUM_ROUNDS);
 
-    let ratio_10k_to_1k = lat_10k / lat_1k.max(1.0);
-    let ratio_100k_to_1k = lat_100k / lat_1k.max(1.0);
-    let slope_per_decade = (lat_100k - lat_1k) / 2.0; // across 2 decades (10^3 to 10^5)
+    for round in 0..NUM_ROUNDS {
+        let mut sample_1k = Vec::with_capacity(SAMPLE_OPS);
+        let mut sample_100k = Vec::with_capacity(SAMPLE_OPS);
 
+        for i in 0..SAMPLE_OPS {
+            let nonce_base = 500_000 + (round * SAMPLE_OPS + i) as u64;
+
+            let f1k = fixture(nonce_base, NOW, 600);
+            let intent1k = read_intent(&f1k.to_json()).unwrap();
+            let t0 = Instant::now();
+            let out1k = sup_1k.run(&intent1k, NOW, false, &bounds);
+            sample_1k.push(t0.elapsed().as_micros());
+            assert!(out1k.receipt.is_some());
+
+            let f100k = fixture(nonce_base + 10_000, NOW, 600);
+            let intent100k = read_intent(&f100k.to_json()).unwrap();
+            let t1 = Instant::now();
+            let out100k = sup_100k.run(&intent100k, NOW, false, &bounds);
+            sample_100k.push(t1.elapsed().as_micros());
+            assert!(out100k.receipt.is_some());
+        }
+
+        sample_1k.sort_unstable();
+        sample_100k.sort_unstable();
+        let med_1k = sample_1k[sample_1k.len() / 2] as f64;
+        let med_100k = sample_100k[sample_100k.len() / 2] as f64;
+
+        let ratio = med_100k / med_1k.max(1.0);
+        ratio_samples.push(ratio);
+        println!("gate1: sample round {round} -> 10^3: {med_1k:.1} µs, 10^5: {med_100k:.1} µs (ratio: {ratio:.2}x)");
+    }
+
+    ratio_samples.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let median_ratio = ratio_samples[ratio_samples.len() / 2];
     println!(
-        "gate1: scaling slope: {slope_per_decade:+.2} µs/decade (ratio 10^4/10^3: {ratio_10k_to_1k:.2}x, ratio 10^5/10^3: {ratio_100k_to_1k:.2}x)"
+        "gate1: median ratio of {NUM_ROUNDS} samples across 10^3 to 10^5 ops = {median_ratio:.2}x"
     );
 
-    // In the old code (reloading journal from disk on admission), ratio would be ~100x.
-    // In our in-memory indexed supervisor, ratio is flat across 10^3, 10^4, 10^5 (within 3.0x variance in debug mode).
-    let max_ratio = if cfg!(debug_assertions) || cfg!(windows) {
-        3.0
-    } else {
-        1.5
-    };
+    let max_ratio = if cfg!(debug_assertions) { 3.0 } else { 1.5 };
     assert!(
-        ratio_100k_to_1k < max_ratio,
-        "admit latency must stay flat from 10^3 to 10^5 journal ops; ratio was {ratio_100k_to_1k:.2} (10^3: {lat_1k:.1} µs, 10^5: {lat_100k:.1} µs)"
+        median_ratio < max_ratio,
+        "admit latency must stay flat from 10^3 to 10^5 journal ops; median ratio was {median_ratio:.2}x (< {max_ratio}x bound)"
     );
 }
 
