@@ -3,6 +3,8 @@
 
 mod common;
 
+mod anchor;
+
 mod adversarial;
 mod authority;
 mod lifecycle;
