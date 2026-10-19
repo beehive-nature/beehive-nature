@@ -3,7 +3,7 @@
   "provider": "github",
   "repository": "beehive-nature/beehive-nature",
   "head": "d472d198bf12b4d420fa828237b167d2b65d71cb",
-  "observed_at": "2026-10-19T00:20:17.405Z",
+  "observed_at": "2026-10-19T00:25:28.312Z",
   "attestation": "unsigned API and job-log observations",
   "coverage_note": "Recorded runs only; compare against the required workflow/event plan before qualification.",
   "timing_note": "Workflow creation to job start includes dependency and retry waiting; it is not pure runner queue time.",
@@ -14,6 +14,7 @@
     "non_success": [],
     "all_recorded_runs_successful": true,
     "executed_jobs": 7,
+    "completed_jobs_without_start_evidence": [],
     "jobs_with_checkout_binding": 7,
     "completed_job_execution_seconds": 737,
     "timing_missing_job_ids": [],
@@ -68,6 +69,7 @@
           "conclusion": "success",
           "started_at": "2026-10-18T23:25:26Z",
           "completed_at": "2026-10-18T23:31:02Z",
+          "execution_started": true,
           "dispatch_to_start_seconds": 845,
           "execution_seconds": 336,
           "steps": [
@@ -184,6 +186,7 @@
           "conclusion": "success",
           "started_at": "2026-10-18T23:37:12Z",
           "completed_at": "2026-10-18T23:38:00Z",
+          "execution_started": true,
           "dispatch_to_start_seconds": 1551,
           "execution_seconds": 48,
           "steps": [
@@ -300,6 +303,7 @@
           "conclusion": "success",
           "started_at": "2026-10-18T23:34:55Z",
           "completed_at": "2026-10-18T23:35:59Z",
+          "execution_started": true,
           "dispatch_to_start_seconds": 1414,
           "execution_seconds": 64,
           "steps": [
@@ -416,6 +420,7 @@
           "conclusion": "success",
           "started_at": "2026-10-18T23:40:13Z",
           "completed_at": "2026-10-18T23:41:00Z",
+          "execution_started": true,
           "dispatch_to_start_seconds": 1732,
           "execution_seconds": 47,
           "steps": [
@@ -514,6 +519,7 @@
           "conclusion": "success",
           "started_at": "2026-10-18T23:39:33Z",
           "completed_at": "2026-10-18T23:40:53Z",
+          "execution_started": true,
           "dispatch_to_start_seconds": 1692,
           "execution_seconds": 80,
           "steps": [
@@ -648,6 +654,7 @@
           "conclusion": "success",
           "started_at": "2026-10-18T23:41:23Z",
           "completed_at": "2026-10-18T23:43:19Z",
+          "execution_started": true,
           "dispatch_to_start_seconds": 1802,
           "execution_seconds": 116,
           "steps": [
@@ -755,6 +762,7 @@
           "conclusion": "success",
           "started_at": "2026-10-18T23:46:26Z",
           "completed_at": "2026-10-18T23:47:12Z",
+          "execution_started": true,
           "dispatch_to_start_seconds": 2105,
           "execution_seconds": 46,
           "steps": [

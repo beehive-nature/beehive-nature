@@ -30,9 +30,24 @@ export function seconds(start, end) {
   return Number.isFinite(value) && value >= 0 ? value : null;
 }
 
+export function jobTiming(job, createdAt) {
+  // GitHub can report started_at == workflow creation while a job is still
+  // queued. Require actual step activity; a cancelled queued job also has no
+  // execution to time. Keep missing evidence unknown, never a zero-second wait.
+  const started = ['in_progress', 'completed'].includes(job.status) &&
+    (job.steps ?? []).some(step => step.started_at &&
+      ['in_progress', 'completed'].includes(step.status) && step.conclusion !== 'skipped');
+  return {
+    execution_started: started,
+    dispatch_to_start_seconds: started ? seconds(createdAt, job.started_at) : null,
+    execution_seconds: started && job.status === 'completed' ? seconds(job.started_at, job.completed_at) : null,
+  };
+}
+
 export function summarizeRuns(runs) {
   const jobs = runs.flatMap(run => run.jobs);
-  const executed = jobs.filter(job => job.status === 'completed' && job.conclusion !== 'skipped');
+  const completed = jobs.filter(job => job.status === 'completed' && job.conclusion !== 'skipped');
+  const executed = completed.filter(job => job.execution_started);
   return {
     workflow_executions: runs.length,
     completed_successfully: runs.filter(run => run.status === 'completed' && run.conclusion === 'success').length,
@@ -40,6 +55,7 @@ export function summarizeRuns(runs) {
     non_success: runs.filter(run => run.status === 'completed' && run.conclusion !== 'success').map(run => run.id),
     all_recorded_runs_successful: runs.length > 0 && runs.every(run => run.status === 'completed' && run.conclusion === 'success'),
     executed_jobs: executed.length,
+    completed_jobs_without_start_evidence: completed.filter(job => !job.execution_started).map(job => job.id),
     jobs_with_checkout_binding: executed.filter(job => job.checkout?.commit && job.checkout?.tree).length,
     completed_job_execution_seconds: executed.reduce((sum, job) => sum + (job.execution_seconds ?? 0), 0),
     timing_missing_job_ids: executed.filter(job => job.execution_seconds === null).map(job => job.id),
@@ -76,8 +92,7 @@ export async function collectReceipt(repo, head, runIds = []) {
       const item = {
         id: job.id, name: job.name, status: job.status, conclusion: job.conclusion,
         started_at: job.started_at, completed_at: job.completed_at,
-        dispatch_to_start_seconds: seconds(run.created_at, job.started_at),
-        execution_seconds: job.status === 'completed' ? seconds(job.started_at, job.completed_at) : null,
+        ...jobTiming(job, run.created_at),
         steps: (job.steps ?? []).map(step => ({
           number: step.number, name: step.name, status: step.status, conclusion: step.conclusion,
           started_at: step.started_at, completed_at: step.completed_at,

@@ -89,9 +89,13 @@ event and attempt identity, job outcomes/timestamps, and the actual full
 checkout SHA from each completed job's checkout log. It resolves that
 commit's tree and retains the log digest without copying raw logs or
 credentials. Missing or ambiguous checkout evidence stays unbound; it
-never substitutes the run's PR head for the tested checkout. Five more
+never substitutes the run's PR head for the tested checkout. Six more
 tests cover that boundary and prevent queued, failed, cancelled, skipped
-or empty observations from becoming successful-run claims (29 tests total).
+or empty observations from becoming successful-run claims (30 tests total).
+The live jobs API supplied `started_at` equal to workflow creation for
+queued jobs with no steps. The collector therefore requires actual step
+activity before timing execution or start delay; queued placeholders and
+cancellation before execution remain unknown, rather than zero seconds.
 
 The first live capture is
 [`cache-pr-first-observation.json`](../receipts/ci-throughput-2026-10-18/cache-pr-first-observation.json).

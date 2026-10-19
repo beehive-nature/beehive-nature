@@ -3,10 +3,10 @@
   "provider": "github",
   "repository": "beehive-nature/beehive-nature",
   "head": "3776749837e2ca8b73eed440b67446362b639ccc",
-  "observed_at": "2026-10-19T00:18:39.183Z",
+  "observed_at": "2026-10-19T00:25:33.267Z",
   "attestation": "unsigned API and job-log observations",
   "coverage_note": "Recorded runs only; compare against the required workflow/event plan before qualification.",
-  "timing_note": "Dispatch-to-start includes dependency waiting; it is not pure runner queue time.",
+  "timing_note": "Workflow creation to job start includes dependency and retry waiting; it is not pure runner queue time.",
   "summary": {
     "workflow_executions": 1,
     "completed_successfully": 1,
@@ -14,6 +14,7 @@
     "non_success": [],
     "all_recorded_runs_successful": true,
     "executed_jobs": 1,
+    "completed_jobs_without_start_evidence": [],
     "jobs_with_checkout_binding": 1,
     "completed_job_execution_seconds": 58,
     "timing_missing_job_ids": [],
@@ -50,8 +51,119 @@
           "conclusion": "success",
           "started_at": "2026-10-19T00:11:43Z",
           "completed_at": "2026-10-19T00:12:41Z",
+          "execution_started": true,
           "dispatch_to_start_seconds": 179,
           "execution_seconds": 58,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:11:44Z",
+              "completed_at": "2026-10-19T00:11:44Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:11:44Z",
+              "completed_at": "2026-10-19T00:11:54Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 3,
+              "name": "Install pinned SAW 1.6 (with bundled solvers)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:11:54Z",
+              "completed_at": "2026-10-19T00:12:00Z",
+              "execution_seconds": 6
+            },
+            {
+              "number": 4,
+              "name": "Install the mir-json toolchain (nightly-2026-03-21)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:12:00Z",
+              "completed_at": "2026-10-19T00:12:19Z",
+              "execution_seconds": 19
+            },
+            {
+              "number": 5,
+              "name": "Restore mir-json build (keyed on its commit and toolchain)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:12:19Z",
+              "completed_at": "2026-10-19T00:12:21Z",
+              "execution_seconds": 2
+            },
+            {
+              "number": 6,
+              "name": "Build mir-json at SAW 1.6's pin",
+              "status": "completed",
+              "conclusion": "skipped",
+              "started_at": "2026-10-19T00:12:21Z",
+              "completed_at": "2026-10-19T00:12:21Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 7,
+              "name": "Expose mir-json",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:12:21Z",
+              "completed_at": "2026-10-19T00:12:21Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 8,
+              "name": "WB002 model core — unit tests",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:12:21Z",
+              "completed_at": "2026-10-19T00:12:31Z",
+              "execution_seconds": 10
+            },
+            {
+              "number": 9,
+              "name": "WB002 SAW — BUILD + EQUIVALENCE + TEETH",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:12:31Z",
+              "completed_at": "2026-10-19T00:12:38Z",
+              "execution_seconds": 7
+            },
+            {
+              "number": 17,
+              "name": "Post Restore mir-json build (keyed on its commit and toolchain)",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:12:38Z",
+              "completed_at": "2026-10-19T00:12:38Z",
+              "execution_seconds": 0
+            },
+            {
+              "number": 18,
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:12:38Z",
+              "completed_at": "2026-10-19T00:12:39Z",
+              "execution_seconds": 1
+            },
+            {
+              "number": 19,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-10-19T00:12:39Z",
+              "completed_at": "2026-10-19T00:12:39Z",
+              "execution_seconds": 0
+            }
+          ],
           "checkout": {
             "commit": "94ced41034e6c4734e5e45ca9e846334308a6755",
             "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
