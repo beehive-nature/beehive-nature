@@ -753,6 +753,7 @@ version = "0.1.0"
 dependencies = [
  "aes-gcm 0.10.3",
  "bech32",
+ "bnr-keys",
  "bpq-core",
  "btungsten-wb001",
  "chilldkg-rs",
@@ -836,6 +837,16 @@ dependencies = [
  "sha2 0.10.9",
  "slh-dsa",
  "x25519-dalek",
+]
+
+[[package]]
+name = "btungsten-qeval"
+version = "0.1.0"
+dependencies = [
+ "btungsten-wb001",
+ "btungsten-wb001-core",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

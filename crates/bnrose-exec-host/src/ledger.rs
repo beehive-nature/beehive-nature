@@ -183,6 +183,10 @@ impl EffectLedger {
         self.rows.is_empty()
     }
 
+    pub fn rows(&self) -> &std::collections::BTreeMap<[u8; 32], Row> {
+        &self.rows
+    }
+
     /// Apply this operation's effect. `env_sha` is the envelope hash the
     /// journal's Admitted record carries; the row's digest is derived from
     /// the binding and must equal `bound` (what dispatch journaled).

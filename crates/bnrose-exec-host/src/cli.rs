@@ -180,14 +180,24 @@ fn cmd_run(args: &[String]) -> i32 {
             return 1;
         }
     };
-    let mut sup = match Supervisor::open(&state, worker, test_policy()) {
+    let is_prod = flag(args, "--production").is_some() || crate::is_production_env();
+    let mut sup = match if is_prod {
+        Supervisor::open_production(&state, worker, test_policy())
+    } else {
+        Supervisor::open(&state, worker, test_policy())
+    } {
         Ok(s) => s,
         Err(e) => {
             eprintln!("refused: {e}");
             return 1;
         }
     };
-    let out = sup.run(&intent, clock, lose, &Bounds::default());
+    let retry = flag(args, "--retry").is_some();
+    let out = if retry {
+        sup.retry(&intent, clock, &Bounds::default())
+    } else {
+        sup.run(&intent, clock, lose, &Bounds::default())
+    };
     let code = if out.lost_response {
         3
     } else if out.refused.is_some() || out.receipt.is_none() {

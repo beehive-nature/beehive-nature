@@ -140,7 +140,7 @@ impl Journal {
 
     /// Append one record: body, tag, length prefix — then fsync. The
     /// fsync is the durability line the effect door stands behind.
-    pub fn append(
+    pub fn append_uncommitted(
         &mut self,
         op_id: &[u8; 32],
         event: u8,
@@ -154,7 +154,6 @@ impl Journal {
         frame.extend_from_slice(&tag);
         self.file
             .write_all(&frame)
-            .and_then(|_| self.file.sync_data())
             .map_err(|e| JournalError::Io(e.to_string()))?;
         let rec = Record {
             seq: self.seq,
@@ -165,6 +164,25 @@ impl Journal {
         };
         self.head = tag;
         self.seq += 1;
+        Ok(rec)
+    }
+
+    pub fn sync(&self) -> Result<(), JournalError> {
+        self.file
+            .sync_data()
+            .map_err(|e| JournalError::Io(e.to_string()))
+    }
+
+    /// Append one record: body, tag, length prefix — then fsync. The
+    /// fsync is the durability line the effect door stands behind.
+    pub fn append(
+        &mut self,
+        op_id: &[u8; 32],
+        event: u8,
+        payload: &[u8],
+    ) -> Result<Record, JournalError> {
+        let rec = self.append_uncommitted(op_id, event, payload)?;
+        self.sync()?;
         Ok(rec)
     }
 }
@@ -290,10 +308,17 @@ pub struct ReplicatedJournal {
     /// What the load rules observed when this process opened the set —
     /// the recovery report names it even after healing.
     pub observed_at_open: ReplicationState,
+    sync_worker: Option<(
+        std::sync::mpsc::SyncSender<std::sync::mpsc::SyncSender<Result<(), JournalError>>>,
+        std::thread::JoinHandle<()>,
+    )>,
 }
 
 impl ReplicatedJournal {
-    pub fn open(paths: &[PathBuf], key: &[u8; 32]) -> Result<ReplicatedJournal, JournalError> {
+    pub fn open_with_records(
+        paths: &[PathBuf],
+        key: &[u8; 32],
+    ) -> Result<(ReplicatedJournal, Vec<Record>), JournalError> {
         if paths.is_empty() {
             return Err(JournalError::Io("no replicas given".into()));
         }
@@ -319,11 +344,39 @@ impl ReplicatedJournal {
         for p in paths {
             replicas.push(Journal::open(p, key)?);
         }
-        Ok(ReplicatedJournal {
-            replicas,
-            paths: paths.to_vec(),
-            observed_at_open: observed,
-        })
+        let sync_worker = if replicas.len() > 1 {
+            if let Ok(file_clone) = replicas[1].file.try_clone() {
+                let (tx, rx) = std::sync::mpsc::sync_channel::<
+                    std::sync::mpsc::SyncSender<Result<(), JournalError>>,
+                >(1);
+                let handle = std::thread::spawn(move || {
+                    while let Ok(ack_tx) = rx.recv() {
+                        let res = file_clone
+                            .sync_data()
+                            .map_err(|e| JournalError::Io(e.to_string()));
+                        let _ = ack_tx.send(res);
+                    }
+                });
+                Some((tx, handle))
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+        Ok((
+            ReplicatedJournal {
+                replicas,
+                paths: paths.to_vec(),
+                observed_at_open: observed,
+                sync_worker,
+            },
+            records,
+        ))
+    }
+
+    pub fn open(paths: &[PathBuf], key: &[u8; 32]) -> Result<ReplicatedJournal, JournalError> {
+        Self::open_with_records(paths, key).map(|(j, _)| j)
     }
 
     pub fn head(&self) -> [u8; 32] {
@@ -332,6 +385,42 @@ impl ReplicatedJournal {
 
     pub fn next_seq(&self) -> u64 {
         self.replicas[0].next_seq()
+    }
+
+    pub fn append_uncommitted(
+        &mut self,
+        op_id: &[u8; 32],
+        event: u8,
+        payload: &[u8],
+    ) -> Result<Record, JournalError> {
+        let mut first: Option<Record> = None;
+        for r in self.replicas.iter_mut() {
+            let rec = r.append_uncommitted(op_id, event, payload)?;
+            if first.is_none() {
+                first = Some(rec);
+            }
+        }
+        Ok(first.expect("at least one replica by construction"))
+    }
+
+    pub fn sync(&self) -> Result<(), JournalError> {
+        if let Some((ref tx, _)) = self.sync_worker {
+            let (ack_tx, ack_rx) = std::sync::mpsc::sync_channel(1);
+            tx.send(ack_tx)
+                .map_err(|e| JournalError::Io(e.to_string()))?;
+            let r0_res = self.replicas[0].sync();
+            let r1_res = ack_rx.recv().map_err(|e| JournalError::Io(e.to_string()))?;
+            r0_res?;
+            r1_res?;
+            for r in self.replicas.iter().skip(2) {
+                r.sync()?;
+            }
+        } else {
+            for r in self.replicas.iter() {
+                r.sync()?;
+            }
+        }
+        Ok(())
     }
 
     /// The acknowledgement: every replica appends and fsyncs, or the
@@ -344,14 +433,9 @@ impl ReplicatedJournal {
         event: u8,
         payload: &[u8],
     ) -> Result<Record, JournalError> {
-        let mut first: Option<Record> = None;
-        for r in self.replicas.iter_mut() {
-            let rec = r.append(op_id, event, payload)?;
-            if first.is_none() {
-                first = Some(rec);
-            }
-        }
-        Ok(first.expect("at least one replica by construction"))
+        let rec = self.append_uncommitted(op_id, event, payload)?;
+        self.sync()?;
+        Ok(rec)
     }
 
     /// Load the replicated state under the §load rules. Returns the
@@ -488,5 +572,15 @@ mod tests {
         let recs = load(&p, &key).unwrap();
         assert_eq!(recs.len(), 2);
         assert_eq!(recs[1].seq, 1);
+    }
+}
+
+impl Drop for ReplicatedJournal {
+    fn drop(&mut self) {
+        let _ = self.sync();
+        if let Some((tx, handle)) = self.sync_worker.take() {
+            drop(tx);
+            let _ = handle.join();
+        }
     }
 }

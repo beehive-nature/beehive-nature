@@ -18,14 +18,26 @@
 //! fresh nonce. Leftover `Admitted`/`Reserved` operations are reported
 //! stale and left alone — recovery does not invent terminal states.
 
+use crate::device_capacity::{DeviceCapacityLedger, DeviceLimits, ResourceBudget};
 use crate::journal::{self, ReplicatedJournal, ReplicationState};
 // the exact replacement law's pure core lives in bnrose-replacement-law (one
 // definition set, dependency-free so cargo saw-build can link it alone);
 // re-exported so the public path is unchanged
 use crate::keys::SupervisorKeys;
 use crate::ledger::{self, EffectLedger};
+use crate::load_shed::CrossDaoAdmissionControl;
 use crate::receipt::{state_word, Receipt};
 use crate::worker::{Bounds, Worker};
+
+fn sha256_of(data: &[u8]) -> [u8; 32] {
+    use sha2::{Digest, Sha256};
+    let mut h = Sha256::new();
+    h.update(data);
+    let mut out = [0u8; 32];
+    out.copy_from_slice(&h.finalize());
+    out
+}
+
 use crate::{
     admit_request, hex, parse_admit_verdict, parse_step_verdict, step_request, AdmitVerdict,
     StepVerdict,
@@ -37,7 +49,7 @@ use bnrose_exec_core::{
 };
 pub use bnrose_replacement_law::{replacement_admissible, replacement_attempt, StepOptions};
 use serde_json::{json, Value};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 pub struct Supervisor {
@@ -47,6 +59,25 @@ pub struct Supervisor {
     pub worker: Box<dyn Worker>,
     pub policy: Policy,
     pub state_dir: PathBuf,
+    /// Optional authority allowlist: if Some, only authorities in this set are admitted.
+    pub allowed_authorities: Option<std::collections::BTreeSet<[u8; 32]>>,
+    /// In-memory index of admitted (authority, nonce) -> op_id (or root for steps)
+    admitted: BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>,
+    /// In-memory map of op_id -> original env_sha
+    admitted_env_shas: BTreeMap<[u8; 32], [u8; 32]>,
+    /// In-memory map of op_id -> original sig
+    admitted_sigs: BTreeMap<[u8; 32], [u8; 64]>,
+    /// In-memory step entities index (zero disk reloads in run_steps)
+    step_entities: BTreeMap<u8, StepEntity>,
+    /// In-memory map of (root, step) -> max_attempt
+    step_attempts: BTreeMap<([u8; 32], u8), u8>,
+    cached_receipts: BTreeMap<[u8; 32], ([u8; 32], Receipt, Value)>,
+    pub capacity_ledger: DeviceCapacityLedger,
+    pub load_shed: CrossDaoAdmissionControl,
+    pub device_id: [u8; 32],
+    pub local_domain: String,
+    /// Nonces of unadmitted operations shed at Gate 3 load control.
+    pub shed_nonces: std::collections::HashSet<([u8; 32], [u8; 32])>,
     /// the exclusive authority over this state directory (see Claim)
     _claim: Claim,
 }
@@ -138,12 +169,55 @@ fn reservations_payload(bounds: &Bounds) -> Vec<u8> {
 }
 
 impl Supervisor {
+    pub fn set_load_shed(&mut self, ctrl: CrossDaoAdmissionControl) {
+        self.load_shed = ctrl;
+    }
+
+    pub fn set_retry_budget_cap(&mut self, cap: usize) {
+        self.load_shed.set_retry_budget_cap(cap);
+    }
+
+    pub fn retry_budget_cap(&self) -> usize {
+        self.load_shed.retry_budget_cap()
+    }
+
+    pub fn issue_capacity_challenge(
+        &mut self,
+        device_id: [u8; 32],
+        claimed_capacity_qps: u64,
+    ) -> Result<[u8; 32], &'static str> {
+        self.capacity_ledger
+            .issue_challenge(device_id, claimed_capacity_qps)
+    }
+
+    pub fn verify_device_challenge(
+        &mut self,
+        challenge_seed: &[u8; 32],
+        nonce: u64,
+    ) -> Result<bool, &'static str> {
+        self.capacity_ledger
+            .verify_device_challenge(challenge_seed, nonce)
+    }
+
     pub fn open(
         state_dir: &Path,
         worker: Box<dyn Worker>,
         policy: Policy,
     ) -> Result<Supervisor, String> {
         Self::open_with(state_dir, worker, policy, false)
+    }
+
+    /// Production constructor: requires explicit allowlist file (refuses to start open)
+    pub fn open_production(
+        state_dir: &Path,
+        worker: Box<dyn Worker>,
+        policy: Policy,
+    ) -> Result<Self, String> {
+        let sup = Self::open(state_dir, worker, policy)?;
+        if sup.allowed_authorities.is_none() {
+            return Err("authorities: allowed_authorities file missing in production mode — refusing to start open".into());
+        }
+        Ok(sup)
     }
 
     /// adopt_stale_claim: the explicit custody gesture after a crashed
@@ -163,10 +237,153 @@ impl Supervisor {
         std::fs::create_dir_all(state_dir.join("receipts")).map_err(|e| e.to_string())?;
         std::fs::create_dir_all(state_dir.join("replica")).map_err(|e| e.to_string())?;
         let keys = SupervisorKeys::load(state_dir)?;
-        let journal = ReplicatedJournal::open(&replica_paths(state_dir), &keys.journal_mac)
-            .map_err(|e| e.to_string())?;
+        let (mut journal, records) =
+            ReplicatedJournal::open_with_records(&replica_paths(state_dir), &keys.journal_mac)
+                .map_err(|e| e.to_string())?;
         let ledger = EffectLedger::open(&state_dir.join("effects.bin"), &keys.ledger_mac)
             .map_err(|e| e.to_string())?;
+        let admitted = nonces_of(&records)?;
+        let step_entities = step_entities(&records)?;
+        let mut step_attempts = BTreeMap::new();
+        let mut admitted_env_shas = BTreeMap::new();
+        let mut admitted_sigs = BTreeMap::new();
+        for r in &records {
+            if r.event == E_ADMITTED && r.payload.len() >= 130 {
+                let sig: [u8; 64] = r.payload[32..96].try_into().unwrap();
+                admitted_sigs.insert(r.op_id, sig);
+                let env_len = u16::from_le_bytes([r.payload[128], r.payload[129]]) as usize;
+                if r.payload.len() >= 130 + env_len {
+                    let env = &r.payload[130..130 + env_len];
+                    admitted_env_shas.insert(r.op_id, env_sha_of(env));
+                }
+            }
+        }
+        for r in &records {
+            if r.event == bnrose_exec_core::E_STEP_ADMITTED && r.payload.len() >= 34 {
+                let rec_root: [u8; 32] = r.payload[..32].try_into().unwrap();
+                let encoded = r.payload[32];
+                let step = encoded & 0x0f;
+                let attempt = encoded >> 4;
+                let entry = step_attempts.entry((rec_root, step)).or_insert(0u8);
+                *entry = (*entry).max(attempt);
+            }
+        }
+        let allowed_authorities = Self::load_authorities_from_dir(state_dir)?;
+        let is_prod = crate::is_production_env();
+        if is_prod && allowed_authorities.is_none() {
+            return Err("authorities: allowed_authorities file missing in production mode — refusing to start open".into());
+        }
+
+        let mut capacity_ledger = DeviceCapacityLedger::new();
+        let device_id = keys.ed_public;
+        capacity_ledger.register_device(
+            device_id,
+            DeviceLimits {
+                capacity: ResourceBudget {
+                    fuel: 100_000_000_000,
+                    memory_pages: 1_000_000,
+                    wall_secs: 86400,
+                },
+                reserve: ResourceBudget {
+                    fuel: 100_000,
+                    memory_pages: 100,
+                    wall_secs: 10,
+                },
+            },
+        );
+
+        // Reconstruct active reservations across reboot
+        let mut terminal_ops = BTreeSet::new();
+        for row in ledger.rows().values() {
+            terminal_ops.insert(row.op_id);
+        }
+        for r in &records {
+            if r.event == E_RESPONSE || r.event == E_BOUNDED_FAIL {
+                terminal_ops.insert(r.op_id);
+            }
+        }
+        let mut cached_receipts = BTreeMap::new();
+        let mut dispatched_ops = BTreeSet::new();
+        for r in &records {
+            if r.event == bnrose_exec_core::E_DISPATCH {
+                dispatched_ops.insert(r.op_id);
+            }
+        }
+
+        // Collect all ops admitted or reserved before reboot
+        let mut admitted_candidates = BTreeSet::new();
+        for r in &records {
+            if r.event == bnrose_exec_core::E_ADMITTED || r.event == bnrose_exec_core::E_RESERVE {
+                admitted_candidates.insert(r.op_id);
+            }
+        }
+
+        // Startup sweep (r4, r4b, r6): resolve ONLY operations that crashed PRE-DISPATCH.
+        // If an operation reached DISPATCH, it is preserved as UNKNOWN per SPEC-RUSTEOSVM-1.
+        // It must NEVER be poisoned as E_BOUNDED_FAIL.
+        for op in admitted_candidates {
+            if !terminal_ops.contains(&op) {
+                if dispatched_ops.contains(&op) {
+                    // It dispatched! Worker ran it or sent it out.
+                    // Preserve as UNKNOWN across reboot. Do NOT append E_BOUNDED_FAIL!
+                    continue;
+                }
+                // Pre-dispatch crash (crashed after E_ADMITTED or E_RESERVE before E_DISPATCH)
+                let word = "crash:interrupted-pre-dispatch";
+                let mut p = Vec::new();
+                p.extend_from_slice(&1001u32.to_le_bytes());
+                p.push(word.len() as u8);
+                p.extend_from_slice(word.as_bytes());
+                let _ = journal.append(&op, E_BOUNDED_FAIL, &p);
+                terminal_ops.insert(op);
+
+                if let Some(&env_sha) = admitted_env_shas.get(&op) {
+                    let op_state = OpState {
+                        state: bnrose_exec_core::S_FAILED,
+                        recovered: 1,
+                        fail: 1001,
+                        bound_effect: [0u8; 32],
+                        seq: journal.next_seq().saturating_sub(1),
+                    };
+                    let r = Receipt {
+                        op,
+                        env_sha,
+                        state: op_state.state,
+                        recovered: op_state.recovered,
+                        fail: op_state.fail,
+                        effect: [0u8; 32],
+                        journal_head: journal.head(),
+                        completed_at: 0,
+                        seq_head: journal.next_seq(),
+                        sig: [0; 64],
+                    };
+                    let mut r = r;
+                    r.sig = Receipt::sign_statement(&keys.ed_seed, &r.statement());
+                    let v = r.to_json();
+                    let receipts_dir = state_dir.join("receipts");
+                    let _ = std::fs::create_dir_all(&receipts_dir);
+                    let path = receipts_dir.join(format!("op-{}.json", hex(&op)));
+                    if let Ok(json_bytes) = serde_json::to_vec(&v) {
+                        let _ = std::fs::write(&path, &json_bytes);
+                        let content_hash = sha256_of(&json_bytes);
+                        cached_receipts.insert(op, (content_hash, r, v));
+                    }
+                }
+            }
+        }
+
+        let load_shed = CrossDaoAdmissionControl::new(10_000, 2_000);
+        let pol_domain = {
+            let (buf, len) = policy.domains[0];
+            let len = (len as usize).min(64);
+            String::from_utf8_lossy(&buf[..len]).to_string()
+        };
+        let local_domain = if pol_domain.is_empty() {
+            "dao:local".to_string()
+        } else {
+            pol_domain
+        };
+
         Ok(Supervisor {
             keys,
             journal,
@@ -174,18 +391,44 @@ impl Supervisor {
             worker,
             policy,
             state_dir: state_dir.to_path_buf(),
+            allowed_authorities,
+            admitted,
+            admitted_env_shas,
+            admitted_sigs,
+            step_entities,
+            step_attempts,
+            capacity_ledger,
+            load_shed,
+            device_id,
+            local_domain,
+            shed_nonces: std::collections::HashSet::new(),
+            cached_receipts,
             _claim: claim,
         })
     }
 
-    fn write_receipt(&self, r: &Receipt) -> Result<(PathBuf, Value), String> {
+    fn write_receipt(&self, r: &Receipt) -> Result<(PathBuf, Value, [u8; 32]), String> {
         let v = r.to_json();
         let p = self
             .state_dir
             .join("receipts")
             .join(format!("op-{}.json", hex(&r.op)));
-        std::fs::write(&p, serde_json::to_string_pretty(&v).unwrap()).map_err(|e| e.to_string())?;
-        Ok((p, v))
+        let json_bytes = serde_json::to_string(&v)
+            .map_err(|e| e.to_string())?
+            .into_bytes();
+        let content_hash = sha256_of(&json_bytes);
+        std::fs::write(&p, &json_bytes).map_err(|e| e.to_string())?;
+        Ok((p, v, content_hash))
+    }
+
+    fn cache_receipt(&mut self, op: [u8; 32], entry: ([u8; 32], Receipt, Value)) {
+        const MAX_CACHED_RECEIPTS: usize = 2048;
+        if self.cached_receipts.len() >= MAX_CACHED_RECEIPTS {
+            if let Some(oldest_key) = self.cached_receipts.keys().next().copied() {
+                self.cached_receipts.remove(&oldest_key);
+            }
+        }
+        self.cached_receipts.insert(op, entry);
     }
 
     fn issue_receipt(
@@ -210,23 +453,158 @@ impl Supervisor {
         };
         let mut r = r;
         r.sig = Receipt::sign_statement(&self.keys.ed_seed, &r.statement());
-        let (p, v) = self.write_receipt(&r)?;
+        let (p, v, content_hash) = self.write_receipt(&r)?;
+        self.cache_receipt(*op, (content_hash, r.clone(), v.clone()));
         Ok((r, p, v))
     }
 
-    /// The (authority, nonce) keys already admitted. Uniqueness here is
-    /// one half of no-second-logical-operation; the ledger's idempotent
-    /// apply is the other half (named in the dispatch).
-    fn admitted_nonces(&self) -> Result<BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>, String> {
+    /// Check for production allowlist provisioned in state directory:
+    /// - `allowed_authorities.bin`: contiguous binary 32-byte public keys
+    /// - `allowed_authorities.json`: JSON array of hex-encoded public keys
+    pub fn load_authorities_from_dir(dir: &Path) -> Result<Option<BTreeSet<[u8; 32]>>, String> {
+        let bin = dir.join("allowed_authorities.bin");
+        if bin.exists() {
+            let bytes = std::fs::read(&bin).map_err(|e| format!("authorities: {e}"))?;
+            if bytes.len() % 32 != 0 {
+                return Err(
+                    "authorities: allowed_authorities.bin length not a multiple of 32".into(),
+                );
+            }
+            let mut set = BTreeSet::new();
+            for chunk in bytes.chunks_exact(32) {
+                set.insert(chunk.try_into().unwrap());
+            }
+            return Ok(Some(set));
+        }
+        let json = dir.join("allowed_authorities.json");
+        if json.exists() {
+            let text = std::fs::read_to_string(&json).map_err(|e| format!("authorities: {e}"))?;
+            let val: serde_json::Value =
+                serde_json::from_str(&text).map_err(|e| format!("authorities JSON: {e}"))?;
+            if let Some(arr) = val.as_array() {
+                let mut set = BTreeSet::new();
+                for item in arr {
+                    if let Some(s) = item.as_str() {
+                        let key = crate::unhex(s).map_err(|e| format!("authorities hex: {e}"))?;
+                        if key.len() == 32 {
+                            set.insert(key.try_into().unwrap());
+                        }
+                    }
+                }
+                return Ok(Some(set));
+            }
+        }
+        Ok(None)
+    }
+
+    /// Set an explicit authority allowlist on the supervisor (deny-unknown).
+    pub fn with_allowed_authorities<I>(mut self, authorities: I) -> Self
+    where
+        I: IntoIterator<Item = [u8; 32]>,
+    {
+        self.allowed_authorities = Some(authorities.into_iter().collect());
+        self
+    }
+
+    /// Read the in-memory fast index of admitted nonces (O(1) clone).
+    pub fn admitted_nonces(&self) -> Result<BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>, String> {
+        Ok(self.admitted.clone())
+    }
+
+    /// Full journal replay: reloads and HMAC-verifies all replicas from disk
+    /// to prove the in-memory index equals a complete journal replay.
+    pub fn replay_journal_nonces(
+        &self,
+    ) -> Result<BTreeMap<([u8; 32], [u8; 32]), [u8; 32]>, String> {
         let (records, _) =
             ReplicatedJournal::load_state(&replica_paths(&self.state_dir), &self.keys.journal_mac)
                 .map_err(|e| e.to_string())?;
         nonces_of(&records)
     }
 
+    /// Check if a specific (authority, nonce) has been admitted in O(log n).
+    pub fn is_nonce_admitted(&self, authority: &[u8; 32], nonce: &[u8; 32]) -> bool {
+        self.admitted.contains_key(&(*authority, *nonce))
+    }
+
+    /// Access reference to the in-memory admitted map.
+    pub fn admitted_map(&self) -> &BTreeMap<([u8; 32], [u8; 32]), [u8; 32]> {
+        &self.admitted
+    }
+
+    pub fn admitted_count(&self) -> usize {
+        self.admitted.len()
+    }
+
     /// Run one operation: verify, admit, reserve, dispatch, effect,
     /// respond, receipt. `lose_response` stops after the effect, which is
     /// exactly the WB004 retry-failure crash point (non-spending).
+    /// Try serving a cached receipt or issuing one from durable ledger evidence.
+    pub fn try_serve_cached_receipt(
+        &mut self,
+        op: &[u8; 32],
+        env_sha: &[u8; 32],
+        clock: u64,
+    ) -> Option<RunOutcome> {
+        let p = self
+            .state_dir
+            .join("receipts")
+            .join(format!("op-{}.json", hex(op)));
+        if p.exists() {
+            if let Ok(text) = std::fs::read_to_string(&p) {
+                if let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) {
+                    if let Ok(r) = Receipt::from_json(&v) {
+                        if r.env_sha == *env_sha && r.verify(&self.keys.ed_public) {
+                            return Some(RunOutcome {
+                                op: Some(*op),
+                                refused: None,
+                                lost_response: false,
+                                receipt: Some(r),
+                                receipt_path: Some(p),
+                                receipt_json: Some(v),
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        if let Some(row) = self.ledger.row_for(op).cloned() {
+            if row.env_sha == *env_sha {
+                let op_state = OpState {
+                    state: bnrose_exec_core::S_COMPLETED,
+                    recovered: 1,
+                    fail: 0,
+                    bound_effect: row.effect_digest,
+                    seq: row.seq,
+                };
+                if let Ok((r, p, v)) =
+                    self.issue_receipt(op, env_sha, op_state, &row.effect_digest, clock)
+                {
+                    return Some(RunOutcome {
+                        op: Some(*op),
+                        refused: None,
+                        lost_response: false,
+                        receipt: Some(r),
+                        receipt_path: Some(p),
+                        receipt_json: Some(v),
+                    });
+                }
+            }
+        }
+        None
+    }
+
+    /// Client retry of an operation (Gate 4): if already admitted, returns original receipt
+    /// bound to envelope hash, or resolves uncompleted/lost-response operation via recovery.
+    pub fn retry(
+        &mut self,
+        intent: &crate::fixtures::IntentFile,
+        clock: u64,
+        bounds: &Bounds,
+    ) -> RunOutcome {
+        self.run_inner(intent, clock, false, bounds, true)
+    }
+
     #[allow(clippy::too_many_lines)]
     pub fn run(
         &mut self,
@@ -234,6 +612,17 @@ impl Supervisor {
         clock: u64,
         lose_response: bool,
         bounds: &Bounds,
+    ) -> RunOutcome {
+        self.run_inner(intent, clock, lose_response, bounds, false)
+    }
+
+    fn run_inner(
+        &mut self,
+        intent: &crate::fixtures::IntentFile,
+        clock: u64,
+        lose_response: bool,
+        bounds: &Bounds,
+        allow_retry: bool,
     ) -> RunOutcome {
         let none = RunOutcome {
             op: None,
@@ -243,15 +632,16 @@ impl Supervisor {
             receipt_path: None,
             receipt_json: None,
         };
-        // 1. the WB001 binding: the envelope verifies under the authority,
-        //    structurally and cryptographically (the frozen contract's own
-        //    verifier; nothing downstream sees a signature again)
-        if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
-            return RunOutcome {
-                refused: Some("wb001:binding-refused".into()),
-                ..none
-            };
+        // 1a. the policy authority allowlist
+        if let Some(ref allowed) = self.allowed_authorities {
+            if !allowed.contains(&intent.authority) {
+                return RunOutcome {
+                    refused: Some("admission:unauthorized-authority".into()),
+                    ..none
+                };
+            }
         }
+        // Fast decode of envelope
         let decoded = match btungsten_wb001::decode(&intent.env) {
             Ok(i) => i,
             Err(_) => {
@@ -261,18 +651,205 @@ impl Supervisor {
                 }
             }
         };
-        // 2. no second logical operation: this authority has spent this nonce
-        if self
-            .admitted_nonces()
-            .map(|m| m.contains_key(&(intent.authority, decoded.nonce)))
-            .unwrap_or(true)
-        {
+        // 2. fast in-memory nonce gate: this authority has spent this nonce (O(log n) in-memory)
+        // MUST RUN BEFORE signature verification & load_shed.admit!
+        // (Eliminates Ed25519 CPU signature burn on replay floods, meeting Gate 1 < 50 µs bound)
+        let prev_op = self
+            .admitted
+            .get(&(intent.authority, decoded.nonce))
+            .copied();
+        if let Some(prev_op) = prev_op {
+            let env_sha = env_sha_of(&intent.env);
+            let is_exact_replay = self.admitted_env_shas.get(&prev_op) == Some(&env_sha)
+                && self.admitted_sigs.get(&prev_op) == Some(&intent.sig);
+
+            if is_exact_replay && !allow_retry {
+                return RunOutcome {
+                    refused: Some("admission:nonce-reuse".into()),
+                    ..none
+                };
+            }
+
+            if !is_exact_replay {
+                // Not an exact replay: envelope or signature differed on an already spent nonce.
+                // Cryptographic binding law: invalid signatures MUST be refused as wb001:binding-refused
+                // BEFORE consulting any state or returning admission:nonce-reuse!
+                if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
+                    return RunOutcome {
+                        refused: Some("wb001:binding-refused".into()),
+                        ..none
+                    };
+                }
+            }
+
+            if allow_retry {
+                // Gate 4: Quantum / lost-response retry & receipt binding
+                let env_sha = env_sha_of(&intent.env);
+
+                // 1. Check in-memory index of original envelope sha
+                if let Some(&orig_sha) = self.admitted_env_shas.get(&prev_op) {
+                    if orig_sha != env_sha {
+                        return RunOutcome {
+                            op: Some(prev_op),
+                            refused: Some("admission:nonce-reuse — payload mismatch".into()),
+                            ..none
+                        };
+                    }
+                }
+
+                // 2. Check receipt on disk with content-hash verification (fixes a1, Gate 4)
+                let p = self
+                    .state_dir
+                    .join("receipts")
+                    .join(format!("op-{}.json", hex(&prev_op)));
+                if p.exists() {
+                    if let Ok(bytes) = std::fs::read(&p) {
+                        let cur_hash = sha256_of(&bytes);
+                        if let Some((cached_hash, r, v)) = self.cached_receipts.get(&prev_op) {
+                            if *cached_hash == cur_hash {
+                                if r.env_sha != env_sha {
+                                    return RunOutcome {
+                                        op: Some(prev_op),
+                                        refused: Some(
+                                            "admission:nonce-reuse - payload mismatch".into(),
+                                        ),
+                                        ..none
+                                    };
+                                }
+                                return RunOutcome {
+                                    op: Some(prev_op),
+                                    refused: None,
+                                    lost_response: false,
+                                    receipt: Some(r.clone()),
+                                    receipt_path: Some(p),
+                                    receipt_json: Some(v.clone()),
+                                };
+                            }
+                        }
+
+                        if let Ok(v) = serde_json::from_slice::<serde_json::Value>(&bytes) {
+                            if let Ok(r) = Receipt::from_json(&v) {
+                                if r.verify(&self.keys.ed_public) {
+                                    if r.env_sha != env_sha {
+                                        return RunOutcome {
+                                            op: Some(prev_op),
+                                            refused: Some(
+                                                "admission:nonce-reuse - payload mismatch".into(),
+                                            ),
+                                            ..none
+                                        };
+                                    }
+                                    self.cache_receipt(prev_op, (cur_hash, r.clone(), v.clone()));
+                                    return RunOutcome {
+                                        op: Some(prev_op),
+                                        refused: None,
+                                        lost_response: false,
+                                        receipt: Some(r),
+                                        receipt_path: Some(p),
+                                        receipt_json: Some(v),
+                                    };
+                                }
+                            }
+                        }
+                    }
+                    // If receipt on disk was damaged or signature-invalid, do not lock out.
+                    // Fall through to step 3 to re-issue and heal from the durable ledger journal.
+                }
+
+                // 3. Check durable ledger row
+                if let Some(row) = self.ledger.row_for(&prev_op).cloned() {
+                    if row.env_sha != env_sha {
+                        return RunOutcome {
+                            op: Some(prev_op),
+                            refused: Some("admission:nonce-reuse — payload mismatch".into()),
+                            ..none
+                        };
+                    }
+                    let op_state = OpState {
+                        state: bnrose_exec_core::S_COMPLETED,
+                        recovered: 1,
+                        fail: 0,
+                        bound_effect: row.effect_digest,
+                        seq: row.seq,
+                    };
+                    if let Ok((r, p, v)) =
+                        self.issue_receipt(&prev_op, &env_sha, op_state, &row.effect_digest, clock)
+                    {
+                        return RunOutcome {
+                            op: Some(prev_op),
+                            refused: None,
+                            lost_response: false,
+                            receipt: Some(r),
+                            receipt_path: Some(p),
+                            receipt_json: Some(v),
+                        };
+                    }
+                }
+
+                // 4. Try serving cached receipt
+                if let Some(outcome) = self.try_serve_cached_receipt(&prev_op, &env_sha, clock) {
+                    return outcome;
+                }
+
+                // Zero journal reload flood: unresolved ops return in O(1) time
+                return RunOutcome {
+                    op: Some(prev_op),
+                    refused: Some("admission:nonce-reuse — operation unresolved".into()),
+                    ..none
+                };
+            } else {
+                return RunOutcome {
+                    refused: Some("admission:nonce-reuse".into()),
+                    ..none
+                };
+            }
+        }
+
+        // 1b. the WB001 binding for fresh operations
+        // Cryptographic signature check MUST run BEFORE capacity admission check (PR #465 review).
+        // If an attacker without a valid key sends forged envelopes, they fail here
+        // as 'wb001:binding-refused' and NEVER consume cross-DAO quota slots or lock out legitimate requests.
+        if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
             return RunOutcome {
-                refused: Some("admission:nonce-reuse".into()),
+                refused: Some("wb001:binding-refused".into()),
                 ..none
             };
         }
-        // 3. the worker's admission verdict (paranoid: native + wasm equal)
+
+        // Gate 3: Cross-DAO Admission Control & Load Shedding
+        // Strict exact local domain match (r2: prevents local priority spoofing e.g. 'local-evil-dao')
+        let domain_str = String::from_utf8_lossy(&decoded.domain[..decoded.domain_len as usize]);
+        let is_local = domain_str == self.local_domain && !self.local_domain.is_empty();
+        let now_ms = clock * 1000;
+        let is_retry = allow_retry
+            || self
+                .shed_nonces
+                .contains(&(intent.authority, decoded.nonce));
+
+        if let Err(e) = self.load_shed.admit_request(is_local, is_retry, now_ms) {
+            self.shed_nonces.insert((intent.authority, decoded.nonce));
+            return RunOutcome {
+                refused: Some(e.into()),
+                ..none
+            };
+        }
+
+        self.shed_nonces.remove(&(intent.authority, decoded.nonce));
+        let outcome = self.run_inner_admitted(intent, clock, lose_response, bounds, &decoded, none);
+        self.load_shed.complete(is_local);
+        outcome
+    }
+
+    fn run_inner_admitted(
+        &mut self,
+        intent: &crate::fixtures::IntentFile,
+        clock: u64,
+        lose_response: bool,
+        bounds: &Bounds,
+        decoded: &btungsten_wb001::core::Intent,
+        none: RunOutcome,
+    ) -> RunOutcome {
+        // 3. worker admission verdict
         let req = admit_request(clock, &intent.authority, &self.policy, &intent.env);
         let verdict = match self.worker.admit(&req) {
             Ok(v) => v,
@@ -280,7 +857,7 @@ impl Supervisor {
                 return RunOutcome {
                     refused: Some(format!("worker:{e}")),
                     ..none
-                }
+                };
             }
         };
         let (op, env_sha, effect) = match parse_admit_verdict(&verdict) {
@@ -302,17 +879,12 @@ impl Supervisor {
                 }
             }
         };
-        // cross-check: the supervisor derives the identity itself; a worker
-        // (even the paranoid pair, were both corrupted) cannot rename an op
         if op != op_id_of(&intent.authority, &intent.env) || env_sha != env_sha_of(&intent.env) {
             return RunOutcome {
                 refused: Some("worker:identity-mismatch".into()),
                 ..none
             };
         }
-        // 4. journal the admission: identity, authorized scope, the binding
-        //    (authority + signature + policy digest + the envelope itself),
-        //    and which worker kind will run it (bookkeeping only)
         let mut payload = Vec::with_capacity(intent.env.len() + 140);
         payload.extend_from_slice(&intent.authority);
         payload.extend_from_slice(&intent.sig);
@@ -321,19 +893,35 @@ impl Supervisor {
         payload.extend_from_slice(&intent.env);
         payload.push(self.worker.name().len() as u8);
         payload.extend_from_slice(self.worker.name().as_bytes());
-        if let Err(e) = self.journal.append(&op, E_ADMITTED, &payload) {
+        if let Err(e) = self.journal.append_uncommitted(&op, E_ADMITTED, &payload) {
             return RunOutcome {
                 refused: Some(format!("journal:{e}")),
                 op: Some(op),
                 ..none
             };
         }
+        self.admitted.insert((intent.authority, decoded.nonce), op);
+        self.admitted_env_shas.insert(op, env_sha);
+        self.admitted_sigs.insert(op, intent.sig);
         let mut state = OpState::ADMITTED_ZERO;
         state.seq = 0;
-        // 5. reserve (bounded worker, its budget journaled before it runs)
+        let budget = ResourceBudget {
+            fuel: bounds.fuel,
+            memory_pages: (bounds.memory_cap / 65_536) as u32,
+            wall_secs: ((bounds.ticks * crate::worker::WATCHDOG_INTERVAL.as_millis() as u64 / 1000)
+                as u32)
+                .max(1),
+        };
+        if let Err(e) = self.capacity_ledger.reserve(&self.device_id, &op, &budget) {
+            return RunOutcome {
+                refused: Some(e.into()),
+                op: Some(op),
+                ..none
+            };
+        }
         let res = reservations_payload(bounds);
         let expiry = decoded.expiry;
-        match self.step_and_journal(
+        match self.step_and_journal_uncommitted(
             &op,
             &env_sha,
             &mut state,
@@ -344,40 +932,40 @@ impl Supervisor {
         ) {
             Ok(()) => {}
             Err(w) => {
+                self.capacity_ledger.release(&self.device_id, &op);
                 return RunOutcome {
                     refused: Some(w),
                     op: Some(op),
                     ..none
-                }
+                };
             }
         }
-        // 6. dispatch: THE DURABILITY LINE — the record (and its fsync)
-        //    precedes the effect door below, always
         match self.step_and_journal(
             &op, &env_sha, &mut state, E_DISPATCH, &effect, clock, expiry,
         ) {
             Ok(()) => {}
             Err(w) => {
+                self.capacity_ledger.release(&self.device_id, &op);
                 return RunOutcome {
                     refused: Some(w),
                     op: Some(op),
                     ..none
-                }
+                };
             }
         }
-        // 7. the effect door: the ledger accepts only the bound digest,
-        //    idempotently, once, forever
         match self.ledger.apply(&op, &env_sha, &effect, clock) {
             Ok(_) => {}
             Err(e) => {
+                self.capacity_ledger.release(&self.device_id, &op);
                 return RunOutcome {
                     refused: Some(format!("ledger:{e}")),
                     op: Some(op),
                     ..none
-                }
+                };
             }
         }
         if lose_response {
+            self.capacity_ledger.release(&self.device_id, &op);
             return RunOutcome {
                 op: Some(op),
                 refused: None,
@@ -387,17 +975,18 @@ impl Supervisor {
                 receipt_json: None,
             };
         }
-        // 8. the worker's response and the receipt
         match self.step_and_journal(&op, &env_sha, &mut state, E_RESPONSE, &[1], clock, expiry) {
             Ok(()) => {}
             Err(w) => {
+                self.capacity_ledger.release(&self.device_id, &op);
                 return RunOutcome {
                     refused: Some(w),
                     op: Some(op),
                     ..none
-                }
+                };
             }
         }
+        self.capacity_ledger.release(&self.device_id, &op);
         match self.issue_receipt(&op, &env_sha, state, &effect, clock) {
             Ok((r, p, v)) => RunOutcome {
                 op: Some(op),
@@ -412,6 +1001,51 @@ impl Supervisor {
                 op: Some(op),
                 ..none
             },
+        }
+    }
+
+    fn step_and_journal_uncommitted(
+        &mut self,
+        op: &[u8; 32],
+        env_sha: &[u8; 32],
+        state: &mut OpState,
+        event: u8,
+        payload: &[u8],
+        clock: u64,
+        expiry: u64,
+    ) -> Result<(), String> {
+        let req = step_request(op, env_sha, state, event, payload, clock, expiry);
+        let verdict = match self.worker.step(&req) {
+            Ok(v) => v,
+            Err(e) => {
+                let word = format!("worker:{e}");
+                let mut p = Vec::new();
+                p.extend_from_slice(&1000u32.to_le_bytes());
+                let w: String = word.chars().take(31).collect();
+                p.push(w.len() as u8);
+                p.extend_from_slice(w.as_bytes());
+                let _ = self.journal.append(op, E_BOUNDED_FAIL, &p);
+                return Err(format!("worker:{e}"));
+            }
+        };
+        match parse_step_verdict(&verdict).map_err(|e| format!("worker:{e}"))? {
+            StepVerdict::Next(next) => {
+                self.journal
+                    .append_uncommitted(op, event, payload)
+                    .map_err(|e| format!("journal:{e}"))?;
+                *state = next;
+                state.seq = self.journal.next_seq() - 1;
+                Ok(())
+            }
+            StepVerdict::Refused(r) => {
+                let mut p = Vec::new();
+                p.extend_from_slice(&r.code().to_le_bytes());
+                let word = r.word();
+                p.push(word.len() as u8);
+                p.extend_from_slice(word.as_bytes());
+                let _ = self.journal.append(op, E_BOUNDED_FAIL, &p);
+                Err(format!("transition:{}", word))
+            }
         }
     }
 
@@ -470,15 +1104,8 @@ impl Supervisor {
     /// whether ANY attempt of this step has a ledger row (an effect that
     /// was recorded — conclusive execution, or worse, uncertainty)
     fn step_has_any_recorded_effect(&self, root: &[u8; 32], step: u8) -> bool {
-        let rows = match ledger::load(&self.state_dir.join("effects.bin"), &self.keys.ledger_mac) {
-            Ok(r) => r,
-            Err(_) => return true, // unreadable ledger: assume the worst
-        };
-        step_has_row_among(
-            &rows.iter().map(|r| r.op_id).collect::<Vec<_>>(),
-            root,
-            step,
-        )
+        let op_ids: Vec<[u8; 32]> = self.ledger.rows().keys().copied().collect();
+        step_has_row_among(&op_ids, root, step)
     }
 
     /// journal one step admission and run it to its end (or its crash
@@ -487,6 +1114,51 @@ impl Supervisor {
     /// stand — reconstructions are never erased).
     #[allow(clippy::too_many_arguments)]
     fn execute_fresh_step(
+        &mut self,
+        intent: &crate::fixtures::IntentFile,
+        root: &[u8; 32],
+        encoded_step: u8,
+        id: [u8; 32],
+        effect: [u8; 32],
+        label: &str,
+        clock: u64,
+        bounds: &Bounds,
+        lose: bool,
+        decoded: &btungsten_wb001::core::Intent,
+        env_sha: &[u8; 32],
+    ) -> RunOutcome {
+        let domain_str = String::from_utf8_lossy(&decoded.domain[..decoded.domain_len as usize]);
+        let is_local = domain_str == self.local_domain && !self.local_domain.is_empty();
+        let now_ms = clock * 1000;
+        if let Err(e) = self.load_shed.admit(is_local, now_ms) {
+            return RunOutcome {
+                refused: Some(e.into()),
+                op: None,
+                lost_response: false,
+                receipt: None,
+                receipt_path: None,
+                receipt_json: None,
+            };
+        }
+        let outcome = self.execute_fresh_step_inner(
+            intent,
+            root,
+            encoded_step,
+            id,
+            effect,
+            label,
+            clock,
+            bounds,
+            lose,
+            decoded,
+            env_sha,
+        );
+        self.load_shed.complete(is_local);
+        outcome
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn execute_fresh_step_inner(
         &mut self,
         intent: &crate::fixtures::IntentFile,
         root: &[u8; 32],
@@ -532,8 +1204,24 @@ impl Supervisor {
                 ..none
             };
         }
+        self.admitted
+            .insert((intent.authority, decoded.nonce), *root);
         let mut state = OpState::ADMITTED_ZERO;
         state.seq = 0;
+        let budget = ResourceBudget {
+            fuel: bounds.fuel,
+            memory_pages: (bounds.memory_cap / 65_536) as u32,
+            wall_secs: ((bounds.ticks * crate::worker::WATCHDOG_INTERVAL.as_millis() as u64 / 1000)
+                as u32)
+                .max(1),
+        };
+        if let Err(e) = self.capacity_ledger.reserve(&self.device_id, &id, &budget) {
+            return RunOutcome {
+                refused: Some(e.into()),
+                op: Some(id),
+                ..none
+            };
+        }
         let res = reservations_payload(bounds);
         let expiry = decoded.expiry;
         for (event, pl) in [
@@ -543,6 +1231,7 @@ impl Supervisor {
             if let Err(w) =
                 self.step_and_journal(&id, env_sha, &mut state, event, pl, clock, expiry)
             {
+                self.capacity_ledger.release(&self.device_id, &id);
                 return RunOutcome {
                     refused: Some(w),
                     op: Some(id),
@@ -550,10 +1239,8 @@ impl Supervisor {
                 };
             }
         }
-        // the step's EXACT signed bytes and identity are durable (the step
-        // record carries envelope + signature); the effect commits after
-        // the acknowledgement
         if let Err(e) = self.ledger.apply(&id, env_sha, &effect, clock) {
+            self.capacity_ledger.release(&self.device_id, &id);
             return RunOutcome {
                 refused: Some(format!("ledger:{e}")),
                 op: Some(id),
@@ -561,6 +1248,24 @@ impl Supervisor {
             };
         }
         if lose {
+            self.capacity_ledger.release(&self.device_id, &id);
+            self.step_entities.insert(
+                encoded_step & 0x0f,
+                StepEntity {
+                    root: *root,
+                    step: encoded_step,
+                    label: label.to_string(),
+                    env: intent.env.clone(),
+                    sig: intent.sig,
+                    authority: intent.authority,
+                    state,
+                },
+            );
+            let entry = self
+                .step_attempts
+                .entry((*root, encoded_step & 0x0f))
+                .or_insert(0);
+            *entry = (*entry).max(encoded_step >> 4);
             return RunOutcome {
                 op: Some(id),
                 refused: None,
@@ -573,12 +1278,31 @@ impl Supervisor {
         if let Err(w) =
             self.step_and_journal(&id, env_sha, &mut state, E_RESPONSE, &[1], clock, expiry)
         {
+            self.capacity_ledger.release(&self.device_id, &id);
             return RunOutcome {
                 refused: Some(w),
                 op: Some(id),
                 ..none
             };
         }
+        self.step_entities.insert(
+            encoded_step & 0x0f,
+            StepEntity {
+                root: *root,
+                step: encoded_step,
+                label: label.to_string(),
+                env: intent.env.clone(),
+                sig: intent.sig,
+                authority: intent.authority,
+                state,
+            },
+        );
+        let entry = self
+            .step_attempts
+            .entry((*root, encoded_step & 0x0f))
+            .or_insert(0);
+        *entry = (*entry).max(encoded_step >> 4);
+        self.capacity_ledger.release(&self.device_id, &id);
         match self.issue_receipt(&id, env_sha, state, &effect, clock) {
             Ok((r, p, v)) => RunOutcome {
                 op: Some(id),
@@ -811,6 +1535,28 @@ impl Supervisor {
                 "receipt": recovered_receipt,
             }));
         }
+        self.admitted = nonces;
+        self.admitted_env_shas = ops
+            .iter()
+            .map(|(op, rp)| (*op, env_sha_of(&rp.env)))
+            .collect();
+        self.admitted_sigs = ops.iter().map(|(op, rp)| (*op, rp.sig)).collect();
+        let (reloaded_records, _) =
+            ReplicatedJournal::load_state(&replica_paths(&self.state_dir), &self.keys.journal_mac)
+                .map_err(|e| format!("journal:{e}"))?;
+        self.step_entities = step_entities(&reloaded_records)?;
+        let mut step_attempts = BTreeMap::new();
+        for r in &reloaded_records {
+            if r.event == bnrose_exec_core::E_STEP_ADMITTED && r.payload.len() >= 34 {
+                let rec_root: [u8; 32] = r.payload[..32].try_into().unwrap();
+                let encoded = r.payload[32];
+                let step = encoded & 0x0f;
+                let attempt = encoded >> 4;
+                let entry = step_attempts.entry((rec_root, step)).or_insert(0u8);
+                *entry = (*entry).max(attempt);
+            }
+        }
+        self.step_attempts = step_attempts;
         let replication_json = match &replication {
             ReplicationState::Healthy { replicas } => json!({
                 "state": "healthy",
@@ -873,16 +1619,46 @@ impl Supervisor {
                 ..none
             };
         };
+        if let Some(ref allowed) = self.allowed_authorities {
+            if !allowed.contains(&intent.authority) {
+                return RunOutcome {
+                    refused: Some("admission:unauthorized-authority".into()),
+                    ..none
+                };
+            }
+        }
         if self
-            .admitted_nonces()
-            .map(|m| m.contains_key(&(intent.authority, decoded.nonce)))
-            .unwrap_or(true)
+            .admitted
+            .contains_key(&(intent.authority, decoded.nonce))
         {
             return RunOutcome {
                 refused: Some("admission:nonce-reuse".into()),
                 ..none
             };
         }
+        let domain_str = String::from_utf8_lossy(&decoded.domain[..decoded.domain_len as usize]);
+        let is_local = domain_str == self.local_domain && !self.local_domain.is_empty();
+        let now_ms = clock * 1000;
+        if let Err(e) = self.load_shed.admit(is_local, now_ms) {
+            return RunOutcome {
+                refused: Some(e.into()),
+                ..none
+            };
+        }
+        let outcome = self.run_raced_inner(intent, clock, bounds, worker_b, &decoded, none);
+        self.load_shed.complete(is_local);
+        outcome
+    }
+
+    fn run_raced_inner(
+        &mut self,
+        intent: &crate::fixtures::IntentFile,
+        clock: u64,
+        bounds: &Bounds,
+        worker_b: Box<dyn Worker>,
+        decoded: &btungsten_wb001::core::Intent,
+        none: RunOutcome,
+    ) -> RunOutcome {
         let req = admit_request(clock, &intent.authority, &self.policy, &intent.env);
         let verdict = match self.worker.admit(&req) {
             Ok(v) => v,
@@ -928,8 +1704,25 @@ impl Supervisor {
                 ..none
             };
         }
+        self.admitted.insert((intent.authority, decoded.nonce), op);
+        self.admitted_env_shas.insert(op, env_sha);
+        self.admitted_sigs.insert(op, intent.sig);
         let mut state = OpState::ADMITTED_ZERO;
         state.seq = 0;
+        let budget = ResourceBudget {
+            fuel: bounds.fuel,
+            memory_pages: (bounds.memory_cap / 65_536) as u32,
+            wall_secs: ((bounds.ticks * crate::worker::WATCHDOG_INTERVAL.as_millis() as u64 / 1000)
+                as u32)
+                .max(1),
+        };
+        if let Err(e) = self.capacity_ledger.reserve(&self.device_id, &op, &budget) {
+            return RunOutcome {
+                refused: Some(e.into()),
+                op: Some(op),
+                ..none
+            };
+        }
         let res = reservations_payload(bounds);
         let expiry = decoded.expiry;
         if let Err(w) = self.step_and_journal(
@@ -941,6 +1734,7 @@ impl Supervisor {
             clock,
             expiry,
         ) {
+            self.capacity_ledger.release(&self.device_id, &op);
             return RunOutcome {
                 refused: Some(w),
                 op: Some(op),
@@ -956,10 +1750,10 @@ impl Supervisor {
             .spawn(move || {
                 let v = worker_b.step(&dreq);
                 let _ = tx.send(v);
-                // worker_b and its local state die with this thread
             })
             .map_err(|e| format!("race:spawn:{e}"));
         if let Err(w) = spawned {
+            self.capacity_ledger.release(&self.device_id, &op);
             return RunOutcome {
                 refused: Some(w),
                 op: Some(op),
@@ -970,32 +1764,35 @@ impl Supervisor {
             &op, &env_sha, &state, E_DISPATCH, &effect, clock, expiry,
         ));
         let verdict_b = rx.recv().map_err(|e| format!("race:b:{e}"));
-        // the two independent implementations must agree byte for byte
         let (a, b) = match (verdict_a, verdict_b) {
             (Ok(a), Ok(Ok(b))) => (a, b),
             (Err(e), _) => {
+                self.capacity_ledger.release(&self.device_id, &op);
                 return RunOutcome {
                     refused: Some(format!("race:a:{e}")),
                     op: Some(op),
                     ..none
-                }
+                };
             }
             (Ok(_), Err(e)) => {
+                self.capacity_ledger.release(&self.device_id, &op);
                 return RunOutcome {
                     refused: Some(e),
                     op: Some(op),
                     ..none
-                }
+                };
             }
             (Ok(_), Ok(Err(e))) => {
+                self.capacity_ledger.release(&self.device_id, &op);
                 return RunOutcome {
                     refused: Some(format!("race:b:{e}")),
                     op: Some(op),
                     ..none
-                }
+                };
             }
         };
         if a != b {
+            self.capacity_ledger.release(&self.device_id, &op);
             return RunOutcome {
                 refused: Some("race:disagreement".into()),
                 op: Some(op),
@@ -1005,40 +1802,39 @@ impl Supervisor {
         match parse_step_verdict(&a) {
             Ok(StepVerdict::Next(_)) => {}
             Ok(StepVerdict::Refused(r)) => {
+                self.capacity_ledger.release(&self.device_id, &op);
                 return RunOutcome {
                     refused: Some(format!("transition:{}", r.word())),
                     op: Some(op),
                     ..none
-                }
+                };
             }
             Err(e) => {
+                self.capacity_ledger.release(&self.device_id, &op);
                 return RunOutcome {
                     refused: Some(format!("worker:{e}")),
                     op: Some(op),
                     ..none
-                }
+                };
             }
         }
-        // exactly one Dispatched record — the acknowledgement the effect
-        // door stands behind (every replica, fsynced)
         if let Err(e) = self.journal.append(&op, E_DISPATCH, &effect) {
+            self.capacity_ledger.release(&self.device_id, &op);
             return RunOutcome {
                 refused: Some(format!("journal:{e}")),
                 op: Some(op),
                 ..none
             };
         }
-        // the effect commits
         if let Err(e) = self.ledger.apply(&op, &env_sha, &effect, clock) {
+            self.capacity_ledger.release(&self.device_id, &op);
             return RunOutcome {
                 refused: Some(format!("ledger:{e}")),
                 op: Some(op),
                 ..none
             };
         }
-        // THE FIRST WORKER IS KILLED here: its process state never records
-        // a response. The replacement's job is recover() with a fresh
-        // worker — no second effect, no second authorization.
+        self.capacity_ledger.release(&self.device_id, &op);
         RunOutcome {
             op: Some(op),
             refused: None,
@@ -1229,29 +2025,15 @@ impl Supervisor {
             }
         };
         let root = op_id_of(&intent.authority, &intent.env);
-        // the new-process reconstruction: what exists, at which state
-        let records = match ReplicatedJournal::load_state(
-            &replica_paths(&self.state_dir),
-            &self.keys.journal_mac,
-        ) {
-            Ok((records, _)) => records,
-            Err(e) => {
+        if let Some(ref allowed) = self.allowed_authorities {
+            if !allowed.contains(&intent.authority) {
                 return RunOutcome {
-                    refused: Some(format!("journal:{e}")),
+                    refused: Some("admission:unauthorized-authority".into()),
                     ..none
-                }
+                };
             }
-        };
-        let nonces = match nonces_of(&records) {
-            Ok(n) => n,
-            Err(e) => {
-                return RunOutcome {
-                    refused: Some(format!("journal:{e}")),
-                    ..none
-                }
-            }
-        };
-        if let Some(prev_root) = nonces.get(&(intent.authority, decoded.nonce)) {
+        }
+        if let Some(prev_root) = self.admitted.get(&(intent.authority, decoded.nonce)) {
             if *prev_root != root {
                 return RunOutcome {
                     refused: Some("admission:nonce-reuse — the authorization already lives in another operation".into()),
@@ -1259,15 +2041,8 @@ impl Supervisor {
                 };
             }
         }
-        let existing = match step_entities(&records) {
-            Ok(e) => e,
-            Err(e) => {
-                return RunOutcome {
-                    refused: Some(format!("journal:{e}")),
-                    ..none
-                }
-            }
-        };
+        // in-memory step reconstruction: zero journal reloads on disk (O(1) memory lookup)
+        let existing = &self.step_entities;
         let env_sha = env_sha_of(&intent.env);
         for (idx, (label, lose)) in steps.iter().enumerate() {
             let step = idx as u8;
@@ -1292,8 +2067,9 @@ impl Supervisor {
                         // row stays refused whatever the policy says.
                         let never_executed = !self.step_has_any_recorded_effect(&root, step);
                         if replacement_admissible(!never_executed, &opts) {
-                            let attempt =
-                                replacement_attempt(step_entity_attempt(&records, &root, step));
+                            let max_att =
+                                self.step_attempts.get(&(root, step)).copied().unwrap_or(0);
+                            let attempt = replacement_attempt(max_att);
                             let encoded = step | (attempt << 4);
                             let id = bnrose_exec_core::step_op_id(&root, encoded);
                             let effect =

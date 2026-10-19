@@ -46,6 +46,10 @@ jobs:
         env:
           BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm
         run: cargo test -p bnrose-exec-core -p bnrose-exec-wasm -p bnrose-exec-host --locked
+      - name: Release battery (latency gates)
+        env:
+          BNROSE_EXEC_WASM: ${{ github.workspace }}/target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm
+        run: cargo test --release -p bnrose-exec-host --test gate1_flat_admit --test gate2_device_capacity --test gate3_load_shed --locked
       - name: Mutation controls (teeth)
         run: sh scripts/bnrose-rust-001/teeth.sh
       - name: Build the CLI and bench (release)

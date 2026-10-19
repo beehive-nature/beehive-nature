@@ -255,3 +255,16 @@ mod tests {
         assert!(unhex("abc").is_err());
     }
 }
+
+pub mod device_capacity;
+pub mod load_shed;
+
+/// Single canonical evaluator for production environment flag across CLI and supervisor.
+pub fn is_production_env() -> bool {
+    std::env::var("BNROSE_PRODUCTION")
+        .map(|v| {
+            let s = v.trim().to_ascii_lowercase();
+            s == "1" || s == "true" || s == "yes"
+        })
+        .unwrap_or(false)
+}

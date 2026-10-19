@@ -88,6 +88,7 @@ members = [
     "crates/bindex-bnrose",
     "crates/bnr-explorer",
     "crates/bnr-explorer-wasm",
+    "crates/btungsten-qeval",
 ]
 
 [workspace.metadata]
@@ -116,4 +117,16 @@ opt-level = 3
 [profile.dev.package.sha3]
 opt-level = 3
 [profile.dev.package.keccak]
+opt-level = 3
+[profile.dev.package.curve25519-dalek]
+opt-level = 3
+[profile.dev.package.ed25519-dalek]
+opt-level = 3
+
+[profile.dev.package.libcrux-ed25519]
+opt-level = 3
+
+[profile.dev.package.btungsten-wb001]
+opt-level = 3
+[profile.dev.package.bnrose-exec-core]
 opt-level = 3
