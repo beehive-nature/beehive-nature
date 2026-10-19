@@ -50,11 +50,6 @@ use serde_json::{json, Value};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
-pub enum ReceiptMsg {
-    Write(PathBuf, Vec<u8>),
-    Flush(std::sync::mpsc::SyncSender<()>),
-}
-
 pub struct Supervisor {
     pub keys: SupervisorKeys,
     pub journal: ReplicatedJournal,
@@ -80,10 +75,6 @@ pub struct Supervisor {
     pub device_id: [u8; 32],
     pub local_domain: String,
     /// the exclusive authority over this state directory (see Claim)
-    receipt_worker: Option<(
-        std::sync::mpsc::SyncSender<ReceiptMsg>,
-        std::thread::JoinHandle<()>,
-    )>,
     _claim: Claim,
 }
 
@@ -404,34 +395,10 @@ impl Supervisor {
             device_id,
             local_domain,
             cached_receipts,
-            receipt_worker: {
-                let (tx, rx) = std::sync::mpsc::sync_channel::<ReceiptMsg>(512);
-                let handle = std::thread::spawn(move || {
-                    while let Ok(msg) = rx.recv() {
-                        match msg {
-                            ReceiptMsg::Write(path, bytes) => {
-                                let _ = std::fs::write(&path, &bytes);
-                            }
-                            ReceiptMsg::Flush(ack) => {
-                                let _ = ack.send(());
-                            }
-                        }
-                    }
-                });
-                Some((tx, handle))
-            },
             _claim: claim,
         })
     }
 
-    pub fn flush_receipts(&self) {
-        if let Some((ref tx, _)) = self.receipt_worker {
-            let (ack_tx, ack_rx) = std::sync::mpsc::sync_channel(1);
-            if tx.send(ReceiptMsg::Flush(ack_tx)).is_ok() {
-                let _ = ack_rx.recv();
-            }
-        }
-    }
 
     fn write_receipt(&self, r: &Receipt) -> Result<(PathBuf, Value, [u8; 32]), String> {
         let v = r.to_json();
@@ -441,12 +408,18 @@ impl Supervisor {
             .join(format!("op-{}.json", hex(&r.op)));
         let json_bytes = serde_json::to_string(&v).map_err(|e| e.to_string())?.into_bytes();
         let content_hash = sha256_of(&json_bytes);
-        if let Some((ref tx, _)) = self.receipt_worker {
-            let _ = tx.send(ReceiptMsg::Write(p.clone(), json_bytes));
-        } else {
-            std::fs::write(&p, &json_bytes).map_err(|e| e.to_string())?;
-        }
+        std::fs::write(&p, &json_bytes).map_err(|e| e.to_string())?;
         Ok((p, v, content_hash))
+    }
+
+    fn cache_receipt(&mut self, op: [u8; 32], entry: ([u8; 32], Receipt, Value)) {
+        const MAX_CACHED_RECEIPTS: usize = 2048;
+        if self.cached_receipts.len() >= MAX_CACHED_RECEIPTS {
+            if let Some(oldest_key) = self.cached_receipts.keys().next().copied() {
+                self.cached_receipts.remove(&oldest_key);
+            }
+        }
+        self.cached_receipts.insert(op, entry);
     }
 
     fn issue_receipt(
@@ -472,7 +445,7 @@ impl Supervisor {
         let mut r = r;
         r.sig = Receipt::sign_statement(&self.keys.ed_seed, &r.statement());
         let (p, v, content_hash) = self.write_receipt(&r)?;
-        self.cached_receipts.insert(*op, (content_hash, r.clone(), v.clone()));
+        self.cache_receipt(*op, (content_hash, r.clone(), v.clone()));
         Ok((r, p, v))
     }
 
@@ -605,7 +578,6 @@ impl Supervisor {
         clock: u64,
         bounds: &Bounds,
     ) -> RunOutcome {
-        self.flush_receipts();
         self.run_inner(intent, clock, false, bounds, true)
     }
 
@@ -726,13 +698,6 @@ impl Supervisor {
 
                         if let Ok(v) = serde_json::from_slice::<serde_json::Value>(&bytes) {
                             if let Ok(r) = Receipt::from_json(&v) {
-                                if r.env_sha != env_sha {
-                                    return RunOutcome {
-                                        op: Some(prev_op),
-                                        refused: Some("admission:nonce-reuse - payload mismatch".into()),
-                                        ..none
-                                    };
-                                }
                                 if !r.verify(&self.keys.ed_public) {
                                     return RunOutcome {
                                         op: Some(prev_op),
@@ -740,7 +705,14 @@ impl Supervisor {
                                         ..none
                                     };
                                 }
-                                self.cached_receipts.insert(prev_op, (cur_hash, r.clone(), v.clone()));
+                                if r.env_sha != env_sha {
+                                    return RunOutcome {
+                                        op: Some(prev_op),
+                                        refused: Some("admission:nonce-reuse - payload mismatch".into()),
+                                        ..none
+                                    };
+                                }
+                                self.cache_receipt(prev_op, (cur_hash, r.clone(), v.clone()));
                                 return RunOutcome {
                                     op: Some(prev_op),
                                     refused: None,
@@ -964,7 +936,7 @@ impl Supervisor {
                 receipt_json: None,
             };
         }
-        match self.step_and_journal_uncommitted(&op, &env_sha, &mut state, E_RESPONSE, &[1], clock, expiry) {
+        match self.step_and_journal(&op, &env_sha, &mut state, E_RESPONSE, &[1], clock, expiry) {
             Ok(()) => {}
             Err(w) => {
                 self.capacity_ledger.release(&self.device_id, &op);
@@ -1295,7 +1267,6 @@ impl Supervisor {
     /// SPEC-RUSTEOSVM-1 load rules), replays the same state machine, and
     /// reconciles both directions. Never re-dispatches; never admits.
     pub fn recover(&mut self, clock: u64) -> Result<Value, String> {
-        self.flush_receipts();
         // 1. chain-verify everything BEFORE any decision
         let (records, _) =
             ReplicatedJournal::load_state(&replica_paths(&self.state_dir), &self.keys.journal_mac)
@@ -2207,12 +2178,3 @@ pub fn step_has_row_among(rows: &[[u8; 32]], root: &[u8; 32], step: u8) -> bool 
 }
 
 
-impl Drop for Supervisor {
-    fn drop(&mut self) {
-        self.flush_receipts();
-        if let Some((tx, handle)) = self.receipt_worker.take() {
-            drop(tx);
-            let _ = handle.join();
-        }
-    }
-}

@@ -112,7 +112,7 @@ fn test_gate2_host_measured_sybil_device_capacity_challenge() {
     let seed = ledger.issue_challenge(device_id, qps).expect("issue challenge");
     let nonce = DeviceCapacityLedger::solve_capacity_challenge(&device_id, &seed, qps)
         .expect("must find valid nonce for 16-bit challenge");
-    std::thread::sleep(std::time::Duration::from_millis(6));
+    std::thread::sleep(std::time::Duration::from_millis(10));
     let honest_res = ledger.verify_device_challenge(&seed, nonce);
     assert_eq!(
         honest_res,
@@ -139,7 +139,7 @@ fn test_gate2_host_measured_sybil_device_capacity_challenge() {
     // 6. Nonce binding to claimed capacity (d1):
     // A nonce solved for QPS=2 cannot satisfy a challenge issued for QPS=10 (different iterations)
     let seed2 = ledger.issue_challenge(device_id, 10).expect("issue second challenge");
-    std::thread::sleep(std::time::Duration::from_millis(6));
+    std::thread::sleep(std::time::Duration::from_millis(10));
     assert_eq!(
         ledger.verify_device_challenge(&seed2, nonce),
         Ok(false),
@@ -212,7 +212,7 @@ fn test_gate2_single_thread_cannot_pass_as_five_devices() {
     let mut passed = 0;
     for (d, seed) in challenges {
         if let Some(nonce) = DeviceCapacityLedger::solve_capacity_challenge(&d, &seed, qps) {
-            std::thread::sleep(std::time::Duration::from_millis(6));
+            std::thread::sleep(std::time::Duration::from_millis(10));
             if ledger.verify_device_challenge(&seed, nonce) == Ok(true) {
                 passed += 1;
             }

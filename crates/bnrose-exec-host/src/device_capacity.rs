@@ -221,14 +221,26 @@ impl DeviceCapacityLedger {
         let elapsed_ms = issued.issued_at.elapsed().as_millis() as u64;
 
         // 1. Host-measured physical silicon floor check: reject instant 0 ms fake claims
-        if elapsed_ms < 5 {
+        if elapsed_ms < 5 { 
             return Ok(false);
+        }
+
+        // Rate-limited capacity probe & anti-Sybil concurrency check (d4):
+        // A single physical hardware thread cannot solve challenges for multiple distinct
+        // devices in rapid succession. Enforce minimum spacing (>= 15 ms) between distinct
+        // device verifications across the ledger, preventing sequential multiplexing of multiple fake devices.
+        let now = Instant::now();
+        self.active_devices.retain(|_, t| now.duration_since(*t).as_millis() <= 500);
+        if let Some((&last_dev, &last_t)) = self.active_devices.iter().max_by_key(|(_, t)| *t) {
+            if last_dev != issued.device_id && now.duration_since(last_t).as_millis() < 15 { 
+                return Ok(false);
+            }
         }
         // 2. Strict concurrency deadline (r3, d1): genuine devices respond within 25 ms.
         // A single thread attempting to sequentially compute challenges for multiple devices
         // inevitably exceeds this deadline (> 25 ms), failing the anti-Sybil check.
-        let max_allowed_ms: u64 = if cfg!(debug_assertions) { 10_000 } else { 35 };
-        if elapsed_ms > max_allowed_ms {
+        let max_allowed_ms: u64 = if cfg!(debug_assertions) { 1_500 } else { 35 };
+        if elapsed_ms > max_allowed_ms { 
             return Ok(false);
         }
 
@@ -248,10 +260,10 @@ impl DeviceCapacityLedger {
         }
 
         // 4. Honest 16-bit difficulty: 16 leading zero bits (first 2 bytes zero)
-        let ok = digest[0] == 0 && digest[1] == 0;
+        let ok = digest[0] == 0 && digest[1] == 0; 
         if ok {
             let now = Instant::now();
-            self.active_devices.retain(|_, t| now.duration_since(*t).as_millis() <= 30);
+            self.active_devices.retain(|_, t| now.duration_since(*t).as_millis() <= 500);
             self.active_devices.insert(issued.device_id, now);
         }
         Ok(ok)

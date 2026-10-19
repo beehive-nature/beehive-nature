@@ -39,7 +39,7 @@ fn write_varuint32(buf: &mut Vec<u8>, mut val: u32) {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PermissionLevel {
     pub actor: u64,
     pub permission: u64,
@@ -54,7 +54,7 @@ impl PermissionLevel {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct VaultaAction {
     pub account: u64,
     pub name: u64,
@@ -74,7 +74,7 @@ impl VaultaAction {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct VaultaTransaction {
     pub chain_id: [u8; 32],
     pub expiration: u32,
@@ -128,7 +128,7 @@ impl VaultaTransaction {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PqAttestation {
     /// Codified exact label: "PQ attestation for K1 actions"
     pub descriptor: String,
@@ -137,7 +137,7 @@ pub struct PqAttestation {
     pub action_digest: [u8; 32],
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct VaultaAuthorizedAction {
     pub transaction: VaultaTransaction,
     pub k1_signature: String,
@@ -224,6 +224,7 @@ pub fn authorize_vaulta_k1_action(
 
 /// Verifies that an authorized action has a valid K1 signature matching the given seed and canonical digest.
 use std::path::PathBuf;
+use serde::{Deserialize, Serialize};
 
 /// Stateful Vaulta authorizer with durable spent-nonce tracking across node restarts.
 pub struct VaultaAuthorizer {
@@ -287,8 +288,8 @@ impl VaultaAuthorizer {
                                 .map_err(|e| format!("vaulta:failed-to-persist-nonce: {e}"))?;
                             file.write_all(&dec.nonce)
                                 .map_err(|e| format!("vaulta:failed-to-write-nonce: {e}"))?;
-                            file.flush()
-                                .map_err(|e| format!("vaulta:failed-to-flush-nonce: {e}"))?;
+                            file.sync_all()
+                                .map_err(|e| format!("vaulta:failed-to-sync-nonce: {e}"))?;
                         }
                     }
                 }

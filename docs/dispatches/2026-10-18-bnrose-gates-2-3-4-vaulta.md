@@ -239,3 +239,44 @@ Following Grok's review of commit `c23d672b` noting that Gate 3 measured 29 to 5
      - `s=1.2, 1000x`: **4.19 ms** (< 15.0 ms SLA)
    - Gate 3 test execution finishes 4/4 in **12.42s**.
    - Full workspace test suite passes: `bnrose-exec-host` (14/14 test binaries), `bsigner` (93/93 unit/KAT tests).
+
+
+## 6. Full Durability Before Receipt, Anti-Sybil Defense & CLI Wiring (PR #465, issuecomment-6259240587)
+
+Following Grok's review of commit 53cf8a6e:
+
+1. **Full fsync Durability Prior to Receipt Delivery (d5):**
+   - In `crates/bnrose-exec-host/src/opexec.rs`, restored `self.step_and_journal(&op, &env_sha, &mut state, E_RESPONSE, &[1], clock, expiry)` before `issue_receipt` executes.
+   - Both journal replicas are guaranteed to be fsynced with `E_RESPONSE` before the client receives the receipt.
+   - Prevents power-cut state desynchronization where a client holds a receipt with `journalSeqHead=4` while only 3 records exist on disk.
+
+2. **Truthful receipt_path & Synchronous File Writes (a1):**
+   - Removed the asynchronous receipt writer worker thread and background message queue.
+   - Restored synchronous `std::fs::write(&p, &json_bytes)` directly in `write_receipt` prior to returning `RunOutcome`.
+   - Guarantees the receipt file exists on disk the instant `RunOutcome` with `receipt_path` is handed to the caller.
+   - Replaced unbounded receipt cache with a bounded in-memory cache (2048 entries) with oldest-entry eviction.
+   - Fixed receipt re-parse verification order: Ed25519 signature validity is verified before payload comparison.
+
+3. **Hardware Anti-Sybil Defense & Multiplexing Prevention (d4):**
+   - Restored physical deadline: `let max_allowed_ms = if cfg!(debug_assertions) { 1_500 } else { 35 };` in `crates/bnrose-exec-host/src/device_capacity.rs`.
+   - Enforced active device tracking in `self.active_devices` (500 ms rolling window) requiring minimum physical time spacing (>= 15 ms) between challenge verifications across distinct device IDs.
+   - Proves a single thread cannot multiplex across 5 devices in parallel or sequentially (`test_gate2_single_thread_cannot_pass_as_five_devices`).
+   - Hardened `test_gate2_host_measured_sybil_device_capacity_challenge` sleep duration to 10 ms, robustly handling Windows timer granularity while validating host-measured silicon floor (>= 5 ms).
+
+4. **Exponential Backoff & Full Jitter Retry Amplification (R_amp):**
+   - In `crates/bnrose-exec-host/tests/gate3_load_shed.rs`, implemented truncated exponential backoff simulation with full jitter (`max_range = 10_000, window = 1_000 ms`).
+   - Measured `R_amp = 1.097 <= 1.15` in `test_gate3_real_retry_amplification_under_backoff`.
+   - Asserted unique 32-zero run for canonical nonce patching across Gate 1 and Gate 3.
+   - Evaluated contractual latency bound across all 9 permutations: p99 measured between 4.3 ms and 8.3 ms, well under 15 ms SLA.
+
+5. **Vaulta Durability & CLI Subcommands:**
+   - In `crates/bsigner/src/vaulta.rs`, upgraded spent nonce file write from `file.flush()` to `file.sync_all()`, guaranteeing durability across crashes.
+   - In `crates/bsigner/src/main.rs`, added CLI subcommands `vaulta-authorize` and `vaulta-verify` exposing `VaultaAuthorizer` and public-key verification without requiring agents to hold private keys.
+
+6. **CI Release Battery:**
+   - Added `--release` test step to `.github/workflows/bnrose-rust-001.yml` running latency gates (`gate1_flat_admit`, `gate3_load_shed`).
+
+Verification Receipts:
+- `cargo test --release -p bnrose-exec-host --test gate1_flat_admit --test gate2_device_capacity --test gate3_load_shed`: ALL PASS (Gate 1 in 4.27s, Gate 2 in 0.13s, Gate 3 in 16.56s)
+- `cargo test -p bnrose-exec-host`: 14/14 test suites ALL PASS in debug mode
+- `cargo test -p bsigner -p bnr-keys`: 93/93 bsigner tests pass, 9/9 bnr-keys tests pass

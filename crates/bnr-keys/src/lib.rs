@@ -246,6 +246,10 @@ pub fn verify_digest65_pubkey(pub33: &[u8; 33], digest: &[u8; 32], payload65: &[
     vk.verify_prehash(digest, &sig).is_ok()
 }
 
+/// Signer-side self-check only: verifies signature using private seed.
+/// Agents verifying third-party actions MUST use verify_digest65_pubkey
+/// to uphold the estate rule that agents never hold private keys.
+#[doc(hidden)]
 pub fn verify_digest65(seed: &[u8; 32], digest: &[u8; 32], payload65: &[u8]) -> bool {
     let Ok(sk) = SigningKey::from_slice(seed) else {
         return false;
