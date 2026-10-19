@@ -37,6 +37,21 @@ Removing the feature-push execution would eliminate its 24m17s of runner
 work for this example. A PR's synthetic merge checkout can differ from
 the pushed head; the PR result is not relabeled as a push result.
 
+On the cache candidate itself, the five completed duplicate push
+workflows consumed 2,776 seconds (46m16s) across eight jobs:
+
+| Workflow | Push run | Job-execution seconds |
+| --- | --- | ---: |
+| WB001 SAW | 39179422708 | 1,798 |
+| WB002 SAW | 39179422712 | 50 |
+| WB002 WASM | 39179422723 | 202 |
+| BNROSE-RUST-001 | 39179422737 | 561 |
+| BNROSE-ADAPTERS-REAL | 39179422744 | 165 |
+
+These are summed job durations from completed GitHub jobs, not billed
+minutes or elapsed PR time. They quantify the duplicate work targeted by
+the scheduling change; its own hosted event set still needs verification.
+
 The full `tests.yml` and `secret-scan.yml` workflows still run on every
 push and PR, without workflow-level cancellation. The RB workflow and
 path-filtered keychain/release workflows retain their existing policy.
@@ -117,8 +132,21 @@ in the cache post-step. Its
 [job log](https://github.com/beehive-nature/beehive-nature/actions/runs/39175451733/job/117817056679)
 explicitly lists the repeated `crates/btungsten-x0x-pq/` target path.
 The x0x crate and both native controllers compare byte-identical between
-this baseline and cache candidate `377674983`. These are baseline values;
-the corrected run and warm-cache effect remain to be measured.
+this baseline and cache candidate `377674983`.
+
+The completed candidate native-PQ run is retained in
+[`cache-pr-pq.json`](../receipts/ci-throughput-2026-10-18/cache-pr-pq.json):
+run `39179441927`, all seven jobs successful and bound to synthetic merge
+`94ced410`, 701 total job-execution seconds. The corrected x0x job took
+312 seconds, including 163 seconds installing the audit tool and 103
+seconds for the native battery. Its log explicitly lists
+`crates/btungsten-x0x-pq/target` at the repository root, confirming the path
+correction. The job started 1,986 seconds (33m06s) after workflow creation;
+the final native job started after 3,453 seconds (57m33s). These observed
+start delays substantially exceed the short native workloads. The
+336-to-312-second x0x comparison is not attributed to the cache correction:
+this candidate still installed the audit tool, and warm-cache restoration
+must be measured after main seeds the corrected target.
 
 ## Stage-one hosting and the next phase
 
