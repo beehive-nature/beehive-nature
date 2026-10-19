@@ -492,8 +492,7 @@ mod tests {
         .expect("prices");
         let keys = root.join("keys");
         std::fs::create_dir_all(&keys).expect("keys");
-        let identity =
-            IdentityHook::genesis(&keys, IdentityHook::test_vault()).expect("genesis");
+        let identity = IdentityHook::genesis(&keys, IdentityHook::test_vault()).expect("genesis");
         let lane = SettlementLane::new(
             &root.join("prices.json"),
             &root.join("work"),

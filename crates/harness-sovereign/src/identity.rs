@@ -104,11 +104,8 @@ impl IdentityHook {
     /// Sign checkpoint bytes (e.g. a transcript sha256). Returns the
     /// signature for the checkpoint CanonicalEvent.
     pub fn checkpoint(&self, bytes: &[u8]) -> Result<SignedCheckpoint, String> {
-        let (alg, seed, verifying_key) = bsigner::keys::load_dsa(
-            &self.key_id,
-            Some(self.keys_dir.clone()),
-            &self.vault,
-        )?;
+        let (alg, seed, verifying_key) =
+            bsigner::keys::load_dsa(&self.key_id, Some(self.keys_dir.clone()), &self.vault)?;
         let sig = bsigner::pq::dsa_sign(alg, &seed, bytes)?;
         Ok(SignedCheckpoint {
             did: self.did.clone(),
