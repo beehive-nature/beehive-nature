@@ -106,9 +106,13 @@ jobs:
         if: always()
         env:
           REPOSITORY_BSIGNER_BIN: ${{ github.workspace }}/target/debug/bsigner
+          REPOSITORY_RAIL_BIN: ${{ github.workspace }}/target/debug/repository-rail
+          REPOSITORY_OWNER_BIN: ${{ github.workspace }}/target/debug/repository-owner
         run: |
           test -x "$REPOSITORY_BSIGNER_BIN" || { echo "bsigner missing: repository signature interoperability cannot skip"; exit 1; }
-          node --test tools/repository-contract/bsigner.test.mjs
+          test -x "$REPOSITORY_RAIL_BIN" || { echo "atmirror repository reader missing"; exit 1; }
+          test -x "$REPOSITORY_OWNER_BIN" || { echo "bzDiD repository owner verifier missing"; exit 1; }
+          node --test tools/repository-contract/bsigner.test.mjs tools/repository-contract/providers.test.mjs
       # SPEC-BTUNGSTEN-PQ-1 §PQ08: the law gate's second implementation. bsigner
       # (RustCrypto ML-DSA-65) checks every docs/PQ-LAW.json file against its
       # current bytes and a pinned signer; the noble half runs in the static job.
@@ -166,7 +170,7 @@ jobs:
           node-version: 22
       - name: Portable repository — acceptance refusals and offline restoration
         if: always()
-        run: node --test tools/repository-contract/contract.test.mjs tools/repository-contract/package.test.mjs
+        run: node --test tools/repository-contract/contract.test.mjs tools/repository-contract/package.test.mjs tools/repository-contract/storage.test.mjs tools/repository-contract/privacy.test.mjs
       # SPRINT-2026-08-28 A1: the registry is the single source — every count
       # on the hub computes from estate.json; this proves the registry is
       # internally honest (surfaces once each, states enum, LIVE files exist,
