@@ -102,6 +102,13 @@ jobs:
         run: |
           test -x "$SETTLE_BSIGNER_BIN" || { echo "bsigner binary missing: a skipped suite is not a pass"; exit 1; }
           node --test bsigner-nerve.test.mjs
+      - name: Portable repository — frozen bSigner interoperability
+        if: always()
+        env:
+          REPOSITORY_BSIGNER_BIN: ${{ github.workspace }}/target/debug/bsigner
+        run: |
+          test -x "$REPOSITORY_BSIGNER_BIN" || { echo "bsigner missing: repository signature interoperability cannot skip"; exit 1; }
+          node --test tools/repository-contract/bsigner.test.mjs
       # SPEC-BTUNGSTEN-PQ-1 §PQ08: the law gate's second implementation. bsigner
       # (RustCrypto ML-DSA-65) checks every docs/PQ-LAW.json file against its
       # current bytes and a pinned signer; the noble half runs in the static job.
@@ -157,6 +164,9 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
+      - name: Portable repository — acceptance refusals and offline restoration
+        if: always()
+        run: node --test tools/repository-contract/contract.test.mjs tools/repository-contract/package.test.mjs
       # SPRINT-2026-08-28 A1: the registry is the single source — every count
       # on the hub computes from estate.json; this proves the registry is
       # internally honest (surfaces once each, states enum, LIVE files exist,
