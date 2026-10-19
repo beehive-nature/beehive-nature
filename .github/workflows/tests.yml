@@ -834,6 +834,14 @@ jobs:
         if: always()
         working-directory: e2e
         run: node local-evidence-host.mjs
+      # Same journey against a REAL prepared private edition. CI has no
+      # private edition, so the driver skips unless SKAISTS_LOCAL_EDITION
+      # points at one; the estate box runs it for qualification.
+      - name: Local working edition — real-edition ordinary-gesture journey (skips without SKAISTS_LOCAL_EDITION)
+        timeout-minutes: 8
+        if: always()
+        working-directory: e2e
+        run: node local-evidence-real-edition.mjs
       - name: Onboarding e2e (Chromium + virtual authenticator w/ PRF)
         timeout-minutes: 1 # measured: max 1s in run 36513809705 (+5900% headroom)
         if: always()
