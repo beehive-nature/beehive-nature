@@ -1,0 +1,38 @@
+{
+  "schema": "btungsten.ci-observation/1",
+  "run_id": 38602989250,
+  "commit": "b7789d579",
+  "result": "PASS",
+  "jobs": [
+    {
+      "name": "pq01-vectors",
+      "result": "success"
+    },
+    {
+      "name": "pq00-teeth",
+      "result": "success"
+    },
+    {
+      "name": "pq05-xwing",
+      "result": "success"
+    },
+    {
+      "name": "pq10-plonky3",
+      "result": "success"
+    },
+    {
+      "name": "pq12-taproot",
+      "result": "success"
+    },
+    {
+      "name": "x0x-pq",
+      "result": "success"
+    },
+    {
+      "name": "pq11-classic",
+      "result": "success"
+    }
+  ],
+  "summary_log": "ci-pq-summary.log",
+  "artifact_download": "HTTP 403; console evidence retained"
+}

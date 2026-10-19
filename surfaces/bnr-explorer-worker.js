@@ -70,7 +70,9 @@ function verdict(digestHex, bytes) {
     m.set(bytes, req + 42);
     var out = X.bx_verdict_arena();
     var n = X.bx_preview(req, len, out, X.bx_verdict_cap());
-    return { bytes: new Uint8Array(X.memory.buffer).slice(out, out + n) };   // a copy: the module's memory stays here
+    var copy = new Uint8Array(X.memory.buffer).slice(out, out + n);   // a copy: the module's memory stays here
+    X.bx_wipe();                                                        // and the arena's copy goes now
+    return { bytes: copy };
   } finally {
     X.bx_free(req, len);
   }

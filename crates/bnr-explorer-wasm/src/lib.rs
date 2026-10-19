@@ -18,7 +18,16 @@
 //! bx_verdict_arena() -> u32             a MAX_VERDICT-byte buffer
 //! bx_verdict_cap() -> u32               MAX_VERDICT
 //! bx_preview(req, req_len, out, cap) -> u32
+//! bx_wipe()                             zero the verdict arena
 //! ```
+//!
+//! PLAINTEXT DOES NOT OUTLIVE ITS CALL IN THIS MEMORY. `bx_free` zeroes the
+//! request (the object's bytes) before it returns the allocation, the kernel
+//! zeroes the text excerpt before freeing it, and `bx_wipe` zeroes the verdict
+//! arena once the host has copied the verdict out. Volatile stores, so the
+//! compiler cannot drop them as dead writes. Not covered, and said so: a few
+//! bytes of hash state or parser locals on the module's stack. The page
+//! retires the whole worker when a preview closes, which releases all of it.
 //!
 //! `bx_preview` returns the verdict's length; when it exceeds `cap` nothing is
 //! written. With the arena as `out` it always fits. A bad request is answered
@@ -64,8 +73,24 @@ pub extern "C" fn bx_free(ptr: u32, len: u32) {
         return;
     }
     if let Ok(layout) = Layout::from_size_align(len, 1) {
-        unsafe { dealloc(ptr as usize as *mut u8, layout) }
+        unsafe {
+            zero(ptr as usize as *mut u8, len);
+            dealloc(ptr as usize as *mut u8, layout)
+        }
     }
+}
+
+/// Volatile zeroing, so the stores survive optimisation even right before
+/// the memory is freed.
+unsafe fn zero(p: *mut u8, len: usize) {
+    for i in 0..len {
+        core::ptr::write_volatile(p.add(i), 0);
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn bx_wipe() {
+    unsafe { zero(core::ptr::addr_of_mut!(VERDICT) as *mut u8, MAX_VERDICT) }
 }
 
 #[no_mangle]
@@ -170,6 +195,7 @@ mod tests {
             "bx_preview",
             "bx_verdict_arena",
             "bx_verdict_cap",
+            "bx_wipe",
             "memory",
         ];
         want.sort();

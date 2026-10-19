@@ -1,0 +1,4 @@
+include "common.saw";
+print "PREPARE CONTROL key obligation";
+check "pq_prepare_proof::replace_key" 1 3309 1 false;
+print "PREPARE UNEXPECTED-PROVEN";

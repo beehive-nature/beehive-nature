@@ -162,6 +162,17 @@ fn flip(b: &[u8]) -> Vec<u8> {
 
 /// Every case of a keyGen or encapDecap vector set (`rev` names the file).
 pub fn run(r: &mut Report, rev: &str, cases: &[Case]) {
+    run_on(r, rev, cases, |set| impls(set).into());
+}
+
+/// Run the same vector and sabotage gates on an explicitly named implementation.
+/// Callers must separately enforce their required coverage rows.
+pub fn run_on(
+    r: &mut Report,
+    rev: &str,
+    cases: &[Case],
+    implementations: impl Fn(&str) -> Vec<Kem>,
+) {
     let mut first = std::collections::BTreeSet::new();
     for c in cases {
         let set = c.group_str("parameterSet").expect("parameterSet");
@@ -172,7 +183,7 @@ pub fn run(r: &mut Report, rev: &str, cases: &[Case]) {
             .unwrap_or_default();
         let key = format!("{set} {function} ({rev}{fmt})");
         let teeth = first.insert(key.clone());
-        for imp in impls(set) {
+        for imp in implementations(set) {
             let (ok, control) = match function {
                 "keyGen" => {
                     let (d, z) = (c.hex("d"), c.hex("z"));

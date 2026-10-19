@@ -41,6 +41,23 @@ impl Report {
             .fold((0, 0), |(e, p), r| (e + r.0, p + r.1))
     }
 
+    /// Machine-readable counts. NOT RUN rows and failures remain distinct.
+    pub fn json(&self) -> serde_json::Value {
+        let (executed, passed) = self.totals();
+        serde_json::json!({
+            "executed": executed,
+            "passed": passed,
+            "failures": self.failures,
+            "not_run": self.not_run,
+            "rows": self.rows.iter().map(|((key, implementation), (executed, passed))| {
+                serde_json::json!({"key": key, "implementation": implementation,
+                    "executed": executed, "passed": passed,
+                    "result_class": if key.contains("TEETH") { "TEETH" }
+                        else if key.contains("DIFFERENTIAL") { "DIFFERENTIAL" } else { "KAT" }})
+            }).collect::<Vec<_>>()
+        })
+    }
+
     pub fn print(&self) {
         self.print_as("PQ01");
     }

@@ -1,0 +1,94 @@
+{
+  "schema": "btungsten.log-gate-observation/1",
+  "result": "PASS",
+  "checks": 14,
+  "passed": 14,
+  "input": "real hosted marker sets plus 4.8 MB padded transcripts",
+  "proofs_reexecuted": false,
+  "observations": [
+    {
+      "lane": "pq05",
+      "case": "all real markers",
+      "result": "PASS",
+      "printf_io_errors": 0
+    },
+    {
+      "lane": "pq05",
+      "case": "missing marker",
+      "result": "PASS",
+      "printf_io_errors": 0
+    },
+    {
+      "lane": "pq05",
+      "case": "markers but nonzero prover",
+      "result": "PASS",
+      "printf_io_errors": 0
+    },
+    {
+      "lane": "pq05",
+      "case": "real counterexample control",
+      "result": "PASS",
+      "printf_io_errors": 0
+    },
+    {
+      "lane": "pq05",
+      "case": "control unexpectedly exits zero",
+      "result": "PASS",
+      "printf_io_errors": 0
+    },
+    {
+      "lane": "pq05",
+      "case": "unrelated failure",
+      "result": "PASS",
+      "printf_io_errors": 0
+    },
+    {
+      "lane": "pq05",
+      "case": "unexpected proof",
+      "result": "PASS",
+      "printf_io_errors": 0
+    },
+    {
+      "lane": "pq06",
+      "case": "all real markers",
+      "result": "PASS",
+      "printf_io_errors": 0
+    },
+    {
+      "lane": "pq06",
+      "case": "missing marker",
+      "result": "PASS",
+      "printf_io_errors": 0
+    },
+    {
+      "lane": "pq06",
+      "case": "markers but nonzero prover",
+      "result": "PASS",
+      "printf_io_errors": 0
+    },
+    {
+      "lane": "pq06",
+      "case": "real counterexample control",
+      "result": "PASS",
+      "printf_io_errors": 0
+    },
+    {
+      "lane": "pq06",
+      "case": "control unexpectedly exits zero",
+      "result": "PASS",
+      "printf_io_errors": 0
+    },
+    {
+      "lane": "pq06",
+      "case": "unrelated failure",
+      "result": "PASS",
+      "printf_io_errors": 0
+    },
+    {
+      "lane": "pq06",
+      "case": "unexpected proof",
+      "result": "PASS",
+      "printf_io_errors": 0
+    }
+  ]
+}

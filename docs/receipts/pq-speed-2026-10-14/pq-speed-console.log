@@ -1,0 +1,14 @@
+X0X-PQ PIN: source files and implementation packages match x0x's pinned lock
+PQ-SPEED honest-1: 414/414; 0 failures
+  0 B: API 1.211x; ANT legacy 1.210x; cold 1.173x
+  256 B: API 1.200x; ANT legacy 1.210x; cold 1.176x
+  4096 B: API 1.189x; ANT legacy 1.190x; cold 1.160x
+  65536 B: API 1.095x; ANT legacy 1.086x; cold 1.084x
+PQ-SPEED honest-2: 414/414; 0 failures
+  0 B: API 1.196x; ANT legacy 1.200x; cold 1.165x
+  256 B: API 1.197x; ANT legacy 1.205x; cold 1.195x
+  4096 B: API 1.168x; ANT legacy 1.182x; cold 1.154x
+  65536 B: API 1.101x; ANT legacy 1.099x; cold 1.085x
+PQ-SPEED accept-teeth: 114/414; 300 failures
+PQ-SPEED truncate-teeth: 388/414; 26 failures
+PQ-SPEED empty-teeth: zero cases refused; no timings

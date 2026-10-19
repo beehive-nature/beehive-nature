@@ -1,0 +1,9 @@
+[package]
+name = "bnrose-replacement-law"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "BNRoSe exact replacement law — the pure gate core (policy flag x never-executed) and the attempt numbering, as ONE dependency-free definition set the host, the grid harness and SAW all consume. no_std, no deps."
+publish = false
+
+[dependencies]

@@ -1,0 +1,49 @@
+== SAW PQ05 NTT: toolchain ==
+1.6 (68eed5f release-1.6)
+Cryptol 3.6.0
+== SAW PQ05 NTT: PIN the harness lock to the workspace lock ==
+SAW-PIN PQ05: PASS (18 packages, each the workspace's version and checksum)
+== SAW PQ05 NTT: BUILD the harness to MIR JSON (cargo-saw-build) ==
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling cmov v0.5.4
+   Compiling typenum v1.20.1
+   Compiling rand_core v0.10.1
+   Compiling autocfg v1.5.1
+   Compiling ctutils v0.4.2
+   Compiling cfg-if v1.0.4
+   Compiling keccak v0.2.2
+   Compiling num-traits v0.2.19
+   Compiling hybrid-array v0.4.14
+   Compiling crypto-common v0.2.2
+   Compiling block-buffer v0.12.1
+   Compiling module-lattice v0.2.3
+   Compiling digest v0.11.3
+   Compiling kem v0.3.0
+   Compiling sha3 v0.11.0
+   Compiling ml-kem v0.3.2
+   Compiling pq05_ntt v0.0.0 (/workspace/wt-pq-battery/scripts/btungsten/pq05-ntt)
+Linking 18 mir files into /workspace/wt-pq-battery/target/saw-pq05-ntt/cargo/x86_64-unknown-linux-gnu/debug/deps/pq05_ntt-9b01612c36b1fb5f.linked-mir.json
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.86s
+  Executable unittests src/lib.rs (/workspace/wt-pq-battery/target/saw-pq05-ntt/cargo/x86_64-unknown-linux-gnu/debug/deps/pq05_ntt-9b01612c36b1fb5f)
+SAW-BUILD PQ05: PASS (12166251 bytes of linked MIR; names:)
+  let elem_adt_name = "module_lattice/c7b61fc3::algebra::Elem::_adt2ef3e55d13c40680[0]";
+  let poly_adt_name = "module_lattice/c7b61fc3::algebra::Polynomial::_adt2ef3e55d13c40680[0]";
+  let npoly_adt_name = "module_lattice/c7b61fc3::algebra::NttPolynomial::_adt2ef3e55d13c40680[0]";
+  let arr_adt_name = "hybrid_array/5acdac59::Array::_adt332565ab07ffc4d0[0]";
+  let add_name = "module_lattice::algebra::{impl#4}::add::_inst2ef3e55d13c40680";
+  let sub_name = "module_lattice::algebra::{impl#5}::sub::_inst2ef3e55d13c40680";
+  let mul_name = "module_lattice::algebra::{impl#6}::mul::_inst2ef3e55d13c40680";
+  let ntt_name = "ml_kem::algebra::{impl#0}::ntt";
+  let ntt_inverse_name = "ml_kem::algebra::{impl#2}::ntt_inverse";
+  let barrett_name = "ml_kem::algebra::{impl#5}::barrett_reduce";
+  let base_case_name = "ml_kem::algebra::base_case_multiply";
+  let multiply_ntt_name = "ml_kem::algebra::{impl#4}::multiply_ntt";
+== SPEC-CHECK PQ05: KemNtt.cry closed terms ==
+SPEC-CHECK zetasMatchAppendixA: PASS
+SPEC-CHECK gammasMatchAppendixA: PASS
+SPEC-CHECK inverseOf128: PASS
+SPEC-CHECK inverseUndoesForward: PASS
+SPEC-CHECK nttMultipliesPolynomials: PASS
+== SAW PQ05 NTT: ntt.saw ==

@@ -212,6 +212,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "antelope-authority"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+]
+
+[[package]]
 name = "anyhow"
 version = "1.0.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -424,6 +431,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "bindex-bnrose"
+version = "0.1.0"
+dependencies = [
+ "bnrose-exec-core",
+ "bnrose-exec-host",
+ "btungsten-wb001",
+ "rusqlite",
+ "serde_json",
+ "sha2 0.10.9",
+]
+
+[[package]]
 name = "bindexer"
 version = "0.1.0"
 dependencies = [
@@ -607,6 +626,7 @@ version = "0.1.0"
 dependencies = [
  "bnrose-exec-core",
  "bnrose-exec-wasm",
+ "bnrose-replacement-law",
  "btungsten-wb001",
  "ed25519-dalek",
  "hmac 0.12.1",
@@ -621,6 +641,33 @@ name = "bnrose-exec-wasm"
 version = "0.1.0"
 dependencies = [
  "bnrose-exec-core",
+]
+
+[[package]]
+name = "bnrose-netpart"
+version = "0.1.0"
+dependencies = [
+ "bnrose-exec-core",
+ "bnrose-exec-host",
+ "btungsten-wb001",
+ "serde_json",
+]
+
+[[package]]
+name = "bnrose-replacement-law"
+version = "0.1.0"
+
+[[package]]
+name = "bnrose-settle-adapters"
+version = "0.1.0"
+dependencies = [
+ "bnr-keys",
+ "bnrose-exec-core",
+ "bnrose-exec-host",
+ "serde_json",
+ "sha2 0.10.9",
+ "sha3 0.10.9",
+ "ureq",
 ]
 
 [[package]]

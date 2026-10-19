@@ -25,7 +25,19 @@ jobs:
           # runs the fuller battery; this weld keeps the workspace test
           # honest about the module too)
           targets: wasm32-unknown-unknown
+      # bSAFE host, the x402 door and the ant write door are their own
+      # workspaces (own members list + lockfile + target dir, driven by
+      # --manifest-path below), so the default root cache never saw them;
+      # mapping them here (with the root kept explicit) covers the ~78s of
+      # measured per-run recompilation the x402 step alone paid (run
+      # 39013417846, job 117340509983).
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: |
+            . -> target
+            rust/bsafe-host -> rust/bsafe-host/target
+            ops/x402-door -> ops/x402-door/target
+            ops/ant-writedoor -> ops/ant-writedoor/target
       - name: Ensure the wasm32 target is installed (the toolchain file outranks action inputs)
         if: always()
         run: rustup target add wasm32-unknown-unknown
@@ -42,6 +54,21 @@ jobs:
       - name: bnr-explorer wasm — the committed module is this tree's build
         if: always()
         run: sh scripts/bnr-explorer/build-wasm.sh --check
+      # BNROSE-ADAPTERS-REAL: the devnet battery (tests/anvil.rs) runs real
+      # EVM node software and refuses to skip when it is missing — anvil
+      # comes from the pinned foundry bundle (the release's own checksum
+      # guards the transport; the TAG is the pin)
+      - name: Install anvil (pinned foundry v1.8.5) for the adapters devnet battery
+        if: always()
+        run: |
+          set -e
+          mkdir -p "$RUNNER_TEMP/foundry"
+          curl -sSL -o f.tar.gz https://github.com/foundry-rs/foundry/releases/download/v1.8.5/foundry_v1.8.5_linux_amd64.tar.gz
+          curl -sSL https://github.com/foundry-rs/foundry/releases/download/v1.8.5/foundry_v1.8.5_linux_amd64.sha256 -o f.sha256
+          sha256sum -c <(awk '{print $1"  f.tar.gz"}' f.sha256)
+          tar -xzf f.tar.gz -C "$RUNNER_TEMP/foundry" anvil
+          test -x "$RUNNER_TEMP/foundry/anvil" || { echo "FAIL CLOSED: anvil missing — the devnet battery is not a skip"; exit 1; }
+          echo "BNROSE_ANVIL_BIN=$RUNNER_TEMP/foundry/anvil" >> "$GITHUB_ENV"
       - name: Test workspace
         if: always()
         env:
@@ -606,6 +633,10 @@ jobs:
         env:
           S7_BEFORE: ${{ github.event.pull_request.base.sha || github.event.before }}
           S7_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          # a branch push (refs/heads/, not tags) to any branch but main checks the branch's whole contribution
+          # against main as this checkout fetched it (pinned to a full SHA in the
+          # log); main's own pushes keep before..after, pull requests base..head
+          S7_TARGET: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') && github.ref != 'refs/heads/main' && 'origin/main' || '' }}
         run: sh scripts/identity-check.sh
 
   node:
@@ -718,7 +749,7 @@ jobs:
       # that fails after hand-off never says nothing left. Two runs per size;
       # the only speed gate is the old 4.5 s freeze at 20,000 rows.
       - name: MY SPACE — explorer (stale work, previews, isolation, honest outcomes)
-        timeout-minutes: 8 # measured locally: ~3.5 min with two runs per size
+        timeout-minutes: 10 # measured locally: ~1.5-3.5 min with two runs per size, privacy section included
         if: always()
         working-directory: e2e
         env:

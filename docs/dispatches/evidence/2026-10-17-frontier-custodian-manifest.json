@@ -1,0 +1,2166 @@
+{
+ "schema": "skaists.frontier-custodian-manifest/1",
+ "generated": "2026-10-18T00:44:44.547Z",
+ "rules": {
+  "1:1 identifier": "/1:1:([A-Z0-9]{4}-[A-Z0-9]{3,4})(?![A-Z0-9-])/g",
+  "citationSet": "matches inside each record's `citation` string",
+  "evidenceSet": "matches inside JSON.stringify of each element of the record's `evidence` array",
+  "collection": "the first double-quoted title at the start of the citation string"
+ },
+ "sets": {
+  "queue": 7114,
+  "queueEqualsUnion": true,
+  "citation": 7018,
+  "evidence": 264,
+  "evidenceAlsoInCitation": 168,
+  "evidenceOnly": 96
+ },
+ "queueStatus": {
+  "no-image-available": 10,
+  "mapped": 18,
+  "retryable-observation": 11,
+  "walker-failure": 1,
+  "never-attempted": 7074
+ },
+ "evidenceOnlyStatus": {
+  "never-attempted": 96
+ },
+ "evidenceOnlyIdentifiers": [
+  "2439-STV",
+  "243W-VV9",
+  "243W-VVM",
+  "24CZ-8BF",
+  "24CZ-8BX",
+  "F4KW-TR9",
+  "F4KW-TRM",
+  "FDGV-849",
+  "FDJJ-S2C",
+  "FDJJ-SJX",
+  "FDNL-V3R",
+  "FDQS-SR9",
+  "FGS9-9B6",
+  "FGS9-9BX",
+  "FHBQ-K7C",
+  "FHLG-D5T",
+  "FXCX-RTR",
+  "FXCX-RTT",
+  "H2YS-H5N2",
+  "H34L-96PZ",
+  "J7ZG-KBP",
+  "J8HB-KJJ",
+  "J8HB-KJN",
+  "J8VR-SMZ",
+  "N2TZ-5J1",
+  "N323-5LR",
+  "N59Q-PWB",
+  "NB95-DB2",
+  "NB95-DBL",
+  "NGZM-SH3",
+  "NGZM-SH7",
+  "NGZM-SHQ",
+  "NLXQ-LB9",
+  "V752-B93",
+  "V752-B9S",
+  "V75G-4F9",
+  "V75G-4FM",
+  "V75G-4XB",
+  "V75G-4XY",
+  "V75G-H56",
+  "V75G-H5D",
+  "V75G-HV4",
+  "V75G-HVH",
+  "V75K-RB2",
+  "V75K-RBK",
+  "V7CC-8ZF",
+  "V7CC-8ZX",
+  "V7GJ-M2F",
+  "V7GJ-M2T",
+  "V7GJ-M2X",
+  "V7GJ-M2Y",
+  "V7GJ-M54",
+  "V7GJ-M5W",
+  "V7GJ-M9J",
+  "V7GJ-M9V",
+  "V7GJ-MGF",
+  "V7GJ-MGX",
+  "V7GJ-ML7",
+  "V7GJ-MLW",
+  "V7GJ-MMF",
+  "V7GJ-MMX",
+  "V7GN-175",
+  "V7GN-17G",
+  "V7GN-17K",
+  "V7GN-17L",
+  "V7GN-17R",
+  "V7GN-17V",
+  "V7GN-193",
+  "V7GN-19S",
+  "V7GN-1D8",
+  "V7GN-1DD",
+  "V7GN-1HJ",
+  "V7GN-1HN",
+  "V7GN-1PF",
+  "V7GN-1PN",
+  "V7GN-1QK",
+  "V7GN-1QV",
+  "V7GN-1RG",
+  "V7GN-1RP",
+  "V7GN-1Y8",
+  "V7GN-1YZ",
+  "VQHH-WPK",
+  "VW3W-ZMC",
+  "VW3W-ZMH",
+  "VW7G-74T",
+  "VW7G-74Y",
+  "WD15-GTPZ",
+  "X6QT-XD7",
+  "X6QT-XDW",
+  "XB27-5B4",
+  "XDNM-QYQ",
+  "XZG2-HD6",
+  "XZG2-HDD",
+  "XZG8-6LJ",
+  "XZG8-6LV",
+  "XZPX-PKJ"
+ ],
+ "unresolvedCollectionAssignments": 7108,
+ "collections": [
+  {
+   "collection": "Massachusetts, Births and Christenings, 1639-1915",
+   "unresolved": 814,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Births and Christenings, 1538-1975",
+   "unresolved": 653,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Massachusetts, Town Clerk, Vital and Town Records, 1626-2001",
+   "unresolved": 551,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Connecticut, Births and Christenings, 1649-1906",
+   "unresolved": 353,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Find a Grave Index",
+   "unresolved": 318,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "The Church of Jesus Christ of Latter-day Saints, Record of Members (Worldwide), 1836-1970",
+   "unresolved": 299,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Rhode Island, Births and Christenings, 1600-1914",
+   "unresolved": 210,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Denmark, Baptisms, 1618-1923",
+   "unresolved": 175,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, Deaths and Burials, 1888-1946",
+   "unresolved": 163,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New Hampshire, Births and Christenings, 1714-1904",
+   "unresolved": 159,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Connecticut, Vital Records, Prior to 1850",
+   "unresolved": 158,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Sweden, Baptisms, 1611-1920",
+   "unresolved": 144,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, Death Certificates, 1904-1966",
+   "unresolved": 135,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Massachusetts, State Vital Records, 1638-1927",
+   "unresolved": 131,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Scotland, Births and Baptisms, 1564-1950",
+   "unresolved": 118,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "(evidence-field reference only — no citing collection)",
+   "unresolved": 96,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Illinois, Hancock County, Nauvoo Community Project, 1839-1846 (BYU Center for Family History and Genealogy)",
+   "unresolved": 88,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "BillionGraves Index",
+   "unresolved": 67,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Buckinghamshire, Church Records, 1217-1994",
+   "unresolved": 64,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Rhode Island, Town Births and Baptisms Index, 1639-1932",
+   "unresolved": 62,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, Salt Lake County Death Records, 1849-1949",
+   "unresolved": 61,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Danmark Kirkebøger, 1484-1941",
+   "unresolved": 59,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "The Church of Jesus Christ of Latter-day Saints, Church Census Records (Worldwide), 1914-1960",
+   "unresolved": 55,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "The Church of Jesus Christ of Latter-day Saints, Missionary Registers (Worldwide), 1860-1937",
+   "unresolved": 52,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Idaho, Southeast Counties Obituaries, 1864-2007",
+   "unresolved": 52,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New Hampshire, Birth Records, Early to 1900",
+   "unresolved": 52,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Denmark, Marriages, 1635-1916",
+   "unresolved": 49,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Pennsylvania, Philadelphia, Historical Society of Pennsylvania, Births and Baptisms, 1520-1999",
+   "unresolved": 48,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England Marriages, 1538–1973",
+   "unresolved": 46,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, Mormon Pioneer Overland Travel Database, 1847-1868",
+   "unresolved": 44,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, Salt Lake, Salt Lake City, Cemetery Records, 1847-1976",
+   "unresolved": 44,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Somerset, Church Records, 1501-1999",
+   "unresolved": 40,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, Marriages, 1887-1935",
+   "unresolved": 39,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Rhode Island, Marriages, 1724-1916",
+   "unresolved": 39,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1860",
+   "unresolved": 36,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Pennsylvania, Philadelphia, Historical Society of Pennsylvania, Marriage Records, 1512-1989",
+   "unresolved": 35,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Yorkshire, Parish Registers, 1538-2016",
+   "unresolved": 35,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1850",
+   "unresolved": 34,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1880",
+   "unresolved": 32,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Yorkshire, Bishop's Transcripts, 1547-1957",
+   "unresolved": 32,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1870",
+   "unresolved": 30,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Connecticut, Deaths and Burials, 1772-1934",
+   "unresolved": 30,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, County Marriages, 1871-1941",
+   "unresolved": 27,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Berkshire, Parish Registers, 1515-1993",
+   "unresolved": 27,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, FamilySearch, Early Church Information File, 1830-1900",
+   "unresolved": 26,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, GenealogyBank Obituaries, Births, and Marriages, 1980-2015",
+   "unresolved": 25,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Vermont, Vital Records, 1760-1954",
+   "unresolved": 25,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Sweden, Marriages, 1630-1920",
+   "unresolved": 25,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Pennsylvania, Births and Christenings, 1709-1950",
+   "unresolved": 25,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New York, Births and Christenings, 1640-1962",
+   "unresolved": 24,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New Jersey, Births and Christenings, 1660-1980",
+   "unresolved": 24,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Massachusetts, Deaths and Burials, 1795-1910",
+   "unresolved": 24,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New Hampshire, Marriages, 1720-1920",
+   "unresolved": 23,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1790",
+   "unresolved": 23,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Ohio, Births and Christenings, 1821-1962",
+   "unresolved": 21,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1800",
+   "unresolved": 21,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1900",
+   "unresolved": 20,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Deaths and Burials, 1538-1991",
+   "unresolved": 20,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Social Security Numerical Identification Files (NUMIDENT), 1936-2007",
+   "unresolved": 19,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, Obituaries from Utah Newspapers, 1850-2005",
+   "unresolved": 18,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Idaho, Jefferson Star, County Cemetery Records, 1800-2000",
+   "unresolved": 17,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Norway, Baptisms, 1634-1927",
+   "unresolved": 16,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Rutland, Parish Registers, 1538-1991",
+   "unresolved": 16,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Ohio, County Births, 1841-2003",
+   "unresolved": 15,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Wisconsin, Marriages, 1836-1930",
+   "unresolved": 15,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, Territorial Militia Records, 1849-1877",
+   "unresolved": 15,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "(no collection title in citation)",
+   "unresolved": 15,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, Cemetery Abstracts",
+   "unresolved": 15,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1830",
+   "unresolved": 15,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Rhode Island, Town Marriages Index, 1639-1932",
+   "unresolved": 15,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Ohio, Deaths, 1908-1953",
+   "unresolved": 14,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England and Wales, Non-Conformist Record Indexes (RG4-8), 1588-1977",
+   "unresolved": 14,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Vermont, Town Clerk, Vital and Town Records, 1732-2005",
+   "unresolved": 13,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1840",
+   "unresolved": 13,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Rosters of Revolutionary War Soldiers and Sailors, 1775-1966",
+   "unresolved": 13,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "California, County Birth and Death Records, 1800-1994",
+   "unresolved": 12,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New Hampshire, Deaths and Burials, 1784-1949",
+   "unresolved": 12,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Scotland, Marriages, 1561-1910",
+   "unresolved": 12,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1920",
+   "unresolved": 11,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Idaho, Death Certificates, 1938-1961",
+   "unresolved": 11,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1820",
+   "unresolved": 11,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1810",
+   "unresolved": 11,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Vermont, Births and Christenings, 1765-1908",
+   "unresolved": 11,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New Jersey, Deaths and Burials, 1720-1988",
+   "unresolved": 11,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Connecticut, Charles R. Hale Collection, Vital Records, 1640-1955",
+   "unresolved": 11,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Pennsylvania, Cemetery Records, ca. 1700-ca. 1950",
+   "unresolved": 11,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Massachusetts, Revolutionary War, Index Cards to Muster Rolls, 1775-1783",
+   "unresolved": 11,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1910",
+   "unresolved": 10,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1930",
+   "unresolved": 10,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Minnesota, Deaths, 1887-2001",
+   "unresolved": 10,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New Hampshire, Marriage Records, 1637-1947",
+   "unresolved": 10,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Denmark, Burials, 1640-1917",
+   "unresolved": 10,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Rhode Island, Town Clerk, Vital and Town Records, 1630-1945",
+   "unresolved": 10,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Ohio, County Marriages, 1789-2016",
+   "unresolved": 9,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Ohio, County Death Records, 1840-2001",
+   "unresolved": 9,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, Veterans with Federal Service Buried in Utah, Territorial to 1966",
+   "unresolved": 9,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Warwickshire, Parish Registers, 1535-1972",
+   "unresolved": 9,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Wiltshire, Church Records, 1518-1990",
+   "unresolved": 9,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1940",
+   "unresolved": 8,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "California, Death Index, 1940-1997",
+   "unresolved": 8,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, Birth Certificates, 1903-1914",
+   "unresolved": 8,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Minnesota, Death Records and Certificates, 1900-1955",
+   "unresolved": 8,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New Hampshire, Death Records, 1654-1947",
+   "unresolved": 8,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Deutschland Heiraten, 1558-1929",
+   "unresolved": 8,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Deutschland Geburten und Taufen, 1558-1898",
+   "unresolved": 8,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Western States Marriage Index",
+   "unresolved": 7,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, Latter-Day Saint Biographical Encyclopedia",
+   "unresolved": 7,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, Pioneers and Prominent Men of Utah, 1847-1868",
+   "unresolved": 7,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Minnesota, Deaths and Burials, 1835-1990",
+   "unresolved": 7,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Minnesota, County Deaths, 1850-2001",
+   "unresolved": 7,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Rhode Island, Vital records, 1846-1898, 1901-1955",
+   "unresolved": 7,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Census, 1950",
+   "unresolved": 6,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New York, New York City Marriage Records, 1829-1938",
+   "unresolved": 6,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Minnesota, County Marriages, 1853-1983",
+   "unresolved": 6,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Bedfordshire, Parish Registers, 1538-1983",
+   "unresolved": 6,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Tennessee, County Marriages, 1790-1959",
+   "unresolved": 6,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Tennessee, Marriages, 1796-1950",
+   "unresolved": 6,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Denmark, Probate Indexes, 1674-1851",
+   "unresolved": 6,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Canada, Ontario, Deaths, 1869-1937 and Overseas Deaths, 1939-1947",
+   "unresolved": 6,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Delaware, Church Records, 1660-1940",
+   "unresolved": 6,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "North Carolina, County Marriages, 1762-2011 ",
+   "unresolved": 6,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Pennsylvania, Marriages, 1709-1940",
+   "unresolved": 6,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Connecticut, Marriages, 1630-1997",
+   "unresolved": 6,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, World War II Index to Army Veterans of Utah, 1939-1945",
+   "unresolved": 5,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, Births and Christenings, 1892-1941",
+   "unresolved": 5,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New York, County Marriages, 1778-1848; 1908-1937",
+   "unresolved": 5,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England and Wales, Census, 1851",
+   "unresolved": 5,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Ohio, Marriages, 1800-1958",
+   "unresolved": 5,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Sweden, Household Examination Books, 1874-1931",
+   "unresolved": 5,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New York, Marriages, 1686-1980",
+   "unresolved": 5,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, Salt Lake City, The Church of Jesus Christ of Latter-day Saints, Missionary Department, Missionary Registers, 1860-1937",
+   "unresolved": 5,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Revolutionary War Rolls, 1775-1783",
+   "unresolved": 5,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Herefordshire, Bishop's Transcripts, 1583-1900",
+   "unresolved": 5,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New Hampshire  Revolutionary War Records, 1675-1835",
+   "unresolved": 5,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Lincolnshire, Parish Registers, 1538-1990",
+   "unresolved": 5,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Deutschland, ausgewählte evangelische Kirchenbücher 1500-1971",
+   "unresolved": 5,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Connecticut, Deaths, 1640-1955",
+   "unresolved": 5,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Maine, Vital Records, 1670-1921",
+   "unresolved": 5,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, World War II Draft Registration Cards, 1942",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Social Security Death Index",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, World War I County Draft Board Registers, Name Index, 1917-1918",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Montana, County Marriages, 1865-1950",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Montana, County Births and Deaths, 1840-2004",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Ohio, Deaths and Burials, 1854-1997",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Nebraska, Marriages, 1855-1995",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Idaho, Death Certificates, 1911-1937",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England and Wales, Census, 1841",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Oregon, Oregon State Archives, Death Records, 1864-1968",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, State Archives, Records, 1848-2001",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Denmark, Census, 1834",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Massachusetts Marriages, 1695-1910, 1921-1924",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New Jersey, County Marriages, 1682-1956",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Michigan, Deaths and Burials, 1800-1995",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Yorkshire, Marriage Bonds and Allegations, 1613-1887",
+   "unresolved": 4,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, World War I Draft Registration Cards, 1917-1918",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, World War II Draft Registration Cards, 1940-1947",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, LDS Mission Calls and Recommendations, 1877-1918",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Ohio, Death Index, 1908-1932, 1938-1944, and 1958-2007",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, County Birth and Death Records,1892-1951",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, General Index to Pension Files, 1861-1934",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England and Wales, Marriage Registration Index, 1837-2005",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Denmark, Census, 1840",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Denmark, Census, 1845",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Nevada County Birth and Death Records, 1871-1992",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Virginia, County Marriage Records, 1771-1989",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England and Wales, Death Registration Index 1837-2007",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New Jersey, Marriages, 1670-1980",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New Jersey, Marriages, 1678-1985",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New York, State Census, 1855",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New York, Church Records, 1660-1954",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Ireland, Diocesan and Prerogative Marriage License Bonds Indexes, 1623-1866",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Canada, Ontario, Marriages, 1869-1927",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New Jersey, Church Records, 1675-1970",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Maryland, Church Records, 1660-1996",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "North Carolina, Revolutionary Pay Vouchers, 1779-1782",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Virginia, Births and Christenings, 1584-1917",
+   "unresolved": 3,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Kentucky, Marriages, 1785-1979",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "North Carolina, Deaths and Burials, 1898-1994",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "North Carolina, Department of Archives and History, Index to Vital Records, 1800-2000",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Nebraska, State Census, 1885",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Index to Indian Wars Pension Files, 1892-1926",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England and Wales, Birth Registration Index, 1837-2008",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Vermont, Franklin, St. Albans, Canadian Border Crossings, 1895-1954",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Washington, Death Certificates, 1907-1960",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Washington, Deaths and Burials, 1810-1960",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Massachusetts, State Census, 1855",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Idaho, Deaths and Burials, 1907-1965",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Iowa, Death Records, 1904-1951",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Minnesota, Births and Christenings, 1840-1980",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England and Wales, Census, 1871",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New York, New York City Municipal Deaths, 1795-1949",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Tennessee, State Marriage Index, 1780-2002",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Norway, Church Books, 1797-1958",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Denmark, Census, 1855",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, War of 1812 Index to Service Records, 1812-1815",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Virginia, Vital Records, 1715-1912",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Virginia, Marriages, 1785-1940",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Staffordshire, Church Records, 1538-1944",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New York, State Census, 1865",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Hertfordshire, Marriage Bonds, 1682-1837",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New York, Land Records, 1630-1975",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Denmark Census, 1787",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Canada, Ontario, Births and Baptisms, 1779-1899",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Canada, Ontario, Census, 1861",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Pennsylvania, Philadelphia, Historical Society of Pennsylvania, Deaths and Burials, 1627-1972",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Cemetery Abstracts, 1949-1969",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Rhode Island, Town Deaths and Burials Index, 1639-1932",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Ireland Tithe Applotment Books, 1824-1855",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Ireland, Marriages, 1619-1898",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Schweiz, Katholische und Reformiert Kirchenbücher, 1418-1996",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Maine, Church Records, 1734-1907",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Maine, Marriages, 1771-1907",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Ireland, Births and Baptisms, 1620-1881",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Cumbria, Parish Registers, 1538-1990",
+   "unresolved": 2,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Veterans Administration Master Index, 1917-1940",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah, World War I Army Servicemen Records Abstracts, 1914-1918",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Obituary Records, 2014-2023",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "North Carolina, Deaths, 1931-1994",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Colorado, World War II Draft Registration Cards, 1940-1945",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Mormon Migration Database, 1840-1932",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Passport Applications, 1795-1925",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Border Crossings from Canada to United States, 1895-1956",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Montana, Death Index, 1860-2007",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Michigan, Marriages, 1822-1995",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Idaho, County Birth and Death Records, 1883-1929",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Denmark, Census, 1890",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Joseph S Rasmussen, 'California, County Birth and Death Records, 1800-1994' .",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Idaho, Bonneville County, Idaho Falls, Rose Hill Cemetery Records, 1800-2007",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Scandinavia, Mission Emigration Records, 1852-1920",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Denmark, Census, 1850",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New Hampshire Births and Christenings, 1714-1904",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Civil War Widows and Other Dependents Pension Files, 1861-1934",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "California, County Marriages, 1849-1957",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "California, Great Registers, 1848-1921",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Texas, Deaths, 1890-1977",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Idaho, Southern Counties Obituaries, 1943-2013",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "New York, Passenger Lists, 1820-1920",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Illinois, Deaths and Stillbirths, 1916-1948",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Minnesota, State Census, 1885",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Minnesota, State Census, 1895",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Muster Rolls of the Marine Corps, 1798-1937",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Missouri, County Marriage, Naturalization, and Court Records, 1800-1991",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Denmark, Census, 1860",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Lancashire, Liverpool, Banns and Marriages, 1557-1960",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England and Wales, Census, 1861",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "California, State Census, 1852",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Wisconsin, Death Records, 1867-1907",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah Death Certificates, 1904-1964",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Utah Mormon Pioneer Overland Travel Database, 1847-1868",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Hampshire, Bishop's Transcripts 1680-1892",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Revolutionary War Pension Payment Ledgers, 1818-1872",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Virginia, Vital Records, 1853-1934",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Virginia, Deaths and Burials, 1853-1912",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Virginia, Bureau of Vital Statistics, Death Records, 1853-1912",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "West Virginia, Deaths, 1804-1999",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England Marriages, 1538–1973  ",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, New England Petitions for Naturalization Index, 1791-1906",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Surrey, Parish Registers, 1536-1992",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Canada, Ontario County Marriage Registers, 1858-1869",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Canada, Census, 1871",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Canada, Census, 1881",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Connecticut, Church Records, 1660-1955",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Deutschland, Württemberg, Diözese Rottenburg-Stuttgart, Katholische Kirchenbücher, 1520-1975",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States Census, 1800, population schedule.",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States Census, 1810, population schedule.",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States Census (Mortality Schedule), 1850-1880",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Connecticut, Marriages, 1640-1939",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Minnesota, State Census, 1865 ",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States Revolutionary War Pension and Bounty Land Warrant Applications, 1800-1900",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Devon, Parish Registers, 1538-1971",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Registers of Enlistments in the U.S. Army, 1798-1914",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Dorset, Parish Registers, 1538-2001",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Scotland, Civil Registration, 1855-1875, 1881, 1891",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Ireland, Calendar of Wills and Administrations, 1858-1920",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Schweiz Taufen, 1491-1940",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Cheshire, Parish Registers, 1538-2000",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Cheshire, Bishop's Transcripts, 1598-1900",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Prisoners of War, 1715-1947",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "United States, Revolutionary War Pension and Bounty Land Warrant Applications, 1800-1900",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Ireland, Civil Registration, 1845-1913",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Pennsylvania, Deaths and Burials, 1720-1999",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Maryland, Births and Christenings, 1650-1995",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "North Carolina, Estate Files, 1663-1979",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Wales, Montgomeryshire, Parish Registers, 1538-1912",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Massachusetts Births and Christenings, 1639-1915",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Sweden, Västerbotten, Church Records, 1619-1896; index, 1688-1860",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Deutschland, Rheinland, Bistum Trier, katholische Kirchenbücher, 1543-1958",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Scotland Births and Baptisms, 1564-1950",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Middlesex, Parish Registers, 1539-1988",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "England, Devon Bishop's Transcripts, 1558-1887",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  },
+  {
+   "collection": "Scotland Marriages, 1561-1910",
+   "unresolved": 1,
+   "custodian": "UNASSESSED",
+   "accessMethod": "UNASSESSED",
+   "rights": "UNASSESSED"
+  }
+ ]
+}

@@ -6,7 +6,8 @@
 //
 //   node e2e/bdata-phase-e.mjs
 import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, mkdtemp, open, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname } from 'node:path';
@@ -165,8 +166,8 @@ const tooLargeOk = await page.evaluate(async (max) => {
   input.dispatchEvent(new Event('change', { bubbles: true }));
   await new Promise(r => setTimeout(r, 200));
   return !!document.querySelector('[data-bdata-intake-large]');
-}, 59 * 4190208);
-check('files over the wave limit render as prose (never a dead button, nothing sent)', tooLargeOk && hits.intake === 0);
+}, 512 * 1024 * 1024);
+check('files over the browser local limit render as prose without blaming payment', tooLargeOk && hits.intake === 0 && !/batch payments/i.test(await words('[data-bdata-intake-large]')));
 
 // reset intake by reload for clean small-file path
 await page.goto(origin + '/bdata.html', { waitUntil: 'domcontentloaded' });
@@ -231,6 +232,50 @@ await page.reload({ waitUntil: 'domcontentloaded' });
 await page.waitForSelector('[data-bdata-intake-ok]', { timeout: 10000 });
 const shelfAfter = await page.getAttribute('[data-bdata-intake-ok]', 'data-bdata-intake-shelf');
 check('browser shelf survives reload', shelfAfter === 'browser', String(shelfAfter));
+
+// Real above-wave file, backed by a sparse fixture on disk (no giant Node
+// Buffer). The browser must keep and recover the bytes with payment disabled.
+await tap('[data-bdata-intake-clear]');
+await page.evaluate(() => {
+  const el = document.getElementById('bdata-bridge');
+  el.value = 'http://127.0.0.1:8807';
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+});
+const largeBytes = 59 * 4190208 + 1;
+const fixtureDir = await mkdtemp(join(tmpdir(), 'bdata-browser-local-'));
+const fixturePath = join(fixtureDir, 'large-local.bin');
+try {
+  const file = await open(fixturePath, 'wx');
+  try { await file.truncate(largeBytes); } finally { await file.close(); }
+  const zero = Buffer.alloc(64 * 1024), digest = createHash('sha256');
+  for (let left = largeBytes; left > 0; left -= zero.length) digest.update(zero.subarray(0, Math.min(left, zero.length)));
+  const largeSha = digest.digest('hex');
+  const before = { prepare: hits.prepare, finalize: hits.finalize, intake: hits.intake, sends: await page.evaluate(() => window.__bdataSends || 0) };
+  await page.setInputFiles('[data-bdata-file]', fixturePath);
+  await page.waitForSelector('[data-bdata-intake-preview]', { timeout: 30000 });
+  check('a real above-wave file can be selected for local custody', await page.getAttribute('[data-bdata-intake-sha]', 'data-bdata-intake-sha') === largeSha);
+  await tap('[data-bdata-intake-go]');
+  await page.waitForSelector('[data-bdata-intake-ok][data-bdata-intake-shelf="browser"]', { timeout: 30000 });
+  check('above-wave browser bytes are kept while remote publication stays unavailable', !!(await page.$('[data-bdata-intake-publish-held]')) && !/pay with your wallet.*same chain/i.test(await words('[data-bdata-add-manifest]')));
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('[data-bdata-intake-ok][data-bdata-intake-shelf="browser"]', { timeout: 30000 });
+  const recovered = await page.evaluate(async (sha) => {
+    const db = await new Promise((resolve, reject) => { const r = indexedDB.open('bdata-local-shelf', 1); r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error); });
+    const row = await new Promise((resolve, reject) => { const r = db.transaction('artifacts', 'readonly').objectStore('artifacts').get(sha); r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error); });
+    db.close();
+    return { bytes: row.blob.size, sha256: Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await row.blob.arrayBuffer())), b => b.toString(16).padStart(2, '0')).join('') };
+  }, largeSha);
+  check('above-wave recovery reads the actual IndexedDB bytes after reload', recovered.bytes === largeBytes && recovered.sha256 === largeSha);
+  check('large local custody makes no quote, signer, finalize or intake-server call', hits.prepare === before.prepare && hits.finalize === before.finalize && hits.intake === before.intake && (await page.evaluate(() => window.__bdataSends || 0)) === before.sends);
+} finally { await rm(fixtureDir, { recursive: true, force: true }); }
+
+const merkle = await page.evaluate(async () => {
+  let network = 0, signer = 0;
+  const payer = window.AntPay.create({ fetch: async () => { network++; throw new Error('must not fetch'); }, signer: { address: async () => { signer++; }, send: async () => { signer++; } } });
+  try { await payer.pay({ prepare: { upload_id: 'above-wave', payment_type: 'merkle' }, authorization: { state: 'authorized-for-signing' } }); return { refused: false, network, signer }; }
+  catch (e) { return { refused: e.refusal === 'merkle-not-built', network, signer }; }
+});
+check('merkle publication still refuses before any network or signer call', merkle.refused && merkle.network === 0 && merkle.signer === 0);
 const cleared = await page.evaluate(() => new Promise((resolve) => {
   const req = indexedDB.deleteDatabase('bdata-local-shelf');
   req.onsuccess = () => resolve('ok');

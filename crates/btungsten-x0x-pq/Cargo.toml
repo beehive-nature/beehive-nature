@@ -1,0 +1,18 @@
+# Test infrastructure only, outside BNR's shipping workspace.
+[package]
+name = "btungsten-x0x-pq"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+default-run = "btungsten-x0x-pq"
+
+[workspace]
+
+[dependencies]
+btungsten-pq = { path = "../btungsten-pq" }
+serde_json = "1"
+# Exact implementations in x0x 32bf552808's Cargo.lock, not substitutes.
+saorsa-pqc = "=0.5.1"
+fips203 = "=0.4.3"
+fips204 = "=0.4.6"

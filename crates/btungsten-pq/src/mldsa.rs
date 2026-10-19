@@ -225,6 +225,18 @@ fn shape(c: &Case) -> String {
 }
 
 pub fn run(r: &mut Report, rev: &str, mode: &str, cases: &[Case]) {
+    run_on(r, rev, mode, cases, |set| impls(set).into());
+}
+
+/// Reuse the official-vector and sabotage gates without inheriting another
+/// implementation's result. Callers enforce their own coverage inventory.
+pub fn run_on(
+    r: &mut Report,
+    rev: &str,
+    mode: &str,
+    cases: &[Case],
+    implementations: impl Fn(&str) -> Vec<Dsa>,
+) {
     let mut first = std::collections::BTreeSet::new();
     for c in cases {
         let set = c.group_str("parameterSet").expect("parameterSet");
@@ -246,7 +258,7 @@ pub fn run(r: &mut Report, rev: &str, mode: &str, cases: &[Case]) {
             continue;
         }
         let teeth = first.insert(key.clone());
-        for imp in impls(set) {
+        for imp in implementations(set) {
             let outcome: Option<(bool, Option<bool>)> = match mode {
                 "keyGen" => {
                     let seed = c.hex("seed");

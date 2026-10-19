@@ -1,0 +1,9 @@
+PQ11 BIP-340 sign [k256]: executed 8 of 8, passed 8
+PQ11 BIP-340 verify [k256]: executed 19 of 19, passed 19
+PQ11 ECDSA secp256k1 SHA-256 [k256]: executed 404 of 404, passed 404
+PQ11 ECDSA secp256k1 SHA-256 bitcoin (low-S) [k256]: executed 464 of 464, passed 464
+PQ11 ECDSA secp256k1 SHA-256 valid, high s (k256 low-S policy) [k256]: executed 72 of 72, passed 72
+PQ11 X25519 acceptable [x25519-dalek]: executed 254 of 254, passed 254
+PQ11 X25519 valid [x25519-dalek]: executed 264 of 264, passed 264
+PQ11 k256 low-S policy: 72 Wycheproof `valid` high-s signatures refused in the plain set (tcIds [1, 2, 5, 297, 298, 299, 301, 302, 303, 305, 307, 309, 310, 311, 313, 316, 318, 320, 322, 323, 324, 325, 330, 331, 332, 335, 337, 347, 348, 350, 352, 363, 364, 365, 392, 393, 396, 397, 398, 399, 401, 402, 406, 412, 413, 417, 421, 423, 425, 427, 431, 432, 437, 438, 447, 448, 449, 450, 452, 453, 454, 455, 456, 458, 459, 460, 461, 462, 463, 467, 471, 476]); 0 in the bitcoin set, which marks them invalid
+PQ11 SUMMARY: 1485 executed, 1485 passed, 0 failed; 6 required rows, 0 missing

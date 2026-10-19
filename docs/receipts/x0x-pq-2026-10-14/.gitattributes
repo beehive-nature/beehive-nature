@@ -1,0 +1,2 @@
+# Preserve blank final lines; log digests bind the original stdout bytes.
+*.log whitespace=-blank-at-eof
