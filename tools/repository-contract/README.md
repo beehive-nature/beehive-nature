@@ -40,7 +40,10 @@ const result = acceptUpdate({
 
 The caller obtains `trustedStateDigest` from a trusted checkpoint channel,
 **outside the proposal/package**. It binds the repository ID, ref, current
-head/tree, sequence and policy digest. A supplied policy cannot authorize itself.
+head/tree, sequence, policy digest and last accepted proposal digest. The latter
+chains the full accepted manifest and previous checkpoint, including artifacts
+that do not change a Git head. It is null only at the trusted sequence-zero
+bootstrap. A supplied policy cannot authorize itself.
 Unknown fields/versions, unknown keys/algorithms and malformed input are refused.
 The result is `{accepted:false, code, detail}` or a deterministic proposed state
 with the old and new checkpoint digests. No clock, network, signing, payment,
@@ -79,7 +82,7 @@ This is the estate's INVOICE-1 profile, not a claim of RFC 8785 compatibility.
 
 | Document | Required content |
 | --- | --- |
-| `bnr.repository-state/1` | repository, ref, sequence, head, tree, policy_digest |
+| `bnr.repository-state/1` | repository, ref, sequence, head, tree, policy_digest, last_proposal |
 | `bnr.repository-policy/1` | repository, ref, revision, pinned public keys, update keys/threshold, suites with recipe digest and executor keys/threshold, max_bytes |
 | `bnr.repository-manifest/1` | repository, ref, source, files, recipes |
 | `bnr.repository-update/1` | repository, ref, next sequence, previous_state, policy_digest, manifest_digest |

@@ -18,6 +18,14 @@ test('replay and a competing proposal lose once the accepted checkpoint advances
   const other = fixture(), graph = sourceGraph(other.state.head, 'competing change'); other.manifest.source = graph.source; other.payloads = graph.payloads; reseal(other);
   other.state = accepted.next_state; other.trustedStateDigest = accepted.next_state_digest; refuse(other, 'STALE_STATE');
 });
+test('checkpoint chains the accepted manifest even when Git head/tree are identical', () => {
+  const a = fixture(), b = fixture(), bytes = Buffer.from('different carried artifact'), digest = bytesDigest(bytes);
+  b.payloads.set(digest, bytes); b.manifest.files.push({ name: 'artifact', role: 'output', bytes: bytes.length, digest }); reseal(b);
+  const left = acceptUpdate(a), right = acceptUpdate(b);
+  assert.equal(left.accepted, true); assert.equal(right.accepted, true); assert.equal(left.next_state.head, right.next_state.head);
+  assert.equal(left.next_state.last_proposal, commitment('proposal', a.proposal));
+  assert.notEqual(left.next_state_digest, right.next_state_digest, 'a checkpoint preserves the full accepted proposal and its predecessor');
+});
 const mutations = [
   ['untrusted checkpoint', f => { f.trustedStateDigest = bytesDigest(Buffer.from('attacker')); }, 'UNTRUSTED_STATE'],
   ['self supplied weaker policy', f => { f.policy.update_threshold = 0; }, 'SHAPE'],

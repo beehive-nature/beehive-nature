@@ -76,8 +76,9 @@ export function validatePolicy(p) {
   for (const s of p.suites) { record(s, ['id', 'recipe_digest', 'executor_keys', 'threshold']); text(s.id); hash(s.recipe_digest); threshold(s.executor_keys, s.threshold); }
 }
 export function validateState(s) {
-  jsonValue(s); record(s, ['schema', 'repository', 'ref', 'sequence', 'head', 'tree', 'policy_digest']);
+  jsonValue(s); record(s, ['schema', 'repository', 'ref', 'sequence', 'head', 'tree', 'policy_digest', 'last_proposal']);
   need(s.schema === 'bnr.repository-state/1', 'VERSION'); text(s.repository); ref(s.ref); integer(s.sequence); oid(s.head); oid(s.tree); hash(s.policy_digest);
+  if (s.sequence === 0) need(s.last_proposal === null, 'STATE_CHAIN'); else hash(s.last_proposal);
 }
 
 // Payload map is digest -> exact bytes. This validates contents as well as
@@ -140,7 +141,9 @@ export function acceptUpdate({ state, trustedStateDigest, policy, manifest, prop
       need(!votes.get(s.suite).has(key), 'DUPLICATE'); votes.get(s.suite).add(key);
     }
     for (const suite of policy.suites) need(votes.get(suite.id).size >= suite.threshold, 'MISSING_SUITE');
-    const nextState = { ...state, sequence: proposal.sequence, head: manifest.source.commit, tree: manifest.source.tree };
+    // Preserve the accepted manifest and previous checkpoint through the
+    // proposal commitment, not only Git's legacy SHA-1 head/tree identifiers.
+    const nextState = { ...state, sequence: proposal.sequence, head: manifest.source.commit, tree: manifest.source.tree, last_proposal: commitment('proposal', proposal) };
     return { accepted: true, previous_state: trustedStateDigest, next_state: nextState, next_state_digest: commitment('state', nextState), proposal_digest: commitment('proposal', proposal), mode: 'shadow', effect: 'verdict only; authoritative storage must compare-and-swap previous_state' };
   } catch (e) { return { accepted: false, code: e.code ?? 'MALFORMED', detail: e.code ? e.message : 'Malformed contract input' }; }
 }

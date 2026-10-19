@@ -51,9 +51,16 @@ The real bSigner interoperability run passed 1/1 with zero skips after a
 successful locked `cargo build -p bsigner`. Final pre-push and CI receipts are
 reported in the PR, bound to the candidate and actual merge separately.
 
-Final combined local run: **90/90 passed, zero skipped**, comprising 60 new
+Combined local run before checkpoint hardening: **90/90 passed, zero skipped**, comprising 60 new
 repository tests and 30 retained CI policy/observation tests, on Node 24.18.0
 and Git 2.55.0.windows.2. CI separately runs the static suite on Node 22.
+
+Pre-merge inspection added `state.last_proposal`: every next checkpoint now
+retains the SHA-256 commitment to the accepted manifest and predecessor through
+its proposal, beyond Git's head/tree identifiers. An adversarial test holds the
+Git head/tree constant and changes a carried artifact; the accepted checkpoints
+must differ. The amended candidate is requalified, not covered by old CI.
+The resulting combined local run passed **91/91, zero skips**.
 
 Existing CI receives two steps: pure/CLI tests in `static`, real-organ
 interoperability after the already-built workspace binary in `test`. There is

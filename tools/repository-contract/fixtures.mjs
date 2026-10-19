@@ -27,7 +27,7 @@ export function fixture() {
   const { source, payloads } = sourceGraph();
   const recipe = { id: 'contract-tests', argv: ['node', '--test', 'test.mjs'], runtime_digest: bytesDigest(Buffer.from('TEST-ONLY runtime')), input_files: [], output_files: [], network: 'none', limits: { cpu_seconds: 60, ram_bytes: 1_000_000, net_bytes: 0 } };
   const policy = { schema: 'bnr.repository-policy/1', repository: 'urn:bnr:test-repository', ref: 'refs/heads/main', revision: 1, keys: structuredClone(keys), update_keys: [keys[0].id], update_threshold: 1, suites: [{ id: recipe.id, recipe_digest: commitment('recipe', recipe), executor_keys: [keys[1].id], threshold: 1 }], max_bytes: 1_000_000 };
-  const state = { schema: 'bnr.repository-state/1', repository: policy.repository, ref: policy.ref, sequence: 0, head: source.parents[0], tree: '2'.repeat(40), policy_digest: commitment('policy', policy) };
+  const state = { schema: 'bnr.repository-state/1', repository: policy.repository, ref: policy.ref, sequence: 0, head: source.parents[0], tree: '2'.repeat(40), policy_digest: commitment('policy', policy), last_proposal: null };
   const manifest = { schema: 'bnr.repository-manifest/1', repository: policy.repository, ref: policy.ref, source, files: [], recipes: [recipe] };
   const f = { state, policy, manifest, payloads };
   return reseal(f);
