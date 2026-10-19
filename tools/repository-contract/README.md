@@ -145,9 +145,15 @@ node tools/repository-contract/cli.mjs restore --package /path/to/new-package --
 ```
 
 Restoration writes only a new bare Git repository, marks its shallow boundary,
-then checks it with `git fsck --strict`. It does not check out or execute source.
+then checks it with `git fsck --strict`. It writes Git's existing
+[zlib-compressed loose object format](https://git-scm.com/book/en/v2/Git-Internals-Git-Objects),
+avoiding one child process per object. It does not check out or execute source.
 Restoration is an integrity check, not authorization. The test restores a
 two-commit fixture with an unavailable remote and proves the exact head/tree.
+For snapshots exceeding the CLI's conservative 256 MiB ceiling, the module API
+accepts an explicit `maxBytes` argument to `packSnapshot`, `loadPackage` and
+`restoreSnapshot`. The policy still bounds acceptance; increasing a caller's
+I/O budget does not override that policy.
 
 Prepare canonical policy/state/proposal and obtain the trusted checkpoint
 through your existing authority process. The module exports `commitment` for

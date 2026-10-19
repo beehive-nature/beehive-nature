@@ -62,6 +62,14 @@ Git head/tree constant and changes a carried artifact; the accepted checkpoints
 must differ. The amended candidate is requalified, not covered by old CI.
 The resulting combined local run passed **91/91, zero skips**.
 
+A real estate snapshot export carried 27,901 objects from initial candidate
+`c4cc89358` (roughly 556 MB of source blobs). Its restoration probe exposed the
+cost of invoking Git per object and was stopped with its partial directory
+preserved. The adapter now writes Git's standard compressed loose objects and
+retains final strict Git validation. This changes only the I/O implementation,
+not the manifest or acceptance bytes. Final full-snapshot restoration and
+candidate/merge receipts are recorded in the PR after completion.
+
 Existing CI receives two steps: pure/CLI tests in `static`, real-organ
 interoperability after the already-built workspace binary in `test`. There is
 no additional workflow or duplicate build; existing checks are retained.

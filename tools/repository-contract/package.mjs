@@ -3,6 +3,7 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync, lstatSync } from 'node:fs';
 import { resolve, join } from 'node:path';
+import { deflateSync } from 'node:zlib';
 import { bytesDigest, canonicalDocument, parseDocument, need, record, text, integer, list } from './contract.mjs';
 import { commitLinks, validateManifest } from './manifest.mjs';
 
@@ -84,8 +85,12 @@ export function restoreSnapshot(directory, out, maxBytes = DEFAULT_MAX_BYTES) {
   const target = resolve(out); mkdirSync(target); // refuses existing repositories
   git(target, ['init', '--bare', '--object-format=sha1', '--template=']);
   for (const entry of manifest.source.objects) {
-    const restored = git(target, ['hash-object', '-w', '-t', entry.kind, '--stdin'], payloads.get(entry.digest)).toString().trim();
-    need(restored === entry.oid, 'GIT_OID');
+    // Git's existing loose-object format: zlib(type SP size NUL content).
+    // All IDs/content were verified above. Avoid one process per object;
+    // Git itself validates the complete reconstructed database below.
+    const fanout = join(target, 'objects', entry.oid.slice(0, 2)); mkdirSync(fanout, { recursive: true });
+    const raw = Buffer.concat([Buffer.from(`${entry.kind} ${entry.bytes}\0`), payloads.get(entry.digest)]);
+    writeFileSync(join(fanout, entry.oid.slice(2)), deflateSync(raw), { flag: 'wx' });
   }
   if (manifest.source.parents.length) writeFileSync(join(target, 'shallow'), manifest.source.commit + '\n', { flag: 'wx' });
   git(target, ['update-ref', manifest.ref, manifest.source.commit, '0'.repeat(40)]);
