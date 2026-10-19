@@ -1,5 +1,10 @@
 # Portable repository contract, version 1
 
+The next increment is implemented in [STORAGE.md](STORAGE.md): peer-owned
+encrypted storage, sovereign bzDiD owner proof verification, atomic local
+checkpoint transactions and ordered Hive shadow replay. GitHub remains stage
+one. The pure verifier and its signature/manifest contracts below are unchanged.
+
 GitHub remains the source host, proposal UI and CI provider. This consumer adds
 an offline source manifest and a deterministic acceptance decision that do not
 call GitHub. It does **not** install a new branch authority or create production
