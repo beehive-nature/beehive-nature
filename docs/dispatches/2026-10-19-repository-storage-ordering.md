@@ -54,7 +54,7 @@ is a correctness replica, not a plan for every wallet to scan every block.
 
 ## Local verification and failure record
 
-The combined repository run passed **86 tests, zero skipped**: prior manifest,
+The combined repository run passed **87 tests, zero skipped**: prior manifest,
 acceptance and bSigner tests plus storage, independent process races,
 before/after-COMMIT process crashes, cold Git restoration, Hive ordering and
 availability refusals, x0x replay, CLI persistence, encrypted byte/metadata
@@ -77,6 +77,11 @@ empty bytes only for a successful read (empty Git blobs are valid). One local
 Cargo invocation repeated `--lib` and exited before tests; corrected command
 above passed. Earlier exploratory PowerShell glob patterns given directly to
 rg were rejected by Windows; explicit directories/files were used instead.
+Final inspection found that a rejected local attempt could poison retries of
+the same proposal after signatures/bytes were repaired. Local decisions now
+retain each attempt; accepted replay still fails the predecessor CAS. The
+regression test covers bad signatures, missing bytes, successful repair and
+replay refusal across reopen.
 
 Tests use local storage, loopback RPC/storage fixtures and published disposable
 test keys. No live x0x delivery, mainnet storage upload/payment, Hive posting,

@@ -128,9 +128,11 @@ export class CheckpointStore {
     need(this.bootstrap.ordering.mode === 'local-shadow', 'ORDERING'); hash(expected);
     return this.#transaction(() => {
       const c = this.current(); need(c.digest === expected, 'CAS_CONFLICT');
-      const position = `local:${commitment('proposal', candidate.proposal)}`;
-      const old = this.#db.prepare('SELECT result FROM decisions WHERE position=?').get(position);
-      need(!old, 'REPLAY');
+      // A refusal must not poison a later attempt with corrected signatures or
+      // restored payloads. Keep every local attempt; accepted replay is already
+      // excluded by the predecessor CAS and acceptUpdate's state binding.
+      const { next } = this.#db.prepare('SELECT coalesce(max(rowid),0)+1 AS next FROM decisions').get();
+      const position = `local:${commitment('proposal', candidate.proposal)}:${next}`;
       return this.#apply(candidate, payloads, position);
     });
   }

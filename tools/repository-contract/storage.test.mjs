@@ -84,6 +84,15 @@ test('corrupt local bytes and a changed bootstrap never reset trust', t => {
 function childInput(s, f, name) {
   const path = join(s.dir, name); writeFileSync(path, canonicalDocument({ bootstrap: s.pin, candidate: candidate(f), payloads: [...f.payloads].map(([k, b]) => [k, Buffer.from(b).toString('base64')]) })); return path;
 }
+test('a local refusal does not poison later valid signatures or restored payloads', t => {
+  const s = setup(t), good = candidate(s.f), bad = structuredClone(good), expected = s.f.trustedStateDigest;
+  bad.signatures[0].signature.b64u = 'A'.repeat(4400);
+  assert.equal(s.store.applyLocal({ candidate: bad, payloads: s.f.payloads, expected }).code, 'SIGNATURE');
+  assert.equal(s.store.applyLocal({ candidate: good, payloads: new Map(), expected }).accepted, false);
+  assert.equal(s.open().applyLocal({ candidate: good, payloads: s.f.payloads, expected }).accepted, true);
+  assert.deepEqual(s.store.decisions().map(d => d.result.accepted), [false, false, true]);
+  assert.throws(() => s.store.applyLocal({ candidate: good, payloads: s.f.payloads, expected }), e => e.code === 'CAS_CONFLICT');
+});
 const childFile = fileURLToPath(new URL('./checkpoint-child.mjs', import.meta.url));
 test('two independent processes race eligible proposals: one checkpoint wins and replay loses', async t => {
   const s = setup(t); const inputs = [childInput(s, s.f, 'a.json'), childInput(s, competing(), 'b.json')];
