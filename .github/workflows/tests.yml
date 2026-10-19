@@ -600,7 +600,7 @@ jobs:
         run: node scripts/lint-ci-shape.mjs
       - name: CI throughput — qualification triggers, push audits and workspace cache paths
         if: always()
-        run: node --test e2e/ci-throughput.test.mjs
+        run: node --test e2e/ci-throughput.test.mjs e2e/ci-run-receipt.test.mjs
       # NO ENABLE-THEN-CLICK ACROSS TWO STEPS (2026-10-03): the wallet check
       # went red on unrelated commits because a test enabled a control and
       # clicked it in separate Playwright steps while the page re-disabled it

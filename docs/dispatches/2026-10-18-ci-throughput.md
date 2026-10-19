@@ -84,6 +84,25 @@ These checks do not claim to validate solver outcomes, all YAML syntax,
 hosted cache hits, or realized elapsed-time savings. The candidate's own
 CI and its actual merge checks must supply those results.
 
+The read-only `scripts/ci-run-receipt.mjs` collector captures GitHub run,
+event and attempt identity, job outcomes/timestamps, and the actual full
+checkout SHA from each completed job's checkout log. It resolves that
+commit's tree and retains the log digest without copying raw logs or
+credentials. Missing or ambiguous checkout evidence stays unbound; it
+never substitutes the run's PR head for the tested checkout. Five more
+tests cover that boundary and prevent queued, failed, cancelled, skipped
+or empty observations from becoming successful-run claims (29 tests total).
+
+The first live capture is
+[`cache-pr-first-observation.json`](../receipts/ci-throughput-2026-10-18/cache-pr-first-observation.json).
+It covers only WB002 SAW run `39179441710`, attempt 1: the head is
+`377674983`, while the actual checkout is synthetic merge `94ced410`.
+Its job took 58 seconds, with 179 seconds from workflow creation to job
+start. Dispatch-to-start can include dependency waiting and is not
+reported as pure runner queue time. This one-run observation is not full
+PR qualification. Receipts are unsigned observations, not attestations;
+required workflow/event coverage must be checked separately.
+
 ## Stage-one hosting and the next phase
 
 GitHub currently supplies hosting, event scheduling, runners and check

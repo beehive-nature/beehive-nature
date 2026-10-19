@@ -1,0 +1,64 @@
+{
+  "format": "bnr.ci-observation.v1",
+  "provider": "github",
+  "repository": "beehive-nature/beehive-nature",
+  "head": "3776749837e2ca8b73eed440b67446362b639ccc",
+  "observed_at": "2026-10-19T00:18:39.183Z",
+  "attestation": "unsigned API and job-log observations",
+  "coverage_note": "Recorded runs only; compare against the required workflow/event plan before qualification.",
+  "timing_note": "Dispatch-to-start includes dependency waiting; it is not pure runner queue time.",
+  "summary": {
+    "workflow_executions": 1,
+    "completed_successfully": 1,
+    "incomplete": 0,
+    "non_success": [],
+    "all_recorded_runs_successful": true,
+    "executed_jobs": 1,
+    "jobs_with_checkout_binding": 1,
+    "completed_job_execution_seconds": 58,
+    "timing_missing_job_ids": [],
+    "dispatch_to_job_start_seconds": [
+      {
+        "id": 117828850361,
+        "seconds": 179
+      }
+    ]
+  },
+  "runs": [
+    {
+      "id": 39179441710,
+      "name": "WB002 SAW equivalence",
+      "event": "pull_request",
+      "attempt": 1,
+      "head": "3776749837e2ca8b73eed440b67446362b639ccc",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-19T00:08:44Z",
+      "url": "https://github.com/beehive-nature/beehive-nature/actions/runs/39179441710",
+      "pull_requests": [
+        {
+          "number": 468,
+          "head": "3776749837e2ca8b73eed440b67446362b639ccc",
+          "base": "6e7f01bcba46f5a753715ad6818165487c2b07dd"
+        }
+      ],
+      "jobs": [
+        {
+          "id": 117828850361,
+          "name": "saw",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-19T00:11:43Z",
+          "completed_at": "2026-10-19T00:12:41Z",
+          "dispatch_to_start_seconds": 179,
+          "execution_seconds": 58,
+          "checkout": {
+            "commit": "94ced41034e6c4734e5e45ca9e846334308a6755",
+            "tree": "74a3877d534252bba32801ce8bb310551e333cd8"
+          },
+          "log_sha256_PUBLIC-CONSTANT": "ac32f7cc2f998cc3c9a741200601a75cb5fe127bae2f4b9b202c2ffa78d27a2d"
+        }
+      ]
+    }
+  ]
+}
