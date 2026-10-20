@@ -59,9 +59,18 @@ pub const CORPUS_FILES: [&str; 9] = [
 /// resolvable Arweave transaction ids, Autonomi addresses or x0x routes
 /// live in this crate. Naming a rail here claims no working retrieval.
 pub const RAILS: [(&str, &str); 4] = [
-    ("github-pages", "declared rail — bootstrap origin; name only, no fetch route in this crate"),
-    ("arweave", "declared rail — adapter-arweave owns any future fetch route"),
-    ("autonomi", "declared rail — adapter-autonomi owns any future fetch route"),
+    (
+        "github-pages",
+        "declared rail — bootstrap origin; name only, no fetch route in this crate",
+    ),
+    (
+        "arweave",
+        "declared rail — adapter-arweave owns any future fetch route",
+    ),
+    (
+        "autonomi",
+        "declared rail — adapter-autonomi owns any future fetch route",
+    ),
     ("x0x", "declared rail — ops/x0x owns any future mesh route"),
 ];
 
@@ -110,7 +119,11 @@ struct Census {
 
 fn census_persons(root: &Path) -> Result<Census, String> {
     let dir = persons_dir(root);
-    let mut c = Census { html: BTreeMap::new(), json: BTreeMap::new(), strays: vec![] };
+    let mut c = Census {
+        html: BTreeMap::new(),
+        json: BTreeMap::new(),
+        strays: vec![],
+    };
     for entry in fs::read_dir(&dir).map_err(|e| format!("{}: {e}", dir.display()))? {
         let entry = entry.map_err(|e| format!("{}: {e}", dir.display()))?;
         let name = entry.file_name().to_string_lossy().into_owned();
@@ -126,10 +139,12 @@ fn census_persons(root: &Path) -> Result<Census, String> {
             continue;
         }
         if let Some(id) = name.strip_suffix(".html") {
-            let d = digest_file(&entry.path()).map_err(|e| format!("{}: {e}", entry.path().display()))?;
+            let d = digest_file(&entry.path())
+                .map_err(|e| format!("{}: {e}", entry.path().display()))?;
             c.html.insert(id.to_string(), d);
         } else if let Some(id) = name.strip_suffix(".json") {
-            let d = digest_file(&entry.path()).map_err(|e| format!("{}: {e}", entry.path().display()))?;
+            let d = digest_file(&entry.path())
+                .map_err(|e| format!("{}: {e}", entry.path().display()))?;
             c.json.insert(id.to_string(), d);
         } else {
             c.strays.push(name);
@@ -150,7 +165,8 @@ pub fn bind(root: &Path) -> Result<BindOutcome, String> {
     // corpus digests (file bytes, exact)
     let mut corpus = Map::new();
     for rel in CORPUS_FILES {
-        let (sha, n) = digest_file(&root.join(rel)).map_err(|e| format!("corpus input {rel}: {e}"))?;
+        let (sha, n) =
+            digest_file(&root.join(rel)).map_err(|e| format!("corpus input {rel}: {e}"))?;
         corpus.insert(rel.to_string(), json!({"sha256": sha, "bytes": n}));
     }
 
@@ -161,7 +177,11 @@ pub fn bind(root: &Path) -> Result<BindOutcome, String> {
         .ok_or("roster: persons map missing")?;
 
     // family edges (child -> parents) and couples, filtered to staged persons
-    let edges = roster.get("edges").and_then(Value::as_object).cloned().unwrap_or_default();
+    let edges = roster
+        .get("edges")
+        .and_then(Value::as_object)
+        .cloned()
+        .unwrap_or_default();
     let mut children: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
     for (child, parents) in &edges {
         if !persons.contains_key(child) {
@@ -180,8 +200,10 @@ pub fn bind(root: &Path) -> Result<BindOutcome, String> {
     let mut spouses: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
     if let Some(couples) = roster.get("couples").and_then(Value::as_object) {
         for c in couples.values() {
-            let (Some(p1), Some(p2)) = (c.get("p1").and_then(Value::as_str), c.get("p2").and_then(Value::as_str))
-            else {
+            let (Some(p1), Some(p2)) = (
+                c.get("p1").and_then(Value::as_str),
+                c.get("p2").and_then(Value::as_str),
+            ) else {
                 continue;
             };
             if persons.contains_key(p1) && persons.contains_key(p2) {
@@ -200,7 +222,10 @@ pub fn bind(root: &Path) -> Result<BindOutcome, String> {
                 if let Some(list) = entry.get("sources").and_then(Value::as_array) {
                     for s in list {
                         if let Some(id) = s.get("id").and_then(Value::as_str) {
-                            record_arks.entry(iid.as_str()).or_default().push(id.to_string());
+                            record_arks
+                                .entry(iid.as_str())
+                                .or_default()
+                                .push(id.to_string());
                         }
                     }
                 }
@@ -321,7 +346,11 @@ pub fn bind(root: &Path) -> Result<BindOutcome, String> {
     });
     let index_json = serde_json::to_string(&index).map_err(|e| e.to_string())? + "\n";
 
-    Ok(BindOutcome { state_json, index_json, persons: persons.len() })
+    Ok(BindOutcome {
+        state_json,
+        index_json,
+        persons: persons.len(),
+    })
 }
 
 /// Write the bound artifacts (bind + persist).
@@ -349,18 +378,27 @@ impl CheckReport {
 /// file and the index file all agree. Findings are named, capped at
 /// `max_named` (a total is always reported).
 pub fn check(root: &Path, max_named: usize) -> Result<CheckReport, String> {
-    let mut report = CheckReport { green: true, findings: vec![] };
+    let mut report = CheckReport {
+        green: true,
+        findings: vec![],
+    };
     let state_file = state_path(root);
     let index_file = index_path(root);
     let state_on_disk = match fs::read_to_string(&state_file) {
         Ok(s) => Some(s),
         Err(_) => {
-            report.red(format!("state file absent: {} — run `gp bind`", state_file.display()));
+            report.red(format!(
+                "state file absent: {} — run `gp bind`",
+                state_file.display()
+            ));
             None
         }
     };
     if fs::read_to_string(&index_file).is_err() {
-        report.red(format!("index file absent: {} — run `gp bind`", index_file.display()));
+        report.red(format!(
+            "index file absent: {} — run `gp bind`",
+            index_file.display()
+        ));
     }
 
     // bind() failing means the tree itself violates the census contract
@@ -375,8 +413,10 @@ pub fn check(root: &Path, max_named: usize) -> Result<CheckReport, String> {
     if let Some(disk) = &state_on_disk {
         if disk != &derived.state_json {
             // name the drift inside the state: corpus and per-page digests
-            let disk_state: Value = serde_json::from_str(disk).map_err(|e| format!("state file unparseable: {e}"))?;
-            let derived_state: Value = serde_json::from_str(&derived.state_json).map_err(|e| e.to_string())?;
+            let disk_state: Value =
+                serde_json::from_str(disk).map_err(|e| format!("state file unparseable: {e}"))?;
+            let derived_state: Value =
+                serde_json::from_str(&derived.state_json).map_err(|e| e.to_string())?;
             let mut named = 0usize;
             let dc = disk_state.get("corpus").and_then(Value::as_object);
             let vc = derived_state.get("corpus").and_then(Value::as_object);
@@ -387,15 +427,29 @@ pub fn check(root: &Path, max_named: usize) -> Result<CheckReport, String> {
                     named += 1;
                     report.red(format!(
                         "corpus drift: {rel} ({} -> {})",
-                        a.and_then(|x| x.get("sha256")).and_then(Value::as_str).unwrap_or("absent"),
-                        b.and_then(|x| x.get("sha256")).and_then(Value::as_str).unwrap_or("absent")
+                        a.and_then(|x| x.get("sha256"))
+                            .and_then(Value::as_str)
+                            .unwrap_or("absent"),
+                        b.and_then(|x| x.get("sha256"))
+                            .and_then(Value::as_str)
+                            .unwrap_or("absent")
                     ));
                 }
             }
-            let dp = disk_state.get("pages").and_then(Value::as_array).cloned().unwrap_or_default();
-            let vp = derived_state.get("pages").and_then(Value::as_array).cloned().unwrap_or_default();
-            let dmap: BTreeMap<String, &Value> =
-                dp.iter().map(|p| (p["id"].as_str().unwrap_or("").to_string(), p)).collect();
+            let dp = disk_state
+                .get("pages")
+                .and_then(Value::as_array)
+                .cloned()
+                .unwrap_or_default();
+            let vp = derived_state
+                .get("pages")
+                .and_then(Value::as_array)
+                .cloned()
+                .unwrap_or_default();
+            let dmap: BTreeMap<String, &Value> = dp
+                .iter()
+                .map(|p| (p["id"].as_str().unwrap_or("").to_string(), p))
+                .collect();
             let mut page_drift = 0usize;
             for p in &vp {
                 let id = p["id"].as_str().unwrap_or("");
@@ -403,7 +457,9 @@ pub fn check(root: &Path, max_named: usize) -> Result<CheckReport, String> {
                     None if named < max_named => {
                         named += 1;
                         page_drift += 1;
-                        report.red(format!("page {id}: new on disk, absent from committed state"));
+                        report.red(format!(
+                            "page {id}: new on disk, absent from committed state"
+                        ));
                     }
                     None => page_drift += 1,
                     Some(old) => {
@@ -411,11 +467,13 @@ pub fn check(root: &Path, max_named: usize) -> Result<CheckReport, String> {
                             page_drift += 1;
                             if named < max_named {
                                 named += 1;
-                                report.red(format!("page drift: persons/{id} (html {} -> {}, json {} -> {})",
+                                report.red(format!(
+                                    "page drift: persons/{id} (html {} -> {}, json {} -> {})",
                                     old["html"]["sha256"].as_str().unwrap_or("?"),
                                     p["html"]["sha256"].as_str().unwrap_or("?"),
                                     old["json"]["sha256"].as_str().unwrap_or("?"),
-                                    p["json"]["sha256"].as_str().unwrap_or("?")));
+                                    p["json"]["sha256"].as_str().unwrap_or("?")
+                                ));
                             }
                         }
                     }
@@ -434,7 +492,9 @@ pub fn check(root: &Path, max_named: usize) -> Result<CheckReport, String> {
                 report.red(format!("total page drift: {page_drift}"));
             }
             if report.findings.is_empty() {
-                report.red("state file bytes differ from re-derivation (fields above matched)".to_string());
+                report.red(
+                    "state file bytes differ from re-derivation (fields above matched)".to_string(),
+                );
             }
         }
     }
@@ -474,7 +534,11 @@ pub struct ResolveOptions<'a> {
 
 impl Default for ResolveOptions<'_> {
     fn default() -> Self {
-        ResolveOptions { bname: None, expect_state_sha: None, preview: false }
+        ResolveOptions {
+            bname: None,
+            expect_state_sha: None,
+            preview: false,
+        }
     }
 }
 
@@ -499,15 +563,20 @@ pub fn resolve(root: &Path, person: &str, opts: ResolveOptions) -> Result<String
 
     let index_bytes = fs::read(index_path(root))
         .map_err(|e| format!("index file unreadable (run `gp bind`): {e}"))?;
-    let index: Value = serde_json::from_slice(&index_bytes).map_err(|e| format!("index unparseable: {e}"))?;
-    let index_claim = index.get("stateSha256").and_then(Value::as_str).unwrap_or("absent");
+    let index: Value =
+        serde_json::from_slice(&index_bytes).map_err(|e| format!("index unparseable: {e}"))?;
+    let index_claim = index
+        .get("stateSha256")
+        .and_then(Value::as_str)
+        .unwrap_or("absent");
     if !index_claim.eq_ignore_ascii_case(&state_sha) {
         return Err(format!(
             "index not bound to the state beside it: index claims {index_claim}, state hashes {state_sha} — tampered or stale index; run `gp check` (or --preview to inspect, untrusted)"
         ));
     }
 
-    let state: Value = serde_json::from_slice(&state_bytes).map_err(|e| format!("state unparseable: {e}"))?;
+    let state: Value =
+        serde_json::from_slice(&state_bytes).map_err(|e| format!("state unparseable: {e}"))?;
     let state_page = state
         .get("pages")
         .and_then(Value::as_array)
@@ -521,8 +590,14 @@ pub fn resolve(root: &Path, person: &str, opts: ResolveOptions) -> Result<String
     // state ↔ index must agree on the page digests before either is believed
     let want_html = state_page["html"]["sha256"].as_str().unwrap_or("?");
     let want_json = state_page["json"]["sha256"].as_str().unwrap_or("?");
-    let got_html = entry.get("pageHtmlSha256").and_then(Value::as_str).unwrap_or("?");
-    let got_json = entry.get("pageJsonSha256").and_then(Value::as_str).unwrap_or("?");
+    let got_html = entry
+        .get("pageHtmlSha256")
+        .and_then(Value::as_str)
+        .unwrap_or("?");
+    let got_json = entry
+        .get("pageJsonSha256")
+        .and_then(Value::as_str)
+        .unwrap_or("?");
     if got_html != want_html || got_json != want_json {
         return Err(format!(
             "index/state disagree on page digests for {person}: html index {got_html} vs state {want_html}; json index {got_json} vs state {want_json}"
@@ -540,11 +615,15 @@ pub fn resolve(root: &Path, person: &str, opts: ResolveOptions) -> Result<String
             Ok((got, _)) if got == want => {}
             Ok((got, _)) => {
                 disk_ok = false;
-                let msg = format!("page bytes drift: persons/{fname} state says {want}, disk hashes {got}");
+                let msg = format!(
+                    "page bytes drift: persons/{fname} state says {want}, disk hashes {got}"
+                );
                 if opts.preview {
                     disk_warnings.push(msg);
                 } else {
-                    return Err(format!("{msg} — failing closed (--preview to inspect, untrusted)"));
+                    return Err(format!(
+                        "{msg} — failing closed (--preview to inspect, untrusted)"
+                    ));
                 }
             }
             Err(e) => {
@@ -561,9 +640,11 @@ pub fn resolve(root: &Path, person: &str, opts: ResolveOptions) -> Result<String
 
     let anchor = match opts.bname {
         Some(fqn) => {
-            let name = bnr_url::BName::parse_fqn(fqn).map_err(|e| format!(".b anchor rejected by ORDER cC label law: {e:?}"))?;
+            let name = bnr_url::BName::parse_fqn(fqn)
+                .map_err(|e| format!(".b anchor rejected by ORDER cC label law: {e:?}"))?;
             let raw = format!("bnr://{}/person/{person}", name.fqn());
-            let url = bnr_url::BnrUrl::parse(&raw).map_err(|e| format!("constructed address failed its own parser: {e:?}"))?;
+            let url = bnr_url::BnrUrl::parse(&raw)
+                .map_err(|e| format!("constructed address failed its own parser: {e:?}"))?;
             json!({
                 "bName": name.fqn(),
                 "url": url.canonical(),
@@ -652,11 +733,19 @@ mod tests {
             "edges": {"founder": ["pa", "ma"]},
             "couples": {"pa|ma": {"p1": "pa", "p2": "ma"}}
         });
-        fs::write(lin.join("remington-bloodline.json"), serde_json::to_string(&roster).unwrap()).unwrap();
+        fs::write(
+            lin.join("remington-bloodline.json"),
+            serde_json::to_string(&roster).unwrap(),
+        )
+        .unwrap();
         // sources index: one record ark on pa
         let si = json!({"schema": "skaists.sources/1", "root": "founder",
             "persons": {"pa": {"iid": "pa", "fsid": "AAA-111", "sources": [{"id": "QW-1"}]}}});
-        fs::write(lin.join("sources/index.json"), serde_json::to_string(&si).unwrap()).unwrap();
+        fs::write(
+            lin.join("sources/index.json"),
+            serde_json::to_string(&si).unwrap(),
+        )
+        .unwrap();
         // the remaining corpus files are digested, not parsed
         for (i, rel) in CORPUS_FILES.iter().enumerate() {
             if i == 0 || i == 5 {
@@ -667,8 +756,16 @@ mod tests {
             fs::write(p, "{}").unwrap();
         }
         for id in ["founder", "pa", "ma"] {
-            fs::write(lin.join(format!("persons/{id}.html")), format!("<html>{id}</html>")).unwrap();
-            fs::write(lin.join(format!("persons/{id}.json")), format!("{{\"id\":\"{id}\"}}")).unwrap();
+            fs::write(
+                lin.join(format!("persons/{id}.html")),
+                format!("<html>{id}</html>"),
+            )
+            .unwrap();
+            fs::write(
+                lin.join(format!("persons/{id}.json")),
+                format!("{{\"id\":\"{id}\"}}"),
+            )
+            .unwrap();
         }
     }
 
@@ -700,8 +797,13 @@ mod tests {
         fs::write(&page, orig + "<!-- tampered -->").unwrap();
         let rep = check(&dir, 20).unwrap();
         assert!(!rep.green);
-        assert!(rep.findings.iter().any(|f| f.contains("persons/") && f.contains("pa")),
-            "findings: {:?}", rep.findings);
+        assert!(
+            rep.findings
+                .iter()
+                .any(|f| f.contains("persons/") && f.contains("pa")),
+            "findings: {:?}",
+            rep.findings
+        );
         let _ = fs::remove_dir_all(&dir);
     }
 
@@ -714,7 +816,11 @@ mod tests {
         fs::write(&recs, "{\"records\":{}}").unwrap();
         let rep = check(&dir, 20).unwrap();
         assert!(!rep.green);
-        assert!(rep.findings.iter().any(|f| f.contains("records.json")), "findings: {:?}", rep.findings);
+        assert!(
+            rep.findings.iter().any(|f| f.contains("records.json")),
+            "findings: {:?}",
+            rep.findings
+        );
         let _ = fs::remove_dir_all(&dir);
     }
 
@@ -724,10 +830,17 @@ mod tests {
         let dir = fixture_root("stray");
         write_fixture(&dir);
         bind_and_write(&dir).unwrap();
-        fs::write(dir.join("assets/profile-archive/lineage/persons/notes.txt"), "x").unwrap();
+        fs::write(
+            dir.join("assets/profile-archive/lineage/persons/notes.txt"),
+            "x",
+        )
+        .unwrap();
         let rep = check(&dir, 20).unwrap();
         assert!(!rep.green);
-        assert!(rep.findings.iter().any(|f| f.contains("bind refused") && f.contains("unbound")));
+        assert!(rep
+            .findings
+            .iter()
+            .any(|f| f.contains("bind refused") && f.contains("unbound")));
         let _ = fs::remove_dir_all(&dir);
 
         // missing page
@@ -749,7 +862,10 @@ mod tests {
         fs::write(&ip, idx).unwrap();
         let rep = check(&dir, 20).unwrap();
         assert!(!rep.green);
-        assert!(rep.findings.iter().any(|f| f.contains("index file stale or tampered")));
+        assert!(rep
+            .findings
+            .iter()
+            .any(|f| f.contains("index file stale or tampered")));
         let _ = fs::remove_dir_all(&dir);
 
         // absent state
@@ -768,7 +884,15 @@ mod tests {
         let dir = fixture_root("resolve");
         write_fixture(&dir);
         bind_and_write(&dir).unwrap();
-        let out = resolve(&dir, "pa", ResolveOptions { bname: Some("blood.b"), ..Default::default() }).unwrap();
+        let out = resolve(
+            &dir,
+            "pa",
+            ResolveOptions {
+                bname: Some("blood.b"),
+                ..Default::default()
+            },
+        )
+        .unwrap();
         let v: Value = serde_json::from_str(&out).unwrap();
         assert_eq!(v["anchor"]["url"], "bnr://blood.b/person/pa");
         assert_eq!(v["person"]["pageHtml"], "persons/pa.html");
@@ -776,9 +900,15 @@ mod tests {
         assert!(v["trustRoot"]["warning"].is_string());
         assert_eq!(v["verification"]["indexBoundToState"], true);
         assert_eq!(v["verification"]["pageDigestsRecomputedFromDisk"], true);
-        assert!(
-            resolve(&dir, "pa", ResolveOptions { bname: Some("Bad..x.b"), ..Default::default() }).is_err()
-        );
+        assert!(resolve(
+            &dir,
+            "pa",
+            ResolveOptions {
+                bname: Some("Bad..x.b"),
+                ..Default::default()
+            }
+        )
+        .is_err());
         assert!(resolve(&dir, "nobody", ResolveOptions::default()).is_err());
         let _ = fs::remove_dir_all(&dir);
     }
@@ -789,8 +919,7 @@ mod tests {
         write_fixture(&dir);
         bind_and_write(&dir).unwrap();
         let ip = index_path(&dir);
-        let mut idx: Value =
-            serde_json::from_str(&fs::read_to_string(&ip).unwrap()).unwrap();
+        let mut idx: Value = serde_json::from_str(&fs::read_to_string(&ip).unwrap()).unwrap();
         // attacker edits the person's page hash but leaves stateSha256 intact:
         // the binding check passes; state↔index disagreement must catch it
         idx["persons"]["pa"]["pageHtmlSha256"] = json!("f".repeat(64));
@@ -806,8 +935,7 @@ mod tests {
         write_fixture(&dir);
         bind_and_write(&dir).unwrap();
         let ip = index_path(&dir);
-        let mut idx: Value =
-            serde_json::from_str(&fs::read_to_string(&ip).unwrap()).unwrap();
+        let mut idx: Value = serde_json::from_str(&fs::read_to_string(&ip).unwrap()).unwrap();
         idx["stateSha256"] = json!("0".repeat(64));
         fs::write(&ip, serde_json::to_string(&idx).unwrap()).unwrap();
         let err = resolve(&dir, "pa", ResolveOptions::default()).unwrap_err();
@@ -825,13 +953,28 @@ mod tests {
         fs::write(&page, orig.clone() + "<!-- drift -->").unwrap();
         // fail closed by default
         let err = resolve(&dir, "pa", ResolveOptions::default()).unwrap_err();
-        assert!(err.contains("page bytes drift") && err.contains("failing closed"), "{err}");
+        assert!(
+            err.contains("page bytes drift") && err.contains("failing closed"),
+            "{err}"
+        );
         // preview proceeds, visibly untrusted, with the drift named
-        let out = resolve(&dir, "pa", ResolveOptions { preview: true, ..Default::default() }).unwrap();
+        let out = resolve(
+            &dir,
+            "pa",
+            ResolveOptions {
+                preview: true,
+                ..Default::default()
+            },
+        )
+        .unwrap();
         let v: Value = serde_json::from_str(&out).unwrap();
         assert_eq!(v["mode"], "preview-untrusted");
         assert_eq!(v["verification"]["pageDigestsRecomputedFromDisk"], false);
-        assert!(v["warnings"].as_array().unwrap().iter().any(|w| w.as_str().unwrap().contains("page bytes drift")));
+        assert!(v["warnings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|w| w.as_str().unwrap().contains("page bytes drift")));
         let _ = fs::remove_dir_all(&dir);
     }
 
@@ -845,10 +988,25 @@ mod tests {
         h.update(&state_bytes);
         let real: String = h.finalize().iter().map(|b| format!("{b:02x}")).collect();
         let wrong = "a".repeat(64);
-        let err = resolve(&dir, "pa", ResolveOptions { expect_state_sha: Some(&wrong), ..Default::default() })
-            .unwrap_err();
+        let err = resolve(
+            &dir,
+            "pa",
+            ResolveOptions {
+                expect_state_sha: Some(&wrong),
+                ..Default::default()
+            },
+        )
+        .unwrap_err();
         assert!(err.contains("pinned-root mismatch"), "{err}");
-        let out = resolve(&dir, "pa", ResolveOptions { expect_state_sha: Some(&real), ..Default::default() }).unwrap();
+        let out = resolve(
+            &dir,
+            "pa",
+            ResolveOptions {
+                expect_state_sha: Some(&real),
+                ..Default::default()
+            },
+        )
+        .unwrap();
         let v: Value = serde_json::from_str(&out).unwrap();
         assert_eq!(v["trustRoot"]["mode"], "pinned");
         assert_eq!(v["verification"]["pinnedRootChecked"], true);
@@ -867,12 +1025,17 @@ mod tests {
         if !made {
             // this Windows host may refuse unprivileged symlinks; CI (ubuntu)
             // creates it and exercises the refusal
-            eprintln!("symlink creation unavailable on this host — negative control deferred to CI");
+            eprintln!(
+                "symlink creation unavailable on this host — negative control deferred to CI"
+            );
             let _ = fs::remove_dir_all(&dir);
             return;
         }
         match bind(&dir) {
-            Err(e) => assert!(e.contains("symlink refused") || e.contains("unbound"), "{e}"),
+            Err(e) => assert!(
+                e.contains("symlink refused") || e.contains("unbound"),
+                "{e}"
+            ),
             Ok(_) => panic!("bind accepted a symlinked page into the census"),
         }
         let _ = fs::remove_dir_all(&dir);

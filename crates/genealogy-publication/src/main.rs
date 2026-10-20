@@ -23,10 +23,15 @@ fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let cmd = args.first().map(String::as_str);
     let flag = |name: &str| -> Option<String> {
-        args.iter().position(|a| a == name).and_then(|i| args.get(i + 1)).cloned()
+        args.iter()
+            .position(|a| a == name)
+            .and_then(|i| args.get(i + 1))
+            .cloned()
     };
     let Some(cmd) = cmd else { return usage() };
-    let Some(root) = flag("--root") else { return usage() };
+    let Some(root) = flag("--root") else {
+        return usage();
+    };
     let root = Path::new(&root);
 
     match cmd {
@@ -46,13 +51,19 @@ fn main() -> ExitCode {
             }
         },
         "check" => {
-            let max: usize = flag("--max-named").and_then(|v| v.parse().ok()).unwrap_or(20);
+            let max: usize = flag("--max-named")
+                .and_then(|v| v.parse().ok())
+                .unwrap_or(20);
             match genealogy_publication::check(root, max) {
                 Ok(rep) => {
                     for f in &rep.findings {
                         println!("RED: {f}");
                     }
-                    println!("{{\"green\": {}, \"findings\": {}}}", rep.green, rep.findings.len());
+                    println!(
+                        "{{\"green\": {}, \"findings\": {}}}",
+                        rep.green,
+                        rep.findings.len()
+                    );
                     if rep.green {
                         ExitCode::SUCCESS
                     } else {
@@ -66,7 +77,9 @@ fn main() -> ExitCode {
             }
         }
         "resolve" => {
-            let Some(person) = flag("--person") else { return usage() };
+            let Some(person) = flag("--person") else {
+                return usage();
+            };
             let bname = flag("--bname");
             let pin = flag("--expect-state-sha");
             let opts = genealogy_publication::ResolveOptions {
