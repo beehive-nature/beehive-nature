@@ -1,0 +1,304 @@
+{
+  "source": "85633f6a6dfea44e62a0cad778aa429275fc4604",
+  "observations_per_arm": 10240,
+  "runs": [
+    {
+      "run": 1,
+      "baseline_p50_us": 237.541,
+      "shadow_p50_us": 262.681,
+      "added_p50_us": 25.14,
+      "overhead_percent": 10.583436122606194,
+      "baseline_p95_us": 304.612,
+      "shadow_p95_us": 333.161,
+      "scaling": [
+        {
+          "elapsed_secs": 0.249258241,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4108.189145088287,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.252212169,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4060.0737230882783,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.253174451,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 8089.283859057326,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.263047756,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 7785.6585098562855,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.241394381,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 16968.083445156914,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.280159572,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 14620.23935416349,
+          "shadow": true
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "baseline_p50_us": 207.481,
+      "shadow_p50_us": 216.741,
+      "added_p50_us": 9.26,
+      "overhead_percent": 4.463059268077552,
+      "baseline_p95_us": 292.081,
+      "shadow_p95_us": 298.471,
+      "scaling": [
+        {
+          "elapsed_secs": 0.245049391,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4178.749417908163,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.239349485,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4278.26280887966,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.243366926,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 8415.276609936716,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.243608577,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 8406.92895636429,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.251798898,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 16266.949667110934,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.322935273,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 12683.656269409752,
+          "shadow": true
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "baseline_p50_us": 215.95,
+      "shadow_p50_us": 239.261,
+      "added_p50_us": 23.311,
+      "overhead_percent": 10.794628386200511,
+      "baseline_p95_us": 274.82,
+      "shadow_p95_us": 316.761,
+      "scaling": [
+        {
+          "elapsed_secs": 0.222122161,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4610.075804187768,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.256115749,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 3998.1922392441397,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.233150819,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 8784.01375034415,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.269188034,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 7608.064777500474,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.237456181,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 17249.498340074795,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.265050953,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 15453.63241912207,
+          "shadow": true
+        }
+      ]
+    },
+    {
+      "run": 4,
+      "baseline_p50_us": 219.431,
+      "shadow_p50_us": 221.52,
+      "added_p50_us": 2.089,
+      "overhead_percent": 0.9520076926232024,
+      "baseline_p95_us": 294.901,
+      "shadow_p95_us": 305.101,
+      "scaling": [
+        {
+          "elapsed_secs": 0.222367631,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4604.986775255972,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.23677485,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4324.783649952687,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.231051664,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 8863.818440190935,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.265858956,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 7703.332740086439,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.262707097,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 15591.508744051935,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.259510468,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 15783.56369038647,
+          "shadow": true
+        }
+      ]
+    },
+    {
+      "run": 5,
+      "baseline_p50_us": 228.351,
+      "shadow_p50_us": 231.511,
+      "added_p50_us": 3.16,
+      "overhead_percent": 1.3838345354300952,
+      "baseline_p95_us": 301.72,
+      "shadow_p95_us": 317.601,
+      "scaling": [
+        {
+          "elapsed_secs": 0.244035649,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4196.108249741824,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.244645561,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4185.647169784535,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.223259805,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 9173.16934859815,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.240252049,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 8524.38099289634,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.253328222,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 16168.747278382589,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.304276607,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 13461.435765254213,
+          "shadow": true
+        }
+      ]
+    }
+  ],
+  "median_run_overhead_percent": 4.463059268077552,
+  "overhead_range_percent": [
+    0.9520076926232024,
+    10.794628386200511
+  ],
+  "median_run_added_p50_us": 9.26,
+  "medians": {
+    "baseline_p50_us": 219.431,
+    "shadow_p50_us": 231.511,
+    "baseline_p95_us": 294.901,
+    "shadow_p95_us": 316.761
+  },
+  "scaling": [
+    {
+      "observers": 1,
+      "baseline_median_ops_per_sec": 4196.108249741824,
+      "shadow_median_ops_per_sec": 4185.647169784535,
+      "median_run_throughput_change_percent": -1.171207563739729
+    },
+    {
+      "observers": 2,
+      "baseline_median_ops_per_sec": 8784.01375034415,
+      "shadow_median_ops_per_sec": 7785.6585098562855,
+      "median_run_throughput_change_percent": -7.072673915051597
+    },
+    {
+      "observers": 4,
+      "baseline_median_ops_per_sec": 16266.949667110934,
+      "shadow_median_ops_per_sec": 14620.23935416349,
+      "median_run_throughput_change_percent": -13.836825464596314
+    }
+  ],
+  "limitations": "Shared VPS; five processes, alternating paired latency arms; scaling arms run baseline first. No CPU isolation, language comparison, production throughput or global user capacity proof. Historical WSL-built timing runs are a separate experiment."
+}

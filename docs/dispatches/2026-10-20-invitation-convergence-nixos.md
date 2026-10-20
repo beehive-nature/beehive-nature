@@ -92,6 +92,15 @@ the native suite above directly executes its seven ignored selectors.
 The original scheduled run itself remains a historical failed run, and
 no one-hour soak result is claimed.
 
+Final closeout on October 20: both pending jobs succeeded. The final rollup
+is **30 success, two skipped, one inherited Cargo Audit failure, zero pending**
+at the same PR #5 head. Test Suite passed 4,746 tests (326 skipped), plus one
+voice acceptance test; Coverage passed 4,740 (318 skipped), reporting 86.97%
+line coverage above the unchanged 65.70% floor. REST/API and transport advisory
+coverage targets remain unmet. The final JSON and selected job log excerpts
+are retained alongside the earlier snapshot. See
+[CI closeout and native comparison](2026-10-20-bnrose-native-comparison-ci-closeout.md).
+
 Publication tooling note: the BNR hook self-test exercised secret rejection
 and clean-content acceptance, but its later inventory fixture did not
 complete (`Missing inventory source: crates/adapter-arweave`) in the sparse

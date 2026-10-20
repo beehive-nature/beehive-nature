@@ -1,0 +1,4 @@
+Tue Oct 20 09:11:16 AM UTC 2026
+ActiveState=active
+NRestarts=0
+{"ok":true,"status":"healthy","version":"0.46.0","peers":25,"send_ready_peers":25,"uptime_secs":221691}

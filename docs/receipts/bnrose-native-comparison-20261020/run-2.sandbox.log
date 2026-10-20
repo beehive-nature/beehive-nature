@@ -1,0 +1,6 @@
+Running as unit: bnrose-native-comparison-2.service; invocation ID: 4b1887ee7302428ab5a10375e3ee86ee
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 2.700s
+             CPU time consumed: 4.588s
+                   Memory peak: 3.3M (swap: 0B)

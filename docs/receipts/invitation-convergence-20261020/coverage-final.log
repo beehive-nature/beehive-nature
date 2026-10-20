@@ -1,0 +1,6 @@
+Coverage Gate	Run line coverage gate	2026-10-20T09:01:25.6613569Z      Summary [ 451.153s] 4740 tests run: 4740 passed (2 slow), 318 skipped
+Coverage Gate	Run line coverage gate	2026-10-20T09:02:28.6849752Z overall line coverage: 86.97% (172033/197799), floor 65.70%
+Coverage Gate	Run line coverage gate	2026-10-20T09:02:28.6857969Z WS-2 REST/API and Agent core: 80.95% (15366/18981), target 90.00% (advisory)
+Coverage Gate	Run line coverage gate	2026-10-20T09:02:28.7017712Z ##[warning]WS-2 REST/API and Agent core coverage 80.95% is below 90.00%
+Coverage Gate	Run line coverage gate	2026-10-20T09:02:28.7128816Z WS-5 Network transport: 82.65% (3831/4635), target 85.00% (advisory)
+Coverage Gate	Run line coverage gate	2026-10-20T09:02:28.7131924Z ##[warning]WS-5 Network transport coverage 82.65% is below 85.00%

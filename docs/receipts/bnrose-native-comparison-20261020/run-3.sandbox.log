@@ -1,0 +1,6 @@
+Running as unit: bnrose-native-comparison-3.service
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 2.682s
+             CPU time consumed: 4.520s
+                   Memory peak: 3.1M (swap: 0B)
