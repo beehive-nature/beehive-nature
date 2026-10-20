@@ -1,0 +1,111 @@
+{
+ "schema": "skaists.blood-relation-reconciliation/1",
+ "generated": "2026-10-19T23:17:52.308Z",
+ "question": "verified count of unique deceased blood relatives in the staged public tree, distinct from associated people (spouses / in-law lines)",
+ "method": {
+  "bloodRule": "transitive closure of parent-child edges from the roster root; spouse links (couples) confer no blood; parent-slot placeholders (UNKNOWN / unfetched stub ids) never enter the closure",
+  "uniqueness": "FamilySearch person refs where present; roster-local ids otherwise",
+  "inputs": {
+   "roster": "assets/profile-archive/lineage/remington-bloodline.json at origin/main ecbc6e8a9 (public)",
+   "walk": "private merged-walk-v4.json (read-only, cross-check numbers only; identities never copied)"
+  }
+ },
+ "counts": {
+  "publicStagedPersons": 11041,
+  "bloodTotal": 10878,
+  "bloodLiving": 3,
+  "bloodDeceased": 10875,
+  "bloodDeceasedWithFsRef": 10875,
+  "uniqueFsPersonsAmongBloodDeceased": 10875,
+  "fsIdsUnderMultipleLocalIds": 0,
+  "spouseOfBloodStaged": 160,
+  "attestedOverlayTraditionalFigures": 3,
+  "residualOther": 0,
+  "eraOfBloodDeceased": {
+   "recorded": 50,
+   "colonial": 2645,
+   "unrecorded": 1344,
+   "medieval": 2509,
+   "saga": 4327
+  }
+ },
+ "checks": {
+  "rosterSum": "10878 blood + 160 spouse-of-blood + 3 attested-overlay + 0 residual = 11041",
+  "rosterSumOk": true,
+  "bloodLineFullyStaged": true,
+  "bloodLineStagingDetail": {
+   "note": "parent refs of blood persons not in the roster",
+   "total": 1612,
+   "placeholderUnknown": 8,
+   "realInWalk": 0,
+   "fsLikeNotInWalk": 1604,
+   "meaning": "realInWalk=0 means every real parent of every blood person is publicly staged — no blood ancestry in the private tier; the rest are walk placeholder slots"
+  },
+  "cohortCrossCheck": {
+   "manifestReceipt": {
+    "cohortPersons": 809,
+    "byDepth": {
+     "2": 4,
+     "3": 8,
+     "4": 16,
+     "5": 32,
+     "6": 60,
+     "7": 112,
+     "8": 203,
+     "9": 374
+    },
+    "redactedLiving": 0
+   },
+   "walkComputed": {
+    "uniqueDepths2to9": 808,
+    "byDepth2to9": {
+     "2": 4,
+     "3": 8,
+     "4": 16,
+     "5": 32,
+     "6": 60,
+     "7": 112,
+     "8": 203,
+     "9": 373
+    }
+   },
+   "rosterComputed": {
+    "uniqueDepths2to9": 807,
+    "byDepth2to9": {
+     "2": 4,
+     "3": 8,
+     "4": 16,
+     "5": 32,
+     "6": 60,
+     "7": 112,
+     "8": 203,
+     "9": 372
+    }
+   },
+   "depths2to8ExactOnWalk": true,
+   "residualDelta": {
+    "depth9": "373 computed vs 374 receipt",
+    "total": "808 computed vs 809 receipt",
+    "cause": "the 09-18 harvest’s guided-spine completion carried one depth-9 person beyond the repaired walk-v4 edges; the id-level cohort list is not committed at tip (records.json is record-keyed; cohort-8gen.json is a stale 503-entry partial; familysearch-ancestry-full.json is the pre-spine 501 state). The roster closure (372 at depth 9, all within the walk’s 373) stages one fewer still.",
+    "verdict": "cross-check agrees depths 2–8 exactly; residual = 1 person at depth 9, explained, not forced to fit"
+   },
+   "livingInComputedRange": {
+    "count": 2,
+    "ids": [
+     "LNQ5-BSG",
+     "LNQ5-BSF"
+    ],
+    "explanation": "raw walk living-flags; both are the paternal grandparents, founder-attested deceased 2026-09-16 (roster corrected.attested), hence manifest redactedLiving=0"
+   }
+  }
+ },
+ "boundaries": {
+  "whatThisIsNot": [
+   "a count of biography COMPLETENESS — pages exist for all staged persons; the era mix (saga/medieval/colonial/unrecorded/recorded) is the evidence-quality axis, not a verified-biography claim",
+   "a publication receipt — staged research pages are not separate published IQ.wiki articles",
+   "the frozen 809-person 8-generation evidence cohort — that cohort (13,249 unique records) is the source-evidence layer for depths 2–9 only; this reconciliation covers the whole staged tree",
+   "exhaustive evidence acquisition — see the order-29 completeness ledger: 314 images in hand, frontier stopped under the refusal"
+  ],
+  "judgmentCallOpen": "the 3 attested-overlay traditional figures (ovl- ids, saga era) sit outside the edge graph; whether traditional-lineage figures count as blood relatives is a founder identity-ruling class question, not closed here"
+ }
+}

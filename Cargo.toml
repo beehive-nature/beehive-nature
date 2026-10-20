@@ -57,6 +57,7 @@ members = [
     "crates/bmesh-serve",
     "crates/bindexer",
     "crates/bnr-url",
+    "crates/genealogy-publication",
     "crates/bnr-archive",
     "crates/reversibility",
     "crates/banchor",

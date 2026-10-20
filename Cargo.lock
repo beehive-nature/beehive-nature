@@ -2180,6 +2180,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "genealogy-publication"
+version = "0.1.0"
+dependencies = [
+ "bnr-url",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+]
+
+[[package]]
 name = "generator"
 version = "0.8.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
