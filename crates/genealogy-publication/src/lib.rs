@@ -885,6 +885,6 @@ mod tests {
 
     #[cfg(unix)]
     fn make_symlink(orig: &Path, link: &Path) -> std::io::Result<()> {
-        std::os::unix::symlink(orig, link)
+        std::os::unix::fs::symlink(orig, link)
     }
 }
