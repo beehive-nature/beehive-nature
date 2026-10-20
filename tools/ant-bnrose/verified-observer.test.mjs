@@ -5,7 +5,8 @@ import {createVerifiedDownloader} from './verified-observer.mjs';
 const bytes=new TextEncoder().encode('verified local fixture');
 const hash=Buffer.from(await crypto.subtle.digest('SHA-256',bytes)).toString('hex');
 const fixture={address:'a'.repeat(64),sha256:hash,size:bytes.length};
-const module=await WebAssembly.compile(await fs.readFile(new URL('./kernel.wasm',import.meta.url)));
+const module=await WebAssembly.compile(await fs.readFile(
+  process.env.BNROSE_EXEC_WASM??new URL('./kernel.wasm',import.meta.url)));
 const good={download:async()=>({bytes:bytes.slice()})};
 
 test('same real Rust core admits independently verified reads; opt-out does no kernel work',async()=>{

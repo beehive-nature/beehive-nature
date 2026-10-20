@@ -16,9 +16,12 @@ members = ["crates/bnrose-exec-core", "crates/bnrose-exec-wasm", "crates/btungst
 [workspace.package]
 edition = "2021"
 EOF
-rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+toolchain=${BNROSE_RUST_TOOLCHAIN:-$(sed -n 's/^channel = "\([^"]*\)".*/\1/p' rust-toolchain.toml)}
+[[ "$toolchain" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+rustup toolchain install "$toolchain" --profile minimal --target wasm32-unknown-unknown
 cd "$root/core-workspace"
 # Lock pruning is limited to the copied minimal workspace. Preserve its lock.
-cargo +1.95.0 build --release --target wasm32-unknown-unknown -p bnrose-exec-wasm
+rustc "+$toolchain" --version
+cargo "+$toolchain" build --release --target wasm32-unknown-unknown -p bnrose-exec-wasm
 cp "$CARGO_TARGET_DIR/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm" "$root/source/tools/ant-bnrose/kernel.wasm"
 sha256sum "$root/source/tools/ant-bnrose/kernel.wasm"
