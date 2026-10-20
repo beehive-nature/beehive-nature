@@ -58,6 +58,7 @@ members = [
     "crates/bindexer",
     "crates/bnr-url",
     "crates/genealogy-publication",
+    "crates/btungsten-sovereign-rails",
     "crates/bnr-archive",
     "crates/reversibility",
     "crates/banchor",

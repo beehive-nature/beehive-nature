@@ -839,6 +839,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "btungsten-sovereign-rails"
+version = "0.1.0"
+dependencies = [
+ "genealogy-publication",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+]
+
+[[package]]
 name = "btungsten-teeth"
 version = "0.1.0"
 dependencies = [

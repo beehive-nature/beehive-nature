@@ -1,0 +1,44 @@
+# btungsten-sovereign-rails (issue #479) — the sovereign P2P content-rail
+# qualification as a REQUIRED check. The two-peer lab proves, with no
+# estate dependency (no GitHub bootstrap, no skaists.dev, no relay door,
+# no box, no DNS), that independently administered peers exchange pinned
+# artifacts with the full /2 seal chain verified over the WIRE bytes, and
+# that hard payer/egress caps refuse unfunded chargeable delivery instead
+# of subsidizing it (402, named, zero chargeable bytes, no estate
+# fallback exists). Corruption, interrupted transfer, recovery-after-
+# restart and traversal refusals are in the lab. Topology honesty: this
+# is the funding-free sovereign local-fixture route (two peer services,
+# one host); it promotes no rail and makes no multi-host or scale claim.
+name: btungsten-sovereign-rails
+
+on:
+  push:
+    paths:
+      - 'crates/btungsten-sovereign-rails/**'
+      - 'crates/genealogy-publication/**'
+      - '.github/workflows/btungsten-sovereign-rails.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+  pull_request:
+    paths:
+      - 'crates/btungsten-sovereign-rails/**'
+      - 'crates/genealogy-publication/**'
+      - '.github/workflows/btungsten-sovereign-rails.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+
+jobs:
+  sovereign-lab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: formatting (the estate's Check formatting gate)
+        run: cargo fmt -p btungsten-sovereign-rails -p genealogy-publication --check
+      - name: the two-peer sovereign lab — pinned retrieval, no estate, egress caps
+        run: cargo test -p btungsten-sovereign-rails --locked
+      - name: the seal crate's own controls (unchanged semantics)
+        run: cargo test -p genealogy-publication --locked

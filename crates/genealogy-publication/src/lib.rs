@@ -517,6 +517,124 @@ pub fn check(root: &Path, max_named: usize) -> Result<CheckReport, String> {
     Ok(report)
 }
 
+/// Pure #477 chain over BYTES (issue #479 §4: "validate all received bytes
+/// against the independently pinned pin -> state.indexSha256 -> index ->
+/// page digests chain BEFORE rendering/retaining"). This is the verifier a
+/// network peer or any transport consumes: give it the four artifacts as
+/// received and the out-of-band pin, and it refuses wrong source, forged
+/// metadata, locator escapes, digest disagreement and byte drift — nothing
+/// else is needed and nothing else is trusted. `resolve` keeps its
+/// disk-rooted flow; the two share semantics, each locked by its own tests.
+pub fn verify_seal_artifacts(
+    state_bytes: &[u8],
+    index_bytes: &[u8],
+    html_bytes: &[u8],
+    json_bytes: &[u8],
+    person: &str,
+    pin: Option<&str>,
+) -> Result<VerifiedArtifacts, String> {
+    let id_ok = !person.is_empty()
+        && !person.starts_with('.')
+        && person
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == '.');
+    if !id_ok {
+        return Err(format!(
+            "person id {person:?} rejected: ids are [A-Za-z0-9._-] and never begin with a dot"
+        ));
+    }
+    let state_sha = sha256_hex(state_bytes);
+    if let Some(pin) = pin {
+        if !pin.eq_ignore_ascii_case(&state_sha) {
+            return Err(format!(
+                "pinned-root mismatch: pin {pin}, received state hashes {state_sha} — refusing"
+            ));
+        }
+    }
+    let state: Value =
+        serde_json::from_slice(state_bytes).map_err(|e| format!("state unparseable: {e}"))?;
+    let index_sha = sha256_hex(index_bytes);
+    let bound = state
+        .get("indexSha256")
+        .and_then(Value::as_str)
+        .unwrap_or("absent");
+    if !bound.eq_ignore_ascii_case(&index_sha) {
+        return Err(format!(
+            "index not bound by the state: the state binds {bound}, the received index hashes {index_sha} — substituted or stale index"
+        ));
+    }
+    let index: Value =
+        serde_json::from_slice(index_bytes).map_err(|e| format!("index unparseable: {e}"))?;
+    let state_page = state
+        .get("pages")
+        .and_then(Value::as_array)
+        .and_then(|ps| ps.iter().find(|p| p["id"].as_str() == Some(person)))
+        .ok_or_else(|| format!("person {person} absent from the state pages"))?;
+    let entry = index
+        .get("persons")
+        .and_then(|p| p.get(person))
+        .ok_or_else(|| format!("person {person} not in the publication index"))?;
+    let loc_html = entry.get("pageHtml").and_then(Value::as_str).unwrap_or("?");
+    let loc_json = entry.get("pageJson").and_then(Value::as_str).unwrap_or("?");
+    if loc_html != format!("persons/{person}.html") || loc_json != format!("persons/{person}.json")
+    {
+        return Err(format!(
+            "locator discipline: {person}'s entry points at {loc_html} / {loc_json} — a person's locators are their own pages under persons/"
+        ));
+    }
+    let want_html = state_page["html"]["sha256"].as_str().unwrap_or("?");
+    let want_json = state_page["json"]["sha256"].as_str().unwrap_or("?");
+    let got_html = entry
+        .get("pageHtmlSha256")
+        .and_then(Value::as_str)
+        .unwrap_or("?");
+    let got_json = entry
+        .get("pageJsonSha256")
+        .and_then(Value::as_str)
+        .unwrap_or("?");
+    if got_html != want_html || got_json != want_json {
+        return Err(format!(
+            "index/state disagree on page digests for {person}: html index {got_html} vs state {want_html}; json index {got_json} vs state {want_json}"
+        ));
+    }
+    let html_sha = sha256_hex(html_bytes);
+    let json_sha = sha256_hex(json_bytes);
+    if html_sha != want_html {
+        return Err(format!(
+            "page bytes drift: persons/{person}.html the seal says {want_html}, received bytes hash {html_sha}"
+        ));
+    }
+    if json_sha != want_json {
+        return Err(format!(
+            "page bytes drift: persons/{person}.json the seal says {want_json}, received bytes hash {json_sha}"
+        ));
+    }
+    Ok(VerifiedArtifacts {
+        state_sha256: state_sha,
+        index_sha256: index_sha,
+        page_html_sha256: want_html.to_string(),
+        page_json_sha256: want_json.to_string(),
+        name: entry
+            .get("name")
+            .and_then(Value::as_str)
+            .map(str::to_string),
+        era: entry.get("era").and_then(Value::as_str).map(str::to_string),
+    })
+}
+
+/// What a fully verified artifact set proves about a person (issue #479 §4:
+/// keep availability, integrity and verdicts separate — this is the
+/// integrity verdict; availability is the transport's own report).
+#[derive(Debug, Clone)]
+pub struct VerifiedArtifacts {
+    pub state_sha256: String,
+    pub index_sha256: String,
+    pub page_html_sha256: String,
+    pub page_json_sha256: String,
+    pub name: Option<String>,
+    pub era: Option<String>,
+}
+
 /// Options for [`resolve`] (issue #475 §2: resolve must validate the seal
 /// it reports, fail closed on mismatch, and carry an independently pinned
 /// trust root before anything calls it authenticated).
