@@ -10,6 +10,30 @@ The new `tools/ant-bnrose/` experiment invokes the existing Rust
 Autonomi SDK download and independent expected-content hash verification.
 It grants no routing, execution, wallet, payment or DAO authority.
 
+## Follow-up: isolate and reduce local observation cost
+
+PR #478's initial `BNROSE-RUST-001` run
+[`39463132586`](https://github.com/beehive-nature/beehive-nature/actions/runs/39463132586)
+passed all four jobs at `1f351dcde2e4151495838cd4953c82f2f5338ddc`.
+The broader CI suite was still running when this follow-up began.
+
+The observer previously allocated and encoded its fixed policy and envelope
+fields on every completion. `observation-request.mjs` now builds one template
+per reader, updating only the timestamp, sequence and verified content hash.
+The existing Rust WASM, SDK, hash verification, admission function, cancellation
+rules and autonomy boundaries are unchanged. Nine tests passed on NixOS,
+including exact old/new wire-byte agreement across time/hash changes and
+sequence carries. Existing concurrent-completion and tampering tests still pass.
+
+Three local Chromium trials on the same NixOS host measured 7,500 reads per
+arm per trial after warmup. In balanced order, the optimized observer reduced
+total measured observation time by **62.53–63.30%** relative to the parent
+implementation. Whole local verified-read blocks improved **19.57–20.94%**
+(median paired block change per trial). All reads still performed full SHA-256
+verification and every shadow completion reached the real Rust admission core.
+These are local component measurements; the new live WAN matrix is a separate
+measurement and must not inherit this speedup claim.
+
 ## Final repository-pin result
 
 The final network driver was

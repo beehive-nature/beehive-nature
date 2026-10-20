@@ -6,15 +6,16 @@ import os from 'node:os';
 import {spawn} from 'node:child_process';
 import {setTimeout as delay} from 'node:timers/promises';
 const [arm,load,fault,output]=process.argv.slice(2);
-if(!['baseline','shadow'].includes(arm)||!['1','4'].includes(load)||!['steady','churn'].includes(fault)||!output)
-  throw Error('Usage: run-browser.mjs baseline|shadow 1|4 steady|churn output.json');
+if(!['baseline','shadow','observer-cost'].includes(arm)||!['1','4'].includes(load)||!['steady','churn'].includes(fault)||!output ||
+  (arm==='observer-cost'&&(load!=='1'||fault!=='steady')))
+  throw Error('Usage: run-browser.mjs baseline|shadow 1|4 steady|churn output.json (or observer-cost 1 steady)');
 await fs.access(output).then(()=>{throw Error('Receipt exists');},e=>{if(e.code!=='ENOENT')throw e;});
 const root=path.resolve(import.meta.dirname,'../..');
 const profile=await fs.mkdtemp(path.join(os.tmpdir(),'bnrose-browser-'));
 const server=http.createServer(async(req,res)=>{
   try {
     const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
-    if(pathname==='/') {res.setHeader('Content-Type','text/html');res.end('<!doctype html><title>ANT observation experiment</title><script type="module" src="/tools/ant-bnrose/trial.mjs"></script>');return;}
+    if(pathname==='/') {res.setHeader('Content-Type','text/html');res.end(`<!doctype html><title>ANT observation experiment</title><script type="module" src="/tools/ant-bnrose/${arm==='observer-cost'?'observer-cost':'trial'}.mjs"></script>`);return;}
     if(!pathname.startsWith('/tools/ant-bnrose/')&&!pathname.startsWith('/vendor/ant-browser-sdk/0.1.2/'))
       throw Error('path outside fixture');
     const target=path.resolve(root,'.'+pathname);

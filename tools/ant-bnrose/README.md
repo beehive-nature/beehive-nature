@@ -115,3 +115,30 @@ sweep is retained separately. To redraw the paired-result figure, use
 `python tools/ant-bnrose/plot-comparison.py comparison-rust198.json paired-rust198.png`
 with Matplotlib installed (the committed figure used 3.11.2). Rendering does
 not run the network benchmark.
+
+## Allocation reduction and component isolation
+
+`observation-request.mjs` pre-encodes each reader's immutable local policy.
+Every completion still supplies a fresh sequence, timestamp and verified
+content hash, then calls the same Rust admission function. Its independent
+reference-encoder test compares every request byte, including nonce carries.
+There is no cached admission verdict, skipped hash verification or network
+policy change.
+
+To isolate this local cost from public network discovery, extract
+`tools/ant-bnrose/verified-observer.mjs` from parent commit
+`1f351dcde2e4151495838cd4953c82f2f5338ddc` to the ignored
+`tools/ant-bnrose/observer-before.mjs`, preserving the Git blob bytes.
+Run `run-nixos.sh observer-cost 1 steady UNIQUE_LABEL` three times and analyze
+all three receipts with `analyze-cost.mjs FILE1 FILE2 FILE3`. Each fresh
+Chromium profile compares baseline, parent observer and optimized observer
+using identical immutable local bytes, full SHA-256 and the real Rust WASM.
+After 100 warmups per arm, 30 blocks of 250 reads alternate all six arm orders.
+All admissions and sequences are checked; failures terminate the experiment.
+These receipts isolate local processing cost and are not live delivery results.
+
+`diagnose.mjs RECEIPT_DIRECTORY MATRIX_PREFIX` locates time in the live matrix:
+normal phase wall time, slowest SDK read per phase, the residual, observer
+time, network bytes and sandbox CPU. SDK time includes authenticated discovery,
+reads and scheduling. This decomposition does not identify the remote cause
+of variable network waits.
