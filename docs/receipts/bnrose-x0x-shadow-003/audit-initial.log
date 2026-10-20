@@ -1,0 +1,64 @@
+this path will be fetched (7.6 MiB download, 23.2 MiB unpacked):
+  /nix/store/q0c3bfsn0raq7s8icvb7k441f9ddwxsi-cargo-audit-0.22.2
+copying path '/nix/store/q0c3bfsn0raq7s8icvb7k441f9ddwxsi-cargo-audit-0.22.2' from 'https://cache.nixos.org'...
+    Fetching advisory database from `https://github.com/RustSec/advisory-db.git`
+      Loaded 1338 security advisories (from /root/.cargo/advisory-db)
+    Updating crates.io index
+Crate:     atomic-polyfill
+warning: couldn't update crates.io index: registry: No such file or directory (os error 2)
+    Scanning /var/lib/private/bnrose-native-validation/source/Cargo.lock for vulnerabilities (582 crate dependencies)
+warning: 7 allowed warnings found
+Version:   1.0.3
+Warning:   unmaintained
+Title:     atomic-polyfill is unmaintained
+Date:      2023-07-11
+ID:        RUSTSEC-2023-0089
+URL:       https://rustsec.org/advisories/RUSTSEC-2023-0089
+
+Crate:     audiopus_sys
+Version:   0.2.2
+Warning:   unmaintained
+Title:     audiopus_sys is unmaintained
+Date:      2026-05-21
+ID:        RUSTSEC-2026-0150
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0150
+
+Crate:     bincode
+Version:   1.3.3
+Warning:   unmaintained
+Title:     Bincode is unmaintained
+Date:      2025-12-16
+ID:        RUSTSEC-2025-0141
+URL:       https://rustsec.org/advisories/RUSTSEC-2025-0141
+
+Crate:     paste
+Version:   1.0.15
+Warning:   unmaintained
+Title:     paste - no longer maintained
+Date:      2024-10-07
+ID:        RUSTSEC-2024-0436
+URL:       https://rustsec.org/advisories/RUSTSEC-2024-0436
+
+Crate:     rustls-pemfile
+Version:   2.2.0
+Warning:   unmaintained
+Title:     rustls-pemfile is unmaintained
+Date:      2025-11-28
+ID:        RUSTSEC-2025-0134
+URL:       https://rustsec.org/advisories/RUSTSEC-2025-0134
+
+Crate:     unsafe-libyaml
+Version:   0.2.11
+Warning:   unmaintained
+Title:     unsafe-libyaml is unmaintained
+Date:      2024-03-25
+ID:        RUSTSEC-2024-0449
+URL:       https://rustsec.org/advisories/RUSTSEC-2024-0449
+
+Crate:     lru
+Version:   0.16.4
+Warning:   unsound
+Title:     Potential use-after-free due to lack of panic safety in `LruCache::pop()`
+Date:      2026-05-12
+ID:        RUSTSEC-2026-0253
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0253

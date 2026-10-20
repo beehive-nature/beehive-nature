@@ -1,0 +1,3 @@
+BNRoSe shadow: use cargo +1.95.0; no daemon or live mesh is started.
+cec652ac6795999a949e0f56b6c6513e6cc1077ccb5b3bcdfb6ed26c035929bb  /var/lib/private/bnrose-native-validation/source/Cargo.lock  # PUBLIC-CONSTANT
+092ba2c4c2e4441de8530bf4d37f66e776dc5bfd1fee46af6279483c18222778  /var/lib/private/bnrose-native-validation/target/release/examples/bnrose_shadow  # PUBLIC-CONSTANT
