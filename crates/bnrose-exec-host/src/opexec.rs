@@ -706,12 +706,58 @@ impl Supervisor {
         clock: u64,
         bounds: &Bounds,
     ) -> RunOutcome {
-        // Fast path: if operation was already admitted, resolve via idempotent recovery / receipt
-        // (Gate 4 quantum retry never consumes network retry budget)
-        if let Ok(decoded) = btungsten_wb001::decode(&intent.env) {
-            if self.is_nonce_admitted(&intent.authority, &decoded.nonce) {
-                return self.run_inner(intent, clock, false, bounds, true);
+        let none = RunOutcome {
+            op: None,
+            refused: None,
+            lost_response: false,
+            receipt: None,
+            receipt_path: None,
+            receipt_json: None,
+        };
+
+        // 1a. Authority allowlist check
+        if let Some(ref allowed) = self.allowed_authorities {
+            if !allowed.contains(&intent.authority) {
+                return RunOutcome {
+                    refused: Some("admission:unauthorized-authority".into()),
+                    ..none
+                };
             }
+        }
+
+        // 1b. Fast decode of envelope
+        let decoded = match btungsten_wb001::decode(&intent.env) {
+            Ok(i) => i,
+            Err(_) => {
+                return RunOutcome {
+                    refused: Some("wb001:undecodable".into()),
+                    ..none
+                };
+            }
+        };
+
+        // 2. Fast path: if operation was already admitted, resolve via idempotent recovery / receipt
+        // (Gate 4 quantum retry never consumes network retry budget)
+        if self.is_nonce_admitted(&intent.authority, &decoded.nonce) {
+            return self.run_inner(intent, clock, false, bounds, true);
+        }
+
+        // 3. Cryptographic signature check: verify envelope before client retry budget check
+        // (Protects against forged envelopes draining victim budgets)
+        if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
+            return RunOutcome {
+                refused: Some("wb001:binding-refused".into()),
+                ..none
+            };
+        }
+
+        // 4. Client-side retry fail-fast: check client retry budget before sending over wire (PR #465, O4)
+        let now_ms = clock * 1000;
+        if !self.try_acquire_client_retry(&intent.authority, now_ms) {
+            return RunOutcome {
+                refused: Some("client:retry-budget-exhausted".into()),
+                ..none
+            };
         }
 
         self.run_inner(intent, clock, false, bounds, true)
@@ -937,15 +983,14 @@ impl Supervisor {
         let work_fp = intent_work_fingerprint(&decoded);
         let intent_key = (intent.authority, work_fp);
         let is_retry = allow_retry
-            || self.shed_nonces.contains_nonce(&nonce_key)
-            || self.shed_nonces.contains_intent(&intent_key);
+            || self.shed_nonces.contains_nonce_at(&nonce_key, now_ms)
+            || self.shed_nonces.contains_intent_at(&intent_key, now_ms);
 
-        // Enforce per-authority client retry budget for all retries (PR #465, O1 & O2).
-        // Runs AFTER verify_envelope and allowed_authorities, so forged or unauthorized requests
-        // never deplete a victim's budget (d16).
-        // Enforced in run_inner for every request matching a prior work fingerprint or nonce,
-        // ensuring clients sending via run() cannot bypass the budget (r8, r10).
-        if is_retry {
+        // Server-side backstop (PR #465 O1, O2, O4):
+        // If an inbound request is identified as a retry, enforce the client retry budget.
+        // If allow_retry is true, retry() already acquired a token on the client side;
+        // if allow_retry is false (e.g. client retrying through run()), acquire here on the server.
+        if is_retry && !allow_retry {
             if !self.try_acquire_client_retry(&intent.authority, now_ms) {
                 return RunOutcome {
                     refused: Some("client:retry-budget-exhausted".into()),
@@ -958,7 +1003,7 @@ impl Supervisor {
             .load_shed
             .admit_request(is_local, is_retry, &intent.authority, now_ms)
         {
-            self.shed_nonces.insert(nonce_key, intent_key);
+            self.shed_nonces.insert_at(nonce_key, intent_key, now_ms);
             return RunOutcome {
                 refused: Some(e.into()),
                 ..none

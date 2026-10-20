@@ -636,3 +636,45 @@ Verification Receipts:
   - Gate 3: 17/17 ok (35.60s)
   - Gate 4: 6/6 ok (0.10s)
   - Total: 40/40 passed in release mode!
+
+
+## 13. PR #465 Review Remediation (Commit ccbc8426 Follow-Up: O1â€“O5)
+
+Following Grok's adversarial review on `ccbc8426` (`issuecomment-6279496406`), all 5 open items have been resolved:
+
+1. **Floor of retries for first-time and light clients (O1 / repro e1):**
+   - **Problem:** `max_retries = (admitted * 10%) / 100` resulted in 0 retries for clients with fewer than 10 admitted requests in a window, starving new or light clients even when server capacity was free.
+   - **Fix:** Added `min_retries: usize = 1` floor to `ClientRetryBudget`:
+     `max_retries = ((self.initial_requests * self.budget_pct) / 100).max(self.min_retries)`.
+     Verified first-time and light clients always have 1 retry per 10s tumbling window when quota is available.
+   - **Verification:** Added `test_gate3_light_client_retry_floor_admitted_when_quota_free` (repro `e1`): light client with 1 admitted request has shed request admitted in the next window when quota is free, while a second retry in the same tumbling window correctly exhausts the floor.
+
+2. **TTL expiry on BoundedShedTracker intent entries (O2 / repro e2):**
+   - **Problem:** `BoundedShedTracker` intent entries never expired by time, so an identical payment sent 24 hours later matched the shed work fingerprint and was refused as an exhausted retry.
+   - **Fix:** Added `ttl_ms: u64 = 10_000` (10-second default TTL) to `BoundedShedTracker`. Stored admission/shed timestamp via `insert_at(nonce_key, intent_key, now_ms)`, and checked `now_ms < ts.saturating_add(self.ttl_ms)` in `contains_nonce_at` and `contains_intent_at`.
+   - **Verification:** Added `test_gate3_recurring_identical_payment_not_refused_after_ttl` (repro `e2`): payment shed on Day 1 is treated as fresh work and admitted when re-sent 24 hours later to an idle server.
+
+3. **True $O(1)$ LRU with MRU promotion in BoundedClientBudgets (O3 / repro e3):**
+   - **Problem:** `BoundedClientBudgets` did not update access order on `get_mut` or `entry_or_insert_with`, causing active clients to be evicted by insertion order (FIFO) when 2,048 new authorities arrived.
+   - **Fix:** Implemented an index-based doubly-linked list (`BudgetNode` with `prev`/`next`, `head`, `tail`, `free_list`) backed by `HashMap<[u8; 32], usize>`. `get_mut`, `entry_or_insert_with`, and `insert` touch the accessed node to the MRU tail. Eviction pops the oldest LRU head.
+   - **Verification:** Added `test_gate3_bounded_client_budgets_true_lru_preserves_active_clients` (repro `e3`): active client with 100 admitted requests is touched between each of 2,048 subsequent authority insertions; its entry and budget remain intact while older unaccessed entries are evicted.
+
+4. **Client-side fail-fast & honest wire send accounting (O4):**
+   - **Problem:** Tests pre-seeded client budgets with `ClientRetryBudget::new(10, 10)`, and server-side refusals in `run_inner` were counted as "local fail-fast without wire send".
+   - **Fix:**
+     - Enforced client-side retry budget in `Supervisor::retry` after envelope verification and before network wire transmission (`refused: Some("client:retry-budget-exhausted")`), while maintaining server-side backstop in `run_inner` for uncooperative clients sending retries via `run()`.
+     - Removed all pre-seeded `set_client_retry_budget` calls from `test_gate3_real_retry_amplification_under_backoff`.
+     - Scenarios 1, 3, and 4 verify honest client-side fail-fast without wire send ($R_{\text{amp}} = 1.100 \le 1.15$). Scenario 2 verifies uncooperative wire sends (180 sends over wire, server backstop admits exactly 20 and refuses 160).
+   - **Verification:** `test_gate3_real_retry_amplification_under_backoff` passes across all 4 scenarios without artificial budget seeding.
+
+5. **Tumbling window nomenclature and anchor semantics (O5 / repro e4):**
+   - **Problem:** Window was documented as "rolling", but behaves as a tumbling window.
+   - **Fix:** Renamed internal window method to `tumble_window` (keeping `roll_window` as a compatibility alias), added `window_initialized: bool` to anchor the first window at the client's first event (even if `now_ms == 0`).
+   - **Verification:** Added `test_gate3_tumbling_window_decays_correctly` (repro `e4`): tests window initialization, decay across 10-second boundaries, and zero token hoarding.
+
+Receipts:
+- `cargo fmt --all --check`: CLEAN (0 diffs)
+- `node scripts/build-stack-inventory.mjs --check`: mode: checked (GREEN)
+- `node scripts/estate-check.mjs`: PASS (112 counted, 121 listed)
+- `cargo test -p bnrose-exec-core -p bnrose-exec-wasm -p bnrose-exec-host`: 20/20 gate3 tests + all workspace test suites PASS
+- `cargo test -p bnrose-exec-host --test gate1_flat_admit --test gate2_device_capacity --test gate4_quantum_retry`: 23/23 tests PASS

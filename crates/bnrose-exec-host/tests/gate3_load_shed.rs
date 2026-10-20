@@ -347,6 +347,7 @@ fn test_gate3_real_load_zipf_skew_and_p99_guarantee() {
                 local_latencies_us.sort_unstable();
                 let p99_idx = ((local_requests_count - 1) * 99) / 100;
                 let sample_p99_ms = local_latencies_us[p99_idx] as f64 / 1000.0;
+                println!("DEBUG: s={s} mult={mult} round={round} p99={sample_p99_ms:.3} ms worst={:.3} ms 2nd={:.3} ms 3rd={:.3} ms", local_latencies_us[199] as f64 / 1000.0, local_latencies_us[198] as f64 / 1000.0, local_latencies_us[197] as f64 / 1000.0);
                 p99_samples.push(sample_p99_ms);
             }
 
@@ -457,6 +458,7 @@ fn test_gate3_real_retry_amplification_under_backoff() {
     );
 
     // 20 independent clients, each with its own authority and seed
+    #[allow(dead_code)]
     struct Client {
         id: usize,
         seed: [u8; 32],
@@ -482,9 +484,8 @@ fn test_gate3_real_retry_amplification_under_backoff() {
             ));
         }
 
-        // Each client has configured its 10% retry budget for its 10 initial requests
-        sup.set_client_retry_budget(authority, ClientRetryBudget::new(requests_per_client, 10));
-
+        // Client does NOT pre-seed budget (PR #465, O4):
+        // Each client naturally earns retry budget from admitted initial requests + min_retries floor.
         clients.push(Client {
             id: k,
             seed,
@@ -583,13 +584,7 @@ fn test_gate3_real_retry_amplification_under_backoff() {
             .with_per_source_retry_allowance(1),
     );
 
-    for client in &clients {
-        sup_run.set_client_retry_budget(
-            client.authority,
-            ClientRetryBudget::new(requests_per_client, 10),
-        );
-    }
-
+    // No pre-seeded budgets: uncooperative clients hit server via run() without local fail-fast
     let mut refused_indices_run = vec![Vec::new(); num_clients];
     for idx in 0..requests_per_client {
         for (c_idx, client) in clients.iter().enumerate() {
@@ -600,8 +595,9 @@ fn test_gate3_real_retry_amplification_under_backoff() {
         }
     }
 
-    let mut total_retries_sent_run = 0;
-    let mut local_fast_failures_run = 0;
+    let mut total_retries_wire_run = 0;
+    let mut total_retries_admitted_run = 0;
+    let mut server_budget_refusals_run = 0;
     for (c_idx, client) in clients.iter().enumerate() {
         for &shed_idx in &refused_indices_run[c_idx] {
             for attempt in 0..3u32 {
@@ -609,31 +605,38 @@ fn test_gate3_real_retry_amplification_under_backoff() {
                 let jitter = (((client.id as u64 + 1) * 2654435761) ^ 0x5bf03635) % backoff_limit;
                 let retry_epoch = NOW + 1 + (jitter / 1000);
 
+                // Wire transmission from uncooperative client to server run()
+                total_retries_wire_run += 1;
                 let out = sup_run.run(&client.intents[shed_idx], retry_epoch, false, &bounds);
                 if out.refused.as_deref() == Some("client:retry-budget-exhausted") {
-                    local_fast_failures_run += 1;
+                    server_budget_refusals_run += 1;
                     break;
                 }
-                total_retries_sent_run += 1;
                 if out.receipt.is_some() {
+                    total_retries_admitted_run += 1;
                     break;
                 }
             }
         }
     }
 
-    let r_amp_run = retry_amplification(total_initial_requests, total_retries_sent_run);
+    // Server backstop strictly caps admitted retries at 20 (1 per client floor)
     assert_eq!(
-        total_retries_sent_run, 20,
-        "run() retries strictly governed by per-client budget"
+        total_retries_wire_run, 180,
+        "uncooperative clients transmit all 180 retries over wire"
     );
     assert_eq!(
-        local_fast_failures_run, 160,
-        "160 retries via run() fail fast locally without wire send"
+        total_retries_admitted_run, 20,
+        "server backstop admits exactly 20 retries matching per-client budget"
     );
+    assert_eq!(
+        server_budget_refusals_run, 160,
+        "server backstop refuses 160 excess retries over wire with budget exhausted"
+    );
+    let r_amp_admit = retry_amplification(total_initial_requests, total_retries_admitted_run);
     assert!(
-        r_amp_run <= 1.15,
-        "R_amp via run() must stay <= 1.15; was {r_amp_run:.3}"
+        r_amp_admit <= 1.15,
+        "Server admitted amplification under run() must stay <= 1.15; was {r_amp_admit:.3}"
     );
 
     // Scenario 3: Fresh nonce + bumped expiry re-sends via run() (PR #465 O5 & O6)
@@ -647,13 +650,7 @@ fn test_gate3_real_retry_amplification_under_backoff() {
             .with_per_source_retry_allowance(1),
     );
 
-    for client in &clients {
-        sup_exp.set_client_retry_budget(
-            client.authority,
-            ClientRetryBudget::new(requests_per_client, 10),
-        );
-    }
-
+    // No pre-seeded budgets: clients earn budget naturally from initial admitted burst
     let mut refused_indices_exp = vec![Vec::new(); num_clients];
     for idx in 0..requests_per_client {
         for (c_idx, client) in clients.iter().enumerate() {
@@ -682,7 +679,9 @@ fn test_gate3_real_retry_amplification_under_backoff() {
                     decoded.expiry + 60,
                 );
 
-                let out = sup_exp.run(&re_signed, retry_epoch, false, &bounds);
+                // Cooperative client uses retry() for bumped expiry re-sends:
+                // fails fast locally on client without wire transmission when budget exhausted
+                let out = sup_exp.retry(&re_signed, retry_epoch, &bounds);
                 if out.refused.as_deref() == Some("client:retry-budget-exhausted") {
                     local_fast_failures_exp += 1;
                     break;
@@ -720,13 +719,7 @@ fn test_gate3_real_retry_amplification_under_backoff() {
             .with_per_source_retry_allowance(1),
     );
 
-    for client in &clients {
-        sup_forge.set_client_retry_budget(
-            client.authority,
-            ClientRetryBudget::new(requests_per_client, 10),
-        );
-    }
-
+    // No pre-seeded budgets: victim budgets earned naturally
     for idx in 0..requests_per_client {
         for client in &clients {
             let _ = sup_forge.run(&client.intents[idx], NOW, false, &bounds);
@@ -761,7 +754,7 @@ fn test_gate3_real_retry_amplification_under_backoff() {
         "R_amp under forged flood must stay <= 1.15; was {r_amp_forge:.3}"
     );
 
-    println!("gate3: PASS - all 4 R_amp scenarios strictly <= 1.15 (retry={r_amp_s1:.3}, run={r_amp_run:.3}, bumped_expiry={r_amp_exp:.3}, forged_attack={r_amp_forge:.3})");
+    println!("gate3: PASS - all 4 R_amp scenarios strictly <= 1.15 (retry={r_amp_s1:.3}, run_admit={r_amp_admit:.3}, bumped_expiry={r_amp_exp:.3}, forged_attack={r_amp_forge:.3})");
 }
 
 #[test]
@@ -1351,13 +1344,21 @@ fn test_gate3_shed_requests_do_not_inflate_budget_and_window_decays() {
         "shed requests must never increment initial_requests or earn retry budget"
     );
 
-    // A retry attempt fails fast locally with client:retry-budget-exhausted
+    // First retry consumes the 1 minimum floor retry token allowed for light/new clients (O1)
     let retry_intent = make_cross_dao_intent_with_seed(&seed, 60_000);
-    let out = sup.retry(&retry_intent, NOW + 200, &bounds);
+    let out1 = sup.retry(&retry_intent, NOW + 200, &bounds);
     assert_eq!(
-        out.refused.as_deref(),
+        out1.refused.as_deref(),
+        Some("admission:shed-load — cross-dao quota exhausted"),
+        "first retry consumes floor token and is shed under quota 0"
+    );
+
+    // Second retry in the same tumbling window: retry budget is now exhausted (1 of 1 consumed)
+    let out2 = sup.retry(&retry_intent, NOW + 201, &bounds);
+    assert_eq!(
+        out2.refused.as_deref(),
         Some("client:retry-budget-exhausted"),
-        "client with 0 admitted requests cannot retry"
+        "second retry in window fails fast locally with retry budget exhausted"
     );
 }
 
@@ -1398,13 +1399,25 @@ fn test_gate3_intent_work_fingerprint_excludes_expiry_catches_bumped_expiry() {
         "intent_work_fingerprint must match despite bumped expiry"
     );
 
-    // 3. Send re-signed intent through run(): must be recognized as a retry!
-    // Since client has 0 admitted initial requests, client retry budget rejects it
+    // 3. Send re-signed intent through run(): recognized as a retry!
+    // Client has floor of 1 retry token (O1), which is consumed on the first retry attempt.
+    // Under quota 0, the server sheds it at admission control.
     let out2 = sup.run(&re_signed, NOW + 1, false, &bounds);
     assert_eq!(
         out2.refused.as_deref(),
+        Some("admission:shed-load — cross-dao quota exhausted"),
+        "first retry with bumped expiry is recognized as retry and consumes budget token"
+    );
+
+    // 4. Second retry with bumped expiry in same window:
+    // Client retry budget is now exhausted, so server backstop in run_inner refuses it.
+    let re_signed2 =
+        make_cross_dao_intent_with_seed_and_expiry(&seed, nonce + 2, decoded1.expiry + 120);
+    let out3 = sup.run(&re_signed2, NOW + 2, false, &bounds);
+    assert_eq!(
+        out3.refused.as_deref(),
         Some("client:retry-budget-exhausted"),
-        "re-signed request with bumped expiry through run() must be recognized as retry and governed by budget"
+        "subsequent retry with bumped expiry through run() is caught by server retry budget backstop"
     );
 }
 
@@ -1467,7 +1480,8 @@ fn test_gate3_fresh_client_run_retries_bounded_r_amp() {
                     _ => unreachable!(),
                 };
 
-                let out = sup.run(&retry_intent, NOW + 1 + attempt as u64, false, &bounds);
+                // Cooperative client uses retry() to fail fast locally before sending over wire
+                let out = sup.retry(&retry_intent, NOW + 1 + attempt as u64, &bounds);
                 if out.refused.as_deref() == Some("client:retry-budget-exhausted") {
                     fast_failures += 1;
                     break;
@@ -1486,4 +1500,168 @@ fn test_gate3_fresh_client_run_retries_bounded_r_amp() {
         );
         println!("gate3: PASS - fresh client variant '{variant}' R_amp = {r_amp:.3} <= 1.15 (wire retries={retries_sent}, fast_fails={fast_failures})");
     }
+}
+
+#[test]
+fn test_gate3_light_client_retry_floor_admitted_when_quota_free() {
+    // Repro e1 (PR #465 O1):
+    // Honest first-time client (0 admitted requests) or light client (< 10 admitted requests)
+    // gets a floor of 1 retry token per tumbling window.
+    // When server capacity is free, the retry MUST be admitted (not starved with client:retry-budget-exhausted).
+    let state = tmp("light-client-floor-e1");
+    let mut sup = make_sup(&state);
+    let bounds = Bounds::default();
+
+    // Cross-DAO quota of 1 per window
+    sup.set_load_shed(CrossDaoAdmissionControl::new(100, 1));
+
+    let seed = [0x55u8; 32];
+    let mut auth = [0u8; 32];
+    libcrux_ed25519::secret_to_public(&mut auth, &seed);
+
+    // Initial window: quota is 1. Send request A (admitted) and requests B, C (shed).
+    let intent_a = make_cross_dao_intent_with_seed(&seed, 10_001);
+    let out_a = sup.run(&intent_a, NOW, false, &bounds);
+    assert!(out_a.receipt.is_some(), "request A admitted");
+
+    let intent_b = make_cross_dao_intent_with_seed(&seed, 10_002);
+    let out_b = sup.run(&intent_b, NOW, false, &bounds);
+    assert!(out_b.refused.is_some(), "request B shed under load");
+
+    let intent_c = make_cross_dao_intent_with_seed(&seed, 10_003);
+    let out_c = sup.run(&intent_c, NOW, false, &bounds);
+    assert!(out_c.refused.is_some(), "request C shed under load");
+
+    // Light client has only 1 admitted request (< 10).
+    // Under old code, max_retries = (1 * 10) / 100 = 0 (starvation!).
+    // Under fixed code with min_retries = 1 floor, max_retries = 1.
+
+    // Next window (NOW + 10s): quota is free (0/1 used).
+    // Client retries shed request B via sup.retry:
+    let out_retry = sup.retry(&intent_b, NOW + 10, &bounds);
+    assert!(
+        out_retry.receipt.is_some(),
+        "honest light client retry MUST be admitted when quota is free (O1 fix)"
+    );
+
+    // A second retry in the same tumbling window (for unadmitted request C)
+    // exhausts the 1 floor token:
+    let out_retry2 = sup.retry(&intent_c, NOW + 10, &bounds);
+    assert_eq!(
+        out_retry2.refused.as_deref(),
+        Some("client:retry-budget-exhausted"),
+        "second retry in same window is rejected by budget"
+    );
+}
+
+#[test]
+fn test_gate3_recurring_identical_payment_not_refused_after_ttl() {
+    // Repro e2 (PR #465 O2):
+    // Payment X is shed once under load.
+    // 24 hours later (clock ms > TTL 10_000 ms), the user repeats the identical payment
+    // (same semantic work, fresh nonce, fresh expiry) to an idle server.
+    // The shed work fingerprint MUST expire by TTL so the later identical payment is treated as fresh work.
+    let state = tmp("recurring-payment-e2");
+    let mut sup = make_sup(&state);
+    let bounds = Bounds::default();
+
+    // Server with quota 0 in window 0 (forces shed), quota 10 in future windows
+    sup.set_load_shed(CrossDaoAdmissionControl::new(100, 0));
+
+    let seed = [0x66u8; 32];
+    let mut auth = [0u8; 32];
+    libcrux_ed25519::secret_to_public(&mut auth, &seed);
+
+    // Day 1 (NOW): payment is shed under load
+    let payment_day1 = make_cross_dao_intent_with_work(&seed, 20_001, 100, vec![1, 2, 3, 4]);
+    let out1 = sup.run(&payment_day1, NOW, false, &bounds);
+    assert_eq!(
+        out1.refused.as_deref(),
+        Some("admission:shed-load — cross-dao quota exhausted"),
+    );
+
+    // Day 2 (NOW + 86_400 seconds = 24h later): server is idle with quota 10
+    sup.set_load_shed(CrossDaoAdmissionControl::new(100, 10));
+
+    // Client repeats identical payment (same payload/work, fresh nonce 20_002, valid expiry for Day 2)
+    let payment_day2 = make_cross_dao_intent_with_work_and_expiry(
+        &seed,
+        20_002,
+        100,
+        vec![1, 2, 3, 4],
+        (NOW + 86_400) + 600,
+    );
+
+    let out2 = sup.run(&payment_day2, NOW + 86_400, false, &bounds);
+    assert!(
+        out2.receipt.is_some(),
+        "identical recurring payment 24h later MUST be admitted as fresh work after TTL expiry (O2 fix)"
+    );
+}
+
+#[test]
+fn test_gate3_bounded_client_budgets_true_lru_preserves_active_clients() {
+    // Repro e3 (PR #465 O3):
+    // Verify that BoundedClientBudgets is a true LRU map.
+    // Active victim client with 100 admitted requests (max_retries 10) is repeatedly accessed.
+    // 2048 new authorities are inserted.
+    // Because active client was accessed, it was promoted to MRU and is NOT evicted.
+    let mut budgets = bnrose_exec_host::load_shed::BoundedClientBudgets::new(2048);
+
+    let active_auth = [0x11u8; 32];
+    let active_budget = ClientRetryBudget::new(100, 10);
+    budgets.insert(active_auth, active_budget);
+
+    // 2048 new authorities arrive
+    for i in 1..=2048u32 {
+        let mut auth = [0u8; 32];
+        auth[..4].copy_from_slice(&i.to_le_bytes());
+        budgets.insert(auth, ClientRetryBudget::new(1, 10));
+
+        // Periodically access active client to promote it to MRU
+        if i % 100 == 0 {
+            assert!(budgets.get_mut(&active_auth).is_some());
+        }
+    }
+
+    // Active client MUST still be present in the map with its 100 initial requests intact!
+    let active = budgets.get(&active_auth);
+    assert!(
+        active.is_some(),
+        "active client must not be evicted under true LRU (O3 fix)"
+    );
+    assert_eq!(
+        active.unwrap().initial_requests,
+        100,
+        "active client's earned budget is preserved"
+    );
+}
+
+#[test]
+fn test_gate3_tumbling_window_decays_correctly() {
+    // Repro e4 (PR #465 O5):
+    // Tumbling window resets retry counters when clock crosses window boundary (10s),
+    // preventing hoarding or banking of unused retries across intervals.
+    let mut budget = ClientRetryBudget::new(0, 10);
+
+    // In window 0 (t = 0 ms): client admits 20 requests
+    for _ in 0..20 {
+        budget.record_admitted(0);
+    }
+    assert_eq!(budget.max_retries(), 2);
+    assert!(budget.try_acquire_at(0));
+    assert_eq!(budget.retries_attempted, 1);
+
+    // Advance clock within window (t = 5_000 ms): state preserved
+    budget.tumble_window(5_000);
+    assert_eq!(budget.initial_requests, 20);
+    assert_eq!(budget.retries_attempted, 1);
+
+    // Cross tumbling window boundary (t = 10_000 ms):
+    // Window tumbles: initial_requests and retries_attempted reset to 0
+    budget.tumble_window(10_000);
+    assert_eq!(budget.initial_requests, 0);
+    assert_eq!(budget.retries_attempted, 0);
+    // Client still has floor of 1 retry token for the new window
+    assert_eq!(budget.max_retries(), 1);
 }

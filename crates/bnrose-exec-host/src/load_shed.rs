@@ -201,70 +201,109 @@ impl<'a> Drop for InFlightGuard<'a> {
 #[derive(Debug, Clone)]
 pub struct BoundedShedTracker {
     max_entries: usize,
+    ttl_ms: u64,
     nonce_queue: std::collections::VecDeque<([u8; 32], [u8; 32])>,
-    nonce_set: std::collections::HashSet<([u8; 32], [u8; 32])>,
+    nonce_map: std::collections::HashMap<([u8; 32], [u8; 32]), u64>,
     intent_queue: std::collections::VecDeque<([u8; 32], [u8; 32])>,
-    intent_set: std::collections::HashSet<([u8; 32], [u8; 32])>,
+    intent_map: std::collections::HashMap<([u8; 32], [u8; 32]), u64>,
 }
 
 impl BoundedShedTracker {
     pub const DEFAULT_MAX: usize = 2048;
+    pub const DEFAULT_TTL_MS: u64 = 10_000; // 10s TTL: retries under backoff match, but recurring payments later are fresh work (PR #465, O2)
 
     pub fn new(max_entries: usize) -> Self {
         Self {
             max_entries,
+            ttl_ms: Self::DEFAULT_TTL_MS,
             nonce_queue: std::collections::VecDeque::with_capacity(max_entries),
-            nonce_set: std::collections::HashSet::with_capacity(max_entries),
+            nonce_map: std::collections::HashMap::with_capacity(max_entries),
             intent_queue: std::collections::VecDeque::with_capacity(max_entries),
-            intent_set: std::collections::HashSet::with_capacity(max_entries),
+            intent_map: std::collections::HashMap::with_capacity(max_entries),
         }
     }
 
+    pub fn with_ttl(mut self, ttl_ms: u64) -> Self {
+        self.ttl_ms = ttl_ms;
+        self
+    }
+
     pub fn insert(&mut self, nonce_key: ([u8; 32], [u8; 32]), intent_key: ([u8; 32], [u8; 32])) {
-        if !self.nonce_set.contains(&nonce_key) {
+        self.insert_at(nonce_key, intent_key, 0);
+    }
+
+    pub fn insert_at(
+        &mut self,
+        nonce_key: ([u8; 32], [u8; 32]),
+        intent_key: ([u8; 32], [u8; 32]),
+        now_ms: u64,
+    ) {
+        if let Some(ts) = self.nonce_map.get_mut(&nonce_key) {
+            *ts = now_ms;
+        } else {
             while self.nonce_queue.len() >= self.max_entries {
                 if let Some(oldest) = self.nonce_queue.pop_front() {
-                    self.nonce_set.remove(&oldest);
+                    self.nonce_map.remove(&oldest);
                 }
             }
-            self.nonce_set.insert(nonce_key);
+            self.nonce_map.insert(nonce_key, now_ms);
             self.nonce_queue.push_back(nonce_key);
         }
 
-        if !self.intent_set.contains(&intent_key) {
+        if let Some(ts) = self.intent_map.get_mut(&intent_key) {
+            *ts = now_ms;
+        } else {
             while self.intent_queue.len() >= self.max_entries {
                 if let Some(oldest) = self.intent_queue.pop_front() {
-                    self.intent_set.remove(&oldest);
+                    self.intent_map.remove(&oldest);
                 }
             }
-            self.intent_set.insert(intent_key);
+            self.intent_map.insert(intent_key, now_ms);
             self.intent_queue.push_back(intent_key);
         }
     }
 
     pub fn contains_nonce(&self, nonce_key: &([u8; 32], [u8; 32])) -> bool {
-        self.nonce_set.contains(nonce_key)
+        self.contains_nonce_at(nonce_key, 0)
+    }
+
+    pub fn contains_nonce_at(&self, nonce_key: &([u8; 32], [u8; 32]), now_ms: u64) -> bool {
+        if let Some(&ts) = self.nonce_map.get(nonce_key) {
+            if now_ms == 0 || ts == 0 || now_ms < ts.saturating_add(self.ttl_ms) {
+                return true;
+            }
+        }
+        false
     }
 
     pub fn contains_intent(&self, intent_key: &([u8; 32], [u8; 32])) -> bool {
-        self.intent_set.contains(intent_key)
+        self.contains_intent_at(intent_key, 0)
+    }
+
+    pub fn contains_intent_at(&self, intent_key: &([u8; 32], [u8; 32]), now_ms: u64) -> bool {
+        if let Some(&ts) = self.intent_map.get(intent_key) {
+            if now_ms == 0 || ts == 0 || now_ms < ts.saturating_add(self.ttl_ms) {
+                return true;
+            }
+        }
+        false
     }
 
     pub fn remove(&mut self, nonce_key: &([u8; 32], [u8; 32]), intent_key: &([u8; 32], [u8; 32])) {
-        if self.nonce_set.remove(nonce_key) {
+        if self.nonce_map.remove(nonce_key).is_some() {
             self.nonce_queue.retain(|k| k != nonce_key);
         }
-        if self.intent_set.remove(intent_key) {
+        if self.intent_map.remove(intent_key).is_some() {
             self.intent_queue.retain(|k| k != intent_key);
         }
     }
 
     pub fn len(&self) -> usize {
-        self.nonce_set.len().max(self.intent_set.len())
+        self.nonce_map.len().max(self.intent_map.len())
     }
 
     pub fn is_empty(&self) -> bool {
-        self.nonce_set.is_empty() && self.intent_set.is_empty()
+        self.nonce_map.is_empty() && self.intent_map.is_empty()
     }
 }
 
@@ -279,27 +318,40 @@ impl Default for BoundedShedTracker {
 /// Enforces local fail-fast behavior: when a client's retry budget is exhausted,
 /// requests fail fast locally without transmitting any packets over the network,
 /// strictly guaranteeing R_amp <= 1.15 across independent client nodes.
+///
+/// Uses a 10s tumbling window with a floor of min_retries = 1 (PR #465, O1)
+/// so first-time and light clients can retry when quota is free.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ClientRetryBudget {
     pub initial_requests: usize,
     pub retries_attempted: usize,
     pub budget_pct: usize,
+    pub min_retries: usize,
     pub window_ms: u64,
     pub window_start_ms: u64,
+    pub window_initialized: bool,
 }
 
 impl ClientRetryBudget {
     pub const DEFAULT_WINDOW_MS: u64 = 10_000;
     pub const DEFAULT_BUDGET_PCT: usize = 10;
+    pub const DEFAULT_MIN_RETRIES: usize = 1;
 
     pub fn new(initial_requests: usize, budget_pct: usize) -> Self {
         Self {
             initial_requests,
             retries_attempted: 0,
             budget_pct,
+            min_retries: Self::DEFAULT_MIN_RETRIES,
             window_ms: Self::DEFAULT_WINDOW_MS,
             window_start_ms: 0,
+            window_initialized: false,
         }
+    }
+
+    pub fn with_min_retries(mut self, min: usize) -> Self {
+        self.min_retries = min;
+        self
     }
 
     pub fn with_window(mut self, window_ms: u64) -> Self {
@@ -312,17 +364,18 @@ impl ClientRetryBudget {
             initial_requests: max_retries * 10,
             retries_attempted: 0,
             budget_pct: 10,
+            min_retries: Self::DEFAULT_MIN_RETRIES,
             window_ms: Self::DEFAULT_WINDOW_MS,
             window_start_ms: 0,
+            window_initialized: false,
         }
     }
 
-    pub fn roll_window(&mut self, now_ms: u64) {
-        if now_ms == 0 {
-            return;
-        }
-        if self.window_start_ms == 0 {
+    /// Advance tumbling window if window_ms has elapsed since window_start_ms.
+    pub fn tumble_window(&mut self, now_ms: u64) {
+        if !self.window_initialized {
             self.window_start_ms = now_ms;
+            self.window_initialized = true;
             return;
         }
         if now_ms >= self.window_start_ms.saturating_add(self.window_ms) {
@@ -332,13 +385,18 @@ impl ClientRetryBudget {
         }
     }
 
+    /// Backwards compatibility alias for tumble_window.
+    pub fn roll_window(&mut self, now_ms: u64) {
+        self.tumble_window(now_ms);
+    }
+
     pub fn record_admitted(&mut self, now_ms: u64) {
-        self.roll_window(now_ms);
+        self.tumble_window(now_ms);
         self.initial_requests = self.initial_requests.saturating_add(1);
     }
 
     pub fn max_retries(&self) -> usize {
-        (self.initial_requests * self.budget_pct) / 100
+        ((self.initial_requests * self.budget_pct) / 100).max(self.min_retries)
     }
 
     /// Tries to acquire a retry token from the client's local budget.
@@ -350,7 +408,7 @@ impl ClientRetryBudget {
     }
 
     pub fn try_acquire_at(&mut self, now_ms: u64) -> bool {
-        self.roll_window(now_ms);
+        self.tumble_window(now_ms);
         if self.retries_attempted < self.max_retries() {
             self.retries_attempted += 1;
             true
@@ -368,14 +426,26 @@ impl ClientRetryBudget {
     }
 }
 
-/// Bounded LRU/FIFO map for verified client retry budgets (PR #465, O3).
+#[derive(Debug, Clone)]
+struct BudgetNode {
+    authority: [u8; 32],
+    budget: ClientRetryBudget,
+    prev: usize,
+    next: usize,
+}
+
+/// Bounded true LRU map for verified client retry budgets (PR #465, O3).
 /// Max capacity bounded at 2048 entries to prevent unbounded memory growth.
+/// Implemented as an O(1) index-based doubly-linked list with HashMap index lookup.
 /// Only cryptographically verified authorities with valid signatures are ever inserted.
 #[derive(Debug, Clone)]
 pub struct BoundedClientBudgets {
     max_entries: usize,
-    queue: std::collections::VecDeque<[u8; 32]>,
-    budgets: std::collections::HashMap<[u8; 32], ClientRetryBudget>,
+    map: std::collections::HashMap<[u8; 32], usize>,
+    nodes: Vec<Option<BudgetNode>>,
+    free_list: Vec<usize>,
+    head: usize, // least recently used (oldest)
+    tail: usize, // most recently used (newest)
 }
 
 impl BoundedClientBudgets {
@@ -384,34 +454,113 @@ impl BoundedClientBudgets {
     pub fn new(max_entries: usize) -> Self {
         Self {
             max_entries,
-            queue: std::collections::VecDeque::with_capacity(max_entries),
-            budgets: std::collections::HashMap::with_capacity(max_entries),
+            map: std::collections::HashMap::with_capacity(max_entries),
+            nodes: Vec::with_capacity(max_entries),
+            free_list: Vec::new(),
+            head: usize::MAX,
+            tail: usize::MAX,
         }
     }
 
+    fn detach(&mut self, idx: usize) {
+        let (prev, next) = {
+            let node = self.nodes[idx].as_ref().unwrap();
+            (node.prev, node.next)
+        };
+        if prev != usize::MAX {
+            self.nodes[prev].as_mut().unwrap().next = next;
+        } else {
+            self.head = next;
+        }
+        if next != usize::MAX {
+            self.nodes[next].as_mut().unwrap().prev = prev;
+        } else {
+            self.tail = prev;
+        }
+        let node = self.nodes[idx].as_mut().unwrap();
+        node.prev = usize::MAX;
+        node.next = usize::MAX;
+    }
+
+    fn attach_tail(&mut self, idx: usize) {
+        {
+            let node = self.nodes[idx].as_mut().unwrap();
+            node.prev = self.tail;
+            node.next = usize::MAX;
+        }
+        if self.tail != usize::MAX {
+            self.nodes[self.tail].as_mut().unwrap().next = idx;
+        } else {
+            self.head = idx;
+        }
+        self.tail = idx;
+    }
+
+    fn touch(&mut self, idx: usize) {
+        if self.tail == idx {
+            return;
+        }
+        self.detach(idx);
+        self.attach_tail(idx);
+    }
+
     pub fn get(&self, authority: &[u8; 32]) -> Option<&ClientRetryBudget> {
-        self.budgets.get(authority)
+        self.map
+            .get(authority)
+            .and_then(|&idx| self.nodes[idx].as_ref().map(|n| &n.budget))
     }
 
     pub fn get_mut(&mut self, authority: &[u8; 32]) -> Option<&mut ClientRetryBudget> {
-        self.budgets.get_mut(authority)
+        if let Some(&idx) = self.map.get(authority) {
+            self.touch(idx);
+            self.nodes[idx].as_mut().map(|n| &mut n.budget)
+        } else {
+            None
+        }
     }
 
     pub fn contains_key(&self, authority: &[u8; 32]) -> bool {
-        self.budgets.contains_key(authority)
+        self.map.contains_key(authority)
     }
 
     pub fn insert(&mut self, authority: [u8; 32], budget: ClientRetryBudget) {
-        if self.budgets.contains_key(&authority) {
-            self.budgets.insert(authority, budget);
+        if let Some(&idx) = self.map.get(&authority) {
+            self.nodes[idx].as_mut().unwrap().budget = budget;
+            self.touch(idx);
         } else {
-            while self.queue.len() >= self.max_entries {
-                if let Some(oldest) = self.queue.pop_front() {
-                    self.budgets.remove(&oldest);
+            while self.map.len() >= self.max_entries {
+                let oldest = self.head;
+                if oldest == usize::MAX {
+                    break;
                 }
+                let oldest_auth = self.nodes[oldest].as_ref().unwrap().authority;
+                self.detach(oldest);
+                self.map.remove(&oldest_auth);
+                self.nodes[oldest] = None;
+                self.free_list.push(oldest);
             }
-            self.budgets.insert(authority, budget);
-            self.queue.push_back(authority);
+
+            let idx = if let Some(free_idx) = self.free_list.pop() {
+                self.nodes[free_idx] = Some(BudgetNode {
+                    authority,
+                    budget,
+                    prev: usize::MAX,
+                    next: usize::MAX,
+                });
+                free_idx
+            } else {
+                let new_idx = self.nodes.len();
+                self.nodes.push(Some(BudgetNode {
+                    authority,
+                    budget,
+                    prev: usize::MAX,
+                    next: usize::MAX,
+                }));
+                new_idx
+            };
+
+            self.attach_tail(idx);
+            self.map.insert(authority, idx);
         }
     }
 
@@ -419,25 +568,21 @@ impl BoundedClientBudgets {
     where
         F: FnOnce() -> ClientRetryBudget,
     {
-        if !self.budgets.contains_key(&authority) {
-            while self.queue.len() >= self.max_entries {
-                if let Some(oldest) = self.queue.pop_front() {
-                    self.budgets.remove(&oldest);
-                }
-            }
+        if !self.map.contains_key(&authority) {
             let b = f();
-            self.budgets.insert(authority, b);
-            self.queue.push_back(authority);
+            self.insert(authority, b);
         }
-        self.budgets.get_mut(&authority).unwrap()
+        let idx = *self.map.get(&authority).unwrap();
+        self.touch(idx);
+        &mut self.nodes[idx].as_mut().unwrap().budget
     }
 
     pub fn len(&self) -> usize {
-        self.budgets.len()
+        self.map.len()
     }
 
     pub fn is_empty(&self) -> bool {
-        self.budgets.is_empty()
+        self.map.is_empty()
     }
 }
 
