@@ -1,0 +1,28 @@
+# Caddy pool block — the door (Hostinger). INTERCHANGEABLE AGENT Phase 1.
+# Standalone form of the block declared in hostinger.nix, for hosts whose
+# Caddy is not Nix-managed (ant-node snippet convention). Keep the two in
+# sync; hostinger.nix is the source of truth.
+#
+# Keyed: every request must carry the pool key as a Bearer token. Caddy
+# reads {$POOL_KEY} from its environment (door.env on the box, root 0600).
+# Failover: members are health-checked on /health every 10s; a member
+# that fails is out of rotation for 30s and traffic fails over to the
+# healthy members. Members bind mesh-only — this door is the sole edge.
+#
+# DEPLOY-TIME: replace llm.door with the real door hostname and
+# ORACLE_MESH_ADDR with the Oracle box's mesh address.
+
+llm.door {
+	@nokey not header Authorization "Bearer {$POOL_KEY}"
+	handle @nokey {
+		respond "unauthorized" 401
+	}
+	reverse_proxy 172.18.0.1:8091 ORACLE_MESH_ADDR:8091 {
+		lb_policy round_robin
+		health_uri /health
+		health_interval 10s
+		health_timeout 5s
+		fail_duration 30s
+		max_fails 1
+	}
+}
