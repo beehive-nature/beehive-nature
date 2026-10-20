@@ -6,6 +6,15 @@
 # Shape: Caddy is the door. It health-checks every member on /health,
 # fails over across healthy members, and demands the pool key. Members
 # themselves bind mesh-only (see llama-server.nix) and hold no secrets.
+#
+# Sovereignty law (issue #479): this door is an OPTIONAL, REPLACEABLE
+# adapter — never an architectural dependency and never an authority.
+# Agents may point at any member door or compatible gateway; the pool
+# survives this door's disappearance. Egress law: the door's bandwidth
+# is funded by the pool operator's authorized budget only. The pool key
+# IS the payer authorization — no key, no service (401 below), and a
+# hard per-key rate ceiling (rate-limit module, deploy-time) refuses
+# once the budget is spent. There is no estate-funded fallback route.
 { config, lib, pkgs, ... }:
 
 {

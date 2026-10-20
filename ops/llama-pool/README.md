@@ -22,6 +22,23 @@ OpenAI-compatible) points at the door with the pool key in env. Kill
 any member mid-task and the door fails over; the agent's DID and task
 state never lived on the member.
 
+## Sovereignty / egress conformance (issue #479)
+
+- The door is a replaceable adapter, never a dependency or authority:
+  any compatible gateway (or a member reached over the mesh) serves
+  the same OpenAI-compatible contract; killing the door degrades
+  convenience, not correctness.
+- Egress is explicitly funded: the pool key is payer authorization.
+  Negative test, required before the door opens: a request with no
+  key is refused 401 (declared in `hostinger.nix`), and a key past
+  its rate ceiling is refused rather than silently billed to the
+  estate. The ceiling itself is deploy-time (Caddy rate-limit
+  module + the operator's budget); it is NOT claimed live until the
+  founder's Hostinger rebuild lands and the test is run against it.
+- Members bind mesh-only and hold no secrets, so peer operators bear
+  only their own agreed compute costs; nobody's traffic is proxied
+  at estate expense by default.
+
 ## Deploy-time facts to fill (marked DEPLOY-TIME in the files)
 
 - Each member's mesh address (`ORACLE_MESH_ADDR` in the door block).
