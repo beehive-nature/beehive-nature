@@ -3,8 +3,11 @@
 //!   gp bind    --root <repo>           seal the tree (write state + index)
 //!   gp check   --root <repo>           verify the seal; red on any drift
 //!   gp resolve --root <repo> --person <id> [--bname <label>.b]
-//!                                       emit the decentralized resolution
-//!                                       record for one person
+//!              [--expect-state-sha <hex>] [--preview]
+//!                                       fail-closed resolution record;
+//!                                       --expect-state-sha pins the trust
+//!                                       root out-of-band; --preview is an
+//!                                       untrusted inspection mode
 //!
 //! Exit codes: 0 green, 1 drift/lookup failure, 2 usage/IO error.
 
@@ -12,7 +15,7 @@ use std::path::Path;
 use std::process::ExitCode;
 
 fn usage() -> ExitCode {
-    eprintln!("usage: gp <bind|check|resolve> --root <repo> [--person <id>] [--bname <label>.b] [--max-named N]");
+    eprintln!("usage: gp <bind|check|resolve> --root <repo> [--person <id>] [--bname <label>.b] [--expect-state-sha <hex>] [--preview] [--max-named N]");
     ExitCode::from(2)
 }
 
@@ -64,7 +67,14 @@ fn main() -> ExitCode {
         }
         "resolve" => {
             let Some(person) = flag("--person") else { return usage() };
-            match genealogy_publication::resolve(root, &person, flag("--bname").as_deref()) {
+            let bname = flag("--bname");
+            let pin = flag("--expect-state-sha");
+            let opts = genealogy_publication::ResolveOptions {
+                bname: bname.as_deref(),
+                expect_state_sha: pin.as_deref(),
+                preview: args.iter().any(|a| a == "--preview"),
+            };
+            match genealogy_publication::resolve(root, &person, opts) {
                 Ok(out) => {
                     print!("{out}");
                     ExitCode::SUCCESS
