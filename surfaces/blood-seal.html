@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>the blood seal — verified reading — beehive nature reserve</title>
+<style>
+/* Every painted colour and face is a skaists token; no sizes are declared —
+   the registers set the type scale (surfaces/skaists.css + register.js).
+   Not yet on skaists-conformance.mjs's --only list: token discipline here is
+   by construction, unmeasured. */
+:root{--bs-pad:14px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-ui);padding:var(--bs-pad) var(--bs-pad) 96px}
+main{max-width:760px;margin:0 auto}
+.crumbs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:4px 0 12px;color:var(--sk-ink-mut)}
+.crumbs a{color:var(--sk-sovereign);display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px)}
+.crumbs .sep{color:var(--sk-ink-mut)} .crumbs .here{color:var(--sk-ink)}
+.kicker{letter-spacing:.3em;text-transform:uppercase;color:var(--sk-ink-mut)}
+h1{color:var(--sk-ink);font-family:var(--sk-font-house);margin:8px 0 4px}
+.lede{color:var(--sk-ink-soft)}
+section{background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:11px;padding:14px 16px;margin-top:14px}
+h2{color:var(--sk-ink-soft)}
+label{display:block;color:var(--sk-ink-soft)}
+input[type=text]{width:100%;background:var(--sk-bg-well);border:1px solid var(--sk-line);border-radius:9px;color:var(--sk-ink);font-family:var(--sk-font-mono);padding:10px 12px;min-height:var(--sk-control-min,44px)}
+input[type=text]:focus{outline:2px solid var(--sk-focus);outline-offset:1px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+button{font-family:var(--sk-font-ui);font-weight:600;background:var(--sk-sovereign);color:var(--sk-on-primary);border:none;border-radius:10px;padding:0 18px;min-height:var(--sk-control-min,44px);cursor:pointer}
+button:focus{outline:2px solid var(--sk-focus)}
+.pin-note{color:var(--sk-ink-mut)}
+.pin-note a{color:var(--sk-sovereign)}
+ul{list-style:none;display:grid;gap:6px}
+li{color:var(--sk-ink-soft)}
+li .q{color:var(--sk-ink)} li .nq{color:var(--sk-ink-mut)}
+#sealStatus{font-family:var(--sk-font-mono)}
+#sealStatus[data-state="verified"]{color:var(--sk-sovereign)}
+#sealStatus[data-state="untrusted-consistency"]{color:var(--sk-ink-soft)}
+#sealStatus[data-state="failed"]{color:var(--sk-ink-soft)}
+#sealReasons{font-family:var(--sk-font-mono);color:var(--sk-ink-mut)}
+#sealCard dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-family:var(--sk-font-mono)}
+#sealCard dt{color:var(--sk-ink-mut)} #sealCard dd{color:var(--sk-ink);word-break:break-all}
+.warn{border:1px solid var(--sk-line-soft);border-radius:9px;background:var(--sk-bg-well);color:var(--sk-ink-soft);padding:8px 12px;margin-top:10px}
+#sealFrameWrap{margin-top:12px}
+#sealFrame{width:100%;min-height:420px;border:1px solid var(--sk-line);border-radius:9px;background:var(--sk-bg-well)}
+footer{margin-top:22px;color:var(--sk-ink-mut);text-align:center}
+footer a{color:var(--sk-sovereign)}
+</style>
+<link rel="stylesheet" href="skaists.css">
+</head>
+<body data-bee-theme="custom">
+<nav class="crumbs" aria-label="you are here">
+ <a href="index.html">beehive nature reserve</a><span class="sep">▸</span>
+ <a href="blood.html">the blood comb</a><span class="sep">▸</span>
+ <span class="here">the blood seal</span>
+</nav>
+<main>
+<div class="kicker">bnr · the blood seal</div>
+<h1>read a sealed person, verified before rendering</h1>
+<p class="lede">This reader fetches the sealed lineage corpus, re-hashes every byte it shows, and renders a person's research page only after the page's own digest matches the seal. Anything missing or corrupted fails closed — an unverified byte never renders.</p>
+
+<section aria-labelledby="sealFormTitle">
+ <h2 id="sealFormTitle">who, and against which root</h2>
+ <div class="row">
+  <div style="flex:1 1 220px"><label for="sealPerson">person id (e.g. p3d44ccaffd)</label>
+   <input type="text" id="sealPerson" placeholder="p3d44ccaffd" autocomplete="off"></div>
+  <div style="flex:2 1 320px"><label for="sealPin">root pin — sha256 of publication-state.json, pasted from an independent channel</label>
+   <input type="text" id="sealPin" placeholder="64 hex characters (leave empty for untrusted consistency-only)" autocomplete="off"></div>
+ </div>
+ <p class="pin-note">The pin is the trust boundary. Take it from a channel no rail controls — the committing git history or the lane dispatch — never from a fetch. Without a pin this reader can only check internal consistency, and says so. <a href="https://github.com/beehive-nature/beehive-nature/commits/main" target="_blank" rel="noopener noreferrer">the commit history on GitHub (opens a new tab)</a> is one independent channel.</p>
+ <div class="row"><button id="sealGo" type="button">verify &amp; read</button></div>
+</section>
+
+<section aria-labelledby="sealRailsTitle">
+ <h2 id="sealRailsTitle">rails</h2>
+ <ul id="sealRailList">
+  <li><span class="q">GitHub Pages — bootstrap</span> — same-origin static fetch of the committed corpus (qualified)</li>
+  <li><span class="nq">Arweave</span> — declared rail; adapter-arweave browser route not yet qualified</li>
+  <li><span class="nq">Autonomi</span> — declared rail; adapter-autonomi browser route not yet qualified</li>
+  <li><span class="nq">x0x</span> — declared rail; ops/x0x mesh route not yet qualified</li>
+ </ul>
+ <p class="pin-note">A rail that serves bytes disagreeing with the pin is named in the reading log and the next qualified rail is tried — the pin, not the rail, decides what is sealed. There is one qualified rail today.</p>
+</section>
+
+<section aria-labelledby="sealResultTitle">
+ <h2 id="sealResultTitle">the reading</h2>
+ <p id="sealStatus" data-state="idle" role="status">idle — nothing fetched, nothing rendered</p>
+ <div id="sealReasons" hidden></div>
+ <div id="sealCard" hidden>
+  <dl>
+   <dt>person</dt><dd id="sealName"></dd>
+   <dt>era</dt><dd id="sealEra"></dd>
+   <dt>familysearch refs</dt><dd id="sealFs"></dd>
+   <dt>record arks</dt><dd id="sealArks"></dd>
+   <dt>page html</dt><dd id="sealHtmlSha"></dd>
+   <dt>page json</dt><dd id="sealJsonSha"></dd>
+   <dt>state root</dt><dd id="sealStateSha"></dd>
+   <dt>served by</dt><dd id="sealRail"></dd>
+  </dl>
+ </div>
+ <div class="warn" id="sealUntrustedWarn" hidden>no root pin — this reading is consistency-only, not authentication. A full rewrite of state, index and pages together would self-verify.</div>
+ <div id="sealFrameWrap" hidden><iframe id="sealFrame" title="the verified person page" sandbox=""></iframe></div>
+</section>
+
+<footer>
+ <p>the seal itself is <span class="mono">crates/genealogy-publication</span> (Rust, zero network); this page is its reader.</p>
+ <p><a href="blood.html">the blood comb</a> stays the unsealed family tree view — same tab.</p>
+</footer>
+</main>
+<script src="tour.js?v=42"></script>
+<script src="blood-seal.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  function setStatus(state, text) {
+    var s = $('sealStatus');
+    s.dataset.state = state;
+    s.textContent = text;
+  }
+  function showReasons(list) {
+    var box = $('sealReasons');
+    box.hidden = false;
+    box.textContent = 'reading log — ' + list.map(function (a) { return a.rail + ': ' + a.refused; }).join(' | ');
+  }
+  $('sealGo').addEventListener('click', function () {
+    var person = $('sealPerson').value.trim();
+    var pin = $('sealPin').value.trim();
+    ['sealCard', 'sealUntrustedWarn', 'sealFrameWrap', 'sealReasons'].forEach(function (id) { $(id).hidden = true; });
+    $('sealFrame').removeAttribute('srcdoc');
+    if (!person) { setStatus('failed', 'refused: a person id is required'); return; }
+    setStatus('idle', 'fetching the seal…');
+    BloodSeal.verifyPerson({ person: person, rootPin: pin }).then(function (r) {
+      if (r.status === 'verified') {
+        setStatus('verified', 'VERIFIED — every byte re-hashed against the pinned root ' + r.stateSha256.slice(0, 16) + '…');
+      } else {
+        setStatus('untrusted-consistency', 'CONSISTENCY ONLY (untrusted) — the seal is internally consistent; no independent root pin was given');
+        $('sealUntrustedWarn').hidden = false;
+      }
+      if (r.attempts && r.attempts.length) showReasons(r.attempts);
+      $('sealName').textContent = (r.person.name || r.person.id) + (r.person.lifespan ? ' · ' + r.person.lifespan : '');
+      $('sealEra').textContent = r.person.era || '—';
+      $('sealFs').textContent = r.person.fsRefs.join(', ') || '—';
+      $('sealArks').textContent = r.person.recordArks.length ? r.person.recordArks.join(', ') : '—';
+      $('sealHtmlSha').textContent = r.person.pageHtmlSha256;
+      $('sealJsonSha').textContent = r.person.pageJsonSha256;
+      $('sealStateSha').textContent = r.stateSha256;
+      $('sealRail').textContent = r.rail;
+      $('sealCard').hidden = false;
+      $('sealFrame').srcdoc = r.htmlText; /* rendered only after its digest verified */
+      $('sealFrameWrap').hidden = false;
+    }).catch(function (e) {
+      var code = e && e.code ? e.code : 'error';
+      setStatus('failed', 'FAILED CLOSED (' + code + ') — nothing rendered. ' + (e && e.message ? e.message : ''));
+      if (e && e.attempts && e.attempts.length) showReasons(e.attempts);
+    });
+  });
+})();
+</script>
+</body>
+</html>

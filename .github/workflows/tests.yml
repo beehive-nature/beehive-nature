@@ -701,6 +701,16 @@ jobs:
           npx playwright --version
           npx playwright install --dry-run chromium
           npx playwright install --with-deps chromium
+      # THE BLOOD SEAL READER (dApp verification layer, 2026-10-19): one law —
+      # an unverified byte never renders. Hermetic fixture corpus; tamper
+      # controls: page drift, wrong root pin, no-pin untrusted labeling,
+      # unknown person — each fails closed, nothing renders. Browser-side
+      # like every playwright suite here — after the shared install, in e2e/.
+      - name: Blood seal reader — verified reads, fail-closed tamper controls
+        if: always()
+        timeout-minutes: 2
+        working-directory: e2e
+        run: node --test blood-seal.test.mjs
       # W@tch and PLUR consume the same language-neutral manifest. These
       # browser proofs keep the adapter read-only: no relay, x0x, wallet,
       # Autonomi write, or Trezor approval is opened by either surface.
