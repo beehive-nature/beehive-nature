@@ -1,0 +1,80 @@
+2026-10-20T08:50:31+00:00 buzz-hostinger systemd[1]: Starting [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/invitation-input/invitation-native-runtime.sh...
+2026-10-20T08:50:31+00:00 buzz-hostinger systemd[1]: Started [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/invitation-input/invitation-native-runtime.sh.
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095952]: UTC:
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095955]: Tue Oct 20 08:50:31 AM UTC 2026
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095952]: uid:
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095956]: uid=62201(invitation-baseline) gid=62201(invitation-baseline) groups=62201(invitation-baseline)
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095952]: host network namespace: net:[4026531833]
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095952]: runtime network namespace:
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095958]: net:[4026532884]
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095960]: lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP>
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095964]: 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000\    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095967]: local 127.0.0.0/8 dev lo table local proto kernel scope host src 127.0.0.1
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095967]: local 127.0.0.1 dev lo table local proto kernel scope host src 127.0.0.1
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095967]: broadcast 127.255.255.255 dev lo table local proto kernel scope link src 127.0.0.1
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095968]: local ::1 dev lo table local proto kernel metric 0 pref medium
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095969]: CapInh:        0000000000000000
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095969]: CapPrm:        0000000000000000
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095969]: CapEff:        0000000000000000
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095969]: CapBnd:        0000000000000000
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095969]: CapAmb:        0000000000000000
+2026-10-20T08:50:31+00:00 buzz-hostinger bash[4095969]: NoNewPrivs:        1
+2026-10-20T08:50:32+00:00 buzz-hostinger bash[4095977]: 3e0c4dd42f58a623cba4f57fb87ea7faec3ccf9f47b8024aa0d84499d8550bea  /run/invitation-bin/x0xd # PUBLIC-CONSTANT
+2026-10-20T08:50:32+00:00 buzz-hostinger bash[4095977]: 140c399b3c2b378a08ed11d5d6fbbec658319d5f25de45ca7cceefb9072970ac  /run/invitation-tests/named_group_join_metadata_event-87faefd2c63253e6 # PUBLIC-CONSTANT
+2026-10-20T08:50:32+00:00 buzz-hostinger bash[4095952]: non_creator_admin_invite_e2e_converges_through_real_daemons: test
+2026-10-20T08:50:32+00:00 buzz-hostinger bash[4095952]: 1 test, 0 benchmarks
+2026-10-20T08:50:32+00:00 buzz-hostinger bash[4095981]: non_creator_admin_invite_e2e_converges_through_real_daemons: test
+2026-10-20T08:50:32+00:00 buzz-hostinger bash[4095952]: running 1 test
+2026-10-20T08:50:32+00:00 buzz-hostinger bash[4095952]: test non_creator_admin_invite_e2e_converges_through_real_daemons ... [cluster] starting alice...
+2026-10-20T08:50:32+00:00 buzz-hostinger bash[4095952]: [cluster] waiting 15s for alice to stabilise before starting bob...
+2026-10-20T08:50:47+00:00 buzz-hostinger bash[4095952]: [cluster] starting bob (bootstraps to alice)...
+2026-10-20T08:50:48+00:00 buzz-hostinger bash[4095952]: [cluster] waiting 15s for bob to join mesh before starting charlie...
+2026-10-20T08:51:03+00:00 buzz-hostinger bash[4095952]: [cluster] starting charlie (bootstraps to alice)...
+2026-10-20T08:51:03+00:00 buzz-hostinger bash[4095952]: [cluster] all nodes up — waiting 5s for mesh to settle...
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]: [cluster] test-alice-8045 sees 2 peer(s)
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]: [cluster] test-bob-8045 sees 2 peer(s)
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]: [cluster] test-charlie-8045 sees 2 peer(s)
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]: [cluster] mesh verified — all 3 nodes connected
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]: thread 'non_creator_admin_invite_e2e_converges_through_real_daemons' (4095982) panicked at tests/named_group_join_metadata_event.rs:897:14:
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]: creator provenance derives from base state: "invite missing base member snapshot; cannot derive creator provenance"
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]: stack backtrace:
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:    0: __rustc::rust_begin_unwind
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:    1: core::panicking::panic_fmt
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:    2: core::result::unwrap_failed
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:    3: core::result::Result<T,E>::expect
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:    4: named_group_join_metadata_event::non_creator_admin_invite_e2e_converges_for_preset::{{closure}}
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:    5: named_group_join_metadata_event::non_creator_admin_invite_e2e_converges_through_real_daemons::{{closure}}
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:    6: <core::pin::Pin<P> as core::future::future::Future>::poll
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:    7: <core::pin::Pin<P> as core::future::future::Future>::poll
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:    8: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:    9: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   10: tokio::runtime::scheduler::current_thread::Context::enter
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   11: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   12: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   13: tokio::runtime::context::scoped::Scoped<T>::set
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   14: tokio::runtime::context::set_scheduler::{{closure}}
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   15: std::thread::local::LocalKey<T>::try_with
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   16: std::thread::local::LocalKey<T>::with
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   17: tokio::runtime::context::set_scheduler
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   18: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   19: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   20: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   21: tokio::runtime::context::runtime::enter_runtime
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   22: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   23: tokio::runtime::runtime::Runtime::block_on_inner
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   24: tokio::runtime::runtime::Runtime::block_on
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   25: named_group_join_metadata_event::non_creator_admin_invite_e2e_converges_through_real_daemons
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   26: named_group_join_metadata_event::non_creator_admin_invite_e2e_converges_through_real_daemons::{{closure}}
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:   27: core::ops::function::FnOnce::call_once
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]: note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]: [cluster] retained fixture diagnostics: /tmp/x0x-test-J8OyVk
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]: [cluster] retained fixture diagnostics: /tmp/x0x-test-T5wnX2
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]: [cluster] retained fixture diagnostics: /tmp/x0x-test-WPS2uz
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]: FAILED
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]: failures:
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]: failures:
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]:     non_creator_admin_invite_e2e_converges_through_real_daemons
+2026-10-20T08:51:08+00:00 buzz-hostinger bash[4095952]: test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 36.25s
+2026-10-20T08:51:08+00:00 buzz-hostinger systemd[1]: invitation-baseline.service: Main process exited, code=exited, status=101/n/a
+2026-10-20T08:51:08+00:00 buzz-hostinger systemd[1]: invitation-baseline.service: Failed with result 'exit-code'.
+2026-10-20T08:51:08+00:00 buzz-hostinger systemd[1]: invitation-baseline.service: Consumed 5.468s CPU time over 36.959s wall clock time, 77.1M memory peak, 736K read from disk, 496K written to disk, 2M incoming IP traffic, 2M outgoing IP traffic.

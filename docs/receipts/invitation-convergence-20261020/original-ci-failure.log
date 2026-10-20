@@ -1,0 +1,3 @@
+Integration Timing Suites (weekly)	UNKNOWN STEP	2026-10-19T08:52:31.2647861Z     test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 36.14s
+Integration Timing Suites (weekly)	UNKNOWN STEP	2026-10-19T08:52:31.2652356Z     ^[[0m^[[31;1mthread 'non_creator_admin_invite_e2e_converges_through_real_daemons' (127) panicked at tests/named_group_join_metadata_event.rs:897:14:^[[0m
+Integration Timing Suites (weekly)	UNKNOWN STEP	2026-10-19T08:52:31.2653334Z     ^[[31;1mcreator provenance derives from base state: "invite missing base member snapshot; cannot derive creator provenance"^[[0m

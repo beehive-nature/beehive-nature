@@ -1,0 +1,803 @@
+2026-10-20T08:33:37+00:00 buzz-hostinger systemd[1]: Starting [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/invitation-input/invitation-native-build.sh...
+2026-10-20T08:33:37+00:00 buzz-hostinger (bash)[4052433]: invitation-native-build.service: Found pre-existing public StateDirectory= directory /var/lib/invitation-validation, migrating to /var/lib/private/invitation-validation.
+2026-10-20T08:33:37+00:00 buzz-hostinger (bash)[4052433]: invitation-native-build.service: Apparently, service previously had DynamicUser= turned off, and has now turned it on.
+2026-10-20T08:33:38+00:00 buzz-hostinger systemd[1]: Started [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/invitation-input/invitation-native-build.sh.
+2026-10-20T08:33:38+00:00 buzz-hostinger bash[4052436]: Cloning into 'source'...
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052533]: HEAD is now at cfb09750 Merge pull request #1186 from saorsa-labs/docs/adr-0094-m2-safe-apply
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: ANSI_COLOR="0;38;2;126;186;228"
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: BUG_REPORT_URL="https://github.com/NixOS/nixpkgs/issues"
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: BUILD_ID="26.05.20260829.c5c4a43"
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: CPE_NAME="cpe:/o:nixos:nixos:26.05"
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: DEFAULT_HOSTNAME=nixos
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: DOCUMENTATION_URL="https://nixos.org/learn.html"
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: HOME_URL="https://nixos.org/"
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: ID=nixos
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: ID_LIKE=""
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: IMAGE_ID=""
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: IMAGE_VERSION=""
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: LOGO="nix-snowflake"
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: NAME=NixOS
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: PRETTY_NAME="NixOS 26.05 (Yarara)"
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: SUPPORT_END="2026-12-31"
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: SUPPORT_URL="https://nixos.org/community.html"
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: VARIANT=""
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: VARIANT_ID=""
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: VENDOR_NAME=NixOS
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: VENDOR_URL="https://nixos.org/"
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: VERSION="26.05 (Yarara)"
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: VERSION_CODENAME=yarara
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052535]: VERSION_ID="26.05"
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052536]: rustc 1.95.0 (59807616e 2026-04-14)
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052536]: binary: rustc
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052536]: commit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052536]: commit-date: 2026-04-14
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052536]: host: x86_64-unknown-linux-gnu
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052536]: release: 1.95.0
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052536]: LLVM version: 22.1.2
+2026-10-20T08:33:43+00:00 buzz-hostinger bash[4052541]:     Updating crates.io index
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:  Downloading crates ...
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded addr2line v0.25.1
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded crc-catalog v2.5.0
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded tikv-jemallocator v0.6.1
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded xz2 v0.1.7
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded bzip2 v0.5.2
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded tikv-jemalloc-ctl v0.6.1
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded backtrace v0.3.76
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded thousands v0.2.0
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded miniz_oxide v0.8.9
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded zip v2.4.2
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded rustc-demangle v0.1.28
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded paste v1.0.15
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded opus v0.3.1
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded lzma-rs v0.3.0
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded dhat v0.3.3
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded crc v3.4.0
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded constant_time_eq v0.3.1
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded gimli v0.32.3
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded rustc-hash v1.1.0
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded mintex v0.1.4
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded object v0.37.3
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded rustls v0.23.45
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded lzma-sys v0.1.20
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded bzip2-sys v0.1.13+1.0.8
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded zstd-sys v2.1.0+zstd.1.5.7
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded audiopus_sys v0.2.2
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded tikv-jemalloc-sys v0.6.1+5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded saorsa-webrtc-codecs v0.6.0
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:   Downloaded saorsa-webrtc-core v0.6.0
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:    Compiling proc-macro2 v1.0.107
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:    Compiling unicode-ident v1.0.26
+2026-10-20T08:33:44+00:00 buzz-hostinger bash[4052541]:    Compiling quote v1.0.47
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]: error: linking with `cc` failed: exit status: 1
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]:   |
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]:   = note:  "cc" "-m64" "/var/lib/invitation-validation/target/debug/build/proc-macro2-79172649b29143f8/rustc6TIGmj/symbols.o" "<3 object files omitted>" "-Wl,--as-needed" "-Wl,-Bstatic" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib/{libstd-*,libpanic_unwind-*,libobject-*,libmemchr-*,libaddr2line-*,libgimli-*,libcfg_if-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libminiz_oxide-*,libadler2-*,libunwind-*,liblibc-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "-Wl,-Bdynamic" "-lgcc_s" "-lutil" "-lrt" "-lpthread" "-lm" "-ldl" "-lc" "-L" "/var/lib/invitation-validation/target/debug/build/proc-macro2-79172649b29143f8/rustc6TIGmj/raw-dylibs" "-B<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld" "-fuse-ld=lld" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "/var/lib/invitation-validation/target/debug/build/proc-macro2-79172649b29143f8/build_script_build-79172649b29143f8" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-Wl,--strip-debug" "-nodefaultlibs"
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]:   = note: some arguments are omitted. use `--verbose` to show all linker arguments
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]:   = note: /nix/store/nsnd1r5zs3x5hlpp1ilzdjmq0c57cay8-rustup-1.29.1/nix-support/ld-wrapper.sh: line 288: /var/lib/bnrose-native-validation/rustup/toolchains/1.95.0-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld-unwrapped/ld.lld: No such file or directory
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]:           clang: error: unable to execute command: No such file or directory
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]:           clang: error: linker command failed due to signal (use -v to see invocation)
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]:
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]: error: could not compile `proc-macro2` (build script) due to 1 previous error
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]: warning: build failed, waiting for other jobs to finish...
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]: error: linking with `cc` failed: exit status: 1
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]:   |
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]:   = note:  "cc" "-m64" "/var/lib/invitation-validation/target/debug/build/quote-bc9e1386c0f69654/rustc2ujjMx/symbols.o" "<2 object files omitted>" "-Wl,--as-needed" "-Wl,-Bstatic" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib/{libstd-*,libpanic_unwind-*,libobject-*,libmemchr-*,libaddr2line-*,libgimli-*,libcfg_if-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libminiz_oxide-*,libadler2-*,libunwind-*,liblibc-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "-Wl,-Bdynamic" "-lgcc_s" "-lutil" "-lrt" "-lpthread" "-lm" "-ldl" "-lc" "-L" "/var/lib/invitation-validation/target/debug/build/quote-bc9e1386c0f69654/rustc2ujjMx/raw-dylibs" "-B<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld" "-fuse-ld=lld" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "/var/lib/invitation-validation/target/debug/build/quote-bc9e1386c0f69654/build_script_build-bc9e1386c0f69654" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-Wl,--strip-debug" "-nodefaultlibs"
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]:   = note: some arguments are omitted. use `--verbose` to show all linker arguments
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]:   = note: /nix/store/nsnd1r5zs3x5hlpp1ilzdjmq0c57cay8-rustup-1.29.1/nix-support/ld-wrapper.sh: line 288: /var/lib/bnrose-native-validation/rustup/toolchains/1.95.0-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld-unwrapped/ld.lld: No such file or directory
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]:           clang: error: unable to execute command: No such file or directory
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]:           clang: error: linker command failed due to signal (use -v to see invocation)
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]:
+2026-10-20T08:33:45+00:00 buzz-hostinger bash[4052541]: error: could not compile `quote` (build script) due to 1 previous error
+2026-10-20T08:33:45+00:00 buzz-hostinger systemd[1]: invitation-native-build.service: Main process exited, code=exited, status=101/n/a
+2026-10-20T08:33:45+00:00 buzz-hostinger systemd[1]: invitation-native-build.service: Failed with result 'exit-code'.
+2026-10-20T08:33:45+00:00 buzz-hostinger systemd[1]: invitation-native-build.service: Consumed 11.866s CPU time over 7.853s wall clock time, 472.6M memory peak, 214.2M written to disk, 228.2M incoming IP traffic, 1.3M outgoing IP traffic.
+2026-10-20T08:34:11+00:00 buzz-hostinger systemd[1]: Starting [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/invitation-input/invitation-native-build.sh...
+2026-10-20T08:34:11+00:00 buzz-hostinger systemd[1]: Started [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/invitation-input/invitation-native-build.sh.
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053201]: HEAD is now at cfb09750 Merge pull request #1186 from saorsa-labs/docs/adr-0094-m2-safe-apply
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: ANSI_COLOR="0;38;2;126;186;228"
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: BUG_REPORT_URL="https://github.com/NixOS/nixpkgs/issues"
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: BUILD_ID="26.05.20260829.c5c4a43"
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: CPE_NAME="cpe:/o:nixos:nixos:26.05"
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: DEFAULT_HOSTNAME=nixos
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: DOCUMENTATION_URL="https://nixos.org/learn.html"
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: HOME_URL="https://nixos.org/"
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: ID=nixos
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: ID_LIKE=""
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: IMAGE_ID=""
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: IMAGE_VERSION=""
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: LOGO="nix-snowflake"
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: NAME=NixOS
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: PRETTY_NAME="NixOS 26.05 (Yarara)"
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: SUPPORT_END="2026-12-31"
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: SUPPORT_URL="https://nixos.org/community.html"
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: VARIANT=""
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: VARIANT_ID=""
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: VENDOR_NAME=NixOS
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: VENDOR_URL="https://nixos.org/"
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: VERSION="26.05 (Yarara)"
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: VERSION_CODENAME=yarara
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053203]: VERSION_ID="26.05"
+2026-10-20T08:34:11+00:00 buzz-hostinger bash[4053204]: info: syncing channel updates for 1.95.0-x86_64-unknown-linux-gnu
+2026-10-20T08:34:12+00:00 buzz-hostinger bash[4053204]: info: latest update on 2026-04-16 for version 1.95.0 (59807616e 2026-04-14)
+2026-10-20T08:34:12+00:00 buzz-hostinger bash[4053204]: info: downloading 3 components
+2026-10-20T08:34:21+00:00 buzz-hostinger bash[4053204]:   1.95.0-x86_64-unknown-linux-gnu installed - rustc 1.95.0 (59807616e 2026-04-14)
+2026-10-20T08:34:21+00:00 buzz-hostinger bash[4053204]: info: default toolchain set to 1.95.0-x86_64-unknown-linux-gnu
+2026-10-20T08:34:21+00:00 buzz-hostinger bash[4053204]: info: self-update is disabled for this build of rustup
+2026-10-20T08:34:21+00:00 buzz-hostinger bash[4053204]: info: any updates to rustup will need to be fetched with your system package manager
+2026-10-20T08:34:21+00:00 buzz-hostinger bash[4053385]: rustc 1.95.0 (59807616e 2026-04-14)
+2026-10-20T08:34:21+00:00 buzz-hostinger bash[4053385]: binary: rustc
+2026-10-20T08:34:21+00:00 buzz-hostinger bash[4053385]: commit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860
+2026-10-20T08:34:21+00:00 buzz-hostinger bash[4053385]: commit-date: 2026-04-14
+2026-10-20T08:34:21+00:00 buzz-hostinger bash[4053385]: host: x86_64-unknown-linux-gnu
+2026-10-20T08:34:21+00:00 buzz-hostinger bash[4053385]: release: 1.95.0
+2026-10-20T08:34:21+00:00 buzz-hostinger bash[4053385]: LLVM version: 22.1.2
+2026-10-20T08:34:21+00:00 buzz-hostinger bash[4053390]:    Compiling proc-macro2 v1.0.107
+2026-10-20T08:34:21+00:00 buzz-hostinger bash[4053390]:    Compiling quote v1.0.47
+2026-10-20T08:34:22+00:00 buzz-hostinger bash[4053390]:    Compiling libc v0.2.189
+2026-10-20T08:34:22+00:00 buzz-hostinger bash[4053390]:    Compiling cfg-if v1.0.5
+2026-10-20T08:34:22+00:00 buzz-hostinger bash[4053390]:    Compiling syn v2.0.119
+2026-10-20T08:34:23+00:00 buzz-hostinger bash[4053390]:    Compiling syn v3.0.6
+2026-10-20T08:34:27+00:00 buzz-hostinger bash[4053390]:    Compiling zeroize_derive v1.5.0
+2026-10-20T08:34:27+00:00 buzz-hostinger bash[4053390]:    Compiling serde_core v1.0.229
+2026-10-20T08:34:27+00:00 buzz-hostinger bash[4053390]:    Compiling zeroize v1.9.0
+2026-10-20T08:34:27+00:00 buzz-hostinger bash[4053390]:    Compiling jobserver v0.1.35
+2026-10-20T08:34:28+00:00 buzz-hostinger bash[4053390]:    Compiling shlex v2.0.1
+2026-10-20T08:34:28+00:00 buzz-hostinger bash[4053390]:    Compiling find-msvc-tools v0.1.13
+2026-10-20T08:34:28+00:00 buzz-hostinger bash[4053390]:    Compiling cc v1.4.7
+2026-10-20T08:34:29+00:00 buzz-hostinger bash[4053390]:    Compiling getrandom v0.2.17
+2026-10-20T08:34:29+00:00 buzz-hostinger bash[4053390]:    Compiling version_check v0.9.5
+2026-10-20T08:34:29+00:00 buzz-hostinger bash[4053390]:    Compiling serde v1.0.229
+2026-10-20T08:34:29+00:00 buzz-hostinger bash[4053390]:    Compiling serde_derive v1.0.229
+2026-10-20T08:34:29+00:00 buzz-hostinger bash[4053390]:    Compiling rand_core v0.6.4
+2026-10-20T08:34:29+00:00 buzz-hostinger bash[4053390]:    Compiling subtle v2.6.1
+2026-10-20T08:34:29+00:00 buzz-hostinger bash[4053390]:    Compiling generic-array v0.14.7
+2026-10-20T08:34:30+00:00 buzz-hostinger bash[4053390]:    Compiling log v0.4.34
+2026-10-20T08:34:30+00:00 buzz-hostinger bash[4053390]:    Compiling typenum v1.20.1
+2026-10-20T08:34:31+00:00 buzz-hostinger bash[4053390]:    Compiling scopeguard v1.2.0
+2026-10-20T08:34:31+00:00 buzz-hostinger bash[4053390]:    Compiling lock_api v0.4.14
+2026-10-20T08:34:31+00:00 buzz-hostinger bash[4053390]:    Compiling smallvec v1.16.1
+2026-10-20T08:34:31+00:00 buzz-hostinger bash[4053390]:    Compiling crypto-common v0.1.7
+2026-10-20T08:34:31+00:00 buzz-hostinger bash[4053390]:    Compiling once_cell v1.21.4
+2026-10-20T08:34:31+00:00 buzz-hostinger bash[4053390]:    Compiling pkg-config v0.3.34
+2026-10-20T08:34:31+00:00 buzz-hostinger bash[4053390]:    Compiling parking_lot_core v0.9.12
+2026-10-20T08:34:32+00:00 buzz-hostinger bash[4053390]:    Compiling itoa v1.0.18
+2026-10-20T08:34:32+00:00 buzz-hostinger bash[4053390]:    Compiling pin-project-lite v0.2.17
+2026-10-20T08:34:32+00:00 buzz-hostinger bash[4053390]:    Compiling bytes v1.12.1
+2026-10-20T08:34:32+00:00 buzz-hostinger bash[4053390]:    Compiling memchr v2.8.3
+2026-10-20T08:34:32+00:00 buzz-hostinger bash[4053390]:    Compiling errno v0.3.14
+2026-10-20T08:34:32+00:00 buzz-hostinger bash[4053390]:    Compiling futures-core v0.3.34
+2026-10-20T08:34:32+00:00 buzz-hostinger bash[4053390]:    Compiling signal-hook-registry v1.4.8
+2026-10-20T08:34:32+00:00 buzz-hostinger bash[4053390]:    Compiling mio v1.2.3
+2026-10-20T08:34:32+00:00 buzz-hostinger bash[4053390]:    Compiling parking_lot v0.12.5
+2026-10-20T08:34:33+00:00 buzz-hostinger bash[4053390]:    Compiling cpufeatures v0.2.17
+2026-10-20T08:34:33+00:00 buzz-hostinger bash[4053390]:    Compiling block-buffer v0.10.4
+2026-10-20T08:34:33+00:00 buzz-hostinger bash[4053390]:    Compiling futures-sink v0.3.34
+2026-10-20T08:34:33+00:00 buzz-hostinger bash[4053390]:    Compiling digest v0.10.7
+2026-10-20T08:34:33+00:00 buzz-hostinger bash[4053390]:    Compiling socket2 v0.6.5
+2026-10-20T08:34:33+00:00 buzz-hostinger bash[4053390]:    Compiling stable_deref_trait v1.2.1
+2026-10-20T08:34:33+00:00 buzz-hostinger bash[4053390]:    Compiling zerocopy v0.8.57
+2026-10-20T08:34:33+00:00 buzz-hostinger bash[4053390]:    Compiling tracing-core v0.1.36
+2026-10-20T08:34:33+00:00 buzz-hostinger bash[4053390]:    Compiling zerocopy-derive v0.8.57
+2026-10-20T08:34:33+00:00 buzz-hostinger bash[4053390]:    Compiling tokio-macros v2.7.2
+2026-10-20T08:34:34+00:00 buzz-hostinger bash[4053390]:    Compiling slab v0.4.12
+2026-10-20T08:34:34+00:00 buzz-hostinger bash[4053390]:    Compiling tokio v1.53.1
+2026-10-20T08:34:37+00:00 buzz-hostinger bash[4053390]:    Compiling futures-channel v0.3.34
+2026-10-20T08:34:37+00:00 buzz-hostinger bash[4053390]:    Compiling tracing-attributes v0.1.31
+2026-10-20T08:34:38+00:00 buzz-hostinger bash[4053390]:    Compiling tracing v0.1.44
+2026-10-20T08:34:38+00:00 buzz-hostinger bash[4053390]:    Compiling futures-macro v0.3.34
+2026-10-20T08:34:38+00:00 buzz-hostinger bash[4053390]:    Compiling synstructure v0.14.0
+2026-10-20T08:34:39+00:00 buzz-hostinger bash[4053390]:    Compiling futures-task v0.3.34
+2026-10-20T08:34:39+00:00 buzz-hostinger bash[4053390]:    Compiling futures-io v0.3.34
+2026-10-20T08:34:39+00:00 buzz-hostinger bash[4053390]:    Compiling futures-util v0.3.34
+2026-10-20T08:34:39+00:00 buzz-hostinger bash[4053390]:    Compiling bitflags v2.13.2
+2026-10-20T08:34:39+00:00 buzz-hostinger bash[4053390]:    Compiling zerofrom-derive v0.1.8
+2026-10-20T08:34:40+00:00 buzz-hostinger bash[4053390]:    Compiling http v1.5.0
+2026-10-20T08:34:41+00:00 buzz-hostinger bash[4053390]:    Compiling cmake v0.1.58
+2026-10-20T08:34:41+00:00 buzz-hostinger bash[4053390]:    Compiling zerofrom v0.1.8
+2026-10-20T08:34:41+00:00 buzz-hostinger bash[4053390]:    Compiling yoke-derive v0.8.3
+2026-10-20T08:34:41+00:00 buzz-hostinger bash[4053390]:    Compiling crossbeam-utils v0.8.23
+2026-10-20T08:34:41+00:00 buzz-hostinger bash[4053390]:    Compiling semver v1.0.28
+2026-10-20T08:34:41+00:00 buzz-hostinger bash[4053390]:    Compiling rustc_version v0.4.1
+2026-10-20T08:34:42+00:00 buzz-hostinger bash[4053390]:    Compiling yoke v0.8.3
+2026-10-20T08:34:42+00:00 buzz-hostinger bash[4053390]:    Compiling displaydoc v0.2.7
+2026-10-20T08:34:42+00:00 buzz-hostinger bash[4053390]:    Compiling zerovec-derive v0.11.6
+2026-10-20T08:34:42+00:00 buzz-hostinger bash[4053390]:    Compiling byteorder v1.5.0
+2026-10-20T08:34:42+00:00 buzz-hostinger bash[4053390]:    Compiling zmij v1.0.23
+2026-10-20T08:34:43+00:00 buzz-hostinger bash[4053390]:    Compiling equivalent v1.0.2
+2026-10-20T08:34:43+00:00 buzz-hostinger bash[4053390]:    Compiling serde_json v1.0.151
+2026-10-20T08:34:43+00:00 buzz-hostinger bash[4053390]:    Compiling zerovec v0.11.8
+2026-10-20T08:34:43+00:00 buzz-hostinger bash[4053390]:    Compiling ppv-lite86 v0.2.21
+2026-10-20T08:34:43+00:00 buzz-hostinger bash[4053390]:    Compiling inout v0.1.4
+2026-10-20T08:34:43+00:00 buzz-hostinger bash[4053390]:    Compiling hashbrown v0.17.1
+2026-10-20T08:34:43+00:00 buzz-hostinger bash[4053390]:    Compiling httparse v1.10.1
+2026-10-20T08:34:43+00:00 buzz-hostinger bash[4053390]:    Compiling dunce v1.0.5
+2026-10-20T08:34:43+00:00 buzz-hostinger bash[4053390]:    Compiling fs_extra v1.3.0
+2026-10-20T08:34:44+00:00 buzz-hostinger bash[4053390]:    Compiling indexmap v2.14.2
+2026-10-20T08:34:44+00:00 buzz-hostinger bash[4053390]:    Compiling aws-lc-sys v0.45.0
+2026-10-20T08:34:44+00:00 buzz-hostinger bash[4053390]:    Compiling rand_chacha v0.3.1
+2026-10-20T08:34:44+00:00 buzz-hostinger bash[4053390]:    Compiling cipher v0.4.4
+2026-10-20T08:34:45+00:00 buzz-hostinger bash[4053390]:    Compiling hmac v0.12.1
+2026-10-20T08:34:45+00:00 buzz-hostinger bash[4053390]:    Compiling sha2 v0.10.9
+2026-10-20T08:34:45+00:00 buzz-hostinger bash[4053390]:    Compiling spin v0.9.9
+2026-10-20T08:34:45+00:00 buzz-hostinger bash[4053390]:    Compiling thiserror v2.0.20
+2026-10-20T08:34:45+00:00 buzz-hostinger bash[4053390]:    Compiling crossbeam-epoch v0.9.21
+2026-10-20T08:34:45+00:00 buzz-hostinger bash[4053390]:    Compiling rand v0.8.8
+2026-10-20T08:34:46+00:00 buzz-hostinger bash[4053390]:    Compiling tinystr v0.8.4
+2026-10-20T08:34:46+00:00 buzz-hostinger bash[4053390]:    Compiling universal-hash v0.5.1
+2026-10-20T08:34:46+00:00 buzz-hostinger bash[4053390]:    Compiling ring v0.17.14
+2026-10-20T08:34:47+00:00 buzz-hostinger bash[4053390]:    Compiling rustls-pki-types v1.15.1
+2026-10-20T08:34:47+00:00 buzz-hostinger bash[4053390]:    Compiling thiserror-impl v2.0.20
+2026-10-20T08:34:48+00:00 buzz-hostinger bash[4053390]:    Compiling crossbeam-deque v0.8.8
+2026-10-20T08:34:48+00:00 buzz-hostinger bash[4053390]:    Compiling percent-encoding v2.3.2
+2026-10-20T08:34:48+00:00 buzz-hostinger bash[4053390]:    Compiling deranged v0.5.8
+2026-10-20T08:34:49+00:00 buzz-hostinger bash[4053390]:    Compiling time-core v0.1.9
+2026-10-20T08:34:49+00:00 buzz-hostinger bash[4053390]:    Compiling fnv v1.0.7
+2026-10-20T08:34:49+00:00 buzz-hostinger bash[4053390]:    Compiling num-conv v0.2.2
+2026-10-20T08:34:49+00:00 buzz-hostinger bash[4053390]:    Compiling writeable v0.6.4
+2026-10-20T08:34:49+00:00 buzz-hostinger bash[4053390]:    Compiling powerfmt v0.2.0
+2026-10-20T08:34:49+00:00 buzz-hostinger bash[4053390]:    Compiling const-oid v0.9.6
+2026-10-20T08:34:50+00:00 buzz-hostinger bash[4053390]:    Compiling num_threads v0.1.7
+2026-10-20T08:34:50+00:00 buzz-hostinger bash[4053390]:    Compiling litemap v0.8.3
+2026-10-20T08:34:50+00:00 buzz-hostinger bash[4053390]:    Compiling opaque-debug v0.3.1
+2026-10-20T08:34:50+00:00 buzz-hostinger bash[4053390]:    Compiling icu_locale_core v2.3.0
+2026-10-20T08:34:51+00:00 buzz-hostinger bash[4053390]:    Compiling time v0.3.55
+2026-10-20T08:34:52+00:00 buzz-hostinger bash[4053390]:    Compiling der v0.7.10
+2026-10-20T08:34:57+00:00 buzz-hostinger bash[4053390]:    Compiling potential_utf v0.1.6
+2026-10-20T08:34:57+00:00 buzz-hostinger bash[4053390]:    Compiling zerotrie v0.2.5
+2026-10-20T08:34:57+00:00 buzz-hostinger bash[4053390]:    Compiling http-body v1.1.0
+2026-10-20T08:34:58+00:00 buzz-hostinger bash[4053390]:    Compiling ff v0.13.1
+2026-10-20T08:34:58+00:00 buzz-hostinger bash[4053390]:    Compiling utf8_iter v1.0.4
+2026-10-20T08:34:58+00:00 buzz-hostinger bash[4053390]:    Compiling base16ct v0.2.0
+2026-10-20T08:34:58+00:00 buzz-hostinger bash[4053390]:    Compiling tower-service v0.3.3
+2026-10-20T08:34:58+00:00 buzz-hostinger bash[4053390]:    Compiling aws-lc-rs v1.18.1
+2026-10-20T08:34:58+00:00 buzz-hostinger bash[4053390]:    Compiling regex-syntax v0.8.11
+2026-10-20T08:35:00+00:00 buzz-hostinger bash[4053390]:    Compiling icu_normalizer_data v2.3.0
+2026-10-20T08:35:00+00:00 buzz-hostinger bash[4053390]:    Compiling icu_properties_data v2.3.0
+2026-10-20T08:35:00+00:00 buzz-hostinger bash[4053390]:    Compiling cpufeatures v0.3.1
+2026-10-20T08:35:00+00:00 buzz-hostinger bash[4053390]:    Compiling sec1 v0.7.3
+2026-10-20T08:35:00+00:00 buzz-hostinger bash[4053390]:    Compiling icu_collections v2.3.0
+2026-10-20T08:35:01+00:00 buzz-hostinger bash[4053390]:    Compiling group v0.13.0
+2026-10-20T08:35:02+00:00 buzz-hostinger bash[4053390]:    Compiling icu_provider v2.3.1
+2026-10-20T08:35:02+00:00 buzz-hostinger bash[4053390]:    Compiling hkdf v0.12.4
+2026-10-20T08:35:02+00:00 buzz-hostinger bash[4053390]:    Compiling heapless v0.7.17
+2026-10-20T08:35:03+00:00 buzz-hostinger bash[4053390]:    Compiling curve25519-dalek v4.1.3
+2026-10-20T08:35:03+00:00 buzz-hostinger bash[4053390]:    Compiling tokio-util v0.7.19
+2026-10-20T08:35:03+00:00 buzz-hostinger bash[4053390]:    Compiling crypto-bigint v0.5.5
+2026-10-20T08:35:04+00:00 buzz-hostinger bash[4053390]:    Compiling try-lock v0.2.5
+2026-10-20T08:35:04+00:00 buzz-hostinger bash[4053390]:    Compiling httpdate v1.0.3
+2026-10-20T08:35:05+00:00 buzz-hostinger bash[4053390]:    Compiling anyhow v1.0.104
+2026-10-20T08:35:05+00:00 buzz-hostinger bash[4053390]:    Compiling keccak v0.1.6
+2026-10-20T08:35:05+00:00 buzz-hostinger bash[4053390]:    Compiling autocfg v1.5.1
+2026-10-20T08:35:05+00:00 buzz-hostinger bash[4053390]:    Compiling untrusted v0.9.0
+2026-10-20T08:35:07+00:00 buzz-hostinger bash[4053390]:    Compiling sha3 v0.10.9
+2026-10-20T08:35:07+00:00 buzz-hostinger bash[4053390]:    Compiling want v0.3.1
+2026-10-20T08:35:07+00:00 buzz-hostinger bash[4053390]:    Compiling elliptic-curve v0.13.8
+2026-10-20T08:35:07+00:00 buzz-hostinger bash[4053390]:    Compiling polyval v0.6.2
+2026-10-20T08:35:08+00:00 buzz-hostinger bash[4053390]:    Compiling form_urlencoded v1.2.2
+2026-10-20T08:35:08+00:00 buzz-hostinger bash[4053390]:    Compiling aes v0.8.4
+2026-10-20T08:35:08+00:00 buzz-hostinger bash[4053390]:    Compiling hash32 v0.2.1
+2026-10-20T08:35:08+00:00 buzz-hostinger bash[4053390]:    Compiling aead v0.5.2
+2026-10-20T08:35:08+00:00 buzz-hostinger bash[4053390]:    Compiling blake3 v1.8.7
+2026-10-20T08:35:08+00:00 buzz-hostinger bash[4053390]:    Compiling async-trait v0.1.92
+2026-10-20T08:35:09+00:00 buzz-hostinger bash[4053390]:    Compiling curve25519-dalek-derive v0.1.1
+2026-10-20T08:35:10+00:00 buzz-hostinger bash[4053390]:    Compiling base64ct v1.8.3
+2026-10-20T08:35:10+00:00 buzz-hostinger bash[4053390]:    Compiling base64 v0.22.1
+2026-10-20T08:35:10+00:00 buzz-hostinger bash[4053390]:    Compiling rayon-core v1.13.0
+2026-10-20T08:35:10+00:00 buzz-hostinger bash[4053390]:    Compiling atomic-waker v1.1.2
+2026-10-20T08:35:10+00:00 buzz-hostinger bash[4053390]:    Compiling h2 v0.4.19
+2026-10-20T08:35:14+00:00 buzz-hostinger bash[4053390]:    Compiling password-hash v0.5.0
+2026-10-20T08:35:16+00:00 buzz-hostinger bash[4053390]:    Compiling ghash v0.5.1
+2026-10-20T08:35:16+00:00 buzz-hostinger bash[4053390]:    Compiling icu_properties v2.3.0
+2026-10-20T08:35:17+00:00 buzz-hostinger bash[4053390]:    Compiling icu_normalizer v2.3.0
+2026-10-20T08:35:18+00:00 buzz-hostinger bash[4053390]:    Compiling primeorder v0.13.6
+2026-10-20T08:35:18+00:00 buzz-hostinger bash[4053390]:    Compiling cobs v0.3.0
+2026-10-20T08:35:18+00:00 buzz-hostinger bash[4053390]:    Compiling poly1305 v0.8.0
+2026-10-20T08:35:18+00:00 buzz-hostinger bash[4053390]:    Compiling ctr v0.9.2
+2026-10-20T08:35:18+00:00 buzz-hostinger bash[4053390]:    Compiling chacha20 v0.9.1
+2026-10-20T08:35:19+00:00 buzz-hostinger bash[4053390]:    Compiling futures-executor v0.3.34
+2026-10-20T08:35:19+00:00 buzz-hostinger bash[4053390]:    Compiling aho-corasick v1.1.5
+2026-10-20T08:35:20+00:00 buzz-hostinger bash[4053390]:    Compiling ahash v0.8.12
+2026-10-20T08:35:20+00:00 buzz-hostinger bash[4053390]:    Compiling constant_time_eq v0.4.2
+2026-10-20T08:35:20+00:00 buzz-hostinger bash[4053390]:    Compiling bytemuck v1.25.2
+2026-10-20T08:35:20+00:00 buzz-hostinger bash[4053390]:    Compiling arrayvec v0.7.8
+2026-10-20T08:35:20+00:00 buzz-hostinger bash[4053390]:    Compiling rustls v0.23.45
+2026-10-20T08:35:21+00:00 buzz-hostinger bash[4053390]:    Compiling either v1.18.0
+2026-10-20T08:35:21+00:00 buzz-hostinger bash[4053390]:    Compiling safe_arch v0.7.4
+2026-10-20T08:35:21+00:00 buzz-hostinger bash[4053390]:    Compiling regex-automata v0.4.18
+2026-10-20T08:35:25+00:00 buzz-hostinger bash[4053390]:    Compiling futures v0.3.34
+2026-10-20T08:35:25+00:00 buzz-hostinger bash[4053390]:    Compiling chacha20poly1305 v0.10.1
+2026-10-20T08:35:25+00:00 buzz-hostinger bash[4053390]:    Compiling aes-gcm v0.10.3
+2026-10-20T08:35:25+00:00 buzz-hostinger bash[4053390]:    Compiling postcard v1.1.3
+2026-10-20T08:35:25+00:00 buzz-hostinger bash[4053390]:    Compiling p256 v0.13.2
+2026-10-20T08:35:25+00:00 buzz-hostinger bash[4053390]:    Compiling idna_adapter v1.2.2
+2026-10-20T08:35:25+00:00 buzz-hostinger bash[4053390]:    Compiling x25519-dalek v2.0.1
+2026-10-20T08:35:25+00:00 buzz-hostinger bash[4053390]:    Compiling pbkdf2 v0.12.2
+2026-10-20T08:35:26+00:00 buzz-hostinger bash[4053390]:    Compiling hyper v1.11.1
+2026-10-20T08:35:27+00:00 buzz-hostinger bash[4053390]:    Compiling sync_wrapper v1.0.2
+2026-10-20T08:35:27+00:00 buzz-hostinger bash[4053390]:    Compiling rand_core v0.9.5
+2026-10-20T08:35:28+00:00 buzz-hostinger bash[4053390]:    Compiling rand_core v0.10.1
+2026-10-20T08:35:28+00:00 buzz-hostinger bash[4053390]:    Compiling tower-layer v0.3.3
+2026-10-20T08:35:28+00:00 buzz-hostinger bash[4053390]:    Compiling cfg_aliases v0.2.2
+2026-10-20T08:35:28+00:00 buzz-hostinger bash[4053390]:    Compiling getrandom v0.4.3
+2026-10-20T08:35:28+00:00 buzz-hostinger bash[4053390]:    Compiling hex v0.4.3
+2026-10-20T08:35:28+00:00 buzz-hostinger bash[4053390]:    Compiling ipnet v2.12.2
+2026-10-20T08:35:28+00:00 buzz-hostinger bash[4053390]:    Compiling hyper-util v0.1.20
+2026-10-20T08:35:30+00:00 buzz-hostinger bash[4053390]:    Compiling hpke v0.13.0
+2026-10-20T08:35:30+00:00 buzz-hostinger bash[4053390]:    Compiling rayon v1.12.0
+2026-10-20T08:35:32+00:00 buzz-hostinger bash[4053390]:    Compiling idna v1.1.0
+2026-10-20T08:35:32+00:00 buzz-hostinger bash[4053390]:    Compiling wide v0.7.33
+2026-10-20T08:35:33+00:00 buzz-hostinger bash[4053390]:    Compiling fips205 v0.4.1
+2026-10-20T08:35:34+00:00 buzz-hostinger bash[4053390]:    Compiling fips204 v0.4.6
+2026-10-20T08:35:35+00:00 buzz-hostinger bash[4053390]:    Compiling fips203 v0.4.3
+2026-10-20T08:35:35+00:00 buzz-hostinger bash[4053390]:    Compiling http-body-util v0.1.5
+2026-10-20T08:35:35+00:00 buzz-hostinger bash[4053390]:    Compiling ryu v1.0.23
+2026-10-20T08:35:35+00:00 buzz-hostinger bash[4053390]:    Compiling lazy_static v1.5.0
+2026-10-20T08:35:35+00:00 buzz-hostinger bash[4053390]:    Compiling utf8parse v0.2.2
+2026-10-20T08:35:36+00:00 buzz-hostinger bash[4053390]:    Compiling anstyle-parse v1.0.0
+2026-10-20T08:35:36+00:00 buzz-hostinger bash[4053390]:    Compiling saorsa-pqc v0.5.1
+2026-10-20T08:35:37+00:00 buzz-hostinger bash[4053390]:    Compiling hashbrown v0.14.5
+2026-10-20T08:35:38+00:00 buzz-hostinger bash[4053390]:    Compiling url v2.5.8
+2026-10-20T08:35:38+00:00 buzz-hostinger bash[4053390]:    Compiling tower v0.5.3
+2026-10-20T08:35:39+00:00 buzz-hostinger bash[4053390]:    Compiling num-traits v0.2.19
+2026-10-20T08:35:39+00:00 buzz-hostinger bash[4053390]:    Compiling anstyle v1.0.14
+2026-10-20T08:35:39+00:00 buzz-hostinger bash[4053390]:    Compiling signal-hook v0.3.18
+2026-10-20T08:35:39+00:00 buzz-hostinger bash[4053390]:    Compiling colorchoice v1.0.5
+2026-10-20T08:35:39+00:00 buzz-hostinger bash[4053390]:    Compiling is_terminal_polyfill v1.70.2
+2026-10-20T08:35:39+00:00 buzz-hostinger bash[4053390]:    Compiling anstyle-query v1.1.5
+2026-10-20T08:35:39+00:00 buzz-hostinger bash[4053390]:    Compiling anstream v1.0.0
+2026-10-20T08:35:39+00:00 buzz-hostinger bash[4053390]:    Compiling serde_urlencoded v0.7.1
+2026-10-20T08:35:40+00:00 buzz-hostinger bash[4053390]:    Compiling memoffset v0.9.1
+2026-10-20T08:35:40+00:00 buzz-hostinger bash[4053390]:    Compiling clap_lex v1.1.1
+2026-10-20T08:35:40+00:00 buzz-hostinger bash[4053390]:    Compiling strsim v0.11.1
+2026-10-20T08:35:40+00:00 buzz-hostinger bash[4053390]:    Compiling heck v0.5.0
+2026-10-20T08:35:40+00:00 buzz-hostinger bash[4053390]:    Compiling linux-raw-sys v0.12.1
+2026-10-20T08:35:40+00:00 buzz-hostinger bash[4053390]:    Compiling clap_derive v4.6.7
+2026-10-20T08:35:42+00:00 buzz-hostinger bash[4053390]:    Compiling clap_builder v4.6.7
+2026-10-20T08:35:45+00:00 buzz-hostinger bash[4053390]:    Compiling sharded-slab v0.1.7
+2026-10-20T08:35:45+00:00 buzz-hostinger bash[4053390]:    Compiling nix v0.29.0
+2026-10-20T08:35:45+00:00 buzz-hostinger bash[4053390]:    Compiling quinn-udp v0.5.15
+2026-10-20T08:35:45+00:00 buzz-hostinger bash[4053390]:    Compiling chacha20 v0.10.2
+2026-10-20T08:35:46+00:00 buzz-hostinger bash[4053390]:    Compiling matchers v0.2.0
+2026-10-20T08:35:46+00:00 buzz-hostinger bash[4053390]:    Compiling regex v1.13.1
+2026-10-20T08:35:46+00:00 buzz-hostinger bash[4053390]:    Compiling webpki-roots v1.0.9
+2026-10-20T08:35:46+00:00 buzz-hostinger bash[4053390]:    Compiling tracing-log v0.2.0
+2026-10-20T08:35:46+00:00 buzz-hostinger bash[4053390]:    Compiling tracing-serde v0.2.0
+2026-10-20T08:35:46+00:00 buzz-hostinger bash[4053390]:    Compiling thread_local v1.1.10
+2026-10-20T08:35:46+00:00 buzz-hostinger bash[4053390]:    Compiling fastrand v2.5.0
+2026-10-20T08:35:46+00:00 buzz-hostinger bash[4053390]:    Compiling openssl-probe v0.2.1
+2026-10-20T08:35:47+00:00 buzz-hostinger bash[4053390]:    Compiling rustversion v1.0.23
+2026-10-20T08:35:47+00:00 buzz-hostinger bash[4053390]:    Compiling base64 v0.23.1
+2026-10-20T08:35:47+00:00 buzz-hostinger bash[4053390]:    Compiling nu-ansi-term v0.50.3
+2026-10-20T08:35:47+00:00 buzz-hostinger bash[4053390]:    Compiling xml-rs v0.8.29
+2026-10-20T08:35:48+00:00 buzz-hostinger bash[4053390]:    Compiling option-ext v0.2.0
+2026-10-20T08:35:48+00:00 buzz-hostinger bash[4053390]:    Compiling iana-time-zone v0.1.65
+2026-10-20T08:35:48+00:00 buzz-hostinger bash[4053390]:    Compiling chrono v0.4.45
+2026-10-20T08:35:49+00:00 buzz-hostinger bash[4053390]:    Compiling dirs-sys v0.4.1
+2026-10-20T08:35:49+00:00 buzz-hostinger bash[4053390]:    Compiling xmltree v0.10.3
+2026-10-20T08:35:49+00:00 buzz-hostinger bash[4053390]:    Compiling tracing-subscriber v0.3.23
+2026-10-20T08:35:51+00:00 buzz-hostinger bash[4053390]:    Compiling pem v4.0.0
+2026-10-20T08:35:51+00:00 buzz-hostinger bash[4053390]:    Compiling rustls-native-certs v0.8.4
+2026-10-20T08:35:51+00:00 buzz-hostinger bash[4053390]:    Compiling rand v0.10.3
+2026-10-20T08:35:52+00:00 buzz-hostinger bash[4053390]:    Compiling clap v4.6.7
+2026-10-20T08:35:52+00:00 buzz-hostinger bash[4053390]:    Compiling tower-http v0.6.11
+2026-10-20T08:35:53+00:00 buzz-hostinger bash[4053390]:    Compiling uuid v1.26.1
+2026-10-20T08:35:53+00:00 buzz-hostinger bash[4053390]:    Compiling attohttpc v0.30.1
+2026-10-20T08:35:54+00:00 buzz-hostinger bash[4053390]:    Compiling dashmap v6.2.1
+2026-10-20T08:35:54+00:00 buzz-hostinger bash[4053390]:    Compiling saorsa-gossip-types v0.5.86
+2026-10-20T08:35:54+00:00 buzz-hostinger bash[4053390]:    Compiling yasna v0.6.0
+2026-10-20T08:35:55+00:00 buzz-hostinger bash[4053390]:    Compiling flume v0.11.1
+2026-10-20T08:35:55+00:00 buzz-hostinger bash[4053390]:    Compiling socket-pktinfo v0.3.2
+2026-10-20T08:35:55+00:00 buzz-hostinger bash[4053390]:    Compiling if-addrs v0.15.0
+2026-10-20T08:35:55+00:00 buzz-hostinger bash[4053390]:    Compiling socket2 v0.5.10
+2026-10-20T08:35:55+00:00 buzz-hostinger bash[4053390]:    Compiling thiserror v1.0.69
+2026-10-20T08:35:56+00:00 buzz-hostinger bash[4053390]:    Compiling rustix v1.1.5
+2026-10-20T08:35:56+00:00 buzz-hostinger bash[4053390]:    Compiling tinyvec_macros v0.1.1
+2026-10-20T08:35:56+00:00 buzz-hostinger bash[4053390]:    Compiling unsafe-libyaml v0.2.11
+2026-10-20T08:35:56+00:00 buzz-hostinger bash[4053390]:    Compiling serde_yaml v0.9.34+deprecated
+2026-10-20T08:35:58+00:00 buzz-hostinger bash[4053390]:    Compiling tinyvec v1.12.0
+2026-10-20T08:35:58+00:00 buzz-hostinger bash[4053390]:    Compiling mdns-sd v0.19.2
+2026-10-20T08:36:00+00:00 buzz-hostinger bash[4053390]:    Compiling rcgen v0.14.10
+2026-10-20T08:36:01+00:00 buzz-hostinger bash[4053390]:    Compiling igd-next v0.17.1
+2026-10-20T08:36:04+00:00 buzz-hostinger bash[4053390]:    Compiling dirs v5.0.1
+2026-10-20T08:36:05+00:00 buzz-hostinger bash[4053390]:    Compiling rustls-pemfile v2.2.0
+2026-10-20T08:36:05+00:00 buzz-hostinger bash[4053390]:    Compiling rustls-webpki v0.103.15
+2026-10-20T08:36:05+00:00 buzz-hostinger bash[4053390]:    Compiling keyring v3.6.3
+2026-10-20T08:36:05+00:00 buzz-hostinger bash[4053390]:    Compiling thiserror-impl v1.0.69
+2026-10-20T08:36:06+00:00 buzz-hostinger bash[4053390]:    Compiling unicode-width v0.2.2
+2026-10-20T08:36:06+00:00 buzz-hostinger bash[4053390]:    Compiling rustc-hash v2.1.3
+2026-10-20T08:36:06+00:00 buzz-hostinger bash[4053390]:    Compiling unicode-segmentation v1.13.3
+2026-10-20T08:36:06+00:00 buzz-hostinger bash[4053390]:    Compiling lru-slab v0.1.3
+2026-10-20T08:36:06+00:00 buzz-hostinger bash[4053390]:    Compiling convert_case v0.10.0
+2026-10-20T08:36:08+00:00 buzz-hostinger bash[4053390]:    Compiling tokio-rustls v0.26.5
+2026-10-20T08:36:08+00:00 buzz-hostinger bash[4053390]:    Compiling hyper-rustls v0.27.10
+2026-10-20T08:36:09+00:00 buzz-hostinger bash[4053390]:    Compiling reqwest v0.12.28
+2026-10-20T08:36:10+00:00 buzz-hostinger bash[4053390]:    Compiling rustls-post-quantum v0.2.4
+2026-10-20T08:36:10+00:00 buzz-hostinger bash[4053390]:    Compiling rustls-platform-verifier v0.6.2
+2026-10-20T08:36:10+00:00 buzz-hostinger bash[4053390]:    Compiling ant-quic v0.27.54
+2026-10-20T08:36:11+00:00 buzz-hostinger bash[4053390]:    Compiling derive_more-impl v2.1.1
+2026-10-20T08:36:12+00:00 buzz-hostinger bash[4053390]:    Compiling litrs v1.0.0
+2026-10-20T08:36:12+00:00 buzz-hostinger bash[4053390]:    Compiling document-features v0.2.12
+2026-10-20T08:36:13+00:00 buzz-hostinger bash[4053390]:    Compiling signal-hook-mio v0.2.5
+2026-10-20T08:36:13+00:00 buzz-hostinger bash[4053390]:    Compiling derive_more v2.1.1
+2026-10-20T08:36:13+00:00 buzz-hostinger bash[4053390]:    Compiling sha1 v0.10.7
+2026-10-20T08:36:13+00:00 buzz-hostinger bash[4053390]:    Compiling zstd-sys v2.1.0+zstd.1.5.7
+2026-10-20T08:36:13+00:00 buzz-hostinger bash[4053390]:    Compiling adler2 v2.0.1
+2026-10-20T08:36:22+00:00 buzz-hostinger bash[4053390]:    Compiling audiopus_sys v0.2.2
+2026-10-20T08:36:22+00:00 buzz-hostinger bash[4053390]:    Compiling half v2.7.1
+2026-10-20T08:36:22+00:00 buzz-hostinger bash[4053390]:    Compiling mime v0.3.17
+2026-10-20T08:36:23+00:00 buzz-hostinger bash[4053390]:    Compiling allocator-api2 v0.2.21
+2026-10-20T08:36:23+00:00 buzz-hostinger bash[4053390]:    Compiling crc32fast v1.5.2
+2026-10-20T08:36:23+00:00 buzz-hostinger bash[4053390]:    Compiling foldhash v0.2.0
+2026-10-20T08:36:23+00:00 buzz-hostinger bash[4053390]:    Compiling ciborium-io v0.2.2
+2026-10-20T08:36:23+00:00 buzz-hostinger bash[4053390]:    Compiling ciborium-ll v0.2.2
+2026-10-20T08:36:23+00:00 buzz-hostinger bash[4053390]:    Compiling hashbrown v0.16.1
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]: error: failed to run custom build command for `audiopus_sys v0.2.2`
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]: Caused by:
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   process didn't exit successfully: `/var/lib/invitation-validation/target/debug/build/audiopus_sys-a317d688867b924f/build-script-build` (exit status: 101)
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   --- stdout
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:info=No feature or environment variable found, linking by default.
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=OPUS_NO_PKG_CONFIG
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=PKG_CONFIG_x86_64-unknown-linux-gnu
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=PKG_CONFIG_x86_64_unknown_linux_gnu
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=HOST_PKG_CONFIG
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=PKG_CONFIG
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=PKG_CONFIG_PATH_x86_64-unknown-linux-gnu
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=PKG_CONFIG_PATH_x86_64_unknown_linux_gnu
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=HOST_PKG_CONFIG_PATH
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=PKG_CONFIG_PATH
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=PKG_CONFIG_LIBDIR_x86_64-unknown-linux-gnu
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=PKG_CONFIG_LIBDIR_x86_64_unknown_linux_gnu
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=HOST_PKG_CONFIG_LIBDIR
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=PKG_CONFIG_LIBDIR
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_x86_64-unknown-linux-gnu
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_x86_64_unknown_linux_gnu
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=HOST_PKG_CONFIG_SYSROOT_DIR
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:info=`pkg_config` could not find `Opus`.
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:info=Opus source path used: "/var/lib/private/invitation-validation/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/audiopus_sys-0.2.2/opus".
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   cargo:info=Building Opus via CMake.
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   CMAKE_TOOLCHAIN_FILE_x86_64-unknown-linux-gnu = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   CMAKE_TOOLCHAIN_FILE_x86_64_unknown_linux_gnu = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   HOST_CMAKE_TOOLCHAIN_FILE = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   CMAKE_TOOLCHAIN_FILE = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   CMAKE_GENERATOR_x86_64-unknown-linux-gnu = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   CMAKE_GENERATOR_x86_64_unknown_linux_gnu = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   HOST_CMAKE_GENERATOR = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   CMAKE_GENERATOR = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   CMAKE_PREFIX_PATH_x86_64-unknown-linux-gnu = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   CMAKE_PREFIX_PATH_x86_64_unknown_linux_gnu = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   HOST_CMAKE_PREFIX_PATH = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   CMAKE_PREFIX_PATH = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   CMAKE_x86_64-unknown-linux-gnu = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   CMAKE_x86_64_unknown_linux_gnu = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   HOST_CMAKE = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   CMAKE = None
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   -- Configuring incomplete, errors occurred!
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   --- stderr
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   running: cd "/var/lib/invitation-validation/target/debug/build/audiopus_sys-1e38bfcd9205b114/out/build" && CMAKE_PREFIX_PATH="" LC_ALL="C" "cmake" "/var/lib/private/invitation-validation/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/audiopus_sys-0.2.2/opus" "-B" "/var/lib/invitation-validation/target/debug/build/audiopus_sys-1e38bfcd9205b114/out/build" "-DCMAKE_INSTALL_PREFIX=/var/lib/invitation-validation/target/debug/build/audiopus_sys-1e38bfcd9205b114/out" "-DCMAKE_C_FLAGS= -ffunction-sections -fdata-sections -fPIC -m64 --target=x86_64-unknown-linux-gnu -w" "-DCMAKE_C_COMPILER=/nix/store/i52d7j6ma8bh4ggg4r2hl4af7bychdpa-clang-wrapper-21.1.8/bin/cc" "-DCMAKE_CXX_FLAGS= -ffunction-sections -fdata-sections -fPIC -m64 --target=x86_64-unknown-linux-gnu -w" "-DCMAKE_CXX_COMPILER=/nix/store/i52d7j6ma8bh4ggg4r2hl4af7bychdpa-clang-wrapper-21.1.8/bin/c++" "-DCMAKE_ASM_FLAGS= -ffunction-sections -fdata-sections -fPIC -m64 --target=x86_64-unknown-linux-gnu -w" "-DCMAKE_ASM_COMPILER=/nix/store/i52d7j6ma8bh4ggg4r2hl4af7bychdpa-clang-wrapper-21.1.8/bin/cc" "-DCMAKE_BUILD_TYPE=Debug"
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   CMake Error at CMakeLists.txt:1 (cmake_minimum_required):
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:     Compatibility with CMake < 3.5 has been removed from CMake.
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:     Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:     to tell CMake that the project requires at least <min> but has been updated
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:     to work with policies introduced by <max> or earlier.
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:     Or, add -DCMAKE_POLICY_VERSION_MINIMUM=3.5 to try configuring anyway.
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   thread 'main' (4063318) panicked at /var/lib/invitation-validation/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cmake-0.1.58/src/lib.rs:1132:5:
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   command did not execute successfully, got: exit status: 1
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   build script failed, must exit now
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]:   note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+2026-10-20T08:36:24+00:00 buzz-hostinger bash[4053390]: warning: build failed, waiting for other jobs to finish...
+2026-10-20T08:36:38+00:00 buzz-hostinger systemd[1]: invitation-native-build.service: Main process exited, code=exited, status=101/n/a
+2026-10-20T08:36:38+00:00 buzz-hostinger systemd[1]: invitation-native-build.service: Failed with result 'exit-code'.
+2026-10-20T08:36:38+00:00 buzz-hostinger systemd[1]: invitation-native-build.service: Consumed 3min 58.546s CPU time over 2min 26.683s wall clock time, 2.9G memory peak, 1.3G written to disk, 119.7M incoming IP traffic, 1.4M outgoing IP traffic.
+2026-10-20T08:37:03+00:00 buzz-hostinger systemd[1]: Starting [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/invitation-input/invitation-native-build.sh...
+2026-10-20T08:37:03+00:00 buzz-hostinger systemd[1]: Started [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/invitation-input/invitation-native-build.sh.
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064077]: HEAD is now at cfb09750 Merge pull request #1186 from saorsa-labs/docs/adr-0094-m2-safe-apply
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: ANSI_COLOR="0;38;2;126;186;228"
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: BUG_REPORT_URL="https://github.com/NixOS/nixpkgs/issues"
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: BUILD_ID="26.05.20260829.c5c4a43"
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: CPE_NAME="cpe:/o:nixos:nixos:26.05"
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: DEFAULT_HOSTNAME=nixos
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: DOCUMENTATION_URL="https://nixos.org/learn.html"
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: HOME_URL="https://nixos.org/"
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: ID=nixos
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: ID_LIKE=""
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: IMAGE_ID=""
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: IMAGE_VERSION=""
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: LOGO="nix-snowflake"
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: NAME=NixOS
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: PRETTY_NAME="NixOS 26.05 (Yarara)"
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: SUPPORT_END="2026-12-31"
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: SUPPORT_URL="https://nixos.org/community.html"
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: VARIANT=""
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: VARIANT_ID=""
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: VENDOR_NAME=NixOS
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: VENDOR_URL="https://nixos.org/"
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: VERSION="26.05 (Yarara)"
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: VERSION_CODENAME=yarara
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064079]: VERSION_ID="26.05"
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064080]: info: syncing channel updates for 1.95.0-x86_64-unknown-linux-gnu
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064080]:   1.95.0-x86_64-unknown-linux-gnu unchanged - rustc 1.95.0 (59807616e 2026-04-14)
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064080]: info: self-update is disabled for this build of rustup
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064080]: info: any updates to rustup will need to be fetched with your system package manager
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064093]: rustc 1.95.0 (59807616e 2026-04-14)
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064093]: binary: rustc
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064093]: commit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064093]: commit-date: 2026-04-14
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064093]: host: x86_64-unknown-linux-gnu
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064093]: release: 1.95.0
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064093]: LLVM version: 22.1.2
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064098]:    Compiling saorsa-gossip-transport v0.5.86
+2026-10-20T08:37:03+00:00 buzz-hostinger bash[4064098]:    Compiling audiopus_sys v0.2.2
+2026-10-20T08:37:07+00:00 buzz-hostinger bash[4064098]:    Compiling rustix v1.1.5
+2026-10-20T08:37:07+00:00 buzz-hostinger bash[4064098]:    Compiling parking_lot v0.12.5
+2026-10-20T08:37:07+00:00 buzz-hostinger bash[4064098]:    Compiling regex-automata v0.4.18
+2026-10-20T08:37:10+00:00 buzz-hostinger bash[4064098]:    Compiling multiversion-macros v0.9.0
+2026-10-20T08:37:10+00:00 buzz-hostinger bash[4064098]:    Compiling encoding_rs v0.8.41
+2026-10-20T08:37:11+00:00 buzz-hostinger bash[4064098]:    Compiling bzip2-sys v0.1.13+1.0.8
+2026-10-20T08:37:11+00:00 buzz-hostinger bash[4064098]:    Compiling lzma-sys v0.1.20
+2026-10-20T08:37:11+00:00 buzz-hostinger bash[4064098]:    Compiling tikv-jemalloc-sys v0.6.1+5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7
+2026-10-20T08:37:11+00:00 buzz-hostinger bash[4064098]:    Compiling utf-8 v0.7.6
+2026-10-20T08:37:11+00:00 buzz-hostinger bash[4064098]:    Compiling rustix v0.38.44
+2026-10-20T08:37:12+00:00 buzz-hostinger bash[4064098]:    Compiling object v0.37.3
+2026-10-20T08:37:12+00:00 buzz-hostinger bash[4064098]:    Compiling radium v0.7.0
+2026-10-20T08:37:12+00:00 buzz-hostinger bash[4064098]:    Compiling zstd-safe v7.3.0
+2026-10-20T08:37:12+00:00 buzz-hostinger bash[4064098]:    Compiling vcpkg v0.2.15
+2026-10-20T08:37:13+00:00 buzz-hostinger bash[4064098]:    Compiling data-encoding v2.11.1
+2026-10-20T08:37:13+00:00 buzz-hostinger bash[4064098]:    Compiling simd-adler32 v0.3.10
+2026-10-20T08:37:13+00:00 buzz-hostinger bash[4064098]:    Compiling tungstenite v0.24.0
+2026-10-20T08:37:14+00:00 buzz-hostinger bash[4064098]:    Compiling libsqlite3-sys v0.30.1
+2026-10-20T08:37:31+00:00 buzz-hostinger bash[4064098]:    Compiling multiversion v0.9.0
+2026-10-20T08:37:31+00:00 buzz-hostinger bash[4064098]:    Compiling regex v1.13.1
+2026-10-20T08:37:31+00:00 buzz-hostinger bash[4064098]:    Compiling crossterm v0.29.0
+2026-10-20T08:37:32+00:00 buzz-hostinger bash[4064098]:    Compiling crc32fast v1.5.2
+2026-10-20T08:37:32+00:00 buzz-hostinger bash[4064098]:    Compiling ciborium v0.2.2
+2026-10-20T08:37:32+00:00 buzz-hostinger bash[4064098]:    Compiling lru v0.16.4
+2026-10-20T08:37:32+00:00 buzz-hostinger bash[4064098]:    Compiling zstd-sys v2.1.0+zstd.1.5.7
+2026-10-20T08:37:33+00:00 buzz-hostinger bash[4064098]:    Compiling saorsa-gossip-identity v0.5.86
+2026-10-20T08:37:33+00:00 buzz-hostinger bash[4064098]:    Compiling crossbeam-channel v0.5.17
+2026-10-20T08:37:34+00:00 buzz-hostinger bash[4064098]:    Compiling multer v3.1.0
+2026-10-20T08:37:34+00:00 buzz-hostinger bash[4064098]:    Compiling gimli v0.32.3
+2026-10-20T08:37:35+00:00 buzz-hostinger bash[4064098]:    Compiling multiversion_no_op v1.0.0
+2026-10-20T08:37:36+00:00 buzz-hostinger bash[4064098]:    Compiling paste v1.0.15
+2026-10-20T08:37:36+00:00 buzz-hostinger bash[4064098]:    Compiling strict v0.2.0
+2026-10-20T08:37:36+00:00 buzz-hostinger bash[4064098]:    Compiling crc-catalog v2.5.0
+2026-10-20T08:37:36+00:00 buzz-hostinger bash[4064098]:    Compiling getrandom v0.3.4
+2026-10-20T08:37:36+00:00 buzz-hostinger bash[4064098]:    Compiling tap v1.0.1
+2026-10-20T08:37:36+00:00 buzz-hostinger bash[4064098]:    Compiling linux-raw-sys v0.4.15
+2026-10-20T08:37:36+00:00 buzz-hostinger bash[4064098]:    Compiling simdutf8 v0.1.5
+2026-10-20T08:37:36+00:00 buzz-hostinger bash[4064098]:    Compiling core_detect v1.0.0
+2026-10-20T08:37:38+00:00 buzz-hostinger bash[4064098]:    Compiling wyz v0.5.1
+2026-10-20T08:37:38+00:00 buzz-hostinger bash[4064098]:    Compiling crc v3.4.0
+2026-10-20T08:37:39+00:00 buzz-hostinger bash[4064098]:    Compiling crokey-proc_macros v1.5.0
+2026-10-20T08:37:39+00:00 buzz-hostinger bash[4064098]:    Compiling addr2line v0.25.1
+2026-10-20T08:37:39+00:00 buzz-hostinger bash[4064098]:    Compiling lazy-regex-proc_macros v3.6.1
+2026-10-20T08:37:40+00:00 buzz-hostinger bash[4064098]:    Compiling opus v0.3.1
+2026-10-20T08:37:45+00:00 buzz-hostinger bash[4064098]:    Compiling tokio-tungstenite v0.24.0
+2026-10-20T08:37:45+00:00 buzz-hostinger bash[4064098]:    Compiling miniz_oxide v0.9.1
+2026-10-20T08:37:46+00:00 buzz-hostinger bash[4064098]:    Compiling saorsa-gossip-membership v0.5.86
+2026-10-20T08:37:47+00:00 buzz-hostinger bash[4064098]:    Compiling axum-core v0.4.5
+2026-10-20T08:37:48+00:00 buzz-hostinger bash[4064098]:    Compiling miniz_oxide v0.8.9
+2026-10-20T08:37:48+00:00 buzz-hostinger bash[4064098]:    Compiling saorsa-gossip-groups v0.5.86
+2026-10-20T08:37:48+00:00 buzz-hostinger bash[4064098]:    Compiling http v0.2.12
+2026-10-20T08:37:49+00:00 buzz-hostinger bash[4064098]:    Compiling crossbeam-queue v0.3.14
+2026-10-20T08:37:49+00:00 buzz-hostinger bash[4064098]:    Compiling headers-core v0.3.0
+2026-10-20T08:37:49+00:00 buzz-hostinger bash[4064098]:    Compiling serde_path_to_error v0.1.20
+2026-10-20T08:37:50+00:00 buzz-hostinger bash[4064098]:    Compiling serde_spanned v0.6.9
+2026-10-20T08:37:50+00:00 buzz-hostinger bash[4064098]:    Compiling toml_datetime v0.6.11
+2026-10-20T08:37:50+00:00 buzz-hostinger bash[4064098]:    Compiling serde_bytes v0.11.19
+2026-10-20T08:37:50+00:00 buzz-hostinger bash[4064098]:    Compiling fs2 v0.4.3
+2026-10-20T08:37:50+00:00 buzz-hostinger bash[4064098]:    Compiling matchit v0.7.3
+2026-10-20T08:37:50+00:00 buzz-hostinger bash[4064098]:    Compiling toml_write v0.1.2
+2026-10-20T08:37:50+00:00 buzz-hostinger bash[4064098]:    Compiling funty v2.0.0
+2026-10-20T08:37:51+00:00 buzz-hostinger bash[4064098]:    Compiling winnow v0.7.15
+2026-10-20T08:37:52+00:00 buzz-hostinger bash[4064098]:    Compiling zip v2.4.2
+2026-10-20T08:37:52+00:00 buzz-hostinger bash[4064098]:    Compiling rustc-demangle v0.1.28
+2026-10-20T08:37:52+00:00 buzz-hostinger bash[4064098]:    Compiling bumpalo v3.20.3
+2026-10-20T08:37:53+00:00 buzz-hostinger bash[4064098]:    Compiling zopfli v0.8.3
+2026-10-20T08:37:53+00:00 buzz-hostinger bash[4064098]:    Compiling backtrace v0.3.76
+2026-10-20T08:37:54+00:00 buzz-hostinger bash[4064098]:    Compiling toml_edit v0.22.27
+2026-10-20T08:37:56+00:00 buzz-hostinger bash[4064098]:    Compiling bitvec v1.1.1
+2026-10-20T08:37:58+00:00 buzz-hostinger bash[4064098]:    Compiling axum v0.7.9
+2026-10-20T08:38:02+00:00 buzz-hostinger bash[4064098]:    Compiling saorsa-gossip-coordinator v0.5.86
+2026-10-20T08:38:03+00:00 buzz-hostinger bash[4064098]:    Compiling headers v0.4.1
+2026-10-20T08:38:04+00:00 buzz-hostinger bash[4064098]:    Compiling crossbeam v0.8.5
+2026-10-20T08:38:04+00:00 buzz-hostinger bash[4064098]:    Compiling http-body v0.4.6
+2026-10-20T08:38:04+00:00 buzz-hostinger bash[4064098]:    Compiling saorsa-gossip-presence v0.5.86
+2026-10-20T08:38:05+00:00 buzz-hostinger bash[4064098]:    Compiling saorsa-gossip-pubsub v0.5.86
+2026-10-20T08:38:10+00:00 buzz-hostinger bash[4064098]:    Compiling flate2 v1.1.10
+2026-10-20T08:38:10+00:00 buzz-hostinger bash[4064098]:    Compiling saorsa-webrtc-codecs v0.6.0
+2026-10-20T08:38:10+00:00 buzz-hostinger bash[4064098]:    Compiling xz2 v0.1.7
+2026-10-20T08:38:10+00:00 buzz-hostinger bash[4064098]:    Compiling bzip2 v0.5.2
+2026-10-20T08:38:11+00:00 buzz-hostinger bash[4064098]:    Compiling lazy-regex v3.6.1
+2026-10-20T08:38:11+00:00 buzz-hostinger bash[4064098]:    Compiling zstd v0.13.3
+2026-10-20T08:38:11+00:00 buzz-hostinger bash[4064098]:    Compiling crokey v1.5.0
+2026-10-20T08:38:12+00:00 buzz-hostinger bash[4064098]:    Compiling lzma-rs v0.3.0
+2026-10-20T08:38:12+00:00 buzz-hostinger bash[4064098]:    Compiling crossterm v0.28.1
+2026-10-20T08:38:13+00:00 buzz-hostinger bash[4064098]:    Compiling coolor v1.1.0
+2026-10-20T08:38:13+00:00 buzz-hostinger bash[4064098]:    Compiling saorsa-gossip-rendezvous v0.5.86
+2026-10-20T08:38:13+00:00 buzz-hostinger bash[4064098]:    Compiling xattr v1.6.1
+2026-10-20T08:38:13+00:00 buzz-hostinger bash[4064098]:    Compiling hashlink v0.9.1
+2026-10-20T08:38:14+00:00 buzz-hostinger bash[4064098]:    Compiling minimad v0.13.1
+2026-10-20T08:38:14+00:00 buzz-hostinger bash[4064098]:    Compiling async-stream-impl v0.3.6
+2026-10-20T08:38:14+00:00 buzz-hostinger bash[4064098]:    Compiling filetime v0.2.29
+2026-10-20T08:38:14+00:00 buzz-hostinger bash[4064098]:    Compiling mintex v0.1.4
+2026-10-20T08:38:14+00:00 buzz-hostinger bash[4064098]:    Compiling constant_time_eq v0.3.1
+2026-10-20T08:38:15+00:00 buzz-hostinger bash[4064098]:    Compiling unicode-width v0.1.14
+2026-10-20T08:38:15+00:00 buzz-hostinger bash[4064098]:    Compiling rustc-hash v1.1.0
+2026-10-20T08:38:15+00:00 buzz-hostinger bash[4064098]:    Compiling deflate64 v0.1.12
+2026-10-20T08:38:15+00:00 buzz-hostinger bash[4064098]:    Compiling fallible-streaming-iterator v0.1.9
+2026-10-20T08:38:15+00:00 buzz-hostinger bash[4064098]:    Compiling env_home v0.1.0
+2026-10-20T08:38:15+00:00 buzz-hostinger bash[4064098]:    Compiling thousands v0.2.0
+2026-10-20T08:38:15+00:00 buzz-hostinger bash[4064098]:    Compiling fallible-iterator v0.3.0
+2026-10-20T08:38:15+00:00 buzz-hostinger bash[4064098]:    Compiling symlink v0.1.0
+2026-10-20T08:38:15+00:00 buzz-hostinger bash[4064098]:    Compiling bs58 v0.5.1
+2026-10-20T08:38:15+00:00 buzz-hostinger bash[4064098]:    Compiling four-word-networking v2.7.0
+2026-10-20T08:38:16+00:00 buzz-hostinger bash[4064098]:    Compiling tracing-appender v0.2.5
+2026-10-20T08:38:17+00:00 buzz-hostinger bash[4064098]:    Compiling rusqlite v0.32.1
+2026-10-20T08:38:18+00:00 buzz-hostinger bash[4064098]:    Compiling dhat v0.3.3
+2026-10-20T08:38:18+00:00 buzz-hostinger bash[4064098]:    Compiling which v7.0.3
+2026-10-20T08:38:19+00:00 buzz-hostinger bash[4064098]:    Compiling termimad v0.30.1
+2026-10-20T08:38:20+00:00 buzz-hostinger bash[4064098]:    Compiling tar v0.4.46
+2026-10-20T08:38:21+00:00 buzz-hostinger bash[4064098]:    Compiling async-stream v0.3.6
+2026-10-20T08:38:21+00:00 buzz-hostinger bash[4064098]:    Compiling saorsa-gossip-runtime v0.5.86
+2026-10-20T08:38:22+00:00 buzz-hostinger bash[4064098]:    Compiling axum-extra v0.9.6
+2026-10-20T08:38:22+00:00 buzz-hostinger bash[4064098]:    Compiling saorsa-webrtc-core v0.6.0
+2026-10-20T08:38:27+00:00 buzz-hostinger bash[4064098]:    Compiling hyper v0.14.32
+2026-10-20T08:38:29+00:00 buzz-hostinger bash[4064098]:    Compiling toml v0.8.23
+2026-10-20T08:38:29+00:00 buzz-hostinger bash[4064098]:    Compiling saorsa-gossip-crdt-sync v0.5.86
+2026-10-20T08:38:29+00:00 buzz-hostinger bash[4064098]:    Compiling terminal_size v0.4.4
+2026-10-20T08:38:30+00:00 buzz-hostinger bash[4064098]:    Compiling saorsa-mls v0.3.8
+2026-10-20T08:38:32+00:00 buzz-hostinger bash[4064098]:    Compiling tokio-stream v0.1.19
+2026-10-20T08:38:32+00:00 buzz-hostinger bash[4064098]:    Compiling bincode v1.3.3
+2026-10-20T08:38:33+00:00 buzz-hostinger bash[4064098]:    Compiling serde_ignored v0.1.14
+2026-10-20T08:38:33+00:00 buzz-hostinger bash[4064098]:    Compiling if-addrs v0.13.4
+2026-10-20T08:38:42+00:00 buzz-hostinger bash[4064098]:    Compiling tikv-jemallocator v0.6.1
+2026-10-20T08:38:42+00:00 buzz-hostinger bash[4064098]:    Compiling tikv-jemalloc-ctl v0.6.1
+2026-10-20T08:38:42+00:00 buzz-hostinger bash[4064098]:    Compiling x0x v0.46.0 (/var/lib/private/invitation-validation/source)
+2026-10-20T08:42:22+00:00 buzz-hostinger bash[4064098]: error: linking with `cc` failed: exit status: 1
+2026-10-20T08:42:22+00:00 buzz-hostinger bash[4064098]:   |
+2026-10-20T08:42:22+00:00 buzz-hostinger bash[4064098]:   = note:  "cc" "-m64" "/var/lib/invitation-validation/target/debug/deps/rustc6Kul0t/symbols.o" "<185 object files omitted>" "-Wl,--as-needed" "-Wl,-Bstatic" "/var/lib/private/invitation-validation/target/debug/deps/libdhat-3b6d46442fff433f.rlib" "/var/lib/invitation-validation/target/debug/deps/{libthousands-f4afd39f3a8ccef2,librustc_hash-d96e5ce49a6c2860,libmintex-b1e99cd95df8d3ef,libbacktrace-726de8cea0d4f200,libminiz_oxide-e86eefcb9c29611d,libadler2-dfafbba69e09a1c8,libobject-06c0fe45d5be709f,libaddr2line-8d858e7d99eb132a,libgimli-ebcdfb8f88949734,librustc_demangle-83f3be76fedbc3bb}.rlib" "/var/lib/private/invitation-validation/target/debug/deps/libx0x-d4ff52e4c14b21a7.rlib" "/var/lib/invitation-validation/target/debug/deps/{libif_addrs-de7cbc6a974852f8,libsaorsa_gossip_coordinator-a8698f05ad585f91,libserde_bytes-9b28d3ee43e9432c,libfs2-ae644d360eea5257,libtokio_stream-5a853f4d5e0103ec,libserde_ignored-4a8834d7567be93c,libwhich-f3a9162f604e55d1,libenv_home-a8c72f75ea17e65e,libeither-4687602edc6c2742,libterminal_size-0d5e253373bb5b2f,libtoml-d2eeee11ae45980c,libtoml_edit-fb6820ac21816b2f,libserde_spanned-1ce88529c6eb30e9,libwinnow-5755892876ec8baa,libtoml_write-ad5b59b7b138bba7,libtoml_datetime-2fede6ecfd54874f,libzip-1e39e5a32f03eac4,libxz2-9d57bd8782f16f9f,liblzma_sys-5ea7816fc6d6f446,libdeflate64-763c69b83d12d07b,libgetrandom-aa4545699afba9d4,libzstd-98d92eeb665e3d22,libzstd_safe-f4d5cc7df686888a,libzstd_sys-052729cdcdad94ff,libzopfli-6a3f9a924c59aef4,libbumpalo-86ac6da54cda8e3a,libbzip2-5d6a35504e836427,libbzip2_sys-b16c4176b6d85e42,liblzma_rs-bea14e5912b1d218,libcrc-585f3cb204084e9e,libcrc_catalog-6ed1d5765005fa69,libconstant_time_eq-7ecaf754928664d0,libtar-b4b3b71ddad4544a,libxattr-2ad6fa243c0cf08b,libfiletime-cb5729f380f7f54d,libflate2-c955506b7da9617e,libminiz_oxide-0f2713abdac45746,libsimd_adler32-3170bfaa34bdaf39,libcrc32fast-d0fd23c95c6419b1,libasync_stream-73486cb0af14a501,libsaorsa_gossip_rendezvous-e8029cec4c41a1b8,libciborium-86719ace23523764,libciborium_ll-342fad3885163454,libhalf-96017d1af4a1ab3e,libciborium_io-39ccb4f105f17bd5,libaxum-166e16a97e00ec47,libserde_path_to_error-beb4148acd98399c,libmatchit-00264401dd2ee42b,libtokio_tungstenite-1af89d4b1aa4353f,libtungstenite-badc86268c329466,libdata_encoding-a6c50a0d590ecdbf,libutf8-d0093f7cff0adc1b,libsha1-efd1b8ace1b3c041,libaxum_core-0c161e480a573e07,libmime-8a5c8cef52e60d33,libtermimad-7cf7a8e20e2a7824,libcoolor-ff36b09b77314143,liblazy_regex-b102aca45c00c9cc,libcrossbeam-0707c6ecbb730995,libcrossbeam_deque-102e9689a51be83b,libcrossbeam_queue-4edaff857b85fb00,libcrossbeam_epoch-84496139ae8e9c97,libcrokey-2115f0c2426c6847,libstrict-24fe235d289e760b,libcrossterm-661c924daa0e98c7,librustix-6f51a73f27bda7f2,liblinux_raw_sys-8517e7b7a212971c,libderive_more-08bddd9804907d52,libsignal_hook_mio-eb1886d23dd44cf1,libsignal_hook-db7c99af6d350b57,libunicode_width-345b60c190bba82b,libminimad-a73b6c0f326df7a7,libfour_word_networking-e6136bbfa1594751,libsaorsa_webrtc_codecs-25cfbe0a39d388e8,libopus-717d379def71a431,libaudiopus_sys-ccc0a6b3cf51b178,libsaorsa_webrtc_core-f6cef2cdd944c475,libthiserror-434e078b3f404f66,librusqlite-9da04df961184721,libfallible_streaming_iterator-4dddcc82d7b3d84d,libfallible_iterator-11b56aa78800e81f,libhashlink-77db605118ffb825,liblibsqlite3_sys-a1e6d263fe1d53d0,libsemver-6a373e22302baa70,libreqwest-f2fc194cabead84a,libserde_urlencoded-302c6cfeab411ba4,libryu-4fc499fa7150713d,libhyper_rustls-643fed26fc1e09fa,libwebpki_roots-9223b10a5072e78b,libtokio_rustls-cfe8e1e4ede067cf,libtower_http-81ac80d7129838db,libtower-99669209428f4014,libtower_layer-c9669642e8670fd6,libsync_wrapper-404836055c6f849e,libsaorsa_gossip_presence-321b34343ad476b4,libsaorsa_gossip_groups-a8b8360945ef9421,libsaorsa_mls-ed6074f02e54481b,libuuid-fdc1b9733b47dd2b,libsaorsa_gossip_crdt_sync-d87a4faa701b6e2c,libsaorsa_gossip_membership-c7858829b0ed3f90,libsaorsa_gossip_pubsub-4ad11ace4d6d7b02,liblru-88fa39d30c1b8480,libhashbrown-f325b969e5b66f14,liballocator_api2-1a2a887c86b2d3dc,libfoldhash-2de384eccee01de3,libsaorsa_gossip_transport-2d0ec1297fa33126,libsaorsa_gossip_identity-e99e644af3a73b15,libsaorsa_gossip_types-a7f670ee2867c1a1,libpostcard-8df42df0e4fc8cfe,libheapless-f8752be46ad90eb7,libhash32-ac46d029b6f5b7d5,libbyteorder-435df27510d586a4,libcobs-5d28a506045f71fe,libbincode-38ca1bce6b96319e,libant_quic-b4467426d0fd17f6,libkeyring-ce9592637c268ae5,libdirs-55704676b6a0ba35,libdirs_sys-2ef9b8b55541d7c8,liboption_ext-ca073365f3669a71,libhex-2fc7d26d85c71ab4,libquinn_udp-a5b4515ccc44c7cc,libregex-313a8045dfcae4b0,libchrono-5799c0fd0dcece81,libiana_time_zone-315ee8916aeaae37,libnum_traits-50109b1873dc5d43,libunicode_width-cffeb711c1ff2698,libsocket2-50a785190e61721a,libsaorsa_pqc-cd888c1d7a15e538,libfips205-55bf726d75a88a95,libpbkdf2-714424b81f549c2a,libpassword_hash-cda4d1502fa65396,libbase64ct-2486f530353a7ad9,libchacha20poly1305-724c3542f5c8f51b,libchacha20-0d3d1b1940972c00,libpoly1305-393c551a8a75473b,libaes_gcm-96fddcfd809225e2,libctr-9a885726b7fbc858,libghash-d89b59eb4b64ad64,libpolyval-9fc42ac15a8b45bc,libopaque_debug-6e1c91a8ae2d0e0e,libuniversal_hash-1929e04279237a6e,libaes-2f537b3988b2a2bd,libcipher-c9e765f3b12e562f,libinout-de709ec4e6977eff,libaead-b60b9c6bf6fa85f7,libhkdf-f146626925f91a7c,libhmac-5f3ec6ce748b0a4f,libfips203-013a565785cd0354,libfips204-905f60aef1eb9793,libsha3-6ad24d119f4850c6,libkeccak-69e3fb5c76621cc9,libsha2-864acadafa9656cd,libcpufeatures-bb94c12fd6ffc57b,libdigest-2f0686698b97f1f8,libblock_buffer-3ddb7e770b1e4d4c,libcrypto_common-bd34fb11eb74c606,libgeneric_array-b888febf94a3dfbe,libtypenum-1ca9fbd7b3f58327,librustls_pemfile-7c357dd32d46a57a,librcgen-7f5be32547bf59fb,libyasna-26d16730ed2cc5b6,libpem-b0d9fce71988c2e3,libbase64-463756a8feb92855,librustls_platform_verifier-5c8464904e277b14,librustls_native_certs-d02f5f3e9f049b37,libopenssl_probe-5be90a1c6ac12afc,liblru_slab-0ccb8ee69a1d9293,libblake3-0a836ad823ddd11b,libconstant_time_eq-c8ec4a8f5de965c3,libarrayvec-61454db139f122dd,libnix-febe022adeff1be6,libmemoffset-31e54db74ea2d8c4,libbitflags-1d196cfccd5ca804,librustc_hash-6d32b71edb4da7bb,librustls-74c0d8dd6a177610,libsubtle-fea85efbf18c23fe,libwebpki-7a0fd585baee8693,libaws_lc_rs-a6f7d3959b1f3b5e,libaws_lc_sys-6332589b1c8a4121,libring-c659011a9d361de0,libuntrusted-5a5043635b2d548b,librustls_pki_types-0f84a6f4321b2fd7,libzeroize-fbfce57d54ec9ee9,libigd_next-f95811bb77f207a1,libattohttpc-be20750df178c9b7,librand-84218036e062d8fb,libgetrandom-147314832ef27bf5,libchacha20-4d08e2018e19cd3d,libcpufeatures-4c6c180409ea1532,librand_core-4dcca60f438351a2,libxmltree-42dee09dda9be0b5,libxml-f804da6eea4e9a91,liburl-1b136035bfb41aa6,libidna-a9147f8b33360f23,libidna_adapter-c68ad514a9196f34,libicu_properties-998c4adcd84db03a,libicu_properties_data-3d9112c886e70ccd,libicu_normalizer-0311df79c82e58f4,libicu_normalizer_data-acacd414e40614b6,libicu_collections-ac29c9b259048e05,libutf8_iter-6c02925ddae71c29,libpotential_utf-53ad3cd0390fb609,libicu_provider-30fdf21c5de67236,libicu_locale_core-b73d53d0918f9f99,libtinystr-b6aa5f25bada9954,liblitemap-a45c49bcacfa2236,libwriteable-ea40acaf658ee2dd,libzerovec-a4d2a1a7187cba31,libzerotrie-ed02adf377d727aa,libyoke-8af3470c18124684,libstable_deref_trait-5aae411189104f36,libzerofrom-5a238756fd58736a,libform_urlencoded-88b81d174144d18a,libhyper_util-ce7545670f26603f,libbase64-1ea43f4c47235624,libpercent_encoding-f43b6e7047f65a33,libipnet-794db8d0c6ce5d43,libtower_service-cefbd1163379f1a1,libhyper-8a7e4dd4ea2dd7cb,libwant-49a8d0390029c802,libtry_lock-a8979b39f87a9c45,libhttparse-dc842e5f6515ca6a,libh2-90084536397eea83,libindexmap-541b42479bc5d8dd,libequivalent-fbf76d4e97284637,libhashbrown-77a861080fe44bc2,libfnv-d65ba9b98ebe0573,libatomic_waker-b0baf0f639cd00d4,libhttpdate-9fe8e4d78dd49f20,libhttp_body_util-64abc50722db23c7,libhttp_body-32f72d88d64462d9,libhttp-4f50d156bee49ac9,libfutures-988be1754dffa54f,libfutures_executor-408090a85528a627,libmdns_sd-7a8631934530cd20,libfastrand-ff3889cbb311bc08,libsocket_pktinfo-d99ea7262d5c443b,libflume-2f920dadc59d561a,libspin-2ca7776b2e80c160,libif_addrs-8ecc28f3cc206724,libdashmap-06146b2503875bec,libhashbrown-b4d25fe9b291d6bc,libahash-c7eb0c2e1fc95310,libfutures_util-f151331b3a942aea,libfutures_io-18a4b6892f3b5ad1,libslab-0b37ff3ac57d8e77,libfutures_channel-826720b95bbea7cc,libfutures_task-146a2f05e4c0bbe9,libtokio_util-32d4365f2a1d3a02,libfutures_core-3889ad8cfe24a9e5,libfutures_sink-ea9939d73b948603,libtokio-9bb4c5bbd461a32f,libsignal_hook_registry-ab76db2c4e1c77fc,liberrno-c6f2c9bcc1aa5708,libsocket2-ad62bb064da0dcef,libmio-c1f4e0a0b61ffbdb,libparking_lot-0f1b957d457b023e,libparking_lot_core-52f7b144594a5ada,liblock_api-4e2663a9d0cf12fb,libscopeguard-8aa3946cf1aa9702,librand-367c1356fda61033,librand_chacha-8cd27268161bb219,libppv_lite86-14c165c808cda6f7,libzerocopy-e1f9626796f3ae1e,librand_core-4a50a5e27eed4342,libgetrandom-143cad8b494de68e,libtinyvec-d605e8392dd7fce7,libtinyvec_macros-b74ad9b6daa1f17a,libbytes-373c242342cc4f9d}.rlib" "/var/lib/private/invitation-validation/target/debug/deps/libtracing_appender-6ec8123c8240c1dc.rlib" "/var/lib/invitation-validation/target/debug/deps/{libsymlink-78cb03545e794f57,libthiserror-559fa404327d4e59,libtracing_subscriber-62eca747cd106d62,libsmallvec-2707158abab12478,libtime-ff60dbf3432c93ea,libnum_threads-5a779c1e9f0e3426,liblibc-0f918b6427b23e90,libpowerfmt-3bde4b79548b662a,libnum_conv-8165a7220bb8a4c2,libderanged-eeeb63bf82536b94,libtime_core-7f24286803960831,libtracing_serde-bdc6b62ab786b3e0,libserde_json-1f280d72ec0d24c7,libitoa-812a2061b055b717,libzmij-fae18440f5ac2960,libserde-ef4235e4fba9095c,libserde_core-162b302c478fb468,libsharded_slab-017efd055ca9cb5f,liblazy_static-8a7406db36520d4a,libmatchers-08e7a73d8e4640dc,libregex_automata-a5f081b4af4a7dc9,libaho_corasick-8143ca4e77687e40,libmemchr-3ccca06e46d831b8,libregex_syntax-cfdac8c0d2cd70a4,libnu_ansi_term-8b3d3c318ccc4535,libtracing-9f7efe6590443de2,libpin_project_lite-65f3f36a377d65b5,libthread_local-af85847ce68564dd,libcfg_if-d3759f01bf5587ba,libtracing_log-437ee9b20b8ac296,liblog-3a1658394ba56604,libtracing_core-27eaddabd809b926,libonce_cell-5ffae3dc441222fd,libcrossbeam_channel-f86674a4c094530e,libcrossbeam_utils-13010195bede6ab9}.rlib" "/var/lib/private/invitation-validation/target/debug/deps/libanyhow-d1ff57989e158959.rlib" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib/{libstd-*,libpanic_unwind-*,libobject-*,libmemchr-*,libaddr2line-*,libgimli-*,libcfg_if-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libminiz_oxide-*,libadler2-*,libunwind-*,liblibc-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "-Wl,-Bdynamic" "-lopus" "-lgcc_s" "-lutil" "-lrt" "-lpthread" "-lm" "-ldl" "-lc" "-L" "/var/lib/invitation-validation/target/debug/deps/rustc6Kul0t/raw-dylibs" "-B<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld" "-fuse-ld=lld" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "/var/lib/invitation-validation/target/debug/build/aws-lc-sys-f32c9cbc531187cf/out" "-L" "/var/lib/invitation-validation/target/debug/build/blake3-88154c0d4c07626b/out" "-L" "/var/lib/invitation-validation/target/debug/build/ring-59608088f43ff360/out" "-L" "/var/lib/invitation-validation/target/debug/build/libsqlite3-sys-5efafb3d3db1ef2e/out" "-L" "/var/lib/invitation-validation/target/debug/build/audiopus_sys-1e38bfcd9205b114/out/lib" "-L" "/var/lib/invitation-validation/target/debug/build/tikv-jemalloc-sys-30f5ad5d2181d248/out/build/lib" "-L" "/var/lib/invitation-validation/target/debug/build/bzip2-sys-e8d5cf99d32ec964/out/lib" "-L" "/var/lib/invitation-validation/target/debug/build/lzma-sys-5f39c487137192d7/out" "-L" "/var/lib/invitation-validation/target/debug/build/zstd-sys-55fc0c655fa01f2d/out" "-L" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "/var/lib/invitation-validation/target/debug/deps/x0xd-4603bfecd5d0ee51" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-Wl,--strip-debug" "-nodefaultlibs"
+2026-10-20T08:42:22+00:00 buzz-hostinger bash[4064098]:   = note: some arguments are omitted. use `--verbose` to show all linker arguments
+2026-10-20T08:42:22+00:00 buzz-hostinger bash[4064098]:   = note: rust-lld: error: unable to find library -lopus
+2026-10-20T08:42:22+00:00 buzz-hostinger bash[4064098]:           clang: error: linker command failed with exit code 1 (use -v to see invocation)
+2026-10-20T08:42:22+00:00 buzz-hostinger bash[4064098]:
+2026-10-20T08:42:22+00:00 buzz-hostinger bash[4064098]: error: could not compile `x0x` (bin "x0xd") due to 1 previous error
+2026-10-20T08:42:22+00:00 buzz-hostinger systemd[1]: invitation-native-build.service: Main process exited, code=exited, status=101/n/a
+2026-10-20T08:42:22+00:00 buzz-hostinger systemd[1]: invitation-native-build.service: Failed with result 'exit-code'.
+2026-10-20T08:42:22+00:00 buzz-hostinger systemd[1]: invitation-native-build.service: Consumed 7min 7.414s CPU time over 5min 19.062s wall clock time, 5.6G memory peak, 56K read from disk, 1G written to disk, 7.3K incoming IP traffic, 1.6K outgoing IP traffic.
+2026-10-20T08:43:20+00:00 buzz-hostinger systemd[1]: Starting [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/invitation-input/invitation-native-build.sh...
+2026-10-20T08:43:20+00:00 buzz-hostinger systemd[1]: Started [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/invitation-input/invitation-native-build.sh.
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082053]: HEAD is now at cfb09750 Merge pull request #1186 from saorsa-labs/docs/adr-0094-m2-safe-apply
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: ANSI_COLOR="0;38;2;126;186;228"
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: BUG_REPORT_URL="https://github.com/NixOS/nixpkgs/issues"
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: BUILD_ID="26.05.20260829.c5c4a43"
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: CPE_NAME="cpe:/o:nixos:nixos:26.05"
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: DEFAULT_HOSTNAME=nixos
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: DOCUMENTATION_URL="https://nixos.org/learn.html"
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: HOME_URL="https://nixos.org/"
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: ID=nixos
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: ID_LIKE=""
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: IMAGE_ID=""
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: IMAGE_VERSION=""
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: LOGO="nix-snowflake"
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: NAME=NixOS
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: PRETTY_NAME="NixOS 26.05 (Yarara)"
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: SUPPORT_END="2026-12-31"
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: SUPPORT_URL="https://nixos.org/community.html"
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: VARIANT=""
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: VARIANT_ID=""
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: VENDOR_NAME=NixOS
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: VENDOR_URL="https://nixos.org/"
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: VERSION="26.05 (Yarara)"
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: VERSION_CODENAME=yarara
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082055]: VERSION_ID="26.05"
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082056]: info: syncing channel updates for 1.95.0-x86_64-unknown-linux-gnu
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082056]:   1.95.0-x86_64-unknown-linux-gnu unchanged - rustc 1.95.0 (59807616e 2026-04-14)
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082056]: info: self-update is disabled for this build of rustup
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082056]: info: any updates to rustup will need to be fetched with your system package manager
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082069]: rustc 1.95.0 (59807616e 2026-04-14)
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082069]: binary: rustc
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082069]: commit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082069]: commit-date: 2026-04-14
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082069]: host: x86_64-unknown-linux-gnu
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082069]: release: 1.95.0
+2026-10-20T08:43:20+00:00 buzz-hostinger bash[4082069]: LLVM version: 22.1.2
+2026-10-20T08:43:21+00:00 buzz-hostinger bash[4082074]:    Compiling aws-lc-sys v0.45.0
+2026-10-20T08:43:21+00:00 buzz-hostinger bash[4082074]:    Compiling audiopus_sys v0.2.2
+2026-10-20T08:43:21+00:00 buzz-hostinger bash[4082074]:    Compiling lzma-sys v0.1.20
+2026-10-20T08:43:29+00:00 buzz-hostinger bash[4082074]:    Compiling bzip2-sys v0.1.13+1.0.8
+2026-10-20T08:43:29+00:00 buzz-hostinger bash[4082074]:    Compiling opus v0.3.1
+2026-10-20T08:43:30+00:00 buzz-hostinger bash[4082074]:    Compiling xz2 v0.1.7
+2026-10-20T08:43:30+00:00 buzz-hostinger bash[4082074]:    Compiling bzip2 v0.5.2
+2026-10-20T08:43:30+00:00 buzz-hostinger bash[4082074]:    Compiling saorsa-webrtc-codecs v0.6.0
+2026-10-20T08:43:30+00:00 buzz-hostinger bash[4082074]:    Compiling zip v2.4.2
+2026-10-20T08:44:02+00:00 buzz-hostinger bash[4082074]:    Compiling aws-lc-rs v1.18.1
+2026-10-20T08:44:02+00:00 buzz-hostinger bash[4082074]:    Compiling rustls v0.23.45
+2026-10-20T08:44:04+00:00 buzz-hostinger bash[4082074]:    Compiling rustls-webpki v0.103.15
+2026-10-20T08:44:07+00:00 buzz-hostinger bash[4082074]:    Compiling tokio-rustls v0.26.5
+2026-10-20T08:44:08+00:00 buzz-hostinger bash[4082074]:    Compiling hyper-rustls v0.27.10
+2026-10-20T08:44:08+00:00 buzz-hostinger bash[4082074]:    Compiling reqwest v0.12.28
+2026-10-20T08:44:09+00:00 buzz-hostinger bash[4082074]:    Compiling rustls-post-quantum v0.2.4
+2026-10-20T08:44:09+00:00 buzz-hostinger bash[4082074]:    Compiling rustls-platform-verifier v0.6.2
+2026-10-20T08:44:09+00:00 buzz-hostinger bash[4082074]:    Compiling ant-quic v0.27.54
+2026-10-20T08:44:33+00:00 buzz-hostinger bash[4082074]:    Compiling saorsa-gossip-transport v0.5.86
+2026-10-20T08:44:36+00:00 buzz-hostinger bash[4082074]:    Compiling saorsa-gossip-membership v0.5.86
+2026-10-20T08:44:37+00:00 buzz-hostinger bash[4082074]:    Compiling saorsa-gossip-pubsub v0.5.86
+2026-10-20T08:44:42+00:00 buzz-hostinger bash[4082074]:    Compiling saorsa-gossip-presence v0.5.86
+2026-10-20T08:44:43+00:00 buzz-hostinger bash[4082074]:    Compiling saorsa-gossip-coordinator v0.5.86
+2026-10-20T08:44:43+00:00 buzz-hostinger bash[4082074]:    Compiling saorsa-gossip-crdt-sync v0.5.86
+2026-10-20T08:44:43+00:00 buzz-hostinger bash[4082074]:    Compiling saorsa-webrtc-core v0.6.0
+2026-10-20T08:44:44+00:00 buzz-hostinger bash[4082074]:    Compiling saorsa-gossip-runtime v0.5.86
+2026-10-20T08:44:47+00:00 buzz-hostinger bash[4082074]:    Compiling x0x v0.46.0 (/var/lib/private/invitation-validation/source)
+2026-10-20T08:45:15+00:00 buzz-hostinger bash[4082074]:     Finished `dev` profile [unoptimized] target(s) in 1m 54s
+2026-10-20T08:45:16+00:00 buzz-hostinger bash[4087712]:    Compiling tokio v1.53.1
+2026-10-20T08:45:16+00:00 buzz-hostinger bash[4087712]:    Compiling rand_core v0.9.5
+2026-10-20T08:45:16+00:00 buzz-hostinger bash[4087712]:    Compiling either v1.18.0
+2026-10-20T08:45:16+00:00 buzz-hostinger bash[4087712]:    Compiling keccak v0.1.6
+2026-10-20T08:45:16+00:00 buzz-hostinger bash[4087712]:    Compiling sha3 v0.10.9
+2026-10-20T08:45:17+00:00 buzz-hostinger bash[4087712]:    Compiling num-traits v0.2.19
+2026-10-20T08:45:17+00:00 buzz-hostinger bash[4087712]:    Compiling rayon v1.12.0
+2026-10-20T08:45:18+00:00 buzz-hostinger bash[4087712]:    Compiling hpke v0.13.0
+2026-10-20T08:45:19+00:00 buzz-hostinger bash[4087712]:    Compiling tokio-util v0.7.19
+2026-10-20T08:45:20+00:00 buzz-hostinger bash[4087712]:    Compiling h2 v0.4.19
+2026-10-20T08:45:20+00:00 buzz-hostinger bash[4087712]:    Compiling fips205 v0.4.1
+2026-10-20T08:45:21+00:00 buzz-hostinger bash[4087712]:    Compiling fips204 v0.4.6
+2026-10-20T08:45:24+00:00 buzz-hostinger bash[4087712]:    Compiling hyper v1.11.1
+2026-10-20T08:45:25+00:00 buzz-hostinger bash[4087712]:    Compiling hyper-util v0.1.20
+2026-10-20T08:45:26+00:00 buzz-hostinger bash[4087712]:    Compiling fips203 v0.4.3
+2026-10-20T08:45:27+00:00 buzz-hostinger bash[4087712]:    Compiling saorsa-pqc v0.5.1
+2026-10-20T08:45:27+00:00 buzz-hostinger bash[4087712]:    Compiling tower v0.5.3
+2026-10-20T08:45:28+00:00 buzz-hostinger bash[4087712]:    Compiling tokio-rustls v0.26.5
+2026-10-20T08:45:28+00:00 buzz-hostinger bash[4087712]:    Compiling chrono v0.4.45
+2026-10-20T08:45:29+00:00 buzz-hostinger bash[4087712]:    Compiling hyper-rustls v0.27.10
+2026-10-20T08:45:29+00:00 buzz-hostinger bash[4087712]:    Compiling tower-http v0.6.11
+2026-10-20T08:45:30+00:00 buzz-hostinger bash[4087712]:    Compiling igd-next v0.17.1
+2026-10-20T08:45:32+00:00 buzz-hostinger bash[4087712]:    Compiling reqwest v0.12.28
+2026-10-20T08:45:34+00:00 buzz-hostinger bash[4087712]:    Compiling ant-quic v0.27.54
+2026-10-20T08:45:36+00:00 buzz-hostinger bash[4087712]:    Compiling saorsa-gossip-identity v0.5.86
+2026-10-20T08:45:36+00:00 buzz-hostinger bash[4087712]:    Compiling tokio-tungstenite v0.24.0
+2026-10-20T08:45:36+00:00 buzz-hostinger bash[4087712]:    Compiling saorsa-gossip-groups v0.5.86
+2026-10-20T08:45:36+00:00 buzz-hostinger bash[4087712]:    Compiling axum v0.7.9
+2026-10-20T08:45:40+00:00 buzz-hostinger bash[4087712]:    Compiling saorsa-gossip-rendezvous v0.5.86
+2026-10-20T08:45:40+00:00 buzz-hostinger bash[4087712]:    Compiling which v7.0.3
+2026-10-20T08:45:40+00:00 buzz-hostinger bash[4087712]:    Compiling four-word-networking v2.7.0
+2026-10-20T08:45:41+00:00 buzz-hostinger bash[4087712]:    Compiling axum-extra v0.9.6
+2026-10-20T08:45:41+00:00 buzz-hostinger bash[4087712]:    Compiling hyper v0.14.32
+2026-10-20T08:45:43+00:00 buzz-hostinger bash[4087712]:    Compiling saorsa-mls v0.3.8
+2026-10-20T08:45:45+00:00 buzz-hostinger bash[4087712]:    Compiling tokio-stream v0.1.19
+2026-10-20T08:45:46+00:00 buzz-hostinger bash[4087712]:    Compiling plotters-backend v0.3.7
+2026-10-20T08:45:46+00:00 buzz-hostinger bash[4087712]:    Compiling plotters-svg v0.3.7
+2026-10-20T08:45:46+00:00 buzz-hostinger bash[4087712]:    Compiling tempfile v3.27.0
+2026-10-20T08:45:46+00:00 buzz-hostinger bash[4087712]:    Compiling itertools v0.10.5
+2026-10-20T08:45:47+00:00 buzz-hostinger bash[4087712]:    Compiling wait-timeout v0.2.1
+2026-10-20T08:45:47+00:00 buzz-hostinger bash[4087712]:    Compiling same-file v1.0.6
+2026-10-20T08:45:47+00:00 buzz-hostinger bash[4087712]:    Compiling bit-vec v0.8.0
+2026-10-20T08:45:48+00:00 buzz-hostinger bash[4087712]:    Compiling quick-error v1.2.3
+2026-10-20T08:45:48+00:00 buzz-hostinger bash[4087712]:    Compiling cast v0.3.0
+2026-10-20T08:45:48+00:00 buzz-hostinger bash[4087712]:    Compiling criterion-plot v0.5.0
+2026-10-20T08:45:48+00:00 buzz-hostinger bash[4087712]:    Compiling rusty-fork v0.3.1
+2026-10-20T08:45:48+00:00 buzz-hostinger bash[4087712]:    Compiling bit-set v0.8.0
+2026-10-20T08:45:48+00:00 buzz-hostinger bash[4087712]:    Compiling walkdir v2.5.0
+2026-10-20T08:45:48+00:00 buzz-hostinger bash[4087712]:    Compiling plotters v0.3.7
+2026-10-20T08:45:49+00:00 buzz-hostinger bash[4087712]:    Compiling rand_xorshift v0.4.0
+2026-10-20T08:45:49+00:00 buzz-hostinger bash[4087712]:    Compiling rand v0.9.5
+2026-10-20T08:45:50+00:00 buzz-hostinger bash[4087712]:    Compiling rand_chacha v0.9.0
+2026-10-20T08:45:50+00:00 buzz-hostinger bash[4087712]:    Compiling tinytemplate v1.2.1
+2026-10-20T08:45:50+00:00 buzz-hostinger bash[4087712]:    Compiling is-terminal v0.4.17
+2026-10-20T08:45:50+00:00 buzz-hostinger bash[4087712]:    Compiling anes v0.1.6
+2026-10-20T08:45:50+00:00 buzz-hostinger bash[4087712]:    Compiling unarray v0.1.4
+2026-10-20T08:45:50+00:00 buzz-hostinger bash[4087712]:    Compiling oorandom v11.1.5
+2026-10-20T08:45:50+00:00 buzz-hostinger bash[4087712]:    Compiling criterion v0.5.1
+2026-10-20T08:45:54+00:00 buzz-hostinger bash[4087712]:    Compiling proptest v1.11.0
+2026-10-20T08:46:02+00:00 buzz-hostinger bash[4087712]:    Compiling saorsa-gossip-transport v0.5.86
+2026-10-20T08:46:08+00:00 buzz-hostinger bash[4087712]:    Compiling saorsa-gossip-membership v0.5.86
+2026-10-20T08:46:09+00:00 buzz-hostinger bash[4087712]:    Compiling saorsa-gossip-pubsub v0.5.86
+2026-10-20T08:46:14+00:00 buzz-hostinger bash[4087712]:    Compiling saorsa-gossip-presence v0.5.86
+2026-10-20T08:46:15+00:00 buzz-hostinger bash[4087712]:    Compiling saorsa-gossip-coordinator v0.5.86
+2026-10-20T08:46:16+00:00 buzz-hostinger bash[4087712]:    Compiling saorsa-gossip-runtime v0.5.86
+2026-10-20T08:46:17+00:00 buzz-hostinger bash[4087712]:    Compiling saorsa-gossip-crdt-sync v0.5.86
+2026-10-20T08:46:17+00:00 buzz-hostinger bash[4087712]:    Compiling saorsa-webrtc-core v0.6.0
+2026-10-20T08:46:24+00:00 buzz-hostinger bash[4087712]:    Compiling x0x v0.46.0 (/var/lib/private/invitation-validation/source)
+2026-10-20T08:50:15+00:00 buzz-hostinger bash[4087712]:     Finished `test` profile [unoptimized] target(s) in 4m 59s
+2026-10-20T08:50:15+00:00 buzz-hostinger bash[4095599]: 3e0c4dd42f58a623cba4f57fb87ea7faec3ccf9f47b8024aa0d84499d8550bea  /var/lib/invitation-validation/target/debug/x0xd # PUBLIC-CONSTANT
+2026-10-20T08:50:15+00:00 buzz-hostinger systemd[1]: invitation-native-build.service: Deactivated successfully.
+2026-10-20T08:50:15+00:00 buzz-hostinger systemd[1]: invitation-native-build.service: Consumed 10min 21.008s CPU time over 6min 55.034s wall clock time, 7.2G memory peak, 2.5G written to disk, 7.4K incoming IP traffic, 1.7K outgoing IP traffic.

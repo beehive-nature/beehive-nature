@@ -1,0 +1,113 @@
+Cargo Audit	Run cargo audit	﻿2026-10-20T08:39:15.5675440Z ##[group]Run cargo audit
+Cargo Audit	Run cargo audit	2026-10-20T08:39:15.5675747Z ^[[36;1mcargo audit^[[0m
+Cargo Audit	Run cargo audit	2026-10-20T08:39:15.5752282Z shell: /usr/bin/bash -e {0}
+Cargo Audit	Run cargo audit	2026-10-20T08:39:15.5752555Z env:
+Cargo Audit	Run cargo audit	2026-10-20T08:39:15.5752757Z   CARGO_TERM_COLOR: always
+Cargo Audit	Run cargo audit	2026-10-20T08:39:15.5753009Z   CARGO_HOME: /home/runner/.cargo
+Cargo Audit	Run cargo audit	2026-10-20T08:39:15.5753264Z   CARGO_INCREMENTAL: 0
+Cargo Audit	Run cargo audit	2026-10-20T08:39:15.5753482Z ##[endgroup]
+Cargo Audit	Run cargo audit	2026-10-20T08:39:15.6204667Z ^[[0m^[[0m^[[1m^[[32m    Fetching^[[0m advisory database from `https://github.com/RustSec/advisory-db.git`
+Cargo Audit	Run cargo audit	2026-10-20T08:39:18.8910525Z ^[[0m^[[0m^[[1m^[[32m      Loaded^[[0m 1338 security advisories (from /home/runner/.cargo/advisory-db)
+Cargo Audit	Run cargo audit	2026-10-20T08:39:18.8911451Z ^[[0m^[[0m^[[1m^[[32m    Updating^[[0m crates.io index
+Cargo Audit	Run cargo audit	2026-10-20T08:39:18.9086865Z ^[[0m^[[0m^[[1m^[[32m    Scanning^[[0m Cargo.lock for vulnerabilities (570 crate dependencies)
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4290140Z ^[[0m^[[0m^[[1m^[[31mCrate:    ^[[0m rustls
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4290837Z ^[[0m^[[0m^[[1m^[[31mVersion:  ^[[0m 0.23.45
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4291710Z ^[[0m^[[0m^[[1m^[[31mTitle:    ^[[0m Buffered application data sent to outer server after ECH rejection
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4292642Z ^[[0m^[[0m^[[1m^[[31mDate:     ^[[0m 2026-10-14
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4293258Z ^[[0m^[[0m^[[1m^[[31mID:       ^[[0m RUSTSEC-2026-0347
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4294090Z ^[[0m^[[0m^[[1m^[[31mURL:      ^[[0m https://rustsec.org/advisories/RUSTSEC-2026-0347
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4294826Z ^[[0m^[[0m^[[1m^[[31mSeverity: ^[[0m 2.3 (low)
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4295408Z ^[[0m^[[0m^[[1m^[[31mSolution: ^[[0m Upgrade to >=0.23.46
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4295775Z
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4295990Z ^[[0m^[[0m^[[1m^[[31mCrate:    ^[[0m rustls
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4296494Z ^[[0m^[[0m^[[1m^[[31mVersion:  ^[[0m 0.23.45
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4297450Z ^[[0m^[[0m^[[1m^[[31mTitle:    ^[[0m Brotli certificate decompression can allocate up to 1 GiB before authentication
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4298420Z ^[[0m^[[0m^[[1m^[[31mDate:     ^[[0m 2026-10-14
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4299238Z ^[[0m^[[0m^[[1m^[[31mID:       ^[[0m RUSTSEC-2026-0348
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4300011Z ^[[0m^[[0m^[[1m^[[31mURL:      ^[[0m https://rustsec.org/advisories/RUSTSEC-2026-0348
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4300798Z ^[[0m^[[0m^[[1m^[[31mSeverity: ^[[0m 3.7 (low)
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4301344Z ^[[0m^[[0m^[[1m^[[31mSolution: ^[[0m Upgrade to >=0.23.46
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4301676Z
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4301878Z ^[[0m^[[0m^[[1m^[[31mCrate:    ^[[0m rustls
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4302342Z ^[[0m^[[0m^[[1m^[[31mVersion:  ^[[0m 0.23.45
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4303262Z ^[[0m^[[0m^[[1m^[[31mTitle:    ^[[0m Unauthenticated ServerHello can downgrade later connections to classical key exchange
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4304114Z ^[[0m^[[0m^[[1m^[[31mDate:     ^[[0m 2026-10-14
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4304610Z ^[[0m^[[0m^[[1m^[[31mID:       ^[[0m RUSTSEC-2026-0349
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4305274Z ^[[0m^[[0m^[[1m^[[31mURL:      ^[[0m https://rustsec.org/advisories/RUSTSEC-2026-0349
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4305904Z ^[[0m^[[0m^[[1m^[[31mSeverity: ^[[0m 3.7 (low)
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4306416Z ^[[0m^[[0m^[[1m^[[31mSolution: ^[[0m Upgrade to >=0.23.46
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4306732Z
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4306930Z ^[[0m^[[0m^[[1m^[[31mCrate:    ^[[0m rustls
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4307391Z ^[[0m^[[0m^[[1m^[[31mVersion:  ^[[0m 0.23.45
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4308067Z ^[[0m^[[0m^[[1m^[[31mTitle:    ^[[0m `Debug` impls for client session values expose TLS secrets
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4308995Z ^[[0m^[[0m^[[1m^[[31mDate:     ^[[0m 2026-10-14
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4309538Z ^[[0m^[[0m^[[1m^[[31mID:       ^[[0m RUSTSEC-2026-0346
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4310217Z ^[[0m^[[0m^[[1m^[[31mURL:      ^[[0m https://rustsec.org/advisories/RUSTSEC-2026-0346
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4310839Z ^[[0m^[[0m^[[1m^[[31mSeverity: ^[[0m 4 (medium)
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4311348Z ^[[0m^[[0m^[[1m^[[31mSolution: ^[[0m Upgrade to >=0.23.46
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4311662Z
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4311855Z ^[[0m^[[0m^[[1m^[[31mCrate:    ^[[0m zip
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4312316Z ^[[0m^[[0m^[[1m^[[31mVersion:  ^[[0m 2.4.2
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4319444Z ^[[0m^[[0m^[[1m^[[31mTitle:    ^[[0m ZipStreamReader::extract() and ZipArchive::extract() apply Unix permissions through symlinks without confining the target
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4320601Z ^[[0m^[[0m^[[1m^[[31mDate:     ^[[0m 2026-10-10
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4321829Z ^[[0m^[[0m^[[1m^[[31mID:       ^[[0m RUSTSEC-2026-0369
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4322566Z ^[[0m^[[0m^[[1m^[[31mURL:      ^[[0m https://rustsec.org/advisories/RUSTSEC-2026-0369
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4323265Z ^[[0m^[[0m^[[1m^[[31mSeverity: ^[[0m 9.1 (critical)
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4323835Z ^[[0m^[[0m^[[1m^[[31mSolution: ^[[0m Upgrade to >=9.0.0
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4324184Z
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4324400Z ^[[0m^[[0m^[[1m^[[31mCrate:    ^[[0m zip
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4324875Z ^[[0m^[[0m^[[1m^[[31mVersion:  ^[[0m 2.4.2
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4325944Z ^[[0m^[[0m^[[1m^[[31mTitle:    ^[[0m  Insecure Preservation of SUID/SGID Bits during ZIP Extraction Leading to Potential Privilege Escalation
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4326958Z ^[[0m^[[0m^[[1m^[[31mDate:     ^[[0m 2026-10-09
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4327712Z ^[[0m^[[0m^[[1m^[[31mID:       ^[[0m RUSTSEC-2026-0367
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4328436Z ^[[0m^[[0m^[[1m^[[31mURL:      ^[[0m https://rustsec.org/advisories/RUSTSEC-2026-0367
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4329339Z ^[[0m^[[0m^[[1m^[[31mSeverity: ^[[0m 7.3 (high)
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4329889Z ^[[0m^[[0m^[[1m^[[31mSolution: ^[[0m Upgrade to >=9.0.0
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4330237Z
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4330439Z ^[[0m^[[0m^[[1m^[[31mCrate:    ^[[0m zip
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4330910Z ^[[0m^[[0m^[[1m^[[31mVersion:  ^[[0m 2.4.2
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4332227Z ^[[0m^[[0m^[[1m^[[31mTitle:    ^[[0m zip: `ZipArchive::extract` creates symbolic links whose attacker-controlled targets are outside the destination directory
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4333367Z ^[[0m^[[0m^[[1m^[[31mDate:     ^[[0m 2026-10-09
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4333896Z ^[[0m^[[0m^[[1m^[[31mID:       ^[[0m RUSTSEC-2026-0368
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4334618Z ^[[0m^[[0m^[[1m^[[31mURL:      ^[[0m https://rustsec.org/advisories/RUSTSEC-2026-0368
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4335329Z ^[[0m^[[0m^[[1m^[[31mSolution: ^[[0m Upgrade to >=9.0.0
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4335673Z
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4335904Z ^[[0m^[[0m^[[1m^[[33mCrate:    ^[[0m audiopus_sys
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4336410Z ^[[0m^[[0m^[[1m^[[33mVersion:  ^[[0m 0.2.2
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4336915Z ^[[0m^[[0m^[[1m^[[33mWarning:  ^[[0m unmaintained
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4337521Z ^[[0m^[[0m^[[1m^[[33mTitle:    ^[[0m audiopus_sys is unmaintained
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4338118Z ^[[0m^[[0m^[[1m^[[33mDate:     ^[[0m 2026-05-21
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4338820Z ^[[0m^[[0m^[[1m^[[33mID:       ^[[0m RUSTSEC-2026-0150
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4339503Z ^[[0m^[[0m^[[1m^[[33mURL:      ^[[0m https://rustsec.org/advisories/RUSTSEC-2026-0150
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4339946Z
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4340139Z ^[[0m^[[0m^[[1m^[[33mCrate:    ^[[0m paste
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4340591Z ^[[0m^[[0m^[[1m^[[33mVersion:  ^[[0m 1.0.15
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4341065Z ^[[0m^[[0m^[[1m^[[33mWarning:  ^[[0m unmaintained
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4341630Z ^[[0m^[[0m^[[1m^[[33mTitle:    ^[[0m paste - no longer maintained
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4342188Z ^[[0m^[[0m^[[1m^[[33mDate:     ^[[0m 2024-10-07
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4342695Z ^[[0m^[[0m^[[1m^[[33mID:       ^[[0m RUSTSEC-2024-0436
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4343367Z ^[[0m^[[0m^[[1m^[[33mURL:      ^[[0m https://rustsec.org/advisories/RUSTSEC-2024-0436
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4343797Z
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4344024Z ^[[0m^[[0m^[[1m^[[33mCrate:    ^[[0m unsafe-libyaml
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4344512Z ^[[0m^[[0m^[[1m^[[33mVersion:  ^[[0m 0.2.11
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4344966Z ^[[0m^[[0m^[[1m^[[33mWarning:  ^[[0m unmaintained
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4345520Z ^[[0m^[[0m^[[1m^[[33mTitle:    ^[[0m unsafe-libyaml is unmaintained
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4346063Z ^[[0m^[[0m^[[1m^[[33mDate:     ^[[0m 2024-03-25
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4346544Z ^[[0m^[[0m^[[1m^[[33mID:       ^[[0m RUSTSEC-2024-0449
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4347198Z ^[[0m^[[0m^[[1m^[[33mURL:      ^[[0m https://rustsec.org/advisories/RUSTSEC-2024-0449
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4347614Z
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4347800Z ^[[0m^[[0m^[[1m^[[33mCrate:    ^[[0m lru
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4348227Z ^[[0m^[[0m^[[1m^[[33mVersion:  ^[[0m 0.16.4
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4348840Z ^[[0m^[[0m^[[1m^[[33mWarning:  ^[[0m unsound
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4349753Z ^[[0m^[[0m^[[1m^[[33mTitle:    ^[[0m Potential use-after-free due to lack of panic safety in `LruCache::pop()`
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4350527Z ^[[0m^[[0m^[[1m^[[33mDate:     ^[[0m 2026-05-12
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4351012Z ^[[0m^[[0m^[[1m^[[33mID:       ^[[0m RUSTSEC-2026-0253
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4351748Z ^[[0m^[[0m^[[1m^[[33mURL:      ^[[0m https://rustsec.org/advisories/RUSTSEC-2026-0253
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4352399Z
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4352622Z ^[[0m^[[0m^[[1m^[[33mCrate:    ^[[0m yoke-derive
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4353100Z ^[[0m^[[0m^[[1m^[[33mVersion:  ^[[0m 0.8.3
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4353645Z ^[[0m^[[0m^[[1m^[[31merror:^[[0m 7 vulnerabilities found!
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4354221Z ^[[0m^[[0m^[[1m^[[33mwarning:^[[0m 5 allowed warnings found
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4354723Z ^[[0m^[[0m^[[1m^[[33mWarning:  ^[[0m yanked
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4354987Z
+Cargo Audit	Run cargo audit	2026-10-20T08:39:19.4424665Z ##[error]Process completed with exit code 1.

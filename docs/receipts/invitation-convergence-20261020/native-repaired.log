@@ -1,0 +1,72 @@
+2026-10-20T08:52:02+00:00 buzz-hostinger systemd[1]: Starting [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/invitation-input/invitation-native-runtime.sh...
+2026-10-20T08:52:02+00:00 buzz-hostinger systemd[1]: Started [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/invitation-input/invitation-native-runtime.sh.
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097777]: UTC:
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097780]: Tue Oct 20 08:52:02 AM UTC 2026
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097777]: uid:
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097781]: uid=63349(invitation-repaired) gid=63349(invitation-repaired) groups=63349(invitation-repaired)
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097777]: host network namespace: net:[4026531833]
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097777]: runtime network namespace:
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097783]: net:[4026532884]
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097785]: lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP>
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097789]: 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000\    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097792]: local 127.0.0.0/8 dev lo table local proto kernel scope host src 127.0.0.1
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097792]: local 127.0.0.1 dev lo table local proto kernel scope host src 127.0.0.1
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097792]: broadcast 127.255.255.255 dev lo table local proto kernel scope link src 127.0.0.1
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097793]: local ::1 dev lo table local proto kernel metric 0 pref medium
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097794]: CapInh:        0000000000000000
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097794]: CapPrm:        0000000000000000
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097794]: CapEff:        0000000000000000
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097794]: CapBnd:        0000000000000000
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097794]: CapAmb:        0000000000000000
+2026-10-20T08:52:02+00:00 buzz-hostinger bash[4097794]: NoNewPrivs:        1
+2026-10-20T08:52:03+00:00 buzz-hostinger bash[4097802]: 3e0c4dd42f58a623cba4f57fb87ea7faec3ccf9f47b8024aa0d84499d8550bea  /run/invitation-bin/x0xd # PUBLIC-CONSTANT
+2026-10-20T08:52:03+00:00 buzz-hostinger bash[4097802]: 7ce7abcf4b53f0b70a912e9bd081e9c2fdbf19770af663eaa1bf2465bda3ab15  /run/invitation-tests/named_group_join_metadata_event-87faefd2c63253e6 # PUBLIC-CONSTANT
+2026-10-20T08:52:03+00:00 buzz-hostinger bash[4097777]: forged_member_joined_admin_role_or_secret_is_rejected: test
+2026-10-20T08:52:03+00:00 buzz-hostinger bash[4097777]: issued_invite_secret_is_recorded_on_inviter: test
+2026-10-20T08:52:03+00:00 buzz-hostinger bash[4097777]: member_joined_event_is_idempotent: test
+2026-10-20T08:52:03+00:00 buzz-hostinger bash[4097777]: member_joined_event_propagates_to_inviter: test
+2026-10-20T08:52:03+00:00 buzz-hostinger bash[4097777]: non_creator_admin_invite_e2e_converges_through_real_daemons: test
+2026-10-20T08:52:03+00:00 buzz-hostinger bash[4097777]: non_creator_admin_private_secure_invite_e2e_converges_through_real_daemons: test
+2026-10-20T08:52:03+00:00 buzz-hostinger bash[4097777]: tampered_member_joined_signed_role_is_rejected_before_role_policy: test
+2026-10-20T08:52:03+00:00 buzz-hostinger bash[4097777]: 7 tests, 0 benchmarks
+2026-10-20T08:52:03+00:00 buzz-hostinger bash[4097777]: running 7 tests
+2026-10-20T08:52:23+00:00 buzz-hostinger bash[4097777]: test forged_member_joined_admin_role_or_secret_is_rejected ... [cluster] pair-alice-23270 sees 1 peer(s)
+2026-10-20T08:52:23+00:00 buzz-hostinger bash[4097777]: [cluster] pair-bob-23270 sees 1 peer(s)
+2026-10-20T08:52:24+00:00 buzz-hostinger bash[4097777]: ok
+2026-10-20T08:52:44+00:00 buzz-hostinger bash[4097777]: test issued_invite_secret_is_recorded_on_inviter ... [cluster] pair-alice-7883 sees 1 peer(s)
+2026-10-20T08:52:44+00:00 buzz-hostinger bash[4097777]: [cluster] pair-bob-7883 sees 1 peer(s)
+2026-10-20T08:52:44+00:00 buzz-hostinger bash[4097777]: ok
+2026-10-20T08:53:05+00:00 buzz-hostinger bash[4097777]: test member_joined_event_is_idempotent ... [cluster] pair-alice-7930 sees 1 peer(s)
+2026-10-20T08:53:05+00:00 buzz-hostinger bash[4097777]: [cluster] pair-bob-7930 sees 1 peer(s)
+2026-10-20T08:53:08+00:00 buzz-hostinger bash[4097777]: ok
+2026-10-20T08:53:29+00:00 buzz-hostinger bash[4097777]: test member_joined_event_propagates_to_inviter ... [cluster] pair-alice-36845 sees 1 peer(s)
+2026-10-20T08:53:29+00:00 buzz-hostinger bash[4097777]: [cluster] pair-bob-36845 sees 1 peer(s)
+2026-10-20T08:53:29+00:00 buzz-hostinger bash[4097777]: ok
+2026-10-20T08:53:29+00:00 buzz-hostinger bash[4097777]: test non_creator_admin_invite_e2e_converges_through_real_daemons ... [cluster] starting alice...
+2026-10-20T08:53:29+00:00 buzz-hostinger bash[4097777]: [cluster] waiting 15s for alice to stabilise before starting bob...
+2026-10-20T08:53:44+00:00 buzz-hostinger bash[4097777]: [cluster] starting bob (bootstraps to alice)...
+2026-10-20T08:53:44+00:00 buzz-hostinger bash[4097777]: [cluster] waiting 15s for bob to join mesh before starting charlie...
+2026-10-20T08:53:59+00:00 buzz-hostinger bash[4097777]: [cluster] starting charlie (bootstraps to alice)...
+2026-10-20T08:54:00+00:00 buzz-hostinger bash[4097777]: [cluster] all nodes up — waiting 5s for mesh to settle...
+2026-10-20T08:54:05+00:00 buzz-hostinger bash[4097777]: [cluster] test-alice-63774 sees 2 peer(s)
+2026-10-20T08:54:05+00:00 buzz-hostinger bash[4097777]: [cluster] test-bob-63774 sees 2 peer(s)
+2026-10-20T08:54:05+00:00 buzz-hostinger bash[4097777]: [cluster] test-charlie-63774 sees 2 peer(s)
+2026-10-20T08:54:05+00:00 buzz-hostinger bash[4097777]: [cluster] mesh verified — all 3 nodes connected
+2026-10-20T08:54:07+00:00 buzz-hostinger bash[4097777]: ok
+2026-10-20T08:54:07+00:00 buzz-hostinger bash[4097777]: test non_creator_admin_private_secure_invite_e2e_converges_through_real_daemons ... [cluster] starting alice...
+2026-10-20T08:54:07+00:00 buzz-hostinger bash[4097777]: [cluster] waiting 15s for alice to stabilise before starting bob...
+2026-10-20T08:54:22+00:00 buzz-hostinger bash[4097777]: [cluster] starting bob (bootstraps to alice)...
+2026-10-20T08:54:22+00:00 buzz-hostinger bash[4097777]: [cluster] waiting 15s for bob to join mesh before starting charlie...
+2026-10-20T08:54:37+00:00 buzz-hostinger bash[4097777]: [cluster] starting charlie (bootstraps to alice)...
+2026-10-20T08:54:37+00:00 buzz-hostinger bash[4097777]: [cluster] all nodes up — waiting 5s for mesh to settle...
+2026-10-20T08:54:42+00:00 buzz-hostinger bash[4097777]: [cluster] test-alice-39375 sees 2 peer(s)
+2026-10-20T08:54:42+00:00 buzz-hostinger bash[4097777]: [cluster] test-bob-39375 sees 2 peer(s)
+2026-10-20T08:54:42+00:00 buzz-hostinger bash[4097777]: [cluster] test-charlie-39375 sees 2 peer(s)
+2026-10-20T08:54:42+00:00 buzz-hostinger bash[4097777]: [cluster] mesh verified — all 3 nodes connected
+2026-10-20T08:54:46+00:00 buzz-hostinger bash[4097777]: ok
+2026-10-20T08:55:06+00:00 buzz-hostinger bash[4097777]: test tampered_member_joined_signed_role_is_rejected_before_role_policy ... [cluster] pair-alice-26356 sees 1 peer(s)
+2026-10-20T08:55:06+00:00 buzz-hostinger bash[4097777]: [cluster] pair-bob-26356 sees 1 peer(s)
+2026-10-20T08:55:22+00:00 buzz-hostinger bash[4097777]: ok
+2026-10-20T08:55:22+00:00 buzz-hostinger bash[4097777]: test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 198.86s
+2026-10-20T08:55:22+00:00 buzz-hostinger systemd[1]: invitation-repaired.service: Deactivated successfully.
+2026-10-20T08:55:22+00:00 buzz-hostinger systemd[1]: invitation-repaired.service: Consumed 27.086s CPU time over 3min 19.636s wall clock time, 94.5M memory peak, 4.9M written to disk, 11.9M incoming IP traffic, 11.9M outgoing IP traffic.
