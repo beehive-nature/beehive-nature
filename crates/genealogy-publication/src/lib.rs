@@ -55,11 +55,14 @@ pub const CORPUS_FILES: [&str; 9] = [
     "assets/profile-archive/lineage/sources/rights-qualification.json",
 ];
 
+/// Declared rails — NAMES ONLY, not fetch locators (issue #475 §3): no
+/// resolvable Arweave transaction ids, Autonomi addresses or x0x routes
+/// live in this crate. Naming a rail here claims no working retrieval.
 pub const RAILS: [(&str, &str); 4] = [
-    ("github-pages", "bootstrap origin while the decentralized rails populate"),
-    ("arweave", "permanent data rail — adapter-arweave fetches by content address"),
-    ("autonomi", "permanent data rail — adapter-autonomi fetches by content address"),
-    ("x0x", "estate mesh rail — ops/x0x node"),
+    ("github-pages", "declared rail — bootstrap origin; name only, no fetch route in this crate"),
+    ("arweave", "declared rail — adapter-arweave owns any future fetch route"),
+    ("autonomi", "declared rail — adapter-autonomi owns any future fetch route"),
+    ("x0x", "declared rail — ops/x0x owns any future mesh route"),
 ];
 
 fn lineage_dir(root: &Path) -> PathBuf {
@@ -111,6 +114,17 @@ fn census_persons(root: &Path) -> Result<Census, String> {
     for entry in fs::read_dir(&dir).map_err(|e| format!("{}: {e}", dir.display()))? {
         let entry = entry.map_err(|e| format!("{}: {e}", dir.display()))?;
         let name = entry.file_name().to_string_lossy().into_owned();
+        // Issue #475 §4: never follow a symlink or hash a non-regular file —
+        // a page must be a regular file inside the corpus, nothing outside it.
+        let ft = entry.file_type().map_err(|e| format!("{name}: {e}"))?;
+        if ft.is_symlink() {
+            c.strays.push(format!("symlink refused: {name}"));
+            continue;
+        }
+        if !ft.is_file() {
+            c.strays.push(format!("not-a-regular-file refused: {name}"));
+            continue;
+        }
         if let Some(id) = name.strip_suffix(".html") {
             let d = digest_file(&entry.path()).map_err(|e| format!("{}: {e}", entry.path().display()))?;
             c.html.insert(id.to_string(), d);
@@ -442,47 +456,162 @@ pub fn check(root: &Path, max_named: usize) -> Result<CheckReport, String> {
     Ok(report)
 }
 
-/// Resolution record for one person: canonical `.b`-anchored address (when
-/// an anchor is configured and valid under ORDER cC) plus content hashes
-/// and rail locators. Locators only — this crate never fetches.
-pub fn resolve(root: &Path, person: &str, bname: Option<&str>) -> Result<String, String> {
-    let state = fs::read_to_string(state_path(root))
+/// Options for [`resolve`] (issue #475 §2: resolve must validate the seal
+/// it reports, fail closed on mismatch, and carry an independently pinned
+/// trust root before anything calls it authenticated).
+pub struct ResolveOptions<'a> {
+    /// Canonical `bnr://` anchor label (e.g. `blood.b`). Address FORM
+    /// validation only — an unregistered label is not authentication.
+    pub bname: Option<&'a str>,
+    /// Independently pinned root: the expected sha256 of the state file,
+    /// taken from a channel outside the mutable pair (git commit, signed
+    /// .b binding). When set, a mismatch refuses resolution.
+    pub expect_state_sha: Option<&'a str>,
+    /// Untrusted preview mode: proceeds past drift to let a developer
+    /// inspect, with every skip visibly labeled. Never a verification.
+    pub preview: bool,
+}
+
+impl Default for ResolveOptions<'_> {
+    fn default() -> Self {
+        ResolveOptions { bname: None, expect_state_sha: None, preview: false }
+    }
+}
+
+/// Resolution record for one person — FAIL CLOSED. Verifies, in order:
+/// the pinned root (if given); the index↔state binding
+/// (`index.stateSha256 == sha256(state bytes)`); state↔index agreement on
+/// the person's page digests; and the page bytes themselves against the
+/// state's digests, recomputed from disk. Only then are digests reported,
+/// as verified facts with the trust-root mode named. Locators only — this
+/// crate never fetches.
+pub fn resolve(root: &Path, person: &str, opts: ResolveOptions) -> Result<String, String> {
+    let state_bytes = fs::read(state_path(root))
         .map_err(|e| format!("state file unreadable (run `gp bind`): {e}"))?;
-    let index = fs::read_to_string(index_path(root))
+    let state_sha = sha256_hex(&state_bytes);
+    if let Some(pin) = opts.expect_state_sha {
+        if !pin.eq_ignore_ascii_case(&state_sha) {
+            return Err(format!(
+                "pinned-root mismatch: pin {pin}, local state hashes {state_sha} — refusing"
+            ));
+        }
+    }
+
+    let index_bytes = fs::read(index_path(root))
         .map_err(|e| format!("index file unreadable (run `gp bind`): {e}"))?;
-    let idx: Value = serde_json::from_str(&index).map_err(|e| format!("index unparseable: {e}"))?;
-    let entry = idx
+    let index: Value = serde_json::from_slice(&index_bytes).map_err(|e| format!("index unparseable: {e}"))?;
+    let index_claim = index.get("stateSha256").and_then(Value::as_str).unwrap_or("absent");
+    if !index_claim.eq_ignore_ascii_case(&state_sha) {
+        return Err(format!(
+            "index not bound to the state beside it: index claims {index_claim}, state hashes {state_sha} — tampered or stale index; run `gp check` (or --preview to inspect, untrusted)"
+        ));
+    }
+
+    let state: Value = serde_json::from_slice(&state_bytes).map_err(|e| format!("state unparseable: {e}"))?;
+    let state_page = state
+        .get("pages")
+        .and_then(Value::as_array)
+        .and_then(|ps| ps.iter().find(|p| p["id"].as_str() == Some(person)))
+        .ok_or_else(|| format!("person {person} absent from the state pages"))?;
+    let entry = index
         .get("persons")
         .and_then(|p| p.get(person))
         .ok_or_else(|| format!("person {person} not in the publication index"))?;
 
-    let anchor = match bname {
+    // state ↔ index must agree on the page digests before either is believed
+    let want_html = state_page["html"]["sha256"].as_str().unwrap_or("?");
+    let want_json = state_page["json"]["sha256"].as_str().unwrap_or("?");
+    let got_html = entry.get("pageHtmlSha256").and_then(Value::as_str).unwrap_or("?");
+    let got_json = entry.get("pageJsonSha256").and_then(Value::as_str).unwrap_or("?");
+    if got_html != want_html || got_json != want_json {
+        return Err(format!(
+            "index/state disagree on page digests for {person}: html index {got_html} vs state {want_html}; json index {got_json} vs state {want_json}"
+        ));
+    }
+
+    // the pages themselves, recomputed from disk — state is the witness
+    let mut disk_warnings: Vec<String> = vec![];
+    let mut disk_ok = true;
+    for (want, fname) in [
+        (want_html, format!("{person}.html")),
+        (want_json, format!("{person}.json")),
+    ] {
+        match digest_file(&persons_dir(root).join(&fname)) {
+            Ok((got, _)) if got == want => {}
+            Ok((got, _)) => {
+                disk_ok = false;
+                let msg = format!("page bytes drift: persons/{fname} state says {want}, disk hashes {got}");
+                if opts.preview {
+                    disk_warnings.push(msg);
+                } else {
+                    return Err(format!("{msg} — failing closed (--preview to inspect, untrusted)"));
+                }
+            }
+            Err(e) => {
+                disk_ok = false;
+                let msg = format!("page unreadable: persons/{fname}: {e}");
+                if opts.preview {
+                    disk_warnings.push(msg);
+                } else {
+                    return Err(msg);
+                }
+            }
+        }
+    }
+
+    let anchor = match opts.bname {
         Some(fqn) => {
             let name = bnr_url::BName::parse_fqn(fqn).map_err(|e| format!(".b anchor rejected by ORDER cC label law: {e:?}"))?;
             let raw = format!("bnr://{}/person/{person}", name.fqn());
             let url = bnr_url::BnrUrl::parse(&raw).map_err(|e| format!("constructed address failed its own parser: {e:?}"))?;
-            json!({"bName": name.fqn(), "url": url.canonical()})
+            json!({
+                "bName": name.fqn(),
+                "url": url.canonical(),
+                "note": "unregistered demonstration anchor — address FORM validation only, not authentication; .b registration is a founder gesture",
+            })
         }
         None => Value::Null,
     };
 
+    let trust_root = if opts.expect_state_sha.is_some() {
+        json!({
+            "mode": "pinned",
+            "stateSha256": state_sha,
+            "pinnedBy": "--expect-state-sha from a channel outside the mutable pair",
+        })
+    } else {
+        json!({
+            "mode": "unpinned-local",
+            "stateSha256": state_sha,
+            "warning": "no independently pinned root — binding verified locally only; a full local rewrite of state+index+pages would self-verify. Pin --expect-state-sha from git or a signed .b binding before trusting.",
+        })
+    };
+
     let out = json!({
-        "schema": "skaists.genealogy-publication-resolve/1",
+        "schema": "skaists.genealogy-publication-resolve/2",
+        "mode": if opts.preview { "preview-untrusted" } else { "verified-local" },
         "tool": {"name": TOOL, "version": VERSION},
         "person": {
             "id": person,
             "pageHtml": entry.get("pageHtml").cloned().unwrap_or(Value::Null),
             "pageJson": entry.get("pageJson").cloned().unwrap_or(Value::Null),
-            "pageHtmlSha256": entry.get("pageHtmlSha256").cloned().unwrap_or(Value::Null),
-            "pageJsonSha256": entry.get("pageJsonSha256").cloned().unwrap_or(Value::Null),
+            "pageHtmlSha256": want_html,
+            "pageJsonSha256": want_json,
             "fsRefs": entry.get("fsRefs").cloned().unwrap_or(Value::Null),
             "recordArks": entry.get("recordArks").cloned().unwrap_or(Value::Null),
         },
+        "verification": {
+            "pinnedRootChecked": opts.expect_state_sha.is_some(),
+            "indexBoundToState": true,
+            "stateIndexAgreeOnPerson": true,
+            "pageDigestsRecomputedFromDisk": disk_ok,
+        },
+        "warnings": disk_warnings,
+        "trustRoot": trust_root,
         "anchor": anchor,
-        "stateSha256": sha256_hex(state.as_bytes()),
-        "indexSha256": sha256_hex(index.as_bytes()),
+        "indexSha256": sha256_hex(&index_bytes),
         "rails": RAILS.iter().map(|(rail, role)| json!({"rail": rail, "role": role})).collect::<Vec<_>>(),
-        "note": "locators only — rails fetch, this crate never does; verify page digests against stateSha256 after any fetch",
+        "note": "rails are declared names, not fetch locators; verify page digests against the pinned stateSha256 after any fetch — locators only, this crate never fetches",
     });
     Ok(serde_json::to_string_pretty(&out).map_err(|e| e.to_string())? + "\n")
 }
@@ -639,17 +768,123 @@ mod tests {
         let dir = fixture_root("resolve");
         write_fixture(&dir);
         bind_and_write(&dir).unwrap();
-        let out = resolve(&dir, "pa", Some("blood.b")).unwrap();
+        let out = resolve(&dir, "pa", ResolveOptions { bname: Some("blood.b"), ..Default::default() }).unwrap();
         let v: Value = serde_json::from_str(&out).unwrap();
         assert_eq!(v["anchor"]["url"], "bnr://blood.b/person/pa");
         assert_eq!(v["person"]["pageHtml"], "persons/pa.html");
-        assert!(resolve(&dir, "pa", Some("Bad..x.b")).is_err());
-        assert!(resolve(&dir, "nobody", None).is_err());
-        // no anchor -> null anchor, still resolves content hashes
-        let out = resolve(&dir, "pa", None).unwrap();
-        let v: Value = serde_json::from_str(&out).unwrap();
-        assert!(v["anchor"].is_null());
-        assert!(!v["person"]["pageHtmlSha256"].is_null());
+        assert_eq!(v["trustRoot"]["mode"], "unpinned-local");
+        assert!(v["trustRoot"]["warning"].is_string());
+        assert_eq!(v["verification"]["indexBoundToState"], true);
+        assert_eq!(v["verification"]["pageDigestsRecomputedFromDisk"], true);
+        assert!(
+            resolve(&dir, "pa", ResolveOptions { bname: Some("Bad..x.b"), ..Default::default() }).is_err()
+        );
+        assert!(resolve(&dir, "nobody", ResolveOptions::default()).is_err());
         let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn resolve_tampered_index_page_hash_fails_closed() {
+        let dir = fixture_root("rx-hash");
+        write_fixture(&dir);
+        bind_and_write(&dir).unwrap();
+        let ip = index_path(&dir);
+        let mut idx: Value =
+            serde_json::from_str(&fs::read_to_string(&ip).unwrap()).unwrap();
+        // attacker edits the person's page hash but leaves stateSha256 intact:
+        // the binding check passes; state↔index disagreement must catch it
+        idx["persons"]["pa"]["pageHtmlSha256"] = json!("f".repeat(64));
+        fs::write(&ip, serde_json::to_string(&idx).unwrap()).unwrap();
+        let err = resolve(&dir, "pa", ResolveOptions::default()).unwrap_err();
+        assert!(err.contains("index/state disagree"), "{err}");
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn resolve_tampered_index_state_sha_fails_closed() {
+        let dir = fixture_root("rx-sha");
+        write_fixture(&dir);
+        bind_and_write(&dir).unwrap();
+        let ip = index_path(&dir);
+        let mut idx: Value =
+            serde_json::from_str(&fs::read_to_string(&ip).unwrap()).unwrap();
+        idx["stateSha256"] = json!("0".repeat(64));
+        fs::write(&ip, serde_json::to_string(&idx).unwrap()).unwrap();
+        let err = resolve(&dir, "pa", ResolveOptions::default()).unwrap_err();
+        assert!(err.contains("index not bound"), "{err}");
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn resolve_page_drift_fails_closed_and_preview_labels_it() {
+        let dir = fixture_root("rx-drift");
+        write_fixture(&dir);
+        bind_and_write(&dir).unwrap();
+        let page = dir.join("assets/profile-archive/lineage/persons/pa.html");
+        let orig = fs::read_to_string(&page).unwrap();
+        fs::write(&page, orig.clone() + "<!-- drift -->").unwrap();
+        // fail closed by default
+        let err = resolve(&dir, "pa", ResolveOptions::default()).unwrap_err();
+        assert!(err.contains("page bytes drift") && err.contains("failing closed"), "{err}");
+        // preview proceeds, visibly untrusted, with the drift named
+        let out = resolve(&dir, "pa", ResolveOptions { preview: true, ..Default::default() }).unwrap();
+        let v: Value = serde_json::from_str(&out).unwrap();
+        assert_eq!(v["mode"], "preview-untrusted");
+        assert_eq!(v["verification"]["pageDigestsRecomputedFromDisk"], false);
+        assert!(v["warnings"].as_array().unwrap().iter().any(|w| w.as_str().unwrap().contains("page bytes drift")));
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn resolve_pinned_root_mismatch_refuses_and_match_passes() {
+        let dir = fixture_root("rx-pin");
+        write_fixture(&dir);
+        bind_and_write(&dir).unwrap();
+        let state_bytes = fs::read(state_path(&dir)).unwrap();
+        let mut h = Sha256::new();
+        h.update(&state_bytes);
+        let real: String = h.finalize().iter().map(|b| format!("{b:02x}")).collect();
+        let wrong = "a".repeat(64);
+        let err = resolve(&dir, "pa", ResolveOptions { expect_state_sha: Some(&wrong), ..Default::default() })
+            .unwrap_err();
+        assert!(err.contains("pinned-root mismatch"), "{err}");
+        let out = resolve(&dir, "pa", ResolveOptions { expect_state_sha: Some(&real), ..Default::default() }).unwrap();
+        let v: Value = serde_json::from_str(&out).unwrap();
+        assert_eq!(v["trustRoot"]["mode"], "pinned");
+        assert_eq!(v["verification"]["pinnedRootChecked"], true);
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn census_refuses_symlinked_and_nonregular_pages() {
+        let dir = fixture_root("rx-link");
+        write_fixture(&dir);
+        bind_and_write(&dir).unwrap();
+        let outside = dir.join("outside-secret.html");
+        fs::write(&outside, "not part of the corpus").unwrap();
+        let link = dir.join("assets/profile-archive/lineage/persons/evil.html");
+        let made = make_symlink(&outside, &link).is_ok();
+        if !made {
+            // this Windows host may refuse unprivileged symlinks; CI (ubuntu)
+            // creates it and exercises the refusal
+            eprintln!("symlink creation unavailable on this host — negative control deferred to CI");
+            let _ = fs::remove_dir_all(&dir);
+            return;
+        }
+        match bind(&dir) {
+            Err(e) => assert!(e.contains("symlink refused") || e.contains("unbound"), "{e}"),
+            Ok(_) => panic!("bind accepted a symlinked page into the census"),
+        }
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[cfg(windows)]
+    fn make_symlink(orig: &Path, link: &Path) -> std::io::Result<()> {
+        std::os::windows::fs::symlink_file(orig, link)
+    }
+
+    #[cfg(unix)]
+    fn make_symlink(orig: &Path, link: &Path) -> std::io::Result<()> {
+        std::os::unix::symlink(orig, link)
     }
 }
