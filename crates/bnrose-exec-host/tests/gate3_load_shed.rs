@@ -12,8 +12,8 @@
 
 use bnrose_exec_host::fixtures::{fixture, IntentFile, TEST_DOMAIN};
 use bnrose_exec_host::load_shed::{
-    retry_amplification, zipf_cumulative_weights, BoundedShedTracker, ClientRetryBudget,
-    CrossDaoAdmissionControl,
+    retry_amplification, zipf_cumulative_weights, BoundedClientBudgets, BoundedShedTracker,
+    ClientRetryBudget, CrossDaoAdmissionControl,
 };
 use bnrose_exec_host::opexec::Supervisor;
 use bnrose_exec_host::worker::{Bounds, NativeWorker};
@@ -620,11 +620,18 @@ fn test_gate3_real_retry_amplification_under_backoff() {
         }
     }
 
-    // Server backstop strictly caps admitted retries at 20 (1 per client floor)
+    // Uncooperative clients transmit all 180 retries over wire (R_amp,wire = 1.90)
     assert_eq!(
         total_retries_wire_run, 180,
         "uncooperative clients transmit all 180 retries over wire"
     );
+    let r_amp_wire_run = retry_amplification(total_initial_requests, total_retries_wire_run);
+    assert_eq!(
+        r_amp_wire_run, 1.90,
+        "uncooperative wire R_amp is 1.90 without host retry() API fail-fast"
+    );
+
+    // Server backstop strictly caps admitted retries at 20 (1 per client floor)
     assert_eq!(
         total_retries_admitted_run, 20,
         "server backstop admits exactly 20 retries matching per-client budget"
@@ -754,7 +761,7 @@ fn test_gate3_real_retry_amplification_under_backoff() {
         "R_amp under forged flood must stay <= 1.15; was {r_amp_forge:.3}"
     );
 
-    println!("gate3: PASS - all 4 R_amp scenarios strictly <= 1.15 (retry={r_amp_s1:.3}, run_admit={r_amp_admit:.3}, bumped_expiry={r_amp_exp:.3}, forged_attack={r_amp_forge:.3})");
+    println!("gate3: PASS - cooperative client fail-fast R_amp <= 1.15 (retry={r_amp_s1:.3}, bumped_expiry={r_amp_exp:.3}, forged_attack={r_amp_forge:.3}); uncooperative wire R_amp={r_amp_wire_run:.3} with server admitted R_amp={r_amp_admit:.3} <= 1.15");
 }
 
 #[test]
@@ -1503,10 +1510,60 @@ fn test_gate3_fresh_client_run_retries_bounded_r_amp() {
 }
 
 #[test]
+fn test_gate3_first_time_client_zero_admitted_retry_floor() {
+    // Repro e1 (PR #465 O1):
+    // First-time client with 0 admitted requests has its initial request shed under load.
+    // In next tumbling window with free capacity, its retry MUST be admitted under min_retries = 1 floor.
+    let state = tmp("first-time-client-e1");
+    let mut sup = make_sup(&state);
+    let bounds = Bounds::default();
+
+    sup.set_load_shed(CrossDaoAdmissionControl::new(100, 1));
+
+    let seed_busy = [0x55u8; 32];
+    let seed_zero = [0x54u8; 32];
+
+    // Request A consumes the 1 quota in window 0:
+    let intent_a = make_cross_dao_intent_with_seed(&seed_busy, 10_001);
+    let out_a = sup.run(&intent_a, NOW, false, &bounds);
+    assert!(out_a.receipt.is_some(), "request A admitted");
+
+    // First-time client request is shed: 0 admitted requests
+    let intent_zero_shed1 = make_cross_dao_intent_with_seed(&seed_zero, 30_001);
+    let out_zero_shed1 = sup.run(&intent_zero_shed1, NOW, false, &bounds);
+    assert!(
+        out_zero_shed1.refused.is_some(),
+        "first-time client initial request shed under load"
+    );
+
+    let intent_zero_shed2 = make_cross_dao_intent_with_seed(&seed_zero, 30_002);
+    let out_zero_shed2 = sup.run(&intent_zero_shed2, NOW, false, &bounds);
+    assert!(
+        out_zero_shed2.refused.is_some(),
+        "first-time client second request shed under load"
+    );
+
+    // In window 1 (NOW + 10s): quota is free (0/1 used).
+    // Client has 0 admitted requests. Under min_retries = 1 floor, max_retries = 1.
+    let out_zero_retry = sup.retry(&intent_zero_shed1, NOW + 10, &bounds);
+    assert!(
+        out_zero_retry.receipt.is_some(),
+        "first-time client with 0 admitted requests MUST be admitted on retry when quota is free (e1 fix)"
+    );
+
+    // Second retry in same window exhausts the 1 floor token:
+    let out_zero_retry2 = sup.retry(&intent_zero_shed2, NOW + 10, &bounds);
+    assert_eq!(
+        out_zero_retry2.refused.as_deref(),
+        Some("client:retry-budget-exhausted"),
+        "second retry for first-time client in same window is rejected by budget"
+    );
+}
+
+#[test]
 fn test_gate3_light_client_retry_floor_admitted_when_quota_free() {
     // Repro e1 (PR #465 O1):
-    // Honest first-time client (0 admitted requests) or light client (< 10 admitted requests)
-    // gets a floor of 1 retry token per tumbling window.
+    // Honest light client (< 10 admitted requests) gets a floor of 1 retry token per tumbling window.
     // When server capacity is free, the retry MUST be admitted (not starved with client:retry-budget-exhausted).
     let state = tmp("light-client-floor-e1");
     let mut sup = make_sup(&state);
@@ -1664,4 +1721,124 @@ fn test_gate3_tumbling_window_decays_correctly() {
     assert_eq!(budget.retries_attempted, 0);
     // Client still has floor of 1 retry token for the new window
     assert_eq!(budget.max_retries(), 1);
+}
+
+#[test]
+fn test_gate3_shed_tracker_ttl_exceeds_backoff_cap_f1() {
+    // Repro f1 (PR #465 O2):
+    // DEFAULT_TTL_MS is 30_000 ms (30s), exceeding the backoff cap of 10s + jitter.
+    // When a client's retry budget is exhausted (1,1), re-sending shed work at +9s, +10s, +11s
+    // MUST NOT turn into a fresh request; it remains recognized as a retry and is refused.
+    // After TTL (> 30s), the shed tracker entry expires, allowing identical recurring payments.
+    let state = tmp("ttl-exceeds-cap-f1");
+    let mut sup = make_sup(&state);
+    let bounds = Bounds::default();
+
+    // Cross-DAO quota 1 in window 0, quota 10 in future windows
+    sup.set_load_shed(CrossDaoAdmissionControl::new(100, 1));
+
+    let seed = [0x77u8; 32];
+    // Fill quota with request 1
+    let fill = make_cross_dao_intent_with_seed(&seed, 40_001);
+    assert!(sup.run(&fill, NOW, false, &bounds).receipt.is_some());
+
+    // Request 2 is shed under load at NOW
+    let shed_work = make_cross_dao_intent_with_work(&seed, 40_002, 500, vec![9, 9, 9]);
+    assert_eq!(
+        sup.run(&shed_work, NOW, false, &bounds).refused.as_deref(),
+        Some("admission:shed-load — cross-dao quota exhausted")
+    );
+
+    // In window 1 (NOW + 10s): quota is free (quota 10).
+    // Client retries shed_work via retry() -> consumes its 1 floor retry token and is admitted.
+    let out_retry = sup.retry(&shed_work, NOW + 10, &bounds);
+    assert!(
+        out_retry.receipt.is_some(),
+        "retry admitted under floor token"
+    );
+
+    // Client sends an unadmitted shed request 3 at NOW + 10s
+    let shed_work3 = make_cross_dao_intent_with_work(&seed, 40_003, 501, vec![8, 8, 8]);
+    // Force quota full so shed_work3 is shed
+    sup.set_load_shed(CrossDaoAdmissionControl::new(100, 0));
+    assert!(sup
+        .run(&shed_work3, NOW + 10, false, &bounds)
+        .refused
+        .is_some());
+
+    // Restore free quota (10) for subsequent tests
+    sup.set_load_shed(CrossDaoAdmissionControl::new(100, 10));
+
+    // Client's retry budget is now exhausted (1 retry already spent in this window).
+    // An uncooperative re-send of shed_work3 via run() at NOW + 11s, NOW + 15s, NOW + 20s
+    // (within 30s TTL) MUST stay classified as a retry and be refused with client:retry-budget-exhausted!
+    let out_at_11 = sup.run(&shed_work3, NOW + 11, false, &bounds);
+    assert_eq!(
+        out_at_11.refused.as_deref(),
+        Some("client:retry-budget-exhausted"),
+        "re-send at +11s (within 30s TTL) must be recognized as retry and refused by budget"
+    );
+
+    let out_at_20 = sup.run(&shed_work3, NOW + 15, false, &bounds);
+    assert_eq!(
+        out_at_20.refused.as_deref(),
+        Some("client:retry-budget-exhausted"),
+        "re-send at +15s (within 30s TTL) must be recognized as retry and refused by budget"
+    );
+
+    // At NOW + 45s (> 30s TTL): shed tracker entry has expired!
+    // A fresh re-send with updated expiry is admitted as fresh work.
+    let fresh_work = make_cross_dao_intent_with_work_and_expiry(
+        &seed,
+        40_004,
+        501,
+        vec![8, 8, 8],
+        NOW + 45 + 600,
+    );
+    let out_after_ttl = sup.run(&fresh_work, NOW + 45, false, &bounds);
+    assert!(
+        out_after_ttl.receipt.is_some(),
+        "re-send after 30s TTL is admitted as fresh work"
+    );
+}
+
+#[test]
+fn test_gate3_eviction_tombstone_prevents_refill_f3() {
+    // Repro f3 (PR #465 O3):
+    // Verify that an attacker cannot refill an exhausted client retry floor
+    // by inserting 2048 fresh verified authorities to evict the victim.
+    let mut budgets = BoundedClientBudgets::new(2048);
+
+    let victim_auth = [0xAA; 32];
+    // Client starts with floor 1, and spends its retry token (retries_attempted = 1)
+    let budget = budgets.entry_or_insert_with(victim_auth, || ClientRetryBudget::new(0, 10));
+    assert!(budget.try_acquire_at(1_000));
+    assert_eq!(budget.retries_attempted, 1);
+    assert!(
+        !budget.try_acquire_at(1_000),
+        "budget is exhausted (1 of 1 spent)"
+    );
+
+    // Insert 2048 fresh verified authorities: victim is evicted from active LRU map
+    for i in 0..2048usize {
+        let mut auth = [0u8; 32];
+        auth[0..8].copy_from_slice(&(i as u64 + 1).to_le_bytes());
+        budgets.entry_or_insert_with(auth, || ClientRetryBudget::new(0, 10));
+    }
+
+    // Victim is evicted from active map
+    assert!(!budgets.contains_key(&victim_auth));
+
+    // Victim re-enters in the SAME tumbling window (t = 2_000 ms, within 10s window):
+    // Eviction tombstone restores spent retry count!
+    let victim_restored =
+        budgets.entry_or_insert_with(victim_auth, || ClientRetryBudget::new(0, 10));
+    assert_eq!(
+        victim_restored.retries_attempted, 1,
+        "evicted victim's spent retries must be preserved across eviction"
+    );
+    assert!(
+        !victim_restored.try_acquire_at(2_000),
+        "eviction MUST NOT refill the retry floor within the same tumbling window (f3 fix)"
+    );
 }

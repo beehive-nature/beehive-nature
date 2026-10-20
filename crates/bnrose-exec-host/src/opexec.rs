@@ -751,7 +751,8 @@ impl Supervisor {
             };
         }
 
-        // 4. Client-side retry fail-fast: check client retry budget before sending over wire (PR #465, O4)
+        // 4. API-level entrypoint retry budget check (fast-path refusal before worker admission & execution)
+        // (For cooperative callers using Supervisor::retry API; uncooperative wire sends hit run_inner backstop)
         let now_ms = clock * 1000;
         if !self.try_acquire_client_retry(&intent.authority, now_ms) {
             return RunOutcome {
@@ -980,15 +981,25 @@ impl Supervisor {
         let is_local = domain_str == self.local_domain && !self.local_domain.is_empty();
         let now_ms = clock * 1000;
         let nonce_key = (intent.authority, decoded.nonce);
-        let work_fp = intent_work_fingerprint(&decoded);
-        let intent_key = (intent.authority, work_fp);
-        let is_retry = allow_retry
-            || self.shed_nonces.contains_nonce_at(&nonce_key, now_ms)
-            || self.shed_nonces.contains_intent_at(&intent_key, now_ms);
+
+        // Fast-path: local priority requests are never shed by cross-DAO admission control,
+        // so avoid hashing the semantic work fingerprint and probing shed nonces for local traffic.
+        let (is_retry, intent_key) = if allow_retry {
+            let work_fp = intent_work_fingerprint(&decoded);
+            (true, Some((intent.authority, work_fp)))
+        } else if is_local {
+            (false, None)
+        } else {
+            let work_fp = intent_work_fingerprint(&decoded);
+            let ikey = (intent.authority, work_fp);
+            let retry = self.shed_nonces.contains_nonce_at(&nonce_key, now_ms)
+                || self.shed_nonces.contains_intent_at(&ikey, now_ms);
+            (retry, Some(ikey))
+        };
 
         // Server-side backstop (PR #465 O1, O2, O4):
         // If an inbound request is identified as a retry, enforce the client retry budget.
-        // If allow_retry is true, retry() already acquired a token on the client side;
+        // If allow_retry is true, retry() already acquired a token at the API entrypoint;
         // if allow_retry is false (e.g. client retrying through run()), acquire here on the server.
         if is_retry && !allow_retry {
             if !self.try_acquire_client_retry(&intent.authority, now_ms) {
@@ -1003,14 +1014,18 @@ impl Supervisor {
             .load_shed
             .admit_request(is_local, is_retry, &intent.authority, now_ms)
         {
-            self.shed_nonces.insert_at(nonce_key, intent_key, now_ms);
+            if let Some(ikey) = intent_key {
+                self.shed_nonces.insert_at(nonce_key, ikey, now_ms);
+            }
             return RunOutcome {
                 refused: Some(e.into()),
                 ..none
             };
         }
 
-        self.shed_nonces.remove(&nonce_key, &intent_key);
+        if let Some(ikey) = intent_key {
+            self.shed_nonces.remove(&nonce_key, &ikey);
+        }
         let outcome = self.run_inner_admitted(
             intent,
             clock,

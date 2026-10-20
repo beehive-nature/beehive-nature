@@ -210,7 +210,7 @@ pub struct BoundedShedTracker {
 
 impl BoundedShedTracker {
     pub const DEFAULT_MAX: usize = 2048;
-    pub const DEFAULT_TTL_MS: u64 = 10_000; // 10s TTL: retries under backoff match, but recurring payments later are fresh work (PR #465, O2)
+    pub const DEFAULT_TTL_MS: u64 = 30_000; // 30s TTL: exceeds maximum backoff (10s) + jitter (10s) (PR #465, O2)
 
     pub fn new(max_entries: usize) -> Self {
         Self {
@@ -434,6 +434,15 @@ struct BudgetNode {
     next: usize,
 }
 
+/// Tombstone tracking spent retries across LRU evictions within a tumbling window (PR #465, O3).
+/// Prevents uncooperative clients from refilling their retry floor by triggering 2048 evictions.
+#[derive(Debug, Clone, Copy)]
+pub struct EvictedBudgetTombstone {
+    pub window_start_ms: u64,
+    pub retries_attempted: usize,
+    pub initial_requests: usize,
+}
+
 /// Bounded true LRU map for verified client retry budgets (PR #465, O3).
 /// Max capacity bounded at 2048 entries to prevent unbounded memory growth.
 /// Implemented as an O(1) index-based doubly-linked list with HashMap index lookup.
@@ -446,6 +455,8 @@ pub struct BoundedClientBudgets {
     free_list: Vec<usize>,
     head: usize, // least recently used (oldest)
     tail: usize, // most recently used (newest)
+    tombstones: std::collections::HashMap<[u8; 32], EvictedBudgetTombstone>,
+    tombstone_queue: std::collections::VecDeque<[u8; 32]>,
 }
 
 impl BoundedClientBudgets {
@@ -459,6 +470,8 @@ impl BoundedClientBudgets {
             free_list: Vec::new(),
             head: usize::MAX,
             tail: usize::MAX,
+            tombstones: std::collections::HashMap::with_capacity(max_entries),
+            tombstone_queue: std::collections::VecDeque::with_capacity(max_entries),
         }
     }
 
@@ -533,11 +546,44 @@ impl BoundedClientBudgets {
                 if oldest == usize::MAX {
                     break;
                 }
-                let oldest_auth = self.nodes[oldest].as_ref().unwrap().authority;
+                let oldest_node = self.nodes[oldest].as_ref().unwrap();
+                let oldest_auth = oldest_node.authority;
+                let oldest_budget = oldest_node.budget;
+
+                // Carry over spent-retry state into bounded tombstones (PR #465, O3)
+                // Prevents an attacker from refilling exhausted retry budgets by evicting entries.
+                if oldest_budget.retries_attempted > 0 {
+                    while self.tombstone_queue.len() >= self.max_entries {
+                        if let Some(oldest_ts_auth) = self.tombstone_queue.pop_front() {
+                            self.tombstones.remove(&oldest_ts_auth);
+                        }
+                    }
+                    self.tombstones.insert(
+                        oldest_auth,
+                        EvictedBudgetTombstone {
+                            window_start_ms: oldest_budget.window_start_ms,
+                            retries_attempted: oldest_budget.retries_attempted,
+                            initial_requests: oldest_budget.initial_requests,
+                        },
+                    );
+                    self.tombstone_queue.push_back(oldest_auth);
+                }
+
                 self.detach(oldest);
                 self.map.remove(&oldest_auth);
                 self.nodes[oldest] = None;
                 self.free_list.push(oldest);
+            }
+
+            let mut budget = budget;
+            if let Some(&ts) = self.tombstones.get(&authority) {
+                // If the client's tombstone is from the active tumbling window, preserve spent retries
+                if budget.window_start_ms == 0 || budget.window_start_ms == ts.window_start_ms {
+                    budget.window_start_ms = ts.window_start_ms;
+                    budget.window_initialized = true;
+                    budget.retries_attempted = ts.retries_attempted;
+                    budget.initial_requests = ts.initial_requests;
+                }
             }
 
             let idx = if let Some(free_idx) = self.free_list.pop() {

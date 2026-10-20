@@ -678,3 +678,43 @@ Receipts:
 - `node scripts/estate-check.mjs`: PASS (112 counted, 121 listed)
 - `cargo test -p bnrose-exec-core -p bnrose-exec-wasm -p bnrose-exec-host`: 20/20 gate3 tests + all workspace test suites PASS
 - `cargo test -p bnrose-exec-host --test gate1_flat_admit --test gate2_device_capacity --test gate4_quantum_retry`: 23/23 tests PASS
+
+
+## 14. PR #465 Review Remediation (Commit 6f6aa8fa Follow-Up: O1–O5 & Repros e1, f1, f3)
+
+Following Grok's review on `6f6aa8fa` (`issuecomment-6282303462`), all remaining retry correctness and measurement items have been addressed:
+
+1. **Wire vs. Admitted Retry Amplification Split (O1):**
+   - **Problem:** Scenario 2 in `gate3_load_shed.rs` asserted `wire == 180`, but checked admitted `R_amp <= 1.15` and claimed "all 4 R_amp scenarios strictly <= 1.15". For uncooperative clients that ignore client-side retry limits, wire traffic is $1.90\times$ ($180 / 200 = 1.90$). Conflating wire sends with admitted retries masked uncooperative wire volume.
+   - **Fix:** Explicitly split and asserted wire send amplification versus server admitted amplification:
+     - Cooperative API entrypoint fail-fast (Scenarios 1, 3, 4): $R_{\text{amp, wire}} = 1.100 \le 1.15$ (wire traffic strictly bounded).
+     - Uncooperative re-sends (Scenario 2): $R_{\text{amp, wire}} = 1.900$ (wire traffic sent by uncooperative client), while server-side worker admission strictly maintains $R_{\text{amp, admit}} = 1.100 \le 1.15$ (refusing 160 excess retries).
+     - Test assertion and summary printouts now report both metrics explicitly and honestly.
+
+2. **TTL Exceeds Max Backoff Cap (O2 / repro f1):**
+   - **Problem:** `DEFAULT_TTL_MS` was 10,000 ms (10s), which exactly matched `cap_ms = 10_000`. A client whose retry budget was exhausted re-sending shed work at $t \ge 10\text{s}$ had its shed entry expire at the cap, causing the re-send to be misclassified as fresh work and admitted.
+   - **Fix:** Increased `DEFAULT_TTL_MS` to 30,000 ms (30s = 3x backoff cap of 10s), providing ample margin for maximum exponential backoff plus full jitter. Re-sends within backoff stay recognized as retries and are refused when budget is exhausted. Identical payments sent $> 30\text{s}$ later expire as expected.
+   - **Verification:** Added `test_gate3_shed_tracker_ttl_exceeds_backoff_cap_f1` (repro `f1`).
+
+3. **Eviction Tombstones Prevent Retry Floor Refill (O3 / repro f3):**
+   - **Problem:** A client with exhausted retry floor (1, 1) evicted from `BoundedClientBudgets` after 2,048 new authority insertions had its floor refilled upon re-insertion within the same tumbling window.
+   - **Fix:** Added `EvictedBudgetTombstone` and a bounded FIFO tombstone queue (`tombstones`, `tombstone_queue` capped at `max_entries = 2048`) to `BoundedClientBudgets`. When an entry with spent retries (`retries_attempted > 0`) is evicted from the active LRU map, its spent count and window anchor are recorded in the tombstone buffer. Re-insertion within the active tumbling window restores the spent retry count, preventing budget refill through eviction churn.
+   - **Verification:** Added `test_gate3_eviction_tombstone_prevents_refill_f3` (repro `f3`).
+
+4. **API-Level Retry Entrypoint Nomenclature (O4):**
+   - **Problem:** Comments in `Supervisor::retry` described the check as "client-side", even though executed by the host supervisor.
+   - **Fix:** Updated nomenclature to "API-level entrypoint retry budget check (fast-path refusal before worker admission & execution)". Preserved cooperative API-level refusal (`Supervisor::retry`) while maintaining the server-side worker backstop in `run_inner`.
+
+5. **Local Priority Fast-Path Optimization (O5):**
+   - **Problem:** Hashing work fingerprints (`intent_work_fingerprint`) and probing shed nonces for local requests added microsecond overhead on high-throughput bursts.
+   - **Fix:** In `Supervisor::run_inner`, prioritized local requests (`is_local == true`) bypass SHA-256 work fingerprint hashing and shed tracker lookups, as local requests are never cross-DAO shed.
+
+6. **Dedicated First-Time Client Test (e1):**
+   - Added `test_gate3_first_time_client_zero_admitted_retry_floor` verifying that an honest first-time client with 0 admitted requests receives 1 retry floor token in the next tumbling window when capacity is free.
+
+Verification Receipts:
+- `cargo fmt --all --check`: CLEAN (0 diffs)
+- `node scripts/build-stack-inventory.mjs --check`: mode: checked (GREEN)
+- `node scripts/estate-check.mjs`: PASS (112 counted, 121 listed)
+- `cargo test -p bnrose-exec-core -p bnrose-exec-wasm -p bnrose-exec-host`: all 23 gate3 tests + full workspace test suite PASS
+- `cargo test --release -p bnrose-exec-host --test gate1_flat_admit --test gate2_device_capacity --test gate4_quantum_retry`: 23/23 tests PASS
