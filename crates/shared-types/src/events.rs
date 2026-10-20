@@ -33,6 +33,11 @@ pub enum SourceChain {
     /// identify a single log. Gas on exSat is BTC; `b` is never gas, and no
     /// `b` accounting rides this variant.
     ExSatEvm,
+    /// Harness-sovereign demo seam (additive): lifecycle events observed
+    /// by the harness itself (status heartbeats, signed checkpoints), not
+    /// by any chain adapter. `source_ref` convention:
+    /// `harness:<session_id>:<phase-or-state>`.
+    Harness,
 }
 
 /// The envelope every consumer reads. `payload` carries the family-specific
@@ -119,6 +124,13 @@ pub enum EventType {
     BnriDrawCommitted,
     /// A draw commitment was opened (reveal phase).
     BnriDrawRevealed,
+    // --- harness-sovereign demo seam (additive) ---
+    /// A harness agent published a status heartbeat.
+    /// `canonicalized_by`: `"harness-sovereign"`.
+    AgentStatus,
+    /// A harness agent published a signed checkpoint (pre-switch,
+    /// post-switch, fatal). `canonicalized_by`: `"harness-sovereign"`.
+    AgentCheckpoint,
 }
 
 /// Family-specific payload data, adjacently tagged for clean JSON
@@ -139,6 +151,10 @@ pub enum EventPayload {
     /// Reputation model private-commerce settlement, and a BNRi log is none of
     /// those. Reusing one of them would make the payload lie about what it is.
     Bnri(BnriEvent),
+    /// Harness agent lifecycle (status heartbeats, signed checkpoints).
+    /// Its own family for the same reason: an agent checkpoint is none of
+    /// the commerce families above.
+    Agent(AgentEvent),
 }
 
 /// A decoded BNRi contract log from the exSat EVM (C-1).
@@ -256,11 +272,39 @@ pub struct ReputationEvent {
     pub basis_ref: Option<String>,
 }
 
+/// Harness agent lifecycle family (`AgentStatus` / `AgentCheckpoint`).
+///
+/// Demo-scoped (`harness-sovereign` hackathon harness): status heartbeats
+/// and signed checkpoints published onto the bus. One struct for the whole
+/// lifecycle; stage-specific fields are optional (the `OrderEvent`
+/// precedent). Additive — never rename or remove.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct AgentEvent {
+    pub agent_did: String,
+    pub session_id: String,
+    #[serde(default)]
+    pub task_id: Option<String>,
+    #[serde(default)]
+    pub turn: Option<u64>,
+    #[serde(default)]
+    pub backend: Option<String>,
+    #[serde(default)]
+    pub state: Option<String>,
+    #[serde(default)]
+    pub phase: Option<String>,
+    #[serde(default)]
+    pub transcript_sha256: Option<String>,
+    #[serde(default)]
+    pub turn_count: Option<u64>,
+    #[serde(default)]
+    pub signature_b64u: Option<String>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    const ALL_EVENT_TYPES: [EventType; 21] = [
+    const ALL_EVENT_TYPES: [EventType; 23] = [
         EventType::ProductListed,
         EventType::ProductUpdated,
         EventType::ProductDelisted,
@@ -283,6 +327,9 @@ mod tests {
         EventType::CircleConcluded,
         EventType::EmissionMinted,
         EventType::AgentPublicationLogged,
+        // harness-sovereign demo seam variants
+        EventType::AgentStatus,
+        EventType::AgentCheckpoint,
     ];
 
     #[test]
@@ -347,6 +394,18 @@ mod tests {
                 subject_did: "did:plc:seller".into(),
                 score_delta: 5,
                 basis_ref: Some("order-1".into()),
+            }),
+            EventPayload::Agent(AgentEvent {
+                agent_did: "did:b:agent".into(),
+                session_id: "sess-1".into(),
+                task_id: Some("T-001".into()),
+                turn: Some(3),
+                backend: Some("spark-primary".into()),
+                state: Some("responded".into()),
+                phase: None,
+                transcript_sha256: None,
+                turn_count: None,
+                signature_b64u: None,
             }),
         ]
     }
