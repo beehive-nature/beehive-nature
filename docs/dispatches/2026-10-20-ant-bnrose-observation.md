@@ -10,7 +10,7 @@ The new `tools/ant-bnrose/` experiment invokes the existing Rust
 Autonomi SDK download and independent expected-content hash verification.
 It grants no routing, execution, wallet, payment or DAO authority.
 
-## Follow-up: isolate and reduce local observation cost
+## Follow-up result: local cost reduced; live slowdown remains variable
 
 PR #478's initial `BNROSE-RUST-001` run
 [`39463132586`](https://github.com/beehive-nature/beehive-nature/actions/runs/39463132586)
@@ -31,10 +31,91 @@ total measured observation time by **62.53–63.30%** relative to the parent
 implementation. Whole local verified-read blocks improved **19.57–20.94%**
 (median paired block change per trial). All reads still performed full SHA-256
 verification and every shadow completion reached the real Rust admission core.
-These are local component measurements; the new live WAN matrix is a separate
-measurement and must not inherit this speedup claim.
+This isolates the JavaScript adapter's allocations; the Rust kernel is not
+changed. The median block-averaged observation cost fell from 40.0–43.0
+microseconds to 14.8–16.8 microseconds. Optimized whole local reads still cost
+112.4–117.0 microseconds versus baseline's 96.2–98.0 microseconds (medians of
+block means). Loopback HTTP/CDP serves and measures this experiment; it does
+not invoke the ANT SDK or contact storage peers.
 
-## Final repository-pin result
+The three full component receipts, all measured blocks and analysis are in
+[`comparison-template-cost.json`](../receipts/ant-bnrose-2026-10-20/comparison-template-cost.json)
+and `template-cost-r{1,2,3}.json`. The parent observer is extracted byte-for-byte
+from `1f351dcde2e4151495838cd4953c82f2f5338ddc`; its digest is checked
+alongside the unchanged Rust 1.98.1 kernel and SDK. No warmup is presented as
+a measured sample, and no failed or slow block was removed.
+
+The live network driver is **`18d0e70210499b894d9e7804c7bf87111b64b614`**.
+All 62 selected input files matched their Git blobs at the start check and
+after the run. It used the same NixOS host, pinned runtime, original matrix,
+fixtures, timeouts, serial ordering and withdrawal behavior as the prior pass.
+The 24 trials ran **17:30:05–17:43:54 UTC** on October 20:
+
+- **150 verified completed reads**, 30 deliberately cancelled reads,
+  **zero unexpected failures**; all 24 trials complete.
+- **75/75** successful shadow completions observed, no refusals or errors.
+- **12/12** active in-flight withdrawals and **12/12** complete authenticated
+  network recoveries.
+- **60/60** normal phases verified with received bytes and a selected direct
+  UDP path; no relay candidate among 1,860 repeated path observations.
+
+| Concurrent reads | Condition | Prior paired median | New paired median | New individual-pair range |
+| --- | --- | ---: | ---: | ---: |
+| 1 | steady | +1.61% | **+3.04%** | -6.08% to +11.96% |
+| 1 | withdrawal/reconnect | +21.48% | **+19.77%** | -5.86% to +20.66% |
+| 4 | steady | +14.88% | **+0.66%** | -2.99% to +15.00% |
+| 4 | withdrawal/reconnect | +15.67% | **+1.06%** | -5.15% to +2.41% |
+
+Positive means slower with shadow; each cell has three pairs. The two passes
+ran in different time windows, so the lower high-load differences cannot be
+causally attributed to the allocation change. The single-read steady median
+worsened and single-read churn still shows a substantial slowdown. There is
+**no demonstrated overall live delivery speedup**.
+
+![New individual pairs and medians](../receipts/ant-bnrose-2026-10-20/paired-template.png)
+
+In the live pass the observer took median **0.100 ms**, p95 **1.400 ms**,
+maximum **3.700 ms**, total **25.100 ms** across 75 completions. The prior
+figures were 0.200 / 1.700 / 2.600 / 32.400 ms. This retains the worse new
+maximum; the controlled local experiment is the stronger allocation-cost
+comparison. Median wrapper preparation remained 0.350 ms.
+
+The measured time decomposition locates the remaining difference:
+
+| Sum across all 12 paired trials | Prior pass | New pass |
+| --- | ---: | ---: |
+| Shadow minus baseline normal read-batch time | +37,341.0 ms | +14,248.4 ms |
+| Difference in slowest SDK read per normal phase | +37,325.9 ms | +14,238.2 ms |
+| Remaining difference outside that SDK interval | +15.1 ms | +10.2 ms |
+
+The SDK interval includes authenticated discovery, reads and scheduling;
+the residual includes launch skew, full-file verification, observation and
+other JavaScript. This is a location of measured time, not proof of a remote
+network cause. The current observer cannot directly change SDK routing or
+request counts. Actual work still varies: baseline/shadow received
+247,777,374 / 263,430,499 DataChannel bytes, created 1,130 / 1,138 connection
+instances and consumed 114.209 / 116.859 aggregate sandbox CPU seconds.
+Each arm delivered the same 16,552,230 verified plaintext bytes.
+
+All 27 new raw browser receipts (24 network, three local), sandbox logs,
+source manifest, before/after provenance, comparison, time decomposition,
+and original/stored digests are committed under
+`docs/receipts/ant-bnrose-2026-10-20/`. All original pretty-printed JSON bytes
+reconstruct exactly from the compact committed files. The live comparison is
+[`comparison-template.json`](../receipts/ant-bnrose-2026-10-20/comparison-template.json);
+the old/new time decompositions are `diagnosis-before-template.json` and
+`diagnosis-template.json`.
+
+At 17:44:33 UTC production x0x remained active, health HTTP 200,
+`NRestarts=0`, with its unchanged October 17 start time. No benchmark unit
+remained active. There was no production restart, deployment, new public
+listener, firewall change, dependency change, cryptographic bypass, authority
+delegation or DAO mutation. No further native Rust rebuild was necessary for
+this JavaScript-only optimization; the prior native tests and exact binary
+digest are retained, and the new nine-test suite ran against that binary
+on NixOS. Hosted CI for the updated PR revision is reported separately.
+
+## Earlier repository-pin result, before allocation reduction
 
 The final network driver was
 `5676033ba5480057c88be2e733e8129dd1b1220b`, with

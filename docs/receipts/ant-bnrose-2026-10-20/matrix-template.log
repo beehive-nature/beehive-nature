@@ -1,0 +1,51 @@
+Started [systemd-run] /run/current-system/sw/bin/bash /var/lib/private/bnrose-ant-validation/source/tools/ant-bnrose/run-matrix.sh matrix18d0e7021.
+2026-10-20T17:30:05Z START matrix18d0e7021-r1-baseline-1-steady
+2026-10-20T17:30:43Z END matrix18d0e7021-r1-baseline-1-steady exit=0
+2026-10-20T17:30:43Z START matrix18d0e7021-r1-shadow-1-steady
+2026-10-20T17:31:18Z END matrix18d0e7021-r1-shadow-1-steady exit=0
+2026-10-20T17:31:18Z START matrix18d0e7021-r1-baseline-1-churn
+2026-10-20T17:31:45Z END matrix18d0e7021-r1-baseline-1-churn exit=0
+2026-10-20T17:31:45Z START matrix18d0e7021-r1-shadow-1-churn
+2026-10-20T17:32:17Z END matrix18d0e7021-r1-shadow-1-churn exit=0
+2026-10-20T17:32:17Z START matrix18d0e7021-r1-baseline-4-steady
+2026-10-20T17:32:55Z END matrix18d0e7021-r1-baseline-4-steady exit=0
+2026-10-20T17:32:55Z START matrix18d0e7021-r1-shadow-4-steady
+2026-10-20T17:33:31Z END matrix18d0e7021-r1-shadow-4-steady exit=0
+2026-10-20T17:33:31Z START matrix18d0e7021-r1-baseline-4-churn
+2026-10-20T17:34:08Z END matrix18d0e7021-r1-baseline-4-churn exit=0
+2026-10-20T17:34:08Z START matrix18d0e7021-r1-shadow-4-churn
+2026-10-20T17:34:46Z END matrix18d0e7021-r1-shadow-4-churn exit=0
+2026-10-20T17:34:46Z START matrix18d0e7021-r2-shadow-1-steady
+2026-10-20T17:35:20Z END matrix18d0e7021-r2-shadow-1-steady exit=0
+2026-10-20T17:35:20Z START matrix18d0e7021-r2-baseline-1-steady
+2026-10-20T17:35:51Z END matrix18d0e7021-r2-baseline-1-steady exit=0
+2026-10-20T17:35:51Z START matrix18d0e7021-r2-shadow-1-churn
+2026-10-20T17:36:24Z END matrix18d0e7021-r2-shadow-1-churn exit=0
+2026-10-20T17:36:24Z START matrix18d0e7021-r2-baseline-1-churn
+2026-10-20T17:36:59Z END matrix18d0e7021-r2-baseline-1-churn exit=0
+2026-10-20T17:36:59Z START matrix18d0e7021-r2-shadow-4-steady
+2026-10-20T17:37:38Z END matrix18d0e7021-r2-shadow-4-steady exit=0
+2026-10-20T17:37:38Z START matrix18d0e7021-r2-baseline-4-steady
+2026-10-20T17:38:13Z END matrix18d0e7021-r2-baseline-4-steady exit=0
+2026-10-20T17:38:13Z START matrix18d0e7021-r2-shadow-4-churn
+2026-10-20T17:38:43Z END matrix18d0e7021-r2-shadow-4-churn exit=0
+2026-10-20T17:38:43Z START matrix18d0e7021-r2-baseline-4-churn
+2026-10-20T17:39:14Z END matrix18d0e7021-r2-baseline-4-churn exit=0
+2026-10-20T17:39:14Z START matrix18d0e7021-r3-baseline-1-steady
+2026-10-20T17:39:46Z END matrix18d0e7021-r3-baseline-1-steady exit=0
+2026-10-20T17:39:46Z START matrix18d0e7021-r3-shadow-1-steady
+2026-10-20T17:40:19Z END matrix18d0e7021-r3-shadow-1-steady exit=0
+2026-10-20T17:40:19Z START matrix18d0e7021-r3-baseline-1-churn
+2026-10-20T17:40:47Z END matrix18d0e7021-r3-baseline-1-churn exit=0
+2026-10-20T17:40:47Z START matrix18d0e7021-r3-shadow-1-churn
+2026-10-20T17:41:20Z END matrix18d0e7021-r3-shadow-1-churn exit=0
+2026-10-20T17:41:20Z START matrix18d0e7021-r3-baseline-4-steady
+2026-10-20T17:42:07Z END matrix18d0e7021-r3-baseline-4-steady exit=0
+2026-10-20T17:42:07Z START matrix18d0e7021-r3-shadow-4-steady
+2026-10-20T17:42:54Z END matrix18d0e7021-r3-shadow-4-steady exit=0
+2026-10-20T17:42:54Z START matrix18d0e7021-r3-baseline-4-churn
+2026-10-20T17:43:24Z END matrix18d0e7021-r3-baseline-4-churn exit=0
+2026-10-20T17:43:24Z START matrix18d0e7021-r3-shadow-4-churn
+2026-10-20T17:43:54Z END matrix18d0e7021-r3-shadow-4-churn exit=0
+Launcher failures: 0
+bnrose-ant-matrix-matrix18d0e7021.service: Deactivated successfully.
