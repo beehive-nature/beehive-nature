@@ -37,8 +37,8 @@ use std::path::{Path, PathBuf};
 use serde_json::{json, Map, Value};
 use sha2::{Digest, Sha256};
 
-pub const SCHEMA_STATE: &str = "skaists.genealogy-publication-state/1";
-pub const SCHEMA_INDEX: &str = "skaists.genealogy-publication-index/1";
+pub const SCHEMA_STATE: &str = "skaists.genealogy-publication-state/2";
+pub const SCHEMA_INDEX: &str = "skaists.genealogy-publication-index/2";
 pub const TOOL: &str = env!("CARGO_PKG_NAME");
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -315,10 +315,32 @@ pub fn bind(root: &Path) -> Result<BindOutcome, String> {
     }
     pages.sort_by(|a, b| a["id"].as_str().cmp(&b["id"].as_str()));
 
+    // Issue #477: the INDEX is bound BY THE STATE, never by itself. Build the
+    // index first (it carries no self-claim — the old stateSha256 field is
+    // gone, it was a claim anyone could copy), then seal its digest inside
+    // the state. Acyclic chain: pin -> state bytes -> state.indexSha256 ->
+    // index bytes -> per-person page digests. Metadata shown beside VERIFIED
+    // is authenticated transitively by the same pinned root.
+    let index = json!({
+        "schema": SCHEMA_INDEX,
+        "tool": {"name": TOOL, "version": VERSION},
+        "hexLawNote": "PUBLIC-CONSTANT machine-generated sha256 content digests of public artifacts",
+        "rootPerson": roster.get("root").cloned().unwrap_or(Value::Null),
+        "counts": {
+            "persons": persons.len(),
+            "fsRefsTotal": fs_refs_total,
+            "recordArksTotal": record_arks_total,
+        },
+        "persons": index_persons,
+    });
+    let index_json = serde_json::to_string(&index).map_err(|e| e.to_string())? + "\n";
+    let index_sha = sha256_hex(index_json.as_bytes());
+
     let state = json!({
         "schema": SCHEMA_STATE,
         "tool": {"name": TOOL, "version": VERSION},
         "hexLawNote": "PUBLIC-CONSTANT machine-generated sha256 content digests of public artifacts",
+        "indexSha256": index_sha,
         "corpus": corpus,
         "census": {
             "persons": persons.len(),
@@ -329,22 +351,6 @@ pub fn bind(root: &Path) -> Result<BindOutcome, String> {
         "pages": pages,
     });
     let state_json = serde_json::to_string(&state).map_err(|e| e.to_string())? + "\n";
-    let state_sha = sha256_hex(state_json.as_bytes());
-
-    let index = json!({
-        "schema": SCHEMA_INDEX,
-        "tool": {"name": TOOL, "version": VERSION},
-        "hexLawNote": "PUBLIC-CONSTANT machine-generated sha256 content digests of public artifacts",
-        "stateSha256": state_sha,
-        "rootPerson": roster.get("root").cloned().unwrap_or(Value::Null),
-        "counts": {
-            "persons": persons.len(),
-            "fsRefsTotal": fs_refs_total,
-            "recordArksTotal": record_arks_total,
-        },
-        "persons": index_persons,
-    });
-    let index_json = serde_json::to_string(&index).map_err(|e| e.to_string())? + "\n";
 
     Ok(BindOutcome {
         state_json,
@@ -501,15 +507,10 @@ pub fn check(root: &Path, max_named: usize) -> Result<CheckReport, String> {
 
     if let Ok(disk_index) = fs::read_to_string(&index_file) {
         if disk_index != derived.index_json {
-            let want = serde_json::from_str::<Value>(&derived.index_json)
-                .map_err(|e| e.to_string())?
-                .get("stateSha256")
-                .and_then(Value::as_str)
-                .unwrap_or("?")
-                .to_string();
-            report.red(format!(
-                "index file stale or tampered (re-derivation stateSha256 {want}); run `gp bind`"
-            ));
+            report.red(
+                "index file stale or tampered (the pinned state binds a different index); run `gp bind`"
+                    .to_string(),
+            );
         }
     }
 
@@ -543,13 +544,29 @@ impl Default for ResolveOptions<'_> {
 }
 
 /// Resolution record for one person — FAIL CLOSED. Verifies, in order:
-/// the pinned root (if given); the index↔state binding
-/// (`index.stateSha256 == sha256(state bytes)`); state↔index agreement on
-/// the person's page digests; and the page bytes themselves against the
-/// state's digests, recomputed from disk. Only then are digests reported,
-/// as verified facts with the trust-root mode named. Locators only — this
-/// crate never fetches.
+/// the person id's shape (issue #477: ids are `[A-Za-z0-9._-]`, never a
+/// path); the pinned root (if given); that the index is BOUND BY THE STATE
+/// (`sha256(index bytes) == state.indexSha256` — the index carries no
+/// self-claim, so a substituted index with intact page digests and forged
+/// metadata refuses here); locator discipline (a person's entry points at
+/// its own pages under `persons/`, never elsewhere); state↔index agreement
+/// on the person's page digests; and the page bytes themselves against the
+/// state's digests, recomputed from disk. Only then is anything reported —
+/// metadata included, which the pin now authenticates transitively.
+/// Locators only — this crate never fetches.
 pub fn resolve(root: &Path, person: &str, opts: ResolveOptions) -> Result<String, String> {
+    // traversal guard first: the id reaches a path join, so it is a shape,
+    // never a path
+    let id_ok = !person.is_empty()
+        && !person.starts_with('.')
+        && person
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == '.');
+    if !id_ok {
+        return Err(format!(
+            "person id {person:?} rejected: ids are [A-Za-z0-9._-] and never begin with a dot"
+        ));
+    }
     let state_bytes = fs::read(state_path(root))
         .map_err(|e| format!("state file unreadable (run `gp bind`): {e}"))?;
     let state_sha = sha256_hex(&state_bytes);
@@ -560,23 +577,28 @@ pub fn resolve(root: &Path, person: &str, opts: ResolveOptions) -> Result<String
             ));
         }
     }
-
-    let index_bytes = fs::read(index_path(root))
-        .map_err(|e| format!("index file unreadable (run `gp bind`): {e}"))?;
-    let index: Value =
-        serde_json::from_slice(&index_bytes).map_err(|e| format!("index unparseable: {e}"))?;
-    let index_claim = index
-        .get("stateSha256")
-        .and_then(Value::as_str)
-        .unwrap_or("absent");
-    if !index_claim.eq_ignore_ascii_case(&state_sha) {
-        return Err(format!(
-            "index not bound to the state beside it: index claims {index_claim}, state hashes {state_sha} — tampered or stale index; run `gp check` (or --preview to inspect, untrusted)"
-        ));
-    }
-
     let state: Value =
         serde_json::from_slice(&state_bytes).map_err(|e| format!("state unparseable: {e}"))?;
+
+    // issue #477: the state binds the index by digest. A substituted index —
+    // forged names, refs, arks, relations, even with every page digest kept
+    // intact — hashes differently than the digest sealed inside the pinned
+    // state and refuses here, BEFORE any of its metadata is read.
+    let index_bytes = fs::read(index_path(root))
+        .map_err(|e| format!("index file unreadable (run `gp bind`): {e}"))?;
+    let index_sha = sha256_hex(&index_bytes);
+    let bound = state
+        .get("indexSha256")
+        .and_then(Value::as_str)
+        .unwrap_or("absent");
+    if !bound.eq_ignore_ascii_case(&index_sha) {
+        return Err(format!(
+            "index not bound by the state: the state binds {bound}, this index hashes {index_sha} — substituted or stale index; run `gp check` (or --preview to inspect, untrusted)"
+        ));
+    }
+    let index: Value =
+        serde_json::from_slice(&index_bytes).map_err(|e| format!("index unparseable: {e}"))?;
+
     let state_page = state
         .get("pages")
         .and_then(Value::as_array)
@@ -586,6 +608,18 @@ pub fn resolve(root: &Path, person: &str, opts: ResolveOptions) -> Result<String
         .get("persons")
         .and_then(|p| p.get(person))
         .ok_or_else(|| format!("person {person} not in the publication index"))?;
+
+    // locator discipline (#477, defense in depth): even a state-bound index
+    // must name this person's OWN pages — a locator pointing anywhere else
+    // refuses, so resolution targets can never escape persons/
+    let loc_html = entry.get("pageHtml").and_then(Value::as_str).unwrap_or("?");
+    let loc_json = entry.get("pageJson").and_then(Value::as_str).unwrap_or("?");
+    if loc_html != format!("persons/{person}.html") || loc_json != format!("persons/{person}.json")
+    {
+        return Err(format!(
+            "locator discipline: {person}'s entry points at {loc_html} / {loc_json} — a person's locators are their own pages under persons/"
+        ));
+    }
 
     // state ↔ index must agree on the page digests before either is believed
     let want_html = state_page["html"]["sha256"].as_str().unwrap_or("?");
@@ -692,7 +726,7 @@ pub fn resolve(root: &Path, person: &str, opts: ResolveOptions) -> Result<String
         "anchor": anchor,
         "indexSha256": sha256_hex(&index_bytes),
         "rails": RAILS.iter().map(|(rail, role)| json!({"rail": rail, "role": role})).collect::<Vec<_>>(),
-        "note": "rails are declared names, not fetch locators; verify page digests against the pinned stateSha256 after any fetch — locators only, this crate never fetches",
+        "note": "rails are declared names, not fetch locators; the pinned root authenticates state, state binds the index (indexSha256), and the index carries the page digests — verify every fetch against that chain; this crate never fetches",
     });
     Ok(serde_json::to_string_pretty(&out).map_err(|e| e.to_string())? + "\n")
 }
@@ -914,32 +948,70 @@ mod tests {
     }
 
     #[test]
-    fn resolve_tampered_index_page_hash_fails_closed() {
-        let dir = fixture_root("rx-hash");
+    fn resolve_forged_index_metadata_fails_closed() {
+        // issue #477's exact adversarial case: ONLY metadata changes (name,
+        // fsRefs, recordArks), every page digest and the state stay intact —
+        // the state-bound index digest must refuse before any of it is read
+        let dir = fixture_root("rx-meta");
         write_fixture(&dir);
         bind_and_write(&dir).unwrap();
         let ip = index_path(&dir);
         let mut idx: Value = serde_json::from_str(&fs::read_to_string(&ip).unwrap()).unwrap();
-        // attacker edits the person's page hash but leaves stateSha256 intact:
-        // the binding check passes; state↔index disagreement must catch it
-        idx["persons"]["pa"]["pageHtmlSha256"] = json!("f".repeat(64));
+        idx["persons"]["pa"]["name"] = json!("Forged von Fabrication");
+        idx["persons"]["pa"]["fsRefs"] = json!(["FAKE-999"]);
+        idx["persons"]["pa"]["recordArks"] = json!(["FAKE-ARK-1"]);
         fs::write(&ip, serde_json::to_string(&idx).unwrap()).unwrap();
         let err = resolve(&dir, "pa", ResolveOptions::default()).unwrap_err();
-        assert!(err.contains("index/state disagree"), "{err}");
+        assert!(err.contains("index not bound by the state"), "{err}");
         let _ = fs::remove_dir_all(&dir);
     }
 
     #[test]
-    fn resolve_tampered_index_state_sha_fails_closed() {
-        let dir = fixture_root("rx-sha");
+    fn resolve_wrong_index_digest_binding_fails_closed() {
+        let dir = fixture_root("rx-bind");
+        write_fixture(&dir);
+        bind_and_write(&dir).unwrap();
+        let sp = state_path(&dir);
+        let mut st: Value = serde_json::from_str(&fs::read_to_string(&sp).unwrap()).unwrap();
+        st["indexSha256"] = json!("0".repeat(64));
+        fs::write(&sp, serde_json::to_string(&st).unwrap()).unwrap();
+        let err = resolve(&dir, "pa", ResolveOptions::default()).unwrap_err();
+        assert!(err.contains("index not bound by the state"), "{err}");
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn resolve_locator_escape_refuses_even_when_state_bound() {
+        // a state that binds a MALICIOUS index (possible only without an
+        // out-of-band pin — the pin is the real trust boundary) still cannot
+        // aim a person's locator outside persons/; tested separately per
+        // issue #477: a page digest is not the only restriction on targets
+        let dir = fixture_root("rx-loc");
         write_fixture(&dir);
         bind_and_write(&dir).unwrap();
         let ip = index_path(&dir);
         let mut idx: Value = serde_json::from_str(&fs::read_to_string(&ip).unwrap()).unwrap();
-        idx["stateSha256"] = json!("0".repeat(64));
-        fs::write(&ip, serde_json::to_string(&idx).unwrap()).unwrap();
+        idx["persons"]["pa"]["pageHtml"] = json!("../secrets.html");
+        let new_index = serde_json::to_string(&idx).unwrap();
+        fs::write(&ip, &new_index).unwrap();
+        let sp = state_path(&dir);
+        let mut st: Value = serde_json::from_str(&fs::read_to_string(&sp).unwrap()).unwrap();
+        st["indexSha256"] = json!(sha256_hex(new_index.as_bytes()));
+        fs::write(&sp, serde_json::to_string(&st).unwrap()).unwrap();
         let err = resolve(&dir, "pa", ResolveOptions::default()).unwrap_err();
-        assert!(err.contains("index not bound"), "{err}");
+        assert!(err.contains("locator discipline"), "{err}");
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn resolve_rejects_path_shaped_person_ids() {
+        let dir = fixture_root("rx-id");
+        write_fixture(&dir);
+        bind_and_write(&dir).unwrap();
+        for bad in ["../escape", "a/b", "a\\b", ".hidden", ""] {
+            let err = resolve(&dir, bad, ResolveOptions::default()).unwrap_err();
+            assert!(err.contains("rejected: ids are"), "id {bad:?}: {err}");
+        }
         let _ = fs::remove_dir_all(&dir);
     }
 

@@ -61,10 +61,18 @@
 
   /* Verify one person against the seal. Returns a result ONLY after the
      person's own page bytes verified against the state; otherwise throws
-     SealError with .attempts naming every rail refusal. */
+     SealError with .attempts naming every rail refusal. Issue #477: the
+     index is authenticated by the STATE (sha256(index bytes) must equal
+     state.indexSha256 — the index carries no self-claim), so a substituted
+     index with forged metadata and intact page digests refuses before any
+     of its fields are read. The pin authenticates the state; the state
+     binds the index; the index carries the page digests. Acyclic. */
   async function verifyPerson(opts) {
     const person = opts && opts.person;
     if (!person) throw new SealError('usage', 'person id required');
+    if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(person)) {
+      throw new SealError('person-id-rejected', 'ids are [A-Za-z0-9._-] and never begin with a dot — a person id is a shape, never a path');
+    }
     const rootPin = ((opts && opts.rootPin) || '').trim().toLowerCase() || null;
     if (rootPin && !/^[0-9a-f]{64}$/.test(rootPin)) {
       throw new SealError('usage', 'root pin must be exactly 64 hex characters');
@@ -110,20 +118,29 @@
       throw new SealError('seal-unparseable', 'state is not JSON: ' + e.message);
     }
     const indexBytes = await fetchBytes(rail.base + 'publication-index.json');
+    // issue #477: the STATE binds the index by digest — the index has no
+    // self-claim to check. Forged names/refs/arks with intact page digests
+    // still hash differently than the digest sealed in the state.
+    const indexSha = await sha256Hex(indexBytes);
+    const bound = (state.indexSha256 || 'absent').toLowerCase();
+    if (bound !== indexSha) {
+      throw new SealError('index-not-state-bound', 'the state binds ' + bound.slice(0, 16) + '…, this rail\u2019s index hashes ' + indexSha.slice(0, 16) + '… — substituted or stale index');
+    }
     let index;
     try {
       index = JSON.parse(new TextDecoder().decode(indexBytes));
     } catch (e) {
       throw new SealError('seal-unparseable', 'index is not JSON: ' + e.message);
     }
-    const claim = (index.stateSha256 || 'absent').toLowerCase();
-    if (claim !== stateSha) {
-      throw new SealError('index-not-bound', 'index claims ' + claim.slice(0, 16) + '… but this rail\u2019s state hashes ' + stateSha.slice(0, 16) + '…');
-    }
     const entry = index.persons && index.persons[person];
     if (!entry) throw new SealError('person-unknown', person + ' is not in the sealed index');
     const pageState = (state.pages || []).find((p) => p.id === person);
     if (!pageState) throw new SealError('person-unknown', person + ' is not in the state pages');
+    // locator discipline (#477, defense in depth): a person's locators are
+    // their own pages under persons/ — nothing else is fetched, ever
+    if (entry.pageHtml !== 'persons/' + person + '.html' || entry.pageJson !== 'persons/' + person + '.json') {
+      throw new SealError('locator-escape', entry.pageHtml + ' / ' + entry.pageJson + ' — a person\u2019s locators are their own pages under persons/');
+    }
     if (entry.pageHtmlSha256 !== pageState.html.sha256 || entry.pageJsonSha256 !== pageState.json.sha256) {
       throw new SealError('digest-disagreement', 'the index and the state disagree on ' + person + '\u2019s page digests');
     }

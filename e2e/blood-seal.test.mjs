@@ -53,22 +53,27 @@ for (const [id, p] of Object.entries(persons)) {
   };
 }
 const stateObj = {
-  schema: 'skaists.genealogy-publication-state/1',
+  schema: 'skaists.genealogy-publication-state/2',
   tool: { name: 'fixture', version: '0' },
   hexLawNote: 'PUBLIC-CONSTANT fixture digests',
+  indexSha256: 'PLACEHOLDER',
   corpus: {}, census: { persons: 2, htmlPages: 2, jsonPages: 2, strays: 0 },
   pages: Object.values(pageEntries),
 };
-const stateBytes = Buffer.from(JSON.stringify(stateObj) + '\n', 'utf8');
-writeFileSync(join(lineageDir, 'publication-state.json'), stateBytes);
-writeFileSync(join(lineageDir, 'publication-index.json'), Buffer.from(JSON.stringify({
-  schema: 'skaists.genealogy-publication-index/1',
+const indexBytes = Buffer.from(JSON.stringify({
+  schema: 'skaists.genealogy-publication-index/2',
   tool: { name: 'fixture', version: '0' },
   hexLawNote: 'PUBLIC-CONSTANT fixture digests',
-  stateSha256: sha(stateBytes), rootPerson: 'p1',
+  rootPerson: 'p1',
   counts: { persons: 2, fsRefsTotal: 2, recordArksTotal: 2 },
   persons: indexPersons,
-}) + '\n', 'utf8'));
+}) + '\n', 'utf8');
+// issue #477 chain: the STATE binds the index by digest (acyclic —
+// pin -> state -> indexSha256 -> index bytes -> page digests)
+stateObj.indexSha256 = sha(indexBytes);
+const stateBytes = Buffer.from(JSON.stringify(stateObj) + '\n', 'utf8');
+writeFileSync(join(lineageDir, 'publication-index.json'), indexBytes);
+writeFileSync(join(lineageDir, 'publication-state.json'), stateBytes);
 const realPin = sha(stateBytes);
 
 // the real surface files, served from the throwaway root so the bootstrap
@@ -92,6 +97,7 @@ for (const id of Object.keys(persons)) {
 }
 const serve = (req, res) => {
   const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '');
+  served.add(rel);
   if (files[rel]) {
     res.writeHead(200, { 'content-type': files[rel] });
     res.end(readFileSync(join(docroot, rel)));
@@ -100,6 +106,7 @@ const serve = (req, res) => {
     res.end('no');
   }
 };
+const served = new Set();
 
 test('the blood seal reader: verified reads, fail-closed everything else', async () => {
   const server = createServer(serve).listen(0);
@@ -158,6 +165,54 @@ test('the blood seal reader: verified reads, fail-closed everything else', async
     await page.waitForSelector('#sealStatus[data-state="failed"]');
     assert.match(await statusText(), /person-unknown|all-rails-failed/, 'F: the miss is named');
     assert.equal(await frame.getAttribute('srcdoc'), null, 'F: nothing renders');
+
+    // G — issue #477's exact substitution: ONLY metadata forged (name, refs,
+    // arks), page digests and state intact — must refuse, nothing displayed
+    const indexPath = join(lineageDir, 'publication-index.json');
+    const pristineIndex = readFileSync(indexPath, 'utf8');
+    const forged = JSON.parse(pristineIndex);
+    forged.persons.p1.name = 'Forged von Fabrication';
+    forged.persons.p1.fsRefs = ['FAKE-999'];
+    forged.persons.p1.recordArks = ['FAKE-ARK-1'];
+    writeFileSync(indexPath, JSON.stringify(forged) + '\n');
+    await page.fill('#sealPerson', 'p1');
+    await page.fill('#sealPin', realPin);
+    await page.click('#sealGo');
+    await page.waitForSelector('#sealStatus[data-state="failed"]');
+    assert.match(await statusText(), /index-not-state-bound/, 'G: the substituted index is named');
+    assert.equal(await frame.getAttribute('srcdoc'), null, 'G: nothing renders');
+    assert.ok(await page.locator('#sealCard').isHidden(), 'G: no forged metadata displayed');
+    writeFileSync(indexPath, pristineIndex);
+
+    // H — locator escape, tested separately per #477: even a self-consistent
+    // state+index pair (only possible without a pin — the pin is the real
+    // boundary) cannot aim a locator outside persons/; and the server PROVES
+    // no outside path was ever requested
+    const escapeIndex = JSON.parse(pristineIndex);
+    escapeIndex.persons.p1.pageHtml = '../secrets.html';
+    const escapeIndexBytes = Buffer.from(JSON.stringify(escapeIndex) + '\n', 'utf8');
+    writeFileSync(indexPath, escapeIndexBytes);
+    const statePath = join(lineageDir, 'publication-state.json');
+    const pristineState = readFileSync(statePath, 'utf8');
+    const escapeState = JSON.parse(pristineState);
+    escapeState.indexSha256 = sha(escapeIndexBytes);
+    writeFileSync(statePath, JSON.stringify(escapeState) + '\n');
+    await page.fill('#sealPin', '');
+    await page.click('#sealGo');
+    await page.waitForSelector('#sealStatus[data-state="failed"]');
+    assert.match(await statusText(), /locator-escape/, 'H: the escape is named');
+    assert.ok(!served.has('secrets.html') && ![...served].some((p) => p.includes('..')),
+      'H: no request ever escaped the corpus paths');
+    assert.equal(await frame.getAttribute('srcdoc'), null, 'H: nothing renders');
+    writeFileSync(indexPath, pristineIndex);
+    writeFileSync(statePath, pristineState);
+
+    // I — path-shaped person ids rejected before anything is fetched
+    await page.fill('#sealPerson', '../escape');
+    await page.click('#sealGo');
+    await page.waitForSelector('#sealStatus[data-state="failed"]');
+    assert.match(await statusText(), /person-id-rejected/, 'I: the id shape is named');
+    assert.equal(await frame.getAttribute('srcdoc'), null, 'I: nothing renders');
   } finally {
     await browser.close();
     server.close();
