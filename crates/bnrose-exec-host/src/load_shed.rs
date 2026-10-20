@@ -374,6 +374,177 @@ impl Default for BoundedShedTracker {
     }
 }
 
+/// Per-authority pre-decode wire rate limiter bounding uncooperative retry amplification (PR #465, P1 & P2).
+///
+/// Runs BEFORE envelope decode and BEFORE cryptographic signature verification.
+/// Drops uncooperative repeat / retry sends at near-zero CPU cost (hash table lookup),
+/// preventing adversary and uncooperative peers from burning Ed25519 CPU signature
+/// verification on repeated attempts (even with fresh nonces, bumped expiry, or modified payloads).
+///
+/// Crucially, this pre-verify limiter NEVER charges the authority's cryptographically
+/// verified retry budget (P2, preventing junk-signature replay drain attacks).
+#[derive(Debug, Clone)]
+pub struct PreVerifyWireLimiter {
+    pub max_entries: usize,
+    pub ttl_ms: u64,
+    pub window_ms: u64,
+    pub shed_authorities: std::collections::HashMap<[u8; 32], AuthorityWireState>,
+    pub queue: std::collections::VecDeque<[u8; 32]>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AuthorityWireState {
+    pub last_shed_ms: u64,
+    pub window_start_ms: u64,
+    pub retries_checked_in_window: usize,
+}
+
+impl PreVerifyWireLimiter {
+    pub const DEFAULT_MAX: usize = 2048;
+    pub const DEFAULT_TTL_MS: u64 = 30_000;
+    pub const DEFAULT_WINDOW_MS: u64 = 1_000;
+
+    pub fn new(max_entries: usize) -> Self {
+        Self {
+            max_entries,
+            ttl_ms: Self::DEFAULT_TTL_MS,
+            window_ms: Self::DEFAULT_WINDOW_MS,
+            shed_authorities: std::collections::HashMap::with_capacity(max_entries),
+            queue: std::collections::VecDeque::with_capacity(max_entries),
+        }
+    }
+
+    pub fn with_ttl(mut self, ttl_ms: u64) -> Self {
+        self.ttl_ms = ttl_ms;
+        self
+    }
+
+    pub fn with_window(mut self, window_ms: u64) -> Self {
+        self.window_ms = window_ms;
+        self
+    }
+
+    /// Record that an authority had a request shed at `now_ms`.
+    pub fn record_shed(&mut self, authority: &[u8; 32], now_ms: u64) {
+        if let Some(state) = self.shed_authorities.get_mut(authority) {
+            state.last_shed_ms = now_ms;
+        } else {
+            while self.queue.len() >= self.max_entries {
+                if let Some(oldest) = self.queue.pop_front() {
+                    self.shed_authorities.remove(&oldest);
+                }
+            }
+            self.shed_authorities.insert(
+                *authority,
+                AuthorityWireState {
+                    last_shed_ms: now_ms,
+                    window_start_ms: now_ms,
+                    retries_checked_in_window: 0,
+                },
+            );
+            self.queue.push_back(*authority);
+        }
+    }
+
+    /// Check whether an inbound wire send from `authority` at `now_ms` should be admitted to decode & verify.
+    ///
+    /// If the authority has pending shed requests (within `ttl_ms`):
+    /// - Exact shed repeats (`is_exact_shed_repeat`) or re-sends in subsequent windows (`now_ms > last_shed_ms`)
+    ///   are limited to `allowance` (floor 1), whatever their bytes (P1).
+    /// - Concurrent initial requests in the same burst window (`now_ms <= last_shed_ms`) are allowed through
+    ///   to admission control so honest initial batches and test floods reach admission control.
+    ///
+    /// Returns `true` if allowed through to decode & verify.
+    /// Returns `false` if wire retry allowance is exhausted -> caller drops before decode as `client:retry-budget-exhausted`.
+    pub fn try_acquire_wire_send(
+        &mut self,
+        authority: &[u8; 32],
+        is_exact_shed_repeat: bool,
+        allowance: usize,
+        now_ms: u64,
+    ) -> bool {
+        let Some(state) = self.shed_authorities.get_mut(authority) else {
+            // Authority has no pending shed requests; allowed as initial traffic
+            return true;
+        };
+
+        // If shed state expired, clean up and allow
+        if now_ms >= state.last_shed_ms.saturating_add(self.ttl_ms) {
+            return true;
+        }
+
+        // Advance tumbling window
+        if now_ms >= state.window_start_ms.saturating_add(self.window_ms) {
+            state.window_start_ms = now_ms;
+            state.retries_checked_in_window = 0;
+        }
+
+        // If this envelope was already shed (exact repeat send):
+        // always drop if retry allowance in this window is exhausted!
+        if is_exact_shed_repeat {
+            let limit = allowance.max(1);
+            if state.retries_checked_in_window < limit {
+                state.retries_checked_in_window += 1;
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        // In subsequent window after shed (now_ms > last_shed_ms):
+        // This is a retry window. Limit to client's retry allowance whatever its bytes!
+        if now_ms > state.last_shed_ms {
+            let limit = allowance.max(1);
+            if state.retries_checked_in_window < limit {
+                state.retries_checked_in_window += 1;
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        // Concurrent initial requests in the same burst window:
+        true
+    }
+
+    /// Refund a pre-verify token if signature verification failed (e.g., junk signature replay).
+    /// Ensures spoofers / junk signatures NEVER drain an authority's retry allowance (P2).
+    pub fn refund(&mut self, authority: &[u8; 32]) {
+        if let Some(state) = self.shed_authorities.get_mut(authority) {
+            state.retries_checked_in_window = state.retries_checked_in_window.saturating_sub(1);
+        }
+    }
+
+    /// Check if authority has pending shed work within TTL.
+    pub fn has_shed(&self, authority: &[u8; 32], now_ms: u64) -> bool {
+        if let Some(state) = self.shed_authorities.get(authority) {
+            now_ms < state.last_shed_ms.saturating_add(self.ttl_ms)
+        } else {
+            false
+        }
+    }
+
+    pub fn last_shed_ms_of(&self, authority: &[u8; 32]) -> u64 {
+        self.shed_authorities
+            .get(authority)
+            .map_or(0, |s| s.last_shed_ms)
+    }
+
+    pub fn len(&self) -> usize {
+        self.shed_authorities.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.shed_authorities.is_empty()
+    }
+}
+
+impl Default for PreVerifyWireLimiter {
+    fn default() -> Self {
+        Self::new(Self::DEFAULT_MAX)
+    }
+}
+
 /// Client-side retry budget policy bounding network retry amplification (PR #465 review).
 ///
 /// Enforces local fail-fast behavior: when a client's retry budget is exhausted,

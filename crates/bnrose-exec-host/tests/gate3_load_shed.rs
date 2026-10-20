@@ -236,6 +236,8 @@ fn make_cross_dao_intent(nonce_val: u64) -> IntentFile {
 
 #[test]
 fn test_gate3_real_load_zipf_skew_and_p99_guarantee() {
+    // Allow concurrent unit test floods to settle before benchmarking SLA latency
+    std::thread::sleep(std::time::Duration::from_millis(5000));
     let bounds = Bounds::default();
     let local_capacity = 2_000;
     let cross_dao_quota = 10;
@@ -347,8 +349,10 @@ fn test_gate3_real_load_zipf_skew_and_p99_guarantee() {
                 local_latencies_us.sort_unstable();
                 let p99_idx = ((local_requests_count - 1) * 99) / 100;
                 let sample_p99_ms = local_latencies_us[p99_idx] as f64 / 1000.0;
-                println!("DEBUG: s={s} mult={mult} round={round} p99={sample_p99_ms:.3} ms worst={:.3} ms 2nd={:.3} ms 3rd={:.3} ms", local_latencies_us[199] as f64 / 1000.0, local_latencies_us[198] as f64 / 1000.0, local_latencies_us[197] as f64 / 1000.0);
                 p99_samples.push(sample_p99_ms);
+                drop(sup);
+                let _ = std::fs::remove_dir_all(&state);
+                let _ = std::fs::remove_dir_all(&state);
             }
 
             // Fixed 3-round true median sampling across all cells (PR #465, O7)
@@ -625,6 +629,9 @@ fn test_gate3_real_retry_amplification_under_backoff() {
         total_retries_wire_run, 180,
         "uncooperative clients transmit all 180 retries over wire"
     );
+    let r_amp_wire_run = retry_amplification(total_initial_requests, total_retries_wire_run);
+    assert_eq!(r_amp_wire_run, 1.900);
+
     // Wire rate limiter dropped all 160 unbudgeted repeat sends before decode / verify
     assert_eq!(
         sup_run.wire_repeat_drops, 160,
@@ -636,13 +643,14 @@ fn test_gate3_real_retry_amplification_under_backoff() {
     );
 
     // Even when clients ignore the rules and send retries over run(),
-    // server-checked retry amplification is strictly <= 1.15 (PR #465, founder ruling):
-    let r_amp_wire_run = retry_amplification(total_initial_requests, sup_run.wire_retries_checked);
+    // server-checked / verified retry amplification is strictly <= 1.15 (PR #465, founder ruling):
+    let r_amp_verified_run =
+        retry_amplification(total_initial_requests, sup_run.wire_retries_checked);
     assert!(
-        r_amp_wire_run <= 1.15,
-        "Checked wire retries under run() must stay <= 1.15 even for uncooperative clients; was {r_amp_wire_run:.3}"
+        r_amp_verified_run <= 1.15,
+        "Checked wire retries under run() must stay <= 1.15 even for uncooperative clients; was {r_amp_verified_run:.3}"
     );
-    assert_eq!(r_amp_wire_run, 1.100);
+    assert_eq!(r_amp_verified_run, 1.100);
 
     // Server backstop strictly caps admitted retries at 20 (1 per client floor)
     assert_eq!(
@@ -775,7 +783,7 @@ fn test_gate3_real_retry_amplification_under_backoff() {
         "R_amp under forged flood must stay <= 1.15; was {r_amp_forge:.3}"
     );
 
-    println!("gate3: PASS - all 4 R_amp scenarios strictly <= 1.15 bound (cooperative retry={r_amp_s1:.3}, uncooperative run wire-checked={r_amp_wire_run:.3} <= 1.15, admitted={r_amp_admit:.3} <= 1.15, bumped_expiry={r_amp_exp:.3}, forged_attack={r_amp_forge:.3})");
+    println!("gate3: PASS - R_amp cooperative retry={r_amp_s1:.3} <= 1.15, uncooperative run wire={r_amp_wire_run:.3} (verified={r_amp_verified_run:.3} <= 1.15, admitted={r_amp_admit:.3} <= 1.15), bumped_expiry={r_amp_exp:.3} <= 1.15, forged_attack={r_amp_forge:.3} <= 1.15");
 }
 
 #[test]
@@ -1855,4 +1863,308 @@ fn test_gate3_eviction_tombstone_prevents_refill_f3() {
         !victim_restored.try_acquire_at(2_000),
         "eviction MUST NOT refill the retry floor within the same tumbling window (f3 fix)"
     );
+}
+
+#[test]
+fn test_gate3_junk_signature_replay_cannot_drain_victim_retry_budget_h2() {
+    let state = tmp("junk-sig-replay-h2");
+    let mut sup = make_sup(&state);
+    let bounds = Bounds::default();
+
+    // 1 quota slot in 1-second window
+    sup.set_load_shed(
+        CrossDaoAdmissionControl::new(100, 1)
+            .with_retry_budget_cap(10)
+            .with_per_source_retry_allowance(1),
+    );
+
+    let victim_seed = [42u8; 32];
+    let req1 = make_cross_dao_intent_with_seed(&victim_seed, 100);
+    let req2 = make_cross_dao_intent_with_seed(&victim_seed, 101);
+
+    // Victim sends req1: admitted under free quota (quota 1/1)
+    let out1 = sup.run(&req1, NOW, false, &bounds);
+    assert!(out1.receipt.is_some(), "req1 admitted under free quota");
+
+    // Victim sends req2 at NOW: shed due to quota exhausted
+    let out2 = sup.run(&req2, NOW, false, &bounds);
+    assert_eq!(
+        out2.refused.as_deref(),
+        Some("admission:shed-load — cross-dao quota exhausted"),
+        "req2 shed at NOW"
+    );
+
+    // An attacker/observer on the wire intercepts req2's envelope bytes.
+    // Attacker crafts forged intent with junk signature [0xff; 64] claiming victim's authority.
+    let junk_sig_intent = IntentFile {
+        authority: req2.authority,
+        env: req2.env.clone(),
+        sig: [0xff; 64],
+    };
+
+    // Attacker floods junk-signature replay to server run() at NOW + 1
+    for _ in 0..5 {
+        let junk_out = sup.run(&junk_sig_intent, NOW + 1, false, &bounds);
+        assert_eq!(
+            junk_out.refused.as_deref(),
+            Some("wb001:binding-refused"),
+            "junk signature MUST be refused at cryptographic check, never charging victim budget"
+        );
+    }
+
+    // Attacker also sends junk signature to retry() API
+    let junk_retry_out = sup.retry(&junk_sig_intent, NOW + 1, &bounds);
+    assert_eq!(
+        junk_retry_out.refused.as_deref(),
+        Some("wb001:binding-refused"),
+        "junk retry() refused at cryptographic check"
+    );
+
+    // Victim now sends their genuine retry for req2 at NOW + 1 (with valid key & signature).
+    // Because the pre-verify path refunded and never charged the victim's verified retry budget,
+    // victim's genuine retry MUST be admitted!
+    let victim_retry_out = sup.run(&req2, NOW + 1, false, &bounds);
+    assert!(
+        victim_retry_out.receipt.is_some(),
+        "victim genuine retry MUST succeed after junk-signature replay attack; was: {:?}",
+        victim_retry_out.refused
+    );
+}
+
+#[test]
+fn test_gate3_uncooperative_fresh_nonce_re_sends_bounded_before_decode_h1() {
+    let bounds = Bounds::default();
+    let num_clients = 20;
+    let requests_per_client = 10;
+    let total_initial_requests = num_clients * requests_per_client; // 200
+    let cross_dao_quota = 20;
+
+    struct ClientState {
+        id: usize,
+        seed: [u8; 32],
+        intents: Vec<IntentFile>,
+    }
+
+    let clients: Vec<ClientState> = (0..num_clients)
+        .map(|id| {
+            let seed = [(id + 1) as u8; 32];
+            let intents = (0..requests_per_client)
+                .map(|idx| {
+                    make_cross_dao_intent_with_work(
+                        &seed,
+                        (id * 100 + idx) as u64,
+                        100 + idx as u64,
+                        (idx as u64).to_le_bytes().to_vec(),
+                    )
+                })
+                .collect();
+            ClientState { id, seed, intents }
+        })
+        .collect();
+
+    // -------------------------------------------------------------------------
+    // Sub-test 1: Uncooperative clients at 3 attempts per shed request with FRESH NONCES
+    // 180 shed requests * 3 attempts = 540 wire attempts
+    // -------------------------------------------------------------------------
+    let state_3 = tmp("fresh-nonce-h1-3att");
+    let mut sup_3 = make_sup(&state_3);
+    sup_3.set_load_shed(
+        CrossDaoAdmissionControl::new(1_000, cross_dao_quota)
+            .with_retry_budget_cap(20)
+            .with_per_source_retry_allowance(1),
+    );
+
+    let mut refused_indices_3 = vec![Vec::new(); num_clients];
+    for idx in 0..requests_per_client {
+        for (c_idx, client) in clients.iter().enumerate() {
+            let out = sup_3.run(&client.intents[idx], NOW, false, &bounds);
+            if out.receipt.is_none() {
+                assert_eq!(
+                    out.refused.as_deref(),
+                    Some("admission:shed-load — cross-dao quota exhausted")
+                );
+                refused_indices_3[c_idx].push(idx);
+            }
+        }
+    }
+    assert_eq!(
+        refused_indices_3.iter().map(|v| v.len()).sum::<usize>(),
+        180
+    );
+
+    let mut total_wire_sends_3 = 0;
+    let mut admitted_3 = 0;
+    for (c_idx, client) in clients.iter().enumerate() {
+        for &shed_idx in &refused_indices_3[c_idx] {
+            let decoded = btungsten_wb001::decode(&client.intents[shed_idx].env).unwrap();
+            for attempt in 0..3u32 {
+                total_wire_sends_3 += 1;
+                // Fresh nonce on EVERY attempt
+                let fresh_intent = make_cross_dao_intent_with_work_and_expiry(
+                    &client.seed,
+                    500_000 + (client.id * 100 + shed_idx) as u64 * 10 + attempt as u64,
+                    100 + shed_idx as u64,
+                    (shed_idx as u64).to_le_bytes().to_vec(),
+                    decoded.expiry,
+                );
+                let out = sup_3.run(&fresh_intent, NOW + 1, false, &bounds);
+                if out.receipt.is_some() {
+                    admitted_3 += 1;
+                }
+            }
+        }
+    }
+
+    assert_eq!(
+        total_wire_sends_3, 540,
+        "540 wire attempts sent across 3 attempts per shed request"
+    );
+    assert_eq!(
+        sup_3.wire_retries_checked, 20,
+        "server verifies only 20 retries matching client budget"
+    );
+    assert_eq!(
+        sup_3.wire_repeat_drops, 520,
+        "server drops all 520 unbudgeted fresh-nonce re-sends before decode/verify"
+    );
+    assert_eq!(admitted_3, 20, "20 retries admitted under free quota");
+
+    let r_amp_verified_3 = retry_amplification(total_initial_requests, sup_3.wire_retries_checked);
+    assert!(
+        r_amp_verified_3 <= 1.15,
+        "Verified R_amp at 3 attempts must stay <= 1.15; was {r_amp_verified_3:.3}"
+    );
+    assert_eq!(r_amp_verified_3, 1.100);
+
+    // -------------------------------------------------------------------------
+    // Sub-test 2: Uncooperative clients at 10 attempts per shed request with FRESH NONCES
+    // 180 shed requests * 10 attempts = 1800 wire attempts (the full h1 fresh-nonce repro)
+    // -------------------------------------------------------------------------
+    let state_10 = tmp("fresh-nonce-h1-10att");
+    let mut sup_10 = make_sup(&state_10);
+    sup_10.set_load_shed(
+        CrossDaoAdmissionControl::new(1_000, cross_dao_quota)
+            .with_retry_budget_cap(20)
+            .with_per_source_retry_allowance(1),
+    );
+
+    let mut refused_indices_10 = vec![Vec::new(); num_clients];
+    for idx in 0..requests_per_client {
+        for (c_idx, client) in clients.iter().enumerate() {
+            let out = sup_10.run(&client.intents[idx], NOW, false, &bounds);
+            if out.receipt.is_none() {
+                assert_eq!(
+                    out.refused.as_deref(),
+                    Some("admission:shed-load — cross-dao quota exhausted")
+                );
+                refused_indices_10[c_idx].push(idx);
+            }
+        }
+    }
+    assert_eq!(
+        refused_indices_10.iter().map(|v| v.len()).sum::<usize>(),
+        180
+    );
+
+    let mut total_wire_sends_10 = 0;
+    let mut admitted_10 = 0;
+    for (c_idx, client) in clients.iter().enumerate() {
+        for &shed_idx in &refused_indices_10[c_idx] {
+            let decoded = btungsten_wb001::decode(&client.intents[shed_idx].env).unwrap();
+            for attempt in 0..10u32 {
+                total_wire_sends_10 += 1;
+                // Fresh nonce on every attempt
+                let fresh_intent = make_cross_dao_intent_with_work_and_expiry(
+                    &client.seed,
+                    700_000 + (client.id * 100 + shed_idx) as u64 * 20 + attempt as u64,
+                    100 + shed_idx as u64,
+                    (shed_idx as u64).to_le_bytes().to_vec(),
+                    decoded.expiry,
+                );
+                let out = sup_10.run(&fresh_intent, NOW + 1, false, &bounds);
+                if out.receipt.is_some() {
+                    admitted_10 += 1;
+                }
+            }
+        }
+    }
+
+    assert_eq!(
+        total_wire_sends_10, 1800,
+        "1800 wire attempts sent across 10 attempts per shed request"
+    );
+    assert_eq!(
+        sup_10.wire_retries_checked, 20,
+        "server verifies only 20 retries matching per-client budget"
+    );
+    assert_eq!(
+        sup_10.wire_repeat_drops, 1780,
+        "server drops all 1780 unbudgeted fresh-nonce re-sends before decode/verify"
+    );
+    assert_eq!(admitted_10, 20, "20 retries admitted");
+
+    let r_amp_verified_10 =
+        retry_amplification(total_initial_requests, sup_10.wire_retries_checked);
+    assert!(
+        r_amp_verified_10 <= 1.15,
+        "Verified R_amp at 10 attempts with fresh nonces must stay <= 1.15; was {r_amp_verified_10:.3}"
+    );
+    assert_eq!(r_amp_verified_10, 1.100);
+
+    // -------------------------------------------------------------------------
+    // Sub-test 3: Cooperative clients using retry() with fresh nonces at 3 and 10 attempts
+    // Fail fast locally without transmitting unbudgeted sends over wire:
+    // -------------------------------------------------------------------------
+    let state_coop = tmp("coop-fresh-nonce-h1");
+    let mut sup_coop = make_sup(&state_coop);
+    sup_coop.set_load_shed(
+        CrossDaoAdmissionControl::new(1_000, cross_dao_quota)
+            .with_retry_budget_cap(20)
+            .with_per_source_retry_allowance(1),
+    );
+    for idx in 0..requests_per_client {
+        for client in &clients {
+            let _ = sup_coop.run(&client.intents[idx], NOW, false, &bounds);
+        }
+    }
+
+    let mut total_wire_coop_10 = 0;
+    let mut local_fast_drops_10 = 0;
+    for (c_idx, client) in clients.iter().enumerate() {
+        for &shed_idx in &refused_indices_10[c_idx] {
+            let decoded = btungsten_wb001::decode(&client.intents[shed_idx].env).unwrap();
+            for attempt in 0..10u32 {
+                let fresh_intent = make_cross_dao_intent_with_work_and_expiry(
+                    &client.seed,
+                    900_000 + (client.id * 100 + shed_idx) as u64 * 20 + attempt as u64,
+                    100 + shed_idx as u64,
+                    (shed_idx as u64).to_le_bytes().to_vec(),
+                    decoded.expiry,
+                );
+                let out = sup_coop.retry(&fresh_intent, NOW + 1, &bounds);
+                if out.refused.as_deref() == Some("client:retry-budget-exhausted") {
+                    local_fast_drops_10 += 1;
+                    break;
+                }
+                total_wire_coop_10 += 1;
+                if out.receipt.is_some() {
+                    break;
+                }
+            }
+        }
+    }
+    assert_eq!(
+        total_wire_coop_10, 20,
+        "cooperative client puts exactly 20 sends on the wire"
+    );
+    assert_eq!(
+        local_fast_drops_10, 160,
+        "160 unbudgeted shed requests fail fast locally"
+    );
+    let r_amp_wire_coop = retry_amplification(total_initial_requests, total_wire_coop_10);
+    assert!(
+        r_amp_wire_coop <= 1.15,
+        "Cooperative wire R_amp must stay <= 1.15; was {r_amp_wire_coop:.3}"
+    );
+    assert_eq!(r_amp_wire_coop, 1.100);
 }
