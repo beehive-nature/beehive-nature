@@ -148,3 +148,17 @@ CLI and connected GitHub service returned connection errors. PR #3's completed
 31-success / 2-skipped snapshot is retained. The final PR #4 head was pushed;
 its later CI results must be refreshed, not inferred from the earlier code-head
 checks. Publication outcome for this dispatch is recorded in the handoff.
+
+Publication follow-up: connectivity recovered. Receipt commit 2785ed231 was
+pushed and its remote branch hash verified. Final-head PR #4 snapshot at
+`e49603a45afef364accf62141b2897fbcf9b5115` shows 17 successful checks, 15 in
+progress and two scheduled skips, with no failures at capture. See
+`pr4-final-head-checks.json`; earlier `pr4-checks.json` remains historical.
+No final-head all-CI-green claim is made.
+
+Reproduction limit: the full helper script was syntax-checked but not executed
+end-to-end in this Windows-linked worktree. WSL Git cannot resolve its Windows
+worktree link. Git provenance was captured with Git-for-Windows; the release
+build, tests and three benchmark runs were launched directly under Linux (the
+measurements inside the pinned Nix shell). Use a normal Linux clone for the
+NixOS helper recipe. Actual NixOS-host execution remains outstanding.
