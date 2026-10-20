@@ -66,10 +66,13 @@ pub fn artifact_path_ok(name: &str) -> Result<PathBuf, String> {
     Err(format!("artifact {name:?}: not a seal artifact"))
 }
 
-/// The payer/egress ledger (issue #479: accountable resources). A peer
-/// serves chargeable bytes only from an EXPLICIT, bounded authorization;
-/// when it is gone the paid route refuses — no estate default payer, no
-/// silent subsidy, no partial drip.
+/// The payer/egress ledger (issue #479: accountable resources; issue #480
+/// P0: a CONCURRENCY-SAFE hard ceiling). A peer serves chargeable bytes
+/// only from an EXPLICIT, bounded authorization; when it is gone the paid
+/// route refuses — no estate default payer, no silent subsidy, no partial
+/// drip. HONEST SCOPE (issue #480 wording): this is a byte-allowance
+/// ledger — not yet evidence of user-signed funding, settlement, or
+/// actual network tariff enforcement.
 pub struct EgressLedger {
     authorized_bytes: u64,
     spent: AtomicU64,
@@ -82,18 +85,28 @@ impl EgressLedger {
             spent: AtomicU64::new(0),
         }
     }
-    /// Reserve `n` bytes of chargeable delivery. Refusal is a named
-    /// verdict, never a silent fallback.
+    /// Reserve `n` bytes of chargeable delivery. The check-and-increment is
+    /// ONE atomic step (issue #480 P0: the old load→check→fetch_add let two
+    /// concurrent requests both pass and collectively overspend). Overflow-
+    /// safe via saturating arithmetic inside the CAS predicate. Refusal is
+    /// a named verdict, never a silent fallback.
     pub fn reserve(&self, n: u64) -> Result<(), String> {
-        let spent = self.spent.load(Ordering::SeqCst);
-        if spent.saturating_add(n) > self.authorized_bytes {
-            return Err(format!(
+        let outcome = self
+            .spent
+            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |spent| {
+                if spent.saturating_add(n) > self.authorized_bytes {
+                    None
+                } else {
+                    Some(spent + n)
+                }
+            });
+        match outcome {
+            Ok(_) => Ok(()),
+            Err(current) => Err(format!(
                 "egress budget exhausted: authorized {}, already served {}, request {n} — paid route REFUSED (payer authorization required; no estate fallback exists)",
-                self.authorized_bytes, spent
-            ));
+                self.authorized_bytes, current
+            )),
         }
-        self.spent.fetch_add(n, Ordering::SeqCst);
-        Ok(())
     }
     pub fn spent(&self) -> u64 {
         self.spent.load(Ordering::SeqCst)
@@ -213,6 +226,54 @@ fn handle_conn(
         }
     };
     let full = store.join(rel);
+    // issue #480 P1: a served artifact is a REGULAR FILE inside the store —
+    // symlink_metadata does not follow, so a planted symlink (or anything
+    // non-regular) refuses BEFORE a byte is read. Client-side digest
+    // verification is not a server-side confidentiality guard.
+    let meta = match std::fs::symlink_metadata(&full) {
+        Ok(m) => m,
+        Err(e) => {
+            let body = format!("artifact {name} not in this peer's store: {e}");
+            let _ = write_response(
+                stream,
+                404,
+                "not found",
+                body.as_bytes(),
+                ledger,
+                truncate_after,
+                false,
+            );
+            return Err(body);
+        }
+    };
+    if meta.file_type().is_symlink() {
+        let body = format!(
+            "artifact {name}: symlink refused — a served artifact is a regular file inside the store, never a link out of it"
+        );
+        let _ = write_response(
+            stream,
+            403,
+            "symlink refused",
+            body.as_bytes(),
+            ledger,
+            truncate_after,
+            false,
+        );
+        return Err(body);
+    }
+    if !meta.file_type().is_file() {
+        let body = format!("artifact {name}: not a regular file — refused");
+        let _ = write_response(
+            stream,
+            403,
+            "not a regular file",
+            body.as_bytes(),
+            ledger,
+            truncate_after,
+            false,
+        );
+        return Err(body);
+    }
     let bytes = match std::fs::read(&full) {
         Ok(b) => b,
         Err(e) => {
@@ -269,20 +330,60 @@ fn write_response(
 }
 
 /// The retrieving side: fetch one artifact from a peer's direct address.
-/// Bounded reads (Content-Length cap), no DNS, no estate endpoints.
+/// Issue #480 P0: memory is bounded BEFORE the payload is trusted — the
+/// header is read incrementally under a byte cap, Content-Length is
+/// REQUIRED (a missing, duplicate or malformed length refuses; a body
+/// without one would be unbounded), the declared size is checked against
+/// `max_bytes` BEFORE any body byte is read, the body is then read
+/// incrementally to exactly the declared length (a peer that lies small
+/// and streams 100× the cap simply stops being read), and every read
+/// carries a deadline. No DNS, no estate endpoints.
 pub fn fetch_artifact(addr: &str, name: &str, max_bytes: u64) -> Result<Vec<u8>, String> {
+    fetch_artifact_deadlined(addr, name, max_bytes, std::time::Duration::from_secs(10))
+}
+
+/// `fetch_artifact` with an explicit read deadline (the trickle-stall
+/// control drives this with a short one).
+pub fn fetch_artifact_deadlined(
+    addr: &str,
+    name: &str,
+    max_bytes: u64,
+    read_timeout: std::time::Duration,
+) -> Result<Vec<u8>, String> {
+    const MAX_HEADER_BYTES: usize = 8 * 1024;
+    const MAX_ERROR_BODY: usize = 4 * 1024;
     artifact_path_ok(name)?;
     let mut stream = TcpStream::connect(addr).map_err(|e| format!("peer {addr}: {e}"))?;
+    stream
+        .set_read_timeout(Some(read_timeout))
+        .map_err(|e| format!("peer {addr}: {e}"))?;
     let req = format!("GET /artifact/{name} HTTP/1.1\r\nHost: peer\r\nConnection: close\r\n\r\n");
     stream
         .write_all(req.as_bytes())
         .map_err(|e| e.to_string())?;
-    let mut buf = Vec::new();
-    stream
-        .read_to_end(&mut buf)
-        .map_err(|e| format!("peer {addr} read: {e}"))?;
-    let text_end = find_headers_end(&buf).ok_or("peer sent no HTTP header terminator")?;
-    let head = String::from_utf8_lossy(&buf[..text_end]).to_string();
+
+    // bounded incremental header read: a header that never ends (or floods)
+    // refuses at the cap, never at the peer's leisure
+    let mut raw: Vec<u8> = Vec::with_capacity(1024);
+    let mut chunk = [0u8; 2048];
+    let mut head_end: Option<usize> = None;
+    while raw.len() < MAX_HEADER_BYTES {
+        let n = stream
+            .read(&mut chunk)
+            .map_err(|e| format!("peer {addr} header read stalled or failed: {e}"))?;
+        if n == 0 {
+            break;
+        }
+        raw.extend_from_slice(&chunk[..n]);
+        if let Some(i) = find_headers_end(&raw) {
+            head_end = Some(i);
+            break;
+        }
+    }
+    let text_end = head_end.ok_or(
+        "peer sent no HTTP header terminator (or flooded the header — refused at the cap)",
+    )?;
+    let head = String::from_utf8_lossy(&raw[..text_end]).to_string();
     let status = head
         .lines()
         .next()
@@ -291,34 +392,69 @@ pub fn fetch_artifact(addr: &str, name: &str, max_bytes: u64) -> Result<Vec<u8>,
         .nth(1)
         .unwrap_or("")
         .to_string();
-    let clen: u64 = head
-        .lines()
-        .find_map(|l| {
-            l.to_ascii_lowercase()
-                .strip_prefix("content-length:")
-                .map(|v| v.trim().to_string())
-        })
-        .and_then(|v| v.parse().ok())
-        .unwrap_or(0);
+    // Content-Length: exactly one, well-formed — required
+    let mut clen_opt: Option<u64> = None;
+    let mut duplicate = false;
+    for l in head.lines() {
+        if let Some(v) = l.to_ascii_lowercase().strip_prefix("content-length:") {
+            if clen_opt.is_some() {
+                duplicate = true;
+            }
+            match v.trim().parse::<u64>() {
+                Ok(n) => clen_opt = Some(n),
+                Err(_) => {
+                    return Err(format!(
+                        "malformed content-length ({:?}) — refusing unbounded body",
+                        v.trim()
+                    ))
+                }
+            }
+        }
+    }
+    if duplicate {
+        return Err("duplicate content-length headers — refusing (ambiguous length)".to_string());
+    }
+    let clen = clen_opt.ok_or("no content-length on the response — refusing unbounded body")?;
     if status != "200" {
-        let body = String::from_utf8_lossy(&buf[text_end.min(buf.len())..])
-            .trim()
-            .to_string();
+        // bounded error-body read, best effort
+        let mut body = raw[text_end.min(raw.len())..].to_vec();
+        while body.len() < MAX_ERROR_BODY {
+            let n = match stream.read(&mut chunk) {
+                Ok(n) => n,
+                Err(_) => break,
+            };
+            if n == 0 {
+                break;
+            }
+            body.extend_from_slice(&chunk[..n]);
+        }
+        let body = String::from_utf8_lossy(&body).trim().to_string();
         return Err(format!("peer refused ({status}): {body}"));
     }
     if clen > max_bytes {
         return Err(format!(
-            "oversized response: {clen} bytes declared, cap {max_bytes}"
+            "oversized response: {clen} bytes declared, cap {max_bytes} — refused before any body byte was read"
         ));
     }
-    let body = &buf[text_end.min(buf.len())..];
-    if body.len() as u64 != clen {
-        return Err(format!(
-            "interrupted transfer: header promised {clen} bytes, {len} arrived — failing closed",
-            len = body.len()
-        ));
+    // read EXACTLY clen body bytes, incrementally; capacity is bounded by
+    // the already-checked clen, so a lying peer cannot grow the allocation
+    let mut body: Vec<u8> = raw[text_end.min(raw.len())..].to_vec();
+    body.reserve_exact(clen.saturating_sub(body.len() as u64) as usize);
+    while (body.len() as u64) < clen {
+        let n = stream
+            .read(&mut chunk)
+            .map_err(|e| format!("peer {addr} body read stalled or failed: {e}"))?;
+        if n == 0 {
+            return Err(format!(
+                "interrupted transfer: header promised {clen} bytes, {len} arrived — failing closed",
+                len = body.len()
+            ));
+        }
+        body.extend_from_slice(&chunk[..n]);
     }
-    Ok(body.to_vec())
+    // never read past the declared length: extra bytes from a lying peer
+    // are simply not consumed (the stream is dropped)
+    Ok(body)
 }
 
 fn find_headers_end(buf: &[u8]) -> Option<usize> {
