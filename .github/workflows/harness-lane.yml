@@ -1,0 +1,57 @@
+name: harness-lane
+
+# ORDER 8 (eat-110): the harness lane gets its own hosted CI.
+# beehive-nature's tests.yml already runs `cargo test --workspace` (the
+# crate is covered there), but the lane needs (a) a fast per-push signal
+# on its own packages with fmt, and (b) the bSigner binary built for the
+# Windows target and kept as a downloadable artifact for demo boxes.
+
+on:
+  push:
+    branches: ["spark/**"]
+  pull_request:
+    paths:
+      - "crates/harness-sovereign/**"
+      - "crates/shared-types/**"
+      - "crates/bsigner/**"
+      - "crates/event-bus/**"
+      - ".github/workflows/harness-lane.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  harness-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+        with:
+          components: rustfmt
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: |
+            . -> target
+      - name: Check formatting (lane packages)
+        run: cargo fmt -p harness-sovereign -p shared-types -- --check
+      - name: Test harness lane
+        run: cargo test -p harness-sovereign -p shared-types --locked
+
+  bsigner-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: |
+            . -> target
+      - name: Build bSigner for the Windows target
+        run: cargo build -p bsigner --release --locked --target x86_64-pc-windows-msvc
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: bsigner-x86_64-pc-windows-msvc
+          path: target/x86_64-pc-windows-msvc/release/bsigner.exe
+          if-no-files-found: error
