@@ -1,0 +1,15 @@
+   Compiling btungsten-wb001-core v0.1.0 (https://github.com/beehive-nature/beehive-nature?rev=49b88d7b294687711b9871f34a74b961f7d5f62a#49b88d7b)
+   Compiling bnrose-exec-core v0.1.0 (https://github.com/beehive-nature/beehive-nature?rev=49b88d7b294687711b9871f34a74b961f7d5f62a#49b88d7b)
+   Compiling x0x v0.46.0 (/mnt/c/Users/travi/wt-codex-x0x-bnrose-shadow)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12m 38s
+     Running unittests examples/bnrose_shadow.rs (/home/travi/target-x0x-security-1019/debug/examples/bnrose_shadow-aff467074be09920)
+
+running 6 tests
+test tests::malformed_oversized_and_trailing_wire_refuse ... ok
+test tests::opt_out_and_invalid_local_policy_refuse ... ok
+test tests::scope_and_signed_freshness_refuse_without_poisoning_state ... ok
+test tests::verified_observation_is_local_and_replay_bounded ... ok
+test tests::tampering_and_classical_signature_substitution_refuse ... ok
+test tests::baseline_and_shadow_share_authentication_boundary ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s

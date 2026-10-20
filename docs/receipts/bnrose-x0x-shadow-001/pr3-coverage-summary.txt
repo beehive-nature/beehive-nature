@@ -1,0 +1,3 @@
+2026-10-20T00:19:27.1215906Z overall line coverage: 86.98% (172079/197839), floor 65.70%
+2026-10-20T00:19:27.1371134Z ##[warning]WS-2 REST/API and Agent core coverage 80.99% is below 90.00%
+2026-10-20T00:19:27.1475758Z ##[warning]WS-5 Network transport coverage 82.61% is below 85.00%
