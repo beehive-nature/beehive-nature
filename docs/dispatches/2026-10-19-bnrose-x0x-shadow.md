@@ -162,3 +162,46 @@ worktree link. Git provenance was captured with Git-for-Windows; the release
 build, tests and three benchmark runs were launched directly under Linux (the
 measurements inside the pinned Nix shell). Use a normal Linux clone for the
 NixOS helper recipe. Actual NixOS-host execution remains outstanding.
+
+## NixOS optimization follow-up (October 20 UTC)
+
+The historical outstanding NixOS runtime check above is now completed for the
+offline experiment. Hostinger directly reports NixOS 26.05, kernel 6.18.48,
+eight AMD EPYC 9354P KVM vCPUs and about 32 GiB RAM. Oracle SSH timed out through
+both configured WSL and native Windows clients; Oracle's current OS remains
+UNVERIFIED. No production configuration or transport setting was changed.
+
+x0x PR #4's original head `e49603a45afef364accf62141b2897fbcf9b5115`
+completed **32 successful checks and two scheduled-only skips**. The new head
+is `85633f6a6dfea44e62a0cad778aa429275fc4604`. It replaces redundant WB001
+padding visits with the pinned core's byte definition over the transmitted
+335-byte prefix, preserving zero padding and the unchanged admission decoder.
+`src/bnrose_shadow.rs::verify_baseline` still calls
+`IdentityAnnouncementV3::verify` on every input. Scope, freshness, replay,
+receiver authority, opt-in behavior and 136-byte observer state are unchanged.
+
+Five interleaved before/after runs on the **same NixOS host** show median added
+p50 latency falling from **21.7603% to 9.0935%**, a **58.2105% reduction in
+shadow overhead**. Per-run ranges are 16.1618–31.2555% before and
+6.5771–11.5166% after. Median extra p50 time fell from 44.861 us to 19.421 us;
+median added mean latency fell from 21.2773% to 7.9204%. This is reduced extra
+work, not a claim of a 58% total x0x throughput increase. All raw samples,
+preflight runs, tails, 1/2/4-observer results and executable hashes are retained
+under `docs/receipts/bnrose-x0x-shadow-002/`. Its summary script recomputes every
+reported percentile from raw samples. Ten native cohort artifact hashes match.
+
+The final-head release build and eight focused tests pass locally. Native
+NixOS also passes the two encoder tests (including 4,097 payload-length
+equivalence cases) and all six authentication/policy negative controls. The
+benchmark and tests run as a transient unprivileged user with no network and
+read-only inputs. These are WSL-built Linux artifacts executed on NixOS with
+pinned Nix runtime libraries; native NixOS source compilation is not claimed.
+
+At this follow-up's initial snapshot, final-head CI has 23 successful checks,
+nine still running and two scheduled-only skips. This is not yet a completed
+CI receipt; the completion snapshot must be read separately. PR #3 remains at
+`8aaf9357c76aa4b9762ba253a3128b91e063bb16` with 31 successful checks and two
+scheduled skips. Neither PR repairs the independent invitation-provenance
+failure from run 39223803733. Live mesh, durable recovery and partition
+acceptance remain unexecuted; the Proposed ADR and Git-crate distribution
+decision remain for review.

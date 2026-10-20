@@ -1,0 +1,9 @@
+   Compiling x0x v0.46.0 (/mnt/c/Users/travi/wt-codex-x0x-bnrose-shadow)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10m 43s
+     Running unittests src/lib.rs (/home/travi/target-x0x-security-1019/debug/deps/x0x-75ad8dee2424d5cd)
+
+running 2 tests
+test bnrose_shadow::tests::oversized_internal_shape_refuses_before_slicing ... ok
+test bnrose_shadow::tests::prefix_encoder_matches_pinned_encoder_including_padding ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 3962 filtered out; finished in 4.69s

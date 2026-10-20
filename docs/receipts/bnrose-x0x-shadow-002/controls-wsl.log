@@ -1,0 +1,13 @@
+   Compiling x0x v0.46.0 (/mnt/c/Users/travi/wt-codex-x0x-bnrose-shadow)
+    Finished `release` profile [optimized] target(s) in 3.56s
+     Running unittests examples/bnrose_shadow.rs (/home/travi/target-x0x-bnrose-release/release/examples/bnrose_shadow-2c81e27b3240b7bb)
+
+running 6 tests
+test tests::malformed_oversized_and_trailing_wire_refuse ... ok
+test tests::opt_out_and_invalid_local_policy_refuse ... ok
+test tests::scope_and_signed_freshness_refuse_without_poisoning_state ... ok
+test tests::verified_observation_is_local_and_replay_bounded ... ok
+test tests::tampering_and_classical_signature_substitution_refuse ... ok
+test tests::baseline_and_shadow_share_authentication_boundary ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
