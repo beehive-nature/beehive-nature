@@ -1,0 +1,8 @@
+Running as unit: bnrose-delivery-r3-w64-churn-baseline.service
+Isolation admitted: non-root, separate loopback-only namespace, zero effective capabilities, no-new-privileges
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 5.326s
+             CPU time consumed: 1.003s
+                   Memory peak: 17.3M (swap: 0B)
+                    IP Traffic: received 4.9M, sent 4.9M

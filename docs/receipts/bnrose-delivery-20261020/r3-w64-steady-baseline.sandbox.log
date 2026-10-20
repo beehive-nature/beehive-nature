@@ -1,0 +1,8 @@
+Running as unit: bnrose-delivery-r3-w64-steady-baseline.service; invocation ID: 7f49f00cfa814ca3ba500e4daf72d078
+Isolation admitted: non-root, separate loopback-only namespace, zero effective capabilities, no-new-privileges
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 2.893s
+             CPU time consumed: 1.078s
+                   Memory peak: 20.6M (swap: 0B)
+                    IP Traffic: received 6.3M, sent 6.3M

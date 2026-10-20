@@ -1,0 +1,29 @@
+Tue Oct 20 09:32:22 AM UTC 2026
+ANSI_COLOR="0;38;2;126;186;228"
+BUG_REPORT_URL="https://github.com/NixOS/nixpkgs/issues"
+BUILD_ID="26.05.20260829.c5c4a43"
+CPE_NAME="cpe:/o:nixos:nixos:26.05"
+DEFAULT_HOSTNAME=nixos
+DOCUMENTATION_URL="https://nixos.org/learn.html"
+HOME_URL="https://nixos.org/"
+ID=nixos
+ID_LIKE=""
+IMAGE_ID=""
+IMAGE_VERSION=""
+LOGO="nix-snowflake"
+NAME=NixOS
+PRETTY_NAME="NixOS 26.05 (Yarara)"
+SUPPORT_END="2026-12-31"
+SUPPORT_URL="https://nixos.org/community.html"
+VARIANT=""
+VARIANT_ID=""
+VENDOR_NAME=NixOS
+VENDOR_URL="https://nixos.org/"
+VERSION="26.05 (Yarara)"
+VERSION_CODENAME=yarara
+VERSION_ID="26.05"
+Linux buzz-hostinger 6.18.48 #1-NixOS SMP PREEMPT_DYNAMIC Fri Aug 28 06:22:54 UTC 2026 x86_64 GNU/Linux
+ 09:32:22  up 2 days 13:56,  0 users,  load average: 1.18, 0.76, 0.63
+e121a98615a0581a0f2090e9ffd912503ac0335196bb34af992a210a681703e9  /var/lib/private/bnrose-native-validation/target/release/examples/bnrose_delivery # PUBLIC-CONSTANT: measured artifact checksum
+beecb7b9ad94654f76cc6942b7e5d914fdd02711b2f302855a965966c3533c5a  /var/lib/private/bnrose-native-validation/direct-source/examples/bnrose_delivery.rs # PUBLIC-CONSTANT: measured artifact checksum
+cec652ac6795999a949e0f56b6c6513e6cc1077ccb5b3bcdfb6ed26c035929bb  /var/lib/private/bnrose-native-validation/direct-source/Cargo.lock # PUBLIC-CONSTANT: measured artifact checksum

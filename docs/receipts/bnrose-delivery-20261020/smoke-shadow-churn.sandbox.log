@@ -1,0 +1,8 @@
+Running as unit: bnrose-delivery-smoke-shadow-churn.service; invocation ID: b49662ee75374cc9a978d938d6648f43
+Isolation admitted: non-root, separate loopback-only namespace, zero effective capabilities, no-new-privileges
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 5.345s
+             CPU time consumed: 1.066s
+                   Memory peak: 18M (swap: 0B)
+                    IP Traffic: received 4.9M, sent 4.9M

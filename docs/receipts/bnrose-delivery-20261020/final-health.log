@@ -1,0 +1,4 @@
+Tue Oct 20 09:34:46 AM UTC 2026
+ActiveState=active
+NRestarts=0
+{"ok":true,"status":"healthy","version":"0.46.0","peers":25,"send_ready_peers":25,"uptime_secs":223101}e121a98615a0581a0f2090e9ffd912503ac0335196bb34af992a210a681703e9  /var/lib/private/bnrose-native-validation/target/release/examples/bnrose_delivery # PUBLIC-CONSTANT: measured artifact checksum

@@ -1,0 +1,8 @@
+Running as unit: bnrose-delivery-r3-w8-steady-shadow.service; invocation ID: 23439604265c4b638d8afff9db607dcd
+Isolation admitted: non-root, separate loopback-only namespace, zero effective capabilities, no-new-privileges
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 3.170s
+             CPU time consumed: 1.221s
+                   Memory peak: 17.2M (swap: 0B)
+                    IP Traffic: received 5.8M, sent 5.8M

@@ -1,0 +1,10 @@
+Running as unit: bnrose-delivery-smoke-baseline.service
+bash: line 3: id: command not found
+bash: line 4: readlink: command not found
+bash: line 5: wc: command not found
+bash: line 5: ip: command not found
+          Finished with result: exit-code
+Main processes terminated with: code=exited, status=1/FAILURE
+               Service runtime: 85ms
+             CPU time consumed: 53ms
+                   Memory peak: 3.1M (swap: 0B)

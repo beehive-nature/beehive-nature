@@ -1,0 +1,27 @@
+2026-10-20T09:28:03+00:00 buzz-hostinger systemd[1]: Starting [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /var/tmp/bnrose-delivery-build.sh...
+2026-10-20T09:28:03+00:00 buzz-hostinger systemd[1]: Started [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /var/tmp/bnrose-delivery-build.sh.
+2026-10-20T09:28:03+00:00 buzz-hostinger bash[4138397]: /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash: /var/tmp/bnrose-delivery-build.sh: No such file or directory
+2026-10-20T09:28:03+00:00 buzz-hostinger systemd[1]: bnrose-delivery-build.service: Main process exited, code=exited, status=127/n/a
+2026-10-20T09:28:03+00:00 buzz-hostinger systemd[1]: bnrose-delivery-build.service: Failed with result 'exit-code'.
+2026-10-20T09:28:22+00:00 buzz-hostinger systemd[1]: Starting [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/bnrose-delivery-build.sh...
+2026-10-20T09:28:22+00:00 buzz-hostinger systemd[1]: Started [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/bnrose-delivery-build.sh.
+2026-10-20T09:28:22+00:00 buzz-hostinger bash[4138771]: tar: Ignoring unknown extended header keyword 'LIBARCHIVE.creationtime'
+2026-10-20T09:28:23+00:00 buzz-hostinger bash[4138816]: error: 'rustfmt' is not installed for the toolchain '1.95.0-x86_64-unknown-linux-gnu'.
+2026-10-20T09:28:23+00:00 buzz-hostinger bash[4138816]: help: run `rustup component add rustfmt` to install it
+2026-10-20T09:28:23+00:00 buzz-hostinger systemd[1]: bnrose-delivery-build.service: Main process exited, code=exited, status=1/FAILURE
+2026-10-20T09:28:23+00:00 buzz-hostinger systemd[1]: bnrose-delivery-build.service: Failed with result 'exit-code'.
+2026-10-20T09:28:57+00:00 buzz-hostinger systemd[1]: Starting [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/bnrose-delivery-build.sh...
+2026-10-20T09:28:57+00:00 buzz-hostinger systemd[1]: Started [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/bnrose-delivery-build.sh.
+2026-10-20T09:28:57+00:00 buzz-hostinger bash[4139518]: tar: Ignoring unknown extended header keyword 'LIBARCHIVE.creationtime'
+2026-10-20T09:28:58+00:00 buzz-hostinger bash[4139519]:    Compiling x0x v0.46.0 (/var/lib/private/bnrose-native-validation/direct-source)
+2026-10-20T09:29:20+00:00 buzz-hostinger bash[4139519]:     Finished `release` profile [optimized] target(s) in 22.24s
+2026-10-20T09:29:20+00:00 buzz-hostinger systemd[1]: bnrose-delivery-build.service: Deactivated successfully.
+2026-10-20T09:29:20+00:00 buzz-hostinger systemd[1]: bnrose-delivery-build.service: Consumed 40.473s CPU time over 22.467s wall clock time, 559.5M memory peak, 93.9M read from disk, 72K written to disk.
+2026-10-20T09:31:39+00:00 buzz-hostinger systemd[1]: Starting [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/bnrose-delivery-build.sh...
+2026-10-20T09:31:39+00:00 buzz-hostinger systemd[1]: Started [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/bnrose-delivery-build.sh.
+2026-10-20T09:31:39+00:00 buzz-hostinger bash[4143089]: tar: Ignoring unknown extended header keyword 'LIBARCHIVE.creationtime'
+2026-10-20T09:31:39+00:00 buzz-hostinger bash[4143089]: tar: Ignoring unknown extended header keyword 'LIBARCHIVE.creationtime'
+2026-10-20T09:31:39+00:00 buzz-hostinger bash[4143090]:    Compiling x0x v0.46.0 (/var/lib/private/bnrose-native-validation/direct-source)
+2026-10-20T09:32:02+00:00 buzz-hostinger bash[4143090]:     Finished `release` profile [optimized] target(s) in 22.87s
+2026-10-20T09:32:02+00:00 buzz-hostinger systemd[1]: bnrose-delivery-build.service: Deactivated successfully.
+2026-10-20T09:32:02+00:00 buzz-hostinger systemd[1]: bnrose-delivery-build.service: Consumed 41.559s CPU time over 23.111s wall clock time, 492.8M memory peak.

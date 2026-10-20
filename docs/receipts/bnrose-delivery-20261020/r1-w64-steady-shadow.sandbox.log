@@ -1,0 +1,8 @@
+Running as unit: bnrose-delivery-r1-w64-steady-shadow.service
+Isolation admitted: non-root, separate loopback-only namespace, zero effective capabilities, no-new-privileges
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 2.950s
+             CPU time consumed: 1.161s
+                   Memory peak: 18.8M (swap: 0B)
+                    IP Traffic: received 5.8M, sent 5.8M
