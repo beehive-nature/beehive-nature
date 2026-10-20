@@ -12,23 +12,38 @@
    QUALIFIED rail is tried (the pin, not the rail, decides what is
    sealed); without a pin, the result is consistency-only and is labeled
    untrusted, never verified. Every refusal is named; nothing falls back
-   silently. Zero network beyond ordinary same-origin static fetch; the
-   adapter rails (arweave/autonomi/x0x) are declared but NOT qualified —
-   attempting them is a named refusal until their browser routes land. */
+   silently.
+
+   RAILS (2026-10-20 qualification pass): a rail says WHERE bytes may
+   come from, never WHAT to trust — every byte from every rail is
+   digest-verified against the pin, so a hostile rail (or a hostile
+   rail-manifest.json) can only affect availability, never content.
+   rail-manifest.json beside the seal carries endpoints, observed
+   response shapes and honest statuses. github-pages is the one
+   qualified rail. The autonomi estate door (relay.skaists.dev) is
+   implemented with its OBSERVED response shape (JSON {"data": base64})
+   and stays unqualified until corpus content lives on Autonomi (upload
+   is a founder gesture). Arweave gateway fetch is implemented the same
+   way, unqualified until content exists. x0x is loopback-only gossip
+   with no stored history (ops/x0x verbatim) — structurally absent as a
+   public read rail, and named as such. */
 (function () {
   'use strict';
 
+  const MANIFEST_URL = '../assets/profile-archive/lineage/rail-manifest.json';
+  const GITHUB_RAIL = {
+    id: 'github-pages',
+    label: 'GitHub Pages — bootstrap',
+    qualified: true,
+    note: 'same-origin static fetch of the committed corpus artifacts',
+    kind: 'same-origin-static',
+    base: '../assets/profile-archive/lineage/',
+  };
   const RAILS = [
-    {
-      id: 'github-pages',
-      label: 'GitHub Pages — bootstrap',
-      qualified: true,
-      note: 'same-origin static fetch of the committed corpus artifacts',
-      base: '../assets/profile-archive/lineage/',
-    },
-    { id: 'arweave', label: 'Arweave', qualified: false, note: 'declared rail — adapter-arweave browser route not yet qualified' },
-    { id: 'autonomi', label: 'Autonomi', qualified: false, note: 'declared rail — adapter-autonomi browser route not yet qualified' },
-    { id: 'x0x', label: 'x0x', qualified: false, note: 'declared rail — ops/x0x mesh route not yet qualified' },
+    GITHUB_RAIL,
+    { id: 'autonomi', label: 'Autonomi', qualified: false, note: 'declared rail — estate door route observed live; corpus content not yet on Autonomi' },
+    { id: 'arweave', label: 'Arweave', qualified: false, note: 'declared rail — gateway route implemented; corpus content not yet on Arweave' },
+    { id: 'x0x', label: 'x0x', qualified: false, note: 'declared rail — loopback-only gossip, no stored history; structurally absent as a public read rail' },
   ];
 
   class SealError extends Error {
@@ -59,6 +74,102 @@
     return new Uint8Array(await r.arrayBuffer());
   }
 
+  // base64 -> bytes (the estate door's observed wrapper shape)
+  function b64ToBytes(b64) {
+    const bin = atob(b64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  // A door-shaped rail: GET door+address, JSON {"data": <base64 raw bytes>}
+  // (shape observed live 2026-10-20 against relay.skaists.dev).
+  async function doorBytes(door, addr) {
+    const raw = await fetchBytes(door + addr);
+    let j;
+    try {
+      j = JSON.parse(new TextDecoder().decode(raw));
+    } catch (e) {
+      throw new SealError('fetch-failed', door + addr + ' — door payload is not its observed JSON shape');
+    }
+    if (!j || typeof j.data !== 'string') {
+      throw new SealError('fetch-failed', door + addr + ' — door payload missing the data field');
+    }
+    return b64ToBytes(j.data);
+  }
+
+  // Build a fetch-one-artifact function for a rail configuration. The
+  // address map names each seal artifact on that rail; a missing address
+  // is a named refusal, never a skip.
+  function railGetter(rail) {
+    if (rail.kind === 'same-origin-static') {
+      return (name) => fetchBytes(rail.base + name);
+    }
+    if (rail.kind === 'estate-door') {
+      return (name) => {
+        const a = rail.addresses && rail.addresses[name];
+        if (!a) throw new SealError('address-missing', rail.id + ' has no address for ' + name);
+        return doorBytes(rail.door, a);
+      };
+    }
+    if (rail.kind === 'public-gateway') {
+      return async (name) => {
+        const a = rail.addresses && rail.addresses[name];
+        if (!a) throw new SealError('address-missing', rail.id + ' has no address for ' + name);
+        let lastErr;
+        for (const gw of rail.gateways || []) {
+          try {
+            return await fetchBytes(gw + a);
+          } catch (e) {
+            lastErr = e;
+          }
+        }
+        throw lastErr || new SealError('fetch-failed', rail.id + ' has no gateway configured');
+      };
+    }
+    return () => Promise.reject(new SealError('route-not-qualified', rail.note || rail.id));
+  }
+
+  // Merge the committed rail-manifest.json (WHERE, never WHAT) into the
+  // rail set. A rail participates only when the manifest marks it
+  // qualified AND carries addresses for the artifacts.
+  function railsFromManifest(m) {
+    const out = [GITHUB_RAIL];
+    const r = m && m.rails;
+    const entries = [
+      ['autonomi', r && r.autonomi],
+      ['arweave', r && r.arweave],
+    ];
+    for (const [id, cfg] of entries) {
+      if (!cfg) {
+        out.push(RAILS.find((x) => x.id === id));
+        continue;
+      }
+      const hasAddresses = cfg.addresses && Object.keys(cfg.addresses).length > 0;
+      out.push({
+        id,
+        label: id === 'autonomi' ? 'Autonomi — estate door' : 'Arweave — public gateway',
+        qualified: !!(cfg.qualified && hasAddresses),
+        note: cfg.status || 'declared rail',
+        kind: cfg.kind,
+        door: cfg.door,
+        gateways: cfg.gateways,
+        addresses: cfg.addresses || {},
+      });
+    }
+    out.push(RAILS.find((x) => x.id === 'x0x'));
+    return out;
+  }
+
+  async function loadManifestRails() {
+    try {
+      const bytes = await fetchBytes(MANIFEST_URL);
+      return railsFromManifest(JSON.parse(new TextDecoder().decode(bytes)));
+    } catch (e) {
+      return RAILS; // the manifest is WHERE-only; without it the built-ins stand
+    }
+  }
+
   /* Verify one person against the seal. Returns a result ONLY after the
      person's own page bytes verified against the state; otherwise throws
      SealError with .attempts naming every rail refusal. Issue #477: the
@@ -77,7 +188,10 @@
     if (rootPin && !/^[0-9a-f]{64}$/.test(rootPin)) {
       throw new SealError('usage', 'root pin must be exactly 64 hex characters');
     }
-    const rails = (opts.rails && opts.rails.length ? opts.rails : RAILS).slice();
+    const rails = (opts.rails && opts.rails.length
+      ? opts.rails
+      : await loadManifestRails()
+    ).slice();
     const attempts = [];
     for (const rail of rails) {
       if (!rail.qualified) {
@@ -106,7 +220,8 @@
   }
 
   async function verifyOnRail(rail, person, rootPin) {
-    const stateBytes = await fetchBytes(rail.base + 'publication-state.json');
+    const get = railGetter(rail); // WHERE the bytes come from — the pin rules WHAT
+    const stateBytes = await get('publication-state.json');
     const stateSha = await sha256Hex(stateBytes);
     if (rootPin && stateSha !== rootPin) {
       throw new SealError('pin-mismatch', 'rail ' + rail.id + ' state hashes ' + stateSha.slice(0, 16) + '…; the pin says otherwise');
@@ -117,7 +232,7 @@
     } catch (e) {
       throw new SealError('seal-unparseable', 'state is not JSON: ' + e.message);
     }
-    const indexBytes = await fetchBytes(rail.base + 'publication-index.json');
+    const indexBytes = await get('publication-index.json');
     // issue #477: the STATE binds the index by digest — the index has no
     // self-claim to check. Forged names/refs/arks with intact page digests
     // still hash differently than the digest sealed in the state.
@@ -144,8 +259,8 @@
     if (entry.pageHtmlSha256 !== pageState.html.sha256 || entry.pageJsonSha256 !== pageState.json.sha256) {
       throw new SealError('digest-disagreement', 'the index and the state disagree on ' + person + '\u2019s page digests');
     }
-    const htmlBytes = await fetchBytes(rail.base + entry.pageHtml);
-    const jsonBytes = await fetchBytes(rail.base + entry.pageJson);
+    const htmlBytes = await get(entry.pageHtml);
+    const jsonBytes = await get(entry.pageJson);
     const htmlSha = await sha256Hex(htmlBytes);
     const jsonSha = await sha256Hex(jsonBytes);
     if (htmlSha !== pageState.html.sha256) {
@@ -175,5 +290,5 @@
     };
   }
 
-  globalThis.BloodSeal = { RAILS, SealError, verifyPerson };
+  globalThis.BloodSeal = { RAILS, SealError, verifyPerson, railsFromManifest };
 })();

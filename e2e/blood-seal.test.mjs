@@ -98,6 +98,26 @@ for (const id of Object.keys(persons)) {
 const serve = (req, res) => {
   const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '');
   served.add(rel);
+  // door-shaped mock rails for gate J: JSON {"data": base64} — the estate
+  // door's OBSERVED wrapper shape. doorA serves a TAMPERED p2 page; doorB
+  // serves the sealed bytes.
+  const doorMatch = /^door([AB])\/(.*)$/.exec(rel);
+  if (doorMatch) {
+    const name = doorMatch[2];
+    const clean = files['assets/profile-archive/lineage/' + name] !== undefined;
+    if (!clean) {
+      res.writeHead(404);
+      res.end('no');
+      return;
+    }
+    let bytes = readFileSync(join(docroot, 'assets/profile-archive/lineage', name));
+    if (doorMatch[1] === 'A' && name === 'persons/p2.html') {
+      bytes = Buffer.from(bytes.toString('utf8').replace('Bob Fixture', 'Bob Tampered'));
+    }
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ data: bytes.toString('base64') }));
+    return;
+  }
   if (files[rel]) {
     res.writeHead(200, { 'content-type': files[rel] });
     res.end(readFileSync(join(docroot, rel)));
@@ -213,6 +233,49 @@ test('the blood seal reader: verified reads, fail-closed everything else', async
     await page.waitForSelector('#sealStatus[data-state="failed"]');
     assert.match(await statusText(), /person-id-rejected/, 'I: the id shape is named');
     assert.equal(await frame.getAttribute('srcdoc'), null, 'I: nothing renders');
+
+    // J — pluggable rails through the REAL reader (the 2026-10-20 rail
+    // qualification pass): door-shaped rails in the reader's own
+    // verifyPerson, serving the estate door's OBSERVED wrapper shape.
+    // Rail "one" serves a tampered p2 page; rail "two" the sealed bytes —
+    // the tampered rail is named and refused, the good rail verifies; two
+    // tampered rails fail closed with every refusal named. No rail's bytes
+    // render unverified, ever.
+    const viaDoors = await page.evaluate(async ({ pin }) => {
+      const origin = location.origin;
+      const mk = (id, doorTag) => ({
+        id,
+        qualified: true,
+        kind: 'estate-door',
+        door: origin + '/door' + doorTag + '/',
+        addresses: {
+          'publication-state.json': 'publication-state.json',
+          'publication-index.json': 'publication-index.json',
+          'persons/p2.html': 'persons/p2.html',
+          'persons/p2.json': 'persons/p2.json',
+        },
+      });
+      const run = async (rails) => {
+        try {
+          const r = await BloodSeal.verifyPerson({ person: 'p2', rootPin: pin, rails });
+          return { status: r.status, rail: r.rail, attempts: r.attempts.map((a) => a.rail + ':' + a.refused) };
+        } catch (e) {
+          return { error: e.code, attempts: (e.attempts || []).map((a) => a.rail + ':' + a.refused) };
+        }
+      };
+      return {
+        happy: await run([mk('door-tampered', 'A'), mk('door-clean', 'B')]),
+        bothTampered: await run([mk('door-tampered-1', 'A'), mk('door-tampered-2', 'A')]),
+      };
+    }, { pin: realPin });
+    assert.ok(viaDoors.happy.status === 'verified' && viaDoors.happy.rail === 'door-clean',
+      'J: verified through the clean door rail: ' + JSON.stringify(viaDoors.happy));
+    assert.ok(viaDoors.happy.attempts.some((a) => a.startsWith('door-tampered:page-drift')),
+      'J: the tampered rail is named: ' + JSON.stringify(viaDoors.happy.attempts));
+    assert.equal(viaDoors.bothTampered.error, 'all-rails-failed',
+      'J: tampered everywhere fails closed: ' + JSON.stringify(viaDoors.bothTampered));
+    assert.ok(viaDoors.bothTampered.attempts.length === 2,
+      'J: every rail refusal named: ' + JSON.stringify(viaDoors.bothTampered.attempts));
   } finally {
     await browser.close();
     server.close();

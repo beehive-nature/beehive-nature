@@ -1,0 +1,35 @@
+{
+ "schema": "skaists.genealogy-rail-manifest/1",
+ "note": "WHERE bytes may be fetched from — never WHAT to trust. Every byte from every rail is digest-verified against the pinned seal before rendering; a malicious manifest can point at evil endpoints and the pin still refuses their bytes (it can only affect availability). Corpus addresses stay EMPTY until an authorized upload puts the artifacts on a rail; a rail flips to qualified:true only with a matching row in rail-qualification.json recording observed availability.",
+ "rails": {
+  "github-pages": {
+   "qualified": true,
+   "kind": "same-origin-static",
+   "base": "../assets/profile-archive/lineage/",
+   "addresses": {},
+   "status": "qualified — the working rail (CI + Pages deploy observed)"
+  },
+  "autonomi": {
+   "qualified": false,
+   "kind": "estate-door",
+   "door": "https://relay.skaists.dev/ant/v1/data/public/",
+   "responseShape": "JSON {\"data\": <base64 raw bytes>} — observed 2026-10-20",
+   "addresses": {},
+   "status": "route observed live (ant-door example artifact, exact bytes, double-fetch identical) but NOT qualified for corpus delivery — no corpus content on Autonomi; upload is a founder gesture"
+  },
+  "arweave": {
+   "qualified": false,
+   "kind": "public-gateway",
+   "gateways": ["https://arweave.net/", "https://gw-arweave-dev.flt.cloud/", "https://arweave-search.microwave.dev/"],
+   "addresses": {},
+   "status": "adapter implemented; observed availability ABSENT — no corpus content on Arweave (upload/spend is a founder gesture)"
+  },
+  "x0x": {
+   "qualified": false,
+   "kind": "loopback-gossip",
+   "api": "http://127.0.0.1:12700",
+   "topics": {},
+   "status": "structurally unqualified for public reads — x0xd is loopback-only gossip with no stored history (ops/x0x verbatim; harness-sovereign x0x.rs); live observation deferred 2026-10-20: box SSH refused (connection reset)"
+  }
+ }
+}
