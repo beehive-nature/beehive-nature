@@ -19,6 +19,7 @@ use harness_sovereign::relay::LocalRelay;
 use harness_sovereign::settle::{NostrSettleSink, SettlementLane};
 use harness_sovereign::switch::{BusPublisher, RunOutcome, SessionStore, SwitchCoordinator};
 use harness_sovereign::tools::Toolset;
+use harness_sovereign::x0x::{X0xBusBridge, X0xTransport};
 
 use event_bus::EventBus;
 
@@ -91,17 +92,31 @@ async fn main() {
     );
     eprintln!("relays: {relay_urls:?}");
 
-    // Bridge: bus lifecycle events → Nostr, lag-tolerant.
+    // Bridge: bus lifecycle events -> transport, lag-tolerant. The
+    // kernel resolves the technology here (Art. III.5); the harness
+    // never names a wire protocol: HARNESS_TRANSPORT=nostr|x0x.
     let demo_secret = ensure_demo_key(&workdir.join("nostr-keys")).expect("demo key");
-    let bridge_rx = bus.subscribe();
-    let bridge = NostrBusBridge::new(NostrAdapter::new(
-        relay_urls.clone(),
-        demo_secret,
-        Duration::from_secs(5),
-    ));
-    tokio::spawn(async move {
-        bridge.forward_loop(bridge_rx, demo_secret, unix_secs).await;
-    });
+    let transport_choice =
+        std::env::var("HARNESS_TRANSPORT").unwrap_or_else(|_| "nostr".to_string());
+    if transport_choice.eq_ignore_ascii_case("x0x") {
+        let x0x = X0xTransport::from_env();
+        eprintln!("transport: x0x ({})", x0x.api());
+        let bridge = X0xBusBridge::new(x0x);
+        let bridge_rx = bus.subscribe();
+        tokio::spawn(async move {
+            bridge.forward_loop(bridge_rx, demo_secret, unix_secs).await;
+        });
+    } else {
+        let bridge = NostrBusBridge::new(NostrAdapter::new(
+            relay_urls.clone(),
+            demo_secret,
+            Duration::from_secs(5),
+        ));
+        let bridge_rx = bus.subscribe();
+        tokio::spawn(async move {
+            bridge.forward_loop(bridge_rx, demo_secret, unix_secs).await;
+        });
+    }
 
     // Settlement lane (R6), receipts fanning out over the same relays.
     let sandbox_dir = workdir.join("sandbox");
