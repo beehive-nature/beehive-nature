@@ -110,6 +110,8 @@ pub struct Supervisor {
     pub local_domain: String,
     /// Nonces of unadmitted operations shed at Gate 3 load control.
     pub shed_nonces: crate::load_shed::BoundedShedTracker,
+    pub wire_repeat_drops: usize,
+    pub wire_retries_checked: usize,
     /// Client-side retry budgets per authority for bounding retry amplification (PR #465, r9, O3).
     pub client_retry_budgets: crate::load_shed::BoundedClientBudgets,
     /// the exclusive authority over this state directory (see Claim)
@@ -505,6 +507,8 @@ impl Supervisor {
             device_id,
             local_domain,
             shed_nonces: crate::load_shed::BoundedShedTracker::default(),
+            wire_repeat_drops: 0,
+            wire_retries_checked: 0,
             client_retry_budgets: crate::load_shed::BoundedClientBudgets::default(),
             cached_receipts,
             _claim: claim,
@@ -725,6 +729,24 @@ impl Supervisor {
             }
         }
 
+        // Per-authority wire rate limit & repeat send drop (PR #465, founder ruling):
+        // Runs BEFORE envelope decode and BEFORE cryptographic signature verification!
+        let now_ms = clock * 1000;
+        let env_sha = env_sha_of(&intent.env);
+        let env_key = (intent.authority, env_sha);
+        let mut retry_token_preacquired = false;
+        if self.shed_nonces.contains_env_at(&env_key, now_ms) {
+            if !self.try_acquire_client_retry(&intent.authority, now_ms) {
+                self.wire_repeat_drops += 1;
+                return RunOutcome {
+                    refused: Some("client:retry-budget-exhausted".into()),
+                    ..none
+                };
+            }
+            retry_token_preacquired = true;
+            self.wire_retries_checked += 1;
+        }
+
         // 1b. Fast decode of envelope
         let decoded = match btungsten_wb001::decode(&intent.env) {
             Ok(i) => i,
@@ -753,8 +775,7 @@ impl Supervisor {
 
         // 4. API-level entrypoint retry budget check (fast-path refusal before worker admission & execution)
         // (For cooperative callers using Supervisor::retry API; uncooperative wire sends hit run_inner backstop)
-        let now_ms = clock * 1000;
-        if !self.try_acquire_client_retry(&intent.authority, now_ms) {
+        if !retry_token_preacquired && !self.try_acquire_client_retry(&intent.authority, now_ms) {
             return RunOutcome {
                 refused: Some("client:retry-budget-exhausted".into()),
                 ..none
@@ -800,6 +821,30 @@ impl Supervisor {
                 };
             }
         }
+
+        // Per-authority wire rate limit & repeat send drop (PR #465, founder ruling):
+        // Runs BEFORE envelope decode and BEFORE cryptographic signature verification!
+        // If an inbound intent is an exact repeat send of a previously shed intent,
+        // enforce the client's retry budget immediately at the wire boundary.
+        // Drops uncooperative repeat sends before spending work on decode or signature verify.
+        let now_ms = clock * 1000;
+        let env_sha = env_sha_of(&intent.env);
+        let env_key = (intent.authority, env_sha);
+        let is_wire_repeat_shed = self.shed_nonces.contains_env_at(&env_key, now_ms);
+        let mut retry_token_preacquired = false;
+
+        if is_wire_repeat_shed && !allow_retry {
+            if !self.try_acquire_client_retry(&intent.authority, now_ms) {
+                self.wire_repeat_drops += 1;
+                return RunOutcome {
+                    refused: Some("client:retry-budget-exhausted".into()),
+                    ..none
+                };
+            }
+            retry_token_preacquired = true;
+            self.wire_retries_checked += 1;
+        }
+
         // Fast decode of envelope
         let decoded = match btungsten_wb001::decode(&intent.env) {
             Ok(i) => i,
@@ -992,22 +1037,24 @@ impl Supervisor {
         } else {
             let work_fp = intent_work_fingerprint(&decoded);
             let ikey = (intent.authority, work_fp);
-            let retry = self.shed_nonces.contains_nonce_at(&nonce_key, now_ms)
+            let retry = is_wire_repeat_shed
+                || self.shed_nonces.contains_nonce_at(&nonce_key, now_ms)
                 || self.shed_nonces.contains_intent_at(&ikey, now_ms);
             (retry, Some(ikey))
         };
 
         // Server-side backstop (PR #465 O1, O2, O4):
         // If an inbound request is identified as a retry, enforce the client retry budget.
-        // If allow_retry is true, retry() already acquired a token at the API entrypoint;
-        // if allow_retry is false (e.g. client retrying through run()), acquire here on the server.
-        if is_retry && !allow_retry {
+        // If retry_token_preacquired is true, token was already acquired at wire rate limiter before decode.
+        // If allow_retry is true, retry() already acquired a token at the API entrypoint.
+        if is_retry && !allow_retry && !retry_token_preacquired {
             if !self.try_acquire_client_retry(&intent.authority, now_ms) {
                 return RunOutcome {
                     refused: Some("client:retry-budget-exhausted".into()),
                     ..none
                 };
             }
+            self.wire_retries_checked += 1;
         }
 
         if let Err(e) = self
@@ -1015,7 +1062,8 @@ impl Supervisor {
             .admit_request(is_local, is_retry, &intent.authority, now_ms)
         {
             if let Some(ikey) = intent_key {
-                self.shed_nonces.insert_at(nonce_key, ikey, now_ms);
+                self.shed_nonces
+                    .insert_all(nonce_key, ikey, env_key, now_ms);
             }
             return RunOutcome {
                 refused: Some(e.into()),
@@ -1024,7 +1072,7 @@ impl Supervisor {
         }
 
         if let Some(ikey) = intent_key {
-            self.shed_nonces.remove(&nonce_key, &ikey);
+            self.shed_nonces.remove_all(&nonce_key, &ikey, &env_key);
         }
         let outcome = self.run_inner_admitted(
             intent,

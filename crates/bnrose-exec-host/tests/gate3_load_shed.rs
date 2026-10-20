@@ -620,16 +620,29 @@ fn test_gate3_real_retry_amplification_under_backoff() {
         }
     }
 
-    // Uncooperative clients transmit all 180 retries over wire (R_amp,wire = 1.90)
+    // Uncooperative clients transmit all 180 retries over wire (ignoring client retry budget):
     assert_eq!(
         total_retries_wire_run, 180,
         "uncooperative clients transmit all 180 retries over wire"
     );
-    let r_amp_wire_run = retry_amplification(total_initial_requests, total_retries_wire_run);
+    // Wire rate limiter dropped all 160 unbudgeted repeat sends before decode / verify
     assert_eq!(
-        r_amp_wire_run, 1.90,
-        "uncooperative wire R_amp is 1.90 without host retry() API fail-fast"
+        sup_run.wire_repeat_drops, 160,
+        "wire rate limit drops all 160 unbudgeted repeat sends before decode/verify"
     );
+    assert_eq!(
+        sup_run.wire_retries_checked, 20,
+        "server spends work checking only 20 retries within client budgets"
+    );
+
+    // Even when clients ignore the rules and send retries over run(),
+    // server-checked retry amplification is strictly <= 1.15 (PR #465, founder ruling):
+    let r_amp_wire_run = retry_amplification(total_initial_requests, sup_run.wire_retries_checked);
+    assert!(
+        r_amp_wire_run <= 1.15,
+        "Checked wire retries under run() must stay <= 1.15 even for uncooperative clients; was {r_amp_wire_run:.3}"
+    );
+    assert_eq!(r_amp_wire_run, 1.100);
 
     // Server backstop strictly caps admitted retries at 20 (1 per client floor)
     assert_eq!(
@@ -645,6 +658,7 @@ fn test_gate3_real_retry_amplification_under_backoff() {
         r_amp_admit <= 1.15,
         "Server admitted amplification under run() must stay <= 1.15; was {r_amp_admit:.3}"
     );
+    assert_eq!(r_amp_admit, 1.100);
 
     // Scenario 3: Fresh nonce + bumped expiry re-sends via run() (PR #465 O5 & O6)
     // Clients re-sign shed work with a fresh nonce and expiry + 60s.
@@ -761,7 +775,7 @@ fn test_gate3_real_retry_amplification_under_backoff() {
         "R_amp under forged flood must stay <= 1.15; was {r_amp_forge:.3}"
     );
 
-    println!("gate3: PASS - cooperative client fail-fast R_amp <= 1.15 (retry={r_amp_s1:.3}, bumped_expiry={r_amp_exp:.3}, forged_attack={r_amp_forge:.3}); uncooperative wire R_amp={r_amp_wire_run:.3} with server admitted R_amp={r_amp_admit:.3} <= 1.15");
+    println!("gate3: PASS - all 4 R_amp scenarios strictly <= 1.15 bound (cooperative retry={r_amp_s1:.3}, uncooperative run wire-checked={r_amp_wire_run:.3} <= 1.15, admitted={r_amp_admit:.3} <= 1.15, bumped_expiry={r_amp_exp:.3}, forged_attack={r_amp_forge:.3})");
 }
 
 #[test]

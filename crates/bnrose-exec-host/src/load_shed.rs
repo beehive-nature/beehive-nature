@@ -206,6 +206,8 @@ pub struct BoundedShedTracker {
     nonce_map: std::collections::HashMap<([u8; 32], [u8; 32]), u64>,
     intent_queue: std::collections::VecDeque<([u8; 32], [u8; 32])>,
     intent_map: std::collections::HashMap<([u8; 32], [u8; 32]), u64>,
+    env_queue: std::collections::VecDeque<([u8; 32], [u8; 32])>,
+    env_map: std::collections::HashMap<([u8; 32], [u8; 32]), u64>,
 }
 
 impl BoundedShedTracker {
@@ -220,6 +222,8 @@ impl BoundedShedTracker {
             nonce_map: std::collections::HashMap::with_capacity(max_entries),
             intent_queue: std::collections::VecDeque::with_capacity(max_entries),
             intent_map: std::collections::HashMap::with_capacity(max_entries),
+            env_queue: std::collections::VecDeque::with_capacity(max_entries),
+            env_map: std::collections::HashMap::with_capacity(max_entries),
         }
     }
 
@@ -289,6 +293,60 @@ impl BoundedShedTracker {
         false
     }
 
+    pub fn insert_env_at(&mut self, env_key: ([u8; 32], [u8; 32]), now_ms: u64) {
+        if let Some(ts) = self.env_map.get_mut(&env_key) {
+            *ts = now_ms;
+        } else {
+            while self.env_queue.len() >= self.max_entries {
+                if let Some(oldest) = self.env_queue.pop_front() {
+                    self.env_map.remove(&oldest);
+                }
+            }
+            self.env_map.insert(env_key, now_ms);
+            self.env_queue.push_back(env_key);
+        }
+    }
+
+    pub fn insert_all(
+        &mut self,
+        nonce_key: ([u8; 32], [u8; 32]),
+        intent_key: ([u8; 32], [u8; 32]),
+        env_key: ([u8; 32], [u8; 32]),
+        now_ms: u64,
+    ) {
+        self.insert_at(nonce_key, intent_key, now_ms);
+        self.insert_env_at(env_key, now_ms);
+    }
+
+    pub fn contains_env(&self, env_key: &([u8; 32], [u8; 32])) -> bool {
+        self.contains_env_at(env_key, 0)
+    }
+
+    pub fn contains_env_at(&self, env_key: &([u8; 32], [u8; 32]), now_ms: u64) -> bool {
+        if let Some(&ts) = self.env_map.get(env_key) {
+            if now_ms == 0 || ts == 0 || now_ms < ts.saturating_add(self.ttl_ms) {
+                return true;
+            }
+        }
+        false
+    }
+
+    pub fn remove_env(&mut self, env_key: &([u8; 32], [u8; 32])) {
+        if self.env_map.remove(env_key).is_some() {
+            self.env_queue.retain(|k| k != env_key);
+        }
+    }
+
+    pub fn remove_all(
+        &mut self,
+        nonce_key: &([u8; 32], [u8; 32]),
+        intent_key: &([u8; 32], [u8; 32]),
+        env_key: &([u8; 32], [u8; 32]),
+    ) {
+        self.remove(nonce_key, intent_key);
+        self.remove_env(env_key);
+    }
+
     pub fn remove(&mut self, nonce_key: &([u8; 32], [u8; 32]), intent_key: &([u8; 32], [u8; 32])) {
         if self.nonce_map.remove(nonce_key).is_some() {
             self.nonce_queue.retain(|k| k != nonce_key);
@@ -299,11 +357,14 @@ impl BoundedShedTracker {
     }
 
     pub fn len(&self) -> usize {
-        self.nonce_map.len().max(self.intent_map.len())
+        self.nonce_map
+            .len()
+            .max(self.intent_map.len())
+            .max(self.env_map.len())
     }
 
     pub fn is_empty(&self) -> bool {
-        self.nonce_map.is_empty() && self.intent_map.is_empty()
+        self.nonce_map.is_empty() && self.intent_map.is_empty() && self.env_map.is_empty()
     }
 }
 
