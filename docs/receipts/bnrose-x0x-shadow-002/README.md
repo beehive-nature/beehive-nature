@@ -39,6 +39,33 @@ raw benchmark JSON is unchanged.
 Superseded local compiles and prior-head CI were deliberately cancelled after
 source corrections; their cancellation logs are not test failures or passes.
 
+## Final-head hosted CI completion
+
+`final-head-checks.json` records **32 successful checks, two scheduled-only
+skips, no failures and no pending jobs** at 85633f6. It supersedes the earlier
+in-progress `current-head-checks.json` snapshot. Relevant log excerpts are
+retained with job timestamps; display color codes are removed for readability.
+
+- Linux suite: 4,756 passed, 326 skipped; all eight shadow tests appear in the
+  pass list. Separate voice acceptance: 1 passed, none skipped.
+- Exact ignored 100k signing test: 1 passed, 3,981 other tests skipped.
+- Windows instance-lock suite: 9 passed, 3,890 unrelated tests filtered.
+- Coverage run: 4,750 passed, 318 skipped. Overall line coverage is 87.00%
+  (172,242/197,973), above the unchanged 65.70% enforced floor. Advisory
+  targets remain unmet for REST/API/core (80.95% versus 90%) and network
+  transport (82.57% versus 85%); passing the floor does not erase those gaps.
+- Cargo Audit completed successfully across 582 dependencies, with five
+  existing warnings: audiopus_sys, paste and unsafe-libyaml unmaintained;
+  lru unsound; yoke-derive yanked. No audit exclusions were added.
+- Linux GNU/musl/ARM, macOS x64/ARM and Windows release builds passed, as did
+  all executed integration, format, lint, docs and authority checks.
+
+Workflow evidence: CI 39361382033, Build 39361382023, Security Audit
+39361382094, Integration & Soak Tests 39361382067. A concurrent CLI log-cache
+read briefly failed; a sequential retry retrieved the signing log successfully.
+That retrieval error was not a CI failure. The original invitation/soak result
+remains separate as described below.
+
 ## Native NixOS execution
 
 Hostinger directly reported NixOS 26.05, kernel 6.18.48, eight KVM vCPUs on
@@ -78,6 +105,10 @@ order. Preflight runs are retained separately. `summarize.mjs` verifies the
 reported summary against every raw sample, checks unchanged wire/state sizes,
 and produces `summary.json`. Report both medians and tails; do not interpret
 a platform change from WSL to NixOS as an adapter optimization.
+
+The optimized preflight used 7f9eede, whose production code matches 85633f6;
+its distinct executable hash is recorded in provenance. Every optimized run
+in the comparison cohort uses the rebuilt final-head 85633f6 executable.
 
 ## Measured result
 

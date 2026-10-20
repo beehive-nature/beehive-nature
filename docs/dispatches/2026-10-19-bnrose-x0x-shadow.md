@@ -205,3 +205,18 @@ scheduled skips. Neither PR repairs the independent invitation-provenance
 failure from run 39223803733. Live mesh, durable recovery and partition
 acceptance remain unexecuted; the Proposed ADR and Git-crate distribution
 decision remain for review.
+
+Final CI completion: at the same head
+`85633f6a6dfea44e62a0cad778aa429275fc4604`, **32 checks passed, two
+scheduled-only checks were skipped, and no jobs remain pending or failed**.
+See `final-head-checks.json` and `ci-*-summary.log` in receipt 002. The Linux
+suite passed 4,756 tests with 326 skips; all eight shadow tests are included.
+Separate voice acceptance passed 1/1. The exact 100k signing test passed 1/1
+with 3,981 other tests skipped. Windows instance-lock acceptance passed 9/9
+with 3,890 unrelated tests filtered. All six platform builds passed.
+
+Coverage passed at 87.00% (172,242/197,973; unchanged floor 65.70%). Advisory
+REST/API/core coverage remains 80.95% against a 90% target, and transport
+82.57% against 85%. Cargo Audit passed with the same five existing warnings;
+none were suppressed by this change. These receipts complete PR #4's executed
+checks, not the independent scheduled invitation-convergence or soak work.

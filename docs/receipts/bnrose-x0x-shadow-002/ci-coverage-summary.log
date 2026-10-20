@@ -1,0 +1,22 @@
+Coverage Gate	Run line coverage gate	2026-10-20T03:12:26.0287236Z         PASS [   0.013s] (  81/4750) x0x bnrose_shadow::tests::oversized_internal_shape_refuses_before_slicing
+Coverage Gate	Run line coverage gate	2026-10-20T03:12:27.3810341Z         PASS [   1.350s] (  82/4750) x0x bnrose_shadow::tests::prefix_encoder_matches_pinned_encoder_including_padding
+Coverage Gate	Run line coverage gate	2026-10-20T03:18:24.3135942Z         PASS [   0.090s] (4732/4750) x0x::example/bnrose_shadow tests::baseline_and_shadow_share_authentication_boundary
+Coverage Gate	Run line coverage gate	2026-10-20T03:18:24.3213755Z         PASS [   0.008s] (4733/4750) x0x::example/bnrose_shadow tests::malformed_oversized_and_trailing_wire_refuse
+Coverage Gate	Run line coverage gate	2026-10-20T03:18:24.3301471Z         PASS [   0.009s] (4734/4750) x0x::example/bnrose_shadow tests::opt_out_and_invalid_local_policy_refuse
+Coverage Gate	Run line coverage gate	2026-10-20T03:18:24.3409034Z         PASS [   0.011s] (4735/4750) x0x::example/bnrose_shadow tests::scope_and_signed_freshness_refuse_without_poisoning_state
+Coverage Gate	Run line coverage gate	2026-10-20T03:18:24.3572696Z         PASS [   0.016s] (4736/4750) x0x::example/bnrose_shadow tests::tampering_and_classical_signature_substitution_refuse
+Coverage Gate	Run line coverage gate	2026-10-20T03:18:24.3712519Z         PASS [   0.014s] (4737/4750) x0x::example/bnrose_shadow tests::verified_observation_is_local_and_replay_bounded
+Coverage Gate	Run line coverage gate	2026-10-20T03:18:29.6095364Z      Summary [ 369.218s] 4750 tests run: 4750 passed (1 slow), 318 skipped
+Coverage Gate	Run line coverage gate	2026-10-20T03:19:17.2933064Z overall line coverage: 87.00% (172242/197973), floor 65.70%
+Coverage Gate	Run line coverage gate	2026-10-20T03:19:17.2933500Z WS-1 CLI commands: 86.44% (5251/6075), target 80.00% (advisory)
+Coverage Gate	Run line coverage gate	2026-10-20T03:19:17.2934323Z WS-2 REST/API and Agent core: 80.95% (15365/18981), target 90.00% (advisory)
+Coverage Gate	Run line coverage gate	2026-10-20T03:19:17.3243671Z ##[warning]WS-2 REST/API and Agent core coverage 80.95% is below 90.00%
+Coverage Gate	Run line coverage gate	2026-10-20T03:19:17.3553731Z WS-3 Exec subsystem: 90.17% (3649/4047), target 85.00% (advisory)
+Coverage Gate	Run line coverage gate	2026-10-20T03:19:17.3554080Z WS-3 Direct messaging: 92.36% (5500/5955), target 85.00% (advisory)
+Coverage Gate	Run line coverage gate	2026-10-20T03:19:17.3554377Z WS-3 Self-update: 86.62% (4584/5292), target 85.00% (advisory)
+Coverage Gate	Run line coverage gate	2026-10-20T03:19:17.3554694Z WS-4 CRDT and sync: 95.27% (14251/14958), target 90.00% (advisory)
+Coverage Gate	Run line coverage gate	2026-10-20T03:19:17.3554981Z WS-4 Groups edge cases: 91.36% (2337/2558), target 90.00% (advisory)
+Coverage Gate	Run line coverage gate	2026-10-20T03:19:17.3555277Z WS-5 Network transport: 82.57% (3827/4635), target 85.00% (advisory)
+Coverage Gate	Run line coverage gate	2026-10-20T03:19:17.3559711Z ##[warning]WS-5 Network transport coverage 82.57% is below 85.00%
+Coverage Gate	Run line coverage gate	2026-10-20T03:19:17.3560424Z Gossip pipeline: 95.49% (7843/8213), target 90.00% (advisory)
+Coverage Gate	Run line coverage gate	2026-10-20T03:19:17.3560745Z Identity, storage, presence, contacts: 93.43% (2688/2877), target 90.00% (advisory)

@@ -1,0 +1,43 @@
+Cargo Audit	Run cargo audit	2026-10-20T02:58:06.1230534Z cargo audit
+Cargo Audit	Run cargo audit	2026-10-20T02:58:06.1285348Z env:
+Cargo Audit	Run cargo audit	2026-10-20T02:58:06.1746830Z     Fetching advisory database from `https://github.com/RustSec/advisory-db.git`
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.0421176Z       Loaded 1338 security advisories (from /home/runner/.cargo/advisory-db)
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.0421793Z     Updating crates.io index
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.0606325Z     Scanning Cargo.lock for vulnerabilities (582 crate dependencies)
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7861881Z Crate:     audiopus_sys
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7862564Z Version:   0.2.2
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7863122Z Warning:   unmaintained
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7863885Z Title:     audiopus_sys is unmaintained
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7864508Z Date:      2026-05-21
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7865098Z ID:        RUSTSEC-2026-0150
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7865839Z URL:       https://rustsec.org/advisories/RUSTSEC-2026-0150
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7895322Z
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7895606Z Crate:     paste
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7896110Z Version:   1.0.15
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7896621Z Warning:   unmaintained
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7897216Z Title:     paste - no longer maintained
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7897794Z Date:      2024-10-07
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7898315Z ID:        RUSTSEC-2024-0436
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7899169Z URL:       https://rustsec.org/advisories/RUSTSEC-2024-0436
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7899642Z
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7899891Z Crate:     unsafe-libyaml
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7900407Z Version:   0.2.11
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7900912Z Warning:   unmaintained
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7901528Z Title:     unsafe-libyaml is unmaintained
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7902099Z Date:      2024-03-25
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7902608Z ID:        RUSTSEC-2024-0449
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7903297Z URL:       https://rustsec.org/advisories/RUSTSEC-2024-0449
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7903743Z
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7903951Z Crate:     lru
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7904418Z Version:   0.16.4
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7904898Z Warning:   unsound
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7911889Z Title:     Potential use-after-free due to lack of panic safety in `LruCache::pop()`
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7912741Z Date:      2026-05-12
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7913263Z ID:        RUSTSEC-2026-0253
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7913970Z URL:       https://rustsec.org/advisories/RUSTSEC-2026-0253
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7914414Z
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7914622Z Crate:     yoke-derive
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7915099Z Version:   0.8.3
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7915574Z Warning:   yanked
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7915846Z
+Cargo Audit	Run cargo audit	2026-10-20T02:58:10.7916109Z warning: 5 allowed warnings found
