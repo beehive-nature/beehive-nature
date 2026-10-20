@@ -1,0 +1,8 @@
+Running as unit: bnrose-ant-matrix5676033ba-r1-shadow-4-churn.service
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 41.359s
+             CPU time consumed: 12.402s
+                   Memory peak: 293.8M (swap: 0B)
+                    IP Traffic: received 38.3M, sent 8.5M
+                      IO Bytes: written 3.6M

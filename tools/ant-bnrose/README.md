@@ -107,3 +107,11 @@ cancelled phase. Connection time is reported separately. Each cell reports the
 median of its three **paired percentage changes**, rather than treating a
 ratio of pooled medians as a paired estimate. A positive change means shadow
 was slower. All individual pairs remain available for inspection.
+
+The October 20 report is
+[`2026-10-20-ant-bnrose-observation.md`](../../docs/dispatches/2026-10-20-ant-bnrose-observation.md).
+Its final 24 trials use the repository's Rust 1.98.1 pin; the earlier 1.95.0
+sweep is retained separately. To redraw the paired-result figure, use
+`python tools/ant-bnrose/plot-comparison.py comparison-rust198.json paired-rust198.png`
+with Matplotlib installed (the committed figure used 3.11.2). Rendering does
+not run the network benchmark.
