@@ -452,8 +452,17 @@ pub fn fetch_artifact_deadlined(
         }
         body.extend_from_slice(&chunk[..n]);
     }
-    // never read past the declared length: extra bytes from a lying peer
-    // are simply not consumed (the stream is dropped)
+    // a peer that DELIVERS more than it declared is lying: an honest peer
+    // sends exactly clen and closes. One buffered read may overshoot by TCP
+    // granularity — that overshoot IS the lie, visible here as body > clen.
+    // Refuse (issue #480: reject overlong responses); memory stayed bounded
+    // regardless, and nothing of the attacker tail is retained.
+    if (body.len() as u64) > clen {
+        return Err(format!(
+            "overlong response: declared {clen} bytes, the peer delivered {len} — a lying peer, refusing",
+            len = body.len()
+        ));
+    }
     Ok(body)
 }
 

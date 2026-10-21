@@ -198,11 +198,10 @@ fn hostile_peer_cannot_grow_the_client_past_its_cap() {
             send_all(s, &junk); // 100x a 64KiB cap, ignored by the client
         }
     });
-    let got = fetch_artifact(&addr, "persons/pa.html", 64 * 1024).unwrap();
-    assert_eq!(
-        got.len(),
-        16,
-        "client read exactly the declared length, nothing more"
+    let err = fetch_artifact(&addr, "persons/pa.html", 64 * 1024).unwrap_err();
+    assert!(
+        err.contains("overlong response"),
+        "the lying tail refuses, bounded: {err}"
     );
     // header flood: no terminator, endless header bytes
     let addr = adversarial_server(|s| {
