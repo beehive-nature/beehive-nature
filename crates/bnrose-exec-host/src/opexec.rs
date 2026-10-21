@@ -113,6 +113,11 @@ pub struct Supervisor {
     pub wire_repeat_drops: usize,
     pub wire_retries_checked: usize,
     pub wire_limiter: crate::load_shed::PreVerifyWireLimiter,
+    /// Independent work counters (PR #465 review 6292975154): every envelope decode and
+    /// every Ed25519 `verify_envelope` on the run()/retry() doors. Gate 3 measures
+    /// amplification from these, not from the limiter's own bookkeeping.
+    pub decode_calls: u64,
+    pub sig_verify_calls: u64,
     /// Client-side retry budgets per authority for bounding retry amplification (PR #465, r9, O3).
     pub client_retry_budgets: crate::load_shed::BoundedClientBudgets,
     /// the exclusive authority over this state directory (see Claim)
@@ -511,6 +516,8 @@ impl Supervisor {
             wire_repeat_drops: 0,
             wire_retries_checked: 0,
             wire_limiter: crate::load_shed::PreVerifyWireLimiter::default(),
+            decode_calls: 0,
+            sig_verify_calls: 0,
             client_retry_budgets: crate::load_shed::BoundedClientBudgets::default(),
             cached_receipts,
             _claim: claim,
@@ -732,8 +739,26 @@ impl Supervisor {
         }
 
         let now_ms = clock * 1000;
+        let allowance = self
+            .client_retry_budgets
+            .get(&intent.authority)
+            .map_or(1, |b| b.max_retries_at(now_ms).max(1));
+
+        // 1a'. Pre-decode limiter, READ-ONLY (PR #465 review 6292975154, P1/P3):
+        // retry() is a door like run(); a shed authority whose slots are spent is dropped here.
+        if !self
+            .wire_limiter
+            .permits(&intent.authority, allowance, now_ms)
+        {
+            self.wire_repeat_drops += 1;
+            return RunOutcome {
+                refused: Some("client:retry-budget-exhausted".into()),
+                ..none
+            };
+        }
 
         // 1b. Fast decode of envelope
+        self.decode_calls += 1;
         let decoded = match btungsten_wb001::decode(&intent.env) {
             Ok(i) => i,
             Err(_) => {
@@ -752,6 +777,7 @@ impl Supervisor {
 
         // 3. Cryptographic signature check: verify envelope before client retry budget check
         // (Protects against forged envelopes draining victim budgets)
+        self.sig_verify_calls += 1;
         if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
             return RunOutcome {
                 refused: Some("wb001:binding-refused".into()),
@@ -808,49 +834,32 @@ impl Supervisor {
             }
         }
 
-        // Per-authority wire rate limit & repeat send drop (PR #465, P1 & P2):
-        // Runs BEFORE envelope decode and BEFORE cryptographic signature verification!
-        // Drops uncooperative repeat sends before spending work on decode or signature verify.
-        // CRITICAL (P2): This pre-verify limiter NEVER charges the verified retry budget.
+        // Pre-decode limiter, READ-ONLY (PR #465 review 6292975154, P1/P2/P3):
+        // Runs BEFORE envelope decode and BEFORE Ed25519 for every send on every door,
+        // including same-second sends. It drops only when the authority's slots are already
+        // spent by VERIFIED sends, and it charges nothing: slots are spent after verify
+        // (see charge_verified below), so no unauthenticated bytes can spend a victim's slot.
         let now_ms = clock * 1000;
-        let mut wire_retry_token_acquired = false;
+        let allowance = self
+            .client_retry_budgets
+            .get(&intent.authority)
+            .map_or(1, |b| b.max_retries_at(now_ms).max(1));
 
-        let is_shed_authority = self.wire_limiter.has_shed(&intent.authority, now_ms);
-        let mut env_key: Option<([u8; 32], [u8; 32])> = None;
-        let is_wire_repeat_shed = if is_shed_authority {
-            let k = (intent.authority, env_sha_of(&intent.env));
-            let repeat = self.shed_nonces.contains_env_at(&k, now_ms);
-            env_key = Some(k);
-            repeat
-        } else {
-            false
-        };
-
-        if !allow_retry && is_shed_authority {
-            let allowance = self
-                .client_retry_budgets
-                .get(&intent.authority)
-                .map_or(1, |b| b.max_retries().max(1));
-
-            if !self.wire_limiter.try_acquire_wire_send(
-                &intent.authority,
-                is_wire_repeat_shed,
-                allowance,
-                now_ms,
-            ) {
-                self.wire_repeat_drops += 1;
-                return RunOutcome {
-                    refused: Some("client:retry-budget-exhausted".into()),
-                    ..none
-                };
-            }
-            if is_wire_repeat_shed || now_ms > self.wire_limiter.last_shed_ms_of(&intent.authority)
-            {
-                wire_retry_token_acquired = true;
-            }
+        if !allow_retry
+            && !self
+                .wire_limiter
+                .permits(&intent.authority, allowance, now_ms)
+        {
+            self.wire_repeat_drops += 1;
+            return RunOutcome {
+                refused: Some("client:retry-budget-exhausted".into()),
+                ..none
+            };
         }
+        let mut env_key: Option<([u8; 32], [u8; 32])> = None;
 
         // Fast decode of envelope
+        self.decode_calls += 1;
         let decoded = match btungsten_wb001::decode(&intent.env) {
             Ok(i) => i,
             Err(_) => {
@@ -883,6 +892,7 @@ impl Supervisor {
                 // Not an exact replay: envelope or signature differed on an already spent nonce.
                 // Cryptographic binding law: invalid signatures MUST be refused as wb001:binding-refused
                 // BEFORE consulting any state or returning admission:nonce-reuse!
+                self.sig_verify_calls += 1;
                 if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
                     return RunOutcome {
                         refused: Some("wb001:binding-refused".into()),
@@ -1018,10 +1028,8 @@ impl Supervisor {
         // Cryptographic signature check MUST run BEFORE capacity admission check (PR #465 review).
         // If an attacker without a valid key sends forged envelopes, they fail here
         // as 'wb001:binding-refused' and NEVER consume cross-DAO quota slots or lock out legitimate requests.
+        self.sig_verify_calls += 1;
         if !btungsten_wb001::verify_envelope(&intent.authority, &intent.env, &intent.sig) {
-            if wire_retry_token_acquired {
-                self.wire_limiter.refund(&intent.authority);
-            }
             return RunOutcome {
                 refused: Some("wb001:binding-refused".into()),
                 ..none
@@ -1052,6 +1060,14 @@ impl Supervisor {
             (retry, Some(ikey))
         };
 
+        // Charge AFTER verify (PR #465 review 6292975154, P1/P3): every verified retry
+        // send from an authority with a live shed epoch spends one slot, whatever its timing
+        // or bytes. Undecodable, junk-signature, spent-nonce, payload-mismatch, and fresh initial
+        // sends spent nothing.
+        if is_retry {
+            self.wire_limiter.charge_verified(&intent.authority, now_ms);
+        }
+
         // Server-side backstop (PR #465 O1, O2, O4, P1, P2):
         // If an inbound request is identified as a retry, enforce the verified client retry budget.
         // If allow_retry is true, retry() already acquired a token at the API entrypoint.
@@ -1072,7 +1088,12 @@ impl Supervisor {
             if let Some(ikey) = intent_key {
                 let e_key = env_key.unwrap_or_else(|| (intent.authority, env_sha_of(&intent.env)));
                 self.shed_nonces.insert_all(nonce_key, ikey, e_key, now_ms);
-                self.wire_limiter.record_shed(&intent.authority, now_ms);
+                let base_slots = self
+                    .client_retry_budgets
+                    .get(&intent.authority)
+                    .map_or(1, |b| b.max_retries_at(now_ms).max(1));
+                self.wire_limiter
+                    .record_shed(&intent.authority, base_slots, now_ms);
             }
             return RunOutcome {
                 refused: Some(e.into()),
@@ -1148,6 +1169,9 @@ impl Supervisor {
         // Shed requests and retries never earn retry credits, preventing lifetime banking and artificial storms (d18).
         if !is_retry {
             self.record_admitted_client_request(&intent.authority, clock * 1000);
+            // Refill the shed-epoch limiter only on admitted fresh work (PR #465 review 6292975154, P2).
+            self.wire_limiter
+                .on_admitted_fresh(&intent.authority, clock * 1000);
         }
         let mut payload = Vec::with_capacity(intent.env.len() + 140);
         payload.extend_from_slice(&intent.authority);

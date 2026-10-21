@@ -788,3 +788,62 @@ Following review feedback on PR #465 commit `d0bfb792` (`issuecomment-6286751803
   - `bnrose-exec-wasm`: 1/1 passed
   - `bnrose-exec-host`: 77/77 passed across all integration test suites
   - Total: 84/84 passed, 0 failed, 0 filtered out
+
+
+### 6. Review Remediation for Commit `742ab36f` (Grok PR #465 issuecomment-6292975154)
+
+Following review feedback on commit `742ab36f`:
+> - **P1 (Same-second bypass):** Retries sent in the same second bypassed the limiter entirely (`try_acquire_wire_send` returned true when `now_ms <= last_shed_ms`), allowing 1,800/1,800 to reach decode and verify ($R_{\\text{amp}} = 10.0$). Every retry send from a shed authority must count, whatever its timing.
+> - **P2 (Bucket refill on clock):** Spread-out retries got through at 3.68x against the 1.15x bar because the bucket refilled every 1s for 30s TTL (`window_ms = 1_000`), allowing 536/1,782 fresh-nonce re-sends over 4s ($R_{\\text{amp, verified}} = 3.680 > 1.15$). Refill must be tied to admitted fresh work (the same earn rule as the verified budget) and a 10s tumbling window, not a 1s clock.
+> - **P3 (Unrefunded pre-verify refusals / d16 class):** A junk packet could block a real user's retry. Undecodable junk claiming a victim's authority spent the victim's slot without refund (`h3` failure). Pre-decode check must be **read-only** (drop only when slots are already spent), and the slot must be charged **after** `verify_envelope` succeeds on the retry path.
+> - **P4 (Residual documentation):** Spoofed junk claiming a shed authority still costs 1 decode + 1 Ed25519 verify (`h3b`: 1,000 junk-signature sends). Document this transport-layer residual in §15 with numbers and add the `h3b` test.
+> - **P5 (Community unit sizing):** The limiter only tracked 2,048 clients, below the 7,776-human community cap, so a flood of other clients could push an attacker out of it. Limiter table and `BoundedClientBudgets` tombstone FIFO must hold at least 7,776 authorities (`COMMUNITY_UNIT = 7_776`), or evict expired entries first (`h5` test).
+
+#### P1 Resolution: Elimination of Same-Second Bypass (`h1s`)
+- Removed the `now_ms <= last_shed_ms` bypass condition.
+- Every retry send from a shed authority is evaluated against `permits(&authority, allowance, now_ms)`.
+- Verified in `test_gate3_uncooperative_fresh_nonce_re_sends_same_second_h1s`:
+  - 3 attempts in same second: 540 wire attempts, 520 dropped before decode, 20 verified ($R_{\\text{amp, wire}} = 1.100 \\le 1.15$).
+  - 10 attempts in same second: 1,800 wire attempts, 1,780 dropped before decode, 20 verified ($R_{\\text{amp, wire}} = 1.100 \\le 1.15$).
+
+#### P2 Resolution: Refill Tied to Admitted Fresh Work & 10s Tumbling Window
+- Replaced 1-second clock-based refill in `PreVerifyWireLimiter` with a 10-second tumbling window (`DEFAULT_WINDOW_MS = 10_000`) synchronized with `ClientRetryBudget`.
+- Allowance refill is tied to admitted fresh work (`on_admitted_fresh`), earning 1 slot per 10 admitted operations (`DEFAULT_EARN_PCT = 10%`), exactly matching the verified budget earn rule.
+- Verified in `test_gate3_uncooperative_fresh_nonce_re_sends_bounded_before_decode_h1` Sub-test 4:
+  - Spread-out retries over 4s (`NOW + 1 + attempt/3`): 1,800 wire sends, 1,780 dropped before decode, exactly 20 verified ($R_{\\text{amp, wire}} = 1.100 \\le 1.15$). Clock drift over 4s yields 0 extra retry refills.
+
+#### P3 Resolution: Read-Only Pre-Decode Gate & Post-Verify Slot Charging (`h3`)
+- Pre-decode check `permits(&intent.authority, allowance, now_ms)` is strictly **read-only**: it checks whether spent slots have reached `allowance`, but does NOT increment or mutate state.
+- Slot charging (`charge_verified`) occurs exclusively **after** `btungsten_wb001::decode` and `verify_envelope` cryptographically succeed, and ONLY when `is_retry == true`.
+- Undecodable junk and forged envelopes claiming a victim's authority fail with `wb001:undecodable` or `wb001:binding-refused` without spending the victim's wire slot.
+- Proved in `test_gate3_undecodable_junk_cannot_drain_victim_retry_allowance_h3`: 10 undecodable junk sends leave the victim's genuine retry fully admitted with receipt.
+
+#### P4 Resolution: Transport-Layer Residual Documentation & `h3b` Test
+- **Residual Specification:**
+  Because the transport layer envelope identifies the claimed authority before payload decode, an attacker can transmit forged envelopes claiming a shed authority.
+  Since the pre-decode gate is read-only (to protect against P3 victim lockout), the server must decode the envelope and perform Ed25519 signature verification before rejecting the forged packet with `wb001:binding-refused`.
+  - **Exact Cost:** For 1,000 spoofed junk packets, the server expends exactly 1,000 envelope decodes and 1,000 Ed25519 point multiplications (`decode_calls = 1000`, `sig_verify_calls = 1000`).
+  - **Mitigation & Invariant:** The spoofed packets cannot spend the victim's retry allowance, cannot consume capacity ledger slots, and cannot cause legitimate client retries to be locked out.
+  - Proved in `test_gate3_spoofed_signature_junk_residual_h3b`: 1,000 junk-signature sends claiming a shed authority cost 1,000 decodes + 1,000 verifies, and the victim's genuine retry is immediately admitted.
+
+#### P5 Resolution: Community Scale ($\\ge 7,776$ Authorities) & Expired-First Eviction (`h5`)
+- Sized `PreVerifyWireLimiter::DEFAULT_MAX = 8_192` ($\\ge \\text{COMMUNITY\\_UNIT} = 7,776$).
+- Sized `BoundedClientBudgets::DEFAULT_TOMBSTONE_MAX = 8_192` ($\\ge 7,776$).
+- `make_room` in `PreVerifyWireLimiter` prioritizes eviction of entries whose 30s TTL has expired before evicting any unthrottled or active authorities.
+- Proved in `test_gate3_limiter_and_tombstones_community_scale_h5`: Flooding 7,776 distinct client requests through the system fails to evict an active throttled attacker, ensuring the attacker remains strictly throttled (`client:retry-budget-exhausted`) and cannot regain unbudgeted retry allowance.
+
+### Updated Verification Receipts (Commit Head)
+- `cargo fmt --manifest-path Cargo.toml --all --check`: CLEAN (0 diffs)
+- `node scripts/build-stack-inventory.mjs --check`: mode: checked (GREEN)
+- `node scripts/estate-check.mjs`: PASS (112 counted, 121 listed)
+- `cargo test --release -p bnrose-exec-host --test gate1_flat_admit --test gate2_device_capacity --test gate3_load_shed --test gate4_quantum_retry`:
+  - `gate1_flat_admit`: 9/9 passed (3.28s)
+  - `gate2_device_capacity`: 8/8 passed (0.41s)
+  - `gate3_load_shed`: 30/30 passed (36.31s)
+  - `gate4_quantum_retry`: 6/6 passed (0.08s)
+  - Total: 53/53 passed in 40.08s, 0 failed, 0 filtered out
+- `cargo test -p bnrose-exec-core -p bnrose-exec-wasm -p bnrose-exec-host`:
+  - `bnrose-exec-core`: 6/6 passed
+  - `bnrose-exec-wasm`: 1/1 passed
+  - `bnrose-exec-host`: 88/88 passed across all integration test suites (including `gate1` 9, `gate2` 8, `gate3` 30, `gate4` 6, `gate5` 2, `recovery` 6, `rejection` 5, `rusteosvm` 10, `sandbox` 3, `wb004_retry` 1)
+  - Total: 95/95 passed, 0 failed, 0 filtered out

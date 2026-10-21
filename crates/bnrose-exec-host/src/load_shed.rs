@@ -211,7 +211,7 @@ pub struct BoundedShedTracker {
 }
 
 impl BoundedShedTracker {
-    pub const DEFAULT_MAX: usize = 2048;
+    pub const DEFAULT_MAX: usize = 8_192; // >= COMMUNITY_UNIT (PR #465, P5)
     pub const DEFAULT_TTL_MS: u64 = 30_000; // 30s TTL: exceeds maximum backoff (10s) + jitter (10s) (PR #465, O2)
 
     pub fn new(max_entries: usize) -> Self {
@@ -374,43 +374,96 @@ impl Default for BoundedShedTracker {
     }
 }
 
-/// Per-authority pre-decode wire rate limiter bounding uncooperative retry amplification (PR #465, P1 & P2).
+/// The community unit (6^5 = 7,776 humans). Every per-authority table that bounds
+/// abuse must hold at least this many authorities, so that one community under
+/// overload cannot evict a flooder from it (PR #465 review 6292975154, P5).
+pub const COMMUNITY_UNIT: usize = 7_776;
+
+/// Per-authority pre-decode limiter for shed authorities (PR #465 review 6292975154, P1-P5).
 ///
-/// Runs BEFORE envelope decode and BEFORE cryptographic signature verification.
-/// Drops uncooperative repeat / retry sends at near-zero CPU cost (hash table lookup),
-/// preventing adversary and uncooperative peers from burning Ed25519 CPU signature
-/// verification on repeated attempts (even with fresh nonces, bumped expiry, or modified payloads).
-///
-/// Crucially, this pre-verify limiter NEVER charges the authority's cryptographically
-/// verified retry budget (P2, preventing junk-signature replay drain attacks).
+/// Law, in order of a send's life:
+/// 1. **Pre-decode is read-only** (\_permits\_). A send from an authority
+///    with an active shed epoch is dropped before decode and before Ed25519 only when
+///    that authority's slots are already spent. Nothing is charged here, so no
+///    unauthenticated bytes (undecodable junk, junk signatures, spent-nonce junk,
+///    payload mismatches) can spend anyone's slot (P3).
+/// 2. **Charge after verify** (\_charge_verified\_). Every send
+///    that passes verify_envelope and is identified as a retry spends one slot, whatever
+///    its timing (same second as the shed or later) and whatever its bytes (fresh
+///    nonce, bumped expiry, new payload). There is no same-second bypass (P1).
+/// 3. **Refill only on admitted fresh work** (\_on_admitted_fresh\_)
+///    and 10s tumbling window floor renewal (P2). The clock never refills slots every second.
+/// 4. **Epoch end.** An epoch closes ttl_ms (30s) after the authority's last shed.
+/// 5. **Capacity >= 7,776** with expired-first eviction (P5).
 #[derive(Debug, Clone)]
 pub struct PreVerifyWireLimiter {
     pub max_entries: usize,
     pub ttl_ms: u64,
     pub window_ms: u64,
-    pub shed_authorities: std::collections::HashMap<[u8; 32], AuthorityWireState>,
-    pub queue: std::collections::VecDeque<[u8; 32]>,
+    pub earn_pct: usize,
+    states: std::collections::HashMap<[u8; 32], AuthorityWireState>,
+    /// Insertion order (oldest first); holds exactly the keys of states.
+    order: std::collections::VecDeque<[u8; 32]>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AuthorityWireState {
     pub last_shed_ms: u64,
     pub window_start_ms: u64,
-    pub retries_checked_in_window: usize,
+    pub base_slots: usize,
+    pub admitted_fresh: usize,
+    pub spent: usize,
+}
+
+impl AuthorityWireState {
+    #[inline]
+    pub fn is_window_expired(&self, window_ms: u64, now_ms: u64) -> bool {
+        now_ms >= self.window_start_ms.saturating_add(window_ms)
+    }
+
+    pub fn earned(&self, allowance: usize, earn_pct: usize, window_ms: u64, now_ms: u64) -> usize {
+        let base = allowance.max(self.base_slots).max(1);
+        if self.is_window_expired(window_ms, now_ms) {
+            base
+        } else {
+            base + (self.admitted_fresh * earn_pct) / 100
+        }
+    }
+
+    pub fn spent_at(&self, window_ms: u64, now_ms: u64) -> usize {
+        if self.is_window_expired(window_ms, now_ms) {
+            0
+        } else {
+            self.spent
+        }
+    }
+
+    fn fresh(base_slots: usize, now_ms: u64) -> Self {
+        Self {
+            last_shed_ms: now_ms,
+            window_start_ms: now_ms,
+            base_slots: base_slots.max(1),
+            admitted_fresh: 0,
+            spent: 0,
+        }
+    }
 }
 
 impl PreVerifyWireLimiter {
-    pub const DEFAULT_MAX: usize = 2048;
+    pub const DEFAULT_MAX: usize = 8_192; // >= COMMUNITY_UNIT (7,776) (PR #465, P5)
     pub const DEFAULT_TTL_MS: u64 = 30_000;
-    pub const DEFAULT_WINDOW_MS: u64 = 1_000;
+    pub const DEFAULT_WINDOW_MS: u64 = ClientRetryBudget::DEFAULT_WINDOW_MS; // 10_000 ms tumbling window
+    pub const DEFAULT_EARN_PCT: usize = ClientRetryBudget::DEFAULT_BUDGET_PCT; // 10%
 
     pub fn new(max_entries: usize) -> Self {
+        let cap = max_entries.min(Self::DEFAULT_MAX).max(1);
         Self {
             max_entries,
             ttl_ms: Self::DEFAULT_TTL_MS,
             window_ms: Self::DEFAULT_WINDOW_MS,
-            shed_authorities: std::collections::HashMap::with_capacity(max_entries),
-            queue: std::collections::VecDeque::with_capacity(max_entries),
+            earn_pct: Self::DEFAULT_EARN_PCT,
+            states: std::collections::HashMap::with_capacity(cap),
+            order: std::collections::VecDeque::with_capacity(cap),
         }
     }
 
@@ -424,118 +477,129 @@ impl PreVerifyWireLimiter {
         self
     }
 
-    /// Record that an authority had a request shed at `now_ms`.
-    pub fn record_shed(&mut self, authority: &[u8; 32], now_ms: u64) {
-        if let Some(state) = self.shed_authorities.get_mut(authority) {
-            state.last_shed_ms = now_ms;
-        } else {
-            while self.queue.len() >= self.max_entries {
-                if let Some(oldest) = self.queue.pop_front() {
-                    self.shed_authorities.remove(&oldest);
-                }
-            }
-            self.shed_authorities.insert(
-                *authority,
-                AuthorityWireState {
-                    last_shed_ms: now_ms,
-                    window_start_ms: now_ms,
-                    retries_checked_in_window: 0,
-                },
-            );
-            self.queue.push_back(*authority);
-        }
+    fn is_live(&self, st: &AuthorityWireState, now_ms: u64) -> bool {
+        now_ms < st.last_shed_ms.saturating_add(self.ttl_ms)
     }
 
-    /// Check whether an inbound wire send from `authority` at `now_ms` should be admitted to decode & verify.
-    ///
-    /// If the authority has pending shed requests (within `ttl_ms`):
-    /// - Exact shed repeats (`is_exact_shed_repeat`) or re-sends in subsequent windows (`now_ms > last_shed_ms`)
-    ///   are limited to `allowance` (floor 1), whatever their bytes (P1).
-    /// - Concurrent initial requests in the same burst window (`now_ms <= last_shed_ms`) are allowed through
-    ///   to admission control so honest initial batches and test floods reach admission control.
-    ///
-    /// Returns `true` if allowed through to decode & verify.
-    /// Returns `false` if wire retry allowance is exhausted -> caller drops before decode as `client:retry-budget-exhausted`.
-    pub fn try_acquire_wire_send(
-        &mut self,
-        authority: &[u8; 32],
-        is_exact_shed_repeat: bool,
-        allowance: usize,
-        now_ms: u64,
-    ) -> bool {
-        let Some(state) = self.shed_authorities.get_mut(authority) else {
-            // Authority has no pending shed requests; allowed as initial traffic
+    pub fn active(&self, authority: &[u8; 32], now_ms: u64) -> Option<&AuthorityWireState> {
+        self.states
+            .get(authority)
+            .filter(|st| self.is_live(st, now_ms))
+    }
+
+    /// READ-ONLY pre-decode check (PR #465 review 6292975154, P1/P3).
+    /// Returns false if authority has spent its allowed retry slots in this window.
+    pub fn permits(&self, authority: &[u8; 32], allowance: usize, now_ms: u64) -> bool {
+        let Some(st) = self.active(authority, now_ms) else {
             return true;
         };
+        let spent = st.spent_at(self.window_ms, now_ms);
+        let earned = st.earned(allowance, self.earn_pct, self.window_ms, now_ms);
+        spent < earned
+    }
 
-        // If shed state expired, clean up and allow
-        if now_ms >= state.last_shed_ms.saturating_add(self.ttl_ms) {
-            return true;
-        }
-
-        // Advance tumbling window
-        if now_ms >= state.window_start_ms.saturating_add(self.window_ms) {
-            state.window_start_ms = now_ms;
-            state.retries_checked_in_window = 0;
-        }
-
-        // If this envelope was already shed (exact repeat send):
-        // always drop if retry allowance in this window is exhausted!
-        if is_exact_shed_repeat {
-            let limit = allowance.max(1);
-            if state.retries_checked_in_window < limit {
-                state.retries_checked_in_window += 1;
-                return true;
+    /// Record a verified shed. Opens an epoch (with base_slots, floor 1) if none is live,
+    /// otherwise extends the live epoch's TTL.
+    pub fn record_shed(&mut self, authority: &[u8; 32], base_slots: usize, now_ms: u64) {
+        let ttl = self.ttl_ms;
+        let window_ms = self.window_ms;
+        if let Some(st) = self.states.get_mut(authority) {
+            if now_ms < st.last_shed_ms.saturating_add(ttl) {
+                st.last_shed_ms = now_ms;
+                st.base_slots = st.base_slots.max(base_slots.max(1));
+                if st.is_window_expired(window_ms, now_ms) {
+                    st.window_start_ms = now_ms;
+                    st.spent = 0;
+                    st.admitted_fresh = 0;
+                }
             } else {
-                return false;
+                *st = AuthorityWireState::fresh(base_slots, now_ms);
+            }
+            return;
+        }
+        self.make_room(now_ms);
+        self.states
+            .insert(*authority, AuthorityWireState::fresh(base_slots, now_ms));
+        self.order.push_back(*authority);
+    }
+
+    /// Charge one slot AFTER verify_envelope succeeds for a retry send (PR #465, P3).
+    pub fn charge_verified(&mut self, authority: &[u8; 32], now_ms: u64) -> bool {
+        let ttl = self.ttl_ms;
+        let window_ms = self.window_ms;
+        if let Some(st) = self.states.get_mut(authority) {
+            if now_ms < st.last_shed_ms.saturating_add(ttl) {
+                if st.is_window_expired(window_ms, now_ms) {
+                    st.window_start_ms = now_ms;
+                    st.spent = 1;
+                    st.admitted_fresh = 0;
+                } else {
+                    st.spent = st.spent.saturating_add(1);
+                }
+                return true;
             }
         }
+        false
+    }
 
-        // In subsequent window after shed (now_ms > last_shed_ms):
-        // This is a retry window. Limit to client's retry allowance whatever its bytes!
-        if now_ms > state.last_shed_ms {
-            let limit = allowance.max(1);
-            if state.retries_checked_in_window < limit {
-                state.retries_checked_in_window += 1;
-                return true;
-            } else {
-                return false;
+    /// Admitted fresh (non-retry) work earns slots at earn_pct (PR #465, P2).
+    pub fn on_admitted_fresh(&mut self, authority: &[u8; 32], now_ms: u64) {
+        let ttl = self.ttl_ms;
+        let window_ms = self.window_ms;
+        if let Some(st) = self.states.get_mut(authority) {
+            if now_ms < st.last_shed_ms.saturating_add(ttl) {
+                if st.is_window_expired(window_ms, now_ms) {
+                    st.window_start_ms = now_ms;
+                    st.spent = 0;
+                    st.admitted_fresh = 1;
+                } else {
+                    st.admitted_fresh = st.admitted_fresh.saturating_add(1);
+                }
             }
         }
-
-        // Concurrent initial requests in the same burst window:
-        true
     }
 
-    /// Refund a pre-verify token if signature verification failed (e.g., junk signature replay).
-    /// Ensures spoofers / junk signatures NEVER drain an authority's retry allowance (P2).
-    pub fn refund(&mut self, authority: &[u8; 32]) {
-        if let Some(state) = self.shed_authorities.get_mut(authority) {
-            state.retries_checked_in_window = state.retries_checked_in_window.saturating_sub(1);
+    /// Eviction order when full: expired epochs first, then unthrottled entries, then oldest entry (P5).
+    fn make_room(&mut self, now_ms: u64) {
+        let ttl = self.ttl_ms;
+        let window_ms = self.window_ms;
+        let earn_pct = self.earn_pct;
+        while self.states.len() >= self.max_entries.max(1) {
+            let pick = self
+                .order
+                .iter()
+                .position(|k| {
+                    self.states
+                        .get(k)
+                        .map_or(true, |st| now_ms >= st.last_shed_ms.saturating_add(ttl))
+                })
+                .or_else(|| {
+                    self.order.iter().position(|k| {
+                        self.states.get(k).map_or(true, |st| {
+                            st.spent_at(window_ms, now_ms)
+                                < st.earned(st.base_slots, earn_pct, window_ms, now_ms)
+                        })
+                    })
+                })
+                .unwrap_or(0);
+            if let Some(k) = self.order.remove(pick) {
+                self.states.remove(&k);
+            } else {
+                break;
+            }
         }
     }
 
-    /// Check if authority has pending shed work within TTL.
-    pub fn has_shed(&self, authority: &[u8; 32], now_ms: u64) -> bool {
-        if let Some(state) = self.shed_authorities.get(authority) {
-            now_ms < state.last_shed_ms.saturating_add(self.ttl_ms)
-        } else {
-            false
-        }
-    }
-
-    pub fn last_shed_ms_of(&self, authority: &[u8; 32]) -> u64 {
-        self.shed_authorities
-            .get(authority)
-            .map_or(0, |s| s.last_shed_ms)
+    pub fn contains(&self, authority: &[u8; 32]) -> bool {
+        self.states.contains_key(authority)
     }
 
     pub fn len(&self) -> usize {
-        self.shed_authorities.len()
+        self.states.len()
     }
 
     pub fn is_empty(&self) -> bool {
-        self.shed_authorities.is_empty()
+        self.states.is_empty()
     }
 }
 
@@ -544,6 +608,8 @@ impl Default for PreVerifyWireLimiter {
         Self::new(Self::DEFAULT_MAX)
     }
 }
+
+const _: () = assert!(PreVerifyWireLimiter::DEFAULT_MAX >= COMMUNITY_UNIT);
 
 /// Client-side retry budget policy bounding network retry amplification (PR #465 review).
 ///
@@ -627,6 +693,16 @@ impl ClientRetryBudget {
         self.initial_requests = self.initial_requests.saturating_add(1);
     }
 
+    /// Read-only `max_retries` as of `now_ms`: a window that has elapsed counts as empty.
+    pub fn max_retries_at(&self, now_ms: u64) -> usize {
+        if self.window_initialized && now_ms >= self.window_start_ms.saturating_add(self.window_ms)
+        {
+            self.min_retries
+        } else {
+            self.max_retries()
+        }
+    }
+
     pub fn max_retries(&self) -> usize {
         ((self.initial_requests * self.budget_pct) / 100).max(self.min_retries)
     }
@@ -682,6 +758,7 @@ pub struct EvictedBudgetTombstone {
 #[derive(Debug, Clone)]
 pub struct BoundedClientBudgets {
     max_entries: usize,
+    tombstone_max: usize,
     map: std::collections::HashMap<[u8; 32], usize>,
     nodes: Vec<Option<BudgetNode>>,
     free_list: Vec<usize>,
@@ -693,17 +770,20 @@ pub struct BoundedClientBudgets {
 
 impl BoundedClientBudgets {
     pub const DEFAULT_MAX: usize = 2048;
+    pub const DEFAULT_TOMBSTONE_MAX: usize = 8_192; // >= COMMUNITY_UNIT (7,776) (PR #465, P5)
 
     pub fn new(max_entries: usize) -> Self {
+        let tombstone_max = Self::DEFAULT_TOMBSTONE_MAX.max(max_entries);
         Self {
             max_entries,
+            tombstone_max,
             map: std::collections::HashMap::with_capacity(max_entries),
             nodes: Vec::with_capacity(max_entries),
             free_list: Vec::new(),
             head: usize::MAX,
             tail: usize::MAX,
-            tombstones: std::collections::HashMap::with_capacity(max_entries),
-            tombstone_queue: std::collections::VecDeque::with_capacity(max_entries),
+            tombstones: std::collections::HashMap::with_capacity(tombstone_max),
+            tombstone_queue: std::collections::VecDeque::with_capacity(tombstone_max),
         }
     }
 
@@ -785,7 +865,7 @@ impl BoundedClientBudgets {
                 // Carry over spent-retry state into bounded tombstones (PR #465, O3)
                 // Prevents an attacker from refilling exhausted retry budgets by evicting entries.
                 if oldest_budget.retries_attempted > 0 {
-                    while self.tombstone_queue.len() >= self.max_entries {
+                    while self.tombstone_queue.len() >= self.tombstone_max {
                         if let Some(oldest_ts_auth) = self.tombstone_queue.pop_front() {
                             self.tombstones.remove(&oldest_ts_auth);
                         }
