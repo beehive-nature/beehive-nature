@@ -488,6 +488,6 @@ pub fn fetch_and_verify(
 /// peers discover by direct address in the lab, labeled as such.
 pub mod x0x {
     pub const SEAM: &str = "x0x-authenticated-peer-transport";
-    pub const MISSING: &str = "node access for authenticated `x0x forward` provisioning (box SSH refused 2026-10-20, then timed out); bilateral ACL + peer identity wiring; a bytes-over-peer-stream contract above gossip";
-    pub const STATUS: &str = "declared — not substituted by any hosted proxy";
+    pub const MISSING: &str = "multi-host repetition (estate box SSH timed out 3x 2026-10-20; no second administered host) and the x0x v0.48.1 restart-path seam: after peer restarts, send-file offers are refused (peer did not accept the file control frame, HTTP 500 — reproduced; see docs/rails/x0x-transport-evidence-2026-10-20.md)";
+    pub const STATUS: &str = "investigated — REAL transport observed live 2026-10-20: two real v0.48.1 daemons, distinct ML-DSA identities, announce/discovery over the real mesh, attributable byte-exact file delivery (sha-identical sealed artifact); pending transfers are volatile across receiver restart; still not qualified for corpus delivery";
 }
