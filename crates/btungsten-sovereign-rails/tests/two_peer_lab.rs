@@ -179,7 +179,6 @@ fn two_peer_sovereign_lab() {
 
     // x0x seam honestly declared, never substituted
     assert!(btungsten_sovereign_rails::x0x::STATUS.starts_with("investigated"));
-    assert!(!btungsten_sovereign_rails::x0x::STATUS.contains("qualified"));
     assert!(btungsten_sovereign_rails::x0x::STATUS.contains("not qualified for corpus delivery"));
     assert!(!btungsten_sovereign_rails::x0x::MISSING.is_empty());
 
