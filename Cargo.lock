@@ -7734,6 +7734,7 @@ name = "zk-adaptor"
 version = "0.1.0"
 dependencies = [
  "bsigner",
+ "btungsten-qeval",
  "getrandom 0.2.17",
  "k256",
  "serde",

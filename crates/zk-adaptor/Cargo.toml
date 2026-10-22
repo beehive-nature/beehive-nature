@@ -7,6 +7,7 @@ description = "zkAdaptor: cryptographic proof shapes behind one adaptor trait, s
 
 [dependencies]
 bsigner = { path = "../bsigner" }
+btungsten-qeval = { path = "../btungsten-qeval", default-features = false }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha3 = { workspace = true }

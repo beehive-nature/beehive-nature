@@ -449,3 +449,57 @@ returns tx + CPU/NET receipts for the scoreboard.
 Order count this session: 13 (11 receipted, 2 unreceived),
 inside the 10^3 ceiling. Laptop daemon stopped at lane end
 (on-demand law).
+
+---
+
+## ADDENDUM 9 — fractal anchor: learned, adapted, bTungsten measured (2026-10-22)
+
+Founder correction accepted: the fractal anchor POC/MVP already
+exists in this repo and Addendum 7's staged lane wrongly designed
+a parallel ordinal registry. Corrected record, all re-verified
+this session:
+
+- The POC is `bnrose-evolve` anchors + the `evanchor` Vaulta
+  carrier + `bnrose-anchor-vaulta` client (2026-10-15 anchor
+  dispatch is the canon: statement ≤124 B, one row per subject,
+  count strictly grows, publisher pays RAM, carrier built with
+  CDT 4.1.1 and **not deployed**, no chain write of any kind,
+  signer lane is next owner, mainnet needs founder word). Its
+  `seq`/count IS the ordinal index. The Arweave leg is the
+  vending lane's audited upload door, a witness carrier, not a
+  chain of record; Autonomi persistence is named not-built.
+- Fresh live reads (2026-10-22, reads only): `bnrevanchor1` and
+  `evolve.ctr1` are unknown accounts on BOTH Jungle4 and Vaulta
+  mainnet (`vaulta.greymass.com`). Under the POC's names the
+  anchor is built + battery-tested, not live. The founder's
+  mainnet anchor under the bDomain/.a/bDesk contracts is not
+  visible under any name this branch knows — account/contract
+  names are the one missing input, requested, not guessed.
+- `ops/vaulta-anchors/README.md` rewritten onto the real
+  carrier: ordinal-0 = first evanchor `anchor` action wrapping
+  the B9 receipt-chain commitment; signer lane signs/pushes
+  (the carrier crate holds no keys by its own authority test).
+
+**bTungsten overcome, measured:** `zk-adaptor` gains a third
+ProofShape, `btungsten-gf16-eval` (GF(16) tower-field evaluation
+via `btungsten-qeval`; tower circuit 102 gates, 10
+Toffoli-class), benched on the same B9 statement alongside the
+signature shapes (bench: `cargo run -p zk-adaptor --example
+b9_bench`; test: `crates/zk-adaptor/tests/shapes.rs`):
+
+| shape | bytes | prove | verify | setup | PQ |
+|---|---|---|---|---|---|
+| schnorr-bip340 | 64 | 2269us | 948us | none | no |
+| ml-dsa-65 | 3309 | 17008us | 6821us | none | yes |
+| btungsten-gf16-eval | 32 | 37us | 22us | none | no |
+
+Honest bounds, in the code: the bTungsten shape is an
+evaluation commitment, not a signature and not a ZK proof —
+no key, no identity binding; its edge is measured size/speed,
+authorization stays with Schnorr/ML-DSA, and its verdicts are
+anchored via evanchor, never trusted alone. Vaulta CPU/NET +
+RAM/ordinal stay UNMEASURED until the signer lane's first live
+anchor; RAM shape is known by construction (net delta 0 per
+advance, anchor dispatch). `cargo test -p zk-adaptor` (1 new
+test), `-p bnrose-anchor-vaulta` (5+1), clippy `-p zk-adaptor`
+exit 0 (pre-existing bsigner warnings only).

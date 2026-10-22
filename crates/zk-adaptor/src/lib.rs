@@ -165,6 +165,89 @@ impl ProofShape for MlDsaShape {
     }
 }
 
+/// Shape 3 (bTungsten evaluation-commitment): the prover runs the
+/// GF(16) tower-field evaluation that `btungsten-qeval` synthesizes
+/// as reversible circuits (Itoh-Tsujii inversion over the statement's
+/// 16 nibble pairs) and commits to the transcript; the verifier
+/// re-evaluates deterministically and compares the commitment.
+///
+/// HONEST BOUNDS: this is an evaluation commitment, NOT a signature
+/// and NOT a ZK proof. There is no key and no identity binding;
+/// security is exactly SHA3-256 binding plus byte-identical
+/// re-evaluation, so verifier cost tracks prover cost. What the
+/// bTungsten lane contributes is the measured tower-field evaluation
+/// engine (gate counts on the bench) — the scoreboard shows the
+/// trade instead of claiming it away. Authorization still comes
+/// from the Schnorr/ML-DSA shapes; verdicts from this shape are
+/// anchored (evanchor), never trusted alone.
+pub struct BtungstenEvalShape {
+    /// Circuit whose synthesis the evaluation follows.
+    pub circuit_gates: usize,
+    pub toffoli_gates: usize,
+}
+
+impl BtungstenEvalShape {
+    pub fn new() -> Self {
+        let circuit = btungsten_qeval::build_tower_bmp_circuit();
+        let stats = btungsten_qeval::compute_circuit_stats(&circuit);
+        BtungstenEvalShape {
+            circuit_gates: stats.total_gates,
+            toffoli_gates: stats.toffoli_count,
+        }
+    }
+
+    fn transcript(statement: &[u8]) -> Vec<u8> {
+        let digest = Sha3_256::digest(statement);
+        let mut out = Vec::with_capacity(16);
+        for i in 0..16 {
+            let x = (digest[i] >> 4) & 0x0f;
+            let y = digest[i] & 0x0f;
+            let m = btungsten_qeval::gf_mul(x, y);
+            // Itoh-Tsujii target operation: inversion in GF(16).
+            out.push(btungsten_qeval::gf_inv(m));
+        }
+        out
+    }
+
+    fn commitment(&self, statement: &[u8]) -> Vec<u8> {
+        let mut h = Sha3_256::new();
+        h.update(statement);
+        h.update(Self::transcript(statement));
+        h.update((self.circuit_gates as u64).to_be_bytes());
+        h.update((self.toffoli_gates as u64).to_be_bytes());
+        h.finalize().to_vec()
+    }
+}
+
+impl Default for BtungstenEvalShape {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ProofShape for BtungstenEvalShape {
+    fn name(&self) -> &'static str {
+        "btungsten-gf16-eval"
+    }
+    fn setup(&self) -> Setup {
+        Setup::None
+    }
+    fn pq_resistant(&self) -> bool {
+        // No key to break; resistance is the hash's, stated as no.
+        false
+    }
+    fn prove(&mut self, statement: &[u8]) -> Result<Vec<u8>, String> {
+        // Validate the synthesized circuit stream once per proof, the
+        // same gate the evaluator applies before any shot.
+        let circuit = btungsten_qeval::build_tower_bmp_circuit();
+        btungsten_qeval::validate_circuit_stream(&circuit).map_err(|e| format!("{e:?}"))?;
+        Ok(self.commitment(statement))
+    }
+    fn verify(&self, statement: &[u8], proof: &[u8]) -> Result<bool, String> {
+        Ok(proof == self.commitment(statement).as_slice())
+    }
+}
+
 /// The receipt-chain statement: SHA3-256 over concatenated stage
 /// hashes (input, output, chain), the B9 ordinal-0 statement.
 pub fn receipt_statement(input_sha: &[u8], output_sha: &[u8], chain_sha: &[u8]) -> Vec<u8> {
