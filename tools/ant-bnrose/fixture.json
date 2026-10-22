@@ -1,0 +1,5 @@
+[
+{"id":"photo","address":"711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a","size":138931,"sha256":"98f657d987d339c302295e79907e7a4abc1564bd6b42300ea8d59ccd2148fd17","PUBLIC-CONSTANT":"Public address and expected SHA256 from https://try.autonomi.com/featured.json"},
+{"id":"whitepaper","address":"08e07281787c501a99967501c48454057ae92c4ae5b5315e1f1d36654b410183","size":183550,"sha256":"408204a0d57f5f906e09bc1dcf6c5c5dca458c1275a3052edfd0f2b237d97b7c","PUBLIC-CONSTANT":"Public address and expected SHA256 from https://try.autonomi.com/featured.json"},
+{"id":"audio","address":"2e36c503096c296a9bb17258fc29dda5d9f5ba9706964000ec0760f9adbc7082","size":321035,"sha256":"2815cac30e63a00d0fb501216b4dd09ec80f807405484352668a6c009d2ff5c3","PUBLIC-CONSTANT":"Public address and expected SHA256 from https://try.autonomi.com/featured.json"}
+]

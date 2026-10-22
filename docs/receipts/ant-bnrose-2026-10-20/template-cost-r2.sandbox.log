@@ -1,0 +1,8 @@
+Running as unit: bnrose-ant-template-cost-r2.service
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 3.369s
+             CPU time consumed: 4.700s
+                   Memory peak: 267.6M (swap: 0B)
+                    IP Traffic: received 122.4K, sent 91.3K
+                      IO Bytes: written 1.5M

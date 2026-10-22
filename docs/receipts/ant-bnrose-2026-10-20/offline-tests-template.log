@@ -1,0 +1,17 @@
+✔ counts controlled cancellation separately and retains all fixed workload cells (9.177267ms)
+✔ failed reads and launch failures remain visible and disqualify their paired timing (2.361116ms)
+✔ cached phases, relay paths, false churn and refused observers cannot qualify as a comparison (4.158442ms)
+✔ reused template preserves every policy and binding byte across sequence carries and time/hash changes (5.321765ms)
+✔ same real Rust core admits independently verified reads; opt-out does no kernel work (9.457878ms)
+✔ tampered bytes fail before observation and do not consume an observation sequence (2.161627ms)
+✔ size mismatch, transport failure and cancellation cannot become observations (1.796785ms)
+✔ concurrent out-of-order completions each receive bounded independent observations (23.011528ms)
+✔ local policy is snapshotted and oversized inputs refuse before download (1.776385ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 129.501391

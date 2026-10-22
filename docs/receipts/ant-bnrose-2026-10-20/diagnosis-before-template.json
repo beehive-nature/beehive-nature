@@ -1,0 +1,366 @@
+{
+  "schema": "bnrose.ant-webrtc.diagnosis.v1",
+  "interpretation": "SDK duration includes authenticated network discovery and reads plus scheduling; residual includes launch skew, verification, observation and other JS. This locates measured time, not a causal attribution of WAN variance.",
+  "comparable_pairs": 12,
+  "batch_delta_sum_ms": 37340.999999940395,
+  "slowest_sdk_delta_sum_ms": 37325.89999997616,
+  "outside_slowest_sdk_delta_sum_ms": 15.099999964237213,
+  "observer": {
+    "samples": 75,
+    "median_ms": 0.20000001788139343,
+    "p95_ms": 1.7000000178813934,
+    "max_ms": 2.5999999940395355,
+    "total_ms": 32.400000005960464,
+    "preparation_median_ms": 0.3499999940395355
+  },
+  "pairs": [
+    {
+      "repeat": 1,
+      "load": 1,
+      "fault": "steady",
+      "comparable": true,
+      "arms": {
+        "baseline": {
+          "batch_ms": 25093.100000023842,
+          "slowest_sdk_read_per_phase_sum_ms": 25091.40000000596,
+          "batch_minus_slowest_sdk_ms": 1.7000000178813934,
+          "summed_observer_ms": 0,
+          "received_datachannel_bytes": 10854808,
+          "connection_instances_created": 86,
+          "sandbox_cpu_seconds": 8.079
+        },
+        "shadow": {
+          "batch_ms": 25497.30000001192,
+          "slowest_sdk_read_per_phase_sum_ms": 25493.69999998808,
+          "batch_minus_slowest_sdk_ms": 3.600000023841858,
+          "summed_observer_ms": 1.800000011920929,
+          "received_datachannel_bytes": 10928973,
+          "connection_instances_created": 77,
+          "sandbox_cpu_seconds": 8.366
+        }
+      },
+      "batch_delta_ms": 404.19999998807907,
+      "slowest_sdk_delta_ms": 402.2999999821186,
+      "outside_slowest_sdk_delta_ms": 1.9000000059604645
+    },
+    {
+      "repeat": 2,
+      "load": 1,
+      "fault": "steady",
+      "comparable": true,
+      "arms": {
+        "baseline": {
+          "batch_ms": 24501.69999998808,
+          "slowest_sdk_read_per_phase_sum_ms": 24500.09999999404,
+          "batch_minus_slowest_sdk_ms": 1.5999999940395355,
+          "summed_observer_ms": 0,
+          "received_datachannel_bytes": 10972833,
+          "connection_instances_created": 78,
+          "sandbox_cpu_seconds": 7.764
+        },
+        "shadow": {
+          "batch_ms": 27110.70000001788,
+          "slowest_sdk_read_per_phase_sum_ms": 27106.79999998212,
+          "batch_minus_slowest_sdk_ms": 3.900000035762787,
+          "summed_observer_ms": 2.300000011920929,
+          "received_datachannel_bytes": 10778939,
+          "connection_instances_created": 80,
+          "sandbox_cpu_seconds": 8.082
+        }
+      },
+      "batch_delta_ms": 2609.0000000298023,
+      "slowest_sdk_delta_ms": 2606.699999988079,
+      "outside_slowest_sdk_delta_ms": 2.3000000417232513
+    },
+    {
+      "repeat": 3,
+      "load": 1,
+      "fault": "steady",
+      "comparable": true,
+      "arms": {
+        "baseline": {
+          "batch_ms": 35322.5,
+          "slowest_sdk_read_per_phase_sum_ms": 35321.09999996424,
+          "batch_minus_slowest_sdk_ms": 1.4000000357627869,
+          "summed_observer_ms": 0,
+          "received_datachannel_bytes": 11732507,
+          "connection_instances_created": 95,
+          "sandbox_cpu_seconds": 8.942
+        },
+        "shadow": {
+          "batch_ms": 26585.19999998808,
+          "slowest_sdk_read_per_phase_sum_ms": 26581.40000000596,
+          "batch_minus_slowest_sdk_ms": 3.7999999821186066,
+          "summed_observer_ms": 1.9999999701976776,
+          "received_datachannel_bytes": 10914984,
+          "connection_instances_created": 80,
+          "sandbox_cpu_seconds": 7.94
+        }
+      },
+      "batch_delta_ms": -8737.300000011921,
+      "slowest_sdk_delta_ms": -8739.699999958277,
+      "outside_slowest_sdk_delta_ms": 2.3999999463558197
+    },
+    {
+      "repeat": 1,
+      "load": 1,
+      "fault": "churn",
+      "comparable": true,
+      "arms": {
+        "baseline": {
+          "batch_ms": 25722.500000029802,
+          "slowest_sdk_read_per_phase_sum_ms": 25721.30000001192,
+          "batch_minus_slowest_sdk_ms": 1.2000000178813934,
+          "summed_observer_ms": 0,
+          "received_datachannel_bytes": 7786821,
+          "connection_instances_created": 92,
+          "sandbox_cpu_seconds": 7.622
+        },
+        "shadow": {
+          "batch_ms": 24875.100000023842,
+          "slowest_sdk_read_per_phase_sum_ms": 24872.40000000596,
+          "batch_minus_slowest_sdk_ms": 2.7000000178813934,
+          "summed_observer_ms": 1.4000000059604645,
+          "received_datachannel_bytes": 7450014,
+          "connection_instances_created": 86,
+          "sandbox_cpu_seconds": 7.406
+        }
+      },
+      "batch_delta_ms": -847.4000000059605,
+      "slowest_sdk_delta_ms": -848.9000000059605,
+      "outside_slowest_sdk_delta_ms": 1.5
+    },
+    {
+      "repeat": 2,
+      "load": 1,
+      "fault": "churn",
+      "comparable": true,
+      "arms": {
+        "baseline": {
+          "batch_ms": 25268,
+          "slowest_sdk_read_per_phase_sum_ms": 25266.500000029802,
+          "batch_minus_slowest_sdk_ms": 1.4999999701976776,
+          "summed_observer_ms": 0,
+          "received_datachannel_bytes": 7494125,
+          "connection_instances_created": 90,
+          "sandbox_cpu_seconds": 7.712
+        },
+        "shadow": {
+          "batch_ms": 30696.80000001192,
+          "slowest_sdk_read_per_phase_sum_ms": 30692.40000000596,
+          "batch_minus_slowest_sdk_ms": 4.4000000059604645,
+          "summed_observer_ms": 2.2000000178813934,
+          "received_datachannel_bytes": 7671165,
+          "connection_instances_created": 97,
+          "sandbox_cpu_seconds": 7.901
+        }
+      },
+      "batch_delta_ms": 5428.800000011921,
+      "slowest_sdk_delta_ms": 5425.899999976158,
+      "outside_slowest_sdk_delta_ms": 2.900000035762787
+    },
+    {
+      "repeat": 3,
+      "load": 1,
+      "fault": "churn",
+      "comparable": true,
+      "arms": {
+        "baseline": {
+          "batch_ms": 25043,
+          "slowest_sdk_read_per_phase_sum_ms": 25041.70000001788,
+          "batch_minus_slowest_sdk_ms": 1.2999999821186066,
+          "summed_observer_ms": 0,
+          "received_datachannel_bytes": 7650854,
+          "connection_instances_created": 87,
+          "sandbox_cpu_seconds": 7.241
+        },
+        "shadow": {
+          "batch_ms": 30927.600000023842,
+          "slowest_sdk_read_per_phase_sum_ms": 30924.600000023842,
+          "batch_minus_slowest_sdk_ms": 3,
+          "summed_observer_ms": 1.699999988079071,
+          "received_datachannel_bytes": 7600676,
+          "connection_instances_created": 98,
+          "sandbox_cpu_seconds": 7.987
+        }
+      },
+      "batch_delta_ms": 5884.600000023842,
+      "slowest_sdk_delta_ms": 5882.9000000059605,
+      "outside_slowest_sdk_delta_ms": 1.7000000178813934
+    },
+    {
+      "repeat": 1,
+      "load": 4,
+      "fault": "steady",
+      "comparable": true,
+      "arms": {
+        "baseline": {
+          "batch_ms": 41806.59999999404,
+          "slowest_sdk_read_per_phase_sum_ms": 41804.80000001192,
+          "batch_minus_slowest_sdk_ms": 1.7999999821186066,
+          "summed_observer_ms": 0.09999999403953552,
+          "received_datachannel_bytes": 41549052,
+          "connection_instances_created": 97,
+          "sandbox_cpu_seconds": 13.249
+        },
+        "shadow": {
+          "batch_ms": 41501.799999952316,
+          "slowest_sdk_read_per_phase_sum_ms": 41500.09999999404,
+          "batch_minus_slowest_sdk_ms": 1.6999999582767487,
+          "summed_observer_ms": 4.199999928474426,
+          "received_datachannel_bytes": 39479129,
+          "connection_instances_created": 89,
+          "sandbox_cpu_seconds": 14.704
+        }
+      },
+      "batch_delta_ms": -304.80000004172325,
+      "slowest_sdk_delta_ms": -304.7000000178814,
+      "outside_slowest_sdk_delta_ms": -0.10000002384185791
+    },
+    {
+      "repeat": 2,
+      "load": 4,
+      "fault": "steady",
+      "comparable": true,
+      "arms": {
+        "baseline": {
+          "batch_ms": 33384.89999997616,
+          "slowest_sdk_read_per_phase_sum_ms": 33382.79999998212,
+          "batch_minus_slowest_sdk_ms": 2.0999999940395355,
+          "summed_observer_ms": 0,
+          "received_datachannel_bytes": 28931662,
+          "connection_instances_created": 88,
+          "sandbox_cpu_seconds": 11.637
+        },
+        "shadow": {
+          "batch_ms": 41844.69999995828,
+          "slowest_sdk_read_per_phase_sum_ms": 41842.39999997616,
+          "batch_minus_slowest_sdk_ms": 2.2999999821186066,
+          "summed_observer_ms": 3.6000000536441803,
+          "received_datachannel_bytes": 37864166,
+          "connection_instances_created": 97,
+          "sandbox_cpu_seconds": 13.082
+        }
+      },
+      "batch_delta_ms": 8459.799999982119,
+      "slowest_sdk_delta_ms": 8459.59999999404,
+      "outside_slowest_sdk_delta_ms": 0.19999998807907104
+    },
+    {
+      "repeat": 3,
+      "load": 4,
+      "fault": "steady",
+      "comparable": true,
+      "arms": {
+        "baseline": {
+          "batch_ms": 32865.10000002384,
+          "slowest_sdk_read_per_phase_sum_ms": 32863.39999997616,
+          "batch_minus_slowest_sdk_ms": 1.7000000476837158,
+          "summed_observer_ms": 0,
+          "received_datachannel_bytes": 31114689,
+          "connection_instances_created": 89,
+          "sandbox_cpu_seconds": 11.402
+        },
+        "shadow": {
+          "batch_ms": 37755.10000002384,
+          "slowest_sdk_read_per_phase_sum_ms": 37752.799999952316,
+          "batch_minus_slowest_sdk_ms": 2.3000000715255737,
+          "summed_observer_ms": 3.300000011920929,
+          "received_datachannel_bytes": 32489380,
+          "connection_instances_created": 93,
+          "sandbox_cpu_seconds": 12.005
+        }
+      },
+      "batch_delta_ms": 4890,
+      "slowest_sdk_delta_ms": 4889.399999976158,
+      "outside_slowest_sdk_delta_ms": 0.6000000238418579
+    },
+    {
+      "repeat": 1,
+      "load": 4,
+      "fault": "churn",
+      "comparable": true,
+      "arms": {
+        "baseline": {
+          "batch_ms": 28129.90000000596,
+          "slowest_sdk_read_per_phase_sum_ms": 28128.09999999404,
+          "batch_minus_slowest_sdk_ms": 1.800000011920929,
+          "summed_observer_ms": 0,
+          "received_datachannel_bytes": 26416723,
+          "connection_instances_created": 98,
+          "sandbox_cpu_seconds": 10.816
+        },
+        "shadow": {
+          "batch_ms": 38643.90000000596,
+          "slowest_sdk_read_per_phase_sum_ms": 38642.10000002384,
+          "batch_minus_slowest_sdk_ms": 1.7999999821186066,
+          "summed_observer_ms": 2.800000011920929,
+          "received_datachannel_bytes": 30364876,
+          "connection_instances_created": 109,
+          "sandbox_cpu_seconds": 12.402
+        }
+      },
+      "batch_delta_ms": 10514,
+      "slowest_sdk_delta_ms": 10514.000000029802,
+      "outside_slowest_sdk_delta_ms": -2.9802322387695312e-8
+    },
+    {
+      "repeat": 2,
+      "load": 4,
+      "fault": "churn",
+      "comparable": true,
+      "arms": {
+        "baseline": {
+          "batch_ms": 28876.70000001788,
+          "slowest_sdk_read_per_phase_sum_ms": 28875.40000000596,
+          "batch_minus_slowest_sdk_ms": 1.300000011920929,
+          "summed_observer_ms": 0.10000002384185791,
+          "received_datachannel_bytes": 27523836,
+          "connection_instances_created": 101,
+          "sandbox_cpu_seconds": 11.118
+        },
+        "shadow": {
+          "batch_ms": 32878.89999997616,
+          "slowest_sdk_read_per_phase_sum_ms": 32876.90000000596,
+          "batch_minus_slowest_sdk_ms": 1.9999999701976776,
+          "summed_observer_ms": 2.9999999701976776,
+          "received_datachannel_bytes": 27001259,
+          "connection_instances_created": 101,
+          "sandbox_cpu_seconds": 10.88
+        }
+      },
+      "batch_delta_ms": 4002.1999999582767,
+      "slowest_sdk_delta_ms": 4001.5,
+      "outside_slowest_sdk_delta_ms": 0.6999999582767487
+    },
+    {
+      "repeat": 3,
+      "load": 4,
+      "fault": "churn",
+      "comparable": true,
+      "arms": {
+        "baseline": {
+          "batch_ms": 32157.40000000596,
+          "slowest_sdk_read_per_phase_sum_ms": 32156.09999999404,
+          "batch_minus_slowest_sdk_ms": 1.300000011920929,
+          "summed_observer_ms": 0.09999999403953552,
+          "received_datachannel_bytes": 24436219,
+          "connection_instances_created": 100,
+          "sandbox_cpu_seconds": 10.957
+        },
+        "shadow": {
+          "batch_ms": 37195.30000001192,
+          "slowest_sdk_read_per_phase_sum_ms": 37193,
+          "batch_minus_slowest_sdk_ms": 2.300000011920929,
+          "summed_observer_ms": 4.100000023841858,
+          "received_datachannel_bytes": 28919453,
+          "connection_instances_created": 102,
+          "sandbox_cpu_seconds": 11.985
+        }
+      },
+      "batch_delta_ms": 5037.9000000059605,
+      "slowest_sdk_delta_ms": 5036.9000000059605,
+      "outside_slowest_sdk_delta_ms": 1
+    }
+  ]
+}

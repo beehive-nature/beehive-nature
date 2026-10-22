@@ -1,0 +1,8 @@
+Running as unit: bnrose-ant-smoke-b1-steady.service
+          Finished with result: exit-code
+Main processes terminated with: code=exited, status=1/FAILURE
+               Service runtime: 11.032s
+             CPU time consumed: 2.508s
+                   Memory peak: 227.6M (swap: 0B)
+                    IP Traffic: received 335.1K, sent 291.3K
+                      IO Bytes: read 1.4M, written 1.9M

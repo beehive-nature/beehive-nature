@@ -1,0 +1,78 @@
+Running as unit: bnrose-ant-native-tests.service
+   Compiling version_check v0.9.5
+   Compiling typenum v1.20.1
+   Compiling cpufeatures v0.2.17
+   Compiling cfg-if v1.0.4
+   Compiling btungsten-wb001-core v0.1.0 (/var/lib/private/bnrose-ant-validation/core-workspace/crates/btungsten-wb001-core)
+   Compiling generic-array v0.14.7
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling digest v0.10.7
+   Compiling sha2 v0.10.9
+   Compiling bnrose-exec-core v0.1.0 (/var/lib/private/bnrose-ant-validation/core-workspace/crates/bnrose-exec-core)
+warning: variable does not need to be mutable
+   --> crates/bnrose-exec-core/src/lib.rs:385:13
+    |
+385 |         let mut read_slot = |r: &mut Rd| -> Result<([u8; TEXT_CAP], u32), Refusal> {
+    |             ----^^^^^^^^^
+    |             |
+    |             help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `put_u16` is never used
+   --> crates/bnrose-exec-core/src/lib.rs:177:4
+    |
+177 | fn put_u16(o: &mut [u8], v: u16) {
+    |    ^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `bnrose-exec-core` (lib) generated 2 warnings (run `cargo fix --lib -p bnrose-exec-core` to apply 1 suggestion)
+warning: unused variable: `n`
+   --> crates/bnrose-exec-core/src/lib.rs:938:13
+    |
+938 |         let n = handle_step(&full, &mut out).unwrap();
+    |             ^ help: if this is intentional, prefix it with an underscore: `_n`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `bnrose-exec-core` (lib test) generated 3 warnings (2 duplicates) (run `cargo fix --lib -p bnrose-exec-core --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.86s
+     Running unittests src/lib.rs (/var/lib/bnrose-ant-validation/target/debug/deps/bnrose_exec_core-cb5d464bc5fb2ab7)
+
+running 7 tests
+test tests::policy_wire_round_trips ... ok
+test tests::oversize_envelope_refuses_before_decode ... ok
+test tests::empty_and_short_envelopes_refuse_named_codes ... ok
+test tests::the_illegal_table_refuses_every_skip_and_resurrection ... ok
+test tests::state_blob_round_trips_and_digests_bind_inputs ... ok
+test tests::the_legal_table_is_exactly_the_documented_one ... ok
+test tests::truncated_requests_refuse_never_panic ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (/var/lib/bnrose-ant-validation/target/debug/deps/btungsten_wb001_core-95dc77520882a270)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests bnrose_exec_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests btungsten_wb001_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 2.010s
+             CPU time consumed: 3.522s
+                   Memory peak: 129.8M (swap: 0B)
+                      IO Bytes: read 4K, written 32K

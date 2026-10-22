@@ -1,0 +1,16 @@
+{
+  "baseline": {
+    "trials": 12,
+    "verified_reads": 75,
+    "verified_bytes": 16552230,
+    "received_datachannel_bytes": 236464129,
+    "connection_instances_created": 1101
+  },
+  "shadow": {
+    "trials": 12,
+    "verified_reads": 75,
+    "verified_bytes": 16552230,
+    "received_datachannel_bytes": 251463014,
+    "connection_instances_created": 1109
+  }
+}

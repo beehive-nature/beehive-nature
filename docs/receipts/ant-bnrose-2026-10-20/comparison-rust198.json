@@ -1,0 +1,281 @@
+{
+  "schema": "bnrose.ant-webrtc.comparison.v1",
+  "trials": 24,
+  "complete_trials": 24,
+  "successful_reads": 150,
+  "expected_withdrawal_cancellations": 30,
+  "unexpected_read_failures": 0,
+  "incomplete_trials": [],
+  "logical_verified_bytes": 33104460,
+  "received_datachannel_bytes": 487927143,
+  "observations": {
+    "observed": 75,
+    "disabled": 75,
+    "refused": 0,
+    "error": 0
+  },
+  "pairs": [
+    {
+      "repeat": 1,
+      "load": 1,
+      "fault": "steady",
+      "comparable": true,
+      "baseline": {
+        "normal_read_batch_ms": 25093.100000023842,
+        "connect_ms": 534.0999999940395
+      },
+      "shadow": {
+        "normal_read_batch_ms": 25497.30000001192,
+        "connect_ms": 546.8000000119209
+      },
+      "delta_percent": 1.610801375627946
+    },
+    {
+      "repeat": 2,
+      "load": 1,
+      "fault": "steady",
+      "comparable": true,
+      "baseline": {
+        "normal_read_batch_ms": 24501.69999998808,
+        "connect_ms": 533.5
+      },
+      "shadow": {
+        "normal_read_batch_ms": 27110.70000001788,
+        "connect_ms": 535.2000000178814
+      },
+      "delta_percent": 10.648240734443215
+    },
+    {
+      "repeat": 3,
+      "load": 1,
+      "fault": "steady",
+      "comparable": true,
+      "baseline": {
+        "normal_read_batch_ms": 35322.5,
+        "connect_ms": 523.5999999940395
+      },
+      "shadow": {
+        "normal_read_batch_ms": 26585.19999998808,
+        "connect_ms": 543.3000000119209
+      },
+      "delta_percent": -24.73579163426123
+    },
+    {
+      "repeat": 1,
+      "load": 1,
+      "fault": "churn",
+      "comparable": true,
+      "baseline": {
+        "normal_read_batch_ms": 25722.500000029802,
+        "connect_ms": 1867.0999999940395
+      },
+      "shadow": {
+        "normal_read_batch_ms": 24875.100000023842,
+        "connect_ms": 1855.800000011921
+      },
+      "delta_percent": -3.294392069219476
+    },
+    {
+      "repeat": 2,
+      "load": 1,
+      "fault": "churn",
+      "comparable": true,
+      "baseline": {
+        "normal_read_batch_ms": 25268,
+        "connect_ms": 1819.1000000238419
+      },
+      "shadow": {
+        "normal_read_batch_ms": 30696.80000001192,
+        "connect_ms": 1875.300000011921
+      },
+      "delta_percent": 21.4848820643182
+    },
+    {
+      "repeat": 3,
+      "load": 1,
+      "fault": "churn",
+      "comparable": true,
+      "baseline": {
+        "normal_read_batch_ms": 25043,
+        "connect_ms": 1824.2999999821186
+      },
+      "shadow": {
+        "normal_read_batch_ms": 30927.600000023842,
+        "connect_ms": 1913.5000000298023
+      },
+      "delta_percent": 23.497983468529494
+    },
+    {
+      "repeat": 1,
+      "load": 4,
+      "fault": "steady",
+      "comparable": true,
+      "baseline": {
+        "normal_read_batch_ms": 41806.59999999404,
+        "connect_ms": 533.0999999940395
+      },
+      "shadow": {
+        "normal_read_batch_ms": 41501.799999952316,
+        "connect_ms": 751
+      },
+      "delta_percent": -0.7290714864202519
+    },
+    {
+      "repeat": 2,
+      "load": 4,
+      "fault": "steady",
+      "comparable": true,
+      "baseline": {
+        "normal_read_batch_ms": 33384.89999997616,
+        "connect_ms": 540.1999999880791
+      },
+      "shadow": {
+        "normal_read_batch_ms": 41844.69999995828,
+        "connect_ms": 535
+      },
+      "delta_percent": 25.340198712556152
+    },
+    {
+      "repeat": 3,
+      "load": 4,
+      "fault": "steady",
+      "comparable": true,
+      "baseline": {
+        "normal_read_batch_ms": 32865.10000002384,
+        "connect_ms": 539.3000000119209
+      },
+      "shadow": {
+        "normal_read_batch_ms": 37755.10000002384,
+        "connect_ms": 522.9000000059605
+      },
+      "delta_percent": 14.879005388684208
+    },
+    {
+      "repeat": 1,
+      "load": 4,
+      "fault": "churn",
+      "comparable": true,
+      "baseline": {
+        "normal_read_batch_ms": 28129.90000000596,
+        "connect_ms": 1897.9000000059605
+      },
+      "shadow": {
+        "normal_read_batch_ms": 38643.90000000596,
+        "connect_ms": 1773.7000000178814
+      },
+      "delta_percent": 37.37659927691806
+    },
+    {
+      "repeat": 2,
+      "load": 4,
+      "fault": "churn",
+      "comparable": true,
+      "baseline": {
+        "normal_read_batch_ms": 28876.70000001788,
+        "connect_ms": 986.5
+      },
+      "shadow": {
+        "normal_read_batch_ms": 32878.89999997616,
+        "connect_ms": 995.5999999940395
+      },
+      "delta_percent": 13.859616922833284
+    },
+    {
+      "repeat": 3,
+      "load": 4,
+      "fault": "churn",
+      "comparable": true,
+      "baseline": {
+        "normal_read_batch_ms": 32157.40000000596,
+        "connect_ms": 1888.9999999701977
+      },
+      "shadow": {
+        "normal_read_batch_ms": 37195.30000001192,
+        "connect_ms": 1002.9000000059605
+      },
+      "delta_percent": 15.666378500765067
+    }
+  ],
+  "groups": [
+    {
+      "load": 1,
+      "fault": "steady",
+      "comparable_pairs": 3,
+      "baseline_median_read_batch_ms": 25093.100000023842,
+      "shadow_median_read_batch_ms": 26585.19999998808,
+      "median_paired_delta_percent": 1.610801375627946,
+      "paired_deltas_percent": [
+        1.610801375627946,
+        10.648240734443215,
+        -24.73579163426123
+      ]
+    },
+    {
+      "load": 1,
+      "fault": "churn",
+      "comparable_pairs": 3,
+      "baseline_median_read_batch_ms": 25268,
+      "shadow_median_read_batch_ms": 30696.80000001192,
+      "median_paired_delta_percent": 21.4848820643182,
+      "paired_deltas_percent": [
+        -3.294392069219476,
+        21.4848820643182,
+        23.497983468529494
+      ]
+    },
+    {
+      "load": 4,
+      "fault": "steady",
+      "comparable_pairs": 3,
+      "baseline_median_read_batch_ms": 33384.89999997616,
+      "shadow_median_read_batch_ms": 41501.799999952316,
+      "median_paired_delta_percent": 14.879005388684208,
+      "paired_deltas_percent": [
+        -0.7290714864202519,
+        25.340198712556152,
+        14.879005388684208
+      ]
+    },
+    {
+      "load": 4,
+      "fault": "churn",
+      "comparable_pairs": 3,
+      "baseline_median_read_batch_ms": 28876.70000001788,
+      "shadow_median_read_batch_ms": 37195.30000001192,
+      "median_paired_delta_percent": 15.666378500765067,
+      "paired_deltas_percent": [
+        37.37659927691806,
+        13.859616922833284,
+        15.666378500765067
+      ]
+    }
+  ],
+  "attempted_reads": 180,
+  "normal_phases": {
+    "expected": 60,
+    "observed": 60,
+    "all_verified_with_received_bytes_and_direct_path": 60,
+    "without_received_bytes": 0
+  },
+  "churn": {
+    "expected": 12,
+    "observed": 12,
+    "active_with_pending_reads_and_sent_bytes": 12,
+    "full_verified_network_recovery": 12
+  },
+  "paths": {
+    "observations": 1914,
+    "relay_observations": 0,
+    "dtls_ciphers": [
+      "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+    ]
+  },
+  "observer": {
+    "samples": 75,
+    "median_ms": 0.20000001788139343,
+    "p95_ms": 1.7000000178813934,
+    "max_ms": 2.5999999940395355,
+    "total_ms": 32.400000005960464,
+    "preparation_median_ms": 0.3499999940395355
+  }
+}

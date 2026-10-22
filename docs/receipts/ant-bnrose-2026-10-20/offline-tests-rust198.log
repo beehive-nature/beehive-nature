@@ -1,0 +1,22 @@
+Running as unit: bnrose-ant-tests-repopin.service
+✔ counts controlled cancellation separately and retains all fixed workload cells (9.024075ms)
+✔ failed reads and launch failures remain visible and disqualify their paired timing (1.623435ms)
+✔ cached phases, relay paths, false churn and refused observers cannot qualify as a comparison (3.98641ms)
+✔ same real Rust core admits independently verified reads; opt-out does no kernel work (9.545297ms)
+✔ tampered bytes fail before observation and do not consume an observation sequence (2.665697ms)
+✔ size mismatch, transport failure and cancellation cannot become observations (2.033006ms)
+✔ concurrent out-of-order completions each receive bounded independent observations (23.238676ms)
+✔ local policy is snapshotted and oversized inputs refuse before download (1.790775ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 138.127102
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 282ms
+             CPU time consumed: 350ms
+                   Memory peak: 46.1M (swap: 0B)
