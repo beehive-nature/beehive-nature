@@ -1,0 +1,10 @@
+Test Suite	Run tests	2026-10-20T03:13:00.1914900Z         PASS [   0.028s] (  81/4756) x0x bnrose_shadow::tests::oversized_internal_shape_refuses_before_slicing
+Test Suite	Run tests	2026-10-20T03:13:02.3241362Z         PASS [   2.134s] ( 117/4756) x0x bnrose_shadow::tests::prefix_encoder_matches_pinned_encoder_including_padding
+Test Suite	Run tests	2026-10-20T03:19:31.2245472Z         PASS [   0.010s] (4739/4756) x0x::example/bnrose_shadow tests::malformed_oversized_and_trailing_wire_refuse
+Test Suite	Run tests	2026-10-20T03:19:31.2327490Z         PASS [   0.008s] (4740/4756) x0x::example/bnrose_shadow tests::opt_out_and_invalid_local_policy_refuse
+Test Suite	Run tests	2026-10-20T03:19:31.2504921Z         PASS [   0.018s] (4741/4756) x0x::example/bnrose_shadow tests::scope_and_signed_freshness_refuse_without_poisoning_state
+Test Suite	Run tests	2026-10-20T03:19:31.2946694Z         PASS [   0.044s] (4742/4756) x0x::example/bnrose_shadow tests::tampering_and_classical_signature_substitution_refuse
+Test Suite	Run tests	2026-10-20T03:19:31.3252702Z         PASS [   0.030s] (4743/4756) x0x::example/bnrose_shadow tests::verified_observation_is_local_and_replay_bounded
+Test Suite	Run tests	2026-10-20T03:19:31.4060621Z         PASS [   0.227s] (4754/4756) x0x::example/bnrose_shadow tests::baseline_and_shadow_share_authentication_boundary
+Test Suite	Run tests	2026-10-20T03:19:34.8744072Z      Summary [ 446.298s] 4756 tests run: 4756 passed (2 slow), 326 skipped
+Test Suite	Voice pipeline acceptance	2026-10-20T03:19:50.8799272Z      Summary [   5.280s] 1 test run: 1 passed, 0 skipped

@@ -1,0 +1,14 @@
+[
+  {
+    "name": "bnrose-exec-core",
+    "version": "0.1.0",
+    "license": "Apache-2.0",
+    "source": "git+https://github.com/beehive-nature/beehive-nature?rev=49b88d7b294687711b9871f34a74b961f7d5f62a#49b88d7b294687711b9871f34a74b961f7d5f62a"
+  },
+  {
+    "name": "btungsten-wb001-core",
+    "version": "0.1.0",
+    "license": "Apache-2.0",
+    "source": "git+https://github.com/beehive-nature/beehive-nature?rev=49b88d7b294687711b9871f34a74b961f7d5f62a#49b88d7b294687711b9871f34a74b961f7d5f62a"
+  }
+]

@@ -1,0 +1,6 @@
+
+running 2 tests
+test bnrose_shadow::tests::oversized_internal_shape_refuses_before_slicing ... ok
+test bnrose_shadow::tests::prefix_encoder_matches_pinned_encoder_including_padding ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 3962 filtered out; finished in 1.30s

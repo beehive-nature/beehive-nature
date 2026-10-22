@@ -1,0 +1,1 @@
+5eccac5170a90a27bac2950fa0c8d4e1780f3215e324a89a14459b950f548ea2  /home/travi/target-x0x-bnrose-release/release/examples/bnrose_shadow PUBLIC-CONSTANT

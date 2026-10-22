@@ -1,0 +1,22 @@
+    Blocking waiting for file lock on artifact directory
+   Compiling x0x v0.46.0 (/mnt/c/Users/travi/wt-codex-x0x-security-1019)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 23m 06s
+     Running unittests src/lib.rs (/home/travi/target-x0x-security-1019/debug/deps/x0x-ace09c1ad33fc80f)
+
+running 14 tests
+test upgrade::apply::tests::test_extract_from_zip ... ok
+test upgrade::apply::tests::test_extract_deflated_zip_masks_privileged_permissions ... ok
+test upgrade::apply::tests::test_extract_nested_path ... ok
+test upgrade::apply::tests::test_extract_refuses_duplicate_binary_in_tar_gz ... ok
+test upgrade::apply::tests::test_extract_appledouble_sidecar_is_ignored ... ok
+test upgrade::apply::tests::test_extract_from_tar_gz ... ok
+test upgrade::apply::tests::test_extract_refuses_duplicate_binary_in_zip ... ok
+test upgrade::apply::tests::test_extract_refuses_archive_with_only_appledouble_sidecar ... ok
+test upgrade::apply::tests::test_extract_refuses_hardlink_named_as_binary ... ok
+test upgrade::apply::tests::test_extract_refuses_non_executable_magic ... ok
+test upgrade::apply::tests::test_extract_refuses_zip_with_only_appledouble_sidecar ... ok
+test upgrade::apply::tests::test_extract_skips_symlink_named_as_binary ... ok
+test upgrade::apply::tests::test_extract_skips_zip_directory_named_as_binary ... ok
+test upgrade::apply::tests::test_extract_zip_skips_symlink_to_external_target ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 3948 filtered out; finished in 0.04s

@@ -1,0 +1,6 @@
+Running as unit: bnrose-native-smoke.service
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 3.227s
+             CPU time consumed: 4.927s
+                   Memory peak: 3.1M (swap: 0B)

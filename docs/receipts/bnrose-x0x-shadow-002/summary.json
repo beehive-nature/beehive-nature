@@ -1,0 +1,695 @@
+{
+  "schema": "x0x.bnrose-shadow.nixos-comparison.v1",
+  "groups": {
+    "before": {
+      "runs": 5,
+      "median_p50_overhead_percent": 21.760283275126113,
+      "p50_overhead_range_percent": [
+        16.161835853862485,
+        31.255538121728456
+      ],
+      "median_extra_p50_ns": 44861,
+      "median_mean_overhead_percent": 21.277296021435575
+    },
+    "after": {
+      "runs": 5,
+      "median_p50_overhead_percent": 9.093505642178211,
+      "p50_overhead_range_percent": [
+        6.577130008833221,
+        11.51664788077218
+      ],
+      "median_extra_p50_ns": 19421,
+      "median_mean_overhead_percent": 7.920357637163633
+    }
+  },
+  "rows": [
+    {
+      "arm": "before",
+      "run": 2,
+      "file": "nixos-before-2.json",
+      "baseline": {
+        "count": 2048,
+        "mean_ns": 219021.95654296875,
+        "p50_ns": 206901,
+        "p95_ns": 293261,
+        "p99_ns": 311952
+      },
+      "shadow": {
+        "count": 2048,
+        "mean_ns": 253803.27099609375,
+        "p50_ns": 240340,
+        "p95_ns": 337061,
+        "p99_ns": 369762
+      },
+      "extra_p50_ns": 33439,
+      "p50_overhead_percent": 16.161835853862485,
+      "mean_overhead_percent": 15.880286616972782,
+      "scaling": [
+        {
+          "elapsed_secs": 0.220294093,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4648.331628211202,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.264567157,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 3870.47285691625,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.268614668,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 7624.304418104227,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.271887318,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 7532.532282362652,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.242165054,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 16914.083730677343,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.275160557,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 14885.854443156983,
+          "shadow": true
+        }
+      ]
+    },
+    {
+      "arm": "before",
+      "run": 3,
+      "file": "nixos-before-3.json",
+      "baseline": {
+        "count": 2048,
+        "mean_ns": 218322.6142578125,
+        "p50_ns": 209300,
+        "p95_ns": 283391,
+        "p99_ns": 304860
+      },
+      "shadow": {
+        "count": 2048,
+        "mean_ns": 260931.611328125,
+        "p50_ns": 249391,
+        "p95_ns": 338410,
+        "p99_ns": 361821
+      },
+      "extra_p50_ns": 40091,
+      "p50_overhead_percent": 19.15480172001911,
+      "mean_overhead_percent": 19.51652934129693,
+      "scaling": [
+        {
+          "elapsed_secs": 0.223681102,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4577.945972387064,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.261799429,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 3911.3912658686513,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.226122479,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 9057.03850876321,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.301227042,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 6798.858384035787,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.255526093,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 16029.674120208147,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.277029793,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 14785.413350830464,
+          "shadow": true
+        }
+      ]
+    },
+    {
+      "arm": "before",
+      "run": 4,
+      "file": "nixos-before-4.json",
+      "baseline": {
+        "count": 2048,
+        "mean_ns": 212589.73974609375,
+        "p50_ns": 206160,
+        "p95_ns": 269460,
+        "p99_ns": 295051
+      },
+      "shadow": {
+        "count": 2048,
+        "mean_ns": 259102.75830078125,
+        "p50_ns": 251021,
+        "p95_ns": 328422,
+        "p99_ns": 351811
+      },
+      "extra_p50_ns": 44861,
+      "p50_overhead_percent": 21.760283275126113,
+      "mean_overhead_percent": 21.87923961440483,
+      "scaling": [
+        {
+          "elapsed_secs": 0.22661108,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4518.755217088238,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.342672988,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 2988.271722193638,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.252279422,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 8117.9827659506855,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.316482995,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 6471.121773857076,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.28326828,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 14459.790556146987,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.321151697,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 12754.097326161724,
+          "shadow": true
+        }
+      ]
+    },
+    {
+      "arm": "before",
+      "run": 5,
+      "file": "nixos-before-5.json",
+      "baseline": {
+        "count": 2048,
+        "mean_ns": 248269.2919921875,
+        "p50_ns": 251881,
+        "p95_ns": 297731,
+        "p99_ns": 318391
+      },
+      "shadow": {
+        "count": 2048,
+        "mean_ns": 301094.2841796875,
+        "p50_ns": 307991,
+        "p95_ns": 362391,
+        "p99_ns": 382961
+      },
+      "extra_p50_ns": 56110,
+      "p50_overhead_percent": 22.27639242340629,
+      "mean_overhead_percent": 21.277296021435575,
+      "scaling": [
+        {
+          "elapsed_secs": 0.264184967,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 3876.072176355137,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.274888686,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 3725.144220741046,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.234567333,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 8730.968518962527,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.289951619,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 7063.247334376843,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.261249178,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 15678.518230591331,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.291627914,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 14045.294717569457,
+          "shadow": true
+        }
+      ]
+    },
+    {
+      "arm": "before",
+      "run": 6,
+      "file": "nixos-before-6.json",
+      "baseline": {
+        "count": 2048,
+        "mean_ns": 236339.9853515625,
+        "p50_ns": 231351,
+        "p95_ns": 293061,
+        "p99_ns": 306580
+      },
+      "shadow": {
+        "count": 2048,
+        "mean_ns": 298198.49609375,
+        "p50_ns": 303661,
+        "p95_ns": 360121,
+        "p99_ns": 377220
+      },
+      "extra_p50_ns": 72310,
+      "p50_overhead_percent": 31.255538121728456,
+      "mean_overhead_percent": 26.173527365744388,
+      "scaling": [
+        {
+          "elapsed_secs": 0.234985593,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4357.713964191839,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.29713308,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 3446.267241600969,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.241764252,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 8471.062132047546,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.315813702,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 6484.83579727646,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.281854186,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 14532.33694389765,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.319005682,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 12839.896688736722,
+          "shadow": true
+        }
+      ]
+    },
+    {
+      "arm": "after",
+      "run": 2,
+      "file": "nixos-after-2.json",
+      "baseline": {
+        "count": 2048,
+        "mean_ns": 235010.083984375,
+        "p50_ns": 223572,
+        "p95_ns": 308841,
+        "p99_ns": 324471
+      },
+      "shadow": {
+        "count": 2048,
+        "mean_ns": 254607.24951171875,
+        "p50_ns": 249320,
+        "p95_ns": 326391,
+        "p99_ns": 344030
+      },
+      "extra_p50_ns": 25748,
+      "p50_overhead_percent": 11.51664788077218,
+      "mean_overhead_percent": 8.338861548020503,
+      "scaling": [
+        {
+          "elapsed_secs": 0.247160758,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4143.052514833281,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.240175619,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4263.546834035639,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.236480348,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 8660.339082383285,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.236064427,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 8675.597700283744,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.229250277,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 17866.93588160855,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.260943618,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 15696.87747642098,
+          "shadow": true
+        }
+      ]
+    },
+    {
+      "arm": "after",
+      "run": 3,
+      "file": "nixos-after-3.json",
+      "baseline": {
+        "count": 2048,
+        "mean_ns": 215153.998046875,
+        "p50_ns": 206950,
+        "p95_ns": 281190,
+        "p99_ns": 305351
+      },
+      "shadow": {
+        "count": 2048,
+        "mean_ns": 227648.51318359375,
+        "p50_ns": 220730,
+        "p95_ns": 290381,
+        "p99_ns": 326102
+      },
+      "extra_p50_ns": 13780,
+      "p50_overhead_percent": 6.658613191592178,
+      "mean_overhead_percent": 5.807242835430193,
+      "scaling": [
+        {
+          "elapsed_secs": 0.2337983,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4379.843651557775,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.233671431,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4382.22163324707,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.224241794,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 9132.998641635912,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.253371666,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 8082.9874639573945,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.229103308,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 17878.39746076473,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.260691646,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 15712.049322823334,
+          "shadow": true
+        }
+      ]
+    },
+    {
+      "arm": "after",
+      "run": 4,
+      "file": "nixos-after-4.json",
+      "baseline": {
+        "count": 2048,
+        "mean_ns": 221447.05126953125,
+        "p50_ns": 213570,
+        "p95_ns": 282241,
+        "p99_ns": 296631
+      },
+      "shadow": {
+        "count": 2048,
+        "mean_ns": 238986.44970703125,
+        "p50_ns": 232991,
+        "p95_ns": 299911,
+        "p99_ns": 317102
+      },
+      "extra_p50_ns": 19421,
+      "p50_overhead_percent": 9.093505642178211,
+      "mean_overhead_percent": 7.920357637163633,
+      "scaling": [
+        {
+          "elapsed_secs": 0.248548431,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4119.921400751067,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.243279158,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4209.156297721155,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.234719673,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 8725.301862532844,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.316404534,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 6472.726462257333,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.26513323,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 15448.836798012833,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.275700069,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 14856.724609669938,
+          "shadow": true
+        }
+      ]
+    },
+    {
+      "arm": "after",
+      "run": 5,
+      "file": "nixos-after-5.json",
+      "baseline": {
+        "count": 2048,
+        "mean_ns": 232862.1376953125,
+        "p50_ns": 225640,
+        "p95_ns": 286550,
+        "p99_ns": 309952
+      },
+      "shadow": {
+        "count": 2048,
+        "mean_ns": 252742.02587890625,
+        "p50_ns": 250992,
+        "p95_ns": 306590,
+        "p99_ns": 329821
+      },
+      "extra_p50_ns": 25352,
+      "p50_overhead_percent": 11.235596525438751,
+      "mean_overhead_percent": 8.537192168872675,
+      "scaling": [
+        {
+          "elapsed_secs": 0.229846039,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4455.156175216925,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.254863,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4017.844881367637,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.331833388,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 6171.771961656854,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.276204469,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 7414.796753342901,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.24750745,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 16548.996807974872,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.308120739,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 13293.490121091785,
+          "shadow": true
+        }
+      ]
+    },
+    {
+      "arm": "after",
+      "run": 6,
+      "file": "nixos-after-6.json",
+      "baseline": {
+        "count": 2048,
+        "mean_ns": 245613.4375,
+        "p50_ns": 249060,
+        "p95_ns": 298591,
+        "p99_ns": 312541
+      },
+      "shadow": {
+        "count": 2048,
+        "mean_ns": 259850.9228515625,
+        "p50_ns": 265441,
+        "p95_ns": 310910,
+        "p99_ns": 325781
+      },
+      "extra_p50_ns": 16381,
+      "p50_overhead_percent": 6.577130008833221,
+      "mean_overhead_percent": 5.796704568153976,
+      "scaling": [
+        {
+          "elapsed_secs": 0.254038907,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4030.878624430549,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.242027733,
+          "local_observers": 1,
+          "operations": 1024,
+          "operations_per_sec": 4230.920098731,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.23385157,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 8757.69189832679,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.255285951,
+          "local_observers": 2,
+          "operations": 2048,
+          "operations_per_sec": 8022.376444836167,
+          "shadow": true
+        },
+        {
+          "elapsed_secs": 0.240179848,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 17053.88705217267,
+          "shadow": false
+        },
+        {
+          "elapsed_secs": 0.245986614,
+          "local_observers": 4,
+          "operations": 4096,
+          "operations_per_sec": 16651.312579147092,
+          "shadow": true
+        }
+      ]
+    }
+  ],
+  "relative_reduction_in_median_p50_overhead_percent": 58.21053647507946,
+  "limitations": [
+    "Offline signed announcement verification, not mesh throughput.",
+    "Shared KVM host; no CPU affinity or dedicated hardware.",
+    "Independent ephemeral signing fixtures each process; identical wires within each baseline/shadow pair.",
+    "Linux release artifacts built on WSL; executed on NixOS using pinned Nix runtime libraries.",
+    "Five interleaved old/new runs; preflight runs are retained separately, not substituted into this cohort."
+  ]
+}

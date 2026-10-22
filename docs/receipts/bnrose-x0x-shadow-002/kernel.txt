@@ -1,0 +1,1 @@
+Linux buzz-hostinger 6.18.48 #1-NixOS SMP PREEMPT_DYNAMIC Fri Aug 28 06:22:54 UTC 2026 x86_64 GNU/Linux

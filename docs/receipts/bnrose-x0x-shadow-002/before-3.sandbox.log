@@ -1,0 +1,6 @@
+Running as unit: bnrose-shadow-before-3.service
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 2.775s
+             CPU time consumed: 4.698s
+                   Memory peak: 3.3M (swap: 0B)

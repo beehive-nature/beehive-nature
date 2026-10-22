@@ -1,0 +1,21 @@
+   Compiling audiopus_sys v0.2.2
+   Compiling tikv-jemalloc-sys v0.6.1+5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7
+   Compiling object v0.37.3
+   Compiling paste v1.0.15
+    Checking gimli v0.32.3
+    Checking miniz_oxide v0.8.9
+    Checking rustc-demangle v0.1.28
+    Checking btungsten-wb001-core v0.1.0 (https://github.com/beehive-nature/beehive-nature?rev=49b88d7b294687711b9871f34a74b961f7d5f62a#49b88d7b)
+    Checking mintex v0.1.4
+    Checking thousands v0.2.0
+    Checking rustc-hash v1.1.0
+    Checking bnrose-exec-core v0.1.0 (https://github.com/beehive-nature/beehive-nature?rev=49b88d7b294687711b9871f34a74b961f7d5f62a#49b88d7b)
+    Checking addr2line v0.25.1
+    Checking backtrace v0.3.76
+    Checking dhat v0.3.3
+    Checking opus v0.3.1
+    Checking saorsa-webrtc-codecs v0.6.0
+    Checking saorsa-webrtc-core v0.6.0
+    Checking tikv-jemalloc-ctl v0.6.1
+    Checking tikv-jemallocator v0.6.1
+    Checking x0x v0.46.0 (/mnt/c/Users/travi/wt-codex-x0x-bnrose-shadow)

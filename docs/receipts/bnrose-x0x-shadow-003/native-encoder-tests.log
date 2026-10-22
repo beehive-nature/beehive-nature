@@ -1,0 +1,12 @@
+2026-10-20T06:01:31+00:00 buzz-hostinger systemd[1]: Starting [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/bnrose-input/native-encoder.sh...
+2026-10-20T06:01:31+00:00 buzz-hostinger systemd[1]: Started [systemd-run] /nix/store/nnm9gdr70ihc6zc9298mzz8jpcgaciql-bash-5.3p20/bin/bash /run/bnrose-input/native-encoder.sh.
+2026-10-20T06:01:33+00:00 buzz-hostinger bash[3883250]:    Compiling x0x v0.46.0 (/var/lib/private/bnrose-native-validation/source)
+2026-10-20T06:24:48+00:00 buzz-hostinger bash[3883250]:     Finished `release` profile [optimized] target(s) in 23m 17s
+2026-10-20T06:24:48+00:00 buzz-hostinger bash[3883250]:      Running unittests src/lib.rs (/var/lib/bnrose-native-validation/target/release/deps/x0x-4ff2467dc5340a6b)
+2026-10-20T06:24:48+00:00 buzz-hostinger bash[3909586]: running 2 tests
+2026-10-20T06:24:48+00:00 buzz-hostinger bash[3909586]: test bnrose_shadow::tests::oversized_internal_shape_refuses_before_slicing ... ok
+2026-10-20T06:24:49+00:00 buzz-hostinger bash[3909586]: test bnrose_shadow::tests::prefix_encoder_matches_pinned_encoder_including_padding ... ok
+2026-10-20T06:24:49+00:00 buzz-hostinger bash[3909586]: test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 3962 filtered out; finished in 0.23s
+2026-10-20T06:24:49+00:00 buzz-hostinger bash[3909656]: 092ba2c4c2e4441de8530bf4d37f66e776dc5bfd1fee46af6279483c18222778  /var/lib/bnrose-native-validation/target/release/examples/bnrose_shadow # PUBLIC-CONSTANT
+2026-10-20T06:24:49+00:00 buzz-hostinger systemd[1]: bnrose-native-encoder.service: Deactivated successfully.
+2026-10-20T06:24:49+00:00 buzz-hostinger systemd[1]: bnrose-native-encoder.service: Consumed 22min 55.419s CPU time over 23min 17.458s wall clock time, 8.4G memory peak, 439.3M read from disk, 212.3M written to disk.

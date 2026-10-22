@@ -1,0 +1,200 @@
+[
+  {
+    "run": 1,
+    "baseline": {
+      "count": 2048,
+      "mean_ns": 1017615.3793945312,
+      "p50_ns": 380093,
+      "p95_ns": 9603138,
+      "p99_ns": 11310161
+    },
+    "shadow": {
+      "count": 2048,
+      "mean_ns": 1162489.4453125,
+      "p50_ns": 453665,
+      "p95_ns": 9979666,
+      "p99_ns": 11327968
+    },
+    "median_overhead_percent": 19.356315428066285,
+    "mean_overhead_percent": 14.236623075033217,
+    "scaling": [
+      {
+        "elapsed_secs": 0.93430023,
+        "local_observers": 1,
+        "operations": 1024,
+        "operations_per_sec": 1096.0074364960822,
+        "shadow": false
+      },
+      {
+        "elapsed_secs": 1.366078683,
+        "local_observers": 1,
+        "operations": 1024,
+        "operations_per_sec": 749.5907905913791,
+        "shadow": true
+      },
+      {
+        "elapsed_secs": 1.229010369,
+        "local_observers": 2,
+        "operations": 2048,
+        "operations_per_sec": 1666.3813842891996,
+        "shadow": false
+      },
+      {
+        "elapsed_secs": 1.326091454,
+        "local_observers": 2,
+        "operations": 2048,
+        "operations_per_sec": 1544.3882047670597,
+        "shadow": true
+      },
+      {
+        "elapsed_secs": 1.314832462,
+        "local_observers": 4,
+        "operations": 4096,
+        "operations_per_sec": 3115.22579368747,
+        "shadow": false
+      },
+      {
+        "elapsed_secs": 1.5115318960000002,
+        "local_observers": 4,
+        "operations": 4096,
+        "operations_per_sec": 2709.833653420966,
+        "shadow": true
+      }
+    ],
+    "observer_bytes": 136,
+    "wire_bytes": 7415,
+    "debug_assertions": false
+  },
+  {
+    "run": 2,
+    "baseline": {
+      "count": 2048,
+      "mean_ns": 979089.7729492188,
+      "p50_ns": 369219,
+      "p95_ns": 9615935,
+      "p99_ns": 11006676
+    },
+    "shadow": {
+      "count": 2048,
+      "mean_ns": 1188112.4819335938,
+      "p50_ns": 446656,
+      "p95_ns": 10088262,
+      "p99_ns": 11116366
+    },
+    "median_overhead_percent": 20.973189353743994,
+    "mean_overhead_percent": 21.348676572808635,
+    "scaling": [
+      {
+        "elapsed_secs": 1.179584822,
+        "local_observers": 1,
+        "operations": 1024,
+        "operations_per_sec": 868.1020481967511,
+        "shadow": false
+      },
+      {
+        "elapsed_secs": 1.388623696,
+        "local_observers": 1,
+        "operations": 1024,
+        "operations_per_sec": 737.4208023020802,
+        "shadow": true
+      },
+      {
+        "elapsed_secs": 1.201509841,
+        "local_observers": 2,
+        "operations": 2048,
+        "operations_per_sec": 1704.5220356210132,
+        "shadow": false
+      },
+      {
+        "elapsed_secs": 1.602295606,
+        "local_observers": 2,
+        "operations": 2048,
+        "operations_per_sec": 1278.1661463284322,
+        "shadow": true
+      },
+      {
+        "elapsed_secs": 1.542334213,
+        "local_observers": 4,
+        "operations": 4096,
+        "operations_per_sec": 2655.7149322602754,
+        "shadow": false
+      },
+      {
+        "elapsed_secs": 1.548776344,
+        "local_observers": 4,
+        "operations": 4096,
+        "operations_per_sec": 2644.6684932062726,
+        "shadow": true
+      }
+    ],
+    "observer_bytes": 136,
+    "wire_bytes": 7415,
+    "debug_assertions": false
+  },
+  {
+    "run": 3,
+    "baseline": {
+      "count": 2048,
+      "mean_ns": 1041951.6958007812,
+      "p50_ns": 399146,
+      "p95_ns": 9817232,
+      "p99_ns": 11463648
+    },
+    "shadow": {
+      "count": 2048,
+      "mean_ns": 1281204.1083984375,
+      "p50_ns": 488710,
+      "p95_ns": 10487702,
+      "p99_ns": 11505228
+    },
+    "median_overhead_percent": 22.438907066587156,
+    "mean_overhead_percent": 22.961948578027048,
+    "scaling": [
+      {
+        "elapsed_secs": 0.964676222,
+        "local_observers": 1,
+        "operations": 1024,
+        "operations_per_sec": 1061.4960508480326,
+        "shadow": false
+      },
+      {
+        "elapsed_secs": 1.20656141,
+        "local_observers": 1,
+        "operations": 1024,
+        "operations_per_sec": 848.6928153951153,
+        "shadow": true
+      },
+      {
+        "elapsed_secs": 1.076383625,
+        "local_observers": 2,
+        "operations": 2048,
+        "operations_per_sec": 1902.6673691733279,
+        "shadow": false
+      },
+      {
+        "elapsed_secs": 1.402831606,
+        "local_observers": 2,
+        "operations": 2048,
+        "operations_per_sec": 1459.9043757216289,
+        "shadow": true
+      },
+      {
+        "elapsed_secs": 1.226781181,
+        "local_observers": 4,
+        "operations": 4096,
+        "operations_per_sec": 3338.818742443686,
+        "shadow": false
+      },
+      {
+        "elapsed_secs": 1.5786731170000001,
+        "local_observers": 4,
+        "operations": 4096,
+        "operations_per_sec": 2594.5839932865592,
+        "shadow": true
+      }
+    ],
+    "observer_bytes": 136,
+    "wire_bytes": 7415,
+    "debug_assertions": false
+  }
+]
