@@ -508,7 +508,8 @@ if (process.argv[1] && process.argv[1].endsWith('stack-dataflow-corpus.mjs')) {
     entry.en = cells.en;
     corpus.strings[k] = entry; touched++;
   }
-  corpus._meta.drafted += ' · 2026-09-17 stack dataflow lane: 112 flow.* keys (Engine Room follow-one-file loop: 8 stages × 4 factual rows + 3 register paragraphs, four-circuit legend, evidence card) fleet-drafted by the zCode seat (GLM 5.3), all ⚙; flow.b.* board chips mirror the intake receipt’s state-board vocabulary — record of origin, never translated (identical cells by law, per the kandi precedent)';
+const PROV = ' · 2026-09-17 stack dataflow lane: 112 flow.* keys (Engine Room follow-one-file loop: 8 stages × 4 factual rows + 3 register paragraphs, four-circuit legend, evidence card) fleet-drafted by the zCode seat (GLM 5.3), all ⚙; flow.b.* board chips mirror the intake receipt’s state-board vocabulary — record of origin, never translated (identical cells by law, per the kandi precedent)'; // Z4 (cut 2d4ddb78): one provenance sentence per corpus lifetime - the append is guarded on includes, so every run is byte-idempotent
+  if (!corpus._meta.drafted.includes(PROV)) corpus._meta.drafted += PROV;
   writeFileSync(CORPUS, JSON.stringify(corpus, null, 1) + '\n');
   console.log('stack-dataflow-corpus: ' + touched + ' flow.* keys written (' + before + ' → ' + Object.keys(corpus.strings).length + ' total), 29 cells each');
 }
