@@ -69,6 +69,9 @@ in {
       ${pkgs.gnused}/bin/sed 's|reverse_proxy 172.20.0.1:8091 {|reverse_proxy 172.20.0.1:8092 {|' ${compose}/Caddyfile.hostinger > ${compose}/Caddyfile.hostinger.metered.tmp \
         && mv ${compose}/Caddyfile.hostinger.metered.tmp ${compose}/Caddyfile.hostinger.metered
     fi
+    # door.deploy's cp source: a root-only staging dir (replaces the old
+    # world-writable /tmp/ prefix, which admitted /tmp/../anywhere).
+    install -d -m 0700 -o root -g root /var/lib/x0x-control/stage
     if [ -f /var/lib/x0x-control/policy.json ]; then
       # umask before create (no world-readable window); mv only on a
       # successful merge, so a jq failure can never truncate the policy.

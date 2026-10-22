@@ -15,6 +15,17 @@ nixos-rebuild of the box-local flake}, with cp/docker/nft/ss all
 `refused_scope` (receipts in the 2026-10-20 dispatch, Addendum 8).
 No serving beyond test agents until this is enforced.
 
+Cutover flow (2026-10-22, legacy-compat for the relay door during
+central sunset): no in-place sed. Activation of
+ops/x0x/hostinger/door-meter.nix renders
+/opt/buzz/deploy/compose/Caddyfile.hostinger.metered (member 8091 ->
+meter 8092, one fixed expression) and a one-time
+Caddyfile.hostinger.premeter backup. Cut over with
+cp Caddyfile.hostinger.metered Caddyfile.hostinger; roll back with
+cp Caddyfile.hostinger.premeter Caddyfile.hostinger; then
+docker compose ... up -d caddy. The container probe image is
+usybox:stable (the door.meter scope only admits usybox: tags).
+
 ## Scale law it answers
 
 10B users, millions of LOVERnments at 6^5, zero estate egress. The

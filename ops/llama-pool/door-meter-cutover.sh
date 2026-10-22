@@ -48,13 +48,22 @@ sleep 2; systemctl is-active door-meter
 # meter->member leg is host-local and probed first.
 systemctl restart llama-pool-fw || true
 curl -sf -m 5 http://172.20.0.1:8091/health; echo " member-host-ok"
-docker run --rm --network buzz-prod_buzz-net busybox wget -qO- -T 5 http://172.20.0.1:8092/v1/models | grep -q unauthorized
+docker run --rm --network buzz-prod_buzz-net busybox:stable wget -qO- -T 5 http://172.20.0.1:8092/v1/models | grep -q unauthorized
 echo "container->meter 401-ok"
 
-# Caddy repoint: /pool/* upstream member -> meter (backup first).
+# Caddy repoint: /pool/* upstream member -> meter. Copy flow only, no
+# in-place sed: nixos activation (ops/x0x/hostinger/door-meter.nix)
+# pre-renders Caddyfile.hostinger.metered with ONE fixed expression
+# and keeps a one-time Caddyfile.hostinger.premeter backup. If this
+# runs before that rebuild, render them here with the same expression.
+# Rollback: cp Caddyfile.hostinger.premeter Caddyfile.hostinger, then
+# the same compose up -d caddy.
 cd /opt/buzz/deploy/compose
+[ -f Caddyfile.hostinger.premeter ] || cp -p Caddyfile.hostinger Caddyfile.hostinger.premeter
+[ -f Caddyfile.hostinger.metered ] || sed 's|reverse_proxy 172.20.0.1:8091 {|reverse_proxy 172.20.0.1:8092 {|' Caddyfile.hostinger.premeter > Caddyfile.hostinger.metered
+grep -qF 'reverse_proxy 172.20.0.1:8092 {' Caddyfile.hostinger.metered || { echo "ABORT: .metered has no meter upstream"; exit 1; }
 cp Caddyfile.hostinger Caddyfile.hostinger.bak-meter-$(date +%Y%m%dT%H%M%SZ)
-sed -i 's|reverse_proxy 172.20.0.1:8091 {|reverse_proxy 172.20.0.1:8092 {|' Caddyfile.hostinger
+cp Caddyfile.hostinger.metered Caddyfile.hostinger
 docker compose -p buzz-prod -f compose.yml -f compose.hostinger.yml up -d caddy
 sleep 3
 

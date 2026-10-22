@@ -9,7 +9,7 @@
     ],
     "door.deploy": [
       {"argv0": "/run/current-system/sw/bin/nixos-rebuild", "max_args": 6, "arg_prefixes": ["switch", "--flake", "/etc/nixos/buzz-hostinger", "--show-trace"]},
-      {"argv0": "/run/current-system/sw/bin/cp", "max_args": 4, "arg_prefixes": ["/tmp/", "/opt/buzz/deploy/compose/Caddyfile"]},
+      {"argv0": "/run/current-system/sw/bin/cp", "max_args": 2, "arg_prefixes": ["/var/lib/x0x-control/stage/Caddyfile.hostinger", "/opt/buzz/deploy/compose/Caddyfile.hostinger"]},
       {"argv0": "/run/current-system/sw/bin/docker", "max_args": 10, "arg_prefixes": ["exec", "buzz-prod-caddy-1", "caddy", "reload", "--config", "/etc/caddy/Caddyfile"]},
       {"argv0": "/run/current-system/sw/bin/systemctl", "max_args": 4, "arg_prefixes": ["restart", "x0x-control", "llama-pool", "x0x"]}
     ],
