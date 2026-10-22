@@ -87,15 +87,19 @@ fn cmd_serve_once(args: &[String]) -> Result<i32, String> {
     let env: x0x_control::SealedEnvelope =
         serde_json::from_str(&read(&in_path)?).map_err(|e| e.to_string())?;
     let order = open_order(&env, &seed)?;
+    // Write-ahead replay ledger: persist the nonce BEFORE serving,
+    // so a crash after execution can never re-serve this order.
+    if !seen.contains(&order.nonce) {
+        let mut ledger = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&ledger_path)
+            .map_err(|e| e.to_string())?;
+        use std::io::Write as _;
+        writeln!(ledger, "{}", order.nonce).map_err(|e| e.to_string())?;
+        ledger.sync_all().map_err(|e| e.to_string())?;
+    }
     let outcome = execute_order(&order, &policy, &env, &mut seen);
-
-    let mut ledger = std::fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&ledger_path)
-        .map_err(|e| e.to_string())?;
-    use std::io::Write as _;
-    writeln!(ledger, "{}", order.nonce).map_err(|e| e.to_string())?;
 
     write(
         &out_path,
@@ -154,6 +158,7 @@ fn cmd_selftest() -> Result<i32, String> {
         stdin: None,
         issued_by: "selftest".to_string(),
         nonce: format!("selftest-{}", std::process::id()),
+        timeout_secs: 0,
         expires_at: u64::MAX,
         pre: vec![Probe {
             argv: vec![exe.clone(), "echo-args".into(), "pre-ok".into()],
@@ -201,7 +206,19 @@ fn cmd_selftest() -> Result<i32, String> {
     let rogue_env = seal_order(&rogue, &id.public)?;
     let refused = execute_order(&rogue, &policy, &rogue_env, &mut seen);
     assert_eq!(refused.receipt.verdict, Verdict::RefusedScope);
+    // Probe-scope escape: valid order argv, probe argv outside scope.
+    let mut esc = order.clone();
+    esc.nonce = "escape-nonce".to_string();
+    esc.pre = vec![Probe {
+        argv: vec!["/bin/evil".to_string()],
+        expect_exit: 0,
+        stdout_contains: None,
+    }];
+    let esc_env = seal_order(&esc, &id.public)?;
+    let esc_out = execute_order(&esc, &policy, &esc_env, &mut seen);
+    assert_eq!(esc_out.receipt.verdict, Verdict::RefusedScope);
     println!("selftest PASS: wrong key refused, replay refused, out-of-scope refused");
+    println!("selftest PASS: probe-scope escape refused before any execution");
     Ok(0)
 }
 

@@ -13,6 +13,10 @@ pub struct Order {
     pub stdin: Option<String>,
     pub issued_by: String,
     pub nonce: String,
+    /// Execution timeout in seconds; 0 selects the 30s default.
+    /// Probes share the same bound. No order runs unbounded.
+    #[serde(default)]
+    pub timeout_secs: u64,
     /// Unix seconds; orders at or past this instant are refused.
     pub expires_at: u64,
     #[serde(default)]
@@ -85,6 +89,9 @@ pub struct ProbeResult {
     pub stderr: String,
     /// SHA3-256 hex of the exact stdout bytes.
     pub stdout_sha3: String,
+    /// True when stdout exceeded the capture cap and was truncated.
+    #[serde(default)]
+    pub stdout_truncated: bool,
     pub passed: bool,
 }
 
@@ -94,6 +101,11 @@ pub struct ExecResult {
     pub exit_code: Option<i32>,
     pub stdout: String,
     pub stderr: String,
+    /// True when the command was killed at the order timeout.
+    #[serde(default)]
+    pub timed_out: bool,
+    #[serde(default)]
+    pub stdout_truncated: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
