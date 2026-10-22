@@ -1,6 +1,6 @@
 { modulesPath, pkgs, ... }:
 {
-  imports = [ (modulesPath + "/profiles/qemu-guest.nix") ./buzz-services.nix ./x0x-service.nix ];
+  imports = [ (modulesPath + "/profiles/qemu-guest.nix") ./buzz-services.nix ./x0x-service.nix ./door-meter.nix ];
   system.stateVersion = "26.05";
   networking.hostName = "buzz-hostinger";
   boot.loader.grub.enable = true;

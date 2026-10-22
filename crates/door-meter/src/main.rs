@@ -44,7 +44,10 @@ struct State {
 }
 
 fn sha256_hex(data: &[u8]) -> String {
-    Sha256::digest(data).iter().map(|b| format!("{b:02x}")).collect()
+    Sha256::digest(data)
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect()
 }
 
 fn now_secs() -> u64 {
@@ -117,7 +120,9 @@ async fn handle(
             None => {
                 drop(st);
                 let _ = client
-                    .write_all(b"HTTP/1.1 401 Unauthorized\r\ncontent-length: 12\r\n\r\nunauthorized")
+                    .write_all(
+                        b"HTTP/1.1 401 Unauthorized\r\ncontent-length: 12\r\n\r\nunauthorized",
+                    )
                     .await;
                 return Ok(());
             }
@@ -150,7 +155,7 @@ async fn handle(
     // Stream the response back, counting exact bytes, honoring
     // the response framing so keep-alive upstreams terminate.
     let mut bytes_out: u64 = 0;
-    let mut status: u16 = 0;
+    let status: u16;
     let mut header_buf: Vec<u8> = Vec::new();
     let mut hchunk = [0u8; 4096];
     let header_end;
@@ -174,8 +179,8 @@ async fn handle(
         .nth(1)
         .and_then(|s| s.parse().ok())
         .unwrap_or(0);
-    let resp_clen: Option<usize> = header(&head_text, "content-length")
-        .and_then(|v| v.parse().ok());
+    let resp_clen: Option<usize> =
+        header(&head_text, "content-length").and_then(|v| v.parse().ok());
     let chunked = header(&head_text, "transfer-encoding")
         .map(|v| v.to_ascii_lowercase().contains("chunked"))
         .unwrap_or(false);
