@@ -114,7 +114,7 @@ pub enum Verdict {
     Completed,
     RefusedScope,
     RefusedExpired,
-    RefusedMalformed,
+    RefusedReplay,
     PreStateFailed,
     PostStateFailed,
 }

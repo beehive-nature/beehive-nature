@@ -60,8 +60,27 @@ the first mutating scope, granted explicitly.
 
 ## Honest bounds
 
-- Sound by construction at the seams it owns (scope check before exec,
-  probes before/after, replay ledger); the KEM/AEAD primitives are the
-  cited upstream implementations, not estate-audited.
-- The nonce ledger is a local append-only file; crash-consistency is
-  "append before serve" and is stated, not proven.
+- Sound by construction at the seams it owns (scope check before exec
+  AND before probes, probes before/after, replay ledger); the
+  KEM/AEAD primitives are the cited upstream implementations, not
+  estate-audited.
+- **Threat model (sender authentication):** sealing an order needs
+  only the agent's PUBLIC encapsulation key — anyone can seal.
+  Confidentiality and integrity-to-the-agent are provided;
+  sender authentication is NOT. The scope policy is therefore the
+  whole authorization boundary: every scope in a production policy
+  must be safe against arbitrary senders, or the transport must
+  authenticate senders (x0xd's ML-DSA peer identity, once the
+  channel bridge lands). A bsigner sender-signature check (order
+  carries an ML-DSA envelope over the canonical order JSON, verified
+  against a policy-pinned sender key id before opening) is the
+  designed follow-up; it is not implemented in this version.
+- The nonce ledger is a local append-only file. `serve-once`
+  appends + fsyncs the nonce BEFORE executing (write-ahead) and
+  holds an exclusive ledger lock for the whole serve
+  (single-flight per ledger); a second concurrent serve against
+  the same ledger is refused, never raced. Cross-host replay is
+  out of scope: one agent, one ledger.
+- Policy authors: `arg_prefixes` match by string prefix — terminate
+  a path prefix with `/` (write `/etc/nixos/`, not `/etc/nixos`)
+  or a sibling like `/etc/nixos-evil` also matches.

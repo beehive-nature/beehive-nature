@@ -80,6 +80,10 @@ fn run_argv(argv: &[String], stdin: Option<&str>, timeout_secs: u64) -> Result<R
         .stderr(Stdio::piped());
     if stdin.is_some() {
         cmd.stdin(Stdio::piped());
+    } else {
+        // Never inherit the agent's stdin: a scoped child must not
+        // consume the control channel or block on the operator tty.
+        cmd.stdin(Stdio::null());
     }
     let mut child = cmd.spawn().map_err(|e| format!("spawn {}: {e}", argv[0]))?;
     if let Some(text) = stdin {
@@ -186,7 +190,7 @@ pub fn execute_order(
     }
     if seen_nonces.contains(&order.nonce) {
         return ExecOutcome {
-            receipt: base(Verdict::RefusedMalformed, "nonce already served (replay)"),
+            receipt: base(Verdict::RefusedReplay, "nonce already served (replay)"),
             exit_code: 2,
         };
     }

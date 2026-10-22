@@ -36,11 +36,31 @@ fn load_seed(path: &str) -> Result<KemIdentity, String> {
     Ok(KemIdentity::from_seed(seed))
 }
 
+fn write_seed(path: &str, text: &str) -> Result<(), String> {
+    // Seed material is 0600 from birth on Unix; the file must never
+    // transit through a world-readable default-umask window.
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        let mut f = std::fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .mode(0o600)
+            .open(path)
+            .map_err(|e| format!("write {path}: {e}"))?;
+        use std::io::Write as _;
+        return f.write_all(text.as_bytes()).map_err(|e| e.to_string());
+    }
+    #[cfg(not(unix))]
+    write(path, text)
+}
+
 fn cmd_keygen(args: &[String]) -> Result<i32, String> {
     let seed_out = arg(args, "--seed-out").ok_or("--seed-out required")?;
     let pub_out = arg(args, "--pub-out").ok_or("--pub-out required")?;
     let id = KemIdentity::generate()?;
-    write(&seed_out, &b64_encode(&id.seed))?;
+    write_seed(&seed_out, &b64_encode(&id.seed))?;
     let pub_json = serde_json::json!({
         "kem_alg": "ml-kem-768",
         "encapsulation_key_b64": b64_encode(&id.public),
@@ -74,6 +94,31 @@ fn cmd_serve_once(args: &[String]) -> Result<i32, String> {
         serde_json::from_str(&read(&arg(args, "--policy").ok_or("--policy required")?)?)
             .map_err(|e| e.to_string())?;
     let ledger_path: PathBuf = arg(args, "--ledger").ok_or("--ledger required")?.into();
+    // Single-flight: one serve-once process per ledger at a time.
+    // An O_EXCL lockfile is created before serving and removed when
+    // this process finishes; a second serve against the same ledger
+    // is refused, never raced. A stale lockfile after a crash is an
+    // operator-visible stop, removed by hand — never silently.
+    struct LockGuard(std::path::PathBuf);
+    impl Drop for LockGuard {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_file(&self.0);
+        }
+    }
+    let lock_path = ledger_path.with_extension("lock");
+    let _lock = match std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&lock_path)
+    {
+        Ok(_) => LockGuard(lock_path),
+        Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
+            return Err(
+                "ledger locked by another serve-once process (or stale lockfile)".to_string(),
+            );
+        }
+        Err(e) => return Err(format!("open ledger lock: {e}")),
+    };
     let in_path = arg(args, "--in").ok_or("--in required")?;
     let out_path = arg(args, "--out").ok_or("--out required")?;
 
@@ -145,6 +190,8 @@ fn cmd_serve_once(args: &[String]) -> Result<i32, String> {
 
 fn cmd_selftest() -> Result<i32, String> {
     use x0x_control::order::{CommandRule, Probe, Verdict};
+    // Enable the gated echo-args helper for child invocations.
+    std::env::set_var("X0X_CONTROL_SELFTEST", "1");
 
     let exe = std::env::current_exe()
         .map_err(|e| e.to_string())?
@@ -199,7 +246,7 @@ fn cmd_selftest() -> Result<i32, String> {
     let other = KemIdentity::generate()?;
     assert!(open_order(&env, &other).is_err());
     let replay = execute_order(&opened, &policy, &env, &mut seen);
-    assert_eq!(replay.receipt.verdict, Verdict::RefusedMalformed);
+    assert_eq!(replay.receipt.verdict, Verdict::RefusedReplay);
     let mut rogue = order.clone();
     rogue.scope = "selftest.root".to_string();
     rogue.nonce = "fresh-nonce".to_string();
@@ -224,8 +271,12 @@ fn cmd_selftest() -> Result<i32, String> {
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    // Hidden helper used by selftest/tests as a harmless scoped command.
-    if args.first().map(String::as_str) == Some("echo-args") {
+    // Test helper used by selftest as a harmless scoped command.
+    // Gated: only active when the selftest parent sets the env flag,
+    // so a deployed binary never exposes it.
+    if std::env::var_os("X0X_CONTROL_SELFTEST").is_some()
+        && args.first().map(String::as_str) == Some("echo-args")
+    {
         println!("{}", args[1..].join(" "));
         return ExitCode::from(0);
     }
