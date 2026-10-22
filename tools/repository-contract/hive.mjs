@@ -3,11 +3,12 @@
 import { normalizeNodes } from '../keychain-release/anchor.mjs';
 import { canonicalDocument, parseDocument, need, record, list, hash, integer, oid } from './contract.mjs';
 import { pointer, retrieveBundle } from './storage.mjs';
+import { retrievePrivateBatch, privateBatchUsage } from './private-batch.mjs';
 
 export const HIVE_ID = 'bnr.repository';
 export function validateNotice(n) {
   record(n, ['schema', 'topic', 'bundle']);
-  need(n.schema === 'bnr.repository-checkpoint/2', 'VERSION'); hash(n.topic); pointer(n.bundle);
+  need(['bnr.repository-checkpoint/2', 'bnr.repository-checkpoint/3'].includes(n.schema), 'VERSION'); hash(n.topic); pointer(n.bundle);
   need(canonicalDocument(n).length <= 8192, 'RESOURCE_LIMIT'); return n;
 }
 export function hiveOperation(account, n) {
@@ -44,8 +45,8 @@ async function agreedBlock(nodes, height, call) {
   need(views.every(v => canonicalDocument(v).equals(first)), 'ORACLE_DIVERGENCE'); return views[0];
 }
 
-export async function syncHiveBlock({ store, rails, maxBytes, privacy, call = rpc }) {
-  const ordering = store.bootstrap.ordering; need(ordering.mode === 'hive-shadow', 'ORDERING'); integer(maxBytes, 1);
+export async function syncHiveBlock({ store, rails, maxBytes, privacy, engine, maxBatchOperations = 64, maxBatchMetadataBytes = 32 * 1024 * 1024, call = rpc }) {
+  const ordering = store.bootstrap.ordering; need(['hive-shadow', 'hive-batch-shadow'].includes(ordering.mode), 'ORDERING'); integer(maxBytes, 1);
   const nodes = normalizeNodes(ordering.nodes); need(nodes.length >= 2, 'ORACLES');
   const current = store.current(), cursor = current.cursor;
   const libs = await Promise.all(nodes.map(async n => {
@@ -59,6 +60,8 @@ export async function syncHiveBlock({ store, rails, maxBytes, privacy, call = rp
   const block = await agreedBlock(nodes, cursor.height + 1, call);
   need(block.previous === cursor.block_id, 'CHAIN_GAP');
   const prepared = [];
+  integer(maxBatchOperations, 1); need(maxBatchOperations <= 1024, 'RESOURCE_LIMIT'); integer(maxBatchMetadataBytes, 1);
+  let batchOperations = 0, remainingBatchBytes = maxBytes, remainingBatchMetadata = maxBatchMetadataBytes;
   for (let transaction = 0; transaction < block.transactions.length; transaction++) {
     const ops = block.transactions[transaction];
     for (let operation = 0; operation < ops.length; operation++) {
@@ -69,6 +72,22 @@ export async function syncHiveBlock({ store, rails, maxBytes, privacy, call = rp
       try { need(typeof v.json === 'string' && Buffer.byteLength(v.json) <= 8192, 'RESOURCE_LIMIT'); n = validateNotice(parseDocument(Buffer.from(v.json))); }
       catch { prepared.push({ ...item, refusal: 'NOTICE_MALFORMED' }); continue; }
       if (n.topic !== ordering.topic) continue;
+      const batchMode = ordering.mode === 'hive-batch-shadow';
+      if (n.schema !== `bnr.repository-checkpoint/${batchMode ? 3 : 2}`) { prepared.push({ ...item, refusal: 'NOTICE_VERSION' }); continue; }
+      if (batchMode) {
+        need(++batchOperations <= maxBatchOperations, 'RESOURCE_LIMIT');
+        need(remainingBatchBytes > 0 && remainingBatchMetadata > 0, 'RESOURCE_LIMIT');
+        try {
+          const privateBatch = await retrievePrivateBatch(n.bundle, { store, rails, maxBytes: remainingBatchBytes, maxMetadataBytes: remainingBatchMetadata, privacy, engine });
+          const usage = privateBatchUsage(privateBatch); remainingBatchBytes -= usage.bytes; remainingBatchMetadata -= usage.metadataBytes;
+          need(remainingBatchBytes >= 0 && remainingBatchMetadata >= 0, 'RESOURCE_LIMIT'); prepared.push({ ...item, privateBatch });
+        }
+        catch (e) {
+          if (['BATCH_ACCEPTANCE', 'BATCH_BINDING', 'BATCH_CHAIN', 'PROOF_REFUSED', 'PROOF_PROFILE', 'PROOF_FIELD', 'PROOF_ENCODING', 'SHAPE', 'NONCANONICAL', 'VERSION'].includes(e.code)) prepared.push({ ...item, refusal: e.code });
+          else throw e; // availability and local resource ceilings cannot reorder votes
+        }
+        continue;
+      }
       // All bytes are fetched before advancing this block. Missing/corrupt
       // storage is UNKNOWN, not an invalid vote which a later vote can overtake.
       const { candidate, payloads } = await retrieveBundle(n.bundle, { store, rails, maxBytes, privacy });

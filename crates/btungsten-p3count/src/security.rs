@@ -3,6 +3,8 @@
 //! what parameters are sized on; conjectured bits are printed beside them and
 //! labeled a conjecture; legacy bits are never used.
 
+use p3_air::symbolic::SymbolicAirBuilder;
+use p3_air::{Air, BaseAir};
 use p3_field::PrimeCharacteristicRing;
 use p3_field::coset::TwoAdicMultiplicativeCoset;
 use p3_uni_stark::{
@@ -27,8 +29,17 @@ pub struct Figure {
 }
 
 pub fn figure(air: &CountAir, p: Params) -> Figure {
+    figure_for_air(air, air.height, p)
+}
+
+/// Same upstream calculator for another explicitly sized AIR.
+pub fn figure_for_air<A: BaseAir<F> + Air<SymbolicAirBuilder<F, Challenge>>>(
+    air: &A,
+    height: usize,
+    p: Params,
+) -> Figure {
     let fri = fri_for_security(p);
-    let log_h = air.height.trailing_zeros() as usize;
+    let log_h = height.trailing_zeros() as usize;
     let params = StarkSecurityParams::from_air::<F, Challenge, _>(
         fri.security_regime(),
         air,

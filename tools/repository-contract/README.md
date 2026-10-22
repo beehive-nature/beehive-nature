@@ -201,3 +201,8 @@ upload/readback/retention. x0x can transport proposals without acquiring update
 authority. An executor can sign the same qualification format without Actions.
 Before moving live refs off GitHub, qualify trusted checkpoint distribution,
 atomic ordering, durable recovery, key/policy transitions and provider failure.
+## Private batch increment
+
+`PRIVATE-BATCH.md` describes private full-contract acceptance, the repository
+hiding STARK relation, compact BEELOG ordering and atomic batch modes. The
+public relation verifier cannot replace the pinned private authority checks.

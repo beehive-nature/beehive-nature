@@ -1,5 +1,9 @@
 # Peer-owned repository storage and checkpoint replicas
 
+The private batch increment is documented in [PRIVATE-BATCH.md](PRIVATE-BATCH.md):
+mandatory private full-contract acceptance, a repository-specific hiding
+receipt-chain STARK, compact BEELOG append evidence and atomic batch modes.
+
 GitHub remains stage one: source hosting, PRs and live merge authority. These
 commands operate a **shadow replica on the user's device**. There is no HTTP
 server, estate endpoint, global user database, wallet creation, background
