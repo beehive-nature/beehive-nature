@@ -170,6 +170,7 @@ in
           "${pkgs.bash}/bin/bash -c 'test -f ${cfg.seedFile} || { echo \"x0x-control: seed file ${cfg.seedFile} missing — run the keygen ceremony\" >&2; exit 1; }'"
           "${pkgs.bash}/bin/bash -c 'test -f ${cfg.policyFile} || { echo \"x0x-control: policy file ${cfg.policyFile} missing\" >&2; exit 1; }'"
         ];
+        Environment = [ "XDG_CACHE_HOME=/var/lib/x0x-control/.cache" ];
         ExecStart = "${loop}/bin/x0x-control-loop";
         Restart = "always";
         RestartSec = 5;

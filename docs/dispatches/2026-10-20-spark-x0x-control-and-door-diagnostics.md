@@ -251,6 +251,66 @@ reported in Addendum 2.
 
 ---
 
+## ADDENDUM 7 — comprehensive order execution (2026-10-22)
+
+1. **BRIDGE IN PRODUCTION — green.** Gossip publish never
+propagated laptop->box; x0x file transfer does. The bridge now
+auto-accepts sender-pinned transfers into the inbox
+(`crates/x0x-control/src/bridge.rs`). Round-trips: `mesh-3`
+(laptop->box order, `completed`) with its receipt received on
+the laptop via gossip; receipts for smoke-1/1c/2, mesh-2,
+kill-1, retire-1/2, mesh-4 all decoded from the laptop's live
+receipts stream.
+2. **SSH RETIREMENT — executed.** Port 22 removed from
+`allowedTCPPorts` AND `services.openssh.openFirewall = false`
+(the module re-opened it after the first change — caught by
+counting live rules, not by trusting the config). retire-1/2
+rebuilds initially failed inside the sandbox (nix cache under
+read-only /root) — fixed with `XDG_CACHE_HOME` in the service
+env. Final state: live `nixos-fw` has zero dport-22 accepts,
+SSH from the laptop times out at banner, and post-retirement
+order `mesh-4` completed over the bridge. Break-glass: a
+`door.deploy` order can rebuild with 22 restored; sshd itself
+still runs behind the closed port.
+3. **METERED GATE — built, locally verified, deployment staged.**
+`crates/door-meter`: per-key (SHA-256 keyed) byte accounting,
+401 unknown / 402 exhausted, fail-closed meter append, ledger
+rebuilds balances at startup. Local proof against the laptop
+member: 401 without key, 200 with, meter record
+`{bytes_in:127, bytes_out:838, status:200}`. Box deployment
+needs ONE founder console write (binary + keys.json + unit +
+Caddy repoint) — retirement removed every other write channel,
+by design. The flat POOL_KEY becomes the capped `test` account
+at cutover; doors serve test agents only until then.
+4. **ZKADAPTOR — crate + measured scoreboard.**
+`crates/zk-adaptor` (ProofShape trait; Schnorr-BIP340 native,
+ML-DSA-65 PQ via bsigner). Bench over the B9 chain statement
+`b3a68919…`: schnorr 64 B, prove 3327us, verify 1629us, setup
+none, PQ no; ml-dsa-65 3309 B, prove 22486us, verify 9283us,
+setup none, PQ yes. Vaulta columns (verifier CPU/NET per proof,
+RAM per ordinal, verifies/block) are UNMEASURED: the probe
+found no public evidence of native Vaulta ZK validators
+(testnet endpoint is an auth-gated proxy; the reachable
+Antelope testnet shows no ZK intrinsics) — per L0V3's
+correction, validators would live in our WASM contracts and
+every verify gets a measured CPU/NET price before the anchor
+lane designs around them. Poseidon is the interop-seam hash
+(plank-Poseidon), SHA3/SHA-256 native.
+5. **VAULTA ANCHORS — staged, not built on an unverified
+native.** Ordinal-0 statement is the B9 chain commitment above,
+Schnorr-authorized shape ready (bsigner taproot path, not
+rebuilt). The founder's bDomain/.a/bDesk mainnet contracts
+hold the RAM/CPU/NET, so per-ordinal cost is estate-resource
+accounting, measured at first inscription.
+6. **BIRTH EVENTS — republication staged** at
+`ops/llama-pool/birth-republication/` (statement, envelope,
+app-side script; key from app env only).
+Irvine citation pinned as ordered:
+https://docs.maidsafe.net/Whitepapers/pdf/SelfAuthentication.pdf
+— cited, not paraphrased, wherever bzDiD's lineage is claimed.
+
+---
+
 ## ADDENDUM 5 — operators lane (2026-10-22)
 
 Founder decision: Buzz dApp users are the operators (WebRTC

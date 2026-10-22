@@ -42,6 +42,84 @@ fn publish(cfg: &BridgeConfig, topic: &str, payload_text: &str) -> Result<(), St
     }
 }
 
+/// Transfer intake: x0x file transfer is the mesh leg that carries
+/// laptop->box today (gossip publish does not propagate from
+/// NAT-side publishers; receipts in the other direction do). Poll
+/// the daemon's transfer list, accept pending order files, and
+/// move completed ones into the inbox atomically.
+fn transfer_intake(
+    cfg: &BridgeConfig,
+    inbox: &Path,
+    senders: &mut std::collections::HashMap<String, String>,
+) {
+    let token = match read_token(cfg) {
+        Ok(t) => t,
+        Err(_) => return,
+    };
+    let out = Command::new(&cfg.x0x_bin)
+        .args(["transfers", "--api", &cfg.api])
+        .env("X0X_API_TOKEN", &token)
+        .output();
+    let Ok(out) = out else { return };
+    let text = String::from_utf8_lossy(&out.stdout).into_owned();
+    // The CLI prints YAML-ish records; sender is learned on one
+    // poll and enforced on the next — a transfer is only accepted
+    // when its sender is pinned, exactly like gossip intake.
+    let mut cur_sender = String::new();
+    let mut cur_id = String::new();
+    let mut cur_status = String::new();
+    let mut records: Vec<(String, String, String)> = Vec::new();
+    for line in text.lines() {
+        let line = line.trim();
+        if let Some(v) = line.strip_prefix("remote_agent_id:") {
+            cur_sender = v.trim().to_string();
+        } else if let Some(v) = line.strip_prefix("status:") {
+            cur_status = v.trim().to_string();
+        } else if let Some(v) = line.strip_prefix("transfer_id:") {
+            cur_id = v.trim().to_string();
+            records.push((cur_id.clone(), cur_sender.clone(), cur_status.clone()));
+        }
+    }
+    for (id, sender, status) in records {
+        if !sender.is_empty() {
+            senders.insert(id.clone(), sender);
+        }
+        if status == "Pending" {
+            let known = senders.get(&id).cloned().unwrap_or_default();
+            if cfg.allow_senders.iter().any(|s| s == &known) {
+                let _ = Command::new(&cfg.x0x_bin)
+                    .args(["accept-file", &id, "--api", &cfg.api])
+                    .env("X0X_API_TOKEN", &token)
+                    .output();
+            } else if !known.is_empty() {
+                eprintln!("bridge: refused transfer from unpinned sender {known}");
+            }
+        }
+    }
+    // Completed transfers land as <id>_<name>.order.json files.
+    let transfers_dir = cfg.state_dir.join("../x0x/data/transfers");
+    if let Ok(entries) = std::fs::read_dir(&transfers_dir) {
+        for e in entries.flatten() {
+            let p = e.path();
+            let name = e.file_name().to_string_lossy().into_owned();
+            if !name.ends_with(".order.json") {
+                continue;
+            }
+            let Some((_, rest)) = name.split_once('_') else {
+                continue;
+            };
+            let dst = inbox.join(rest);
+            let tmp = inbox.join(format!("{rest}.tmp"));
+            if std::fs::copy(&p, &tmp).is_ok() {
+                if std::fs::rename(&tmp, &dst).is_ok() {
+                    let _ = std::fs::remove_file(&p);
+                    println!("bridge: inbox <- {rest} via x0x file transfer");
+                }
+            }
+        }
+    }
+}
+
 fn read_token(cfg: &BridgeConfig) -> Result<String, String> {
     std::fs::read_to_string(&cfg.token_file)
         .map(|s| s.trim().to_string())
@@ -95,6 +173,26 @@ pub fn run_bridge(cfg: BridgeConfig) -> Result<i32, String> {
         .stderr(Stdio::null())
         .spawn()
         .map_err(|e| format!("spawn x0x subscribe: {e}"))?;
+    // Transfer intake runs alongside the subscription.
+    let intake_cfg = BridgeConfig {
+        x0x_bin: cfg.x0x_bin.clone(),
+        api: cfg.api.clone(),
+        token_file: cfg.token_file.clone(),
+        state_dir: cfg.state_dir.clone(),
+        orders_topic: cfg.orders_topic.clone(),
+        receipts_topic: cfg.receipts_topic.clone(),
+        allow_senders: cfg.allow_senders.clone(),
+    };
+    let intake_inbox = inbox.clone();
+    std::thread::spawn(move || {
+        let mut senders: std::collections::HashMap<String, String> =
+            std::collections::HashMap::new();
+        loop {
+            transfer_intake(&intake_cfg, &intake_inbox, &mut senders);
+            std::thread::sleep(std::time::Duration::from_secs(5));
+        }
+    });
+
     let stdout = child.stdout.take().ok_or("subscribe stdout missing")?;
     println!(
         "bridge: subscribed to {} (senders: {})",

@@ -1876,6 +1876,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "door-meter"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tokio",
+]
+
+[[package]]
 name = "dro-signer"
 version = "0.1.0"
 dependencies = [
@@ -7717,6 +7727,19 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.3",
+]
+
+[[package]]
+name = "zk-adaptor"
+version = "0.1.0"
+dependencies = [
+ "bsigner",
+ "getrandom 0.2.17",
+ "k256",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sha3 0.10.9",
 ]
 
 [[package]]
