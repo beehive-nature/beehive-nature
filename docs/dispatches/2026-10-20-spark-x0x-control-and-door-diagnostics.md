@@ -57,6 +57,64 @@ checklist must clear before serving beyond test agents.
   birth kinds 31337 + 31340 with the verified keydir, then
   Chain-of-Custody with the mid-task kill coordinated through L0V3.
 
+---
+
+## ADDENDUM — singularity execution (same day, later)
+
+Route decided by this seat under the autonomy grant: single scoped
+SSH bootstrap (the key already authorized), SSH retirement deferred
+until the control agent has a live channel (below).
+
+**Fault (proven, not suspected):** the box firewall backend is
+iptables; `networking.firewall.extraInputRules` was written in nft
+syntax and the generated `firewall-start` script contains no
+extra-rules section at all — the rule never existed live. There is
+no `nft` binary anywhere in `/nix/store`.
+
+**Fix:** `llama-pool.nix` now applies the accept via an idempotent
+oneshot (`llama-pool-fw`: `iptables -C || -I nixos-fw 1 -s
+172.20.0.0/16 -p tcp --dport 8091 -j nixos-fw-accept`, store-pathed
+after a first attempt failed on service PATH). Two
+`nixos-rebuild switch` runs; live chain now carries the rule;
+container probe returns `{"status":"ok"}` (was: timeout).
+Mirrored verbatim to `ops/x0x/hostinger/llama-pool.nix`.
+
+**Door:** Caddy (Docker, project buzz-prod) gained a `/pool/*`
+handle on `relay.skaists.dev` (host-guarded, keyed Bearer via
+`env_file: /var/lib/llama-pool/door.env`, upstream
+`172.20.0.1:8091`, health-checked); container recreated once,
+config validated first. **Key discrepancy:** the POOL_KEY pasted to
+this seat hashes differently from `door.env` (laptop
+`768a1955…` vs box `041855d3…`, prefixes only). `door.env` is
+authoritative; laptop env was synced from it without printing the
+value. Verified from the public internet: no key → 401; keyed
+`/pool/v1/models` → 200 with `llama-pool`; keyed chat completion
+returned. **DOOR_BASE_URL = https://relay.skaists.dev/pool**.
+Finding: `https://skaists.buzz/` resets TLS from this laptop while
+the box serves it 200 locally and via public IP — environmental to
+the laptop path, untouched by this lane.
+
+**x0x-control installed** (static musl build from this branch):
+`/var/lib/x0x-control/{bin,policy.json,seed.b64 (0600),pub.json}`;
+selftest PASS on the box. **sshd deliberately NOT disabled:** the
+agent's live x0xd channel service is not built yet (serve-once file
+transport only); killing sshd now would brick remote admin. SSH
+retirement completes with the channel daemon + L0V3's deployment
+spec. Hardening shipped ahead of the review (commit 651c375f8):
+probe-scope check, write-ahead nonce ledger, exec timeout/capture
+caps.
+
+**Steps 4–5 blockers (exact):** (1) `BSIGNER_REC` absent in all env
+scopes — the 24-word recovery phrase must be placed in env by the
+founder/L0V3 (never via chat) before any birth/checkpoint signing;
+(2) Buzz managed-agent records live in the Buzz app surface, not
+the local relay (127.0.0.1:3000 is the Nostr relay) — record
+creation needs the app or its API; (3) Step 5's mid-task kill
+coordinates through L0V3 by design, and the door currently has one
+member (Hostinger), so post-kill completion rides member restart
+per the brief. Metered gate remains design-only: the door serves
+test agents only until enforcement lands.
+
 ## Lane 4 — quantum circuit adapters (continued from GitHub)
 
 `crates/btungsten-qeval` (bTunGsTeN Quantum Circuit Evaluator &
