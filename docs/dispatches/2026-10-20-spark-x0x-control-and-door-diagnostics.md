@@ -183,6 +183,44 @@ a full round-trip through x0xd messaging, not scp — is unmet; the
 x0xd→inbox bridge is still undesigned on the box. sshd stays up
 until that lands; closing 22 now would brick remote admin.
 
+---
+
+## ADDENDUM 4 — re-review CLEAR, bridge built, mesh gate (2026-10-22)
+
+**Independent re-review: CLEAR.** A non-author reviewer audited
+`9858b1a45` and cleared all eight findings with file:line evidence
+(probe gate at exec.rs:203/211, threat model at README:67,
+write-ahead + lock at main.rs:108/137, seed 0600 at main.rs:39,
+stdin null at exec.rs:81–86, echo gate at main.rs:277, RefusedReplay
+at order.rs:111, prefix warning at README:84). One note kept: seed
+`mode` applies at creation; a pre-existing file is not
+re-permissioned (box seed predates the fix — chmod verified 600).
+
+**Bridge built and deployed** (crate `bridge` subcommand):
+subscribes `x0x-control/orders` on the box x0xd (sender-pinned to
+the laptop agent `be9ad64a…` and the box agent), atomically drops
+envelopes into the inbox, publishes outbox receipts to
+`x0x-control/receipts`. Service `x0x-control-bridge` active.
+Proven on the box: self-published order reached the inbox
+(`bridge: inbox <- smoke-1c`), and the laptop received every
+receipt the bridge published (smoke-1/2/1c, decoded from the
+stream). **Cross-peer order delivery is blocked at the mesh
+layer**: repeated laptop publishes return `ok` but never reach
+the box subscription, and a direct send times out (504), while
+box→laptop receipt flow works. Peers overlap; the asymmetry is
+upstream of this crate (laptop is NAT-side, on-demand daemon).
+
+**§7 retirement remains NOT executed** — its first checklist item
+(full round-trip via x0xd messaging) is only half-proven
+(receipts out, orders in blocked). Closing 22 on this evidence
+would brick remote admin; sshd stays up. Unblock path: mesh
+order-path fix (upstream x0x topic propagation to a NAT-side
+publisher) or a laptop-resident relay; the bridge needs no change.
+
+**Step 5** remains staged at the signed stage-2 checkpoint; the
+member kill is L0V3's signal per the brief and has not arrived.
+Resume is one command on that signal.
+
 ## Lane 4 — quantum circuit adapters (continued from GitHub)
 
 `crates/btungsten-qeval` (bTunGsTeN Quantum Circuit Evaluator &

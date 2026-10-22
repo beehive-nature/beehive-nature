@@ -17,6 +17,7 @@
 //! - Secrets come from files/env named on the command line; key
 //!   material is never printed by any subcommand.
 
+pub mod bridge;
 pub mod envelope;
 pub mod exec;
 pub mod order;

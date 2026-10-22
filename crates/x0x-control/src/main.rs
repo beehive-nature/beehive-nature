@@ -188,6 +188,27 @@ fn cmd_serve_once(args: &[String]) -> Result<i32, String> {
     Ok(outcome.exit_code)
 }
 
+fn cmd_bridge(args: &[String]) -> Result<i32, String> {
+    let cfg = x0x_control::bridge::BridgeConfig {
+        x0x_bin: arg(args, "--x0x-bin").ok_or("--x0x-bin required")?,
+        api: arg(args, "--api").unwrap_or_else(|| "127.0.0.1:12700".to_string()),
+        token_file: arg(args, "--token-file").ok_or("--token-file required")?,
+        state_dir: arg(args, "--state-dir")
+            .unwrap_or_else(|| "/var/lib/x0x-control".to_string())
+            .into(),
+        orders_topic: arg(args, "--orders-topic")
+            .unwrap_or_else(|| "x0x-control/orders".to_string()),
+        receipts_topic: arg(args, "--receipts-topic")
+            .unwrap_or_else(|| "x0x-control/receipts".to_string()),
+        allow_senders: arg(args, "--allow-sender")
+            .ok_or("--allow-sender required (pinned operator agent id)")?
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .collect(),
+    };
+    x0x_control::bridge::run_bridge(cfg)
+}
+
 fn cmd_selftest() -> Result<i32, String> {
     use x0x_control::order::{CommandRule, Probe, Verdict};
     // Enable the gated echo-args helper for child invocations.
@@ -284,6 +305,7 @@ fn main() -> ExitCode {
         Some("keygen") => cmd_keygen(&args[1..]),
         Some("send") => cmd_send(&args[1..]),
         Some("serve-once") => cmd_serve_once(&args[1..]),
+        Some("bridge") => cmd_bridge(&args[1..]),
         Some("selftest") => cmd_selftest(),
         _ => Err("usage: x0x-control <keygen|send|serve-once|selftest>".to_string()),
     };
