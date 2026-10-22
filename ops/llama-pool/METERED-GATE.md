@@ -1,7 +1,19 @@
 # Metered gate — design (door lane, enforce before serving beyond test agents)
 
-Status: DESIGN. The flat `POOL_KEY` gate is test-only. No serving
-beyond test agents until this is enforced.
+Status: BUILT + LOCALLY VERIFIED, BOX ENFORCEMENT BLOCKED
+(2026-10-22). `crates/door-meter` implements this design (per-key
+SHA-256 accounting, 401 unknown / 402 exhausted, fail-closed
+append, ledger-rebuilt balances); local proof: 401/200 with meter
+record `{bytes_in:127, bytes_out:838, status:200}`. The flat
+`POOL_KEY` gate is test-only and becomes the capped `test` account
+(100 MiB) at cutover. Box cutover is staged as ONE box-local write
+(`door-meter-cutover.sh`, binary already on the box by mesh
+transfer) — no agent-side write channel remains after SSH
+retirement: the deployed x0x-control policy proves out at
+diag=curl-only and door.deploy={systemctl restart member,
+nixos-rebuild of the box-local flake}, with cp/docker/nft/ss all
+`refused_scope` (receipts in the 2026-10-20 dispatch, Addendum 8).
+No serving beyond test agents until this is enforced.
 
 ## Scale law it answers
 

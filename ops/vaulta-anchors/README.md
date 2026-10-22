@@ -47,3 +47,26 @@ Operator-side numbers measured 2026-10-22 over the B9 chain
 measurement once a testnet account inscribes ordinal-0; that
 inscription is the next action and needs the founder's Vaulta
 account/keys (env only, never in this repo).
+
+## Inscription attempt — 2026-10-22 (BLOCKED, exact)
+
+Ordinal-0 was NOT inscribed. No agent-side channel exists:
+
+- No Vaulta/EOS account or key material in any env scope
+  (Process/User/Machine swept for `VAULTA*`, `EOS*`, `ANTELOPE*`,
+  `JUNGLE*`, `BDOMAIN*`, `BDESK*` — all absent; values never
+  printed, presence only).
+- No chain tooling on PATH (`cleos`, `anchor`, `nodeos` absent).
+- `https://testnet.vaulta.com/v1/chain/get_info` unreachable
+  from this seat (curl `http:000`, 2026-10-22). The reachable
+  Antelope testnet (Jungle4, `get_info` 200) is not Vaulta and
+  this seat holds no account there either.
+- The anchor client (`crates/bnrose-anchor-vaulta`) reads/writes
+  an `evanchor` contract via signed transactions; no deployed
+  contract account is known to this seat.
+
+Unblock (any one): founder places a Vaulta testnet account name
++ signing key in env (names only in chat, values via env), or
+founder/L0V3 inscribes ordinal-0 (statement above) from their
+seat and returns the tx id + CPU/NET receipts. On either, this
+scoreboard's Vaulta columns get measured, not estimated.

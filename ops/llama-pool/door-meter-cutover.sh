@@ -40,6 +40,17 @@ iptables -w -C INPUT -s 172.20.0.0/16 -p tcp --dport 8092 -j ACCEPT 2>/dev/null 
 systemctl daemon-reload; systemctl enable --now door-meter
 sleep 2; systemctl is-active door-meter
 
+# Preflight (2026-10-22: public door answered keyed 503 while the
+# member was healthy host-side — the container->member hop is sick).
+# Re-run the estate's firewall oneshot, then prove the exact path
+# Caddy will use (container -> meter 8092, unauthenticated = 401
+# body). Abort BEFORE the Caddy repoint if that path is dead; the
+# meter->member leg is host-local and probed first.
+systemctl restart llama-pool-fw || true
+curl -sf -m 5 http://172.20.0.1:8091/health; echo " member-host-ok"
+docker run --rm --network buzz-prod_buzz-net busybox wget -qO- -T 5 http://172.20.0.1:8092/v1/models | grep -q unauthorized
+echo "container->meter 401-ok"
+
 # Caddy repoint: /pool/* upstream member -> meter (backup first).
 cd /opt/buzz/deploy/compose
 cp Caddyfile.hostinger Caddyfile.hostinger.bak-meter-$(date +%Y%m%dT%H%M%SZ)

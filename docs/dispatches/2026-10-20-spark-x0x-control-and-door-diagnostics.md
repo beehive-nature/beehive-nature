@@ -373,3 +373,79 @@ side of that stack; no crypto claims beyond the cited sources.
 - DNS (L0V3, logged not executed here): DNSSEC on `skaists.buzz` +
   `skaists.dev`; dead `relay2.skaists.dev` removed; mail stack left
   pending founder ruling.
+
+---
+
+## ADDENDUM 8 — meter cutover + Vaulta ordinal-0: channel inventory (2026-10-22)
+
+Attempted both still-unenforced items agent-side through the
+production bridge (laptop x0xd on-demand, agent `be9ad64a…`;
+box agent `a92d82b9…` hive-hostinger). Thirteen scoped orders
+this session, each sealed to the box pub (`agent.pub.json`,
+ML-KEM-768) and file-transferred; receipts decoded from the live
+`x0x-control/receipts` gossip stream, sender `a92d82b9…`:
+
+- `meter-diag-1` **completed**: member health from the box,
+  `{"status":"ok"}` (envelope `856bc370…`). `meter-diag-9`
+  **completed** again after all probes — bridge + agent live.
+- `meter-diag-2/3/4` (systemctl is-active member/door-meter/
+  x0x-control), `meter-diag-5` (nft list ruleset), `meter-diag-6`
+  (ss), `meter-diag-7/8` (docker inspect/ps): all
+  **refused_scope**. Deployed `diag.readonly` is curl-to-member
+  only — narrower than `policy.example.json`.
+- `meter-probe-1` (cp /tmp→Caddyfile path), `meter-probe-2`
+  (docker exec caddy reload): both **refused_scope**.
+  `door.deploy` therefore proves out at exactly the two shapes
+  already exercised: `systemctl restart llama-server-hostinger`
+  (kill-1) and `nixos-rebuild switch` of the box-local flake
+  (retire-1/2).
+- `meter-probe-3` (systemctl restart llama-pool-fw) and
+  `meter-probe-4` (systemctl restart x0x-control): transfers
+  Complete, **no receipts within 5 minutes** while a later diag
+  receipted in seconds. Verdicts UNRECEIVED — not resent
+  (self-restart/replay hazard). Door keyed answer stayed 503
+  after them, so no healing is claimed from either.
+- Mesh `x0x exec` to the box: transport error (recipient has no
+  gossip DM capability advert, HTTP 502) — raw exec is not a
+  channel, and would not be used to bypass the scope policy if
+  it were. SSH re-verified retired this session: banner timeout
+  on 2.25.245.161:22. The laptop tunnel helper depends on that
+  dead SSH path.
+
+**Metered gate: NOT live; blocker is exact.** The cutover needs
+box-local writes no proven scope admits (install binary, write
+keys.json/unit, iptables, Caddy repoint). The staged script
+(`ops/llama-pool/door-meter-cutover.sh`, hardened this session
+with a container→meter preflight that aborts before repointing)
+remains ONE box-local root action; per L0V3's 2026-10-20 report
+the hPanel console itself is dead (spinner, no tab), so the
+unblock is whichever box-local root write the founder/L0V3 can
+still perform: run the cutover, or widen
+`/var/lib/x0x-control/policy.json` with a `door.meter` scope —
+after which this seat executes and receipts every step through
+the bridge. Until then the flat `POOL_KEY` serves test agents
+only, uncapped; the meter becomes the capped `test` account
+(100 MiB) the moment the cutover lands.
+
+**New fault found:** public door answers no-key 401 / keyed
+**503** while the member is healthy host-side
+(`meter-diag-1/9`). The Caddy→member hop is sick independently
+of the meter (llama-pool-fw rule or buzz-net path; nft/docker
+diag are refused_scope, so the failing hop is not further
+isolable from this seat). The hardened cutover re-runs
+`llama-pool-fw` and proves container→meter before repointing;
+if the 503's cause is the container→host hop generally, the
+preflight aborts loudly instead of repointing into the fault.
+
+**Vaulta ordinal-0: NOT inscribed; blocker is exact** (full
+receipts in `ops/vaulta-anchors/README.md`): no Vaulta/EOS
+account or key in any env scope, no `cleos`/`anchor`/`nodeos`
+on PATH, `testnet.vaulta.com` unreachable from this seat
+(`http:000`); Jungle4 answers but is not Vaulta and no account
+is held there. Unblock: founder env-places a testnet account +
+key (names only in chat), or inscribes from their seat and
+returns tx + CPU/NET receipts for the scoreboard.
+
+Order count this session: 13 (11 receipted, 2 unreceived),
+inside the 10^3 ceiling. Laptop daemon stopped at lane end
+(on-demand law).
