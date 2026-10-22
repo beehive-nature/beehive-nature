@@ -115,6 +115,42 @@ member (Hostinger), so post-kill completion rides member restart
 per the brief. Metered gate remains design-only: the door serves
 test agents only until enforcement lands.
 
+---
+
+## ADDENDUM 2 — Steps 4–5 executed to the kill point
+
+`AGENT_SOVEREIGN_REC` arrived in User env via the founder/L0V3
+channel (value never read or printed here); signing unblocked.
+
+**Step 4 — complete.** Buzz managed agent record created in the
+app's own store (`%APPDATA%/xyz.block.buzz.app/agents/
+managed-agents.json`, backup taken): record id
+`3c2dfb6e-be5b-402f-823f-cc3832cd01ca`, runtime `buzz-agent`,
+provider `openai`, model `llama-pool`, base URL
+`https://relay.skaists.dev/pool`, key sourced from env at write
+time per the app's record shape. Birth statement signed with
+`bheart-XAoTNYsd0JPyUfxj` (ML-DSA-65) — `bsigner verify` →
+`verified: true`. Kind 31337 event
+`3cc069aee77fb02cbedf5e4265e5bcb3faf4827b85bbfa7b869c7c6ee128a402` PUBLIC-CONSTANT
+and kind 31340 identity proof
+`dbf384743b1d46f04f95870eeb4c1545380aa8817d228e51f8b12786563fded9` PUBLIC-CONSTANT
+published to two local evidence relays and queried back (2/2).
+Production relays refused this seat: local relay demands NIP-42
+auth the harness publisher does not perform, and `skaists.buzz`
+resets this laptop's connections — app-side republication remains.
+
+**Step 5 — staged at the kill point.** B9 LEDGER-KEEP through the
+door: DID-before `did:b:pq2ji…mfda`; door model answered
+(`llama-pool`, 25 tokens); steps 1–2 done — input sha256
+`56882888…fe7`, 7 records parsed; stage-2 checkpoint signed and
+verified true. Per the brief the member kill is L0V3's call, not
+this seat's: on the kill + member restart signal, completion is
+one command (`step5_resume.py` in the harness workspace) —
+recompute, `verify.py` oracle, bsigner sign + verify, DID-after
+comparison. Scripts: `step4_birth.py`, `step4_publish_local.py`,
+`step5_stage1.py`, `step5_resume.py` (harness workspace, runs/
+holds the signed checkpoint).
+
 ## Lane 4 — quantum circuit adapters (continued from GitHub)
 
 `crates/btungsten-qeval` (bTunGsTeN Quantum Circuit Evaluator &
