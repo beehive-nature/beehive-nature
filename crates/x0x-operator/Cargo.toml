@@ -1,0 +1,17 @@
+[package]
+name = "x0x-operator"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "WebRTC operator channel for x0x-control: dApp-user operators carry sealed orders/receipts over RTCDataChannels into the box inbox (OPERATORS.md). Rust rewrite of the Python aiortc prototype, per the estate Rust-first law."
+
+[dependencies]
+# PARKED (2026-10-22, L0V3 course correction): the x0xd bridge is the
+# one primary control plane; this operator lane resumes only after the
+# bridge is proven in production. Pinned to webrtc 0.14 (classic
+# APIBuilder surface); the 0.21 trait-API rewrite is a documented
+# future revisit, not a silent drift.
+webrtc = "0.14"
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

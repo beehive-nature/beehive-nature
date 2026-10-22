@@ -223,6 +223,34 @@ Resume is one command on that signal.
 
 ---
 
+## ADDENDUM 6 — Step 5 kill test executed (2026-10-22, L0V3 order)
+
+Kill coordinated as its own scoped order through the deployed
+agent (counted against the 10^3 ceiling): `kill-1`, scope
+`door.deploy`, `systemctl restart llama-server-hostinger` —
+receipt verdict `completed`, exit 0. Member pid 704269 ->
+3104741; door dipped to 503 during model reload, back to 200;
+host-local health `{"status":"ok"}`. Resume then completed B9:
+`verify.py` exit 0 (input/output/chain hashes PASS, 5 records
+after dedupe), result signed — `bsigner verify` -> `verified:
+true`, DID-after `did:b:pq2ji…mfda` **identical** to DID-before.
+The kill matrix (per-stage receipts: stage-2 checkpoint, kill-1,
+result) is the deliverable; hashes in `runs/b9-door-run/` on the
+harness seat. **Step 5 complete.**
+
+Course corrections applied same turn: the WebRTC operator is
+PARKED (`crates/x0x-operator/README.md`) — x0xd bridge is the one
+primary control plane; Google STUN removed outright (host
+candidates only; estate-hosted STUN is the sanctioned path on
+resume); webrtc pinned to 0.14 with the 0.21 rewrite documented
+as a future revisit. One live operator round-trip was observed
+before parking (envelope reached the box inbox over the data
+channel, receipt returned) — recorded, not built on. Birth
+events remain local-relay only (production NIP-42), as honestly
+reported in Addendum 2.
+
+---
+
 ## ADDENDUM 5 — operators lane (2026-10-22)
 
 Founder decision: Buzz dApp users are the operators (WebRTC

@@ -92,6 +92,7 @@ members = [
     "crates/bnr-explorer",
     "crates/bnr-explorer-wasm",
     "crates/x0x-control",
+    "crates/x0x-operator",
 ]
 
 [workspace.metadata]
