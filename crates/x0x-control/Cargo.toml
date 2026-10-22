@@ -1,0 +1,20 @@
+[package]
+name = "x0x-control"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "x0x box-control agent: scoped command orders over ML-KEM-768 sealed envelopes, full verbatim receipts, state verified before and after every change. Built to retire SSH on estate boxes; deployment waits on the founder's route ruling."
+
+# Crypto is never reimplemented here: ML-KEM-768 comes from the bsigner
+# library (crates/bsigner/src/pq.rs, RustCrypto ml-kem 0.3), envelope
+# encryption is the standard KEM -> HKDF-SHA-256 -> AES-256-GCM hybrid,
+# and receipt signing (when enabled) shells to the frozen bsigner CLI.
+[dependencies]
+bsigner = { path = "../bsigner" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha3 = { workspace = true }
+sha2 = { workspace = true }
+hkdf = "0.12"
+aes-gcm = "0.10"
+getrandom = "0.2"

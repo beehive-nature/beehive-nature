@@ -180,6 +180,28 @@ pub fn decode(env: &[u8]) -> Result<Box<Intent>, Refusal> {
     }
 }
 
+/// The reference decode implementation calling `btungsten_wb001_core::decode_core`.
+/// Ported from `antigravity/btungsten-repro-2026-10-17` so the
+/// `btungsten-qeval` differential tests can pin the optimized `decode`
+/// against this direct core wrapper.
+pub fn decode_reference(env: &[u8]) -> Result<Box<Intent>, Refusal> {
+    let mut buf = Box::new([0u8; MAX_ENV]);
+    let k = env.len().min(MAX_ENV);
+    buf[..k].copy_from_slice(&env[..k]);
+    let mut i = Box::new(Intent::ZERO);
+    match decode_core(&buf, env.len() as u64, &mut i) {
+        D_OK => Ok(i),
+        D_SHORT => Err(Refusal::Short),
+        D_MAGIC => Err(Refusal::Magic),
+        D_VERSION => Err(Refusal::Version),
+        D_TAG_ORDER => Err(Refusal::TagOrder),
+        D_LENGTH => Err(Refusal::Length),
+        D_UTF8 => Err(Refusal::Utf8),
+        D_TRAILING => Err(Refusal::Trailing),
+        v => unreachable!("decode_core verdict {v}: decodeSpec has only D_OK..=D_TRAILING"),
+    }
+}
+
 /// Ed25519 public key for a 32-byte seed (RFC 8032 secret key).
 pub fn public_key(seed: &[u8; 32]) -> [u8; 32] {
     let mut pk = [0u8; 32];
