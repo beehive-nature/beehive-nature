@@ -151,6 +151,38 @@ comparison. Scripts: `step4_birth.py`, `step4_publish_local.py`,
 `step5_stage1.py`, `step5_resume.py` (harness workspace, runs/
 holds the signed checkpoint).
 
+---
+
+## ADDENDUM 3 — safety-review fix + deployment (2026-10-22)
+
+Tarball `x0x-control-deploy.tar.gz` verified (SHA-256
+`bdb54131…e516`, matches the relayed hash) and mirrored to
+`ops/x0x-control-deploy/`. The independent review's DO NOT SHIP
+(commit `a15dd2fe2`) is answered in commit `9858b1a45`: Finding 1
+(probe scope bypass) pinned by five maintained tests in
+`crates/x0x-control/tests/findings.rs`; Finding 2 threat model
+documented (sealing is public-key only — policy is the boundary);
+Finding 3 write-ahead fsync + single-flight ledger lock;
+Finding 4 seed 0600 at creation; Finding 5 child stdin null;
+Finding 6 echo-args env-gated; Finding 7 `RefusedReplay`;
+Finding 8 prefix-boundary warning. Tests, selftest, clippy green.
+**Re-review requested** — this seat does not clear its own review.
+
+Runbook executed §§1–6: fixed binary + `x0x-control.nix` on the
+box, service active (one eval fix: the enable line first landed
+outside the attrset). Smoke: `smoke-1c` verdict `completed` with
+member health in `exec.stdout`; negative (`scope: nope`) →
+`refused_scope`; ledger carries both nonces; envelopes in `done/`.
+Two spec frictions found: the runbook's example order (`curl -m 5`)
+is refused by its own example policy prefixes, and non-atomic
+inbox delivery races the poll loop (the `.tmp` + rename rule is
+load-bearing — one partial file was claimed and refused, rc=1,
+nothing executed). Transport remains scp for the bootstrap.
+**SSH retirement (§7) NOT executed**: the checklist's first item —
+a full round-trip through x0xd messaging, not scp — is unmet; the
+x0xd→inbox bridge is still undesigned on the box. sshd stays up
+until that lands; closing 22 now would brick remote admin.
+
 ## Lane 4 — quantum circuit adapters (continued from GitHub)
 
 `crates/btungsten-qeval` (bTunGsTeN Quantum Circuit Evaluator &

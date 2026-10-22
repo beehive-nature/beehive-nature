@@ -1,0 +1,26 @@
+# x0xd.toml.example — copy to /var/lib/x0x/x0xd.toml on the box and fill the mesh section.
+#
+# Baseline matches the estate's recorded hostinger config (loopback-only API,
+# P2P on UDP 5483). The [mesh] section is operator-filled: without bootstrap
+# peers / identity wiring the daemon idles with zero peers (see
+# zero_peer_restart_secs) — that is the safe default, not an error.
+
+api_address = "127.0.0.1:12700"
+bind_address = "0.0.0.0:5483"
+log_level = "warn"
+log_format = "text"
+data_dir = "/var/lib/x0x/data"
+identity_dir = "/var/lib/x0x/identity"
+zero_peer_restart_secs = 600
+
+[update]
+enabled = false
+
+[history]
+enabled = true
+
+# ---- OPERATOR FILLS BELOW ----
+# Mesh identity and bootstrap peers. Keep this file 0600 root:x0x.
+# [mesh]
+# bootstrap_peers = ["<peer multiaddr or host:port>"]
+# identity_seed_file = "/var/lib/x0x/identity/seed"
