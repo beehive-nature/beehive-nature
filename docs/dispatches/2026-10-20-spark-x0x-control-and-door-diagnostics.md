@@ -221,6 +221,26 @@ publisher) or a laptop-resident relay; the bridge needs no change.
 member kill is L0V3's signal per the brief and has not arrived.
 Resume is one command on that signal.
 
+---
+
+## ADDENDUM 5 — operators lane (2026-10-22)
+
+Founder decision: Buzz dApp users are the operators (WebRTC
+data-channel plane of the bview/bdata POC), carrying x0x-control
+orders/receipts first, to fix the laptop->box order path with
+user-scaled bandwidth and ~zero estate egress. Design:
+`ops/x0x-control-deploy/OPERATORS.md`. Galvanization attempts
+this turn, all measured: box connect ACL installed from
+`ops/x0x/connect-acl.toml` and enabled (daemon restart; laptop
+entry live); `x0x forward` registered from the laptop but the
+byte-stream never carried (`active_streams: 0`); `x0x direct`
+connect resolves, send times out; mesh `store` put 404s on the
+laptop daemon. Box->laptop gossip remains the one working leg.
+The operator channel is therefore the build that unblocks both
+the order path and DEPLOY-README §7; the bridge needs no change
+(operators terminate at the same inbox/outbox). Laptop daemon
+stopped after probing (on-demand law); forward removed.
+
 ## Lane 4 — quantum circuit adapters (continued from GitHub)
 
 `crates/btungsten-qeval` (bTunGsTeN Quantum Circuit Evaluator &
