@@ -1,0 +1,28 @@
+{
+ "schema": "skaists.local-edition-acceptance/1",
+ "generated": "2026-10-19T00:00:00.000Z",
+ "seat": "zCode seat (order-28 session; repaired per the PR #471 review)",
+ "host": {
+  "files": 23276,
+  "totalBytes": 363300913,
+  "startupVerificationMs": 51825,
+  "servingModel": "verified immutable snapshot: every declared file is regular-file-checked (lstat identity, no symlinks), streamed once while hashed into a private mode-0700 temp snapshot, and every response is served from that snapshot — package files changed, replaced, symlinked or deleted after startup cannot alter or crash what is served"
+ },
+ "page": {
+  "stampedAttribute": "../assets/profile-archive/lineage/local-evidence/",
+  "person": "Elizabeth Jane Boyd (tree ring person; her shard holds the retained 1885 Nebraska census page)",
+  "gestures": "keyboard Enter on the tree orbit button and story card (the orbit buttons overlap each other's pointer paths at 1280x900 and 1920x1080 — sibling buttons intercept the centre click), then ORDINARY actionable clicks: the section's summary header, the census source-row summary, the nested transcription summary, and Verify and open saved page",
+  "evidenceStateLineVisible": "19 source entries stored locally. Conflicting dates and interpretations remain as recorded.",
+  "receiptLineVisible": "Saved bytes match the receipt. This verifies the copy, not the historical claim.",
+  "imageDecodedInBrowser": true,
+  "outsideOriginAttempts": 0,
+  "pageErrors": 0
+ },
+ "hiddenStateCause": "PROVEN: the person view renders its sections inside collapsible <details class=\"pp-sec\"> elements that start CLOSED. Chrome still lays out the closed content (non-zero bounding boxes, ancestor checkVisibility true), which is why indirect probes read 'visible', but the browser paints and hit-tests nothing inside a closed details — Playwright correctly reported the state line hidden and refused clicks until the section's own summary header was opened. Not a defect of the evidence organ itself.",
+ "hermeticGates": {
+  "unitServeLocal": "11/11 under WSL Linux (all four review rows: post-startup same-length tamper still serves verified bytes; post-startup symlink swap still serves verified bytes; pre-startup outside symlink refused; post-startup deletion keeps serving, host stays up). 9 pass + 2 symlink rows skipped on the Windows dev box (no unprivileged symlinks); CI runs Linux.",
+  "e2eLocalEvidenceHost": "14/14 on real Chromium: the person-panel's own mountLocalEvidence organ in a visible page, ordinary clicks (row summary, nested transcription summary, Verify), VISIBLE transcription/conflict/citation/receipt text, a VALID zlib-built PNG the browser DECODES (img.decode + natural pixels), a corrupted-artifact control showing Page unavailable with no image, a browser-context route guard installed before navigation recording zero outside-origin attempts, and a negative probe proving an outside attempt is blocked AND detected"
+ },
+ "note": "Windows local paths omitted; the private package stays on the private tier. The earlier receipt's 'full product path' claim (evaluate-driven gestures) is superseded by this ordinary-gesture pass.",
+ "verdict": "ACCEPTANCE PASS (ordinary gestures)"
+}

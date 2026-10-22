@@ -1,0 +1,9 @@
+{
+  "checkedAt": "2026-10-03T14:52:05.062Z",
+  "url": "https://connect.trezor.io/9.7.3/trezor-connect.js",
+  "initialized": true,
+  "webSocketAttempts": 0,
+  "api": true,
+  "upstreamSourceRevision": "4434f0fdc6f140f08dabe2d44f825429cbfbbae7",
+  "boundary": "Actual pinned SDK initializes in explicit Suite web mode on an in-memory source page. No device/export/signing method or physical pairing was invoked; no local WebSocket bridge was attempted. Hosted Suite deployment and physical SAFE 7 acceptance remain separate."
+}

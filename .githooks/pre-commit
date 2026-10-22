@@ -1,6 +1,9 @@
 #!/bin/sh
 # Pre-commit: the shared scans — secrets in the staged diff, §7 identity on the
-# commit in progress. Both are DETECTION BEFORE PUBLICATION: hooks are
-# --no-verify-able and CI re-scans on push; never call this layer prevention.
-# Trailer half of §7 lives in commit-msg (a message does not exist yet here).
-sh scripts/secret-scan.sh diff && S7_STAGED=1 sh scripts/identity-check.sh
+# commit in progress, and the generated stack inventory against the staged
+# workspace member list (the Engine Room check CI runs on push; stale on four
+# heads at once on 2026-10-16). All three are DETECTION BEFORE PUBLICATION:
+# hooks are --no-verify-able and CI re-checks on push; never call this layer
+# prevention. Trailer half of §7 lives in commit-msg (a message does not exist
+# yet here).
+sh scripts/secret-scan.sh diff && S7_STAGED=1 sh scripts/identity-check.sh && sh scripts/stack-inventory-check.sh diff

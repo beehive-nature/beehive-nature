@@ -685,6 +685,13 @@
    "i18n": "s.attest"
   },
   {
+   "file": "bheraldry.html",
+   "domain": "nature",
+   "name": "a symbol is evidence, not artwork",
+   "state": "working",
+   "i18n": "s.bheraldry"
+  },
+  {
    "file": "blanguage.html",
    "domain": "social",
    "name": "dock your tongue, no permission",
@@ -765,6 +772,13 @@
    "name": "every blood relative, for millennia",
    "state": "partly",
    "i18n": "s.blood"
+  },
+  {
+   "file": "blood-seal.html",
+   "domain": "nature",
+   "name": "the blood seal — a person read from the sealed corpus, verified before rendering",
+   "state": "partly",
+   "i18n": "s.blood-seal"
   }
  ]
 }

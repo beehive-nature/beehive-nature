@@ -95,45 +95,15 @@ hash.
 - **Smart wallets support this; EOAs (MetaMask, Rabby, etc.) do not** —
   capability detection must run every time, never assumed from wallet name.
 
-### What landed
+### The helper is gone
 
-`surfaces/wallet-batch.js` — a shared helper, same pattern as
-`level-truth.js`: one module, reusable by every Base-facing surface.
-
-- `getCapabilities(provider, address, chainIdHex)` — calls
-  `wallet_getCapabilities`, returns `null` (never throws) on any error so a
-  caller never has to special-case an unrecognized wallet.
-- `supportsBatching(...)` — true only when the wallet explicitly reports
-  `atomic.status` as `'supported'` or `'ready'` on the target chain.
-- `sendBatch(...)` — composes a correct `wallet_sendCalls` request
-  (`version: '2.0.0'`, normalized `calls[]` with `value` defaulted to
-  `'0x0'`).
-- `sendSequential(...)` — the spec's own fallback, executed in call order,
-  **stops and rethrows on the first failure** rather than silently
-  continuing past a broken step in what was meant to be one approval.
-- `sendCallsOrFallback(...)` — the one entry point: detects, then routes.
-
-**14/14 selftests pass** (`node surfaces/wallet-batch.js --selftest`) —
-pure-logic checks against a mock EIP-1193 provider: capability detection
-(supported / ready / unsupported / no-response / throwing wallet), batch
-request shape (call order, version, value defaulting), sequential fallback
-(order preserved, one hash per call, stops on first failure).
-
-**Not yet wired into a live UI, and that is stated plainly rather than
-hidden.** No Base-facing surface currently composes more than one call per
-user action:
-
-- `surfaces/blight/midi.html`'s swap is a single `exactInputSingle` call —
-  there is nothing to batch.
-- The one-click Base desk (renewals, ordered in the prior nightshift's
-  item 4) is **still parked** on a missing verified mainnet
-  `RegistrarController` address — it has no calls to compose yet, so it has
-  nothing to batch yet either.
-- `surfaces/blight/market.html`'s buy flow doesn't sign at all (§1).
-
-`wallet-batch.js` ships ready for the first surface that composes more
-than one call per approval — most likely the one-click Base desk once its
-missing address lands, or a future multi-buy on the ERC-20i market.
+`surfaces/wallet-batch.js` was **stripped from the tree on 2026-08-29** and
+does not exist. It was never wired into any UI. Receipt:
+`docs/dispatches/RECEIPT-WALLET-NATIVE-2026-08-29.md:12` (commit
+`eda54b9`); live proof there: `https://skaists.dev/surfaces/wallet-batch.js`
+returns HTTP 404. No EIP-5792 batching code exists in the estate. The first
+surface that composes more than one call per approval builds it fresh against
+the read-back above.
 
 ---
 
@@ -208,7 +178,7 @@ explorer) got the audit pass first — §1 and §3 above cover both directly.
 | item | finding | action |
 |---|---|---|
 | 1 · ERC-1271/6492 | zero live signature verification exists Base-side; nothing to fix at cause | binding guidance recorded for the first code that adds it |
-| 2 · EIP-5792 batching | zero live multi-call flows exist to batch | `wallet-batch.js` shipped, 14/14 selftests, ready to wire in |
+| 2 · EIP-5792 batching | zero live multi-call flows exist to batch | none: `wallet-batch.js` was stripped 2026-08-29 (`RECEIPT-WALLET-NATIVE-2026-08-29.md:12`); no batching code exists |
 | 3 · EIP-1193 connect | already compliant on all 4 audited surfaces | documented; EIP-6963 multi-wallet gap logged, not built |
 | 4 · ERC-20i first | market/museum audited first per order | paymaster + sub-account mechanisms documented for future use |
 

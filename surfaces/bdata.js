@@ -14,8 +14,9 @@
 //  - Nothing here can spend. Phase C adds ONE founder-reviewed authorization
 //    object (an intent to sign, bound to the exact quote + invoice lineage);
 //    Phase E wires pay-with-wallet (ant-pay.js) after Authorized, and Add to manifest (picker + in-page sha256 + live/local intake).
-//    Wallet load lives ON this surface (injected ethereum / eth_requestAccounts). Agents never hold keys; the person's wallet signs.
-//    Unreachable loopback shelf falls back to an honest browser-local receipt — never a New-bee fail wall, never a fake Autonomi claim.
+//    Wallet load lives ON this surface. connectWallet calls eth_requestAccounts and eth_chainId only.
+//    Signing is surfaces/ant-pay.js injectedSigner (eth_requestAccounts, eth_chainId, eth_sendTransaction) — those functions take no key parameter.
+//    Unreachable loopback shelf falls back to a browser-local receipt only after an IndexedDB read-back. Metadata-only is not kept. Pay is withheld while a kept file is not the priced object.
 //
 // THE A+ REBUILD (founder, 2026-09-18: "D+ — buttons don't even work"):
 //  - EVERY PRESS ANSWERS. The screen is DERIVED from state (policy key + st +
@@ -36,12 +37,24 @@
   var LS = 'bdata-v1', SHARED = 'bpay-policy-v1';
   var DEFAULT_BRIDGE = 'http://127.0.0.1:8807';
   var WAVE_CHUNK = 4190208;
-  var WAVE_MAX_CHUNKS = 63;
+  var WAVE_MAX_CHUNKS = 59;        // + 3 DataMap chunks + 1 public map record = 63; 64 records is merkle, which the bridge cannot finalize
   var WAVE_MAX_BYTES = WAVE_CHUNK * WAVE_MAX_CHUNKS;
+  // Browser memory/quota bound, independent of the remote payment shape.
+  // The disk shelf has its own configurable local ceiling.
+  var LOCAL_MAX_BYTES = 512 * 1024 * 1024;
   var FRESH_MS = 15 * 60 * 1000;   // past this a cached price is "earlier", never "current"
   var DEADLINE_MS = 150000;        // measured asks: 42-69 s; a hung one ends here
   var RETRY_MS = 3000;
   var MODES = ['ask', 'auto', 'never'];
+  // A post-quantum sealed object (SPEC-BPQ-1 §4) starts with these eight bytes. My Data only
+  // recognises the head; sealing and opening stay in the wallet, where the keys are.
+  var BPQ_MAGIC = [0x89, 0x42, 0x50, 0x51, 0x31, 0x0d, 0x0a, 0x1a];
+  function isSealedHead(u){
+    if (!u || u.length < BPQ_MAGIC.length) return false;
+    for (var i = 0; i < BPQ_MAGIC.length; i++) if (u[i] !== BPQ_MAGIC[i]) return false;
+    return true;
+  }
+  function sealedLine(){ return '<p class="law" data-bdata-sealed="1">🔒 ' + tx('bd.add.sealed', 'sealed in your wallet: only the readers it was sealed for can open it, and anyone else sees only sealed bytes') + '</p>'; }
   var UNAVAIL = [
     { id:'only-me', ico:'🔒', label:['wl.bpay.aud.onlyme','Only me'], why:['bd.aud.onlyme.why','Private storage for your eyes only is not ready.'], tech:['bd.aud.onlyme.tech','private-DataMap custody path not yet qualified'] },
     { id:'selected-people', ico:'🔒', label:['wl.bpay.aud.selected','Selected people'], why:['bd.aud.selected.why','Sharing with people you pick is not ready.'], tech:['bd.aud.selected.tech','recipient capability/key granting not yet qualified'] }
@@ -256,7 +269,13 @@
       ask = null; mark(null);
       fail = { cls: f.cls, detail: String(f.message || ''), secs: Math.round((Date.now() - my.startedAt) / 1000) };
       render({ focus: 'price' });
-      say(failHead(fail));
+      // New bee: never announce scare words into the live region
+      if (isNewBee()) {
+        var kept = usableQuote(chosen());
+        say(kept ? (antStr(kept.totalAtto) + ' ANT. ' + T('bd.paid.scope', 'Nothing has been paid from this page.')) : '');
+      } else {
+        say(failHead(fail));
+      }
     });
   }
 
@@ -376,6 +395,7 @@
       h += '<div class="opt na" role="radio" aria-checked="false" aria-disabled="true" data-bdata-aud="' + u.id + '" data-bdata-unavailable="' + u.id + '"><span class="ico" aria-hidden="true">' + u.ico + '</span><span class="name">' + tx(u.label[0], u.label[1]) + '</span><span class="soon">' + tx('bd.aud.notyet', 'Not available yet') + '</span><span class="desc">' + tx(u.why[0], u.why[1]) + '<span data-reg="cypherpunk"> · ' + tx(u.tech[0], u.tech[1]) + '</span></span></div>';
     });
     h += '</div>';
+    h += '<p class="law" data-bdata-seal-hint="1">🔒 <a href="wallet.html#pq-file" data-bdata-seal-link="1"><b>' + tx('bd.aud.sealhint', 'For your eyes only, or for people you pick: seal the file in your wallet, then add the sealed file here.') + '</b></a></p>';
     if (notice === 'nostore') h += '<div class="alert note"><b>' + tx('bd.aud.nostore', 'This browser would not save your choice, so nothing was asked.') + '</b></div>';
     if (sel) h += '<div class="chose"><span>' + tx('wl.bpay.youchose', 'You chose') + ' <b>🌐 ' + tx('wl.bpay.aud.public', 'Public') + '</b> <span class="sub">· ' + when(sel.selectedAt) + '</span></span><button type="button" class="btn quiet" data-bdata-undo="1" data-act="undo" data-fk="undo">' + tx('bd.aud.undo', 'Undo this choice') + '</button></div>';
     h += '<details class="more" data-reg-disclose data-dk="aud-rules"><summary>' + tx('bd.rules.sum', 'The rules behind this') + '</summary>';
@@ -423,13 +443,24 @@
       h += q ? earlier() : refHtml;
       h += nothing;
     } else if (state === 'failed') {
-      h += '<div class="alert" data-bdata-fail="' + esc(fail.cls) + '"><b>' + esc(failHead(fail)) + '</b>';
-      if (fail.cls === 'unreachable') h += '<div class="sub">' + tx('bd.price.unreachable.hint', 'It runs on the owner’s own machine — start it there, then try again.') + ' ' + tx('bd.price.unreachable.allow', 'If this browser asked whether the page may reach it, allow that.') + '</div>';
-      if (fail.detail) h += '<bdi class="mono">' + esc(fail.detail.slice(0, 200)) + '</bdi>';
-      h += '</div>';
-      if (fail.cls !== 'automation') h += '<div class="actions"><button type="button" class="btn primary" data-bdata-quote-go="1" data-act="ask" data-fk="ask">' + tx('bd.price.again', 'Try again') + '</button></div>';
-      if (q) h += earlier();
-      h += nothing;
+      // New bee is art/play: one path, no fail boxes, no HTTP/JSON, no Try again.
+      // Raver/cypherpunk keep the honest named failure.
+      if (isNewBee()) {
+        if (q) h += earlier();
+        else {
+          h += '<button type="button" class="btn primary" data-bdata-quote-go="1" data-act="ask" data-fk="ask">➜ ' + tx('bd.price.go', 'Get the storage price') + '</button>';
+          h += refHtml;
+        }
+        h += nothing;
+      } else {
+        h += '<div class="alert" data-bdata-fail="' + esc(fail.cls) + '"><b>' + esc(failHead(fail)) + '</b>';
+        if (fail.cls === 'unreachable') h += '<div class="sub">' + tx('bd.price.unreachable.hint', 'It runs on the owner’s own machine — start it there, then try again.') + ' ' + tx('bd.price.unreachable.allow', 'If this browser asked whether the page may reach it, allow that.') + '</div>';
+        if (fail.detail) h += '<bdi class="mono">' + esc(fail.detail.slice(0, 200)) + '</bdi>';
+        h += '</div>';
+        if (fail.cls !== 'automation') h += '<div class="actions"><button type="button" class="btn primary" data-bdata-quote-go="1" data-act="ask" data-fk="ask">' + tx('bd.price.again', 'Try again') + '</button></div>';
+        if (q) h += earlier();
+        h += nothing;
+      }
     } else if (state === 'idle') {
       h += '<button type="button" class="btn primary" data-bdata-quote-go="1" data-act="ask" data-fk="ask">➜ ' + tx('bd.price.go', 'Get the storage price') + '</button>';
       h += '<p class="sub note" data-bdata-price-hint="1">' + tx('bd.price.askingnote', 'one press asks the live network; it can take up to a minute') + '</p>';
@@ -501,11 +532,11 @@
   function shortAddr(a){ a = String(a || ''); return a.length > 12 ? (a.slice(0, 6) + '…' + a.slice(-4)) : a; }
 
   /* ── Wallet on THIS surface (same UI as Add to manifest / pay) ──
-     Injected provider only. Never holds, derives, or stores a private key. */
+     Injected provider only. connectWallet calls eth_requestAccounts and eth_chainId. pickSigner uses ant-pay.js injectedSigner (eth_sendTransaction). No key parameter. */
   function walletCard(){
     var h = '<section class="card" data-bdata-wallet="1" aria-labelledby="wal-h">';
     h += '<div class="head"><div><h2 id="wal-h">' + tx('bd.wal.h', 'Your wallet') + '</h2>';
-    h += '<p class="sub">' + tx('bd.wal.sub', 'load it here — same page as your files; this page never holds a key') + '</p></div></div>';
+    h += '<p class="sub">' + tx('bd.wal.sub', 'load it here — same page as your files. connectWallet only calls eth_requestAccounts') + '</p></div></div>';
     if (wallet.connecting) {
       h += '<div class="busy" data-bdata-wal-busy="1"><span class="spin" aria-hidden="true"></span><div><b>' + tx('bd.wal.connecting', 'opening your wallet…') + '</b></div></div>';
       return h + '</section>';
@@ -513,7 +544,7 @@
     if (wallet.address) {
       h += '<div class="badge" data-bdata-wal-ok="1">✓ ' + tx('bd.wal.ready', 'wallet ready') + ' · <bdi class="mono" data-bdata-wal-addr="' + esc(wallet.address) + '">' + esc(shortAddr(wallet.address)) + '</bdi></div>';
       if (wallet.chainId && String(wallet.chainId).toLowerCase() !== '0xa4b1') {
-        h += '<p class="sub" data-bdata-wal-chain="1">' + tx('bd.wal.switch', 'when you pay, your wallet will ask to use Arbitrum One') + '</p>';
+        h += '<p class="sub" data-bdata-wal-chain="1">' + tx('bd.wal.switch', 'this wallet is not on Arbitrum One — switch to it before you pay') + '</p>';
       }
       h += '<div class="actions"><button type="button" class="btn" data-act="wal-connect" data-fk="wal-connect" data-bdata-wal-go="1">↻ ' + tx('bd.wal.again', 'Use a different account') + '</button></div>';
     } else if (window.ethereum && typeof window.ethereum.request === 'function') {
@@ -571,43 +602,72 @@
       req.onerror = function(){ reject(req.error || new Error('idb open failed')); };
     });
   }
+  function idbClose(db){ try { if (db) db.close(); } catch (e) {} }
+  function idbReq(req){
+    return new Promise(function(resolve, reject){
+      req.onsuccess = function(){ resolve(req.result); };
+      req.onerror = function(){ reject(req.error || new Error('idb request failed')); };
+    });
+  }
+  function shelfMeta(file, sha, name){
+    var key = 'bdata-shelf-meta';
+    var list = JSON.parse(localStorage.getItem(key) || '[]');
+    if (!Array.isArray(list)) list = [];
+    list = list.filter(function(r){ return r && r.sha256 !== sha; });
+    list.push({ sha256: sha, bytes: file.size || 0, name: name, shelf: 'browser-meta', at: new Date().toISOString() });
+    localStorage.setItem(key, JSON.stringify(list.slice(-40)));
+    return { sha256: sha, bytes: file.size || 0, name: name, shelf: 'meta' };
+  }
   function shelfLocal(file, sha, name){
     return file.arrayBuffer().then(function(ab){
-      var rec = { sha256: sha, bytes: file.size || ab.byteLength, name: name, shelf: 'browser', at: new Date().toISOString(), blob: new Blob([ab], { type: file.type || 'application/octet-stream' }) };
+      var rec = { sha256: sha, bytes: ab.byteLength, name: name, shelf: 'browser', at: new Date().toISOString(), blob: new Blob([ab], { type: file.type || 'application/octet-stream' }) };
       return idbOpen().then(function(db){
         return new Promise(function(resolve, reject){
           var tx = db.transaction(IDB_STORE, 'readwrite');
           tx.objectStore(IDB_STORE).put(rec);
-          tx.oncomplete = function(){ resolve({ sha256: rec.sha256, bytes: rec.bytes, name: rec.name, shelf: 'browser' }); };
+          tx.oncomplete = function(){ resolve(db); };
           tx.onerror = function(){ reject(tx.error || new Error('idb put failed')); };
-        });
+        }).then(function(){
+          var tx = db.transaction(IDB_STORE, 'readonly');
+          return idbReq(tx.objectStore(IDB_STORE).get(sha)).then(function(got){
+            idbClose(db);
+            if (!got || !got.blob || typeof got.blob.size !== 'number') throw new Error('idb read-back empty');
+            if (got.blob.size !== rec.bytes || String(got.sha256) !== String(sha)) throw new Error('idb read-back mismatch');
+            return { sha256: sha, bytes: got.blob.size, name: got.name || name, shelf: 'browser', blob: got.blob, at: got.at || rec.at };
+          });
+        }).catch(function(err){ idbClose(db); throw err; });
       }).catch(function(){
-        // last-resort: metadata-only (tiny files may fit localStorage — never claim bytes on Autonomi)
-        try {
-          var key = 'bdata-shelf-meta';
-          var list = JSON.parse(localStorage.getItem(key) || '[]');
-          if (!Array.isArray(list)) list = [];
-          list = list.filter(function(r){ return r && r.sha256 !== sha; });
-          list.push({ sha256: sha, bytes: file.size || 0, name: name, shelf: 'browser-meta', at: new Date().toISOString() });
-          localStorage.setItem(key, JSON.stringify(list.slice(-40)));
-          return { sha256: sha, bytes: file.size || 0, name: name, shelf: 'browser' };
-        } catch(e){ throw e; }
+        try { return shelfMeta(file, sha, name); }
+        catch (e) { throw e; }
       });
     });
   }
+  function intakeVoice(shelfName){
+    if (shelfName === 'browser') return T('bd.add.ok.browser', 'kept on this device');
+    if (shelfName === 'meta') return T('bd.add.ok.meta', 'not kept — only the name and hash');
+    return T('bd.add.ok', 'on the local intake shelf');
+  }
+  function pricedArtifact(){
+    return (INV && INV.domain && INV.domain.artifact) ? INV.domain.artifact : null;
+  }
+  function browserFileBlocksPay(){
+    if (!intake.result || intake.result.shelf !== 'browser') return false;
+    if (!intake.result.blob) return true;
+    var a = pricedArtifact();
+    if (!a || !a.sha256) return true;
+    return String(intake.result.sha256).toLowerCase() !== String(a.sha256).toLowerCase() || Number(intake.result.bytes) !== Number(a.bytes);
+  }
   function finishIntake(rec, voice){
-    intake.result = { name: String(rec.name || intake.name), bytes: Number(rec.bytes || intake.bytes), sha256: String(rec.sha256), shelf: rec.shelf || 'bridge' };
+    intake.result = { name: String(rec.name || intake.name), bytes: Number(rec.bytes || intake.bytes), sha256: String(rec.sha256), shelf: rec.shelf || 'bridge', blob: rec.blob || null, at: rec.at || null, sealed: !!intake.sealed };
     intake.err = null; intake.soft = null; intake.placing = false;
     note({ kind:'intake', sha256: intake.result.sha256, name: intake.result.name, bytes: intake.result.bytes, shelf: intake.result.shelf });
     render();
-    say(voice || (intake.result.shelf === 'browser'
-      ? T('bd.add.ok.browser', 'kept on this device')
-      : T('bd.add.ok', 'on the local intake shelf')));
+    say(voice || intakeVoice(intake.result.shelf));
   }
 
   /* ── PHASE E-2: Add to manifest (picker + in-page sha256 + live/local intake) ──
      Two witnesses: the page hashes BEFORE anything is sent; the bridge hashes
-     while writing. Files over the wave limit are prose — never a dead button.
+     while writing. Local custody is independent of the remote payment limit.
      Unreachable loopback → honest browser-local shelf (never Autonomi claim). */
   function addManifestCard(){
     var h = walletCard();
@@ -615,15 +675,23 @@
     h += '<div class="head"><div><h2 id="add-h">' + tx('bd.add.h', 'Add to manifest') + '</h2>';
     h += '<p class="sub">' + tx('bd.add.sub', 'choose a file on this device — the page hashes it here; nothing leaves until you pay') + '</p></div></div>';
     if (intake.result) {
-      var okVoice = intake.result.shelf === 'browser'
-        ? T('bd.add.ok.browser', 'kept on this device')
-        : T('bd.add.ok', 'on the local intake shelf');
-      h += '<div class="badge" data-bdata-intake-ok="1" data-bdata-intake-shelf="' + esc(intake.result.shelf || 'bridge') + '">✓ ' + esc(okVoice) + ' · <bdi class="mono">' + esc(intake.result.sha256.slice(0, 16)) + '…</bdi></div>';
+      var okVoice = intakeVoice(intake.result.shelf);
+      h += '<div class="badge" data-bdata-intake-ok="1" data-bdata-intake-shelf="' + esc(intake.result.shelf || 'bridge') + '">' + (intake.result.shelf === 'meta' ? '' : '✓ ') + esc(okVoice) + ' · <bdi class="mono">' + esc(intake.result.sha256.slice(0, 16)) + '…</bdi></div>';
       h += '<div class="meta sub"><span><bdi>' + esc(intake.result.name) + '</bdi> · <bdi>' + Number(intake.result.bytes).toLocaleString('en-US') + '</bdi> ' + tx('bd.bytes', 'bytes') + '</span></div>';
+      if (intake.result.sealed) h += sealedLine();
       if (intake.result.shelf === 'browser') {
-        h += '<p class="law" data-bdata-intake-honest="1">' + tx('bd.add.honest', 'on this browser only — Autonomi storage starts when you pay with your wallet') + '</p>';
+        h += '<p class="law" data-bdata-intake-honest="1">' + tx('bd.add.honest', 'still in this browser, not on Autonomi') + '</p>';
+        if (browserFileBlocksPay()) {
+          h += '<p class="law" data-bdata-intake-pay="held">' + tx('bd.add.payheld', 'the price below is for a different file') + '</p>';
+          h += '<div class="actions"><button type="button" class="btn" data-act="intake-clear" data-fk="intake-clear" data-bdata-intake-clear="1">' + tx('bd.add.clear', 'Clear this kept file') + '</button></div>';
+        }
+      } else if (intake.result.shelf === 'meta') {
+        h += '<p class="law" data-bdata-intake-honest="1" data-bdata-intake-meta="1">' + tx('bd.add.meta', 'the file itself was not saved') + '</p>';
       }
-      h += '<p class="law">' + tx('bd.add.next', 'audience → price → authorize → pay with your wallet — same chain as the registered object below') + '</p>';
+      if (intake.result.shelf !== 'meta') {
+        h += '<p class="law">' + tx('bd.add.local.complete', 'Local copy complete. Publishing a separate copy is optional.') + '</p>';
+        if (intake.result.bytes > WAVE_MAX_BYTES) h += '<p class="law" data-bdata-intake-publish-held="1">' + tx('bd.add.publish.large', 'This copy is kept locally. The current Autonomi payment path cannot publish a file this large.') + '</p>';
+      }
       h += '</section>';
       return h;
     }
@@ -640,10 +708,11 @@
       h += '<div class="rv"><span class="sub">' + tx('bd.add.size', 'size') + '</span><span><bdi>' + Number(intake.bytes).toLocaleString('en-US') + '</bdi> ' + tx('bd.bytes', 'bytes') + '</span></div>';
       h += '<div class="rv"><span class="sub">sha256</span><span class="mono" data-bdata-intake-sha="' + esc(intake.sha256) + '"><bdi>' + esc(intake.sha256) + '</bdi></span></div>';
       h += '</div>';
+      if (intake.sealed) h += sealedLine();
       h += '<div class="actions"><button type="button" class="btn primary" data-bdata-intake-go="1" data-act="intake-go" data-fk="intake-go">➜ ' + tx('bd.add.go', 'Add to manifest') + '</button></div>';
     }
     if (intake.tooLarge) {
-      h += '<div class="opt na" data-bdata-intake-large="1" role="status"><span class="name">' + tx('bd.add.large', 'Not available yet') + '</span><span class="desc">' + tx('bd.add.largenote', 'files this large need batch payments, which are not built — nothing was sent') + ' · ' + Number(intake.bytes).toLocaleString('en-US') + ' ' + tx('bd.bytes', 'bytes') + ' &gt; ' + Number(WAVE_MAX_BYTES).toLocaleString('en-US') + '</span></div>';
+      h += '<div class="opt na" data-bdata-intake-large="1" role="status"><span class="name">' + tx('bd.add.local.large', 'Over this page’s local file limit') + '</span><span class="desc">' + tx('bd.add.local.largenote', 'This page has not copied the file. Its local memory limit is separate from publishing or payment.') + ' · ' + Number(intake.bytes).toLocaleString('en-US') + ' ' + tx('bd.bytes', 'bytes') + ' &gt; ' + Number(LOCAL_MAX_BYTES).toLocaleString('en-US') + '</span></div>';
     }
     // New bee: soft continuity only — never a purple fail / "could not" scare panel
     if (intake.soft) h += '<p class="sub note" data-bdata-intake-soft="1">' + esc(intake.soft) + '</p>';
@@ -657,15 +726,16 @@
     return o;
   }
   function hashFile(file){
-    intake = { file:file, name:file.name||'unnamed', bytes:file.size||0, sha256:null, hashing:true, placing:false, err:null, soft:null, result:null, tooLarge:file.size > WAVE_MAX_BYTES };
+    intake = { file:file, name:file.name||'unnamed', bytes:file.size||0, sha256:null, hashing:true, placing:false, err:null, soft:null, result:null, tooLarge:file.size > LOCAL_MAX_BYTES };
     render();
-    if (intake.tooLarge) { intake.hashing = false; render(); say(T('bd.add.largenote', 'files this large need batch payments, which are not built — nothing was sent')); return; }
-    // incremental SHA-256 (WebCrypto cannot stream a File directly on every browser — chunked digest)
+    if (intake.tooLarge) { intake.hashing = false; render(); say(T('bd.add.local.largenote', 'This page has not copied the file. Its local memory limit is separate from publishing or payment.')); return; }
+    // Chunked reads, then one WebCrypto digest; LOCAL_MAX_BYTES bounds the
+    // accumulated browser buffer. This is not a streaming hash.
     var chunk = 1024 * 1024, offset = 0, acc = [];
     function step(){
       if (offset >= file.size) {
         return crypto.subtle.digest('SHA-256', concat(acc)).then(function(d){
-          intake.hashing = false; intake.sha256 = hexOf(d); render({ focus:'intake-go' });
+          intake.hashing = false; intake.sha256 = hexOf(d); intake.sealed = isSealedHead(acc[0]); render({ focus:'intake-go' });
           say(intake.name + ' · sha256 ' + intake.sha256.slice(0, 12) + '…');
         }).catch(function(e){ intake.hashing = false; intake.err = String((e&&e.message)||e).slice(0,160); render(); });
       }
@@ -707,7 +777,7 @@
     }
     (skipLive ? viaBrowser() : viaBridge()).catch(function(e){
       var unreachable = (e instanceof TypeError) || (e && e.name === 'TypeError');
-      if (unreachable || (e && e.cls === 'http' && /Failed to fetch/i.test(String(e.message||'')))) {
+      if (unreachable || (e && e.cls === 'http')) {
         // ONE path that just works: browser-local receipt, no scare panel, no Autonomi claim
         return viaBrowser().catch(function(e2){
           intake.placing = false;
@@ -779,6 +849,9 @@
     if (!auth || auth.state !== 'authorized-for-signing') {
       return '<div class="step"><p class="locked" data-bdata-pay-next="1">' + num + '<span><span aria-hidden="true">🔒 </span>' + tx('bd.pay.next', 'Pay with your wallet — unlocks after you authorize') + '</span></p></div>';
     }
+    if (browserFileBlocksPay()) {
+      return '<div class="step" data-bdata-pay-held="1"><h3 class="step-h" id="pay-h" tabindex="-1" data-fk="pay">' + num + tx('bd.pay.h', 'Pay with your wallet') + '</h3><p class="law">' + tx('bd.pay.held', 'pay waits — the kept file is not this priced object') + '</p></div>';
+    }
     var h = '<div class="step" data-bdata-pay="1"' + (pay.phase && pay.phase !== 'done' && pay.phase !== 'refused' && pay.phase !== 'plan' ? ' aria-busy="true"' : '') + '><h3 class="step-h" id="pay-h" tabindex="-1" data-fk="pay">' + num + tx('bd.pay.h', 'Pay with your wallet') + '</h3>';
     if (pay.receipt) {
       h += '<div class="badge" data-bdata-pay-done="1">✓ ' + tx('bd.pay.done', 'Paid and stored') + '</div>';
@@ -801,7 +874,7 @@
       h += row(tx('bd.auth.ceiling', 'ANT ceiling'), antHtml(String(pl.ant_total_atto), true) + ' <span class="sub">' + tx('bd.auth.exact', 'exact, never above') + '</span>');
       h += row(tx('bd.pay.confirms', 'wallet confirmations'), '<b>' + esc(String(pl.wallet_confirmations)) + '</b> · ' + esc(String(pl.payment_calls)) + ' ' + tx('bd.pay.calls', 'payment call(s)') + ' · ' + esc(String(pl.quotes)) + ' ' + tx('wl.bpay.quotes', 'chunk quotes'));
       h += '</div>';
-      h += '<p class="sub note"><b>' + tx('bd.pay.law', 'Nothing is signed until you press Confirm and pay.') + '</b> ' + tx('bd.pay.signer', 'your wallet signs — this page never holds a key') + '</p>';
+      h += '<p class="sub note"><b>' + tx('bd.pay.law', 'Nothing is signed until you press Confirm and pay.') + '</b> ' + tx('bd.pay.signer', 'your wallet signs — ant-pay.js injectedSigner takes no key (eth_sendTransaction)') + '</p>';
       h += '<div class="actions"><button type="button" class="btn primary" data-bdata-pay-confirm="1" data-act="pay-confirm" data-fk="pay-confirm">✓ ' + tx('bd.pay.confirm', 'Confirm and pay') + '</button>';
       h += '<button type="button" class="btn" data-bdata-pay-abort="1" data-act="pay-abort" data-fk="pay-abort">✕ ' + tx('bd.pay.abort', 'Not now') + '</button></div>';
       return h + '</div>';
@@ -855,6 +928,7 @@
   function payOpen(){
     var sel = chosen(), q = sel ? usableQuote(sel) : null, auth = authFor(q), fl = founderLine();
     if (!q || !auth || auth.state !== 'authorized-for-signing' || !fl) { render(); return; }
+    if (browserFileBlocksPay()) { render(); return; }
     if (pay.phase && pay.phase !== 'refused' && pay.phase !== 'done' && pay.confirmResolve) { render(); return; }
     var AP = window.AntPay;
     if (!AP) { pay.refusal = { code:'no-wallet', message:'ant-pay.js missing' }; pay.phase = 'refused'; render(); return; }
@@ -1182,9 +1256,9 @@
       if (sel) fill = tok('sovereign-strong');
       h += '<path class="pt" data-i="' + i + '" d="' + petal(66, r1, a0, a1) + '" fill="' + fill + '" opacity="' + (sel || lit ? 1 : (D.stored ? .78 : .9)) + '"' + (D.stored ? '' : ' stroke="' + tok('sovereign') + '" stroke-width="1"') + '/>';
     }
-    h += '<circle r="58" fill="' + tok('bg-card') + '"/><circle r="50" fill="none" stroke="' + tok('sovereign') + '" stroke-dasharray="3 4"/>';
-    h += '<text y="-4" text-anchor="middle" fill="' + tok('ink') + '" style="font:700 15px/1.2 var(--sk-font-raver-display)">' + D.mb + ' MB</text>';
-    h += '<text y="18" text-anchor="middle" fill="' + tok('ink-soft') + '" style="font:400 14px/1.4 var(--sk-font-raver-body)">' + esc(T('et.bdata.r.one', '1 video')) + '</text>';
+    h += '<circle r="58" fill="' + tok('sovereign-wash') + '"/><circle r="50" fill="none" stroke="' + tok('sovereign') + '" stroke-dasharray="3 4"/>';
+    h += '<text y="-4" text-anchor="middle" fill="' + tok('ink') + '" style="font:700 15px/1.2 var(--sk-font-ui)">' + D.mb + ' MB</text>';
+    h += '<text y="18" text-anchor="middle" fill="' + tok('ink-soft') + '" style="font:400 14px/1.4 var(--sk-font-ui)">' + esc(T('et.bdata.r.one', '1 video')) + '</text>';
     if (D.stored) h += '<circle r="196" fill="none" stroke="' + RN[0] + '" stroke-width="2" stroke-dasharray="2 6"/>';
     svg.innerHTML = h;
     var litN = Object.keys(ES.lit).length;
@@ -1305,6 +1379,7 @@
     else if (act === 'pay-abort') payAbort();
     else if (act === 'pay-stop') payStop();
     else if (act === 'intake-go') intakeGo();
+    else if (act === 'intake-clear') intakeClear();
     else if (act === 'wal-connect') connectWallet();
   });
   root.addEventListener('change', function(ev){
@@ -1415,8 +1490,64 @@
       INV = inv; invState = 'ready';
     }).catch(function(){ INV = null; invState = 'failed'; say(T('bd.inv.fail', 'Your data list did not load.')); }).then(function(){ render(); });
   }
+  function restoreMeta(){
+    if (intake.result || intake.file || intake.hashing || intake.placing) return;
+    try {
+      var list = JSON.parse(localStorage.getItem('bdata-shelf-meta') || '[]');
+      if (!Array.isArray(list) || !list.length) return;
+      var got = list[list.length - 1];
+      if (!got || !got.sha256) return;
+      intake.result = { name: String(got.name || 'file'), bytes: Number(got.bytes) || 0, sha256: String(got.sha256), shelf: 'meta', blob: null, at: got.at || null };
+      render();
+    } catch (e) {}
+  }
+  function restoreShelf(){
+    if (!window.indexedDB) { restoreMeta(); return; }
+    idbOpen().then(function(db){
+      var store = db.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE);
+      var readAll = (typeof store.getAll === 'function') ? idbReq(store.getAll()) : new Promise(function(resolve, reject){
+        var out = [];
+        var cur = store.openCursor();
+        cur.onsuccess = function(){ var c = cur.result; if (!c) { resolve(out); return; } out.push(c.value); c.continue(); };
+        cur.onerror = function(){ reject(cur.error || new Error('idb cursor failed')); };
+      });
+      return readAll.then(function(rows){ idbClose(db); return rows || []; }, function(err){ idbClose(db); throw err; });
+    }).then(function(rows){
+      if (intake.result || intake.file || intake.hashing || intake.placing) return;
+      var kept = (rows || []).filter(function(r){ return r && r.blob && r.sha256 && typeof r.blob.size === 'number'; });
+      kept.sort(function(a, b){ return String(b.at || '').localeCompare(String(a.at || '')); });
+      if (!kept.length) { restoreMeta(); return; }
+      var got = kept[0];
+      intake.result = { name: String(got.name || 'file'), bytes: got.blob.size, sha256: String(got.sha256), shelf: 'browser', blob: got.blob, at: got.at || null };
+      render();
+      got.blob.slice(0, BPQ_MAGIC.length).arrayBuffer().then(function(ab){
+        if (intake.result && intake.result.sha256 === String(got.sha256) && isSealedHead(new Uint8Array(ab))) { intake.result.sealed = true; render(); }
+      }).catch(function(){});
+    }).catch(function(){ restoreMeta(); });
+  }
+  function intakeClear(){
+    var sha = intake.result && intake.result.sha256;
+    intake = { file:null, name:'', bytes:0, sha256:null, hashing:false, placing:false, err:null, soft:null, result:null, tooLarge:false };
+    render();
+    if (!sha) return;
+    try {
+      var key = 'bdata-shelf-meta';
+      var list = JSON.parse(localStorage.getItem(key) || '[]');
+      if (Array.isArray(list)) localStorage.setItem(key, JSON.stringify(list.filter(function(r){ return r && r.sha256 !== sha; })));
+    } catch (e) {}
+    if (!window.indexedDB) return;
+    idbOpen().then(function(db){
+      return new Promise(function(resolve){
+        var tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).delete(sha);
+        tx.oncomplete = function(){ idbClose(db); resolve(); };
+        tx.onerror = function(){ idbClose(db); resolve(); };
+      });
+    }).catch(function(){});
+  }
   loadInvoice();
   loadStored();
+  restoreShelf();
   // without the current founder invoice the authorization step stays locked, in words
   fetch('bpay-invoice-founder.json').then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(function(finv){ if (finv && finv.identity && finv.commitment && finv.domain && finv.domain.artifact) { FINV = finv; render(); } })

@@ -1,0 +1,12 @@
+[package]
+name = "btungsten-sovereign-rails"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-only"
+description = "Sovereign P2P content rails (issue #479): independently administered peers serving pinned, seal-verified artifacts with hard payer/egress caps. No estate endpoints, no hosted DB, no mandatory gateway — a peer-local loopback adapter plus a declared x0x authenticated-peer seam (missing pieces named, never substituted)."
+
+[dependencies]
+genealogy-publication = { path = "../genealogy-publication" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"

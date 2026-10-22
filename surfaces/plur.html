@@ -28,11 +28,10 @@
   .plur{font-size:clamp(3.4rem,17vw,10rem);font-weight:800;letter-spacing:.06em;line-height:.95;
     background:var(--rainbow);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;
     color:transparent;animation:drift 14s linear infinite;padding-bottom:.06em}
-  .expand{font-family:var(--mono);font-size:clamp(.68rem,2.4vw,.95rem);letter-spacing:.34em;
-    text-transform:uppercase;color:var(--ink-mut);margin-top:6px}
+  .expand{font-family:var(--mono);font-size:clamp(.68rem,2.4vw,.95rem);letter-spacing:.34em;color:var(--ink-mut);margin-top:6px}
   .open p{color:var(--ink-mut);max-width:34ch;margin:26px auto 0;font-size:1.04rem;line-height:1.6}
   .open .floor{color:var(--ink);margin-top:20px;font-size:1.06rem;max-width:32ch}
-  .hint{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  .hint{font-family:var(--mono);font-size:12px;letter-spacing:.14em;
     color:var(--ink-dim);margin-top:38px}
 
   @keyframes drift{to{background-position:220% 0}}
@@ -43,8 +42,7 @@
   .field{padding:78px 20px 88px;position:relative;border-top:1px solid var(--line)}
   .field .en{font-size:clamp(2.6rem,11vw,6.6rem);font-weight:800;letter-spacing:-.02em;line-height:1;
     text-align:center;color:var(--hue);text-shadow:0 0 62px var(--hue)}
-  .field .gloss{text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.22em;
-    text-transform:uppercase;color:var(--ink-dim);margin-top:16px}
+  .field .gloss{text-align:center;font-family:var(--mono);font-size:12px;letter-spacing:.22em;color:var(--ink-dim);margin-top:16px}
   .f-peace{--hue:#8FE0C6}
   .f-love{--hue:#D655BB}
   .f-unity{--hue:#6FA9E0}
@@ -56,7 +54,7 @@
     font-family:inherit;text-align:center;border-radius:10px;transition:transform .22s,color .22s}
   .w .t{display:block;font-size:var(--sz,1.6rem);line-height:1.2;color:var(--ink);
     transition:color .22s,text-shadow .22s}
-  .w .r{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.05em;
+  .w .r{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.05em;
     color:var(--ink-dim);margin-top:3px;opacity:0;transition:opacity .22s}
   .w:hover,.w:focus-visible{outline:none;transform:translateY(-3px)}
   .w:hover .t,.w:focus-visible .t{color:var(--hue);text-shadow:0 0 26px var(--hue)}
@@ -64,7 +62,7 @@
   .w.speaking .t{color:var(--hue);text-shadow:0 0 34px var(--hue)}
   .w.novoice{cursor:default}
   .w.novoice:hover{transform:none}
-  .w .mute{position:absolute;top:-4px;right:-2px;font-family:var(--mono);font-size:8px;
+  .w .mute{position:absolute;top:-4px;right:-2px;font-family:var(--mono);font-size:12px;
     letter-spacing:.05em;color:var(--guard);opacity:0;transition:opacity .22s}
   .w.novoice:hover .mute{opacity:.75}
   .w[data-sz="xl"]{--sz:2.5rem}
@@ -76,7 +74,7 @@
   /* ── the note ── */
   .note{max-width:640px;margin:52px auto 0;padding:22px 24px;border-left:3px solid var(--hue);
     background:rgba(255,255,255,.022);border-radius:0 12px 12px 0}
-  .note h3{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  .note h3{font-family:var(--mono);font-size:12px;letter-spacing:.2em;
     color:var(--hue);margin-bottom:11px}
   .note p{color:var(--ink-mut);font-size:1rem;line-height:1.65}
   .note p + p{margin-top:11px}
@@ -95,7 +93,7 @@
   .voicebox .vpick{display:flex;gap:6px;align-items:center;font-size:.8rem;color:var(--ink-mut)}
   .voicebox select{font:inherit;font-size:12px;background:#0A1410;color:var(--ink);border:1px solid var(--line);
     border-radius:999px;padding:5px 11px;max-width:230px}
-  .voicebox .st{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);letter-spacing:.04em;flex-basis:100%}
+  .voicebox .st{font-family:var(--mono);font-size:12px;color:var(--ink-dim);letter-spacing:.04em;flex-basis:100%}
   .voicebox .vnote{flex-basis:100%;margin:2px 0 0;font-size:.8rem;line-height:1.55;color:var(--ink-dim)}
 
   footer{text-align:center;padding:64px 22px 84px;border-top:1px solid var(--line);color:var(--ink-dim);font-size:.86rem}
@@ -124,7 +122,7 @@
   .bloomed .rosehead{animation:sway 7.5s ease-in-out infinite}
   .mourning .rosehead{animation:none}
   @keyframes sway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
-  .oddlaw{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);margin-top:10px}
+  .oddlaw{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--ink-dim);margin-top:10px}
   .oddpick{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
   .oddpick button{font-family:var(--mono);font-size:13px;padding:8px 16px;border-radius:999px;border:1px solid var(--line);
     background:transparent;color:var(--ink-mut);cursor:pointer;transition:all .25s}
@@ -139,7 +137,7 @@
   .talk{padding:80px 20px 90px;border-top:1px solid var(--line)}
   .talk .wrap{max-width:760px;margin:0 auto}
   .talk h2{font-size:clamp(1.7rem,6.4vw,2.8rem);font-weight:800;text-align:center;letter-spacing:-.01em}
-  .talk h2 .who{display:block;font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.22em;
+  .talk h2 .who{display:block;font-family:var(--mono);font-size:12px;font-weight:400;letter-spacing:.22em;
     color:var(--ai);margin-top:10px}
   .talk .sub{text-align:center;color:var(--ink-mut);max-width:48ch;margin:14px auto 0;line-height:1.6}
   .tongues{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:26px;
@@ -153,7 +151,7 @@
   .seeds button:hover{border-color:var(--sovereign);color:var(--ink);transform:translateY(-1px)}
   .thread{margin-top:28px;display:flex;flex-direction:column;gap:16px;min-height:40px}
   .msg{border:1px solid var(--line);border-radius:16px;padding:16px 18px;animation:rise .5s ease both;max-width:92%}
-  .msg .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;margin-bottom:8px}
+  .msg .tag{font-family:var(--mono);font-size:12px;letter-spacing:.16em;margin-bottom:8px}
   .msg.you{align-self:flex-end;background:rgba(214,85,187,.07);border-color:rgba(214,85,187,.35)}
   .msg.you .tag{color:var(--you)}
   .msg.hive{align-self:flex-start;background:rgba(69,194,220,.05);border-color:rgba(69,194,220,.3)}
@@ -184,7 +182,7 @@
   .composer .send:hover{background:rgba(214,85,187,.12)}
   .composer .mic[data-live="1"]{border-color:var(--rose);color:var(--rose-lift);box-shadow:0 0 18px rgba(200,30,60,.35);animation:breathe 1.6s ease-in-out infinite}
   .composer .mic:disabled{opacity:.4;cursor:default}
-  .talkst{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-dim);text-align:center;margin-top:12px;min-height:15px}
+  .talkst{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--ink-dim);text-align:center;margin-top:12px;min-height:15px}
   .thinking{display:inline-flex;gap:5px;align-items:center}
   .thinking i{width:6px;height:6px;border-radius:50%;background:var(--ai);animation:think 1.1s ease-in-out infinite;font-style:normal}
   .thinking i:nth-child(2){animation-delay:.18s}.thinking i:nth-child(3){animation-delay:.36s}
@@ -199,7 +197,7 @@
   .pillar{border:1px solid var(--line);border-radius:14px;padding:18px;transition:all .3s;animation:rise .6s ease both}
   .pillar:hover{transform:translateY(-3px);border-color:var(--pc)}
   .pillar .word{font-weight:800;font-size:1.1rem;color:var(--pc)}
-  .pillar .is{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink-dim);margin-top:4px}
+  .pillar .is{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--ink-dim);margin-top:4px}
   .pillar p{color:var(--ink-mut);font-size:.9rem;line-height:1.55;margin-top:10px}
   .p-peace{--pc:var(--guard)} .p-love{--pc:var(--you)} .p-unity{--pc:var(--sovereign)} .p-respect{--pc:var(--info)}
   .stone .dock{margin-top:30px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mut)}
@@ -262,10 +260,10 @@
   body:not([data-reg="cypherpunk"]) :is(.w .r,.w .mute,.field .gloss,.oddlaw,.note h3,.talk h2 .who,.talkst,.pillar .is,.voicebox .st,.tongues,.msg .tag,.stone .dock){font-size:14px}
   body:not([data-reg="cypherpunk"]) :is(.roselinks a,.seeds button){font-size:14px}
   footer{color:var(--ink-mut)}
-  body[data-reg="bee"] footer .m{color:#65509a;font-size:.875rem}
-  body[data-reg="bee"]{--rose-lift:#a31c35}
+  body[data-reg="bee"] footer .m{color:var(--sk-sovereign);font-size:.875rem}
+  body[data-reg="bee"]{--rose-lift:var(--sk-rose)}
   body:not([data-reg="bee"]) .w .mute{color:var(--guard)}
-  body[data-reg="bee"] .w .mute{color:#65509a}
+  body[data-reg="bee"] .w .mute{color:var(--sk-sovereign)}
 /* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (surfaces/skaists.css,
    compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
    e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. ── */
@@ -280,82 +278,94 @@ body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
 #eternal svg{display:block}
 #eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
 .et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink)}
-body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
-body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="bee"] .et-archive-h{font:700 28px/1.15 var(--sk-font-ui);letter-spacing:-.02em}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;border-top-color:rgba(156,111,214,.34)}
 body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
 
-/* NEW BEE — a calm welcome: four words, where they live, one plain step */
-.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font-family:var(--sk-font-bee-sans)}
-.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
-.et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
-.et-b-lede{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
-.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+/* NEW BEE — a calm welcome: four words, where they live, one plain step. Dressed in the founder's
+   chosen UI (his My Space screens, 2026-10-04; surfaces/myspace.html): paper, ink, bold system sans,
+   forest green for the one filled pill (white label) and for what is open, white cards with soft
+   large corners, an outlined pill for the second way on. The guard well stays lavender (guard, never
+   red). The mark, the title, the lede, the guard, the four rows, the voice line, the one step, the
+   talk link and the foot keep their order as built. */
+.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font-family:var(--sk-font-ui)}
+.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-ink-mut)}
+.et-b-h{margin:0;font:700 32px/1.12 var(--sk-font-ui);color:var(--sk-ink);letter-spacing:-.025em}
+.et-b-lede{margin:0;font:400 16px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius-xl);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-ui)}
 .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
-.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);text-decoration:none}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;width:100%;font:600 16px/1.45 var(--sk-font-ui);color:var(--sk-ink);text-decoration:none}
 .et-b-row:last-child{border-bottom:0}
 a.et-b-row{cursor:pointer}
-.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 15px/1.4 var(--sk-font-ui);color:var(--sk-ink-mut);text-align:right}
 .et-b-row .chev{flex:none}
-.et-b-now{margin:0;padding:var(--sk-s2) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font:600 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-now{margin:0;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-bg-card);box-shadow:inset 3px 0 0 var(--sk-forest);color:var(--sk-forest);font:700 16px/1.45 var(--sk-font-ui)}
 .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1)}
-.et-b-primary{height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;cursor:pointer;padding:0 var(--sk-s3)}
-.et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;text-decoration:none;cursor:pointer;padding:0}
-.et-b-link:hover{color:var(--sk-link-hover)!important;background:transparent}
-.et-b-foot{margin:0;text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-primary{height:var(--sk-control-primary);border-radius:var(--sk-radius-pill);border:0;background:var(--sk-forest);color:var(--sk-on-primary)!important;font:700 17px/1.2 var(--sk-font-ui)!important;cursor:pointer;padding:0 var(--sk-s3)}
+.et-b-primary:hover{background:var(--sk-forest)}
+.et-b-link{min-height:var(--sk-control-row);display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-pill);background:transparent;font:700 16px/1.2 var(--sk-font-ui)!important;color:var(--sk-ink)!important;text-decoration:none;cursor:pointer;padding:0 var(--sk-s3)}
+.et-b-link:hover{border-color:var(--sk-forest);background:transparent}
+.et-b-foot{margin:0;text-align:center;font:400 14px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut)}
 
 /* RAVER — the words are a constellation: four fields, one star per spoken word, filled where
    this browser has a voice, hollow where it has none. Tap a field, tap a word to hear it. The sky
    turns once in three minutes (far under 3 Hz), pauses on the switch, and is still under
-   prefers-reduced-motion. */
-.et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+   prefers-reduced-motion. Dressed in the founder's chosen UI: night purple ground (sovereign wash
+   into tint), plain white bold sans titles, round everything, magenta for the one filled pill with
+   its soft glow and as the outline of every second way on (and of the field that is open). The sky,
+   its four fields and seventy-six stars, the legend, the card, the word chips, the pill and the
+   motion switch stay as built. */
+.et-r{color:var(--sk-ink);font-family:var(--sk-font-ui)}
 .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
-.et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
-.et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-h{margin:0;font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;color:var(--sk-ink)}
+.et-r-hint{font:400 15px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
 .et-r-stars{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign))}
 .et-r-stars .field-w{cursor:pointer}
-.et-r-stars .field-w .zone{fill:var(--sk-bg-card);stroke:var(--sk-line);stroke-width:1.5}
-.et-r-stars .field-w.sel .zone{fill:var(--sk-sovereign-tint);stroke:var(--sk-sovereign-soft)}
+.et-r-stars .field-w .zone{fill:var(--sk-sovereign-wash);stroke:rgba(156,111,214,.34);stroke-width:1.5}
+.et-r-stars .field-w.sel .zone{fill:var(--sk-sovereign-wash);stroke:var(--sk-you);stroke-width:2}
 .et-r-stars .field-w:focus{outline:none}.et-r-stars .field-w:focus-visible .zone{stroke:var(--sk-ink);stroke-width:3}
 .et-r-stars .star{stroke-width:2}
 .et-r-stars .star.mute{fill:none!important}
 .et-r-stars .k-peace .star{fill:var(--sk-guard);stroke:var(--sk-guard)}.et-r-stars .k-love .star{fill:var(--sk-you);stroke:var(--sk-you)}
 .et-r-stars .k-unity .star{fill:var(--sk-sovereign);stroke:var(--sk-sovereign)}.et-r-stars .k-respect .star{fill:var(--sk-info);stroke:var(--sk-info)}
 .et-r-stars .star.root{stroke:var(--sk-ink)}
-.et-r-stars .lbl-w{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+.et-r-stars .lbl-w{font:700 15px/1.2 var(--sk-font-ui);letter-spacing:.04em}
 .et-r-stars .k-peace .lbl-w{fill:var(--sk-guard)}.et-r-stars .k-love .lbl-w{fill:var(--sk-you)}.et-r-stars .k-unity .lbl-w{fill:var(--sk-sovereign-soft)}.et-r-stars .k-respect .lbl-w{fill:var(--sk-info)}
-.et-r-stars .core{fill:var(--sk-bg);stroke:var(--sk-sovereign);stroke-width:1.5;stroke-dasharray:3 5}
-.et-r-stars .core-t{fill:var(--sk-ink);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+.et-r-stars .core{fill:var(--sk-sovereign-tint);stroke:var(--sk-sovereign);stroke-width:1.5;stroke-dasharray:3 5}
+.et-r-stars .core-t{fill:var(--sk-ink);font:700 15px/1.2 var(--sk-font-ui);letter-spacing:.04em}
 .et-r-turn{transform-origin:0 0;animation:etTurn 180s linear infinite}
 @keyframes etTurn{to{transform:rotate(360deg)}}
 body.et-still .et-r-turn{animation-play-state:paused}
 @media (prefers-reduced-motion:reduce){.et-r-turn{animation:none}}
 .et-r-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin-top:var(--sk-s2)}
-.et-r-chips button{min-width:var(--sk-control-min);min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body);cursor:pointer}
-.et-r-chips button.mute{border-style:dashed;border-color:var(--sk-ink-dim);background:var(--sk-bg-card);color:var(--sk-ink-soft)}
-.et-r-chips button[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
-.et-r-card .et-r-word{display:block;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink);margin-bottom:var(--sk-s1)}
+.et-r-chips button{min-width:var(--sk-control-min);min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1.5px solid rgba(214,85,187,.6);border-radius:var(--sk-radius-pill);background:transparent;color:var(--sk-ink);font:700 15px/1.25 var(--sk-font-ui);cursor:pointer}
+.et-r-chips button.mute{border-style:dashed;border-color:rgba(183,159,224,.6);background:transparent;color:var(--sk-sovereign-soft)}
+.et-r-chips button[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:inset 0 0 0 1px var(--sk-you),0 0 18px rgba(214,85,187,.38)}
+.et-r-card .et-r-word{display:block;font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;color:var(--sk-ink);margin-bottom:var(--sk-s1)}
 .et-c-fields td{height:var(--sk-control-min)}
 .et-c-fields .st-ok{color:var(--sk-verified)}.et-c-fields .st-no{color:var(--sk-guard)}
-.et-r-legend{display:flex;justify-content:space-between;gap:var(--sk-s1);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-legend{display:flex;justify-content:space-between;gap:var(--sk-s1);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
 .et-r-legend span{display:flex;flex-direction:column;align-items:center;gap:var(--sk-s1)}
-.et-r-legend i{width:28px;height:12px;border-radius:var(--sk-radius-sm)}
+.et-r-legend i{width:28px;height:12px;border-radius:var(--sk-radius-pill)}
 .et-r-legend em{font-style:normal}
 .lg-voice{background:var(--sk-sovereign)}.lg-mute{border:1.5px solid var(--sk-sovereign)}.lg-root{background:var(--sk-sovereign);border:2px solid var(--sk-ink)}
-.et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
-.et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
-.et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body)}.et-r-card span{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+.et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid rgba(156,111,214,.34);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-wash);min-height:var(--sk-control-person)}
+.et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-strong);color:var(--sk-sovereign-tint);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-ui);flex:none}
+.et-r-card b{display:block;font:700 15px/1.3 var(--sk-font-ui)}.et-r-card span{font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
 .et-r-forks{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0 0}
-.et-r-forks span{padding:var(--sk-s1) var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
-.et-r-pill{position:relative;overflow:hidden;display:block;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;padding:0}
+.et-r-forks span{padding:var(--sk-s1) var(--sk-s2);border:1px solid rgba(156,111,214,.34);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+.et-r-pill{position:relative;overflow:hidden;display:block;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 18px/1.2 var(--sk-font-ui)!important;box-shadow:0 0 28px rgba(214,85,187,.38);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;padding:0}
 .et-r-pill:hover{background:var(--sk-primary)}
 .et-r-pill .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--sk-bg);opacity:.25}
 .et-r-pill .lbl{position:relative}
-.et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
-.et-r-ghost{display:block;margin:var(--sk-s1) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 14px/1.4 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-.et-r-ghost:hover{background:none}
+.et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.5 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+.et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s1) auto 0;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:1.5px solid rgba(214,85,187,.6);border-radius:var(--sk-radius-pill);background:transparent;color:var(--sk-ink)!important;font:700 15px/1.2 var(--sk-font-ui)!important;text-decoration:none;cursor:pointer}
+.et-r-ghost:hover{border-color:var(--sk-you);background:transparent}
 
-/* CYPHERPUNK — the corpus and its boundaries: counts, voices, the data flow, the tutor */
+/* CYPHERPUNK — the corpus and its boundaries: counts, voices, the data flow, the tutor. It already
+   wore the chosen UI (near-black, IBM Plex Mono throughout, cyan action cut 6px with a dark label,
+   dense); the chosen UI adds only thin grey lines on the verify panel and every second way on. */
 .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
 .et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;margin:0}
 .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
@@ -379,34 +389,103 @@ body.et-still .et-r-turn{animation-play-state:paused}
 .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
 .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer;padding:0}
 .et-c-primary:hover{background:var(--sk-primary)}
-.et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+.et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
 .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
 .et-c-verify ol{margin:0;padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1);overflow-wrap:anywhere}
 .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
-.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
-.et-c-ghost:hover{background:transparent}
-/* ── THE WHOLE FLOOR, dressed per register: the page's own variables mapped onto skaists. The
-   four words take the cornerstone's own colours (peace = guard, love = you, unity = sovereign,
-   respect = info); honey stays for b amounts only. ── */
+.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1px solid rgba(100,129,118,.7);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+.et-c-ghost:hover{border-color:var(--sk-ai);background:transparent}
+/* ── THE WHOLE FLOOR, dressed per register: the page's own variables mapped onto skaists, in the
+   founder's chosen UI (2026-10-05). The four words take the cornerstone's own colours (peace =
+   guard, love = you, unity = sovereign, respect = info); honey stays for b amounts only. The floor's
+   one filled press per view wears the register's action (--act): a forest pill with a white label in
+   new bee, the magenta pill with its glow in raver, cyan cut 6px in cypherpunk; every other way on is
+   outlined in --edge (a pill in new bee and raver, a thin grey cut corner in cypherpunk), and what
+   is chosen wears --sel. Only the dress: the opening, the
+   festival, the voices, the four word fields, the roses, the boundary, the conversation, the
+   cornerstone and the footer keep every part and its order in every register. ── */
 body[data-reg]{--ai:var(--sk-ai);--biomass:var(--sk-verified);--sovereign:var(--sk-sovereign);--sovereign-soft:var(--sk-sovereign-soft);--you:var(--sk-you);--info:var(--sk-info);--guard:var(--sk-guard);
  --bg:var(--sk-bg);--ink:var(--sk-ink);--ink-mut:var(--sk-ink-mut);--ink-dim:var(--sk-ink-dim);--line:var(--sk-line);background:var(--sk-bg);color:var(--sk-ink)}
 body[data-reg] .f-peace{--hue:var(--sk-guard)}body[data-reg] .f-love{--hue:var(--sk-you)}body[data-reg] .f-unity{--hue:var(--sk-sovereign)}body[data-reg] .f-respect{--hue:var(--sk-info)}
 body[data-reg] .stone .dock a{color:var(--sk-link);border-bottom-color:var(--sk-link)}
-body[data-reg="bee"]{--font:var(--sk-font-bee-sans);--mono:var(--sk-font-mono);color-scheme:light}
-body[data-reg="bee"] .plur,body[data-reg="bee"] .field .en{color:var(--sk-sovereign)}
-body[data-reg="bee"] .view-title{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="bee"]{--font:var(--sk-font-ui);--mono:var(--sk-font-ui);color-scheme:light;
+ --card:var(--sk-bg-card);--act:var(--sk-forest);--on-act:var(--sk-on-primary);--edge:rgba(106,115,110,.4);--field:rgba(106,115,110,.4);--sel:var(--sk-forest);--sel-ink:var(--sk-forest);--ring:rgba(38,77,54,.15);--glow:none}
+body[data-reg="bee"] :is(.plur,.field .en){color:var(--sk-ink)}
+body[data-reg="bee"] .view-title{font:700 40px/1.08 var(--sk-font-ui);letter-spacing:-.03em}
 body[data-reg="bee"] footer .m,body[data-reg="bee"] .w .mute{color:var(--sk-sovereign)}
 body[data-reg="bee"] .voicebox,body[data-reg="bee"] .voicebox select{background:var(--sk-bg-card);color:var(--sk-ink)}
-body[data-reg="raver"]{--font:var(--sk-font-raver-body);--mono:var(--sk-font-raver-body)}
-body[data-reg="raver"] :is(.view-title,.plur,.field .en,.roses h2,.talk h2,.stone h2){font-family:var(--sk-font-raver-display)}
-body[data-reg="raver"] .plur-actions a:nth-child(2){background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary)}
-body[data-reg="cypherpunk"]{--font:var(--sk-font-mono);--mono:var(--sk-font-mono);font-family:var(--sk-font-mono)}
+/* new bee's paper is plain: the opening's breathing light is raver's */
+body[data-reg="bee"] .open .glow{display:none}
+/* new bee reads nothing under 14 px */
+body[data-reg="bee"] :is(.expand,.voicebox .vpick,.voicebox .vnote,.voicebox select,.oddpick button,.tongues select,.msg.sys,.msg .rom,.msg .try button,footer){font-size:14px}
+body[data-reg="bee"] .entry-note{font-size:14px!important}
+body[data-reg="raver"]{--font:var(--sk-font-ui);--mono:var(--sk-font-ui);color-scheme:dark;
+ --bg:var(--sk-sovereign-tint);--line:rgba(156,111,214,.34);--ink-mut:var(--sk-sovereign-soft);--ink-dim:var(--sk-sovereign-soft);
+ --card:var(--sk-sovereign-wash);--act:var(--sk-primary);--on-act:var(--sk-on-primary);--edge:rgba(214,85,187,.6);--field:rgba(156,111,214,.55);--sel:var(--sk-you);--sel-ink:var(--sk-ink);--ring:rgba(214,85,187,.15);--glow:0 0 28px rgba(214,85,187,.38);
+ background-color:var(--sk-sovereign-tint);
+ background-image:radial-gradient(120% 55% at 0% 100%,rgba(111,169,224,.09),transparent 60%),linear-gradient(180deg,var(--sk-sovereign-wash),var(--sk-sovereign-tint) 42%);
+ background-attachment:fixed}
+html:has(body[data-reg="raver"]){background:#120e1e}/* raver --sk-sovereign-tint: the token resolves on body only, so the canvas names its value */
+/* the opening keeps its light (the people purple, the machines teal) over the night purple ground
+   instead of a hand-mixed ground of its own */
+body[data-reg="raver"] .open{background:radial-gradient(ellipse at 20% 40%,rgba(156,111,214,.28) 0,transparent 60%),radial-gradient(ellipse at 90% 60%,rgba(69,194,220,.16) 0,transparent 60%)}
+body[data-reg="cypherpunk"]{--font:var(--sk-font-mono);--mono:var(--sk-font-mono);font-family:var(--sk-font-mono);color-scheme:dark;
+ --card:var(--sk-bg-card);--act:var(--sk-primary);--on-act:var(--sk-on-primary);--edge:rgba(100,129,118,.7);--sel:var(--sk-ai);--sel-ink:var(--sk-ai);--ring:rgba(69,194,220,.15);--glow:none}
 body[data-reg="cypherpunk"] :is(.voicebox,.voicebox button,.voicebox select,.privacy-note,.msg,.pillar,.composer input,.composer button,.tongues select,.seeds button,.oddpick button,.roselinks a,.plur-actions a){border-radius:var(--sk-radius-sm)}
 body[data-reg] #eternal{border:0;padding-bottom:0}
+/* titles: plain bold sans (no rainbow on a title) */
+body:is([data-reg="bee"],[data-reg="raver"]) .plur{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--sk-ink);font-family:var(--sk-font-ui);font-weight:700}
+body:is([data-reg="bee"],[data-reg="raver"]) :is(.view-title,.field .en,.roses h2,.talk h2,.stone h2,.plur-festival h2,.voice-coverage h2){font-family:var(--sk-font-ui);font-weight:700;letter-spacing:-.03em}
+/* the top row of doors: ink words on a 44 px target; the door you are in wears --sel */
+body[data-reg]>nav[aria-label="Festivals, PLUR, SKAISTS and BNR"] a{display:inline-flex;align-items:center;justify-content:center;min-width:var(--sk-control-min);min-height:var(--sk-control-min);color:var(--ink);font-family:var(--font);font-weight:600;text-underline-offset:4px}
+body[data-reg]>nav[aria-label="Festivals, PLUR, SKAISTS and BNR"] a[aria-current="page"]{color:var(--sel);font-weight:700}
+/* every second way on: an outlined pill in new bee and raver (its words centred in it), thin grey in
+   cypherpunk */
+body:is([data-reg="bee"],[data-reg="raver"]) .plur-actions a{display:flex;align-items:center;justify-content:center;text-align:center}
+body:is([data-reg="bee"],[data-reg="raver"]) :is(.plur-actions a,.roselinks a,.seeds button,.oddpick button,.voicebox button,.composer .mic,.voice-coverage button){border:1.5px solid var(--edge);border-radius:var(--sk-radius-pill);background:transparent;color:var(--ink);font-family:var(--sk-font-ui);font-weight:700;letter-spacing:0}
+body:is([data-reg="bee"],[data-reg="raver"]) :is(.plur-actions a,.roselinks a,.seeds button,.oddpick button,.voicebox button:enabled,.voice-coverage button):is(:hover,:focus-visible){border-color:var(--act);background:transparent;color:var(--ink);transform:none}
+body[data-reg="cypherpunk"] :is(.plur-actions a,.roselinks a,.seeds button,.oddpick button,.voicebox button,.composer .mic,.voice-coverage button,.privacy-note){border:1px solid var(--edge)}
+body[data-reg="cypherpunk"] :is(.plur-actions a,.roselinks a,.seeds button,.oddpick button,.voicebox button:enabled,.voice-coverage button):is(:hover,:focus-visible){border-color:var(--sk-ai);background:transparent;color:var(--ink)}
+body[data-reg="cypherpunk"] .voice-coverage button{border-radius:var(--sk-radius-sm);font:600 14px/1.2 var(--sk-font-mono);padding:0 var(--sk-s2)}
+/* what is chosen (the number of roses) */
+body[data-reg] .oddpick button[aria-pressed="true"]{border-color:var(--sel);box-shadow:inset 0 0 0 1px var(--sel);background:transparent;color:var(--sel-ink)}
+/* the one filled press of a view: raver's festival door on the opening, and send in the conversation */
+body[data-reg="raver"] .plur-actions a:nth-child(2){background:var(--act);color:var(--on-act);border-color:var(--act);box-shadow:var(--glow)}
+body[data-reg="raver"] .plur-actions a:nth-child(2):is(:hover,:focus-visible){background:var(--act);color:var(--on-act);border-color:var(--act)}
+body[data-reg] .composer .send{min-height:var(--sk-control-row);border:0;border-radius:var(--sk-radius-pill);background:var(--act);color:var(--on-act);box-shadow:var(--glow);font-family:var(--sk-font-ui);font-weight:700}
+body[data-reg] .composer .send:hover{background:var(--act);color:var(--on-act)}
+body[data-reg="cypherpunk"] .composer .send{border-radius:var(--sk-radius-sm);font-family:var(--sk-font-mono);font-weight:600}
+/* fields to write in and choose from: soft pills on the card colour */
+body:is([data-reg="bee"],[data-reg="raver"]) :is(.composer input,.tongues select,.voicebox select){border:1px solid var(--field);border-radius:var(--sk-radius-pill);background:var(--card);color:var(--ink)}
+body[data-reg] .composer input:focus{border-color:var(--act);box-shadow:0 0 0 3px var(--ring)}
+/* cards: white (new bee) or night purple (raver) with soft large corners */
+body:is([data-reg="bee"],[data-reg="raver"]) :is(.voicebox,.privacy-note,.plur-festival){border:1px solid var(--line);border-radius:var(--sk-radius-xl);background:var(--card);color:var(--ink)}
+body:is([data-reg="bee"],[data-reg="raver"]) .msg{border-radius:var(--sk-radius-xl)}
+body:is([data-reg="bee"],[data-reg="raver"]) .lw{border-radius:var(--sk-radius-pill)}
+body[data-reg="raver"] .note{border:1px solid var(--line);border-radius:var(--sk-radius-xl);background:var(--card);box-shadow:inset 3px 0 0 var(--hue)}
+body[data-reg="cypherpunk"] .plur-festival{border-radius:var(--sk-radius-sm)}
+body[data-reg] .plur-festival a{color:var(--sk-link)}
+/* raver's word fields: the title reads plain white like every raver title; the word's own colour
+   (peace = guard, love = you, unity = sovereign, respect = info) moves to a short glowing rule under it */
+body[data-reg="raver"] .field .en{color:var(--sk-ink);text-shadow:none}
+body[data-reg="raver"] .field .en::after{content:"";display:block;width:56px;height:4px;margin:var(--sk-s2) auto 0;border-radius:var(--sk-radius-pill);background:var(--hue);box-shadow:0 0 18px var(--hue)}
+/* new bee's conversation arrow is a quiet mark, not the action colour */
+body[data-reg="bee"] .tongues .arrow{color:var(--sk-ink-mut)}
+/* the voices for every language: the speaker review's fields and every sample press were the
+   browser's own fields and buttons at 13 px. New bee and raver: soft pills on the card colour at
+   the page's 16 px (the notes box keeps a large soft corner), the sample presses at 15 px;
+   cypherpunk: thin grey cut corners in IBM Plex Mono. */
+body:is([data-reg="bee"],[data-reg="raver"]) #plurReview :is(input,select,textarea){font:inherit;line-height:1.4;padding:0 var(--sk-s3);border:1px solid var(--field);border-radius:var(--sk-radius-pill);background:var(--card);color:var(--ink)}
+body:is([data-reg="bee"],[data-reg="raver"]) #plurReview textarea{padding:var(--sk-s2) var(--sk-s3);border-radius:var(--sk-radius-xl)}
+body:is([data-reg="bee"],[data-reg="raver"]) .voice-coverage button{font-size:15px;line-height:1.2;padding:0 var(--sk-s3)}
+body[data-reg="cypherpunk"] #plurReview :is(input,select,textarea){font:400 16px/1.4 var(--sk-font-mono);padding:0 var(--sk-s2);border:1px solid var(--edge);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--ink)}
+body[data-reg="cypherpunk"] #plurReview textarea{padding:var(--sk-s1) var(--sk-s2)}
+body[data-reg] #plurReview :is(input,select,textarea):focus{border-color:var(--act);box-shadow:0 0 0 3px var(--ring)}
 </style>
 <link rel="stylesheet" href="skaists.css">
+<style>/* 44px control floor */#vsel,#myLang,#learnLang{min-height:44px}</style>
 </head>
-<body data-reg="bee" data-bee-theme="custom">
+<body data-reg="bee" data-bee-theme="custom"><nav aria-label="Festivals, PLUR, SKAISTS and BNR" style="padding:16px;display:flex;gap:16px;flex-wrap:wrap"><a href="festival/index.html">Festivals</a><a href="plur.html" aria-current="page">PLUR</a><a href="doors/skaists.html">SKAISTS</a><a href="index.html">BNR</a></nav>
 
 <!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
      one surface. ONE data layer (the word cards this page carries, the browser's own voices as the
@@ -477,10 +556,62 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
     <div class="expand" data-i18n="plur.values">peace · love · unity · respect</div>
     <p class="floor" data-reg="raver">Thirty years ago, first time on the floor, somebody said <b>come as you are — we accept you</b>.</p>
     <p data-reg="bee"><span data-i18n="plur.intro">Start with a word. Choose a language, listen when a voice is available, and find your way into the conversation.</span></p><p data-reg="raver"><span data-i18n="plur.raverIntro">Trade a greeting. Bring a friend. Carry the music across languages.</span></p><p data-reg="cypherpunk">Inspect the browser-to-provider boundary, voice dependencies and translation evidence. This page does not establish private messaging or encrypted media transport.</p>
-    <nav class="plur-actions" aria-label="Explore PLUR"><a href="#words"><span data-i18n="plur.words">Explore the words</span></a><a href="music.html">SKAISTS mUsiC ↗</a><a href="#talk"><span data-i18n="plur.conversation">Try a conversation</span></a><a href="blanguage.html"><span data-i18n="plur.dock">Language dock</span></a></nav><p class="entry-note"><span data-i18n="plur.voice">Voices depend on your browser. Unavailable voices are labelled.</span></p>
+    <nav class="plur-actions" aria-label="Explore PLUR"><a href="#voices">All language voices</a><a href="#festival">Enter the festival</a><a href="#words"><span data-i18n="plur.words">Explore the words</span></a><a href="music.html">SKAISTS mUsiC ↗</a><a href="#talk"><span data-i18n="plur.conversation">Try a conversation</span></a><a href="blanguage.html"><span data-i18n="plur.dock">Language dock</span></a></nav><p class="entry-note"><span>Matching browser voices or labelled synthetic previews. Native review is pending.</span></p>
   </div>
 </section>
 
+
+<section id="festival" class="plur-festival" aria-labelledby="plurFestivalTitle">
+  <h2 id="plurFestivalTitle">The festival, here in PLUR</h2>
+  <p>Your day on the floor: the day pass, nine stops, kandi, music, the calm tent and the economy board. The same complete festival experience, in your selected view.</p>
+  <p><a href="festival/index.html">Open the festival on its own</a></p>
+  <p id="plurFestivalEnter"><a href="#festival">Enter the festival</a></p>
+  <iframe id="plurFestival" title="PLUR festival — full interactive attendee experience" data-src="festival/index.html?embed=plur&amp;v=20261002" hidden></iframe>
+</section>
+<style>
+.plur-festival{max-width:960px;margin:24px auto;padding:20px;color:var(--sk-ink);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-md);scroll-margin-top:16px}.plur-festival h2{font-size:clamp(22px,5vw,32px);margin-bottom:12px}.plur-festival p{line-height:1.6;margin:10px 0}.plur-festival a{display:inline-flex;align-items:center;min-height:44px}.plur-festival iframe{display:block;width:100%;height:900px;border:0;margin-top:16px;background:transparent}.plur-festival iframe[hidden]{display:none}@media(max-width:600px){.plur-festival{padding:12px;margin:16px 8px}}
+</style>
+<script>
+(function(){
+ var frame=document.getElementById('plurFestival'),enter=document.getElementById('plurFestivalEnter'),observer,focusOnLoad,landOnLoad,landUntil=0;
+ // Explicit entry: the frame has no src until the reader presses an "Enter the festival" control,
+ // so reading or scrolling PLUR never starts the festival's own chain reads.
+ function open(e){if(frame.getAttribute('src'))return;frame.src=frame.dataset.src;frame.hidden=false;focusOnLoad=enter.contains(e.target);landOnLoad=true;enter.hidden=true;}
+ document.addEventListener('click',function(e){if(e.target.closest('a[href="#festival"]'))open(e);});
+ function landNow(){var h=Math.ceil(frame.contentDocument&&frame.contentDocument.body?frame.contentDocument.body.getBoundingClientRect().height:0)+8;if(h>8&&Math.abs(frame.offsetHeight-h)>2)frame.style.height=h+'px';document.getElementById('festival').scrollIntoView({block:'start',behavior:'instant'});}
+ ['wheel','touchstart','keydown'].forEach(function(t){addEventListener(t,function(){landUntil=0;},{passive:true});});
+ function sync(){var doc=frame.contentDocument;if(!doc||!doc.body)return;var reg=document.body.dataset.reg||'bee';if(doc.body.dataset.reg!==reg){var control=doc.getElementById('breg-'+reg);if(control)control.click();}}
+ frame.addEventListener('load',function(){
+  var doc=frame.contentDocument;if(!doc||!doc.body)return;
+  function resize(){var h=Math.ceil(doc.body.getBoundingClientRect().height)+8;if(h>0&&Math.abs(frame.offsetHeight-h)>2)frame.style.height=h+'px';}
+  if(observer)observer.disconnect();observer=new ResizeObserver(function(){sync();resize();if(performance.now()<landUntil)landNow();});observer.observe(doc.body);sync();resize();
+  if(focusOnLoad){focusOnLoad=false;frame.focus({preventScroll:true});}
+  // The press lands on the section and stays landed while the frame settles: its content,
+  // its faces and its height can arrive after the jump (a short page cannot scroll the section
+  // to the top until the frame has grown), and the reader should still be where they pressed.
+  // For four seconds every growth re-lands; the reader's own scroll, wheel, touch or key ends it.
+  if(landOnLoad){landOnLoad=false;landUntil=performance.now()+4000;landNow();
+   Promise.all([document.fonts?document.fonts.ready:0,doc.fonts?doc.fonts.ready:0]).then(function(){if(performance.now()<landUntil)landNow();});}
+ });
+ document.addEventListener('bregister',sync);
+ new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['data-reg']});
+})();
+</script>
+
+<section class="voice-coverage" id="voices" lang="en" aria-labelledby="voiceCoverageTitle"><h2 id="voiceCoverageTitle">Voices for every PLUR language</h2><p id="voiceCoverageSummary" role="status">Reading voice coverage…</p><p>The fixed words and samples below have synthetic previews hosted on this site. Sanskrit uses an explicitly labelled Hindi-engine approximation; Flemish uses Dutch synthesis. Japanese uses kana readings; Arabic uses vowel-marked input. All require native review. This does not provide arbitrary-text speech for every language.</p><p>Audio availability is not a quality score. Meaning, dialect and pronunciation still need a speaker’s review. <a href="../assets/plur-voices/quality.json">Download the review queue and audio evidence</a> · <a href="blanguage.html">Explore the language dock</a></p><details id="plurReview"><summary>Compare voices and prepare a speaker review</summary>
+<p>Compare the existing preview with a Kokoro candidate where available. No winner is selected automatically. Language stewardship follows <a href="blanguage.html#representation">bLanguageDOCK’s Royal Guard pathway</a>, with Thai/Rama X as the original reference case. Diplomatic consent and a speaker’s assessment of pronunciation are recorded separately. Every assessment records a named speaker and dialect. A downloaded review is your assessment, not a verified approval; nothing is submitted or saved automatically.</p>
+<label for="reviewItem">Word or language sample</label><select id="reviewItem"></select>
+<p id="reviewText" aria-live="polite"></p>
+<label>Existing preview<audio id="reviewBaseline" controls preload="none"></audio></label>
+<label>Kokoro candidate<audio id="reviewCandidate" controls preload="none"></audio></label>
+<p id="reviewCandidateNote"></p>
+<form id="speakerReviewForm">
+<label for="reviewerName">Reviewer name or public alias</label><input id="reviewerName" required maxlength="100" autocomplete="off">
+<label for="reviewerDialect">Language and dialect you speak</label><input id="reviewerDialect" required maxlength="120" autocomplete="off">
+<label for="reviewRating">Your assessment</label><select id="reviewRating" required><option value="">Choose after listening</option><option value="baseline">Existing preview is better</option><option value="candidate">Kokoro candidate is better</option><option value="both">Both are acceptable</option><option value="neither">Both need correction</option><option value="unsure">I am unsure</option></select>
+<label for="reviewNotes">Meaning, pronunciation, stress or corrections</label><textarea id="reviewNotes" required maxlength="2000"></textarea>
+<button type="submit">Download my review draft</button><p id="reviewStatus" role="status">Loading comparison evidence…</p>
+</form><details><summary>Translation model probes</summary><p>These are machine drafts of contextual sentences, not replacements for the word cards. Speaker review is pending.</p><div id="translationProbes"></div></details></details><details><summary>Explore all languages and hear a sample</summary><table><thead><tr><th>Language</th><th>Audio route</th><th>Listen</th></tr></thead><tbody id="voiceCoverageRows"></tbody></table></details></section><style>.voice-coverage{max-width:920px;margin:24px auto;padding:20px;line-height:1.6}.voice-coverage p{margin:12px 0}.voice-coverage a{color:var(--sk-link)}#plurReview label{display:block;margin-top:14px}#plurReview input,#plurReview select,#plurReview textarea,#plurReview audio{display:block;width:100%;max-width:100%;min-height:44px;box-sizing:border-box}#plurReview textarea{min-height:100px}#plurReview{margin:18px 0}.voice-coverage table{width:100%;border-collapse:collapse}.voice-coverage td,.voice-coverage th{padding:10px;text-align:left;overflow-wrap:anywhere}.voice-coverage button,.voice-coverage summary{min-height:44px;cursor:pointer}.voice-coverage button{padding:10px;background:var(--sk-bg-card);color:var(--sk-ink);border:1px solid var(--sk-line)}@media(max-width:600px){.voice-coverage thead{display:none}.voice-coverage tr,.voice-coverage td,.voice-coverage th{display:block}.voice-coverage tr{border-bottom:1px solid var(--sk-line)}}</style>
 <section class="field f-peace" id="words">
   <div class="en" data-i18n="plur.peace">peace</div>
   <div class="gloss" data-i18n="plur.g1">the first word</div>
@@ -513,8 +644,8 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
     <label class="vpick" for="vsel"><span data-i18n="plur.voicePick">Voice used for listening</span>
       <select id="vsel"></select>
     </label>
-    <span class="st" id="vst" role="status">—</span>
-    <p class="vnote" id="vnote" data-i18n="plur.hearPairNote">Optional pronunciation example beside the words. It plays the two greetings in turn, only when you press it, and only if your browser offers a Hebrew or an Arabic voice. Nothing plays automatically.</p>
+    <button id="voiceStop" type="button">Stop audio</button><span class="st" id="vst" role="status">Choose a word or language sample.</span>
+    <p class="vnote" id="vnote">Matching browser voices are preferred. Missing voices use site-hosted synthetic word previews, not a recording by a native speaker. Native review is pending. A selected voice only applies to its own language. Nothing plays automatically.</p>
   </div>
   <div class="note">
     <h3>the word two peoples share</h3>
@@ -646,7 +777,7 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
     <a href="blight/museum.html" data-i18n="d.plur.roses.museum">even roses stand at the Museum of the DeAD ⟶</a>  </div>
 </section>
 
-<section class="boundary" data-reg="cypherpunk" id="privacy-map"><h2>Data flow / current implementation</h2><div class="flow"><div><b>01 · Browser</b><p>Word cards are embedded in this document. View and UI-language preferences are stored by the shared controls on this origin.</p></div><div><b>02 · Voice engine</b><p>Speech synthesis uses the browser's installed voices. Recognition may use a browser vendor service. Local-only audio processing is not established.</p></div><div><b>03 · AI provider</b><p>Send posts your text, selected languages and this tab's conversation history to api.anthropic.com/v1/messages. The provider receives plaintext; HTTPS is not end-to-end encryption against that provider.</p></div></div><h3>Evidence, not a privacy badge</h3><dl><dt>Source</dt><dd>surfaces/plur.html: ask(), renderHive(), SpeechRecognition; shared register.js and lang.js.</dd><dt>Tutor availability</dt><dd>The current direct request has no configured authentication header. A working authenticated service is not verified. Failed requests must show an unavailable state.</dd><dt>Translation</dt><dd>Interface corpus renderings are machine drafts until attested. English fallback remains visible in the shared coverage counter. Word-card provenance and voice coverage are separate from interface coverage.</dd><dt>Unverified</dt><dd>Provider retention, relay privacy, end-to-end chat encryption, live media performance and network anonymity. No measurements are fabricated here.</dd></dl></section>
+<section class="boundary" data-reg="cypherpunk" id="privacy-map"><h2>Data flow / current implementation</h2><div class="flow"><div><b>01 · Browser</b><p>Word cards are embedded in this document. View and UI-language preferences are stored by the shared controls on this origin.</p></div><div><b>02 · Voice engine</b><p>Speech uses matching browser voices or fixed synthetic previews fetched from this site. Recognition may use a browser vendor service. Local-only audio processing is not established.</p></div><div><b>03 · AI provider</b><p>Send posts your text, selected languages and this tab's conversation history to api.anthropic.com/v1/messages. The provider receives plaintext; HTTPS is not end-to-end encryption against that provider.</p></div></div><h3>Evidence, not a privacy badge</h3><dl><dt>Source</dt><dd>surfaces/plur.html: ask(), renderHive(), SpeechRecognition; shared register.js and lang.js.</dd><dt>Tutor availability</dt><dd>The current direct request has no configured authentication header. A working authenticated service is not verified. Failed requests must show an unavailable state.</dd><dt>Translation</dt><dd>Interface corpus renderings are machine drafts until attested. English fallback remains visible in the shared coverage counter. Word-card provenance and voice coverage are separate from interface coverage.</dd><dt>Unverified</dt><dd>Provider retention, relay privacy, end-to-end chat encryption, live media performance and network anonymity. No measurements are fabricated here.</dd></dl></section>
 <section class="talk" id="talk">
   <div class="wrap">
     <h2><span data-i18n="d.plur.talk.h">now say it back</span>
@@ -720,120 +851,52 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
 </footer>
 
 <script>
-/* bvoice — the estate's shared voice module.
-   Any element with data-say + data-lang speaks. Zero network, zero deps.
-   Honest about absence: a tongue with no installed voice is LABELLED, never silently mute. */
 (function(){
-  "use strict";
-  var synth = window.speechSynthesis;
-  var words = [].slice.call(document.querySelectorAll('[data-say][data-lang]'));
-  var sel = document.getElementById('vsel'), st = document.getElementById('vst');
-  var salam = document.getElementById('vsalam');
-  var voices = [], byLang = {}, override = null, current = null;
-
-  if(!synth){
-    stDirty=true; st.textContent = T('plur.st.noengine', 'no speech engine in this browser');
-    words.forEach(function(w){ w.classList.add('novoice'); });
-    sel.disabled = salam.disabled = true;
-    window.bvoice = { speak:function(t,l,then){ if(then) then(); }, has:function(){ return false; } };
-    return;
-  }
-  function base(t){ return (t||'').toLowerCase().split(/[-_]/)[0]; }
-  /* the shared corpus lookup keeps script-written strings translatable with
-     a visible English fallback (corpus law) */
-  function T(key, fallback){
-    return (window.BNRLanguage && typeof window.BNRLanguage.text === 'function')
-      ? window.BNRLanguage.text(key, fallback) : fallback;
-  }
-  /* honest enable/disable for the optional pronunciation example: it is
-     usable exactly when a Hebrew OR an Arabic voice exists — never a mystery
-     button, never silent-on-click without an explanation */
-  function pairVoices(){
-    return words.filter(function(w){
-      return (w.dataset.say === 'שלום' || w.dataset.say === 'سلام') && !w.classList.contains('novoice');
-    });
-  }
-  function refreshSalam(){
-    var ok = pairVoices().length > 0;
-    salam.disabled = !ok;
-    st.textContent = ok ? T('plur.voiceReady', 'a Hebrew or Arabic voice is available for the example')
-                        : T('plur.voiceNone', 'No Hebrew or Arabic voice is installed in this browser, so this example stays silent; the written greetings remain.');
-  }
-
-  function index(){
-    voices = synth.getVoices() || [];
-    byLang = {};
-    voices.forEach(function(v){ var b = base(v.lang); (byLang[b] = byLang[b]||[]).push(v); });
-    var have = {}, miss = {};
-    words.forEach(function(w){
-      var b = base(w.dataset.lang), ok = !!(byLang[b] && byLang[b].length);
-      w.classList.toggle('novoice', !ok);
-      ok ? have[b]=1 : miss[b]=1;
-    });
-    var h = Object.keys(have).length, m = Object.keys(miss).length;
-    /* the status line belongs to the pronunciation example (refreshSalam);
-       the general voice summary stays visible on the word cards themselves */
-    sel.title = h + ' tongues speak here · ' + m + ' have no voice on this machine';
-    fill();
-    refreshSalam();
-  }
-  function fill(){
-    sel.innerHTML = '';
-    var a = document.createElement('option');
-    a.value=''; a.textContent = T('plur.voiceMatch', 'match each tongue'); sel.appendChild(a);
-    voices.forEach(function(v,i){
-      var o=document.createElement('option'); o.value=String(i);
-      o.textContent = v.name + ' — ' + v.lang; sel.appendChild(o);
-    });
-    var s=null; try{ s = localStorage.getItem('bvoice'); }catch(e){}
-    if(s !== null && voices[s]){ sel.value = s; override = voices[s]; }
-  }
-  sel.addEventListener('change', function(){
-    override = sel.value === '' ? null : voices[sel.value];
-    try{ localStorage.setItem('bvoice', sel.value); }catch(e){}
-  });
-  function pick(lang){
-    if(override) return override;
-    var b = base(lang), l = byLang[b];
-    if(!l || !l.length) return null;
-    for(var i=0;i<l.length;i++){ if(l[i].lang.toLowerCase().replace('_','-') === lang.toLowerCase()) return l[i]; }
-    return l[0];
-  }
-  function say(w, then){
-    var v = pick(w.dataset.lang);
-    if(!v){ if(then) then(); return; }
-    synth.cancel();
-    var u = new SpeechSynthesisUtterance(w.dataset.say);
-    u.voice = v; u.lang = v.lang; u.rate = .82;
-    if(current) current.classList.remove('speaking');
-    current = w; w.classList.add('speaking');
-    u.onend = u.onerror = function(){ w.classList.remove('speaking'); if(then) then(); };
-    synth.speak(u);
-  }
-  words.forEach(function(w){
-    w.addEventListener('click', function(){ if(!w.classList.contains('novoice')) say(w); });
-  });
-  salam.addEventListener('click', function(){
-    var pair = pairVoices();
-    if(!pair.length){ refreshSalam(); return; } /* honest disable makes this rare; the runtime check stays as a guard */
-    pair[0].scrollIntoView({block:'center',behavior:'auto'}); /* jump, not glide: reduced-motion safe */
-    say(pair[0], function(){ if(pair[1]) setTimeout(function(){ say(pair[1]); }, 420); });
-  });
-  window.bvoice = {
-    speak: function(text, lang, then){
-      var v = pick(lang);
-      if(!v){ if(then) then(); return; }
-      synth.cancel();
-      var u = new SpeechSynthesisUtterance(text);
-      u.voice = v; u.lang = v.lang; u.rate = .82;
-      u.onend = u.onerror = function(){ if(then) then(); };
-      synth.speak(u);
-    },
-    has: function(lang){ return !!pick(lang); }
-  };
-  index();
-  if(typeof synth.onvoiceschanged !== 'undefined') synth.onvoiceschanged = index;
+'use strict';
+var synth=window.speechSynthesis,words=Array.from(document.querySelectorAll('.w[data-say][data-lang]'));
+var sel=document.getElementById('vsel'),st=document.getElementById('vst'),pair=document.getElementById('vsalam');
+var voices=[],preferred='',manifest={entries:[],languages:[]},clips=new Map(),active=null,serial=0;
+function norm(lang){return String(lang||'').toLowerCase().replace(/_/g,'-').replace(/^iw(?=-|$)/,'he').replace(/^no(?=-|$)/,'nb');}
+function matches(a,b){a=norm(a);b=norm(b);if(a===b)return true;if(a.startsWith('zh')||b.startsWith('zh'))return ['zh','zh-cn','zh-sg','cmn'].includes(a)&&['zh','zh-cn','zh-sg','cmn'].includes(b);return a.split('-')[0]===b.split('-')[0];}
+function pick(lang){var available=voices.filter(v=>matches(v.lang,lang));return available.find(v=>v.voiceURI===preferred)||available.find(v=>norm(v.lang)===norm(lang))||available[0]||null;}
+function clip(text,lang){return clips.get(lang+'|'+text)||null;}
+function stop(){serial++;if(active){if(active.audio){active.audio.pause();active.audio.onended=active.audio.onerror=null;}if(active.node)active.node.classList.remove('speaking');active=null;}if(synth)synth.cancel();}
+function speak(text,lang,done,node){
+ stop();var ticket=serial,v=pick(lang),recording=clip(text,lang);active={node:node};if(node)node.classList.add('speaking');
+ function finish(ok,message){if(ticket!==serial)return;if(node)node.classList.remove('speaking');active=null;st.textContent=message;if(done)done(ok);}
+ function preview(){if(ticket!==serial)return;if(!recording){finish(false,'No matching voice or fixed preview for '+lang+'. No substitute language was used.');return;}
+  var audio=new Audio('../assets/plur-voices/'+recording.file);active={node:node,audio:audio};st.textContent=recording.note+' · '+lang+' · native review pending';
+  audio.onended=function(){finish(true,'Played '+lang+' synthetic preview · native review pending');};audio.onerror=function(){finish(false,'Audio could not be loaded for '+lang+'. Try again.');};
+  audio.play().catch(function(){finish(false,'Playback was blocked or unavailable. Press the word to retry.');});
+ }
+ if(!v){preview();return;}
+ try{var u=new SpeechSynthesisUtterance(text);u.voice=v;u.lang=lang;u.rate=.82;
+  st.textContent='Browser voice: '+v.name+' · '+v.lang;
+  u.onend=function(){finish(true,'Finished '+lang+' with '+v.name);};u.onerror=function(e){if(e.error==='canceled'||e.error==='interrupted'){finish(false,'Speech stopped.');return;}preview();};synth.speak(u);
+ }catch(e){preview();}
+}
+function index(){
+ voices=synth?synth.getVoices()||[]:[];
+ try{preferred=localStorage.getItem('plur.voiceURI')||'';}catch(e){}
+ sel.replaceChildren();var auto=document.createElement('option');auto.value='';auto.textContent='Match each language automatically';sel.appendChild(auto);
+ voices.forEach(function(v){var o=document.createElement('option');o.value=v.voiceURI;o.textContent=v.name+' — '+v.lang;sel.appendChild(o);});sel.value=voices.some(v=>v.voiceURI===preferred)?preferred:'';sel.disabled=!voices.length;
+ var ready=0;words.forEach(function(w){var v=pick(w.dataset.lang),c=clip(w.dataset.say,w.dataset.lang),ok=!!(v||c);w.classList.toggle('novoice',!ok);var mute=w.querySelector&&w.querySelector('.mute');if(mute){mute.hidden=ok;mute.setAttribute('aria-hidden',String(ok));}w.dataset.voiceSource=v?'browser':c?'synthetic':'unavailable';w.title=v?'Browser voice: '+v.name:c?c.note+' · native review pending':'No matching voice or preview';if(ok)ready++;});
+ pair.disabled=!words.some(w=>['שלום','سلام'].includes(w.dataset.say)&&!w.classList.contains('novoice'));
+ document.getElementById('voiceCoverageSummary').textContent=ready+' of '+words.length+' word cards have an audio route. '+manifest.languages.length+' language samples. Synthetic previews await native review.';
+ var body=document.getElementById('voiceCoverageRows');body.replaceChildren();manifest.languages.forEach(function(lang){var sample=manifest.entries.find(e=>e.lang===lang&&e.kind==='sample'),v=pick(lang);var row=document.createElement('tr');
+ var name=document.createElement('th');name.scope='row';name.textContent=lang+' · '+sample.text;var status=document.createElement('td');status.textContent=v?'Browser voice + synthetic sample':sample.note+' · native review pending';var action=document.createElement('td'),button=document.createElement('button');button.type='button';button.textContent='Hear '+lang;button.addEventListener('click',()=>speak(sample.text,lang,null,button));action.appendChild(button);row.append(name,status,action);body.appendChild(row);});
+ document.dispatchEvent(new CustomEvent('plurvoiceschanged'));
+}
+sel.addEventListener('change',function(){preferred=sel.value;try{localStorage.setItem('plur.voiceURI',preferred);}catch(e){}index();});
+words.forEach(w=>w.addEventListener('click',()=>speak(w.dataset.say,w.dataset.lang,null,w)));
+pair.addEventListener('click',function(){var greetings=words.filter(w=>['שלום','سلام'].includes(w.dataset.say)&&!w.classList.contains('novoice'));if(!greetings.length)return;speak(greetings[0].dataset.say,greetings[0].dataset.lang,function(ok){if(ok&&greetings[1])speak(greetings[1].dataset.say,greetings[1].dataset.lang,null,greetings[1]);},greetings[0]);});
+document.getElementById('voiceStop').addEventListener('click',function(){stop();st.textContent='Speech stopped.';});
+window.bvoice={speak:speak,has:function(lang,text){return !!(pick(lang)||(text&&clip(text,lang)));},stop:stop};
+if(synth)synth.addEventListener('voiceschanged',index);
+window.addEventListener('pagehide',stop);index();
+fetch('../assets/plur-voices/manifest.json?v=20261002').then(function(r){if(!r.ok)throw Error('manifest');return r.json();}).then(function(m){manifest=m;clips=new Map(m.entries.map(e=>[e.lang+'|'+e.text,e]));index();}).catch(function(){st.textContent='Synthetic audio catalog unavailable; matching browser voices remain usable.';});
 })();
+
 </script>
 <script>
 /* ─────────────────────────────────────────────────────────────
@@ -1183,7 +1246,7 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
       return {key:k,n:ws.length,tongues:new Set(ws.map(function(w){return w.lang.split('-')[0];})).size,voiced:ws.filter(function(w){return w.voice;}).length,words:ws};});
     D.total=D.fields.reduce(function(a,f){return a+f.n;},0); D.tongues=all.size;
     D.voiced=D.fields.reduce(function(a,f){return a+f.voiced;},0);
-    D.engine=!!window.speechSynthesis; D.voices=D.engine?(speechSynthesis.getVoices()||[]).length:0;
+    D.engine=!!window.bvoice; D.voices=window.speechSynthesis?(speechSynthesis.getVoices()||[]).length:0;
     D.pair=!!($('vsalam')&&!$('vsalam').disabled);
     D.recognition=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
     var th=$('thread'); D.tutor=th&&th.querySelector('.msg.hive:not(:has(.thinking))')?'answered':th&&th.querySelector('.msg.sys')?'unavailable':'not verified';
@@ -1195,7 +1258,7 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
     $('etBeeRows').innerHTML=D.fields.map(function(f){
       return '<button type="button" class="et-b-row" data-go="f-'+f.key+'"><span>'+esc(fieldName(f.key))+'</span><small>'+esc(f.n+' '+T('et.plur.b.ways','ways to say it'))+'<svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></button>';}).join('');
     $('etBeeNow').textContent=!D.engine?T('et.plur.b.noEngine','this browser cannot speak, so the words stay written. every one of them is here to read.')
-      :D.voiced?T('et.plur.b.voiced','your browser can say {n} of these {t} words out loud. press one to hear it.').replace('{n}',D.voiced).replace('{t}',D.total)
+      :D.voiced?T('et.plur.b.audioRoutes','{n} of these {t} words have browser or synthetic audio. Press one to hear it; synthetic previews await native review.').replace('{n}',D.voiced).replace('{t}',D.total)
       :T('et.plur.b.silent','your browser has no voices for these words yet, so they stay written. every one of them is here to read.');
     $('etBeeStart').textContent=T('et.plur.b.start','start with peace');
   }
@@ -1238,7 +1301,7 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
       '<tr><td>total</td><td>'+D.total+'</td><td>'+D.tongues+'</td><td class="'+(D.voiced?'st-ok':'st-no')+'">'+D.voiced+'/'+D.total+'</td></tr>';
     var steps=[
       ['browser · word cards',D.total+' cards embedded in this document · register and tongue kept on this origin','done'],
-      ['voice engine',!D.engine?'no speechSynthesis in this browser · every card labelled silent':D.voices+' installed voices · '+D.voiced+' of '+D.total+' cards can speak · local-only audio not established',D.engine?'done':'guard'],
+      ['voice engine',!D.engine?'audio routing unavailable · inspect the language coverage below':D.voices+' browser voices · '+D.voiced+' of '+D.total+' cards have browser or synthetic audio · native review pending',D.engine?'done':'guard'],
       ['voice in',D.recognition?'SpeechRecognition present · may use a browser vendor service':'no SpeechRecognition · the mic stays off',D.recognition?'done':'guard'],
       ['ai provider',D.tutor==='answered'?'api.anthropic.com/v1/messages answered':D.tutor==='unavailable'?'api.anthropic.com/v1/messages refused · the message was not answered':'api.anthropic.com/v1/messages · no auth header configured · not verified · nothing sent until you press send',D.tutor==='answered'?'done':'now']
     ];
@@ -1246,7 +1309,7 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
     var kv=function(rows){return rows.map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');};
     $('etReceipt').innerHTML=kv([
       ['voices',esc(String(D.voices))],['voiced',esc(D.voiced+' / '+D.total)],
-      ['pair',D.pair?'<span class="yes">a Hebrew or Arabic voice exists</span>':'<span class="no">no Hebrew or Arabic voice · the example stays silent</span>'],
+      ['pair',D.pair?'<span class="yes">a Hebrew or Arabic audio route exists</span>':'<span class="no">no Hebrew or Arabic audio route</span>'],
       ['tutor',D.tutor==='answered'?'<span class="yes">answered</span>':'<span class="no">'+esc(D.tutor)+'</span>'],
       ['sent','<span class="yes">nothing</span> · until you press send'],
       ['unverified','provider retention · relay privacy · end-to-end encryption']]);
@@ -1292,5 +1355,36 @@ body[data-reg] #eternal{border:0;padding-bottom:0}
 })();
 </script>
 <script src="tour.js?v=42"></script>
+
+<script>
+(function(){
+'use strict';
+var root=document.getElementById('plurReview'),select=document.getElementById('reviewItem'),status=document.getElementById('reviewStatus'),base=document.getElementById('reviewBaseline'),candidate=document.getElementById('reviewCandidate'),entries=[],comparisons=new Map();
+function chosen(){return entries.find(e=>e.id===select.value);}
+function urls(e){var c=comparisons.get(e.id);return {baseline:'../assets/plur-voices/'+e.file+'?v='+e['sha256_PUBLIC-CONSTANT'].slice(0,12),candidate:c?'../assets/plur-voices/comparison/'+c.candidate+'?v='+c['candidateSha256_PUBLIC-CONSTANT'].slice(0,12):null};}
+function show(){var e=chosen();if(!e)return;var c=comparisons.get(e.id),u=urls(e);base.pause();candidate.pause();base.src=u.baseline;candidate.removeAttribute('src');candidate.hidden=!c;if(c)candidate.src=u.candidate;
+ document.getElementById('reviewText').textContent=e.lang+' · '+e.text+' · '+e.linguistic;
+ document.getElementById('reviewCandidateNote').textContent=c?'Kokoro v1.0 int8 · '+c.voice+' · '+c.dialect+' · unreviewed. Short-word performance needs special scrutiny.':'No Kokoro comparison for this entry. Review the existing preview; do not infer support from a different language.';
+ document.getElementById('reviewRating').value='';document.getElementById('reviewNotes').value='';
+ Array.from(document.getElementById('reviewRating').options).forEach(o=>{o.disabled=!c&&['candidate','both','neither'].includes(o.value);});
+ document.getElementById('reviewRating').options[1].textContent=c?'Existing preview is better':'Existing preview is acceptable';
+ status.textContent='Ready for your review. Nothing is submitted automatically.';
+}
+select.addEventListener('change',show);base.addEventListener('play',()=>{candidate.pause();if(window.bvoice)window.bvoice.stop();});candidate.addEventListener('play',()=>{base.pause();if(window.bvoice)window.bvoice.stop();});
+async function verified(url,expected){var response=await fetch(url);if(!response.ok)throw Error('Audio unavailable');var bytes=await response.arrayBuffer(),digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).map(b=>b.toString(16).padStart(2,'0')).join('');if(digest!==expected)throw Error('Audio changed since this review queue was built');return digest;}
+document.getElementById('speakerReviewForm').addEventListener('submit',async function(event){event.preventDefault();var e=chosen();if(!e)return;var c=comparisons.get(e.id),u=urls(e),button=event.currentTarget.querySelector('button[type="submit"]');
+ var receipt={schema:1,status:'self-reported review draft; not authenticated or approved',pathway:'bLanguageDOCK / Royal Guard / FATHER-SET-1',communityAttested:'not_sought',royalEndorsement:'not evidenced by this draft',createdAt:new Date().toISOString(),entryId:e.id,lang:e.lang,text:e.text,reviewer:document.getElementById('reviewerName').value.trim(),dialect:document.getElementById('reviewerDialect').value.trim(),assessment:document.getElementById('reviewRating').value,notes:document.getElementById('reviewNotes').value.trim()};
+ if(!receipt.reviewer||!receipt.dialect||!receipt.assessment||!receipt.notes){status.textContent='Complete each review field first.';return;}
+ if(!c&&['candidate','both','neither'].includes(receipt.assessment)){status.textContent='No candidate exists for this entry.';return;}
+ button.disabled=true;select.disabled=true;status.textContent='Checking the exact audio files…';
+ try{receipt.baselineSha256=await verified(u.baseline,e['sha256_PUBLIC-CONSTANT']);if(c)receipt.candidateSha256=await verified(u.candidate,c['candidateSha256_PUBLIC-CONSTANT']);var blob=new Blob([JSON.stringify(receipt,null,2)+'\n'],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='plur-review-'+e.id+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status.textContent='Review draft downloaded. It has not been submitted or marked as approved.';}
+ catch(error){status.textContent='Review not exported: '+error.message+'. Reload the current edition and try again.';}
+ finally{button.disabled=false;select.disabled=false;}
+});
+Promise.all(['../assets/plur-voices/quality.json?v=20261003','../assets/plur-voices/comparison/manifest.json?v=20261003-headroom'].map(url=>fetch(url).then(r=>{if(!r.ok)throw Error('Comparison evidence unavailable');return r.json();}))).then(function(data){entries=data[0].entries;comparisons=new Map(data[1].entries.map(e=>[e.id,e]));entries.forEach(e=>{var o=document.createElement('option');o.value=e.id;o.textContent=e.lang+' · '+e.text+(comparisons.has(e.id)?' · two recordings':'');select.appendChild(o);});show();}).catch(()=>{status.textContent='Review evidence could not be loaded. Existing word previews remain available.';});
+fetch('../assets/plur-voices/comparison/translations.json?v=20261003').then(r=>{if(!r.ok)throw Error('Unavailable');return r.json();}).then(function(report){var host=document.getElementById('translationProbes');report.models.forEach(function(model){var h=document.createElement('h3');h.textContent=model.lang+' · '+model.model;host.appendChild(h);model.entries.forEach(e=>{var p=document.createElement('p');p.textContent=e.source+' → '+e.candidate+' · machine draft';host.appendChild(p);});});}).catch(()=>{document.getElementById('translationProbes').textContent='Translation comparison evidence is unavailable.';});
+window.addEventListener('pagehide',()=>{base.pause();candidate.pause();});
+})();
+</script>
 </body>
 </html>

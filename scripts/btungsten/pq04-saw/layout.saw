@@ -1,0 +1,130 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ04 — EQUIVALENCE: crates/bpq-core/src/layout.rs
+// (what bsigner calls for every bpq1 label, nonce, segment length and
+// binding validator) against ../pq04-cryptol/BpqLayout.cry, by SAW over MIR.
+//
+//   domain_byte        == domainByte          (every domain id, every k)
+//   domain_len         == domainLen           (every domain id)
+//   nonce              == nonceSpec           (every flag, index)
+//   seg_ok             == segOk
+//   segment_count      == segCount            (segOk seg)
+//   body_len_some      body_len == Some(bodyLen) when bodyOk
+//   body_len_none      body_len == None when not bodyOk (incl. any wrap)
+//   segment_plain_len  == plainLen            (n = segCount, i < n: no
+//                      overflow or underflow on that path)
+//   utc_timestamp      == atOk                (every 32-byte text)
+//   claim_kind         == kindOk              (every 32-byte text)
+//
+// Text::new, domain() (a slice of the table domain_byte reads, cut at
+// domain_len) and the bsigner wrappers copy bytes in and out; the crate's
+// unit tests cover them.
+//
+// usage (from this directory): saw layout.saw   with MIR at ../../../target/saw-pq04/
+
+enable_experimental;
+import "../pq04-cryptol/BpqLayout.cry";
+
+m <- mir_load_module "../../../target/saw-pq04/bpq_core.linked-mir.json";
+
+let fn n = str_concat "bpq_core::layout::" n;
+text_adt <- return (mir_find_adt m "bpq_core::layout::Text" []);
+option_u64 <- return (mir_find_adt m "core::option::Option" [mir_u64]);
+
+let proven name = print (str_concat "PQ04-SAW PROVEN " name);
+let bw = w4_unint_bitwuzla [];
+
+let domain_byte_spec = do {
+  d <- mir_fresh_var "d" mir_u8;
+  k <- mir_fresh_var "k" mir_u32;
+  mir_precond {{ d < 14 }};
+  mir_execute_func [mir_term d, mir_term k];
+  mir_return (mir_term {{ domainByte d k }});
+};
+mir_verify m (fn "domain_byte") [] false domain_byte_spec bw;
+proven "domain_byte";
+
+let domain_len_spec = do {
+  d <- mir_fresh_var "d" mir_u8;
+  mir_precond {{ d < 14 }};
+  mir_execute_func [mir_term d];
+  mir_return (mir_term {{ domainLen d }});
+};
+mir_verify m (fn "domain_len") [] false domain_len_spec bw;
+proven "domain_len";
+
+let nonce_spec = do {
+  f <- mir_fresh_var "flag" mir_u32;
+  i <- mir_fresh_var "index" mir_u64;
+  mir_execute_func [mir_term f, mir_term i];
+  mir_return (mir_term {{ nonceSpec f i }});
+};
+mir_verify m (fn "nonce") [] false nonce_spec bw;
+proven "nonce";
+
+let seg_ok_spec = do {
+  seg <- mir_fresh_var "seg" mir_u64;
+  mir_execute_func [mir_term seg];
+  mir_return (mir_term {{ segOk seg }});
+};
+mir_verify m (fn "seg_ok") [] false seg_ok_spec bw;
+proven "seg_ok";
+
+let segment_count_spec = do {
+  len <- mir_fresh_var "len" mir_u64;
+  seg <- mir_fresh_var "seg" mir_u64;
+  mir_precond {{ segOk seg }};
+  mir_execute_func [mir_term len, mir_term seg];
+  mir_return (mir_term {{ segCount len seg }});
+};
+count_ov <- mir_verify m (fn "segment_count") [] false segment_count_spec bw;
+proven "segment_count";
+
+let body_len_spec some = do {
+  len <- mir_fresh_var "len" mir_u64;
+  seg <- mir_fresh_var "seg" mir_u64;
+  avail <- mir_fresh_var "avail" mir_u64;
+  mir_precond {{ segOk seg }};
+  if some then mir_precond {{ bodyOk len seg avail }} else mir_precond {{ ~ bodyOk len seg avail }};
+  mir_execute_func [mir_term len, mir_term seg, mir_term avail];
+  if some
+    then mir_return (mir_enum_value option_u64 "Some" [mir_term {{ bodyLen len seg }}])
+    else mir_return (mir_enum_value option_u64 "None" []);
+};
+mir_verify m (fn "body_len") [count_ov] false (body_len_spec true) bw;
+proven "body_len_some";
+mir_verify m (fn "body_len") [count_ov] false (body_len_spec false) bw;
+proven "body_len_none";
+
+let segment_plain_len_spec = do {
+  i <- mir_fresh_var "i" mir_u64;
+  len <- mir_fresh_var "len" mir_u64;
+  seg <- mir_fresh_var "seg" mir_u64;
+  mir_precond {{ segOk seg /\ i < segCount len seg }};
+  mir_execute_func [mir_term i, mir_term {{ segCount len seg }}, mir_term len, mir_term seg];
+  mir_return (mir_term {{ plainLen i (segCount len seg) len seg }});
+};
+mir_verify m (fn "segment_plain_len") [] false segment_plain_len_spec bw;
+proven "segment_plain_len";
+
+let text_ref = do {
+  len <- mir_fresh_var "t_len" mir_u32;
+  bs <- mir_fresh_var "t_bytes" (mir_array 32 mir_u8);
+  r <- mir_alloc (mir_adt text_adt);
+  mir_points_to r (mir_struct_value text_adt [mir_term len, mir_term bs]);
+  return (r, {{ { len = len, bytes = bs } : Text }});
+};
+
+let utc_timestamp_spec = do {
+  (r, t) <- text_ref;
+  mir_execute_func [r];
+  mir_return (mir_term {{ atOk t }});
+};
+mir_verify m (fn "utc_timestamp") [] false utc_timestamp_spec bw;
+proven "utc_timestamp";
+
+let claim_kind_spec = do {
+  (r, t) <- text_ref;
+  mir_execute_func [r];
+  mir_return (mir_term {{ kindOk t }});
+};
+mir_verify m (fn "claim_kind") [] false claim_kind_spec bw;
+proven "claim_kind";

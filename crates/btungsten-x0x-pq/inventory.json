@@ -1,0 +1,147 @@
+{
+  "schema": "btungsten.x0x-pq-inventory/1",
+  "x0x": {
+    "version": "0.48.0",
+    "commit": "32bf552808cc907ed47978e2bb7c896d7c815858"
+  },
+  "packages": [
+    {
+      "name": "fips203",
+      "version": "0.4.3",
+      "checksum": "sha256:yL22RU9pLKKitFzVVMaCjGOdf5yWjPg6Z4iZ7ERDooA"
+    },
+    {
+      "name": "fips204",
+      "version": "0.4.6",
+      "checksum": "sha256:yftaNnuYRpM-Jxo8KpkpMHQ_gq5ejLf6p4BxWoD6CxU"
+    },
+    {
+      "name": "saorsa-pqc",
+      "version": "0.5.1",
+      "checksum": "sha256:ou0uQp5Wc3Y2JcpShby_FScPoWkYy15j_JWrq6y7Gkw"
+    },
+    {
+      "name": "sha2",
+      "version": "0.10.9",
+      "checksum": "sha256:p1B9gZdp0Bo2WrcHeUpAhDksgk9Up6anhi-MPQiSsoM"
+    },
+    {
+      "name": "sha3",
+      "version": "0.10.9",
+      "checksum": "sha256:d_1wKDRdQVpANM-Hd81PirGFEnQjO0X4Tj2VVQLZOHQ"
+    },
+    {
+      "name": "rand_core",
+      "version": "0.6.4",
+      "checksum": "sha256:7AvkeV4vaigGm-wLX_PirJuvyZ5qmn3DVHmWxcgWkiw"
+    },
+    {
+      "name": "rand",
+      "version": "0.8.8",
+      "checksum": "sha256:4FjH3gsmr3d4DHaUFNYleDC7JA88OEd9vCwW5fVNbUw"
+    }
+  ],
+  "source_files": [
+    {
+      "path": "Cargo.toml",
+      "bytes": 7712,
+      "sha256": "sha256:hCRMCqCaETBEtSa5vw_kVptJ220HxON7ndTyUK9UUzM"
+    },
+    {
+      "path": "Cargo.lock",
+      "bytes": 144103,
+      "sha256": "sha256:7Kgvw2uUFxH7jKH4IwJVXQ-a5j7P1df8BkT9__a9QgY"
+    },
+    {
+      "path": "src/groups/kem_envelope.rs",
+      "bytes": 17562,
+      "sha256": "sha256:YE1PcUHgtDt9sQJt_kVViwkSuW6Qfdo-Bmu-kQ-A220"
+    },
+    {
+      "path": "src/upgrade/signature.rs",
+      "bytes": 22933,
+      "sha256": "sha256:4w1R5GFBIFydpJhp23lH1KZ-dQPOuEQu71DXyPCeAE4"
+    },
+    {
+      "path": "src/identity.rs",
+      "bytes": 67099,
+      "sha256": "sha256:wqkGPwlR210-SREDXkPFA87pkUho-z4KosgdSXsspZY"
+    },
+    {
+      "path": "src/bin/x0x-keygen.rs",
+      "bytes": 13953,
+      "sha256": "sha256:Ct8QQl6-WL2sJsOjHCjBwKHFWsAwNSJFj_D_Tp71hi0"
+    }
+  ],
+  "coverage_boundary": "ML-KEM-768 / ML-DSA-65 FIPS cores and Saorsa API wrappers; selected x0x composition tests recorded separately; no full-system qualification",
+  "coverage": [
+    {
+      "algorithm": "ML-KEM-768",
+      "implementation": "fips203 0.4.3 / saorsa-pqc 0.5.1",
+      "call_sites": [
+        "src/groups/kem_envelope.rs:AgentKemKeypair::generate",
+        "src/groups/kem_envelope.rs:AgentKemKeypair::decapsulate",
+        "src/groups/kem_envelope.rs:seal_group_secret_to_recipient / seal_bytes_to_recipient",
+        "src/dm.rs"
+      ],
+      "functions": [
+        "keyGen",
+        "encapsulation",
+        "decapsulation",
+        "encapsulationKeyCheck",
+        "decapsulationKeyCheck"
+      ],
+      "evidence": [
+        "official ACVP FIPS203 and FIPS203-tr1",
+        "RustCrypto/libcrux DIFFERENTIAL",
+        "changed-ciphertext implicit rejection",
+        "empty import refusal"
+      ],
+      "assurance": "L1 and two-implementation testing; full L2 Cryptol/L3-L5 NOT RUN"
+    },
+    {
+      "algorithm": "ML-DSA-65",
+      "implementation": "fips204 0.4.6 / Saorsa API and legacy MlDsa65 wrappers",
+      "call_sites": [
+        "src/upgrade/signature.rs:verify_bytes_signature_with_key",
+        "src/bin/x0x-keygen.rs",
+        "src/identity.rs:MachineIdentity::generate (ant-quic wrapper)"
+      ],
+      "functions": [
+        "keyGen",
+        "sigGen",
+        "sigVer"
+      ],
+      "evidence": [
+        "official ACVP FIPS204 and FIPS204-tr1",
+        "RustCrypto/libcrux DIFFERENTIAL",
+        "last message/signature byte, wrong signer and empty import controls"
+      ],
+      "assurance": "L1 and two-implementation testing; full L2 Cryptol/L3-L5 NOT RUN"
+    },
+    {
+      "algorithm": "ChaCha20-Poly1305",
+      "assurance": "NOT RUN in this lane; separate qualification required"
+    },
+    {
+      "algorithm": "BLAKE3",
+      "assurance": "NOT RUN in this lane; separate qualification required"
+    },
+    {
+      "algorithm": "SHA-256",
+      "assurance": "NOT RUN in this lane; separate qualification required"
+    },
+    {
+      "algorithm": "RNG entropy and failure propagation",
+      "assurance": "NOT RUN in this lane; separate qualification required"
+    },
+    {
+      "algorithm": "transport handshake and every application composition",
+      "assurance": "NOT RUN in this lane; separate qualification required"
+    },
+    {
+      "algorithm": "full-system properties",
+      "assurance": "NOT RUN in this lane; separate qualification required"
+    }
+  ]
+}

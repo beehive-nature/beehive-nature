@@ -1,0 +1,17 @@
+    Finished `release` profile [optimized] target(s) in 0.10s
+     Running `target/release/p3count forgery`
+PQ10 FORGERY control (honest claim kind 0 count 20): verified
+PQ10 FORGERY wrong count (21 for 20): refused
+PQ10 FORGERY reversed claim (kind 1, count 20): refused
+PQ10 FORGERY non-binary kind (2): refused
+PQ10 FORGERY wrong root (one fingerprint bit): refused
+PQ10 FORGERY skipped receipt (member 5 zeroed, claimed under the real root): refused
+PQ10 FORGERY nonzero pad (slot 50 carries a kept dead member): refused
+PQ10 FORGERY public value swap (count 19 on a count-20 proof): refused
+PQ10 FORGERY public value swap (kind 1 on a kind-0 proof): refused
+PQ10 FORGERY members lie (verified against the 39-member key): refused
+PQ10 FORGERY one-bit flips at 256 evenly spaced positions of the 339341-byte proof (256 refused): refused
+PQ10 FORGERY truncated by one byte: refused
+PQ10 FORGERY T-VACUOUS no commit-phase openings (1 arrays emptied): refused
+PQ10 FORGERY T-VACUOUS zero queries opened (13 arrays emptied): refused
+PQ10 FORGERY instance label (the proof checked under members = 41's transcript): refused

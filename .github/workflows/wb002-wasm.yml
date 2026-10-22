@@ -1,0 +1,63 @@
+name: WB002 WASM corpus
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# One expensive qualification per PR candidate; main verifies the actual merge.
+# Branch pushes still receive tests.yml identity and secret-scan.yml audits.
+
+# A newer head on the same PR cancels the superseded candidate run.
+# Main and manual dispatches each get a group of their own, so they are never
+# cancelled or folded into another run; the exact head always gets a full run.
+# tests.yml and secret-scan.yml are deliberately left out: the §7 identity
+# check reads only the commits a push added, so a cancelled push run there
+# would let those commits skip detection.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && github.run_id || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  wasm-corpus:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Install pinned Spring 1.2.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 -o /tmp/spring.deb https://github.com/AntelopeIO/spring/releases/download/v1.2.2/antelope-spring_1.2.2_amd64.deb
+          echo '531ed1c965f94dd7732f5e900401f132170769c45b7589819a0ba1336627687a  /tmp/spring.deb' | sha256sum --check # PUBLIC-CONSTANT: upstream release asset digest
+          sudo apt-get update
+          sudo apt-get install -y /tmp/spring.deb
+          nodeos --version
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Build the Rust corpus harness (the model is crates/btungsten-wb002)
+        shell: bash
+        run: cargo build --locked --release -p btungsten-wb002 --bin wb002-wasm-equiv
+      - name: Compare the vendored WASM with the Rust model on three fresh chains
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p receipts
+          for run in 1 2 3; do
+            WB002_RECEIPT="$PWD/receipts/wb002-$run.json" target/release/wb002-wasm-equiv
+          done
+      - name: Preserve fresh corpus receipts
+        if: always()  # preservation: runs on cancel and on a timeout, so the evidence survives
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wb002-wasm-${{ github.run_id }}-${{ github.run_attempt }}
+          path: receipts/*.json
+          if-no-files-found: error
+          retention-days: 14

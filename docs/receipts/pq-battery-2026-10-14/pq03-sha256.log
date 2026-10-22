@@ -1,0 +1,35 @@
+== SAW PQ03 SHA-256: toolchain ==
+1.6 (68eed5f release-1.6)
+Cryptol 3.6.0
+== SAW PQ03 SHA-256: PIN sha2 0.10.9 to Cargo.lock ==
+SAW-PIN PQ03: PASS (sha2 0.10.9, sha256 matches Cargo.lock)
+== SAW PQ03 SHA-256: BUILD the harness to MIR JSON ==
+Linking 3 mir files into /workspace/wt-pq-battery/target/saw-pq03-sha256/pq03_sha256.linked-mir.json
+SAW-BUILD PQ03: PASS (2825131 bytes of linked MIR)
+== SPEC-CHECK PQ03: Sha256.cry closed terms ==
+SPEC-CHECK primesArePrimesInOrder: PASS
+SPEC-CHECK constantsMatchThePublishedOnes: PASS
+SPEC-CHECK sha256EmptyDigest: PASS
+SPEC-CHECK sha256AbcDigest: PASS
+SPEC-CHECK sha256TwoBlockDigest: PASS
+== SAW PQ03 SHA-256: sha256.saw ==
+PQ03-SAW PROVEN sha256 K32 = K
+PQ03-SAW PROVEN sha256 H256_256 = H0
+PQ03-SAW PROVEN sha256_digest_round_x2
+PQ03-SAW PROVEN schedule
+PQ03-SAW PROVEN sha256_digest_block_u32
+PQ03-SAW PROVEN compress1
+SAW sha256.saw: 6 obligations PROVEN in 4s
+== SAW PQ03 SHA-256: TEETH sha256-teeth.saw — must FAIL with a counterexample ==
+PQ03-SAW-TEETH obligation sigma1Rotation
+Subgoal failed: pq03_sha256/460da69c::soft[0]::sha256_digest_round_x2[0] Literal equality postcondition
+----------Counterexample----------
+SAW-TEETH sha256-teeth.saw: PASS (counterexample found, as required)
+== SAW PQ03 SHA-256: TEETH sha256-teeth-k.saw — must FAIL with a counterexample ==
+PQ03-SAW-TEETH obligation roundConstant
+Subgoal failed: pq03_sha256/460da69c::k32[0] Literal equality postcondition
+----------Counterexample----------
+<<All settings of the symbolic variables constitute a counterexample>>
+SAW-TEETH sha256-teeth-k.saw: PASS (counterexample found, as required)
+== SAW PQ03 SHA-256: ladder state ==
+PIN: PASS | BUILD: PASS | SPEC-CHECK: PASS (5) | EQUIVALENCE: PROVEN (6: tables, two-round function, schedule, 64-round block composed, one-block compress; the soft path) | TEETH: PASS (2)

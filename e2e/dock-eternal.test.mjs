@@ -49,10 +49,13 @@ const shown = p => p.evaluate(() => ['.et-b', '.et-r', '.et-c'].filter(s => getC
 // dock-claims' own parse of the page source: the hero numbers it re-derives from source
 const heroesInSource = async () => [...(await readFile(SRC, 'utf8')).matchAll(/<div class="n [a-z]+">(\d+)<\/div><div class="l">([^<]*)</g)].map(m => +m[1]);
 
+// the founder's chosen UI (2026-10-05): new bee is paper with bold system sans titles and a forest
+// green action; raver is night purple (the sovereign tint) with plain bold sans titles and its
+// magenta pill; cypherpunk is unchanged. Each value is asserted exactly.
 test('one front per register, each in its own dress', async () => {
   const want = {
-    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, act: '#etDkGo', action: 'rgb(168, 35, 140)' },
-    raver: { front: '.et-r', bg: 'rgb(6, 17, 12)', title: /Unbounded/, act: '#etDkPill', action: 'rgb(214, 85, 187)' },
+    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /^ui-sans-serif, system-ui/, act: '#etDkGo', action: 'rgb(38, 77, 54)' },
+    raver: { front: '.et-r', bg: 'rgb(18, 14, 30)', title: /^ui-sans-serif, system-ui/, act: '#etDkPill', action: 'rgb(214, 85, 187)' },
     cypherpunk: { front: '.et-c', bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, act: '#etDkCopy', action: 'rgb(69, 194, 220)' },
   };
   for (const [reg, w] of Object.entries(want)) {
@@ -141,10 +144,16 @@ test('cypherpunk: copy says "copied" only when the browser copied, and the clipb
   const refused = await p.textContent('#etDkCopied');
   assert.doesNotMatch(refused, /^copied/, 'no permission, no "copied"'); assert.match(refused, /refused|no clipboard/);
   const g = await open('cypherpunk', { clip: true });
+  // the Windows clipboard is the real system one and outlives the run: seed it, so a copy that never
+  // happened cannot pass on a previous run's text
+  await g.p.evaluate(() => navigator.clipboard.writeText('not copied by the page'));
   await g.p.click('#etDkCopy'); await g.p.waitForTimeout(250);
   assert.match(await g.p.textContent('#etDkCopied'), /^copied · 3 lines/);
   const clip = await g.p.evaluate(() => navigator.clipboard.readText());
-  assert.equal(clip, (await g.p.evaluate(() => window.__eternal.data.proof.commands)).join('\n'));
+  // the page writes '\n'; Chromium on Windows stores every line break on the system clipboard as CRLF
+  // (writeText 'a\nb', 'a\r\nb' and 'a\rb' all read back 'a\r\nb'), so the exact bytes differ per OS
+  const eol = process.platform === 'win32' ? '\r\n' : '\n';
+  assert.equal(clip, (await g.p.evaluate(() => window.__eternal.data.proof.commands)).join(eol));
   assert.equal(await g.p.$eval('#eternal .et-c-row a[target="_blank"]', a => a.rel), 'noopener noreferrer');
   await g.ctx.close();
 });

@@ -1,0 +1,29 @@
+search_time_utc: 2026-10-09T10:17:57Z
+tool: gh version 2.95.0 (2026-06-17)
+repo: GaloisInc/swanky
+repo metadata: {"default_branch":"dev","has_issues":true,"open_issues_count":11,"pushed_at":"2026-10-06T20:01:05Z"}
+private vulnerability reporting: {"enabled":false}
+--- gh search issues --repo GaloisInc/swanky "popsicle" (issues and PRs, open and closed)
+[{"number":8,"state":"closed","title":"Fix Popsicle's Cuckoo Hashing"},{"number":7,"state":"merged","title":"Add PSTY19's PSI with Associated Payloads Extensions"},{"number":1,"state":"merged","title":"Cfg flag improvements"}]
+--- gh search issues --repo GaloisInc/swanky "kmprt" (issues and PRs, open and closed)
+[]
+--- gh search issues --repo GaloisInc/swanky "npoints" (issues and PRs, open and closed)
+[]
+--- gh search issues --repo GaloisInc/swanky "duplicate" (issues and PRs, open and closed)
+[{"number":46,"state":"open","title":"Added prime VOLE"},{"number":13,"state":"closed","title":"Fix duplicate gates with number n1+n2"}]
+--- gh search issues --repo GaloisInc/swanky "circuit_psi" (issues and PRs, open and closed)
+[]
+--- gh search issues --repo GaloisInc/swanky "PsiGarbler" (issues and PRs, open and closed)
+[]
+--- gh search issues --repo GaloisInc/swanky "cuckoo" (issues and PRs, open and closed)
+[{"number":8,"state":"closed","title":"Fix Popsicle's Cuckoo Hashing"},{"number":7,"state":"merged","title":"Add PSTY19's PSI with Associated Payloads Extensions"}]
+--- gh search issues --repo GaloisInc/swanky "OpprfPsiGarbler" (issues and PRs, open and closed)
+[]
+--- gh search issues --repo GaloisInc/swanky "compress_and_hash_inputs" (issues and PRs, open and closed)
+[]
+--- gh search issues --repo GaloisInc/swanky "same seed" (issues and PRs, open and closed)
+[]
+--- gh issue list -R GaloisInc/swanky --state all --limit 200 (count)
+28
+--- gh pr list -R GaloisInc/swanky --state all --limit 200 (count)
+18

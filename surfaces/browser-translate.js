@@ -44,8 +44,8 @@
     while(stack.length){
       var el=stack.pop();
       for(var i=0;i<el.children.length;i++) stack.push(el.children[i]);
-      if(el===scope||skip[el.tagName]) continue;
-      if(el.closest('#brtrctl,[translate="no"],[data-language-host]')) continue;
+      if(el===scope||skip[el.tagName]||el.children.length) continue;
+      if(el.closest('#brtrctl,[translate="no"],[data-language-host],[data-i18n],[data-key],[data-say]')) continue;
       var text=(el.textContent||'').trim();
       if(!/\p{L}/u.test(text)) continue;
       out.push(el);
@@ -75,7 +75,7 @@
     state.busy=true; state.btn.setAttribute('aria-busy','true'); state.btn.title=label('work');
     try{
       if(!state.translator)
-        state.translator=await root.Translation.create({sourceLanguage:state.pair.source,targetLanguage:state.pair.target});
+        state.translator=await root.Translator.create({sourceLanguage:state.pair.source,targetLanguage:state.pair.target});
       await translateAll();
       state.on=true; state.btn.setAttribute('aria-pressed','true'); state.btn.title=label('back');
     }catch(e){
@@ -101,14 +101,14 @@
     return b;
   }
   async function mount(){
-    if(!('Translation' in root)||typeof root.Translation.create!=='function') return;
+    if(!('Translator' in root)||typeof root.Translator.create!=='function') return;
     if(state.wrap) return;
     var host=document.querySelector('[data-language-host]')||document.getElementById('blangctl');
     if(!host) return;
     state.pair=pair();
     if(!state.pair) return; /* the page already speaks the reader's tongue */
     try{
-      var avail=await root.Translation.availability({sourceLanguage:state.pair.source,targetLanguage:state.pair.target});
+      var avail=await root.Translator.availability({sourceLanguage:state.pair.source,targetLanguage:state.pair.target});
       if(!avail||avail==='unavailable') return; /* this browser cannot make the pair — no button */
     }catch(e){ return; }
     var wrap=document.createElement('span'); wrap.id='brtrctl';
@@ -126,7 +126,7 @@
     unmount();
     mount();
   });
-  root.BNRBrowserTranslate={version:'1',state:state,mount:mount};
+  root.BNRBrowserTranslate={version:'2',state:state,mount:mount};
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mount);
   else mount();
 })(typeof window==='object'?window:globalThis);

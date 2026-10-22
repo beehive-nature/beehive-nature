@@ -1,0 +1,46 @@
+# The genealogy publication seal (2026-10-19): the corpus under
+# assets/profile-archive/lineage/ (roster, sources layer, 11,041 staged
+# person pages) is bound by crates/genealogy-publication into two committed,
+# deterministic artifacts — publication-state.json (every page and corpus
+# input sha256, census) and publication-index.json (the machine index,
+# digest-bound to the state). This workflow keeps the seal honest:
+#   1. the crate's own tests — including the sabotage negative controls
+#      (tampered page / corpus file / stray / missing / stale state all go
+#      red, named);
+#   2. `gp check` against the checked-out tree — any drift between the
+#      committed pages, the committed corpus, and the committed seal goes
+#      red with named findings.
+# An authorized corpus change lands by running `gp bind` in the same commit
+# that changes the corpus; anything else fails here. Rust-only, no network,
+# no secrets: the crate is artifacts-only by doctrine (see its lib.rs).
+name: genealogy-publication
+
+on:
+  push:
+    paths:
+      - 'crates/genealogy-publication/**'
+      - 'assets/profile-archive/lineage/**'
+      - '.github/workflows/genealogy-publication.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+  pull_request:
+    paths:
+      - 'crates/genealogy-publication/**'
+      - 'assets/profile-archive/lineage/**'
+      - '.github/workflows/genealogy-publication.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+
+jobs:
+  seal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: crate tests (sabotage negative controls included)
+        run: cargo test -p genealogy-publication --locked
+      - name: seal check against the committed corpus
+        run: cargo run --release -p genealogy-publication --locked -- check --root .

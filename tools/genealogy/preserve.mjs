@@ -1,5 +1,6 @@
 // ── preservation: versioned whole-experience snapshots (adversarial repair) ─
 //   node preserve.mjs prepare  [outdir] [destination] → clean package from DECLARED contents
+//   node preserve.mjs prepare-local <fresh-outdir> [local-input.json] → retained working evidence
 //   node preserve.mjs approve <dir> <by> <destination> → verifies bytes FIRST, writes approval.json
 //   node preserve.mjs restore <dir> <target-root>      → validates everything, then restores (fresh dir)
 //   node preserve.mjs verify <dir> [manifest]          → local-verification + approval binding
@@ -20,8 +21,10 @@
 //  5. Crest-missing refusal stays (regression control).
 // Local verification only; retrieval-verified requires an adapter receipt + fresh fetch.
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, rmSync, renameSync, rmdirSync } from "node:fs";
 import { join, dirname, isAbsolute, resolve, sep } from "node:path";
+import { checkRuntimeDependencies } from "./preservation-runtime.mjs";
+import { buildLocalEvidence, readLocalEvidenceInput, heldFileReceipt, copyHeldArtifact } from "./local-evidence-build.mjs";
 
 // test override: adversarial suites run this tool against synthetic fixture
 // estates via BNR_PRESERVE_ROOT (never the real archive)
@@ -44,23 +47,133 @@ const MANDATORY = [
   LINEAGE + "/reconstructions.json",
   LINEAGE + "/identity-registry.json",
   LINEAGE + "/staging-inventory.json",
+  // EVIDENCE LAYER (founder order 2026-10-02: the eternalization edition
+  // contains the merged relationship audit, the 13,249-record source
+  // harvest public layer, and the public image evidence — the approved
+  // treatment of private image bytes is that they NEVER enter the bundle.
+  // records.json is projected during prepare: citation/pointer metadata stays,
+  // while raw evidence[].value transcription strings never enter the bundle.)
+  LINEAGE + "/sources/manifest.json",
+  LINEAGE + "/sources/index.json",
+  LINEAGE + "/sources/records.json",
+  LINEAGE + "/sources/search-evidence.json",
+  LINEAGE + "/sources/images-summary.json",
+  LINEAGE + "/sources/relationship-audit.json",
+  // The deployed estate carries an exact artifact/quote receipt at this path.
+  // prepare projects it to a package-safe capability record so the archived
+  // blood surface remains truthful without creating a self-referential quote.
+  LINEAGE + "/zblood-storage-economics.json",
 ];
 
 const sha256 = (buf) => createHash("sha256").update(buf).digest("hex");
-const fail = (msg) => { console.error("FAILED: " + msg); process.exit(1); };
+const fail = (msg) => {
+  if (process.argv[2] === "prepare-local") throw new Error("FAILED: " + msg);
+  console.error("FAILED: " + msg); process.exit(1);
+};
+
+// The repository source layer retains research data needed for correlation,
+// including transcription values. The eternalized PUBLIC edition follows the
+// stricter source-harvest boundary: citations, ARKs, event metadata and the
+// affected fact classes may leave; raw transcription values may not. Keep the
+// package path stable while deterministically projecting its bytes.
+export function publicSourceRecords(buf, expected = {}) {
+  const source = JSON.parse(Buffer.isBuffer(buf) ? buf.toString("utf8") : String(buf));
+  if (source?.schema !== "skaists.sources-records/1" || !source.records || Array.isArray(source.records) || typeof source.records !== "object")
+    throw new Error("source records must be a skaists.sources-records/1 object with records");
+  const sourceIds = Object.keys(source.records);
+  if (sourceIds.length === 0) throw new Error("source records must not be empty");
+  if (expected.count !== undefined && sourceIds.length !== expected.count)
+    throw new Error("source records count mismatch: records=" + sourceIds.length + " declared=" + expected.count);
+  if (expected.ids) {
+    const sourceSet = new Set(sourceIds);
+    const missing = [...expected.ids].filter((id) => !sourceSet.has(id));
+    const extra = sourceIds.filter((id) => !expected.ids.has(id));
+    if (missing.length || extra.length)
+      throw new Error("source record id reconciliation failed: missing=" + missing.length + " extra=" + extra.length);
+  }
+  const records = {};
+  for (const [id, record] of Object.entries(source.records || {})) {
+    records[id] = {
+      id: record.id,
+      title: record.title,
+      citation: record.citation,
+      redactedLiving: !!record.redactedLiving,
+      urls: Array.isArray(record.urls) ? record.urls : [],
+      event: record.event ?? null,
+      evidence: Array.isArray(record.evidence)
+        ? record.evidence.map((fact) => ({ factType: fact?.factType ?? null, fieldType: fact?.fieldType ?? null }))
+        : [],
+      retrieved: record.retrieved,
+      provider: record.provider,
+    };
+  }
+  return Buffer.from(JSON.stringify({
+    schema: "skaists.sources-records-public/1",
+    generated: source.generated,
+    projection: "public citation and fact-class metadata; raw evidence values excluded",
+    records,
+  }, null, 1) + "\n");
+}
+
+export function packageSafeStorageEconomics(buf) {
+  const source = JSON.parse(Buffer.isBuffer(buf) ? buf.toString("utf8") : String(buf));
+  const ant = source?.quotes?.autonomi;
+  const ceilings = ant?.ceilings;
+  if (source?.schema !== "zblood.storage-economics/1")
+    throw new Error("storage economics must use zblood.storage-economics/1");
+  if (!ceilings || typeof ceilings.storageMaxANT !== "number" || !Number.isFinite(ceilings.storageMaxANT) || ceilings.storageMaxANT < 0 ||
+      typeof ceilings.gasMaxETH !== "number" || !Number.isFinite(ceilings.gasMaxETH) || ceilings.gasMaxETH < 0)
+    throw new Error("storage economics must declare separate ANT and ETH ceilings");
+  return Buffer.from(JSON.stringify({
+    schema: "zblood.storage-economics-package/1",
+    law: "package-safe status only; a fresh exact-artifact quote is required before any approval or payment",
+    artifact: { name: "zBlood interactive public preservation edition v3" },
+    quotes: {
+      autonomi: {
+        state: "quote intentionally omitted from the archive because embedding its own price would change the quoted artifact",
+        route: ant.route,
+        queriedAt: null,
+        raw: null,
+        computed: null,
+        ceilings: {
+          storageMaxANT: ceilings.storageMaxANT,
+          gasMaxETH: ceilings.gasMaxETH,
+          enforceableByClient: false,
+        },
+        qualifications: [
+          "fresh quote required for the exact restored artifact",
+          "payment disabled because the client cannot enforce both ceilings atomically",
+        ],
+      },
+    },
+    states: {
+      prepared: true,
+      approved: false,
+      quoted: false,
+      purchased: false,
+      uploaded: false,
+      retrieved: false,
+      hashVerifiedFromStorage: false,
+    },
+  }, null, 1) + "\n");
+}
 
 // DECLARED contents: the archive says what it contains — persons from the
 // corpus, evidence from the pack index + overlay references, fixtures' pages.
-function declaredContents() {
+function declaredContents({ local = false } = {}) {
+  const runtimePath = "tools/genealogy/preservation-runtime.json";
+  const runtime = JSON.parse(readFileSync(join(REPO, runtimePath), "utf8"));
   const corpus = JSON.parse(readFileSync(join(REPO, LINEAGE, "remington-bloodline.json"), "utf8"));
   const overlay = JSON.parse(readFileSync(join(REPO, LINEAGE, "attested-overlays.json"), "utf8"));
   const packs = new Set(Object.values(corpus.meta?.packs || {}));
   for (const p of Object.values(overlay.persons || {})) if (p?.evidencePack) packs.add(p.evidencePack);
   const persons = Object.keys(corpus.persons || {}).map((iid) => LINEAGE + "/persons/" + iid + ".json");
-  const personPages = readdirSync(join(REPO, LINEAGE, "persons"))
-    .filter((f) => f.endsWith(".html")).map((f) => LINEAGE + "/persons/" + f);
+  // Pages have the same publication boundary as their declared person objects.
+  // Directory leftovers must neither expand the edition nor hide missing pages.
+  const personPages = persons.map((file) => file.replace(/\.json$/, ".html"));
   return {
-    files: [...new Set([...MANDATORY, ...persons, ...[...packs].map((p) => LINEAGE + "/" + p), ...personPages])],
+    files: [...new Set([...MANDATORY.filter(f => !local || f !== LINEAGE + "/zblood-storage-economics.json"), runtimePath, ...runtime.files, ...persons, ...[...packs].map((p) => LINEAGE + "/" + p), ...personPages])],
+    runtime,
     expectedPersons: persons.length,
     expectedPacks: packs.size,
   };
@@ -69,14 +182,31 @@ function declaredContents() {
 function verifyPackage(dir, manifestPath) {
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   const problems = [];
-  let ok = 0;
+  let ok = 0, actualTotal = 0, declaredTotal = 0;
   for (const [f, meta] of Object.entries(manifest.files)) {
     const p = join(dir, f);
+    const declaredSizeValid = Number.isSafeInteger(meta.bytes) && meta.bytes >= 0;
+    if (declaredSizeValid) declaredTotal += meta.bytes;
+    else problems.push([f, "invalid declared byte size"]);
     if (!existsSync(p)) { problems.push([f, "missing"]); continue; }
-    if (sha256(readFileSync(p)) === meta.sha256) ok++; else problems.push([f, "hash mismatch"]);
+    const receipt = heldFileReceipt(p);
+    actualTotal += receipt.bytes;
+    const sizeMatches = declaredSizeValid && receipt.bytes === meta.bytes;
+    const hashMatches = receipt.sha256 === meta.sha256;
+    if (!sizeMatches) problems.push([f, `byte size mismatch (declared ${meta.bytes}, actual ${receipt.bytes})`]);
+    if (!hashMatches) problems.push([f, "hash mismatch"]);
+    if (sizeMatches && hashMatches) ok++;
+  }
+  if (!Number.isSafeInteger(manifest.totalBytes) || manifest.totalBytes < 0)
+    problems.push(["(manifest)", "invalid totalBytes"]);
+  else {
+    if (manifest.totalBytes !== declaredTotal)
+      problems.push(["(manifest)", `totalBytes does not equal declared file sizes (${manifest.totalBytes} != ${declaredTotal})`]);
+    if (manifest.totalBytes !== actualTotal)
+      problems.push(["(manifest)", `totalBytes does not equal package bytes (${manifest.totalBytes} != ${actualTotal})`]);
   }
   const digest = sha256(Buffer.from(JSON.stringify(manifest.files)));
-  return { manifest, problems, ok, digest };
+  return { manifest, problems, ok, digest, actualTotal, declaredTotal };
 }
 
 // path safety: reject absolute, traversal, and anything resolving outside root
@@ -90,40 +220,99 @@ function safeJoin(root, rel) {
 
 const cmd = process.argv[2];
 
-if (cmd === "prepare") {
-  const out = process.argv[3] || "preservation-snapshot";
-  const destination = process.argv[4] || "(destination not yet chosen)";
-  const declared = declaredContents();
+if (cmd === "prepare" || cmd === "prepare-local") {
+  const local = cmd === "prepare-local";
+  const finalOut = process.argv[3] || "preservation-snapshot";
+  const out = local ? finalOut + ".preparing-" + process.pid : finalOut;
+  const destination = local ? "local working copy" : process.argv[4] || "(destination not yet chosen)";
+  if (local && (!process.argv[3] || existsSync(finalOut) || existsSync(out))) fail("prepare-local requires a fresh output directory; existing files are never replaced");
+  try {
+  const localInput = local ? readLocalEvidenceInput(process.argv[4]) : null;
+  const declared = declaredContents({ local });
   const missing = declared.files.filter((f) => !existsSync(join(REPO, f)));
   if (missing.length) {
     console.error("PREPARE FAILED — declared archive contents missing (no silent omission):");
     missing.forEach((f) => console.error("  - " + f));
     process.exit(1);
   }
+  checkRuntimeDependencies(REPO, declared.files, declared.runtime);
   // CLEAN package dir: stale files from earlier publications cannot slip in
   if (existsSync(out)) rmSync(out, { recursive: true, force: true });
-  mkdirSync(out, { recursive: true });
+  mkdirSync(out, { recursive: true, ...(local ? { mode: 0o700 } : {}) });
+  const sourceManifest = JSON.parse(readFileSync(join(REPO, LINEAGE, "sources/manifest.json"), "utf8"));
+  const sourceIndex = JSON.parse(readFileSync(join(REPO, LINEAGE, "sources/index.json"), "utf8"));
+  if (sourceManifest?.schema !== "skaists.sources-manifest/1" || !Number.isSafeInteger(sourceManifest.uniqueRecords) || sourceManifest.uniqueRecords < 1)
+    fail("source manifest must declare a positive integer uniqueRecords count");
+  if (sourceIndex?.schema !== "skaists.sources/1" || !sourceIndex.persons || Array.isArray(sourceIndex.persons))
+    fail("source index must be a skaists.sources/1 persons object");
+  const indexedRecordIds = new Set();
+  for (const person of Object.values(sourceIndex.persons)) {
+    if (!Array.isArray(person?.sources)) fail("source index person is missing sources[]");
+    for (const source of person.sources) {
+      if (!source?.id) fail("source index contains a source without an id");
+      indexedRecordIds.add(source.id);
+    }
+  }
+  if (indexedRecordIds.size !== sourceManifest.uniqueRecords)
+    fail("source index/manifest reconciliation failed: index=" + indexedRecordIds.size + " manifest=" + sourceManifest.uniqueRecords);
   const manifest = {
-    schema: "skaists.preservation/1",
+    schema: local ? "skaists.preservation-local/1" : "skaists.preservation/1",
     status: "prepared",
     preparedAt: new Date().toISOString(),
     destination,
     declared: { persons: declared.expectedPersons, evidencePacks: declared.expectedPacks },
     upstream: "FamilySearch Family Tree (attribution + retrieval date in corpus meta)",
-    privacy: "public artifacts only — living-family/private material stays on estate-local disk",
+    privacy: local ? "local working evidence with retained values and explicitly selected page bytes; not a public/ANT edition"
+      : "public artifacts only — living-family/private material stays on estate-local disk",
     files: {},
   };
   for (const f of declared.files) {
-    const buf = readFileSync(join(REPO, f));
+    const sourceBuf = readFileSync(join(REPO, f));
+    const buf = f === LINEAGE + "/sources/records.json" && !local
+      ? publicSourceRecords(sourceBuf, { count: sourceManifest.uniqueRecords, ids: indexedRecordIds })
+      : f === LINEAGE + "/zblood-storage-economics.json"
+        ? packageSafeStorageEconomics(sourceBuf)
+        : f === "surfaces/blood.html"
+          ? Buffer.from(sourceBuf.toString("utf8").replace(/<html\b([^>]*)>/i, (_, attrs) => {
+            const clean = attrs.replace(/\sdata-local-evidence(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?/gi, "");
+            return '<html' + clean + (local ? ' data-local-evidence="../assets/profile-archive/lineage/local-evidence/"' : '') + '>';
+          }))
+          : sourceBuf;
     mkdirSync(dirname(join(out, f)), { recursive: true });
     writeFileSync(join(out, f), buf);
     manifest.files[f] = { sha256: sha256(buf), bytes: buf.length };
   }
+  if (local) {
+    // A usable local archive needs no quote, ceiling, signer, or storage
+    // service. Keep the existing UI's status endpoint without inventing any.
+    const statusPath = LINEAGE + "/zblood-storage-economics.json";
+    const status = Buffer.from(JSON.stringify({ schema: "zblood.storage-economics-package/1",
+      artifact: { name: "Skaists local working archive" }, quotes: {},
+      states: { prepared: true, approved: false, quoted: false, purchased: false,
+        uploaded: false, retrieved: false, hashVerifiedFromStorage: false },
+      scope: "local custody and reading are complete independently of optional remote replication" }) + "\n");
+    writeFileSync(join(out, statusPath), status, { mode: 0o600 });
+    manifest.files[statusPath] = { sha256: sha256(status), bytes: status.length };
+    const corpus = JSON.parse(readFileSync(join(REPO, LINEAGE, "remington-bloodline.json"), "utf8"));
+    const records = JSON.parse(readFileSync(join(REPO, LINEAGE, "sources/records.json"), "utf8"));
+    const evidence = buildLocalEvidence({ index: sourceIndex, records, corpus, out: join(out, LINEAGE, "local-evidence"), ...localInput });
+    for (const [path, meta] of Object.entries(evidence.files)) manifest.files[LINEAGE + "/local-evidence/" + path] = meta;
+    manifest.localEvidence = { path: LINEAGE + "/local-evidence/manifest.json", ...evidence.manifest.counts,
+      crosswalk: evidence.manifest.crosswalk };
+  }
   manifest.totalBytes = Object.values(manifest.files).reduce((a, b) => a + b.bytes, 0);
   manifest.manifestSha256 = sha256(Buffer.from(JSON.stringify(manifest.files)));
   writeFileSync(join(out, "manifest.json"), JSON.stringify(manifest, null, 2));
-  console.log(JSON.stringify({ status: "prepared", out, destination, files: Object.keys(manifest.files).length,
+  if (local) {
+    if (existsSync(finalOut)) fail("local output appeared during preparation; existing files are never replaced");
+    renameSync(out, finalOut);
+  }
+  console.log(JSON.stringify({ status: "prepared", out: finalOut, destination, files: Object.keys(manifest.files).length,
     declared: manifest.declared, totalBytes: manifest.totalBytes, manifestSha256: manifest.manifestSha256 }, null, 2));
+  } catch (error) {
+    if (local) rmSync(out, { recursive: true, force: true });
+    throw error;
+  }
 } else if (cmd === "approve") {
   const dir = process.argv[3];
   const approvedBy = process.argv[4] || "";
@@ -131,6 +320,8 @@ if (cmd === "prepare") {
   if (!approvedBy || !destination) fail("usage: approve <dir> <approved-by> <destination-label> — approval binds to the exact package and its intended destination");
   // verify EVERY byte before approval; altered content refuses approval
   const v = verifyPackage(dir, join(dir, "manifest.json"));
+  if (v.manifest.schema === "skaists.preservation-local/1")
+    fail("local working copies are not publication editions; prepare a separate public edition before public approval or upload");
   if (v.problems.length) {
     console.error("APPROVAL REFUSED — package content does not match its manifest:");
     v.problems.forEach(([f, why]) => console.error("  - " + f + ": " + why));
@@ -162,9 +353,10 @@ if (cmd === "prepare") {
     const dst = safeJoin(target, f);
     if (!src || !dst) { problems.push([f, "unsafe path (absolute/traversal/escape)"]); continue; }
     if (!existsSync(src)) { problems.push([f, "missing from package"]); continue; }
-    const buf = readFileSync(src);
-    if (sha256(buf) !== meta.sha256) { problems.push([f, "hash mismatch — package altered"]); continue; }
-    plan.push([src, dst, buf]);
+    const receipt = heldFileReceipt(src);
+    if (receipt.sha256 !== meta.sha256) { problems.push([f, "hash mismatch — package altered"]); continue; }
+    if (receipt.bytes !== meta.bytes) { problems.push([f, "size mismatch — package altered"]); continue; }
+    plan.push([src, f, meta]);
   }
   // approval binding: if approved, the current manifest digest must match
   if (existsSync(join(dir, "approval.json"))) {
@@ -179,8 +371,18 @@ if (cmd === "prepare") {
   }
   // fresh target only: refuse to merge into a populated directory
   if (existsSync(target) && readdirSync(target).length) fail("restore target exists and is not empty — restore into a fresh directory");
-  mkdirSync(target, { recursive: true });
-  for (const [, dst, buf] of plan) { mkdirSync(dirname(dst), { recursive: true }); writeFileSync(dst, buf); }
+  const staging = target + ".restoring-" + process.pid;
+  if (existsSync(staging)) fail("restore staging directory already exists");
+  mkdirSync(staging, { recursive: true, mode: 0o700 });
+  try {
+    for (const [src, relative, meta] of plan) {
+      const copied = copyHeldArtifact(src, join(staging, relative), "sha256:" + meta.sha256);
+      if (copied.bytes !== meta.bytes) throw new Error("restore source changed size during copying");
+    }
+    // rmdir refuses if another writer populated a formerly empty target.
+    if (existsSync(target)) rmdirSync(target);
+    renameSync(staging, target);
+  } catch (error) { rmSync(staging, { recursive: true, force: true }); throw error; }
   console.log(JSON.stringify({ status: "restored", target, files: plan.length }, null, 2));
 } else if (cmd === "verify") {
   const dir = process.argv[3], manifestPath = process.argv[4] || join(dir, "manifest.json");
@@ -205,6 +407,6 @@ if (cmd === "prepare") {
   }, null, 2));
   process.exit(ok ? 0 : 1);
 } else {
-  console.error("usage: node preserve.mjs prepare [outdir] [destination] | approve <dir> <by> <destination> | restore <dir> <fresh-target> | verify <dir> [manifest]");
+  console.error("usage: node preserve.mjs prepare [outdir] [destination] | prepare-local <fresh-outdir> [local-input.json] | approve <dir> <by> <destination> | restore <dir> <fresh-target> | verify <dir> [manifest]");
   process.exit(1);
 }

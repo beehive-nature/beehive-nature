@@ -1,0 +1,147 @@
+{
+  "schema": "btungsten.pq-speed-run/1",
+  "result": "PASS",
+  "error": null,
+  "started_utc": "2026-10-14T17:55:29.272019+00:00",
+  "completed_utc": "2026-10-14T17:55:48.240088+00:00",
+  "runs": [
+    {
+      "name": "build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--release",
+        "--manifest-path",
+        "/workspace/wt-pq-battery/crates/btungsten-x0x-pq/Cargo.toml",
+        "--bin",
+        "pq-speed"
+      ],
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.16449238600034732,
+      "log": "build.log",
+      "sha256": "sha256:GVqOonWMEwZuxdLrQdl2yBgPWSCPhqgAKdYDBMoUWCA"
+    },
+    {
+      "name": "honest-1",
+      "command": [
+        "/workspace/wt-pq-battery/crates/btungsten-x0x-pq/target/release/pq-speed",
+        "--cache",
+        "/workspace/pq-artifacts/vectors",
+        "--receipt",
+        "/workspace/pq-artifacts/pq-speed-final/honest-1.json"
+      ],
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 5.941764688001058,
+      "log": "honest-1.log",
+      "sha256": "sha256:sLcw1pJ879DDPTmzmPaaan-5L5nfPyEhO-NB0oGrGow"
+    },
+    {
+      "name": "honest-2",
+      "command": [
+        "/workspace/wt-pq-battery/crates/btungsten-x0x-pq/target/release/pq-speed",
+        "--cache",
+        "/workspace/pq-artifacts/vectors",
+        "--receipt",
+        "/workspace/pq-artifacts/pq-speed-final/honest-2.json"
+      ],
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 5.879183204999208,
+      "log": "honest-2.log",
+      "sha256": "sha256:qhzq3WPKHT2Ie_syEmHQZ-6JMoa975kNnVeFI79utSE"
+    },
+    {
+      "name": "accept-teeth",
+      "command": [
+        "/workspace/wt-pq-battery/crates/btungsten-x0x-pq/target/release/pq-speed",
+        "--cache",
+        "/workspace/pq-artifacts/vectors",
+        "--receipt",
+        "/workspace/pq-artifacts/pq-speed-final/accept-teeth.json",
+        "--sabotage-accept"
+      ],
+      "exit_code": 1,
+      "expected_exit": 1,
+      "seconds": 0.06418637800015858,
+      "log": "accept-teeth.log",
+      "sha256": "sha256:aoYgZl4CPQakSb4KRrUdpyCxxVx-yQCFy6G8yC422Yg"
+    },
+    {
+      "name": "truncate-teeth",
+      "command": [
+        "/workspace/wt-pq-battery/crates/btungsten-x0x-pq/target/release/pq-speed",
+        "--cache",
+        "/workspace/pq-artifacts/vectors",
+        "--receipt",
+        "/workspace/pq-artifacts/pq-speed-final/truncate-teeth.json",
+        "--sabotage-truncate"
+      ],
+      "exit_code": 1,
+      "expected_exit": 1,
+      "seconds": 0.11420060100135743,
+      "log": "truncate-teeth.log",
+      "sha256": "sha256:MrO1Q6Bl9feJ0JkOIs5tM3OofP4zB20DbGfWFUx-pwA"
+    },
+    {
+      "name": "empty-teeth",
+      "command": [
+        "/workspace/wt-pq-battery/crates/btungsten-x0x-pq/target/release/pq-speed",
+        "--cache",
+        "/workspace/pq-artifacts/vectors",
+        "--receipt",
+        "/workspace/pq-artifacts/pq-speed-final/empty-teeth.json",
+        "--empty-vectors"
+      ],
+      "exit_code": 1,
+      "expected_exit": 1,
+      "seconds": 0.0036211079986969708,
+      "log": "empty-teeth.log",
+      "sha256": "sha256:UckwolhHJDNbuPnCasH68LFaArrOv7QrbF_G9lVSSi4"
+    }
+  ],
+  "host": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "cpu_model": "AMD EPYC 7763 64-Core Processor",
+  "binary_sha256": "sha256:wFMj9xsCz-XcNuRXMnBjRfpSh2yoCq8kbiFhkd1BruE",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "battery_commit": "a27921cf872657bb8ef8b7e61f1a78a46b803108",
+  "source_sha256": {
+    "crates/btungsten-x0x-pq/Cargo.toml": "sha256:CFRkVNIbmlRyXnhSH3CaRCu0QEj2ATdIQ2zU6W4bx8M",
+    "crates/btungsten-x0x-pq/Cargo.lock": "sha256:Z__dvZLG9X0w5Cbu1_QdJ-aH9mQYBK6-Ir_voK2vJxg",
+    "crates/btungsten-x0x-pq/inventory.json": "sha256:cvWXYtWEXkT3OH4NmGGA4xdokVwS-OVYm9492DN-nhM",
+    "crates/btungsten-x0x-pq/src/backends.rs": "sha256:7dyIBfj2MqafTjVDRYzXH10pavzKFDJS8-DFVaQw58s",
+    "crates/btungsten-x0x-pq/src/bin/pq-speed.rs": "sha256:KypKNLrovVu29xUILVN2MuYlCcP-KjjobIvy36oKB1I",
+    "crates/btungsten-x0x-pq/src/lib.rs": "sha256:YaDVzyatoYG0I3ci144hSdefx7blgCzK4J4NtYvisEY",
+    "crates/btungsten-x0x-pq/src/main.rs": "sha256:cONdo8aPZBAruV8rZvHndKcM7WAIBum-bfnJSiPbiFc",
+    "crates/btungsten-x0x-pq/src/wrappers.rs": "sha256:OyPaf5f97-6t_67oRwzEgdQK3Joi56TEVUKE3Vs4GJ0",
+    "crates/btungsten-pq/src/acvp.rs": "sha256:lGSv27-9yhCeU-KqeRBllUFccnupko0G0XgVnQUCg78",
+    "crates/btungsten-pq/src/classic.rs": "sha256:SID_7ZAGl_5x2wqTTCdqhAstVBoW60IFeIKBYdPgm84",
+    "crates/btungsten-pq/src/lib.rs": "sha256:hVdN98w3RgiDitn6Ll2PpXuXH0AwwiNPFro66JvDx_w",
+    "crates/btungsten-pq/src/mldsa.rs": "sha256:Rv3ZYkXFp3UBweKkU6zQw5VOZCLtFMV_ge7yxomJ3lQ",
+    "crates/btungsten-pq/src/mlkem.rs": "sha256:s3rggqp3EwjnZ7GwO-badqtEICXAotoFZAaSeLczlKM",
+    "crates/btungsten-pq/src/report.rs": "sha256:jeAu_O6flkOi0QIbikq2V6H1IOoBAZ45c8B-vOcqPa4",
+    "crates/btungsten-pq/src/slhdsa.rs": "sha256:Af_trcRVmBq-GTggA7lOz_JBXGWZIHu_tiMte_gneBk",
+    "crates/btungsten-pq/kat-manifest.json": "sha256:y7Ke9cN1pNBVtyzsqeBppKD7CxtwFDI4ncX4TxskR3c",
+    "scripts/btungsten/pq-speed-check.py": "sha256:f4JqkluxDN85bKFR4e88l7TmjEAFpOE2S_vsgSj19U8",
+    "scripts/btungsten/x0x-pq-check.py": "sha256:akuw-WwWHuIY-mxGVnn1Q9rxWeHX5cMuxUu9KVboBr4"
+  },
+  "files": {
+    "accept-teeth.json": "sha256:ztZdRqj6awLRpie6hsQo5iJmek_yupgaCBQm1nDKCAA",
+    "accept-teeth.log": "sha256:aoYgZl4CPQakSb4KRrUdpyCxxVx-yQCFy6G8yC422Yg",
+    "build.log": "sha256:GVqOonWMEwZuxdLrQdl2yBgPWSCPhqgAKdYDBMoUWCA",
+    "default-graph.log": "sha256:FeeMUuNoFvsNhSyAfbm31taHyeC3CG5abS_xw5Kc03A",
+    "empty-teeth.json": "sha256:LCqTHkPE-tleoEkdQXepbQvtP6vLxJvel3YC_R2z-RY",
+    "empty-teeth.log": "sha256:UckwolhHJDNbuPnCasH68LFaArrOv7QrbF_G9lVSSi4",
+    "honest-1.json": "sha256:4fCxJ97Pyzoov7_NM2Ta75G2IIBskYcDEa38PlZ2FY4",
+    "honest-1.log": "sha256:sLcw1pJ879DDPTmzmPaaan-5L5nfPyEhO-NB0oGrGow",
+    "honest-2.json": "sha256:_L9PdGb-hdBNI9tfdl0JQ7eoEtvc6q2hVP4rcbC0tXk",
+    "honest-2.log": "sha256:qhzq3WPKHT2Ie_syEmHQZ-6JMoa975kNnVeFI79utSE",
+    "source-pins.json": "sha256:cvWXYtWEXkT3OH4NmGGA4xdokVwS-OVYm9492DN-nhM",
+    "truncate-teeth.json": "sha256:9q6kr7n0xoe3TGgegrAKmDjfZEMYukHMWRyl9g1WaFI",
+    "truncate-teeth.log": "sha256:MrO1Q6Bl9feJ0JkOIs5tM3OofP4zB20DbGfWFUx-pwA"
+  },
+  "scope": "experimental comparator; timings are host observations, no production performance guarantee",
+  "full_system_qualification": "UNESTABLISHED"
+}

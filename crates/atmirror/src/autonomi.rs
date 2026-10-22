@@ -24,13 +24,34 @@ use crate::rail::{Rail, RailError};
 
 pub struct AntCli {
     pub bin: String,
+    read_limit: u64,
 }
 
 impl AntCli {
     pub fn new(bin: &str) -> AntCli {
         AntCli {
             bin: bin.to_string(),
+            read_limit: 2 * 1024 * 1024 * 1024,
         }
+    }
+
+    /// Bounds bytes read into this process. The external CLI owns download disk/network limits.
+    pub fn with_read_limit(mut self, bytes: u64) -> Self {
+        self.read_limit = bytes.min(2 * 1024 * 1024 * 1024);
+        self
+    }
+
+    fn read_download(&self, path: &std::path::Path) -> Result<Vec<u8>, RailError> {
+        use std::io::Read;
+        let file = std::fs::File::open(path).map_err(|e| RailError::Local(e.to_string()))?;
+        let mut bytes = Vec::new();
+        file.take(self.read_limit + 1)
+            .read_to_end(&mut bytes)
+            .map_err(|e| RailError::Local(e.to_string()))?;
+        if bytes.len() as u64 > self.read_limit {
+            return Err(RailError::Local("read exceeds consumer byte limit".into()));
+        }
+        Ok(bytes)
     }
 
     fn run(&self, args: &[&str]) -> Result<(String, String), RailError> {
@@ -128,9 +149,9 @@ impl Rail for AntCli {
                     entries.len()
                 )));
             }
-            std::fs::read(entries[0].path()).map_err(|e| RailError::Local(e.to_string()))?
+            self.read_download(&entries[0].path())?
         } else {
-            std::fs::read(&dest).map_err(|e| RailError::Local(e.to_string()))?
+            self.read_download(&dest)?
         };
         let _ = std::fs::remove_dir_all(&dest);
         let _ = std::fs::remove_file(&dest);

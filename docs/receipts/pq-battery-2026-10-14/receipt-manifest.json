@@ -1,0 +1,352 @@
+{
+  "schema": "btungsten.pq-battery-log-manifest/1",
+  "bnr_baseline": "25258d564",
+  "code_commit": "e246b7954",
+  "x0x_commit": "32bf552808cc907ed47978e2bb7c896d7c815858",
+  "x0x_version": "0.48.0",
+  "qualification": "UNESTABLISHED",
+  "logs": [
+    {
+      "file": "bnr-audit.log",
+      "retained_sha256": "sha256:ORk1Uw9Rh94-zyV-mMKYynIVkPAq8sLTN3ivAgscp80",
+      "raw_sha256": "sha256:ORk1Uw9Rh94-zyV-mMKYynIVkPAq8sLTN3ivAgscp80",
+      "bytes": 5120,
+      "annotation": null
+    },
+    {
+      "file": "ci-pq-summary.log",
+      "retained_sha256": "sha256:RNRtx1Y2NtP4EUECN57Vb52S2M7cjjDPMZt4QXL-TUo",
+      "raw_sha256": "sha256:RNRtx1Y2NtP4EUECN57Vb52S2M7cjjDPMZt4QXL-TUo",
+      "bytes": 1377,
+      "annotation": null
+    },
+    {
+      "file": "ci-pq05-ntt-summary.log",
+      "retained_sha256": "sha256:jw7qlm5Uwr29MM1TvoUw-uhUtUKMIG4Ds7StehdRJpQ",
+      "raw_sha256": "sha256:jw7qlm5Uwr29MM1TvoUw-uhUtUKMIG4Ds7StehdRJpQ",
+      "bytes": 18774,
+      "annotation": null
+    },
+    {
+      "file": "ci-pq06-ntt-summary.log",
+      "retained_sha256": "sha256:Bpm9c324dRW4ra7-KSUD46QJ6c9iclDsd0cPmUxouAg",
+      "raw_sha256": "sha256:Bpm9c324dRW4ra7-KSUD46QJ6c9iclDsd0cPmUxouAg",
+      "bytes": 24606,
+      "annotation": null
+    },
+    {
+      "file": "hooks.log",
+      "retained_sha256": "sha256:fMpK5iU2EErAyKQAdb_qVmvce8DH3mMyxOOjHY-XPyo",
+      "raw_sha256": "sha256:fMpK5iU2EErAyKQAdb_qVmvce8DH3mMyxOOjHY-XPyo",
+      "bytes": 572,
+      "annotation": null
+    },
+    {
+      "file": "pq-browser-tests.log",
+      "retained_sha256": "sha256:pFpQKWMUGJAk_MoyyCMXcHHJVruk2JDq8euB8q6HU90",
+      "raw_sha256": "sha256:pFpQKWMUGJAk_MoyyCMXcHHJVruk2JDq8euB8q6HU90",
+      "bytes": 3399,
+      "annotation": null
+    },
+    {
+      "file": "pq-unit-final.log",
+      "retained_sha256": "sha256:_D9_kGqyXpfmNX47mh2CpoWz_WeVOTwc5M1u5ua4l2I",
+      "raw_sha256": "sha256:_D9_kGqyXpfmNX47mh2CpoWz_WeVOTwc5M1u5ua4l2I",
+      "bytes": 3491,
+      "annotation": null
+    },
+    {
+      "file": "pq-unit.log",
+      "retained_sha256": "sha256:pgs0rJxAwQm34UNnMJ-2O1HJUV14mxm9AM2AfjnpRJg",
+      "raw_sha256": "sha256:pgs0rJxAwQm34UNnMJ-2O1HJUV14mxm9AM2AfjnpRJg",
+      "bytes": 12670,
+      "annotation": null
+    },
+    {
+      "file": "pq00-vortex.log",
+      "retained_sha256": "sha256:pDscnzEr34bBGaROXzE55O-65aVZv3OfSLk9HJ_Toy0",
+      "raw_sha256": "sha256:pDscnzEr34bBGaROXzE55O-65aVZv3OfSLk9HJ_Toy0",
+      "bytes": 1650,
+      "annotation": null
+    },
+    {
+      "file": "pq01-final.log",
+      "retained_sha256": "sha256:e2T4bi3zC4YeJPibcCrtTrX3v1bVYQnoKl1fRXqtYWc",
+      "raw_sha256": "sha256:e2T4bi3zC4YeJPibcCrtTrX3v1bVYQnoKl1fRXqtYWc",
+      "bytes": 42096,
+      "annotation": null
+    },
+    {
+      "file": "pq02-saw.log",
+      "retained_sha256": "sha256:zqgpnSt7xUfsjl4OR9JYVzWpdCTeWEBIDDRpL8HXDvg",
+      "raw_sha256": "sha256:zqgpnSt7xUfsjl4OR9JYVzWpdCTeWEBIDDRpL8HXDvg",
+      "bytes": 5331,
+      "annotation": null
+    },
+    {
+      "file": "pq02-sponge.log",
+      "retained_sha256": "sha256:jV9EF-GjdsVEO2lb4NlX4vOwvYUHYCydf0IyvEJDNzU",
+      "raw_sha256": "sha256:jV9EF-GjdsVEO2lb4NlX4vOwvYUHYCydf0IyvEJDNzU",
+      "bytes": 2705,
+      "annotation": null
+    },
+    {
+      "file": "pq02-sponge022.log",
+      "retained_sha256": "sha256:Fvot26MPFnrczjYmbuZwXKJbFhOdBodN5rdV-RxkQAw",
+      "raw_sha256": "sha256:Fvot26MPFnrczjYmbuZwXKJbFhOdBodN5rdV-RxkQAw",
+      "bytes": 2747,
+      "annotation": null
+    },
+    {
+      "file": "pq03-hkdf.log",
+      "retained_sha256": "sha256:z4ITXPlLDVPFe2YedWrERY0STQFn9RoeBa8wQx-VWq0",
+      "raw_sha256": "sha256:z4ITXPlLDVPFe2YedWrERY0STQFn9RoeBa8wQx-VWq0",
+      "bytes": 3199,
+      "annotation": null
+    },
+    {
+      "file": "pq03-saw.log",
+      "retained_sha256": "sha256:wgpy4MHN4hWd0QZo6B2X7ux6WMNmMrREkcn2lwJ5ROM",
+      "raw_sha256": "sha256:wgpy4MHN4hWd0QZo6B2X7ux6WMNmMrREkcn2lwJ5ROM",
+      "bytes": 1484,
+      "annotation": null
+    },
+    {
+      "file": "pq03-sha256.log",
+      "retained_sha256": "sha256:rVbZPk_MelRloNsmjEjRzn4Jm4wxfVH9dy8rPuYfGJU",
+      "raw_sha256": "sha256:rVbZPk_MelRloNsmjEjRzn4Jm4wxfVH9dy8rPuYfGJU",
+      "bytes": 1847,
+      "annotation": null
+    },
+    {
+      "file": "pq04-saw.log",
+      "retained_sha256": "sha256:wcSqzSGlJ6tUiHiFy_SIjzrnU9xowK3ziPQs7Ggw52s",
+      "raw_sha256": "sha256:wcSqzSGlJ6tUiHiFy_SIjzrnU9xowK3ziPQs7Ggw52s",
+      "bytes": 2162,
+      "annotation": null
+    },
+    {
+      "file": "pq05-browser.log",
+      "retained_sha256": "sha256:B6bPdwt-f0CUY-MUuj2y4TufHqZW6XC3zRMHltibj7c",
+      "raw_sha256": "sha256:B6bPdwt-f0CUY-MUuj2y4TufHqZW6XC3zRMHltibj7c",
+      "bytes": 351,
+      "annotation": null
+    },
+    {
+      "file": "pq05-field.log",
+      "retained_sha256": "sha256:x-djtv43mwiEiOL5HDSH4pUrsXiTzkjY2tQSthj1tp0",
+      "raw_sha256": "sha256:x-djtv43mwiEiOL5HDSH4pUrsXiTzkjY2tQSthj1tp0",
+      "bytes": 3576,
+      "annotation": null
+    },
+    {
+      "file": "pq05-ntt-attempt1.log",
+      "retained_sha256": "sha256:3zHaiucULCyewsM8Mg1Nf5vW9nUwzzTw_q07GNwCKyw",
+      "raw_sha256": "sha256:3zHaiucULCyewsM8Mg1Nf5vW9nUwzzTw_q07GNwCKyw",
+      "bytes": 2604,
+      "annotation": null
+    },
+    {
+      "file": "pq05-ntt-attempt2.log",
+      "retained_sha256": "sha256:mskVAhqBT2V7P60Uv8MvTZzfA6y1aroUgYDYPzowqOY",
+      "raw_sha256": "sha256:mskVAhqBT2V7P60Uv8MvTZzfA6y1aroUgYDYPzowqOY",
+      "bytes": 2604,
+      "annotation": null
+    },
+    {
+      "file": "pq05-rust.log",
+      "retained_sha256": "sha256:LgghUCiIXufPUwS0cMIzRdFkGPEAYTADKmkSAspDK2U",
+      "raw_sha256": "sha256:LgghUCiIXufPUwS0cMIzRdFkGPEAYTADKmkSAspDK2U",
+      "bytes": 2599,
+      "annotation": null
+    },
+    {
+      "file": "pq05-saw.log",
+      "retained_sha256": "sha256:9RC4cpt8cuhy6aOmVlUXa69w1IFwmQfPSE7J6H4xPsU",
+      "raw_sha256": "sha256:9RC4cpt8cuhy6aOmVlUXa69w1IFwmQfPSE7J6H4xPsU",
+      "bytes": 496,
+      "annotation": null
+    },
+    {
+      "file": "pq06-ntt-attempt1.log",
+      "retained_sha256": "sha256:uOpEHF7geoHXkFL1IAR18f1gzQpwSa4bd-V3McN1H6U",
+      "raw_sha256": "sha256:uOpEHF7geoHXkFL1IAR18f1gzQpwSa4bd-V3McN1H6U",
+      "bytes": 3228,
+      "annotation": null
+    },
+    {
+      "file": "pq06-ntt-attempt2.log",
+      "retained_sha256": "sha256:4D79skDq5WPFwBLQjlXzwJrR2IXoUb2n_NcGzlPM3WU",
+      "raw_sha256": "sha256:4D79skDq5WPFwBLQjlXzwJrR2IXoUb2n_NcGzlPM3WU",
+      "bytes": 4076,
+      "annotation": null
+    },
+    {
+      "file": "pq08-browser.log",
+      "retained_sha256": "sha256:m_6i2jacaV_lSU2IvjnLjHqqjex1Cckxg9B6Yd3treE",
+      "raw_sha256": "sha256:m_6i2jacaV_lSU2IvjnLjHqqjex1Cckxg9B6Yd3treE",
+      "bytes": 1141,
+      "annotation": null
+    },
+    {
+      "file": "pq08-rust.log",
+      "retained_sha256": "sha256:Q0MbYUYMTUme8tFyYi7KF2C6rYvBQSdqVp7obKQ1-G0",
+      "raw_sha256": "sha256:Q0MbYUYMTUme8tFyYi7KF2C6rYvBQSdqVp7obKQ1-G0",
+      "bytes": 890,
+      "annotation": null
+    },
+    {
+      "file": "pq10-forgery.log",
+      "retained_sha256": "sha256:ag-2Mev59PAnwrBiM6BrE40H9MN4SvYUQRFFdm8x7SU",
+      "raw_sha256": "sha256:ag-2Mev59PAnwrBiM6BrE40H9MN4SvYUQRFFdm8x7SU",
+      "bytes": 1121,
+      "annotation": null
+    },
+    {
+      "file": "pq10-scale1024.log",
+      "retained_sha256": "sha256:fFHvh1mHW9E6tcCSpuOcwN-lQrJltsvWEk6-nxuCHRc",
+      "raw_sha256": "sha256:fFHvh1mHW9E6tcCSpuOcwN-lQrJltsvWEk6-nxuCHRc",
+      "bytes": 581,
+      "annotation": null
+    },
+    {
+      "file": "pq10-scale16384.log",
+      "retained_sha256": "sha256:NdWnYC7gRIDTB4Mc7nSrscGfLXbJ-GWVTu4tlRNpn4I",
+      "raw_sha256": "sha256:NdWnYC7gRIDTB4Mc7nSrscGfLXbJ-GWVTu4tlRNpn4I",
+      "bytes": 595,
+      "annotation": null
+    },
+    {
+      "file": "pq10-scale64.log",
+      "retained_sha256": "sha256:zGWj36ecq42za0rP3aUGTYMmzAcK7ZEqgkiZJLO8CaQ",
+      "raw_sha256": "sha256:zGWj36ecq42za0rP3aUGTYMmzAcK7ZEqgkiZJLO8CaQ",
+      "bytes": 558,
+      "annotation": null
+    },
+    {
+      "file": "pq10-unit.log",
+      "retained_sha256": "sha256:tfj73PIdeBCj0kQUaq5uWw4meh--1kTtSEjQF0zPZtU",
+      "raw_sha256": "sha256:tfj73PIdeBCj0kQUaq5uWw4meh--1kTtSEjQF0zPZtU",
+      "bytes": 6160,
+      "annotation": null
+    },
+    {
+      "file": "pq11-browser.log",
+      "retained_sha256": "sha256:-7og7lPPYgB58t_HY5LnaYuVxkZpaRiPp0BSjyXRc2Q",
+      "raw_sha256": "sha256:-7og7lPPYgB58t_HY5LnaYuVxkZpaRiPp0BSjyXRc2Q",
+      "bytes": 173,
+      "annotation": null
+    },
+    {
+      "file": "pq11-saw.log",
+      "retained_sha256": "sha256:S0sPz2d7HnRP7ayRPLmgyBQKW5LSA8GGlYI3D__IVbE",
+      "raw_sha256": "sha256:S0sPz2d7HnRP7ayRPLmgyBQKW5LSA8GGlYI3D__IVbE",
+      "bytes": 1059,
+      "annotation": null
+    },
+    {
+      "file": "pq11.log",
+      "retained_sha256": "sha256:x__MUjTllBXM6yDyjbOyVsdNq2g2twRsn8_R5V3RfUg",
+      "raw_sha256": "sha256:x__MUjTllBXM6yDyjbOyVsdNq2g2twRsn8_R5V3RfUg",
+      "bytes": 1079,
+      "annotation": null
+    },
+    {
+      "file": "pq12-frost.log",
+      "retained_sha256": "sha256:aQcTHhzUuz6vxz8QWLZhQK67hgJLYvk0mIrzDO5wW2U",
+      "raw_sha256": "sha256:aQcTHhzUuz6vxz8QWLZhQK67hgJLYvk0mIrzDO5wW2U",
+      "bytes": 3909,
+      "annotation": null
+    },
+    {
+      "file": "pq12-gate1-default.log",
+      "retained_sha256": "sha256:xNcO5fcOfZBzlj74AqvwZfLir1l6qVKZE7LJXEtBe-U",
+      "raw_sha256": "sha256:xNcO5fcOfZBzlj74AqvwZfLir1l6qVKZE7LJXEtBe-U",
+      "bytes": 283,
+      "annotation": null
+    },
+    {
+      "file": "pq12-gate1-frost.log",
+      "retained_sha256": "sha256:9LACl3pN_4l674rrAXSS42KluNXt7fH6pgCghjXtEdU",
+      "raw_sha256": "sha256:9LACl3pN_4l674rrAXSS42KluNXt7fH6pgCghjXtEdU",
+      "bytes": 296,
+      "annotation": null
+    },
+    {
+      "file": "pq12-official.log",
+      "retained_sha256": "sha256:qtlHxQ_FavnfdRdOV_qaJb8c4FJiEhtVjtmZCUbphSk",
+      "raw_sha256": "sha256:qtlHxQ_FavnfdRdOV_qaJb8c4FJiEhtVjtmZCUbphSk",
+      "bytes": 6356,
+      "annotation": null
+    },
+    {
+      "file": "pq12-upstream.log",
+      "retained_sha256": "sha256:hxo1oFI97X7w9eSEfy9QmyT0n_S3GoqwvlYo6njv8EU",
+      "raw_sha256": "sha256:hxo1oFI97X7w9eSEfy9QmyT0n_S3GoqwvlYo6njv8EU",
+      "bytes": 7999,
+      "annotation": null
+    },
+    {
+      "file": "x0x-app-audit.log",
+      "retained_sha256": "sha256:TYw2ex4YjsnXNDDQYQkz9xGpQ7VwlS2KliMMUGo0GfQ",
+      "raw_sha256": "sha256:TYw2ex4YjsnXNDDQYQkz9xGpQ7VwlS2KliMMUGo0GfQ",
+      "bytes": 2424,
+      "annotation": null
+    },
+    {
+      "file": "x0x-clippy.log",
+      "retained_sha256": "sha256:gN1mXw4qFg6qgDgFCQBetB2VGpmj4uFINSbBOnTJOV4",
+      "raw_sha256": "sha256:gN1mXw4qFg6qgDgFCQBetB2VGpmj4uFINSbBOnTJOV4",
+      "bytes": 4638,
+      "annotation": null
+    },
+    {
+      "file": "x0x-identity.log",
+      "retained_sha256": "sha256:_h4cJLblsFRKi67WbELosn7yJ5QA7cfFQuMAIcVw0zM",
+      "raw_sha256": "sha256:m1PKwksLNh4_MKq0RNJ7XU6fg_mfcCV-2rH3-LJ1rjc",
+      "bytes": 6226,
+      "annotation": "PUBLIC-CONSTANT suffix on two synthetic identifier lines"
+    },
+    {
+      "file": "x0x-kem-envelope.log",
+      "retained_sha256": "sha256:UVmru6Wy9yauwXKu06yfD7TGVzrjnpE21KljdwPvH5g",
+      "raw_sha256": "sha256:UVmru6Wy9yauwXKu06yfD7TGVzrjnpE21KljdwPvH5g",
+      "bytes": 52287,
+      "annotation": null
+    },
+    {
+      "file": "x0x-rustls-paths.log",
+      "retained_sha256": "sha256:FKiAN7-C_W13SaCk8bEg0JmRdKhydNT6MUXs7x8iEsg",
+      "raw_sha256": "sha256:FKiAN7-C_W13SaCk8bEg0JmRdKhydNT6MUXs7x8iEsg",
+      "bytes": 1602,
+      "annotation": null
+    },
+    {
+      "file": "x0x-upgrade-signature.log",
+      "retained_sha256": "sha256:vxOZKaVyKPsRWm5G1fp-w8Of-0g3SDAxCdtrnezR4Kg",
+      "raw_sha256": "sha256:vxOZKaVyKPsRWm5G1fp-w8Of-0g3SDAxCdtrnezR4Kg",
+      "bytes": 1080,
+      "annotation": null
+    }
+  ],
+  "formal_completed_lanes": 12,
+  "transform_replays": "PASS in hosted run 38598493065; local attempts remain inconclusive",
+  "audits": {
+    "isolated_test_lock": {
+      "vulnerabilities": 0,
+      "warnings": 2
+    },
+    "x0x_full_lock": {
+      "vulnerabilities": 4,
+      "warnings": 5
+    },
+    "bnr_full_lock": {
+      "vulnerabilities": 10,
+      "warnings": 3,
+      "yanked_lookup_http503_errors": 6
+    }
+  },
+  "hosted_native_run": 38602989250,
+  "hosted_native_commit": "b7789d579",
+  "hosted_formal_run": 38598493065
+}

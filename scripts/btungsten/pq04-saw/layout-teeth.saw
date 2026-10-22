@@ -1,0 +1,26 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ04 — TEETH for layout.saw: the Rust utc_timestamp
+// asked to equal a pattern that also takes a lowercase 'z'. It MUST fail
+// with a counterexample, or the utc_timestamp PROVEN line could be passing
+// a spec it never compared.
+//
+// usage (from this directory): saw layout-teeth.saw
+
+enable_experimental;
+import "../pq04-cryptol/BpqLayout.cry";
+
+m <- mir_load_module "../../../target/saw-pq04/bpq_core.linked-mir.json";
+text_adt <- return (mir_find_adt m "bpq_core::layout::Text" []);
+
+let wrong_spec = do {
+  len <- mir_fresh_var "t_len" mir_u32;
+  bs <- mir_fresh_var "t_bytes" (mir_array 32 mir_u8);
+  r <- mir_alloc (mir_adt text_adt);
+  mir_points_to r (mir_struct_value text_adt [mir_term len, mir_term bs]);
+  mir_execute_func [r];
+  let t = {{ { len = len, bytes = bs } : Text }};
+  mir_return (mir_term {{ atOk t \/ (classMatch "DDDD-DD-DDTDD:DD:DD" (take`{19} t.bytes) /\ t.len == 20 /\ t.bytes @ 19 == 'z') }});
+};
+
+print "PQ04-SAW-TEETH obligation utc_timestamp takes a lowercase z";
+mir_verify m "bpq_core::layout::utc_timestamp" [] false wrong_spec (w4_unint_bitwuzla []);
+print "PQ04-SAW-TEETH UNEXPECTED-PROVEN utc_timestamp takes a lowercase z";

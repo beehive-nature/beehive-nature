@@ -22,7 +22,8 @@
 .atlas-stage:active { cursor: grabbing; }
 .atlas-root:focus-visible .atlas-stage { outline: 2px solid var(--atlas-info); }
 
-.atlas-world { width: 100%; height: 100%; display: block; user-select: none; -webkit-user-select: none; }
+/* Own the viewport even inside hosts whose generic SVG rule uses height:auto. */
+.atlas-stage > svg.atlas-world { width: 100%; height: 100%; display: block; user-select: none; -webkit-user-select: none; }
 
 /* cells: blood people carry their evidence-era tone; ghosts/mirrors recede */
 .atlas-cell { cursor: pointer; }

@@ -58,6 +58,8 @@
        it adds no names, ids, or URLs of its own; it logs nothing
 */
 
+import { mountLocalEvidence } from '../tools/genealogy/local-evidence.mjs';
+
 export const PP_VERSION = 'person-panel/1.3';
 
 /* v1.1 — curiosity-first (founder guidance 2026-09-18: "the graph is not the
@@ -112,16 +114,61 @@ export function relationshipSummary (rel, nameOf) {
   if (!rel) return '';
   const A = nameOf(rel.a), B = nameOf(rel.b);
   if (rel.kind === 'self') return A + ' is the person you are standing on.';
-  if (rel.kind === 'affinity') return A + ' is joined to ' + B + ' by marriage — affinity, never blood.';
-  if (rel.kind === 'blood-and-affinity') return A + ' and ' + B + ' are married AND share blood — affinity and blood both hold, each labeled.';
+  if (rel.kind === 'affinity') return rel.affinity?.hopsFromRoot.length === 1
+    ? A + ' and ' + B + ' are married.'
+    : A + ' and ' + B + ' are connected through a marriage in their families, not a marriage to each other.';
+  if (rel.kind === 'blood-and-affinity') return A + ' and ' + B + ' are married and also share ancestors.';
   if (rel.kind === 'direct') {
     const up = rel.blood && rel.blood.mode === 'ancestor-of-root';
-    return A + ' is ' + (up ? 'an ancestor of ' : 'a descendant of ') + B + ' — the line itself is the relationship; the common ancestor is its endpoint.';
+    return A + ' is ' + (up ? 'an ancestor of ' : 'a descendant of ') + B + '.';
   }
   if (rel.kind === 'shared') {
     return A + ' and ' + B + ' share a common ancestor within the published archive — both lines and the common ancestor are shown.';
   }
   return 'no shared line between ' + A + ' and ' + B + ' within the published archive.';
+}
+
+// Only parent-child ancestry counts toward a grandparent branch. A route
+// crossing a marriage must not be presented as descent through that person.
+export function grandparentBranches (archive, founder, person) {
+  const root = archive.getPerson(founder);
+  const ids = [...new Set((root?.parents || []).flatMap(parent =>
+    (archive.getPerson(parent.id)?.parents || []).map(p => p.id)))];
+  return ids.map(id => {
+    const grandparent = archive.getPerson(id);
+    const relationship = archive.relationship(person, id);
+    return { grandparent, relationship, direct: person === id ||
+      relationship.blood?.mode === 'ancestor-of-root' };
+  });
+}
+
+export function grandparentPathHtml (branch, person, chainHtml = () => '') {
+  const g = branch?.grandparent;
+  if (!g || !person) return '';
+  if (branch.relationship?.kind === 'self' || g.id === person.id)
+    return '<p class="pp-branch-self">This person is the head of this grandparent branch.</p>';
+  return '<details><summary>Show the parent-to-child line from ' + esc(g.name) + ' to ' + esc(person.name) + '</summary>' + chainHtml(branch.relationship) + '</details>';
+}
+
+export function wikipediaLink (person) {
+  if (!person || person.living) return null;
+  const articles = { p1790a81049: 'Charlemagne', paf36b10c53: 'Louis_the_Pious' };
+  return articles[person.id]
+    ? { url: 'https://en.wikipedia.org/wiki/' + articles[person.id], label: 'Read on Wikipedia (new tab)' }
+    : { url: 'https://en.wikipedia.org/w/index.php?search=' + encodeURIComponent(person.name), label: 'Search Wikipedia (new tab)' };
+}
+
+export function familyGroups (person, getPerson) {
+  const assigned = new Set();
+  const marriages = person.spouses.map(spouse => {
+    const children = person.children.filter(id => {
+      const parents = (getPerson(id)?.parents || []).map(p => p.id);
+      return parents.includes(person.id) && parents.includes(spouse);
+    });
+    children.forEach(id => assigned.add(id));
+    return { spouse, children };
+  });
+  return { marriages, otherChildren: person.children.filter(id => !assigned.has(id)) };
 }
 
 export function hopArrow (hop) {
@@ -247,6 +294,7 @@ export function mountPersonPanel (host, archive, opts) {
     onnavigate: null,
     openPersonPage: null,
     langText: null,
+    localEvidence: null, // optional package reader; never a provider fallback
     scrollContainer: null,
     searchPlaceholder: 'search the archive — a name (the panel will not pick for you)'
   }, opts || {});
@@ -261,6 +309,7 @@ export function mountPersonPanel (host, archive, opts) {
   let searchHi = -1;
   let searchRows = [];
   let searchDup = false;
+  let disposeLocalEvidence = null;
 
   host.classList.add('pp');
   host.setAttribute('data-pp', PP_VERSION);
@@ -307,6 +356,7 @@ export function mountPersonPanel (host, archive, opts) {
   function setView (nv) {
     view = nv;
     render();
+    if (o.scrollContainer) restoreScroll(0);
     viewEl.focus({ preventScroll: true });
     notify();
   }
@@ -390,7 +440,12 @@ export function mountPersonPanel (host, archive, opts) {
 
   function choosePerson (id, fromQuery) {
     resultsEl.hidden = true;
-    if (view.type === 'person' && view.id === id) return;
+    if (view.type === 'person' && view.id === id) {
+      if (o.scrollContainer) restoreScroll(0);
+      viewEl.focus({ preventScroll: true });
+      notify();
+      return;
+    }
     pushContext();
     setView({ type: 'person', id, fromQuery: fromQuery || null });
   }
@@ -444,10 +499,10 @@ export function mountPersonPanel (host, archive, opts) {
     }
     if (rel.affinity) {
       h += '<div class="pp-chain pp-affinity">' + chainHtml(rel.affinity.hopsFromRoot, rel.b) + '</div>' +
-        '<div class="pp-ca-line">' + esc(T('pp.rel.affinity', 'affinity — marriage; never described as blood')) + '</div>';
+        '<div class="pp-ca-line">' + esc(T('pp.rel.affinity', 'Family connection through marriage')) + '</div>';
     }
     if (rel.kind === 'blood-and-affinity') {
-      h += '<div class="pp-coexist">' + esc(T('pp.rel.coexist', 'blood AND affinity coexist for this pair — married cousins; both are true and separately labeled')) + '</div>';
+      h += '<div class="pp-coexist">' + esc(T('pp.rel.coexist', 'These spouses also share ancestors.')) + '</div>';
     }
     /* the epistemic descent: when the blood line's evidence texture changes,
      * the change itself is shown — era labels date the evidence; support is
@@ -476,7 +531,7 @@ export function mountPersonPanel (host, archive, opts) {
   /* a chain of labeled, clickable hops starting at startId; null hop = the
    * honest ellipsis for a compressed middle */
   function chainHtml (hopsRaw, startId) {
-    const w = hopWindow(hopsRaw, 10, 3);
+    const w = { render: hopsRaw, elided: 0, total: hopsRaw.length };
     const start = archive.getPerson(startId);
     let h = nodeHtml(startId, start);
     for (const hop of w.render) {
@@ -499,14 +554,27 @@ export function mountPersonPanel (host, archive, opts) {
   }
 
   function relToRootHtml (p) {
-    if (!curRoot) return '';
-    const rel = archive.relationship(p.id, curRoot);
-    const rootP = archive.getPerson(curRoot);
-    let h = '<section class="pp-sec pp-rel"><h3 class="pp-h">' + esc(T('pp.rel.title', 'relationship to where you are standing')) + '</h3>';
-    h += '<div class="pp-rel-line">' + esc(relationshipSummary(rel, nameOf)) + '</div>';
-    h += endpointsHtml(p, rootP);
-    h += relChainsHtml(rel);
-    h += '<div class="pp-sec-note">' + esc(T('pp.rel.era', 'each hop carries its own evidence — era and support are assessed per person and per claim, never upgraded by this line')) + '</div>';
+    const reference = o.founderRoot || curRoot;
+    if (!reference) return '';
+    const branches = grandparentBranches(archive, reference, p.id);
+    const direct = branches.filter(b => b.direct);
+    let h = '<section class="pp-sec pp-rel"><h3 class="pp-h">Which grandparent’s branch?</h3>';
+    if (direct.length) {
+      for (const b of direct) {
+        const g = b.grandparent;
+        const title = /^F/i.test(g.gender || '') ? 'Grandma ' : /^M/i.test(g.gender || '') ? 'Grandpa ' : '';
+        h += '<p class="pp-branch"><strong>Through ' + title + esc(g.name) + '</strong></p>';
+        h += grandparentPathHtml(b, p, relChainsHtml);
+      }
+    } else h += '<p>No direct ancestral path through the four grandparents is recorded for this person yet.</p>';
+    h += '<details><summary>Check all four grandparent branches</summary>';
+    for (const b of branches) h += '<p>' + esc(b.grandparent.name) + ' — ' + (b.direct ? 'ancestor on this branch' : 'no direct path recorded here') + '</p>';
+    h += '<p>This identifies the family-tree route, not an inherited DNA segment.</p></details>';
+    if (curRoot && curRoot !== reference && curRoot !== p.id) {
+      h += '<details><summary>Optional comparison with chart starting person: ' + esc(nameOf(curRoot)) + '</summary>';
+      const comparison = archive.relationship(p.id, curRoot);
+      h += '<p>' + esc(relationshipSummary(comparison, nameOf)) + '</p>' + relChainsHtml(comparison) + '</details>';
+    }
     h += '</section>';
     return h;
   }
@@ -520,7 +588,7 @@ export function mountPersonPanel (host, archive, opts) {
   }
 
   function familyHtml (p) {
-    let h = '<section class="pp-sec"><h3 class="pp-h">' + esc(T('pp.family', 'family in the archive')) + '</h3><div class="pp-fam">';
+    let h = '<section class="pp-sec"><h3 class="pp-h">' + esc(T('pp.family', 'Parents, marriages and children')) + '</h3><div class="pp-fam">';
     if (p.parents.length) {
       h += '<div class="pp-fam-lab">' + esc(T('pp.parents', 'parents')) + '</div>';
       for (const par of p.parents) {
@@ -530,34 +598,22 @@ export function mountPersonPanel (host, archive, opts) {
           '<span class="pp-row-ev">' + esc(par.evidence) + '</span></button>';
       }
     }
-    if (p.children.length) {
-      h += '<div class="pp-fam-lab">' + esc(T('pp.children', 'children')) + ' (' + p.children.length + ')</div>';
-      for (const cid of p.children.slice(0, 10)) {
-        const cp = archive.getPerson(cid);
-        h += '<button type="button" class="pp-row" data-ppgo="' + esc(cid) + '">' +
-          '<span class="pp-row-name">↓ ' + esc(cp ? cp.name : cid) + (cp && cp.lifespan ? ' · ' + esc(cp.lifespan) : '') + '</span></button>';
-      }
-      if (p.children.length > 10) h += '<div class="pp-more">… ' + (p.children.length - 10) + ' ' + esc(T('pp.more.children', 'more')) + '</div>';
+
+    const groups = familyGroups(p, archive.getPerson);
+    const childrenHtml = ids => ids.map(id => {
+      const child = archive.getPerson(id);
+      return '<button type="button" class="pp-row" data-ppgo="' + esc(id) + '"><span class="pp-row-name">' + esc(child?.name || id) + (child?.lifespan ? ' · ' + esc(child.lifespan) : '') + '</span></button>';
+    }).join('');
+    for (const group of groups.marriages) {
+      const spouse = archive.getPerson(group.spouse);
+      h += '<div class="pp-marriage"><h4>Marriage</h4><p>' + esc(p.name) + ' &amp; <button type="button" class="pp-link" data-ppgo="' + esc(group.spouse) + '">' + esc(spouse?.name || group.spouse) + '</button></p>';
+      h += '<div class="pp-fam-lab">Children listed for this couple (' + group.children.length + ')</div>';
+      h += group.children.length ? childrenHtml(group.children) : '<p>No children linked to both parents here yet.</p>';
+      h += '</div>';
     }
-    if (p.spouses.length) {
-      h += '<div class="pp-fam-lab">' + esc(T('pp.spouses', 'spouses')) + '</div>';
-      for (const sid of p.spouses) {
-        const sp = archive.getPerson(sid);
-        const pairRel = archive.relationship(p.id, sid);
-        const cousins = !!(pairRel && pairRel.blood && pairRel.affinity);
-        h += '<button type="button" class="pp-row" data-pprel="' + esc(p.id) + '|' + esc(sid) + '">' +
-          '<span class="pp-row-name">⚭ ' + esc(sp ? sp.name : sid) + (sp && sp.lifespan ? ' · ' + esc(sp.lifespan) : '') + '</span>' +
-          '<span class="pp-row-ev">' + esc(T('pp.spouse.ev', 'marriage — affinity, never blood')) + (cousins ? ' · ' + esc(T('pp.spouse.cousins', 'married cousins — blood also present')) : '') + '</span></button>';
-      }
-    }
-    if (!p.parents.length && !p.children.length && !p.spouses.length) {
-      h += '<div class="pp-none">' + esc(T('pp.family.empty', 'no recorded family links inside the published archive — coverage of the walk, not a finding about anyone')) + '</div>';
-    } else {
-      /* descendant-side frontier — the generic coverage law: a PARTIAL family
-       * must never read as the whole family (the founder's Albert Rockwood
-       * finding: “children (1)” ≠ “had one child”) */
-      h += '<div class="pp-coverage">' + esc(T('pp.family.coverage', 'this edition follows the founder’s blood line — siblings, other marriages, and descendants of people on the line largely live beyond the published record (coverage, not contradiction)')) + '</div>';
-    }
+    if (groups.otherChildren.length) h += '<div class="pp-fam-lab">' + (p.spouses.length ? 'Children not yet linked to a couple here' : 'Children') + '</div>' + childrenHtml(groups.otherChildren);
+    if (!p.parents.length && !p.children.length && !p.spouses.length) h += '<p>No family links added yet.</p>';
+    h += '<p class="pp-coverage">Children listed here may not be the complete family.</p>';
     /* known broader family — attributed numbers carried by the archive
      * (family testimony / cited biography); never invented by the panel */
     if (p.broaderFamily) {
@@ -591,7 +647,8 @@ export function mountPersonPanel (host, archive, opts) {
       h += '<div class="pp-layer" data-kind="records"><div class="pp-layer-lab">① ' + esc(T('pp.layer.records', 'documentary record')) + '</div>' +
         '<div class="pp-layer-att">' + esc(L.records.provider) + ' · ' + esc(L.records.providerRef) +
         (L.records.retrieved ? ' · ' + esc(T('pp.retrieved', 'retrieved')) + ' ' + esc(L.records.retrieved.slice(0, 10)) : '') + '</div>' +
-        '<a class="pp-layer-link" href="' + esc(L.records.recordUrl) + '" target="_blank" rel="noopener">' + esc(T('pp.openrecord', 'open the provider record ↗')) + '</a></div>';
+        '<a class="pp-layer-link" href="' + esc(L.records.recordUrl) + '" target="_blank" rel="noopener noreferrer">' +
+        esc(o.localEvidence ? T('pp.openprovenance', 'optional provider tree reference ↗') : T('pp.openrecord', 'open the provider record ↗')) + '</a></div>';
     }
     if (L.correction) {
       any = true;
@@ -749,18 +806,21 @@ export function mountPersonPanel (host, archive, opts) {
     let h = '<article class="pp-person" data-ppid="' + esc(id) + '">';
     h += '<h2 class="pp-name" tabindex="-1">' + esc(p.name) + '</h2>';
     if (p.lifespan) h += '<div class="pp-years">' + esc(p.lifespan) + '</div>';
-    h += '<div class="pp-chips">' + chipsHtml(p) + '</div>';
+
+    h += '<div class="pp-actions">' +
+      '<button type="button" class="pp-act" data-pproot="' + esc(id) + '">' + esc(T('pp.walk', 'walk this branch')) + '</button>' +
+      '<button type="button" class="pp-act pp-ghost" data-pparchive="' + esc(id) + '">' + esc(T('pp.research', 'open full research')) + '</button></div>';
+    const wiki = wikipediaLink(p);
+    if (wiki) h += '<p><a class="pp-link" href="' + esc(wiki.url) + '" target="_blank" rel="noopener noreferrer">' + esc(wiki.label) + '</a></p>';
     h += relToRootHtml(p);
     h += familyHtml(p);
     h += frontierHtml(p);
-    h += layersHtml(p);
-    h += teasersHtml(p);
+    h += '<details class="pp-sec"><summary>Sources and research notes</summary>' +
+      (o.localEvidence && !p.living ? '<section class="pp-sec" data-pp-local-evidence></section>' : '') +
+      '<div class="pp-chips">' + chipsHtml(p) + '</div>' + layersHtml(p) + teasersHtml(p) + '</details>';
     h += '<section class="pp-sec"><h3 class="pp-h">' + esc(T('pp.bnr', 'blood address')) + '</h3>' +
       '<div class="pp-bnr">' + esc(p.bnr) + '</div></section>';
-    h += '<div class="pp-actions">' +
-      '<button type="button" class="pp-act" data-pproot="' + esc(id) + '">' + esc(T('pp.reroot', 'stand here (re-root)')) + ' <kbd>R</kbd></button>' +
-      '<button type="button" class="pp-act pp-ghost" data-pparchive="' + esc(id) + '">' + esc(T('pp.openarchive', 'open the person archive')) + ' <kbd>O</kbd></button>' +
-      '</div></article>';
+    h += '</article>';
     return h;
   }
 
@@ -802,6 +862,7 @@ export function mountPersonPanel (host, archive, opts) {
 
   /* ── render + events ───────────────────────────────────────────────────── */
   function render () {
+    if (disposeLocalEvidence) { disposeLocalEvidence(); disposeLocalEvidence = null; }
     backbar.hidden = stack.length === 0;
     if (view.type === 'person') viewEl.innerHTML = personHtml(view.id);
     else if (view.type === 'relationship') viewEl.innerHTML = relationshipHtml(view.a, view.b);
@@ -828,6 +889,8 @@ export function mountPersonPanel (host, archive, opts) {
     } else {
       viewEl.innerHTML = discoveriesHtml();
     }
+    const localSlot = o.localEvidence && view.type === 'person' ? viewEl.querySelector('[data-pp-local-evidence]') : null;
+    if (localSlot) disposeLocalEvidence = mountLocalEvidence(localSlot, o.localEvidence, view.id);
   }
 
   function onHostClick (e) {
@@ -909,6 +972,7 @@ export function mountPersonPanel (host, archive, opts) {
     state: publicState,
     get root () { return curRoot; },
     destroy () {
+      if (disposeLocalEvidence) { disposeLocalEvidence(); disposeLocalEvidence = null; }
       qEl.removeEventListener('input', onQInput);
       qEl.removeEventListener('keydown', onQKeydown);
       host.removeEventListener('click', onHostClick);

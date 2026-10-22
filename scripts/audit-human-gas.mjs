@@ -72,21 +72,6 @@ const LEDGER = [
   },
   {
     file: 'wallet.html',
-    pattern: 'Gas is estimated live',
-    finding: 'the ANT-on-Arbitrum flow surfaces a live gas estimate to the '
-      + 'human before broadcast — the human pays ARB gas to move their own ANT',
-    remediation: 'R5 gas abstraction on the Arbitrum ANT flow (sponsor the '
-      + 'broadcast or fold gas into the quoted price)',
-  },
-  {
-    file: 'wallet.html',
-    pattern: 'gas: reading',
-    finding: 'a gas read is surfaced in a derived-address status line (the '
-      + 'human-facing contract names gas as a live concern)',
-    remediation: 'same R5 abstraction; display price-inclusive totals only',
-  },
-  {
-    file: 'wallet.html',
     pattern: 'gwei',
     finding: 'the EVM panel renders gas prices in gwei — native-fee '
       + 'management in the human-facing contract',

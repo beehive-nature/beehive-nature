@@ -40,6 +40,8 @@ const CONTRACT = env('CONTRACT', 'bnrapolltest');
 const LIVE_DIR = resolve(env('LIVE_DIR', '/opt/buzz/deploy/compose/live'));
 const PORT = Number(env('PORT', '8094'));
 const RTMP_PORT = Number(env('RTMP_PORT', '1935'));
+const STATIC_ROOT = env('STATIC_ROOT', '') ? resolve(env('STATIC_ROOT', '')) : null;
+const DOOR_HOSTS = env('DOOR_HOSTS', '127.0.0.1,172.18.0.1').split(',').map(s => s.trim()).filter(Boolean);
 const ROOM_DEFAULT = env('ROOM', 'general');
 const SEG_MS = 2000;           // hls_time
 const WINDOW_SEGS = 12;        // hls_list_size (24s window: churn gaps must not strand the player)
@@ -219,6 +221,35 @@ const handler = async (req, res) => {
     const u = new URL(req.url, 'http://door');
     const parts = u.pathname.split('/').filter(Boolean); // [live, ...]
 
+    // Optional Hostinger public surface bundle. It contains only the estate's
+    // tracked public surfaces; private runtime state is never below this root.
+    if (STATIC_ROOT && (u.pathname === '/tokens.css' || u.pathname === '/watch' || u.pathname.startsWith('/watch/'))) {
+      if (!['GET', 'HEAD'].includes(req.method)) return send(405, { ok: false });
+      if (u.pathname === '/watch') return send(308, '', 'text/plain', { location: '/watch/' + u.search });
+      let relative = u.pathname === '/tokens.css' ? 'tokens.css' : decodeURIComponent(u.pathname.slice('/watch/'.length));
+      if (!relative || relative === 'index.html') relative = 'watch.html';
+      if (relative.endsWith('/')) relative += 'index.html';
+      const file = resolve(STATIC_ROOT, relative);
+      if (!file.startsWith(STATIC_ROOT + sep)) return send(404, { ok: false });
+      const types = { html: 'text/html', js: 'text/javascript', mjs: 'text/javascript', css: 'text/css', json: 'application/json', svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', webp: 'image/webp', woff2: 'font/woff2', mp4: 'video/mp4' };
+      const type = types[file.split('.').pop()];
+      if (!type) return send(404, { ok: false });
+      try {
+        const bytes = readFileSync(file);
+        if (type === 'video/mp4' && req.headers.range) {
+          const range = String(req.headers.range).match(/^bytes=(\d+)-(\d*)$/);
+          const start = range ? Number(range[1]) : NaN;
+          const end = range?.[2] ? Number(range[2]) : bytes.length - 1;
+          if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= bytes.length)
+            return send(416, '', type, { 'content-range': `bytes */${bytes.length}` });
+          const last = Math.min(end, bytes.length - 1);
+          return send(206, bytes.subarray(start, last + 1), type, { 'accept-ranges': 'bytes', 'content-range': `bytes ${start}-${last}/${bytes.length}` });
+        }
+        return send(200, bytes, type, type === 'video/mp4' ? { 'accept-ranges': 'bytes' } : {});
+      }
+      catch { return send(404, { ok: false, reason: 'no such public asset' }); }
+    }
+
     /* health — publishing + honest numbers */
     if (u.pathname === '/live/health') {
       const rooms = [...streams.entries()].map(([room, s]) => {
@@ -328,7 +359,7 @@ const handler = async (req, res) => {
 };
 // two binds, one door: loopback (x0x tailnet forwards) + the docker bridge
 // (caddy's 172.18.0.1 pattern — unreachable from the public internet)
-for (const host of ['127.0.0.1', '172.18.0.1']) {
+for (const host of DOOR_HOSTS) {
   await new Promise((res) => createServer(handler).listen(PORT, host, () => {
     console.log(`door: listening on ${host}:${PORT} (read-only meter gate)`); res();
   }));

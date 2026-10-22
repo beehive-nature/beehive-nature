@@ -1,0 +1,105 @@
+X0X-PQ x0x "0.48.0" / "32bf552808cc907ed47978e2bb7c896d7c815858"; saorsa-pqc 0.5.1 / fips203 0.4.3 / fips204 0.4.6; ACVP 975de31eb83d87039ec88934fdc47d8c312b892d
+X0X-PQ ML-KEM-keyGen-FIPS203: 25 selected cases
+X0X-PQ ML-KEM-encapDecap-FIPS203: 55 selected cases
+X0X-PQ ML-KEM-encapDecap-FIPS203-tr1: 65 selected cases
+X0X-PQ ML-DSA-keyGen-FIPS204: 25 selected cases
+X0X-PQ ML-DSA-sigGen-FIPS204: 120 selected cases
+X0X-PQ ML-DSA-sigGen-FIPS204-tr1: 240 selected cases
+X0X-PQ ML-DSA-sigVer-FIPS204: 60 selected cases
+X0X-PQ ML-DSA-65 OsRng keyGen/sign DIFFERENTIAL [libcrux]: executed 12 of 12, passed 12
+X0X-PQ ML-DSA-65 OsRng keyGen/sign DIFFERENTIAL [rustcrypto]: executed 12 of 12, passed 12
+X0X-PQ ML-DSA-65 TEETH last message byte [saorsa-pqc]: executed 12 of 12, passed 12
+X0X-PQ ML-DSA-65 TEETH last signature byte [saorsa-pqc]: executed 12 of 12, passed 12
+X0X-PQ ML-DSA-65 TEETH wrong signer [saorsa-pqc]: executed 12 of 12, passed 12
+X0X-PQ ML-DSA-65 keyGen (FIPS204) [fips204]: executed 25 of 25, passed 25
+X0X-PQ ML-DSA-65 keyGen (FIPS204) KAT [saorsa-pqc]: executed 25 of 25, passed 25
+X0X-PQ ML-DSA-65 keyGen (FIPS204) TEETH one input byte flipped [fips204]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 legacy wrapper DIFFERENTIAL [libcrux]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 legacy wrapper DIFFERENTIAL [rustcrypto]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 legacy wrapper TEETH message [saorsa-pqc]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 sigGen ext-pure (FIPS204) DIFFERENTIAL [saorsa-pqc]: executed 30 of 30, passed 30
+X0X-PQ ML-DSA-65 sigGen ext-pure (FIPS204-tr1) DIFFERENTIAL [saorsa-pqc]: executed 60 of 60, passed 60
+X0X-PQ ML-DSA-65 sigGen ext-pure det (FIPS204) [fips204]: executed 15 of 15, passed 15
+X0X-PQ ML-DSA-65 sigGen ext-pure det (FIPS204) TEETH one input byte flipped [fips204]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, expanded) [fips204]: executed 15 of 15, passed 15
+X0X-PQ ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, expanded) TEETH one input byte flipped [fips204]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, seed) [fips204]: executed 15 of 15, passed 15
+X0X-PQ ML-DSA-65 sigGen ext-pure det (FIPS204-tr1, seed) TEETH one input byte flipped [fips204]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 sigGen ext-pure hedged (FIPS204) [fips204]: executed 15 of 15, passed 15
+X0X-PQ ML-DSA-65 sigGen ext-pure hedged (FIPS204) TEETH one input byte flipped [fips204]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, expanded) [fips204]: executed 15 of 15, passed 15
+X0X-PQ ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, expanded) TEETH one input byte flipped [fips204]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, seed) [fips204]: executed 15 of 15, passed 15
+X0X-PQ ML-DSA-65 sigGen ext-pure hedged (FIPS204-tr1, seed) TEETH one input byte flipped [fips204]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 sigGen internal det (FIPS204) [fips204]: executed 15 of 15, passed 15
+X0X-PQ ML-DSA-65 sigGen internal det (FIPS204) TEETH one input byte flipped [fips204]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 sigGen internal det (FIPS204-tr1, expanded) [fips204]: executed 15 of 15, passed 15
+X0X-PQ ML-DSA-65 sigGen internal det (FIPS204-tr1, expanded) TEETH one input byte flipped [fips204]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 sigGen internal det (FIPS204-tr1, seed) [fips204]: executed 15 of 15, passed 15
+X0X-PQ ML-DSA-65 sigGen internal det (FIPS204-tr1, seed) TEETH one input byte flipped [fips204]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 sigGen internal hedged (FIPS204) [fips204]: executed 15 of 15, passed 15
+X0X-PQ ML-DSA-65 sigGen internal hedged (FIPS204) TEETH one input byte flipped [fips204]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 sigGen internal hedged (FIPS204-tr1, expanded) [fips204]: executed 15 of 15, passed 15
+X0X-PQ ML-DSA-65 sigGen internal hedged (FIPS204-tr1, expanded) TEETH one input byte flipped [fips204]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 sigGen internal hedged (FIPS204-tr1, seed) [fips204]: executed 15 of 15, passed 15
+X0X-PQ ML-DSA-65 sigGen internal hedged (FIPS204-tr1, seed) TEETH one input byte flipped [fips204]: executed 1 of 1, passed 1
+X0X-PQ ML-DSA-65 sigVer ext-pure (FIPS204) [fips204]: executed 15 of 15, passed 15
+X0X-PQ ML-DSA-65 sigVer ext-pure (FIPS204) KAT [saorsa-pqc]: executed 15 of 15, passed 15
+X0X-PQ ML-DSA-65 sigVer internal (FIPS204) [fips204]: executed 15 of 15, passed 15
+X0X-PQ ML-KEM-768 OsRng keyGen/encapsulation DIFFERENTIAL [libcrux]: executed 12 of 12, passed 12
+X0X-PQ ML-KEM-768 OsRng keyGen/encapsulation DIFFERENTIAL [rustcrypto]: executed 12 of 12, passed 12
+X0X-PQ ML-KEM-768 TEETH changed ciphertext (implicit rejection) [saorsa-pqc]: executed 12 of 12, passed 12
+X0X-PQ ML-KEM-768 TEETH decapsulation key check [fips203]: executed 1 of 1, passed 1
+X0X-PQ ML-KEM-768 TEETH decapsulation key check [saorsa-pqc]: executed 1 of 1, passed 1
+X0X-PQ ML-KEM-768 TEETH encapsulation key check [fips203]: executed 1 of 1, passed 1
+X0X-PQ ML-KEM-768 TEETH encapsulation key check [saorsa-pqc]: executed 1 of 1, passed 1
+X0X-PQ ML-KEM-768 decapsulation (FIPS203) [fips203]: executed 10 of 10, passed 10
+X0X-PQ ML-KEM-768 decapsulation (FIPS203) KAT [saorsa-pqc]: executed 10 of 10, passed 10
+X0X-PQ ML-KEM-768 decapsulation (FIPS203) TEETH one input byte flipped [fips203]: executed 1 of 1, passed 1
+X0X-PQ ML-KEM-768 decapsulation (FIPS203-tr1, expanded) [fips203]: executed 10 of 10, passed 10
+X0X-PQ ML-KEM-768 decapsulation (FIPS203-tr1, expanded) KAT [saorsa-pqc]: executed 10 of 10, passed 10
+X0X-PQ ML-KEM-768 decapsulation (FIPS203-tr1, expanded) TEETH one input byte flipped [fips203]: executed 1 of 1, passed 1
+X0X-PQ ML-KEM-768 decapsulation (FIPS203-tr1, seed) [fips203]: executed 10 of 10, passed 10
+X0X-PQ ML-KEM-768 decapsulation (FIPS203-tr1, seed) KAT [saorsa-pqc]: executed 10 of 10, passed 10
+X0X-PQ ML-KEM-768 decapsulation (FIPS203-tr1, seed) TEETH one input byte flipped [fips203]: executed 1 of 1, passed 1
+X0X-PQ ML-KEM-768 decapsulationKeyCheck (FIPS203) [fips203]: executed 10 of 10, passed 10
+X0X-PQ ML-KEM-768 decapsulationKeyCheck (FIPS203) KAT [saorsa-pqc]: executed 10 of 10, passed 10
+X0X-PQ ML-KEM-768 decapsulationKeyCheck (FIPS203-tr1, expanded) [fips203]: executed 10 of 10, passed 10
+X0X-PQ ML-KEM-768 decapsulationKeyCheck (FIPS203-tr1, expanded) KAT [saorsa-pqc]: executed 10 of 10, passed 10
+X0X-PQ ML-KEM-768 encapsulation (FIPS203) [fips203]: executed 25 of 25, passed 25
+X0X-PQ ML-KEM-768 encapsulation (FIPS203) TEETH one input byte flipped [fips203]: executed 1 of 1, passed 1
+X0X-PQ ML-KEM-768 encapsulation (FIPS203-tr1) [fips203]: executed 25 of 25, passed 25
+X0X-PQ ML-KEM-768 encapsulation (FIPS203-tr1) TEETH one input byte flipped [fips203]: executed 1 of 1, passed 1
+X0X-PQ ML-KEM-768 encapsulationKeyCheck (FIPS203) [fips203]: executed 10 of 10, passed 10
+X0X-PQ ML-KEM-768 encapsulationKeyCheck (FIPS203) KAT [saorsa-pqc]: executed 10 of 10, passed 10
+X0X-PQ ML-KEM-768 encapsulationKeyCheck (FIPS203-tr1) [fips203]: executed 10 of 10, passed 10
+X0X-PQ ML-KEM-768 encapsulationKeyCheck (FIPS203-tr1) KAT [saorsa-pqc]: executed 10 of 10, passed 10
+X0X-PQ ML-KEM-768 independent encapsulation/wrapper decapsulation DIFFERENTIAL [libcrux]: executed 12 of 12, passed 12
+X0X-PQ ML-KEM-768 independent encapsulation/wrapper decapsulation DIFFERENTIAL [rustcrypto]: executed 12 of 12, passed 12
+X0X-PQ ML-KEM-768 keyGen (FIPS203) [fips203]: executed 25 of 25, passed 24
+X0X-PQ ML-KEM-768 keyGen (FIPS203) KAT [saorsa-pqc]: executed 25 of 25, passed 24
+X0X-PQ ML-KEM-768 keyGen (FIPS203) TEETH one input byte flipped [fips203]: executed 1 of 1, passed 1
+X0X-PQ T-VACUOUS malformed imports TEETH [saorsa-pqc]: executed 1 of 1, passed 1
+X0X-PQ NOT RUN L2 Cryptol comparison / L3-L5 FIPS and Saorsa proofs: this lane executes official-vector and independent-implementation tests; BNR's RustCrypto proofs do not transfer
+X0X-PQ NOT RUN ML-DSA-65 internal/mu/prehash [saorsa-pqc]: not exercised through x0x's pure external wrapper path; fips204 internal cases have their own result
+X0X-PQ NOT RUN ML-DSA-65 sigGen [saorsa-pqc] KAT: wrapper fixes OsRng; supplied-randomness KAT runs on fips204; wrapper signatures checked by RustCrypto and libcrux
+X0X-PQ NOT RUN ML-DSA-65 sigGen ext-prehash det (FIPS204): HashML-DSA (pre-hash) is not used anywhere in the estate
+X0X-PQ NOT RUN ML-DSA-65 sigGen ext-prehash det (FIPS204-tr1, expanded): HashML-DSA (pre-hash) is not used anywhere in the estate
+X0X-PQ NOT RUN ML-DSA-65 sigGen ext-prehash det (FIPS204-tr1, seed): HashML-DSA (pre-hash) is not used anywhere in the estate
+X0X-PQ NOT RUN ML-DSA-65 sigGen ext-prehash hedged (FIPS204): HashML-DSA (pre-hash) is not used anywhere in the estate
+X0X-PQ NOT RUN ML-DSA-65 sigGen ext-prehash hedged (FIPS204-tr1, expanded): HashML-DSA (pre-hash) is not used anywhere in the estate
+X0X-PQ NOT RUN ML-DSA-65 sigGen ext-prehash hedged (FIPS204-tr1, seed): HashML-DSA (pre-hash) is not used anywhere in the estate
+X0X-PQ NOT RUN ML-DSA-65 sigGen internal-mu det (FIPS204) [fips204]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+X0X-PQ NOT RUN ML-DSA-65 sigGen internal-mu det (FIPS204-tr1, expanded) [fips204]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+X0X-PQ NOT RUN ML-DSA-65 sigGen internal-mu det (FIPS204-tr1, seed) [fips204]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+X0X-PQ NOT RUN ML-DSA-65 sigGen internal-mu hedged (FIPS204) [fips204]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+X0X-PQ NOT RUN ML-DSA-65 sigGen internal-mu hedged (FIPS204-tr1, expanded) [fips204]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+X0X-PQ NOT RUN ML-DSA-65 sigGen internal-mu hedged (FIPS204-tr1, seed) [fips204]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+X0X-PQ NOT RUN ML-DSA-65 sigVer ext-prehash (FIPS204): HashML-DSA (pre-hash) is not used anywhere in the estate
+X0X-PQ NOT RUN ML-DSA-65 sigVer internal-mu (FIPS204) [fips204]: this implementation exposes no external-μ interface; the estate never signs or verifies μ
+X0X-PQ NOT RUN ML-KEM-768 encapsulation [saorsa-pqc] KAT: wrapper fixes OsRng; deterministic encapsulation KAT runs on fips203; randomized wrapper tested separately
+X0X-PQ NOT RUN RNG assurance: OsRng calls exercised; entropy quality, validation status and failure injection not established
+X0X-PQ NOT RUN other crypto and full-system qualification: ChaCha20-Poly1305, BLAKE3, SHA-256, transport, all application call sites and full-system properties require separate lanes
+X0X-PQ FAIL ML-KEM-768 keyGen (FIPS203) [fips203] tcId 26
+X0X-PQ FAIL ML-KEM-768 keyGen (FIPS203) KAT [saorsa-pqc] tcId 26
+X0X-PQ SUMMARY: 752 executed, 750 passed, 2 failed; 37 required rows, 0 missing; 0 errors

@@ -3,7 +3,7 @@
 // repository or production files are touched.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, readdirSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { execFileSync } from "node:child_process";
@@ -44,8 +44,37 @@ function buildFixture() {
   file("assets/profile-archive/lineage/reconstructions.json", JSON.stringify({ current: {}, versions: [] }));
   file("assets/profile-archive/lineage/identity-registry.json", JSON.stringify({ schema: "skaists.identity-registry/1", issued: {}, aliases: {} }));
   file("assets/profile-archive/lineage/staging-inventory.json", JSON.stringify({ publicStaged: 2, privateStaged: 0, sumCheck: true }));
+  // evidence layer (founder order 2026-10-02): the six declared public source files
+  file("assets/profile-archive/lineage/sources/manifest.json", JSON.stringify({ schema: "skaists.sources-manifest/1", uniqueRecords: 1 }));
+  file("assets/profile-archive/lineage/sources/index.json", JSON.stringify({
+    schema: "skaists.sources/1", persons: { pa1: { sources: [{ id: "rec1" }] } },
+  }));
+  file("assets/profile-archive/lineage/sources/records.json", JSON.stringify({
+    schema: "skaists.sources-records/1", generated: "fixture", records: {
+      rec1: { id: "rec1", title: "Public title", citation: "Public citation", redactedLiving: false,
+        urls: ["https://example.test/ark"], event: { factType: "Census", place: "Somewhere" },
+        evidence: [{ factType: "Name", fieldType: "Original", value: "PRIVATE TRANSCRIPTION" }],
+        retrieved: "2026-10-02", provider: "fixture" },
+    },
+  }));
+  file("assets/profile-archive/lineage/sources/search-evidence.json", JSON.stringify({ schema: "skaists.search-evidence/1", observations: [] }));
+  file("assets/profile-archive/lineage/sources/images-summary.json", JSON.stringify({ schema: "skaists.images-summary/1", images: [] }));
+  file("assets/profile-archive/lineage/sources/relationship-audit.json", JSON.stringify({ schema: "skaists.relationship-audit/1", edges: {} }));
+  file("assets/profile-archive/lineage/zblood-storage-economics.json", JSON.stringify({
+    schema: "zblood.storage-economics/1",
+    quotes: { autonomi: {
+      route: "fixture quote route",
+      queriedAt: "2026-10-02T00:00:00Z",
+      raw: { storage_cost_atto: "999" },
+      computed: { storageANT: "999" },
+      ceilings: { storageMaxANT: 2.5, gasMaxETH: 0.0002, enforceableByClient: false },
+    } },
+    states: { prepared: true, quoted: true },
+  }));
   file("assets/profile-archive/lineage/persons/pa1.json", '{"internalId":"pa1"}');
   file("assets/profile-archive/lineage/persons/pa2.json", '{"internalId":"pa2"}');
+  file("assets/profile-archive/lineage/persons/pa1.html", '<html>Published A</html>');
+  file("assets/profile-archive/lineage/persons/pa2.html", '<html>Published B</html>');
   file("assets/profile-archive/lineage/evidence/pack-a.json", '{"schema":"skaists.evidence/1"}');
   file("assets/profile-archive/house-crest-von-zutphen-DESIGN.svg", "<svg>crest</svg>");
   file("assets/profile-archive/house-crest-von-zutphen.json", '{"schema":"skaists.house-profile/1"}');
@@ -53,8 +82,124 @@ function buildFixture() {
     file("surfaces/" + s, "<!--" + s + "-->");
   file("docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing.svg", "<svg>breathe</svg>");
   file("assets/brand/skaists-separators.svg", "<svg>sep</svg>");
+  const runtime = JSON.parse(readFileSync(join(REPO, 'tools/genealogy/preservation-runtime.json'), 'utf8'));
+  file('tools/genealogy/preservation-runtime.json', JSON.stringify(runtime));
+  for (const path of runtime.files) file(path, '');
   return root;
 }
+
+test('interactive dependency missing fails before replacing an existing package', () => {
+  const root = buildFixture(), pkg = join(root, 'pkg');
+  mkdirSync(pkg); writeFileSync(join(pkg, 'sentinel'), 'keep');
+  rmSync(join(root, 'surfaces/tree-of-life.mjs'));
+  const result = run(['prepare', pkg], { cwd: root });
+  assert.notEqual(result.code, 0);
+  assert.match(result.stderr, /tree-of-life\.mjs/);
+  assert.equal(readFileSync(join(pkg, 'sentinel'), 'utf8'), 'keep');
+});
+
+test('local working edition retains text, activates local reading, and is refused by public approval and tar', () => {
+  const root = buildFixture(), pkg = join(root, 'local-pkg'), restored = join(root, 'restored');
+  writeFileSync(join(root, 'surfaces/blood.html'), '<!doctype html><html lang="en"><body>Archive</body></html>');
+  const result = run(['prepare-local', pkg], { cwd: root });
+  assert.equal(result.code, 0, result.stderr);
+  const manifest = JSON.parse(readFileSync(join(pkg, 'manifest.json'), 'utf8'));
+  assert.equal(manifest.schema, 'skaists.preservation-local/1');
+  const localText = readFileSync(join(pkg, 'assets/profile-archive/lineage/local-evidence/persons/pa1.json'), 'utf8');
+  assert.ok(localText.includes('PRIVATE TRANSCRIPTION'));
+  assert.ok(readFileSync(join(pkg, 'surfaces/blood.html'), 'utf8').includes('data-local-evidence="../assets/profile-archive/lineage/local-evidence/"'));
+  assert.equal(run(['verify', pkg], { cwd: root }).code, 0);
+  assert.equal(run(['restore', pkg, restored], { cwd: root }).code, 0);
+  assert.equal(readFileSync(join(restored, 'assets/profile-archive/lineage/local-evidence/persons/pa1.json'), 'utf8'), localText);
+  if (process.platform !== 'win32') {
+    assert.equal(statSync(restored).mode & 0o777, 0o700);
+    assert.equal(statSync(join(restored, 'assets/profile-archive/lineage/local-evidence/persons/pa1.json')).mode & 0o777, 0o600);
+  }
+  const approve = run(['approve', pkg, 'tester', 'public network'], { cwd: root });
+  assert.notEqual(approve.code, 0);
+  assert.match(approve.stderr, /local working copies are not publication editions/);
+  assert.throws(() => execFileSync('bash', [join(REPO, 'tools/genealogy/build-eternalization-tar.sh'), pkg, join(root, 'private.tar')],
+    { encoding: 'utf8', stdio: 'pipe' }), /public preservation edition/);
+  assert.equal(existsSync(join(root, 'private.tar')), false);
+  const publicPkg = join(root, 'public-pkg');
+  assert.equal(run(['prepare', publicPkg], { cwd: root }).code, 0);
+  assert.ok(!readFileSync(join(publicPkg, 'assets/profile-archive/lineage/sources/records.json'), 'utf8').includes('PRIVATE TRANSCRIPTION'));
+  assert.equal(existsSync(join(publicPkg, 'assets/profile-archive/lineage/local-evidence')), false);
+  assert.ok(!readFileSync(join(publicPkg, 'surfaces/blood.html'), 'utf8').includes('data-local-evidence'));
+});
+
+test('failed local acquisition leaves no partial working edition or blocked retry', () => {
+  const root = buildFixture(), pkg = join(root, 'local-pkg'), input = join(root, 'local-input.json');
+  writeFileSync(join(root, 'saved.txt'), 'actual bytes');
+  const evidence = { schema: 'skaists.local-evidence-input/1', artifacts: [{ sourceId: 'rec1', file: 'saved.txt',
+    mediaType: 'text/plain', digest: 'sha256:' + createHash('sha256').update('wrong bytes').digest('hex') }] };
+  writeFileSync(input, JSON.stringify(evidence));
+  const result = run(['prepare-local', pkg, input], { cwd: root });
+  assert.notEqual(result.code, 0);
+  assert.match(result.stderr, /digest mismatch/);
+  assert.equal(existsSync(pkg), false);
+  assert.equal(readdirSync(root).filter(p => p.startsWith('local-pkg.preparing-')).length, 0);
+  evidence.artifacts[0].digest = 'sha256:' + createHash('sha256').update('actual bytes').digest('hex');
+  writeFileSync(input, JSON.stringify(evidence));
+  assert.equal(run(['prepare-local', pkg, input], { cwd: root }).code, 0);
+});
+
+test('local preparation needs no quote or payment configuration; public export removes local activation', () => {
+  const root = buildFixture(), local = join(root, 'local');
+  const economics = join(root, 'assets/profile-archive/lineage/zblood-storage-economics.json');
+  const original = readFileSync(economics);
+  rmSync(economics);
+  assert.equal(run(['prepare-local', local], { cwd: root }).code, 0);
+  const status = JSON.parse(readFileSync(join(local, 'assets/profile-archive/lineage/zblood-storage-economics.json')));
+  assert.deepEqual(status.quotes, {});
+  assert.equal(status.states.uploaded, false);
+  writeFileSync(economics, original);
+  writeFileSync(join(root, 'surfaces/blood.html'), '<html lang="en" data-local-evidence="private/"><body>Archive</body></html>');
+  const publicPkg = join(root, 'public');
+  assert.equal(run(['prepare', publicPkg], { cwd: root }).code, 0);
+  assert.ok(!readFileSync(join(publicPkg, 'surfaces/blood.html'), 'utf8').includes('data-local-evidence'));
+});
+
+test('new transitive import refuses silent omission from the reviewed allowlist', () => {
+  const root = buildFixture();
+  writeFileSync(join(root, 'surfaces/tree-of-life.mjs'), 'import "./new-tree-helper.mjs";');
+  const result = run(['prepare', join(root, 'pkg')], { cwd: root });
+  assert.notEqual(result.code, 0);
+  assert.match(result.stderr, /Undeclared interactive dependencies/);
+  assert.match(result.stderr, /new-tree-helper\.mjs/);
+  writeFileSync(join(root, 'surfaces/tree-of-life.mjs'), 'import {\n helper\n} from "./multiline-helper.mjs";');
+  const multiline = run(['prepare', join(root, 'pkg')], { cwd: root });
+  assert.notEqual(multiline.code, 0);
+  assert.match(multiline.stderr, /multiline-helper\.mjs/);
+});
+
+test('string CSS imports and both video dependencies must be declared', () => {
+  const root = buildFixture();
+  writeFileSync(join(root, 'surfaces/tree-of-life.css'), '@import "missing-theme.css";');
+  writeFileSync(join(root, 'surfaces/blood.html'), '<video src="missing-video.webm" poster="missing-poster.jpg"></video>');
+  const result = run(['prepare', join(root, 'pkg')], { cwd: root });
+  assert.notEqual(result.code, 0);
+  for (const name of ['missing-theme.css', 'missing-video.webm', 'missing-poster.jpg']) assert.ok(result.stderr.includes(name));
+});
+
+test('person pages follow the corpus and cannot smuggle stale directory entries', () => {
+  const root = buildFixture(), pkg = join(root, 'pkg');
+  writeFileSync(join(root, 'assets/profile-archive/lineage/persons/stale.html'), 'UNPUBLISHED');
+  assert.equal(run(['prepare', pkg], { cwd: root }).code, 0);
+  assert.equal(existsSync(join(pkg, 'assets/profile-archive/lineage/persons/stale.html')), false);
+  rmSync(join(root, 'assets/profile-archive/lineage/persons/pa1.html'));
+  const missing = run(['prepare', pkg], { cwd: root });
+  assert.notEqual(missing.code, 0);
+  assert.match(missing.stderr, /pa1\.html/);
+});
+
+test('person page runtime dependencies cannot be omitted from a preservation edition', () => {
+  const root = buildFixture();
+  writeFileSync(join(root, 'assets/profile-archive/lineage/persons/pa1.html'), '<script src="missing.js"></script>');
+  const result = run(['prepare', join(root, 'pkg')], { cwd: root });
+  assert.notEqual(result.code, 0);
+  assert.match(result.stderr, /persons\/missing\.js/);
+});
 
 test("probe 0 (control): crest-missing refusal stays", () => {
   const root = buildFixture();
@@ -84,6 +229,31 @@ test("probe 2: approval refuses altered bytes", () => {
   const r = run(["approve", pkg, "tester", "test destination"], { cwd: root });
   assert.notEqual(r.code, 0, "approve must verify bytes first");
   assert.match(r.stderr, /blood\.html: hash mismatch/);
+});
+
+test("verification checks every file byte count and the manifest total", () => {
+  const root = buildFixture();
+  const pkg = join(root, "pkg");
+  assert.equal(run(["prepare", pkg, "test destination"], { cwd: root }).code, 0);
+  const manifestPath = join(pkg, "manifest.json");
+  let manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  manifest.files["surfaces/blood.html"].bytes += 1;
+  manifest.totalBytes += 1;
+  writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  let r = run(["verify", pkg], { cwd: root });
+  assert.notEqual(r.code, 0);
+  assert.match(r.stdout, /byte size mismatch/);
+
+  const root2 = buildFixture();
+  const pkg2 = join(root2, "pkg");
+  assert.equal(run(["prepare", pkg2, "test destination"], { cwd: root2 }).code, 0);
+  const manifestPath2 = join(pkg2, "manifest.json");
+  manifest = JSON.parse(readFileSync(manifestPath2, "utf8"));
+  manifest.totalBytes += 1;
+  writeFileSync(manifestPath2, JSON.stringify(manifest, null, 2));
+  r = run(["verify", pkg2], { cwd: root2 });
+  assert.notEqual(r.code, 0);
+  assert.match(r.stdout, /totalBytes does not equal/);
 });
 
 test("probe 3: manifest substitution after approval fails verification", () => {
@@ -143,4 +313,83 @@ test("prepare builds clean packages: stale files cannot slip in", () => {
     "stale file from an earlier publication must not enter the new package");
   assert.ok(!existsSync(join(pkg, "assets/profile-archive/lineage/persons/STALE-from-old-publication.json")),
     "prepare cleaned the package directory");
+});
+
+test("EVIDENCE LAYER declared: all six public source files are mandatory and missing ones fail prepare", () => {
+  const root = buildFixture();
+  // delete one declared evidence file → prepare must fail, no silent omission
+  rmSync(join(root, "assets/profile-archive/lineage/sources/relationship-audit.json"));
+  const r = run(["prepare", join(root, "pkg"), "test"], { cwd: root });
+  assert.notEqual(r.code, 0, "prepare must fail when a declared evidence file is missing");
+  assert.match(r.stderr, /relationship-audit/);
+});
+
+test("public search-evidence is present in a prepared edition", () => {
+  const root = buildFixture();
+  const pkg = join(root, "pkg");
+  const r = run(["prepare", pkg, "test"], { cwd: root });
+  assert.equal(r.code, 0, r.stderr);
+  assert.equal(existsSync(join(pkg, "assets/profile-archive/lineage/sources/search-evidence.json")), true);
+  const manifest = JSON.parse(readFileSync(join(pkg, "manifest.json"), "utf8"));
+  assert.ok(manifest.files["assets/profile-archive/lineage/sources/search-evidence.json"]);
+});
+
+test("prepared edition carries package-safe status without a self-referential quote", () => {
+  const root = buildFixture();
+  const pkg = join(root, "pkg");
+  const r = run(["prepare", pkg, "test"], { cwd: root });
+  assert.equal(r.code, 0, r.stderr);
+  const statusPath = join(pkg, "assets/profile-archive/lineage/zblood-storage-economics.json");
+  const status = JSON.parse(readFileSync(statusPath, "utf8"));
+  assert.equal(status.schema, "zblood.storage-economics-package/1");
+  assert.equal(status.quotes.autonomi.computed, null, "the archive cannot embed a quote for its own bytes");
+  assert.equal(status.quotes.autonomi.ceilings.storageMaxANT, 2.5);
+  assert.equal(status.quotes.autonomi.ceilings.gasMaxETH, 0.0002);
+  assert.equal(status.states.prepared, true);
+  assert.equal(status.states.quoted, false);
+  const manifest = JSON.parse(readFileSync(join(pkg, "manifest.json"), "utf8"));
+  assert.ok(manifest.files["assets/profile-archive/lineage/zblood-storage-economics.json"]);
+});
+
+test("package-safe status rejects null and empty ceiling values", () => {
+  for (const [field, value] of [["storageMaxANT", null], ["gasMaxETH", ""]]) {
+    const root = buildFixture();
+    const statusPath = join(root, "assets/profile-archive/lineage/zblood-storage-economics.json");
+    const status = JSON.parse(readFileSync(statusPath, "utf8"));
+    status.quotes.autonomi.ceilings[field] = value;
+    writeFileSync(statusPath, JSON.stringify(status));
+    const r = run(["prepare", join(root, "pkg"), "test"], { cwd: root });
+    assert.notEqual(r.code, 0, `${field}=${JSON.stringify(value)} must fail closed`);
+    assert.match(r.stderr, /separate ANT and ETH ceilings/);
+  }
+});
+
+test("privacy-safe edition projects source records without raw transcription values", () => {
+  const root = buildFixture();
+  const pkg = join(root, "pkg");
+  const r = run(["prepare", pkg, "test"], { cwd: root });
+  assert.equal(r.code, 0, r.stderr);
+  const projected = JSON.parse(readFileSync(join(pkg, "assets/profile-archive/lineage/sources/records.json"), "utf8"));
+  assert.equal(projected.schema, "skaists.sources-records-public/1");
+  assert.equal(projected.records.rec1.citation, "Public citation");
+  assert.deepEqual(projected.records.rec1.evidence, [{ factType: "Name", fieldType: "Original" }]);
+  assert.doesNotMatch(JSON.stringify(projected), /PRIVATE TRANSCRIPTION/);
+  const original = readFileSync(join(root, "assets/profile-archive/lineage/sources/records.json"), "utf8");
+  assert.match(original, /PRIVATE TRANSCRIPTION/, "prepare projects package bytes without mutating the research source");
+});
+
+test("privacy projection refuses missing or unreconciled source records", () => {
+  const root = buildFixture();
+  const recordsPath = join(root, "assets/profile-archive/lineage/sources/records.json");
+  writeFileSync(recordsPath, JSON.stringify({ schema: "skaists.sources-records/1" }));
+  let r = run(["prepare", join(root, "pkg"), "test"], { cwd: root });
+  assert.notEqual(r.code, 0);
+  assert.match(r.stderr, /with records/);
+
+  const root2 = buildFixture();
+  const manifestPath = join(root2, "assets/profile-archive/lineage/sources/manifest.json");
+  writeFileSync(manifestPath, JSON.stringify({ schema: "skaists.sources-manifest/1", uniqueRecords: 2 }));
+  r = run(["prepare", join(root2, "pkg"), "test"], { cwd: root2 });
+  assert.notEqual(r.code, 0);
+  assert.match(r.stderr, /reconciliation failed/);
 });

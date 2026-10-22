@@ -376,8 +376,28 @@ await hangCtx.close();
 // a quote service that is not there = a port nothing listens on (counted at the browser)
 const closed = createServer(); await new Promise(r => closed.listen(0, '127.0.0.1', r));
 const deadOrigin = `http://127.0.0.1:${closed.address().port}`; await new Promise(r => closed.close(r));
+
+// 6a · New bee (default art/play): bridge down NEVER paints a fail box / HTTP / Try again
+const beeDeadCtx = await openContext(deadOrigin);
+const beeDead = await openPage(beeDeadCtx);
+beeDead.on('request', r => { if (r.url().indexOf(deadOrigin) === 0 && r.method() === 'POST') hits.dead++; });
+await beeDead.evaluate(() => localStorage.setItem('bregister', 'bee'));
+await beeDead.reload({ waitUntil: 'load' });
+await beeDead.waitForSelector('[data-bdata-object]', { timeout: 8000 });
+await tap(beeDead, '[data-bdata-aud="public"]');
+await beeDead.waitForFunction(() => document.querySelector('[data-bdata-price-state]')?.dataset?.bdataPriceState === 'failed', null, { timeout: 8000 }).catch(() => {});
+const beeDeadText = await words(beeDead, '[data-bdata-price-state]');
+check('New bee: unreachable quote paints no fail box / no HTTP / no Autonomi scare', !(await beeDead.$('[data-bdata-fail]')) && !/Autonomi did not answer/i.test(beeDeadText) && !/HTTP\s*\d/i.test(beeDeadText) && !/8817|quote bridge/i.test(beeDeadText) && !/Try again/i.test(beeDeadText), beeDeadText.slice(0, 160));
+check('New bee: still says nothing was paid, and the same ask path remains', hits.dead === 1 && /Nothing has been paid from this page/i.test(beeDeadText) && (await val(beeDead, '[data-bdata-quote-go]', e => !e.disabled)) === true, `requests=${hits.dead}`);
+await beeDeadCtx.close();
+
+// 6b · cypherpunk keeps the honest named failure + Try again
+hits.dead = 0;
 const deadCtx = await openContext(deadOrigin);
 const dead = await openPage(deadCtx);
+await dead.evaluate(() => localStorage.setItem('bregister', 'cypherpunk'));
+await dead.reload({ waitUntil: 'load' });
+await dead.waitForSelector('[data-bdata-object]', { timeout: 8000 });
 dead.on('request', r => { if (r.url().indexOf(deadOrigin) === 0 && r.method() === 'POST') hits.dead++; });
 await tap(dead, '[data-bdata-aud="public"]');
 await dead.waitForSelector('[data-bdata-fail]', { timeout: 6000 }).catch(() => {});
@@ -394,6 +414,9 @@ await deadCtx.close();
 // an AUTOMATED browser can never reach the live quote service by omission
 const bareCtx = await openContext(null);
 const bare = await openPage(bareCtx);
+await bare.evaluate(() => localStorage.setItem('bregister', 'cypherpunk'));
+await bare.reload({ waitUntil: 'load' });
+await bare.waitForSelector('[data-bdata-object]', { timeout: 8000 });
 await tap(bare, '[data-bdata-aud="public"]');
 await bare.waitForTimeout(500);
 check('an automated browser with NO seeded mock is refused in words — the live quote service is never touched', (await val(bare, '[data-bdata-fail]', e => e.dataset.bdataFail).catch(() => 'none')) === 'automation' && liveBridgeTouches === 0, `live-bridge touches=${liveBridgeTouches}`);

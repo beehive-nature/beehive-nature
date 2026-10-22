@@ -181,6 +181,16 @@ export function depths(model, fromId) {
   return d;
 }
 
+// Full published ancestry, independent of a selected spine or a viewport.
+// Shortest parent distances count founder as 0 and terminate on pedigree cycles.
+export function generationStats(model) {
+  const distance = depths(model);
+  return {
+    maxGenerations: Math.max(0, ...Object.values(distance)),
+    generationBasis: "maximum shortest recorded parent distance from founder (generation 0); disputed and legendary links remain claims",
+  };
+}
+
 // shortest root→target parent-chain (ids, root first). Null when unreachable.
 // viaIds: optional waypoint chain — each via must be an ancestor of the next —
 // pinning the route when the collapsed medieval web offers several

@@ -1,0 +1,96 @@
+{
+  "schema": "bnrose.ant-observer-cost-comparison.v1",
+  "scope": "same-browser local verified bytes and actual WASM admission; no network delivery claim",
+  "trials": [
+    {
+      "filename": "docs\\receipts\\ant-bnrose-2026-10-20\\template-cost-r1.json",
+      "observedAt": "2026-10-20T17:27:00.690Z",
+      "browser": "Chrome/155.0.8059.84",
+      "arms": {
+        "baseline": {
+          "measured_reads": 7500,
+          "batch_mean_per_read_median_ms": 0.098,
+          "observer_mean_per_read_median_ms": 0.0003999999761581421,
+          "total_elapsed_ms": 744.1999999284744,
+          "total_observation_ms": 5.0999999940395355
+        },
+        "before": {
+          "measured_reads": 7500,
+          "batch_mean_per_read_median_ms": 0.1451999999880791,
+          "observer_mean_per_read_median_ms": 0.04300000035762787,
+          "total_elapsed_ms": 1112.2000000178814,
+          "total_observation_ms": 336.50000059604645
+        },
+        "after": {
+          "measured_reads": 7500,
+          "batch_mean_per_read_median_ms": 0.11700000005960465,
+          "observer_mean_per_read_median_ms": 0.01679999977350235,
+          "total_elapsed_ms": 876.7999999821186,
+          "total_observation_ms": 123.50000041723251
+        }
+      },
+      "paired_block_median_elapsed_change_pct": -20.11700308010128,
+      "observer_total_change_pct": -63.29866264532675
+    },
+    {
+      "filename": "docs\\receipts\\ant-bnrose-2026-10-20\\template-cost-r2.json",
+      "observedAt": "2026-10-20T17:27:43.587Z",
+      "browser": "Chrome/155.0.8059.84",
+      "arms": {
+        "baseline": {
+          "measured_reads": 7500,
+          "batch_mean_per_read_median_ms": 0.09619999998807907,
+          "observer_mean_per_read_median_ms": 0.0003999999761581421,
+          "total_elapsed_ms": 726.8000001013279,
+          "total_observation_ms": 3.5999999344348907
+        },
+        "before": {
+          "measured_reads": 7500,
+          "batch_mean_per_read_median_ms": 0.14139999997615815,
+          "observer_mean_per_read_median_ms": 0.040000000357627866,
+          "total_elapsed_ms": 1063.5999999046326,
+          "total_observation_ms": 312.00000047683716
+        },
+        "after": {
+          "measured_reads": 7500,
+          "batch_mean_per_read_median_ms": 0.11239999997615814,
+          "observer_mean_per_read_median_ms": 0.014799999833106994,
+          "total_elapsed_ms": 842.7000000178814,
+          "total_observation_ms": 115.99999976158142
+        }
+      },
+      "paired_block_median_elapsed_change_pct": -19.571153011784197,
+      "observer_total_change_pct": -62.82051295375135
+    },
+    {
+      "filename": "docs\\receipts\\ant-bnrose-2026-10-20\\template-cost-r3.json",
+      "observedAt": "2026-10-20T17:27:47.024Z",
+      "browser": "Chrome/155.0.8059.84",
+      "arms": {
+        "baseline": {
+          "measured_reads": 7500,
+          "batch_mean_per_read_median_ms": 0.09619999998807907,
+          "observer_mean_per_read_median_ms": 0.0003999999761581421,
+          "total_elapsed_ms": 727.8000000119209,
+          "total_observation_ms": 4.5
+        },
+        "before": {
+          "measured_reads": 7500,
+          "batch_mean_per_read_median_ms": 0.14499999994039536,
+          "observer_mean_per_read_median_ms": 0.04280000030994415,
+          "total_elapsed_ms": 1088.8999999463558,
+          "total_observation_ms": 326.3999992311001
+        },
+        "after": {
+          "measured_reads": 7500,
+          "batch_mean_per_read_median_ms": 0.11480000007152558,
+          "observer_mean_per_read_median_ms": 0.016399999737739562,
+          "total_elapsed_ms": 862.1000000536442,
+          "total_observation_ms": 122.29999941587448
+        }
+      },
+      "paired_block_median_elapsed_change_pct": -20.942982454523474,
+      "observer_total_change_pct": -62.53063734559547
+    }
+  ]
+}

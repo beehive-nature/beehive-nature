@@ -4,7 +4,7 @@
 // name regex to pin it (e.g. "Sigurd Ring de Trondheim").
 import { readFileSync, writeFileSync } from "node:fs";
 import { existsSync, readdirSync } from "node:fs";
-import { createModel, bloodline, spine, depths, validate, birthYear, evidenceClass, applyCorrection } from "./model.mjs";
+import { createModel, bloodline, spine, depths, generationStats, validate, birthYear, evidenceClass, applyCorrection } from "./model.mjs";
 import { importWalk, importSourceWalk, harvestRecord, researchBasis } from "./fs-adapter.mjs";
 import { publish } from "./publish.mjs";
 import { joinLine, emptyPart } from "./lines.mjs";
@@ -257,6 +257,7 @@ pub.meta = {
   retrieved: (raw.meta && (raw.meta.pulledAt || raw.meta.checkpointAt)) || model.meta.generated,
   source: "FamilySearch Family Tree, walked under the founder's signed-in session (fs-adapter)",
   stats: {
+    ...generationStats(pub),
     personsWalked: Object.keys(model.persons).length,
     bloodlinePersons: blood.size,
     deceasedPublished: Object.keys(pub.persons).length,

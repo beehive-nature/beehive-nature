@@ -1,0 +1,135 @@
+# BNROSE-RUST-001 recovery demonstration
+# run: 2026-10-13T05:55:18Z binary: target/release/bnrose-exec-host wasm: target/wasm32-unknown-unknown/release/bnrose_exec_wasm.wasm
+
+## supervisor init
+{"note":"root written once, never replaced; fingerprint is public","state":"C:/Users/travi/AppData/Local/Temp/tmp.Tczt56UzPg","supervisorFingerprint":"447a5d32aa5ccb70"}
+
+## phase 1 — run-op --lose-response (the WB004 retry crash point)
+{"clock":1800000000,"effectDigest":null,"lostResponse":true,"op":"f7a80bb36fe9ba7a7dbd77133bb11a0e0d1ed6ceff1f0bcfc9eaf6811a9974e3","receiptPath":null,"recovered":null,"refused":null,"state":null,"worker":"paranoid"}  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+exit=3 (3 = dispatched and effect applied, response lost)
+{"effectRows":1,"effectsAreOnePerOp":true,"journalRecords":3,"receiptPublicKey":"84f62e38f96d1418ea1f7f43ad247bdf68d7047d574c4c9237f0f2496713969a","supervisorFingerprint":"447a5d32aa5ccb70"}  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+
+## phase 2 — a clean replacement process recovers
+{
+  "effectRows": 1,
+  "format": "bnrose-exec/recovery/1",
+  "ops": [
+    {
+      "effectRows": 1,
+      "invariantReverified": true,
+      "op": "f7a80bb36fe9ba7a7dbd77133bb11a0e0d1ed6ceff1f0bcfc9eaf6811a9974e3",  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+      "receipt": {
+        "completedAt": 1800000100,
+        "effectDigest": "f75657839aa3fd6059929dfb5c69869b21e891b28c36b52e3e83708b1e8a8850",  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+        "envSha256": "cffe5644078fa5eb7f9b404fdd556fdcc029cbf247797b70138065a546c363da",  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+        "fail": 0,
+        "failWord": "",
+        "format": "bnrose-exec/receipt/1",
+        "journalHead": "bcae547ab8ec0f60929d126c47ac92e7347c0fe49c3e70d3d8924a718b47a0a4",  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+        "journalSeqHead": 4,
+        "op": "f7a80bb36fe9ba7a7dbd77133bb11a0e0d1ed6ceff1f0bcfc9eaf6811a9974e3",  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+        "recovered": true,
+        "sigEd25519": "X6TYX+WLFASLsGSOmtHWmMDryoWpLVpHXZWnKWAxC1dQB9TMe0ZKF8VHuD9wrra5JPC9MxQs9qfyrcdGq2NXAw==",
+        "state": 4,
+        "stateWord": "completed"
+      },
+      "recovered": true,
+      "stateAfter": "completed",
+      "stateBefore": "dispatched"
+    }
+  ],
+  "records": 3,
+  "stale": [],
+  "unknownsPreserved": []
+}
+exit=0 (0 = unknowns resolved by ledger evidence)
+{"effectRows":1,"effectsAreOnePerOp":true,"journalRecords":4,"receiptPublicKey":"84f62e38f96d1418ea1f7f43ad247bdf68d7047d574c4c9237f0f2496713969a","supervisorFingerprint":"447a5d32aa5ccb70"}  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+verify-receipt exit=0 (0 = the recovered receipt verifies under the public key alone)
+
+## phase 3 — the same intent again: refused (no replacement)
+{"clock":1800000000,"effectDigest":null,"lostResponse":false,"op":null,"receiptPath":null,"recovered":null,"refused":"admission:nonce-reuse","state":null,"worker":"paranoid"}
+refused: admission:nonce-reuse
+exit=1 (1 = admission:nonce-reuse)
+
+## phase 4 — adversarial sibling: durable evidence removed
+{
+  "effectRows": 0,
+  "format": "bnrose-exec/recovery/1",
+  "ops": [
+    {
+      "effectRows": 0,
+      "invariantReverified": true,
+      "op": "01a590127030e794a18ecb18ac0692273a7dbdcd15d2d5c6934acbc8184c7668",  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+      "receipt": {
+        "completedAt": 1800000100,
+        "effectDigest": "8d8cd2300b1036e05f3ad2e214227f371818472461694bd9873a69213fed1666",  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+        "envSha256": "5e879d457bf9ddc78e75eb3b7afd22a95fb709eeaaa321cbf8175848d9990dc0",  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+        "fail": 0,
+        "failWord": "",
+        "format": "bnrose-exec/receipt/1",
+        "journalHead": "dd97b1d8c30df81451b6b40343c74a4a9c0a015fec9653d94a3aaa56f53e9e6f",  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+        "journalSeqHead": 4,
+        "op": "01a590127030e794a18ecb18ac0692273a7dbdcd15d2d5c6934acbc8184c7668",  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+        "recovered": false,
+        "sigEd25519": "bu1Ry9CyoVhvmPX+SdR4lt16mViTRYp2wbkfOcvCSHKn4gL1mhIwd85iYKvGXh043h0fWPnvwNpe04ZraTU7AA==",
+        "state": 6,
+        "stateWord": "unknown"
+      },
+      "recovered": false,
+      "stateAfter": "unknown",
+      "stateBefore": "dispatched"
+    }
+  ],
+  "records": 3,
+  "stale": [],
+  "unknownsPreserved": [
+    "01a590127030e794a18ecb18ac0692273a7dbdcd15d2d5c6934acbc8184c7668"  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+  ]
+}
+round 1 exit=4 (4 = UNKNOWN preserved)
+{
+  "effectRows": 0,
+  "format": "bnrose-exec/recovery/1",
+  "ops": [
+    {
+      "effectRows": 0,
+      "invariantReverified": true,
+      "op": "01a590127030e794a18ecb18ac0692273a7dbdcd15d2d5c6934acbc8184c7668",  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+      "receipt": {
+        "completedAt": 1800000100,
+        "effectDigest": "8d8cd2300b1036e05f3ad2e214227f371818472461694bd9873a69213fed1666",  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+        "envSha256": "5e879d457bf9ddc78e75eb3b7afd22a95fb709eeaaa321cbf8175848d9990dc0",  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+        "fail": 0,
+        "failWord": "",
+        "format": "bnrose-exec/receipt/1",
+        "journalHead": "8b100207ec13a2024dfc7013376fdc4d25c6f8a06099858ef2bcd64b2dc07261",  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+        "journalSeqHead": 5,
+        "op": "01a590127030e794a18ecb18ac0692273a7dbdcd15d2d5c6934acbc8184c7668",  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+        "recovered": false,
+        "sigEd25519": "zSlGxvjR4PuTggjNqI/CZ5nPZcJ80h1CpeilCPY39i8j173rBXrVUkagEAJSbR5ybCUOgJD2SCK7LL4f2bB+Cw==",
+        "state": 6,
+        "stateWord": "unknown"
+      },
+      "recovered": false,
+      "stateAfter": "unknown",
+      "stateBefore": "unknown"
+    }
+  ],
+  "records": 4,
+  "stale": [],
+  "unknownsPreserved": [
+    "01a590127030e794a18ecb18ac0692273a7dbdcd15d2d5c6934acbc8184c7668"  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+  ]
+}
+round 2 exit=4 (4 = UNKNOWN preserved)
+{"clock":1800000000,"effectDigest":null,"lostResponse":false,"op":null,"receiptPath":null,"recovered":null,"refused":"admission:nonce-reuse","state":null,"worker":"paranoid"}
+refused: admission:nonce-reuse
+replacement exit=1 (1 = refused)
+
+## phase 5 — one flipped journal byte: the supervisor refuses to open
+refused: journal tampered at record 0: tag mismatch: recorded 36c99f266a835b41e5156aa8c049cd84617a78c3874767ccc428b3ca083c925f computed 8d1b40b943836d191305604117a29ded841d412616623909e7fc209af3a0a2b0  # PUBLIC-CONSTANT (receipt digest / public key — public by construction)
+tampered-status exit=1 (1 = chain refusal at load, fail closed)
+
+## verdict
+recovery-demo: PASS — the same operation completed from durable records;
+UNKNOWN preserved across restarts with replacements refused; tamper fails closed.

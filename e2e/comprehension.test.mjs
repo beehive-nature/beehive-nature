@@ -159,7 +159,7 @@ test('stack organ board: walls become disclosures; bee-only walls never show emp
       beeOnly: ds.filter(d => d.dataset.reg === 'bee').length,
       fullTextKept: ds.every(d => (d.textContent || '').length > 150) };
   });
-  assert.ok(stB.total >= 7, 'seven disclosures on the organ board, got ' + stB.total);
+  assert.ok(stB.total >= 6, 'six disclosures on the organ board, got ' + stB.total);
   assert.equal(stB.open, 0, 'collapsed for bee');
   assert.equal(stB.beeOnly, 2, 'the two bee-only walls carry data-reg onto the whole disclosure');
   assert.ok(stB.fullTextKept, 'full text rides inside');

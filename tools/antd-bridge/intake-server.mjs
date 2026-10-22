@@ -6,9 +6,12 @@ import {mkdir,open,readFile,rename,rm,stat} from 'node:fs/promises';
 import {resolve,join,basename,win32} from 'node:path';
 import {pathToFileURL} from 'node:url';
 
-export const MAX_BYTES=63*4190208;
+// Device custody is independent of the remote payment client's batch limit.
+// Bound disk intake separately; a caller can select a different local quota.
+export const MAX_BYTES=1024*1024*1024;
 const allowedOrigin=origin=>{try{const u=new URL(origin);return origin==='https://skaists.dev'||(['localhost','127.0.0.1'].includes(u.hostname)&&u.protocol==='http:');}catch{return false;}};
 export function createIntakeServer({stateDir,upstream='http://127.0.0.1:8817',maxBytes=MAX_BYTES}){
+  if(!Number.isSafeInteger(maxBytes)||maxBytes<=0)throw Error('local intake maxBytes must be a positive safe integer');
   const root=resolve(stateDir);let queue=Promise.resolve();
   const serial=async fn=>{const work=queue.then(fn);queue=work.catch(()=>{});return work;};
   return createServer(async(req,res)=>{
@@ -69,5 +72,6 @@ export function createIntakeServer({stateDir,upstream='http://127.0.0.1:8817',ma
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href){
   const stateDir=process.env.ANTD_BRIDGE_STATE;if(!stateDir)throw Error('ANTD_BRIDGE_STATE must name the existing bridge state directory');
   const port=Number(process.env.BDATA_INTAKE_PORT||8807);
-  const server=createIntakeServer({stateDir});server.listen(port,'127.0.0.1',()=>console.log(`bData intake ready on loopback port ${port}; keyless, local only`));
+  const maxBytes=process.env.BDATA_INTAKE_MAX_BYTES===undefined?MAX_BYTES:Number(process.env.BDATA_INTAKE_MAX_BYTES);
+  const server=createIntakeServer({stateDir,maxBytes});server.listen(port,'127.0.0.1',()=>console.log(`bData intake ready on loopback port ${port}; keyless, local only`));
 }

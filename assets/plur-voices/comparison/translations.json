@@ -1,0 +1,62 @@
+{
+  "scope": "Contextual PLUR text probes, not replacements for authored words; no native scores or quality winner",
+  "torch": "2.6.0+cpu",
+  "models": [
+    {
+      "model": "Helsinki-NLP/opus-mt-en-fr",
+      "revision": "dd7f6540a7a48a7f4db59e5c0b9c42c8eea67f18",
+      "lang": "fr",
+      "seconds": 0.56,
+      "entries": [
+        {
+          "source": "We value peace.",
+          "candidate": "Nous apprécions la paix.",
+          "review": "machine draft; native review pending"
+        },
+        {
+          "source": "We share love.",
+          "candidate": "Nous partageons l'amour.",
+          "review": "machine draft; native review pending"
+        },
+        {
+          "source": "We welcome unity without losing our differences.",
+          "candidate": "Nous saluons l'unité sans perdre nos différences.",
+          "review": "machine draft; native review pending"
+        },
+        {
+          "source": "We treat every person with respect.",
+          "candidate": "Nous traitons chaque personne avec respect.",
+          "review": "machine draft; native review pending"
+        }
+      ]
+    },
+    {
+      "model": "Helsinki-NLP/opus-mt-en-es",
+      "revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+      "lang": "es",
+      "seconds": 0.575,
+      "entries": [
+        {
+          "source": "We value peace.",
+          "candidate": "Valoramos la paz.",
+          "review": "machine draft; native review pending"
+        },
+        {
+          "source": "We share love.",
+          "candidate": "Compartimos el amor.",
+          "review": "machine draft; native review pending"
+        },
+        {
+          "source": "We welcome unity without losing our differences.",
+          "candidate": "Damos la bienvenida a la unidad sin perder nuestras diferencias.",
+          "review": "machine draft; native review pending"
+        },
+        {
+          "source": "We treat every person with respect.",
+          "candidate": "Tratamos a cada persona con respeto.",
+          "review": "machine draft; native review pending"
+        }
+      ]
+    }
+  ]
+}

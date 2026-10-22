@@ -1,0 +1,8 @@
+Running as unit: bnrose-ant-matrix5676033ba-r1-shadow-4-steady.service; invocation ID: 9e1b097e96b04d78be6de4f66aa66ec8
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 43.360s
+             CPU time consumed: 14.704s
+                   Memory peak: 294.6M (swap: 0B)
+                    IP Traffic: received 47M, sent 9M
+                      IO Bytes: written 3.6M

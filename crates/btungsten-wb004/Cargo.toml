@@ -1,0 +1,17 @@
+[package]
+name = "btungsten-wb004"
+version = "0.1.0"
+edition.workspace = true
+license = "Apache-2.0"
+description = "bTunGsTeN WB004: the time-extinction specimen - epochal governance across the 2106 time_point_sec boundary (SPEC-BTUNGSTEN-1 laws L1-L4)."
+publish = false
+
+[dependencies]
+sha2 = { workspace = true }
+
+[dev-dependencies]
+# ORDER BZDID-002 Phase 3: the epoch-root settlement bridge drives this
+# engine with a bzdid BEELOG anchor (model scale; live chain named, not
+# claimed — the Skaists bridge precedent).
+bzdid = { path = "../bzdid" }
+ed25519-dalek = "2"

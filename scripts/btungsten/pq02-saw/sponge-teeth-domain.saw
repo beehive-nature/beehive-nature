@@ -1,0 +1,28 @@
+// SPEC-BTUNGSTEN-PQ-1 PQ02 — TOOTH for sponge.saw: sha3_256_32 against the
+// sponge with the original Keccak domain byte 0x01 where SHA-3 has 0x06 (the
+// Keccak256 / SHA3-256 mix-up).
+// It MUST fail with a counterexample.
+//
+// usage (from this directory): saw sponge-teeth-domain.saw
+
+enable_experimental;
+import "../pq02-cryptol/KeccakF1600.cry";
+
+m <- mir_load_module "../../../target/saw-pq02-sponge/pq02_sponge.linked-mir.json";
+ov_p <- mir_unsafe_assume_spec m "keccak::p1600" (do {
+  st <- mir_fresh_var "st" (mir_array 25 mir_u64);
+  r <- mir_alloc_mut (mir_array 25 mir_u64);
+  mir_points_to r (mir_term st);
+  mir_execute_func [r, mir_term {{ 24 : [64] }}];
+  mir_points_to r (mir_term {{ keccakF st }});
+});
+
+print "PQ02-SAW-TEETH obligation sha3_256_32 against domain byte 0x01";
+mir_verify m "pq02_sponge::sha3_256_32" [ov_p] false (do {
+  x <- mir_fresh_var "m" (mir_array 32 mir_u8);
+  p <- mir_alloc (mir_array 32 mir_u8);
+  mir_points_to p (mir_term x);
+  mir_execute_func [p];
+  mir_return (mir_term {{ take`{32} (fromLanes (absorb (padRate 0x01 x))) }});
+}) (w4_unint_bitwuzla ["keccakF"]);
+print "PQ02-SAW-TEETH UNEXPECTED-PROVEN sha3_256_32 against domain byte 0x01";

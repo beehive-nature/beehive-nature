@@ -1,0 +1,36 @@
+{
+  "schema": "wallet-coins-public-read/1",
+  "date": "2026-10-03",
+  "source_commit": "e03ef7d0d53d7fa4d37728c78e5b34368474fb5f",
+  "reader": "surfaces/wallet.html# wallet-coins / readHoldings",
+  "subject": "0x0000000000000000000000000000000000000000",
+  "subject_kind": "public zero-address probe, not a user account",
+  "methods": ["eth_chainId", "eth_blockNumber", "eth_call:balanceOf", "eth_call:decimals"],
+  "server_started": false,
+  "signing_or_broadcast": false,
+  "independent_consensus_verification": false,
+  "observations": [
+    {
+      "chain": "base",
+      "chain_id_checked": 8453,
+      "block": "0x31b4c88",
+      "source": "base-rpc.publicnode.com",
+      "contracts": ["FUNGI", "FROGGI", "PEPi-v1", "PEPi-v2", "JELLI", "TRUFFI", "JEDI", "MiDi-1", "MiDi-2", "MiDi-3", "Souli", "NTNT"],
+      "each_decimals": 9,
+      "each_raw_balance": "0",
+      "each_state": "empty"
+    },
+    {
+      "chain": "ethereum",
+      "chain_id_checked": 1,
+      "block": "0x18e6f5b",
+      "source": "eth.drpc.org",
+      "contracts": ["PEPi-item"],
+      "each_decimals": 9,
+      "each_raw_balance": "0",
+      "each_state": "empty"
+    }
+  ],
+  "contract_addresses": "docs/receipts/deployments.json at source_commit",
+  "limits": "Endpoint observations only. Does not prove nonzero user holdings, browser CORS, hardware import, token transfer or production deployment."
+}

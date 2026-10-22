@@ -1,0 +1,27 @@
+{
+  "schema": "skaists.genealogy-staleness-audit/1",
+  "checkedAt": "2026-10-11T03:30:26.799Z",
+  "baseline": "pkg14",
+  "checked": 22151,
+  "changedPersonPages": 11041,
+  "changedOtherFiles": [
+    "surfaces/profile.html",
+    "surfaces/blood.html",
+    "surfaces/tour.js",
+    "surfaces/lang-corpus.json",
+    "surfaces/register.js",
+    "surfaces/skaists.css"
+  ],
+  "missing": [],
+  "stalePersonFiles": [],
+  "dependencyRepair": "Added existing surfaces/fonts/skaists.woff2 to tools/genealogy/preservation-runtime.json",
+  "currentPackageSourceBinding": {
+    "checkedAt": "2026-10-11T03:41:15.954Z",
+    "verified": 22152,
+    "mismatches": [],
+    "projectedSeparately": [
+      "assets/profile-archive/lineage/sources/records.json",
+      "assets/profile-archive/lineage/zblood-storage-economics.json"
+    ]
+  }
+}

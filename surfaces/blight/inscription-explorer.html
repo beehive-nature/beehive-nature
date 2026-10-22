@@ -125,102 +125,114 @@ body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
 #eternal th,#eternal td{border:0;padding:0;vertical-align:top;background:none;width:auto}
 #eternal canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
 #etArchive.et-archive-h{position:relative;z-index:6;max-width:600px;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding:var(--sk-s4,24px) 0 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);text-transform:none;letter-spacing:normal;background:none;text-shadow:none}
-body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
-body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="bee"] #etArchive.et-archive-h{font:700 28px/1.15 var(--sk-font-ui);letter-spacing:-.02em}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;border-top-color:rgba(156,111,214,.34)}
 body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
 
-/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
-#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
-#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
-#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
-#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
-#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+/* NEW BEE — a calm room: plain rows, one reassurance, one action, a second way on, a footnote.
+   Dressed in the founder's chosen UI (his My Space screens, 2026-10-04; surfaces/myspace.html; rolled to
+   this explorer 2026-10-05): paper, ink, bold system sans, forest green for the one filled action (white
+   label) and for the door you have chosen, white cards with soft large corners, an outlined pill for the
+   second way on (your own address). The guard well stays lavender (guard, never red). The three doors,
+   the card, the action, the second way on and the footnote keep every part and their order. */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.5 var(--sk-font-ui)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-ink-mut)}
+#eternal .et-b-h{font:700 32px/1.12 var(--sk-font-ui);letter-spacing:-.025em;color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius-xl,18px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-ui)}
 #eternal .et-b-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 #eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
-#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:600 16px/1.45 var(--sk-font-ui);color:var(--sk-ink)}
 #eternal .et-b-row:last-child{border-bottom:0}
 #eternal button.et-b-row,#eternal a.et-b-row{cursor:pointer}
-#eternal button.et-b-row:hover,#eternal a.et-b-row:hover{background:var(--sk-sovereign-tint);color:var(--sk-ink)}
+#eternal button.et-b-row:hover,#eternal a.et-b-row:hover{background:var(--sk-bg-well);color:var(--sk-ink)}
 #eternal .et-b-row>span{flex:1 1 auto}
-#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;max-width:55%;text-align:right;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;max-width:55%;text-align:right;font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-ink-mut)}
 #eternal .et-b-row small.et-out{color:var(--sk-guard)}
-#eternal .et-b-row small.et-ok{color:var(--sk-verified)}
-#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
-#eternal .et-b-row[aria-expanded="true"] small,#eternal .et-b-row[aria-pressed="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row small.et-ok{color:var(--sk-verified);font-weight:700}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-bg-well);color:var(--sk-forest);font-weight:700;box-shadow:inset 3px 0 0 var(--sk-forest)}
+#eternal .et-b-row[aria-expanded="true"] small,#eternal .et-b-row[aria-pressed="true"] small{color:var(--sk-forest)}
 #eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
 #eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
-#eternal .et-b-open{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
-#eternal .et-b-open div{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-open{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-bg-well);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-open div{font:400 15px/1.5 var(--sk-font-ui);color:var(--sk-ink)}
 #eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-person,60px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft)}
 #eternal .et-b-person:last-child{border-bottom:0}
-#eternal .et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:700 14px/1.4 var(--sk-font-ui);font-style:normal;flex:none}
 #eternal .et-b-person i.et-dash{background:transparent;border:1.5px dashed var(--sk-ink-dim);color:var(--sk-ink-mut)}
 #eternal .et-b-person i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
 #eternal .et-b-person i.et-no{background:var(--sk-guard-wash);color:var(--sk-guard)}
-#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
-#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
-#eternal .et-b-note{padding:var(--sk-s2,12px) var(--sk-s3,18px);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
-#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
-#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary,54px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
-#eternal .et-b-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important;filter:none}
+#eternal .et-b-person b{display:block;font:700 16px/1.45 var(--sk-font-ui);color:var(--sk-ink)}
+#eternal .et-b-person span{display:block;font:400 14px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut)}
+#eternal .et-b-note{padding:var(--sk-s2,12px) var(--sk-s3,18px);font:400 14px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s2,12px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary,54px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-forest);color:var(--sk-on-primary)!important;font:700 17px/1.2 var(--sk-font-ui)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:hover{background:var(--sk-forest);color:var(--sk-on-primary)!important;filter:none}
 #eternal .et-b-primary:disabled,#eternal .et-b-primary[aria-disabled="true"]{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
-#eternal .et-b-link{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius,12px);background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer;text-align:center}
-#eternal .et-b-link:hover{background:transparent;color:var(--sk-link-hover)!important}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-row,52px);padding:0 var(--sk-s3,18px);border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-pill,999px);background:transparent;font:700 16px/1.2 var(--sk-font-ui)!important;color:var(--sk-ink)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{background:transparent;border-color:var(--sk-forest);color:var(--sk-ink)!important}
 #eternal .et-b-link:disabled{color:var(--sk-ink-mut)!important;cursor:not-allowed}
-#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
-#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-bg-card);border:1px dashed var(--sk-ink-dim);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut)}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-bg-card);border:1px dashed rgba(106,115,110,.55);border-radius:var(--sk-radius-xl,18px)}
 #eternal .et-b-card.et-ok{border:1px solid var(--sk-line);background:var(--sk-verified-wash)}
 #eternal .et-b-card.et-no{border:1px dashed var(--sk-guard);background:var(--sk-guard-wash)}
-#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
-#eternal .et-b-card div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card h3{font:700 22px/1.25 var(--sk-font-ui);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-b-card div{font:400 16px/1.5 var(--sk-font-ui);color:var(--sk-ink-mut)}
 #eternal .et-b-card.et-no div,#eternal .et-b-card.et-ok div{color:var(--sk-ink)}
 
-/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
-#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change. Dressed in the
+   founder's chosen UI: night purple ground (sovereign wash into tint), plain white bold system sans
+   titles (no rainbow), round everything, magenta for the one filled pill with its soft glow. The sky
+   paints its families from the tokens in script; here its hub and its quiet lines take the night
+   ground's own tokens. The constellation, its labels, the card, the three door tiles, the note and the
+   pill keep every part and their order. */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-ui)}
 #eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
-#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
-#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-h{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 15px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
 #eternal .et-r-art{position:relative;width:100%;max-width:360px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
 #eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
 #eternal .et-r-art [role="button"]{cursor:pointer}
 #eternal .et-r-art [role="button"]:focus{outline:none}
 #eternal .et-r-art [role="button"]:focus-visible>*{stroke:var(--sk-ink);stroke-width:2}
 #eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:40%}
-#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
-#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-ui);letter-spacing:-.03em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
 #eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
-#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
 #eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
-#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
-#eternal .et-r-card .et-rk{min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
-#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
-#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
-#eternal .et-r-sub{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid rgba(156,111,214,.34);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-wash);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-ui);flex:none}
+#eternal .et-r-card b{display:block;font:700 15px/1.3 var(--sk-font-ui);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+#eternal .et-r-sub{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:700 18px/1.3 var(--sk-font-ui);letter-spacing:-.01em;color:var(--sk-ink)}
 #eternal .et-r-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:var(--sk-s2,12px)}
-#eternal .et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:96px;padding:var(--sk-s2,12px) var(--sk-s1,6px);border-radius:var(--sk-radius-xl,18px);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;text-align:center;cursor:pointer;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s)}
+#eternal .et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:96px;padding:var(--sk-s2,12px) var(--sk-s1,6px);border-radius:var(--sk-radius-xl,18px);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:700 14px/1.3 var(--sk-font-ui)!important;text-align:center;cursor:pointer;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s)}
 #eternal .et-r-tile:hover{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important}
-#eternal .et-r-tile.et-dash{border-style:dashed;border-color:var(--sk-ink-dim);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important}
+#eternal .et-r-tile.et-dash{border-style:dashed;border-color:rgba(183,159,224,.55);background:var(--sk-sovereign-tint);color:var(--sk-sovereign-soft)!important}
 #eternal .et-r-tile.et-on{border-color:var(--sk-verified);box-shadow:var(--sk-glow-ok);color:var(--sk-ink)!important}
 #eternal .et-r-tile[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign);color:var(--sk-ink)!important}
 #eternal .et-r-tile svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
-#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4,24px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4,24px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 18px/1.2 var(--sk-font-ui)!important;box-shadow:0 0 28px rgba(214,85,187,.38);text-align:center;cursor:pointer}
 #eternal .et-r-pill:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
-#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
-#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-biomass);border-radius:var(--sk-radius-pill,999px);background:transparent;color:var(--sk-biomass)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer;text-align:center}
-#eternal .et-r-ghost:hover{background:transparent;color:var(--sk-ink)!important}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;box-shadow:none;cursor:not-allowed}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-row,52px);padding:0 var(--sk-s4,24px);border:1.5px solid rgba(214,85,187,.6);border-radius:var(--sk-radius-pill,999px);background:transparent;color:var(--sk-ink)!important;font:700 15px/1.2 var(--sk-font-ui)!important;cursor:pointer;text-align:center}
+#eternal .et-r-ghost:hover{background:transparent;border-color:var(--sk-you);color:var(--sk-ink)!important}
 #eternal .et-r-hold{position:relative;width:196px;height:196px;margin:var(--sk-s3,18px) auto 0}
 #eternal .et-r-hold>svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);pointer-events:none}
 #eternal .et-hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
 #eternal .et-hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
 #eternal .et-r-holdbtn{position:absolute;inset:22px;padding:0;border:0;border-radius:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
 #eternal .et-r-holdbtn:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
-#eternal .et-r-holdbtn b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
-#eternal .et-r-holdbtn span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-holdbtn b{font:700 30px/1 var(--sk-font-ui);letter-spacing:-.03em}
+#eternal .et-r-holdbtn span{font:700 15px/1.2 var(--sk-font-ui)}
 #eternal .et-r-holdbtn:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
 @media (prefers-reduced-motion:reduce){#eternal *{transition:none!important;animation:none!important}}
 
-/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts. It already
+   wore the chosen UI (near-black, IBM Plex Mono throughout, cyan action cut 6px with a dark label, dense);
+   the chosen UI adds only thin grey borders on the address field and the two second ways on. */
 #eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
 #eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
 #eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
@@ -270,8 +282,8 @@ body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-
 #eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
 #eternal .et-c-verify code,#eternal .et-c code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);background:none;padding:0;border:0;word-break:break-all}
 #eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
-#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
-#eternal .et-c-ghost:hover{background:transparent;color:var(--sk-link-hover)!important}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1,6px);border:1px solid rgba(100,129,118,.7);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-ghost:hover{background:transparent;border-color:var(--sk-ai);color:var(--sk-link-hover)!important}
 #eternal .et-c-well{margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-well);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft);white-space:pre-wrap;word-break:break-all}
 
 /* explorer front specifics: this page has no column wrapper, so the front brings its own gutter */
@@ -282,10 +294,15 @@ body #etArchive.et-archive-h{padding-left:var(--sk-s3,18px);padding-right:var(--
 #eternal .et-r-sky .et-fam{cursor:pointer}
 #eternal .et-r-sky .et-fam:focus{outline:none}
 #eternal .et-r-sky .et-fam:focus-visible .et-fam-body{stroke:var(--sk-ink);stroke-width:2.5}
+/* the sky on the night ground: its hub names the house card (black green) in script, so here the hub is
+   the sovereign wash, as the cards are, and the ring and the quiet spokes take the violet edge; a lit
+   spoke, every family and every bead keep the paint the script gives them */
+body[data-reg="raver"] #etExSky>polygon{fill:var(--sk-sovereign-wash)}
+body[data-reg="raver"] #etExSky>circle,body[data-reg="raver"] #etExSky>line[stroke-width="1.5"]{stroke:rgba(156,111,214,.34)}
 #eternal .et-r-card .et-rk.et-ok{background:var(--sk-biomass);color:var(--sk-bg)}
 #eternal .et-c-ask{display:grid;grid-template-columns:1fr;gap:var(--sk-s1,6px);margin:var(--sk-s3,18px) 0 0}
 #eternal .et-c-ask .et-c-ask-l{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
-#eternal .et-c-ask input{width:100%;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-ink-dim);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono);outline:none}
+#eternal .et-c-ask input{width:100%;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1px solid var(--sk-ink-dim);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono);outline:none}
 #eternal .et-c-ask input:focus-visible{border-color:var(--sk-ai)}
 #eternal .et-c-ask .et-c-primary{margin-top:var(--sk-s1,6px)}
 #eternal .et-b-card .et-b-rows{margin-top:var(--sk-s1,6px)}
@@ -314,6 +331,7 @@ body[data-reg] #door .seeds button:hover{border-color:var(--sk-link);color:var(-
 body[data-reg] #dmsg{color:var(--sk-ink-soft)!important}
 body[data-reg] #top button,body[data-reg] #top a{background:var(--sk-bg-card);color:var(--sk-ink-soft);border-color:var(--sk-line)}
 body[data-reg] #top button:hover,body[data-reg] #top a:hover,body[data-reg] #top #conn.ok{color:var(--sk-link);border-color:var(--sk-link)}
+body[data-reg] #top button,body[data-reg] #top a{min-width:var(--sk-control-min,44px);justify-content:center}
 body[data-reg] .piece{background:var(--sk-bg-card);border-color:var(--sk-line)}
 body[data-reg] .piece .art,body[data-reg] #room .art{background:var(--sk-bg)}
 body[data-reg] .piece.crown{border-color:var(--sk-sovereign)}
@@ -328,27 +346,120 @@ body[data-reg] #room #deets,body[data-reg] #curtain .card{background:var(--sk-bg
 body[data-reg] #curtain{background:var(--sk-bg)}
 body[data-reg] #curtain .card h3{color:var(--sk-ink)}
 body[data-reg] #curtain .card p{color:var(--sk-ink-mut)}
-body[data-reg="bee"]{font:400 16px/1.6 var(--sk-font-bee-sans)}
+/* the room's trait chips and the crown dossier are written by script with inline paint (a dark well, gold
+   ink); in every register they take the register's card, line and ink. A trait's own colour swatch (the
+   art's data) keeps its paint. */
+body[data-reg] #dossier{background:var(--sk-bg-card)!important;border-color:var(--sk-line)!important;color:var(--sk-ink-soft)!important}
+body[data-reg] #dossier>div:first-child{color:var(--sk-sovereign-strong)!important}
+body[data-reg] #traits>div{color:var(--sk-ink-mut)!important}
+body[data-reg] #traits>span{border-color:var(--sk-line)!important;color:var(--sk-ink-soft)!important}
+/* ── the whole gallery in the founder's chosen UI (2026-10-05). Only the dress moves: the doorway (its
+   title, its form, its message and its three seed doors), the toolbar, the wall, the room and the
+   curtain keep every part and its order. The front above holds the one filled press; every press down
+   here is a second way on and wears an outline (new bee grey, raver magenta, cypherpunk thin grey), and
+   the chosen state is the register's accent (new bee forest, raver magenta, cypherpunk cyan). ── */
+/* NEW BEE — paper, ink, bold system sans, outlined pills, white cards with soft large corners */
+body[data-reg="bee"]{font:400 16px/1.6 var(--sk-font-ui)}
 body[data-reg="bee"] .piece .art,body[data-reg="bee"] #room .art{background:var(--sk-ink)}
-body[data-reg="bee"] #door h1{font:400 40px/1.05 var(--sk-font-bee-serif)}
-body[data-reg="bee"] #door p,body[data-reg="bee"] #dmsg,body[data-reg="bee"] #wing{font:400 16px/1.45 var(--sk-font-bee-sans)}
-body[data-reg="bee"] #door input,body[data-reg="bee"] #door button{font:500 16px/1.45 var(--sk-font-bee-sans);border-radius:var(--sk-radius-md,14px)}
-body[data-reg="bee"] #top button,body[data-reg="bee"] #top a,body[data-reg="bee"] .piece .lab .n,body[data-reg="bee"] .piece .lab .m{font-family:var(--sk-font-bee-sans);font-size:14px}
+body[data-reg="bee"] #door h1{font:700 32px/1.12 var(--sk-font-ui);letter-spacing:-.025em}
+body[data-reg="bee"] #door p,body[data-reg="bee"] #dmsg,body[data-reg="bee"] #wing{font:400 16px/1.5 var(--sk-font-ui)}
+body[data-reg="bee"] #door input{font:400 16px/1.45 var(--sk-font-ui);border-radius:var(--sk-radius-md,14px)}
+body[data-reg="bee"] #door input:focus{border-color:var(--sk-forest)}
+body[data-reg="bee"] :is(#door button,#door .seeds button,#room .whisper button,#room .close,#curtain .card button){background:transparent;color:var(--sk-ink);border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-pill,999px);font:700 16px/1.2 var(--sk-font-ui)}
+body[data-reg="bee"] :is(#top button,#top a){background:transparent;color:var(--sk-ink);border:1.5px solid rgba(106,115,110,.4);border-radius:var(--sk-radius-pill,999px);font:600 14px/1.4 var(--sk-font-ui)}
+body[data-reg="bee"] :is(#door button,#door .seeds button,#top button,#top a,#room .whisper button,#room .close,#curtain .card button):hover{background:transparent;color:var(--sk-ink);border-color:var(--sk-forest)}
+body[data-reg="bee"] #top #conn.ok{color:var(--sk-forest);border-color:var(--sk-forest)}
+body[data-reg="bee"] #room .close{background:var(--sk-bg-card)}
 body[data-reg="bee"] .piece{border-radius:var(--sk-radius-xl,18px)}
-body[data-reg="raver"]{font:400 14px/1.6 var(--sk-font-raver-body)}
-body[data-reg="raver"] #door h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
-body[data-reg="raver"] #door p,body[data-reg="raver"] #dmsg,body[data-reg="raver"] #wing{font:400 14px/1.4 var(--sk-font-raver-body)}
-body[data-reg="raver"] #door input,body[data-reg="raver"] #door button{font:600 14px/1.25 var(--sk-font-raver-body);border-radius:var(--sk-radius-pill,999px)}
-body[data-reg="raver"] #top button,body[data-reg="raver"] #top a{font:600 14px/1.25 var(--sk-font-raver-body);border-radius:var(--sk-radius-pill,999px)}
-body[data-reg="raver"] .piece{border-radius:var(--sk-radius-xl,18px);box-shadow:var(--sk-glow-sovereign)}
+body[data-reg="bee"] .piece:hover{border-color:var(--sk-forest);box-shadow:none}
+body[data-reg="bee"] .piece .lab .n{font:700 16px/1.4 var(--sk-font-ui);color:var(--sk-ink)}
+body[data-reg="bee"] .piece .lab .m{font:400 14px/1.5 var(--sk-font-ui)}
+body[data-reg="bee"] #room .plaque .t{font:700 22px/1.25 var(--sk-font-ui);letter-spacing:-.01em;color:var(--sk-ink)}
+body[data-reg="bee"] #room .plaque .s,body[data-reg="bee"] #room #deets{font:400 14px/1.6 var(--sk-font-ui)}
+body[data-reg="bee"] #room #deets,body[data-reg="bee"] #curtain .card{border-radius:var(--sk-radius-xl,18px)}
+body[data-reg="bee"] #curtain .card h3{font:700 22px/1.25 var(--sk-font-ui);letter-spacing:-.01em}
+body[data-reg="bee"] #curtain .card p{font:400 16px/1.5 var(--sk-font-ui)}
+body:is([data-reg="bee"],[data-reg="raver"]) :is(#dossier,#dossier>div:first-child,#traits>div,#traits>span){font-family:var(--sk-font-ui)!important;font-size:14px!important}
+body[data-reg="bee"] #dossier{border-radius:var(--sk-radius-xl,18px)!important}
+body[data-reg="bee"] #room .art,body[data-reg="bee"] #room.gold .art{box-shadow:none}
+body[data-reg="bee"] #bnr-beta-badge{font:700 14px/1.4 var(--sk-font-ui)!important}
+/* RAVER — night purple ground (sovereign wash into tint), plain white bold sans, magenta outlined pills */
+body[data-reg="raver"]{font:400 15px/1.6 var(--sk-font-ui);background-color:var(--sk-sovereign-tint);
+  background-image:radial-gradient(120% 55% at 0% 100%,rgba(111,169,224,.09),transparent 60%),linear-gradient(180deg,var(--sk-sovereign-wash),var(--sk-sovereign-tint) 42%);
+  background-attachment:fixed;color-scheme:dark}
+html:has(body[data-reg="raver"]){background:#120e1e}/* raver --sk-sovereign-tint: the token resolves on body only, so the canvas names its value */
+body[data-reg="raver"] #door h1{font:700 30px/1.12 var(--sk-font-ui);letter-spacing:-.03em}
+body[data-reg="raver"] #door p,body[data-reg="raver"] #wing{font:400 15px/1.5 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+body[data-reg="raver"] #dmsg{font:400 15px/1.5 var(--sk-font-ui);color:var(--sk-sovereign-soft)!important}
+body[data-reg="raver"] #door input{font:400 15px/1.4 var(--sk-font-ui);border:1.5px solid var(--sk-sovereign-soft);border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-tint)}
+body[data-reg="raver"] #door input:focus{border-color:var(--sk-you)}
+body[data-reg="raver"] :is(#door button,#door .seeds button,#room .whisper button,#room .close,#curtain .card button){background:transparent;color:var(--sk-ink);border:1.5px solid rgba(214,85,187,.6);border-radius:var(--sk-radius-pill,999px);font:700 15px/1.2 var(--sk-font-ui)}
+body[data-reg="raver"] :is(#top button,#top a){background:transparent;color:var(--sk-ink);border:1.5px solid rgba(214,85,187,.6);border-radius:var(--sk-radius-pill,999px);font:600 14px/1.25 var(--sk-font-ui)}
+body[data-reg="raver"] :is(#door button,#door .seeds button,#top button,#top a,#room .whisper button,#room .close,#curtain .card button):hover{background:transparent;color:var(--sk-ink);border-color:var(--sk-you)}
+body[data-reg="raver"] #top #conn.ok{color:var(--sk-ink);border-color:var(--sk-you)}
+body[data-reg="raver"] #room .close{background:var(--sk-sovereign-wash)}
+body[data-reg="raver"] .piece{background:var(--sk-sovereign-wash);border-color:rgba(156,111,214,.34);border-radius:var(--sk-radius-xl,18px);box-shadow:var(--sk-glow-sovereign)}
+body[data-reg="raver"] .piece:hover{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+body[data-reg="raver"] .piece .art,body[data-reg="raver"] #room .art{background:var(--sk-sovereign-tint)}
+body[data-reg="raver"] .piece .lab .n{font:700 15px/1.3 var(--sk-font-ui);color:var(--sk-ink)}
+body[data-reg="raver"] .piece .lab .m,body[data-reg="raver"] #empty{font:400 14px/1.4 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+body[data-reg="raver"] #room,body[data-reg="raver"] #curtain{background:var(--sk-sovereign-tint)}
+body[data-reg="raver"] #room .art,body[data-reg="raver"] #room.gold .art{box-shadow:var(--sk-glow-sovereign)}
+body[data-reg="raver"] #room .plaque .t{font:700 22px/1.25 var(--sk-font-ui);letter-spacing:-.01em;color:var(--sk-ink)}
+body[data-reg="raver"] #room .plaque .s,body[data-reg="raver"] #room #deets,body[data-reg="raver"] #room #deets .k{font:400 15px/1.6 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+body[data-reg="raver"] #room #deets,body[data-reg="raver"] #curtain .card{background:var(--sk-sovereign-wash);border-color:rgba(156,111,214,.34);border-radius:var(--sk-radius-xl,18px)}
+body[data-reg="raver"] #curtain .card h3{font:700 22px/1.25 var(--sk-font-ui);letter-spacing:-.01em}
+body[data-reg="raver"] #curtain .card p{font:400 15px/1.5 var(--sk-font-ui);color:var(--sk-sovereign-soft)}
+body[data-reg="raver"] #dossier{background:var(--sk-sovereign-wash)!important;border-color:rgba(156,111,214,.34)!important;border-radius:var(--sk-radius-xl,18px)!important}
+body[data-reg="raver"] #traits>div{color:var(--sk-sovereign-soft)!important}
+body[data-reg="raver"] #traits>span{border-color:rgba(156,111,214,.34)!important;border-radius:var(--sk-radius-pill,999px)!important}
+body[data-reg="raver"] #bnr-beta-badge{font:700 14px/1.25 var(--sk-font-ui)!important}
+/* CYPHERPUNK — near-black, IBM Plex Mono, cyan cut 6px, thin grey lines, dense */
 body[data-reg="cypherpunk"]{font:400 13px/1.6 var(--sk-font-mono)}
 body[data-reg="cypherpunk"] #door h1{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ai)}
 body[data-reg="cypherpunk"] #door p,body[data-reg="cypherpunk"] #dmsg,body[data-reg="cypherpunk"] #wing{font:400 13px/1.45 var(--sk-font-mono)}
 body[data-reg="cypherpunk"] #door input,body[data-reg="cypherpunk"] #door button,body[data-reg="cypherpunk"] #top button,body[data-reg="cypherpunk"] #top a{font:500 13px/1.45 var(--sk-font-mono);border-radius:var(--sk-radius-sm,6px)}
+body[data-reg="cypherpunk"] #door input{border:1px solid var(--sk-ink-dim)}
+body[data-reg="cypherpunk"] #top{gap:var(--sk-s1,6px)}
+body[data-reg="cypherpunk"] :is(#door button,#door .seeds button,#top button,#top a,#room .whisper button,#room .close,#curtain .card button){border:1px solid rgba(100,129,118,.7);border-radius:var(--sk-radius-sm,6px)}
+body[data-reg="cypherpunk"] :is(#door button,#door .seeds button,#top button,#top a,#room .whisper button,#room .close,#curtain .card button):hover{background:transparent;border-color:var(--sk-ai)}
+body[data-reg="cypherpunk"] :is(#room .whisper button,#room .close,#curtain .card button){font:500 13px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] :is(#room #deets,#curtain .card,#dossier){border-radius:var(--sk-radius-sm,6px)!important}
 body[data-reg="cypherpunk"] .piece{border-radius:var(--sk-radius-sm,6px)}
+body[data-reg="cypherpunk"] :is(#dossier,#traits>div,#traits>span){font-size:12px!important}
+body[data-reg="cypherpunk"] :is(#room .art,#room.gold .art,.piece:hover,.piece.crown:hover){box-shadow:none}
+/* the parlor (parlor.js and toll.js, shared with the hearth and the pulse, untouched) worn in this room's
+   register: its three filled presses become outlined second ways on of 44px and its words take the
+   register's ink and type; the spot value keeps its green (verified) and a fee line short of its
+   requirement keeps its warning (the guard, never red) */
+body[data-reg] #parlor :is(div,span,pre){color:var(--sk-ink-mut)!important}
+body[data-reg] #parlor b{color:var(--sk-verified)!important}
+body[data-reg] #parlor span[style*="e8b84a"]{color:var(--sk-guard)!important}
+body[data-reg] #parlor div[style*="c9a0ff"]{color:var(--sk-sovereign-strong)!important}
+body[data-reg] #parlor button{min-height:var(--sk-control-min,44px);background:transparent!important;color:var(--sk-ink)!important}
+body[data-reg] #parlor input{min-height:var(--sk-control-min,44px);background:var(--sk-bg-card)!important;color:var(--sk-ink)!important;border-color:var(--sk-ink-dim)!important}
+body[data-reg] #parlor #aiWin{background:var(--sk-bg-card)!important;border-color:var(--sk-line)!important}
+body[data-reg="bee"] #parlor :is(div,span,b,input){font-family:var(--sk-font-ui)!important;font-size:14px!important}
+body[data-reg="bee"] #parlor pre{font:400 14px/1.5 var(--sk-font-mono)!important}
+body[data-reg="bee"] #parlor button{padding:0 var(--sk-s3,18px)!important;border:1.5px solid rgba(106,115,110,.4)!important;border-radius:var(--sk-radius-pill,999px)!important;font:700 14px/1.2 var(--sk-font-ui)!important}
+body[data-reg="bee"] #parlor input{border-radius:var(--sk-radius-md,14px)!important}
+body[data-reg="raver"] #parlor :is(div,span,b,input){font-family:var(--sk-font-ui)!important;font-size:14px!important}
+body[data-reg="raver"] #parlor :is(div,span,pre){color:var(--sk-sovereign-soft)!important}
+body[data-reg="raver"] #parlor pre{font:400 13px/1.5 var(--sk-font-mono)!important}
+body[data-reg="raver"] #parlor button{padding:0 var(--sk-s3,18px)!important;border:1.5px solid rgba(214,85,187,.6)!important;border-radius:var(--sk-radius-pill,999px)!important;font:700 14px/1.2 var(--sk-font-ui)!important}
+body[data-reg="raver"] #parlor input{background:var(--sk-sovereign-tint)!important;border-color:var(--sk-sovereign-soft)!important;border-radius:var(--sk-radius-pill,999px)!important}
+body[data-reg="raver"] #parlor #aiWin{background:var(--sk-sovereign-wash)!important;border-color:rgba(156,111,214,.34)!important;border-radius:var(--sk-radius-xl,18px)!important}
+body[data-reg="cypherpunk"] #parlor :is(div,span,b,input){font-size:13px!important}
+body[data-reg="cypherpunk"] #parlor pre{font-size:12px!important}
+body[data-reg="cypherpunk"] #parlor button{border:1px solid rgba(100,129,118,.7)!important;border-radius:var(--sk-radius-sm,6px)!important;font:500 13px/1.45 var(--sk-font-mono)!important}
+body[data-reg="cypherpunk"] #parlor :is(input,#aiWin){border-radius:var(--sk-radius-sm,6px)!important}
+body[data-reg="cypherpunk"] #parlor :is(pre,input){font-family:var(--sk-font-mono)!important}
 body[data-reg] #bnr-beta-badge a{background:var(--sk-bg-card)!important;color:var(--sk-link)!important;border-color:var(--sk-line)!important}
+/* the hub chip: new bee an ink label in a grey outlined pill, raver a white label in a magenta one */
+body[data-reg="bee"] #bnr-beta-badge a{color:var(--sk-ink)!important;border:1.5px solid rgba(106,115,110,.4)!important}
+body[data-reg="raver"] #bnr-beta-badge a{background:var(--sk-sovereign-wash)!important;color:var(--sk-ink)!important;border:1.5px solid rgba(214,85,187,.6)!important}
 body[data-reg="cypherpunk"] #bnr-beta-badge a{border-radius:var(--sk-radius-sm,6px)!important}
-#eternal .et-r-sky .et-fam-l{position:absolute;transform:translate(-50%,0);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft);white-space:nowrap;pointer-events:none}
+#eternal .et-r-sky .et-fam-l{position:absolute;transform:translate(-50%,0);font:700 14px/1.25 var(--sk-font-ui);color:var(--sk-sovereign-strong);white-space:nowrap;pointer-events:none}
 #eternal .et-r-sky .et-fam-l.et-lit{color:var(--sk-biomass)}
 
 </style>

@@ -1,0 +1,91 @@
+$ cdt-cpp -abigen -o $O/evanchor.wasm contracts/evanchor/evanchor.cpp
+# cdt-cpp version 4.1.1; Linux 6.18.33.2-microsoft-standard-WSL2 x86_64; 2026-10-15T12:03:39Z
+Warning, empty ricardian clause file
+Warning, empty ricardian clause file
+Warning, action <anchor> does not have a ricardian contract
+exit=0
+$ cd $O; for f in evanchor.wasm evanchor.abi; do echo "$f sha256:$(openssl dgst -sha256 -binary $f | base64)"; done; wc -c evanchor.wasm evanchor.abi
+evanchor.wasm sha256:P7xNIZph0Yr20ZHkU/HHtc4Ddh5vrKzwNsljPoseItA=
+evanchor.abi sha256:cOwB/cKNezNAMndlC3R9qEwBwDQB5SP+2nz0KlWRHmM=
+7636 evanchor.wasm
+1918 evanchor.abi
+9554 total
+$ cat evanchor.abi
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.2",
+    "types": [],
+    "structs": [
+        {
+            "name": "anchor",
+            "base": "",
+            "fields": [
+                {
+                    "name": "publisher",
+                    "type": "name"
+                },
+                {
+                    "name": "subject",
+                    "type": "name"
+                },
+                {
+                    "name": "count",
+                    "type": "uint64"
+                },
+                {
+                    "name": "statement",
+                    "type": "bytes"
+                }
+            ]
+        },
+        {
+            "name": "anchor_row",
+            "base": "",
+            "fields": [
+                {
+                    "name": "subject",
+                    "type": "name"
+                },
+                {
+                    "name": "publisher",
+                    "type": "name"
+                },
+                {
+                    "name": "count",
+                    "type": "uint64"
+                },
+                {
+                    "name": "seq",
+                    "type": "uint64"
+                },
+                {
+                    "name": "statement",
+                    "type": "bytes"
+                },
+                {
+                    "name": "at",
+                    "type": "time_point_sec"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "anchor",
+            "type": "anchor",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "anchors",
+            "type": "anchor_row",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": []
+}

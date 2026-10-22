@@ -1,0 +1,58 @@
+== SAW PQ03 HKDF: toolchain ==
+1.6 (68eed5f release-1.6)
+Cryptol 3.6.0
+== SAW PQ03 HKDF: PIN the harness lock to the workspace lock ==
+SAW-PIN PQ03 HKDF: PASS (13 packages, each the workspace's version and checksum)
+== SAW PQ03 HKDF: BUILD the harness to MIR JSON (cargo-saw-build) ==
+   Compiling version_check v0.9.5
+   Compiling typenum v1.20.1
+   Compiling subtle v2.6.1
+   Compiling cfg-if v1.0.4
+   Compiling cpufeatures v0.2.17
+   Compiling generic-array v0.14.7
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling digest v0.10.7
+   Compiling hmac v0.12.1
+   Compiling sha2 v0.10.9
+   Compiling hkdf v0.12.4
+   Compiling pq03_hkdf v0.0.0 (/workspace/wt-pq-battery/scripts/btungsten/pq03-hkdf)
+Linking 14 mir files into /workspace/wt-pq-battery/target/saw-pq03-hkdf/cargo/x86_64-unknown-linux-gnu/debug/deps/pq03_hkdf-21bd4c5e5048ca21.linked-mir.json
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.42s
+  Executable unittests src/lib.rs (/workspace/wt-pq-battery/target/saw-pq03-hkdf/cargo/x86_64-unknown-linux-gnu/debug/deps/pq03_hkdf-21bd4c5e5048ca21)
+SAW-BUILD PQ03 HKDF: PASS (5335472 bytes of linked MIR)
+== SPEC-CHECK PQ03 HKDF: Hkdf.cry closed terms ==
+SPEC-CHECK sha256AgreesOneBlock: PASS
+SPEC-CHECK sha256TwoBlockExample: PASS
+SPEC-CHECK hkdfRfc5869Case1: PASS
+SPEC-CHECK hkdfShape21: PASS
+SPEC-CHECK hkdfShape55: PASS
+SPEC-CHECK hkdfShape101: PASS
+== SAW PQ03 HKDF: hkdf.saw ==
+PQ03-SAW ASSUMED sha2 x86 compress, one block = FIPS 180-4 compress (the soft path is proven by pq03-sha256-check.sh)
+PQ03-SAW ASSUMED the SHA-NI probe answers absent (the soft path)
+PQ03-SAW PROVEN reference_21
+PQ03-SAW PROVEN agree_21
+PQ03-SAW PROVEN reference_55
+PQ03-SAW PROVEN agree_55
+PQ03-SAW PROVEN reference_101
+PQ03-SAW PROVEN agree_101
+SAW hkdf.saw: 6 obligations PROVEN in 74s
+== SAW PQ03 HKDF: TEETH hkdf-teeth-counter.saw — must FAIL with a counterexample ==
+PQ03-SAW-TEETH obligation reference_21 against counter 0x02
+Subgoal failed: pq03_hkdf/15694e74::reference_21[0] Literal equality postcondition
+----------Counterexample----------
+SAW-TEETH hkdf-teeth-counter.saw: PASS (counterexample found, as required)
+== SAW PQ03 HKDF: TEETH hkdf-teeth-pads.saw — must FAIL with a counterexample ==
+PQ03-SAW-TEETH obligation reference_21 against swapped pads
+Subgoal failed: pq03_hkdf/15694e74::reference_21[0] Literal equality postcondition
+----------Counterexample----------
+SAW-TEETH hkdf-teeth-pads.saw: PASS (counterexample found, as required)
+== SAW PQ03 HKDF: TEETH hkdf-teeth-agree.saw — must FAIL with a counterexample ==
+PQ03-SAW-TEETH obligation agree_bent_21 returns true on the zero inputs
+Subgoal failed: pq03_hkdf/15694e74::agree_bent_21[0] Literal equality postcondition
+----------Counterexample----------
+<<All settings of the symbolic variables constitute a counterexample>>
+SAW-TEETH hkdf-teeth-agree.saw: PASS (counterexample found, as required)
+== SAW PQ03 HKDF: ladder state ==
+PIN: PASS | BUILD: PASS | SPEC-CHECK: PASS (6) | EQUIVALENCE: PROVEN (6: at info 21, 55, 101 bytes, the reference = RFC 5869 and the shipped expand = the reference) with the one-block compression and the soft path ASSUMED | TEETH: PASS (3)

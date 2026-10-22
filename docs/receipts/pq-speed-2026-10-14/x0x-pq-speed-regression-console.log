@@ -1,0 +1,9 @@
+X0X-PQ PIN: source files and implementation packages match x0x's pinned lock
+X0X-PQ RUN: unit
+X0X-PQ RUN: build
+X0X-PQ RUN: honest
+X0X-PQ RESULT honest: PASS; 752 executed, 752 passed, 0 failed; 37 required rows, 0 missing; classes {"DIFFERENTIAL": 164, "KAT": 515, "TEETH": 73}
+X0X-PQ RUN: expected-byte-teeth
+X0X-PQ RESULT expected-byte-teeth: FAIL; 752 executed, 750 passed, 2 failed; 37 required rows, 0 missing; classes {"DIFFERENTIAL": 164, "KAT": 515, "TEETH": 73}
+X0X-PQ RUN: empty-vectors-teeth
+X0X-PQ RESULT empty-vectors-teeth: FAIL; 0 executed, 0 passed, 0 failed; 37 required rows, 37 missing; classes {}

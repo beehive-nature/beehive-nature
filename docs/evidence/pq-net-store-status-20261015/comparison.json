@@ -1,0 +1,1261 @@
+{
+  "schema": "pq-net-store-status-1",
+  "trials": [
+    {
+      "phase": "trial",
+      "trial": "baseline",
+      "run_id": "qsb-s9-20261015",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {},
+      "skip_legacy_dm_bus": false,
+      "scale": 9,
+      "cost": [
+        {
+          "node": "seed",
+          "role": "Seed",
+          "idle_egress_bytes_per_min": 758701.3333333334,
+          "idle_ingress_bytes_per_min": 601380.6666666666,
+          "phase_egress_bytes": 12018884,
+          "phase_ingress_bytes": 9608154,
+          "cpu_percent_sustained": 3.696906135291033,
+          "vmhwm_kib": 75056
+        },
+        {
+          "node": "relay",
+          "role": "RelayFull",
+          "idle_egress_bytes_per_min": 627704.0,
+          "idle_ingress_bytes_per_min": 538266.0,
+          "phase_egress_bytes": 13292092,
+          "phase_ingress_bytes": 8627349,
+          "cpu_percent_sustained": 3.1113441705995455,
+          "vmhwm_kib": 68052
+        },
+        {
+          "node": "n1",
+          "role": "ConstrainedLeaf",
+          "idle_egress_bytes_per_min": 904226.6666666666,
+          "idle_ingress_bytes_per_min": 489644.6666666667,
+          "phase_egress_bytes": 11227932,
+          "phase_ingress_bytes": 8367779,
+          "cpu_percent_sustained": 3.4958923265163437,
+          "vmhwm_kib": 77464
+        },
+        {
+          "node": "n2",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 763894.6666666666,
+          "idle_ingress_bytes_per_min": 515207.3333333333,
+          "phase_egress_bytes": 10660669,
+          "phase_ingress_bytes": 9049778,
+          "cpu_percent_sustained": 3.277399056109072,
+          "vmhwm_kib": 75988
+        },
+        {
+          "node": "n3",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 296452.0,
+          "idle_ingress_bytes_per_min": 565071.3333333334,
+          "phase_egress_bytes": 8118619,
+          "phase_ingress_bytes": 10702499,
+          "cpu_percent_sustained": 2.875371438559692,
+          "vmhwm_kib": 68296
+        },
+        {
+          "node": "n4",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 313798.0,
+          "idle_ingress_bytes_per_min": 438144.0,
+          "phase_egress_bytes": 7463582,
+          "phase_ingress_bytes": 10326807,
+          "cpu_percent_sustained": 2.595700052438385,
+          "vmhwm_kib": 67196
+        },
+        {
+          "node": "n5",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 428501.3333333333,
+          "idle_ingress_bytes_per_min": 429709.3333333333,
+          "phase_egress_bytes": 7349098,
+          "phase_ingress_bytes": 10195600,
+          "cpu_percent_sustained": 2.7530152071316203,
+          "vmhwm_kib": 68068
+        },
+        {
+          "node": "n6",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 289356.6666666667,
+          "idle_ingress_bytes_per_min": 512579.3333333333,
+          "phase_egress_bytes": 6673499,
+          "phase_ingress_bytes": 7715411,
+          "cpu_percent_sustained": 2.718056283866457,
+          "vmhwm_kib": 67500
+        },
+        {
+          "node": "n7",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 296971.3333333333,
+          "idle_ingress_bytes_per_min": 594970.0,
+          "phase_egress_bytes": 6475460,
+          "phase_ingress_bytes": 8697798,
+          "cpu_percent_sustained": 2.6219192448872572,
+          "vmhwm_kib": 68396
+        }
+      ],
+      "matrix_targeted_dm": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_group": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_sync": {
+        "total": 20,
+        "delivered": 20,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_probe": {
+        "total": 560,
+        "delivered": 560,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "unsafe_retries": 0,
+      "verdicts": [
+        {
+          "gate": "idle_combined_bytes_per_min",
+          "role": "constrained-leaf",
+          "measured": 1393871.3333333333,
+          "budget": 2097152.0,
+          "unit": "bytes/min",
+          "pass": true
+        },
+        {
+          "gate": "cpu_percent_sustained",
+          "role": "constrained-leaf",
+          "measured": 3.4958923265163437,
+          "budget": 15.0,
+          "unit": "percent",
+          "pass": true
+        },
+        {
+          "gate": "rss_mib_peak",
+          "role": "constrained-leaf",
+          "measured": 75.6484375,
+          "budget": 128.0,
+          "unit": "MiB",
+          "pass": true
+        },
+        {
+          "gate": "targeted_dm_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "group_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "sync_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        }
+      ],
+      "verdicts_pass": true,
+      "notes": [],
+      "budget_sha256_prefix": "d2e47e2d76ca5c2a",
+      "store_puts": [
+        {
+          "key": "store:k0",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [
+            {
+              "node": "n1",
+              "latency_ms": 3163,
+              "on_time": true
+            },
+            {
+              "node": "n2",
+              "latency_ms": 3164,
+              "on_time": true
+            }
+          ],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k1",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [
+            {
+              "node": "n1",
+              "latency_ms": 2852,
+              "on_time": true
+            },
+            {
+              "node": "n2",
+              "latency_ms": 2853,
+              "on_time": true
+            }
+          ],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k2",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [
+            {
+              "node": "n1",
+              "latency_ms": 2545,
+              "on_time": true
+            },
+            {
+              "node": "n2",
+              "latency_ms": 2546,
+              "on_time": true
+            }
+          ],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k3",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [
+            {
+              "node": "n1",
+              "latency_ms": 2228,
+              "on_time": true
+            },
+            {
+              "node": "n2",
+              "latency_ms": 2229,
+              "on_time": true
+            }
+          ],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k4",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [
+            {
+              "node": "n1",
+              "latency_ms": 1916,
+              "on_time": true
+            },
+            {
+              "node": "n2",
+              "latency_ms": 1917,
+              "on_time": true
+            }
+          ],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k5",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [
+            {
+              "node": "n1",
+              "latency_ms": 1605,
+              "on_time": true
+            },
+            {
+              "node": "n2",
+              "latency_ms": 1606,
+              "on_time": true
+            }
+          ],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k6",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [
+            {
+              "node": "n1",
+              "latency_ms": 1290,
+              "on_time": true
+            },
+            {
+              "node": "n2",
+              "latency_ms": 1291,
+              "on_time": true
+            }
+          ],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k7",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [
+            {
+              "node": "n1",
+              "latency_ms": 981,
+              "on_time": true
+            },
+            {
+              "node": "n2",
+              "latency_ms": 982,
+              "on_time": true
+            }
+          ],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k8",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [
+            {
+              "node": "n1",
+              "latency_ms": 666,
+              "on_time": true
+            },
+            {
+              "node": "n2",
+              "latency_ms": 666,
+              "on_time": true
+            }
+          ],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k9",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [
+            {
+              "node": "n1",
+              "latency_ms": 354,
+              "on_time": true
+            },
+            {
+              "node": "n2",
+              "latency_ms": 355,
+              "on_time": true
+            }
+          ],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            }
+          }
+        }
+      ],
+      "observation": {
+        "failures": []
+      },
+      "sse_lag_warnings": {
+        "relay": 0,
+        "seed": 0,
+        "n5": 0,
+        "n1": 0,
+        "n7": 0,
+        "n4": 0,
+        "n2": 0,
+        "n6": 0,
+        "n3": 0
+      },
+      "workload": {
+        "dm_count": 12,
+        "dm_size": 256,
+        "group_msgs": 6,
+        "store_puts": 10,
+        "store_value_size": 512,
+        "probe_bulk_msgs": 40,
+        "probe_bulk_size": 1024,
+        "probe_normal_msgs": 40,
+        "probe_normal_size": 256,
+        "idle_secs": 90
+      }
+    },
+    {
+      "phase": "trial",
+      "trial": "shed_normal",
+      "run_id": "qsc-s9-20261015",
+      "x0x_version": "v0.47.1",
+      "leaf_config": {
+        "byte_policy": "shed_normal"
+      },
+      "skip_legacy_dm_bus": false,
+      "scale": 9,
+      "cost": [
+        {
+          "node": "seed",
+          "role": "Seed",
+          "idle_egress_bytes_per_min": 542797.3333333334,
+          "idle_ingress_bytes_per_min": 508518.0,
+          "phase_egress_bytes": 12780746,
+          "phase_ingress_bytes": 8249725,
+          "cpu_percent_sustained": 3.171831622847237,
+          "vmhwm_kib": 74600
+        },
+        {
+          "node": "relay",
+          "role": "RelayFull",
+          "idle_egress_bytes_per_min": 501768.0,
+          "idle_ingress_bytes_per_min": 539776.6666666666,
+          "phase_egress_bytes": 14836212,
+          "phase_ingress_bytes": 8626132,
+          "cpu_percent_sustained": 2.581431281168742,
+          "vmhwm_kib": 67908
+        },
+        {
+          "node": "n1",
+          "role": "ConstrainedLeaf",
+          "idle_egress_bytes_per_min": 1051754.0,
+          "idle_ingress_bytes_per_min": 509466.6666666667,
+          "phase_egress_bytes": 10539851,
+          "phase_ingress_bytes": 7705302,
+          "cpu_percent_sustained": 7.34231914278895,
+          "vmhwm_kib": 78812
+        },
+        {
+          "node": "n2",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 887568.0,
+          "idle_ingress_bytes_per_min": 584448.6666666666,
+          "phase_egress_bytes": 8238689,
+          "phase_ingress_bytes": 10395160,
+          "cpu_percent_sustained": 5.382692476792242,
+          "vmhwm_kib": 76640
+        },
+        {
+          "node": "n3",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 299092.0,
+          "idle_ingress_bytes_per_min": 645852.0,
+          "phase_egress_bytes": 6624519,
+          "phase_ingress_bytes": 8751760,
+          "cpu_percent_sustained": 2.2987928197269083,
+          "vmhwm_kib": 67688
+        },
+        {
+          "node": "n4",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 296734.0,
+          "idle_ingress_bytes_per_min": 347125.3333333333,
+          "phase_egress_bytes": 6418834,
+          "phase_ingress_bytes": 9172223,
+          "cpu_percent_sustained": 2.3176353838230304,
+          "vmhwm_kib": 68180
+        },
+        {
+          "node": "n5",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 293906.0,
+          "idle_ingress_bytes_per_min": 393667.3333333333,
+          "phase_egress_bytes": 6582202,
+          "phase_ingress_bytes": 8989191,
+          "cpu_percent_sustained": 2.1606140163553453,
+          "vmhwm_kib": 67616
+        },
+        {
+          "node": "n6",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 298088.0,
+          "idle_ingress_bytes_per_min": 533168.0,
+          "phase_egress_bytes": 6448114,
+          "phase_ingress_bytes": 8773480,
+          "cpu_percent_sustained": 2.286231110329494,
+          "vmhwm_kib": 67976
+        },
+        {
+          "node": "n7",
+          "role": "DesktopLeaf",
+          "idle_egress_bytes_per_min": 294019.3333333333,
+          "idle_ingress_bytes_per_min": 407484.0,
+          "phase_egress_bytes": 6933762,
+          "phase_ingress_bytes": 8747669,
+          "cpu_percent_sustained": 2.217141708643712,
+          "vmhwm_kib": 67720
+        }
+      ],
+      "matrix_targeted_dm": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_group": {
+        "total": 12,
+        "delivered": 12,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "matrix_sync": {
+        "total": 20,
+        "delivered": 4,
+        "delayed": 0,
+        "lost": 16,
+        "unknown": 0
+      },
+      "matrix_probe": {
+        "total": 560,
+        "delivered": 560,
+        "delayed": 0,
+        "lost": 0,
+        "unknown": 0
+      },
+      "unsafe_retries": 0,
+      "verdicts": [
+        {
+          "gate": "idle_combined_bytes_per_min",
+          "role": "constrained-leaf",
+          "measured": 1561220.6666666667,
+          "budget": 2097152.0,
+          "unit": "bytes/min",
+          "pass": true
+        },
+        {
+          "gate": "cpu_percent_sustained",
+          "role": "constrained-leaf",
+          "measured": 7.34231914278895,
+          "budget": 15.0,
+          "unit": "percent",
+          "pass": true
+        },
+        {
+          "gate": "rss_mib_peak",
+          "role": "constrained-leaf",
+          "measured": 76.96484375,
+          "budget": 128.0,
+          "unit": "MiB",
+          "pass": true
+        },
+        {
+          "gate": "targeted_dm_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "group_delivered_frac",
+          "role": "leaf",
+          "measured": 1.0,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": true
+        },
+        {
+          "gate": "sync_delivered_frac",
+          "role": "leaf",
+          "measured": 0.2,
+          "budget": 1.0,
+          "unit": "fraction",
+          "pass": false
+        }
+      ],
+      "verdicts_pass": false,
+      "notes": [],
+      "budget_sha256_prefix": "d2e47e2d76ca5c2a",
+      "store_puts": [
+        {
+          "key": "store:k0",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [
+            {
+              "node": "n1",
+              "latency_ms": 3157,
+              "on_time": true
+            },
+            {
+              "node": "n2",
+              "latency_ms": 3157,
+              "on_time": true
+            }
+          ],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k1",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [
+            {
+              "node": "n1",
+              "latency_ms": 2844,
+              "on_time": true
+            },
+            {
+              "node": "n2",
+              "latency_ms": 2844,
+              "on_time": true
+            }
+          ],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k2",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k3",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k4",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k5",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k6",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k7",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k8",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            }
+          }
+        },
+        {
+          "key": "store:k9",
+          "http_status": 200,
+          "response": "{\"evicted_keys\":[],\"ok\":true}",
+          "response_truncated": false,
+          "error": null,
+          "publication_recorded": true,
+          "recipient_observations": [],
+          "reads": {
+            "seed": {
+              "attempts": 1,
+              "statuses": {
+                "200": 1
+              },
+              "matches": 1,
+              "errors": []
+            },
+            "n1": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            },
+            "n2": {
+              "attempts": 16,
+              "statuses": {
+                "404": 16
+              },
+              "matches": 0,
+              "errors": []
+            }
+          }
+        }
+      ],
+      "observation": {
+        "failures": []
+      },
+      "sse_lag_warnings": {
+        "relay": 0,
+        "seed": 0,
+        "n5": 0,
+        "n1": 0,
+        "n7": 0,
+        "n4": 0,
+        "n2": 0,
+        "n6": 0,
+        "n3": 0
+      },
+      "workload": {
+        "dm_count": 12,
+        "dm_size": 256,
+        "group_msgs": 6,
+        "store_puts": 10,
+        "store_value_size": 512,
+        "probe_bulk_msgs": 40,
+        "probe_bulk_size": 1024,
+        "probe_normal_msgs": 40,
+        "probe_normal_size": 256,
+        "idle_secs": 90
+      }
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+Running as unit: bnrose-ant-matrix5676033ba-r3-baseline-4-churn.service; invocation ID: 8648ae0394e641ffbed86069abea240e
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 34.937s
+             CPU time consumed: 10.957s
+                   Memory peak: 302.8M (swap: 0B)
+                    IP Traffic: received 32.1M, sent 8.1M
+                      IO Bytes: written 3.3M

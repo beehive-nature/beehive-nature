@@ -1,0 +1,20 @@
+[package]
+name = "settle-solana"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Offline devnet evaluation: compose bounded SOL intents, verify external signatures, reconcile explicit RPC evidence. No signer, RPC client or broadcast."
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+hex = "0.4"
+base64 = "0.22"
+bs58 = "=0.5.1"
+ed25519-dalek = "=2.2.0"
+solana-message = { version = "=3.0.1", features = ["bincode"] }
+solana-instruction = "=3.0.0"
+solana-pubkey = "=3.0.0"
+solana-hash = "=3.0.0"
+solana-system-interface = { version = "=2.0.0", features = ["bincode"] }

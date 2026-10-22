@@ -4,7 +4,7 @@
 // cypherpunk retaining diagnostics, and honest page-error silence.
 import { chromium } from 'playwright';
 import { readFileSync } from 'node:fs';
-import { createServer } from 'node:http';
+import {installWalletFixture,WALLET_ORIGIN} from './lib/wallet-source-fixture.mjs';
 import { readFile } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,18 +21,8 @@ const ok = (name, cond, note = '') => {
   else { fail++; console.log(`FAIL ${name}${note ? ' — ' + note : ''}`); }
 };
 
-const srv = createServer(async (q, s) => {
-  try {
-    const rel = decodeURIComponent(q.url.split('?')[0]).replace(/^\/surfaces(?=\/|$)/, '').replace(/^\//, '');
-    const ct = rel.endsWith('.html') ? 'text/html' : rel.endsWith('.js') ? 'text/javascript' : rel.endsWith('.json') ? 'application/json' : 'application/octet-stream';
-    const body = await readFile(join(SURF, rel));
-    if (!s.headersSent) s.writeHead(200, { 'content-type': ct });
-    s.end(body);
-  } catch { if (!s.headersSent) s.writeHead(404); s.end(); }
-});
-
-await new Promise(r => srv.listen(8847, '127.0.0.1', r));
 const b = await chromium.launch();
+await installWalletFixture(b,ROOT);
 
 async function pageAt(path, { lang = 'ru', reg = 'bee' } = {}) {
   const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true });
@@ -42,7 +32,7 @@ async function pageAt(path, { lang = 'ru', reg = 'bee' } = {}) {
   const p = await ctx.newPage();
   const errs = [];
   p.on('pageerror', e => errs.push(String(e)));
-  await p.goto('http://127.0.0.1:8847/surfaces/' + path, { waitUntil: 'domcontentloaded', timeout: 20000 });
+  await p.goto('https://skaists.dev/surfaces/' + path, { waitUntil: 'domcontentloaded', timeout: 20000 });
   await p.waitForTimeout(900);
   return { ctx, p, errs };
 }
@@ -51,15 +41,15 @@ async function pageAt(path, { lang = 'ru', reg = 'bee' } = {}) {
 {
   const { ctx, p, errs } = await pageAt('wallet.html', { lang: 'ru', reg: 'bee' });
   ok('wallet bee register renders ru corpus-exact',
-    await p.locator('[data-i18n="wl.reg.connect.bee"]').textContent() === cell('wl.reg.connect.bee', 'ru'));
-  ok('wallet h1arg ru', (await p.locator('[data-i18n="wl.h1arg"]').textContent()).includes('одна душа'));
+    await p.locator('[data-i18n="wl.wallet.intro"]').textContent() === cell('wl.wallet.intro', 'ru'));
+  ok('wallet account navigation translates and brand stays exact', (await p.locator('#wallet-identity [data-i18n="wl.wallet.accounts"]').textContent())===cell('wl.wallet.accounts','ru') && (await p.locator('#wallet-identity h1').textContent())==='skaists heART WALLet');
   ok('wallet zero page errors', errs.length === 0, errs.join(' | '));
   await ctx.close();
 }
 {
   const { ctx, p } = await pageAt('wallet.html', { lang: 'ru', reg: 'cypherpunk' });
   ok('wallet cypher register renders ru corpus-exact',
-    await p.locator('[data-i18n="wl.reg.connect.cypher"]').textContent() === cell('wl.reg.connect.cypher', 'ru'));
+    await p.locator('#wallet-identity [data-i18n="wl.wallet.accounts"]').textContent() === cell('wl.wallet.accounts', 'ru'));
   await ctx.close();
 }
 
@@ -95,7 +85,7 @@ async function pageAt(path, { lang = 'ru', reg = 'bee' } = {}) {
   const errs = [];
   p.on('pageerror', e => errs.push(String(e)));
   await p.route('**/hive/board.json', route => route.abort('connectionrefused'));
-  await p.goto('http://127.0.0.1:8847/surfaces/or-board.html', { waitUntil: 'domcontentloaded' });
+  await p.goto('https://skaists.dev/surfaces/or-board.html', { waitUntil: 'domcontentloaded' });
   await p.waitForTimeout(1200);
   const hiveText = await p.locator('#hive').textContent();
   ok('or-board bee sees friendly failure', /live board did not answer/i.test(hiveText), hiveText.slice(0, 80));
@@ -123,7 +113,7 @@ async function pageAt(path, { lang = 'ru', reg = 'bee' } = {}) {
     if (block) route.abort('failed');
     else route.fulfill({ status: 200, contentType: 'application/json', body: fixture });
   });
-  await p.goto('http://127.0.0.1:8847/surfaces/watch.html', { waitUntil: 'domcontentloaded' });
+  await p.goto('https://skaists.dev/surfaces/watch.html', { waitUntil: 'domcontentloaded' });
   await p.waitForTimeout(1200);
   await p.locator('#room-details > summary').click(); // the room-details card is a closed disclosure
   await p.waitForTimeout(300);
@@ -151,6 +141,6 @@ async function pageAt(path, { lang = 'ru', reg = 'bee' } = {}) {
 }
 
 await b.close();
-srv.close();
+
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -18,7 +18,7 @@
 // surfaces/arweave.js (format-2 data tx, deepHash SHA-384, merkle notes) —
 // vendored same-origin, proven working inside the worker (the stack law:
 // present-but-inert does not count).
-importScripts('arweave.js?v=2');
+importScripts('arweave.js?v=5');
 var A = globalThis.BNRAR;
 
 var E = { RAIL_UNREACHABLE: -32001, BAD_PARAMS: -32007, SUBMIT_REFUSED: -32005, UNSUPPORTED: -32008, SERIALIZE: -32004 };
@@ -64,7 +64,7 @@ var METHODS = {
      unsigned transaction body the shell re-pairs with the signature. */
   buildPublish: async function (p) {
     p = p || {};
-    if (!p.public_jwk || !p.public_jwk.n) throw bad('buildPublish needs {public_jwk:{kty,n,e}} — the JWK\'s PUBLIC parts only');
+    if (!p.public_jwk || !(p.public_jwk.n || A.isEc(p.public_jwk))) throw bad('buildPublish needs {public_jwk:{kty,n,e}} or {kty:EC,crv:secp256k1,pub}: PUBLIC parts only');
     if (typeof p.payload_b64 !== 'string' || !p.payload_b64) throw bad('buildPublish needs {payload_b64}');
     if (!Array.isArray(p.tags)) throw bad('buildPublish needs {tags:[[name,value],…]}');
     var bytes = b64ToBytes(p.payload_b64);
@@ -102,12 +102,12 @@ var METHODS = {
     if (!p || !p.ref) throw bad('confirm needs {ref}');
     var st = await A.txStatus(p.ref);
     if (st.tx === 'confirmed') {
-      return { phase: 'confirmed', evidence: { read: 'GET /tx/' + p.ref.slice(0, 12) + '… @ ' + st.gateway, status: st.tx, confirmations: st.confirmations } };
+      return { phase: 'confirmed', evidence: { read: 'GET /tx/' + p.ref.slice(0, 12) + '…/status @ ' + st.gateway, status: st.tx, confirmations: st.confirmations, block_height: st.block_height, block_indep_hash: st.block_indep_hash } };
     }
     if (st.tx === 'unknown' || st.tx === 'refused') {
-      return { phase: 'submitted', evidence: { read: 'GET /tx/' + p.ref.slice(0, 12) + '… @ ' + st.gateway, status: 'not in the mempool (HTTP ' + st.status + ') — an unfunded key never enters the pool' } };
+      return { phase: 'submitted', evidence: { read: 'GET /tx/' + p.ref.slice(0, 12) + '…/status @ ' + st.gateway, status: 'not in the mempool (HTTP ' + st.status + ') — an unfunded key never enters the pool' } };
     }
-    return { phase: 'submitted', evidence: { read: 'GET /tx/' + p.ref.slice(0, 12) + '… @ ' + (st.gateway || 'no gateway'), status: st.tx || 'pending' } };
+    return { phase: 'submitted', evidence: { read: 'GET /tx/' + p.ref.slice(0, 12) + '…/status @ ' + (st.gateway || 'no gateway'), status: st.tx || 'pending' } };
   },
   status: null   // alias set below
 };

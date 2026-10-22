@@ -1,0 +1,5 @@
+[Crux] Found counterexample for verification goal
+[Crux]   ./libs/crucible/lib.rs:50:9: 50:79 !src/props.rs:49:5: 49:72: error: in rb03_budget/b5c6597c::props[0]::check_refuses_iff_unaffordable[0]
+[Crux]   MIR assertion at src/props.rs:49:5:
+[Crux]   	refused == !fits(i.fee, i.gas_limit, i.remaining)
+[Crux] Overall status: Invalid.

@@ -1,0 +1,499 @@
+{
+ "counts": {
+  "findings": 70,
+  "kept": 70
+ },
+ "verdicts": [
+  {
+   "id": "PQ-1",
+   "verdict": "CONFIRMED",
+   "reason": "synthesis.md:217 puts 'one X-Wing slot per recipient device plus the archive slot' on every P5 wire object. :117 derives the archive persona from the 'wallet root, buzz:archive'. SPEC-BPQ-1.md:33-34 and :41 derive every kem deterministically from masterPrk, which 'a passkey PRF gives'. Anyone who holds the phrase or a PRF output can therefore open every recorded DM, including the relay's 90-day cache (:270). Recipient slots target the card kem (SPEC-BPQ-1.md:94, :164), which comes from the seed, so P5 cannot have PCS. One caveat: the slot is the draft's recovery path for messages not yet bundled (:128 'devices also seal to the archive persona'). Removing it costs that recovery, and the fix has to say so. Merged with ADV-02.",
+   "fix": "Apply (1)-(3) as proposed: no archive slot and no card-kem target on any message lane; wording that anyone with the phrase can read what was archived; the replay tooth. Replace the slot's recovery role: the receiving device re-seals plaintext locally at receipt into its journal or bundle, which is replicated to the user's second failure domain (F1 alt). State the residual loss window when every device is lost before a flush. Extend D13's PASS to confidentiality, so a captor decrypts 0 recorded DMs (from ADV-02(d))."
+  },
+  {
+   "id": "PQ-2",
+   "verdict": "CONFIRMED",
+   "reason": ":219 'fresh encapsulation every 50 messages or 24 h' never says to whose key. The only published KEM key is the card kem, derived from the seed (SPEC-BPQ-1.md:41, :94). Upstream says the same thing: 'Post-quantum signatures and key encapsulation do not alone prove forward secrecy or recovery after key compromise' (up/cons/A09-r01-group-encryption-and-key-changes.md:58). The cost arithmetic reproduces: 7,103 B x 2e10 / 604,800 x 8 = 1.88 Gbps. The CONSTITUTION.md:49 tension is correctly escalated, not resolved. Merged with ADV-08.",
+   "fix": "As proposed (PQ-EPOCH). OS-RNG weekly prekeys attested by the existing bpq1/nostr-event statement, so the 14-label proof stands. P5 retargets at prekeys. P6 per PQ-8. For P7, a KEM ratchet with ephemeral keys from both sides, erased after use (ADV-08's formulation). Teeth: FS-1 and PCS-1. Escalate the 'never orphan data' reading and the conflict between prekey retention and cache_days. Withhold 'keys that change every epoch' until the receipts exist."
+  },
+  {
+   "id": "PQ-3",
+   "verdict": "CONFIRMED",
+   "reason": ":50 says 'Weekly windows cost no forgery resistance before a quantum break'. But the nsec sits on hosts (BZ/crates/buzz-acp/src/config.rs:243-244, BUZZ_PRIVATE_KEY), and readers check K_ATT only for Tier-S or things they act on (:191). Unbound detection waits for the window, up to 30 days (:177). The forcing switch needs a registry record that :511 says cannot yet be signed. The :13 summary goes above the ceiling against the separate-tracks rule (N:pq-tungsten.md:104). Founder Decision 15 (:39) already asks the E23 question, so the fix is to make it a precondition, not to ask it again. Merged with ADV-06; ADV-05 overlaps.",
+   "fix": "As proposed. Add a per-cell sender chain tag 'prev' inside the id, so a fork is flagged on the author's next post. Make Unbound events, forks and equivocation local break evidence that triggers suspect mode. Bound the window by time ('close on next send after 7 days'). Rewrite :13 and :50. Make E23 a precondition of P0.f and D7. Add ADV-06's npub_compromised_since bind field, signed under the PQ-4 rank rules, and the PQB-FORGE stolen-nsec tooth."
+  },
+  {
+   "id": "PQ-4",
+   "verdict": "CONFIRMED",
+   "reason": "Under :122 any already-pinned card can attest a new bind. A device thief has that card and its succession key, which comes from the same seed (SPEC-BPQ-1.md:43). E25 (:100) is 'first seen wins'. K_BIND carries only an optional 'prev?' and no mandatory seq or charter. The estate already arbitrates by rank, not arrival: 'the lower signedBy index wins ... a thief holding r1 can extend a stolen fork forever' (crates/bzdid/src/succession.rs:44-48). Cross-community replay is weak because npubs are per community (:114), but it is worth keeping as defence in depth. Merged with ADV-01.",
+   "fix": "As proposed. Device cards may add or retire only themselves. Changing another card, 'recovery' or 'owner' needs the recovery card, or k-of-n device cards (ADV-01(b)). Evictions enter CONTESTED with a 72 h veto. E25 becomes 'recovery-card-endorsed wins; two handovers from one from = alarm'. Make 'charter' and 'seq' mandatory, refuse a lower seq, and pin newcomers on 2-road agreement plus OTS. Caveat: putting the wallet-root recovery card on top makes E22(b) (PRF-reachable root, :97) load-bearing for messaging. So recovery-card evictions also get a notice window with an alarm on every pinned device, until E22(b) is ruled."
+  },
+  {
+   "id": "PQ-5",
+   "verdict": "CONFIRMED",
+   "reason": "PQ capability is learned only from a K_BIND that a relay serves (:122), with no pin. A relay that withholds it produces 'classical only' (:156), and the sender then has the classical bnr-private lane (:216). This is the harvest-now path the estate has already hit (N:pq-tungsten.md:108). Upstream rejects transparent downgrade (up/adr/0030-dm-durable-application-ack-v2.md:82-85). :417 'never a silent fallback' covers suites, not per-contact lane choice. ADV-11(b)-(d) merged here.",
+   "fix": "As proposed. A sticky per-contact PQ pin with a named refusal. Suite floor = max(registry prefer, highest suite seen). An in-band suite advertisement inside sealed objects. A relay listed in a PQ-declaring charter that drops 4710x kinds is a FAULTY road, not 'classical only'. A per-persona pq-seen high-water alarm. First pin requires its OTS proof. PQB-FORGE refusal tooth."
+  },
+  {
+   "id": "PQ-6",
+   "verdict": "CONFIRMED",
+   "reason": "The card is {bpq, id, dsa, kem, succ, sig} with no Ed25519 field (SPEC-BPQ-1.md:94). The section 2 key table lists no Ed25519 key (:112-118), and the seal carries no Ed25519 public key (:199). A verifier therefore has no specified source for the key behind ':396 a composite seal survives while either half qualifies'. A key delivered inside an ML-DSA-signed card is forgeable by the D6 adversary.",
+   "fix": "As proposed. Bind the Ed25519 key in K_BIND, Schnorr-signed and OTS-stamped before any break; the wallet's existing bzDiD Ed25519 cosign (SPEC-BPQ-1.md:115-118) is the precedent. Define M = 'bzm1/seal' || suite || SHA3-256(all non-signature fields). Both halves must verify; 'either half' applies only to attribution under rule (3). Add F10 compositeNonSeparable and the strip, swap and relabel teeth."
+  },
+  {
+   "id": "PQ-7",
+   "verdict": "CONFIRMED",
+   "reason": ":215 'TLS to the relay' with no hybrid key exchange anywhere, so review condition 1's hybrid establishment is absent on every road. The IDENTITY receipt (:258) rests on the NIP-11 'self' secp256k1 key (BZ nip11.rs:55-57, :308), and K_PQAUTH only authenticates client to relay. The relay-authentication half duplicates C5-08 and ADV-04 and is merged there.",
+   "fix": "(1) Record the negotiated group per road and rung (X25519MLKEM768, 0x11EC) as a connect receipt, and label classical-only roads 'classical transport' rather than refusing them, because some obfuscation rungs may not support hybrid groups. (2) and (3): merged into the C5-08 fix (relay bzpq1 card in the charter, mutual PQ auth in break mode)."
+  },
+  {
+   "id": "PQ-8",
+   "verdict": "CONFIRMED",
+   "reason": ":227 rekeys only on 'a leave or ban'. It has no join or timed rule and no tie-break for concurrent rekeys. Wraps go to device keys derived from the seed (SPEC-BPQ-1.md:41), and the relay keeps wraps and ciphertext for 90 days (:270). So there is no group FS or PCS, and a joiner may read cached epochs.",
+   "fix": "As proposed. Fresh random epoch keys. Rekey on join, on leave or ban (within 10 min) and weekly. Wrap to current prekeys (depends on PQ-2). Delete at epoch end + late_days. Lowest SHA3(wrap-set) wins. Add the join and weekly rekey bytes to section 7. Teeth: the joiner and heal tests."
+  },
+  {
+   "id": "PQ-9",
+   "verdict": "PARTIAL",
+   "reason": "Two parts hold. First, no rule requires a verifier to match K_CP 'c'/'h' to the displaying cell; only a test at :448 checks it. Second, a post-distrust settlement passes :396 rule (3), because 'Settled legacy-nostr records depend on ML-DSA-65, SHA-256 and the binding, not secp256k1'. A backdated record therefore shows VALID with no time evidence. One part is overstated: journal order is not needed to detect omissions, since set membership against the window's range is enough. Merged with LAW-06.",
+   "fix": "Add to section 3.4 as rules: a verifier refuses a K_CP whose c/h does not match the cell; every K_CP is OTS-stamped on close. Add a SETTLED-LATE state (attributable, time unproven, never satisfies Tier-S, binds or payment intents), shown with the claimed date struck. Journal order is optional, or comes from the PQ-3 chain head."
+  },
+  {
+   "id": "PQ-10",
+   "verdict": "CONFIRMED",
+   "reason": "SPEC-BPQ-1.md:224: bsigner 'signs deterministically and reproduces it byte for byte'. :272: 'JS signing is not claimed to be constant-time'. The draft never states the signing mode for device and harness signatures (:83, :201), although those keys sign K_CP, K_ATT, binds and seals for years. Low severity.",
+   "fix": "As proposed. Hedged ML-DSA (and Ed25519 where supported) for every device and harness signature; deterministic signing only in vector mode. Add a P0.b sign-twice row: signatures differ on devices and are byte-identical in vector mode."
+  },
+  {
+   "id": "PQ-11",
+   "verdict": "CONFIRMED",
+   "reason": ":80 lets the harness host hold the agent's nsec and its PQ seed together, so one host breach takes both halves and the succession key. Agents keep no journal (:468). This applies only if E5 is ruled the draft's way; LAW-01 moves the default to owner-device attestation. Low severity.",
+   "fix": "In the E5-ruled branch only: claim wording 'post-quantum signed by the agent's host; a compromise of that host compromises both signatures'; an owner endorsement attested by the recovery card; a host-incident rotation drill (numbered centrally); and ADV-01(e) owner co-attestation for agent Tier-S acts."
+  },
+  {
+   "id": "F1",
+   "verdict": "CONFIRMED-ALT",
+   "reason": "The defect holds. In Stage 1 the only inbox is the community relay that the owner's charter picks (:248-250). User-chosen mailboxes arrive only at P7 (:314), and 'relay copies never count' toward durability (:264). Both source designs had a per-user inbox (D/economics-first.md:19, :216; D/mesh-native.md:213-214, :352), and section 15 gives no reason for dropping it. But the proposed inbox 'holds the user's NIP-42 sessions to every community relay'. That needs each community npub's private key at a third-party operator, which could then forge the user. It collides with the custody rule (CLAUDE.md section 2) and E5 by analogy.",
+   "fix": "Add a Stage-1 per-user INBOX role that authenticates under its own key. It holds a user-issued, read-scoped, expiring, per-community grant (Buzz already models scoped, expiring tokens: BZ/crates/buzz-db/src/lib.rs:660-664) and never signs as the user. It caches received and sealed bytes, fans in to one phone connection, and holds the user's journal ciphertext as a second failure domain. It is listed in K_BIND and contact cards and replaced by one bind update. The free path is the user's own always-on device. Add the inbox-operator-dies drill (numbered centrally) and a 1-connection phone budget in section 7.4."
+  },
+  {
+   "id": "F2",
+   "verdict": "CONFIRMED",
+   "reason": ":318 counts 2e10 connections, while the draft assumes '1.5 operators per user' (:362) and publishing to both rho = 2 relays (:250). '$0.024 per user-year packed (50,000 users a box)' implies 100% concurrency, while '$24M' = 20,000 boxes x $1,212 implies 10%. Break-mode K_PQAUTH verifies are named (:322) but never counted. Minor: readers 'read either' relay (:250), so rho_read may be 1.",
+   "fix": "As proposed. connections = N x D x C x rho x concurrency + agents, as a table over C in {1, 1.5, 3}, rho in {1, 2} and 5/10/30%. One concurrency basis for every cost line. Relay K_PQAUTH verifies per second in section 7.5. State the inbox fan-in form (F1 alt)."
+  },
+  {
+   "id": "F3",
+   "verdict": "CONFIRMED",
+   "reason": "brief.md:102 and N:buzz.md:55 give Buzz's target as '10K humans + 50K agents'. The section 7.1 workload (:292-300) has no agent row, although agents are always-connected harness processes and the draft carries 18 of them (:205).",
+   "fix": "As proposed. An agent row (a in {0.1, 1, 5}, 100% concurrency, M_a, channel fan-out) carried through sections 7.2, 7.4 and 7.5. Agent relay connections metered to the owner bzDiD in section 8.1. An agent-heavy rung in section 7.6."
+  },
+  {
+   "id": "F4",
+   "verdict": "CONFIRMED",
+   "reason": ":297 fixes channel fan-out at 100, while :310 talks about 10,000-member communities and :322 budgets a '1,000-author channel'. Reproduced: mean copies = 1.8 + 4.55 + 0.05 x (2R + 1) gives 106.4 at R = 1,000 and 1,006.4 at R = 10,000. At R = 10,000 bandwidth (about 19 Tbps peak) overtakes the connection estimate, so 'connections bind' (:310) is not robust.",
+   "fix": "As proposed. A heavy-tailed channel-size distribution, a sensitivity table over R_ch and D, the crossover R_ch stated, PQB-SCALE including a community-wide channel at today's 10K + 50K target, and pull-based reads for large channels with per-reader egress."
+  },
+  {
+   "id": "F5",
+   "verdict": "CONFIRMED",
+   "reason": "Reproduced section 7.2's 1,750 B at M = 1 only as DM (2,149 + 920) x 3, group (2,049 + 788) x 13 and channel (586 + 654/1.5) x 201, over 16.4 copies, which leaves out the channel K_ATT. Adding 5,033/1.5 per channel copy gives 3,806 B. Yet :191 says K_ATT is fetched 'in the background'. No section budgets the backlog in break mode.",
+   "fix": "As proposed. Pick background prefetch (a K_ATT column, restated per-copy and Gbps) or on-demand. In either case add section 7.7 'break-mode transition': backlog bytes, verifies per device, the drain-rate cap, the C5-06 interim per-event K_ATT lane and K_PQAUTH. Add the PQB-SCALE simulated-distrust tooth."
+  },
+  {
+   "id": "F6",
+   "verdict": "CONFIRMED",
+   "reason": "Applying :201 (512 + 4,096/n) with section 3.4's n at M = 1, weighted by copy, gives (1.8 x 967 + 4.55 x 902 + 10.05 x 3,243) / 16.4 = 2,344 B, not the 1,130 B at :306. No file in pqbuzz/lm/ or calc.js contains the native rows, although :7 labels everything ARITH. The draft gives no native n.",
+   "fix": "As proposed. Save the section 7 calculator beside the draft now, state native n per lane, and restate the native rows. Redesign channel seals so a 4 KiB seal is not fanned out per copy in low-rate channels (aggregated, lazy or longer-window seals). Remove 'native is the fix' (:503) until the corrected figure supports it."
+  },
+  {
+   "id": "F7",
+   "verdict": "CONFIRMED",
+   "reason": ":322 sets t_v <= 4 ms 'at n-bar = 8'. From section 7.5's own window count (3.6 per device-day at M = 1) and 7.7 received messages per device-day, n-bar is about 2.1. The 5 s budget therefore needs t_v <= 1.07 ms, and a channel with n = 1.5 needs 0.75 ms. :324 allows the phone row to be NOT-RUN.",
+   "fix": "As proposed. Derive n-bar per lane from section 3.4, state a per-lane t_v budget, and make a phone row mandatory in P0.b. Otherwise mark the mobile claim NOT-RUN in section 11."
+  },
+  {
+   "id": "F8",
+   "verdict": "CONFIRMED",
+   "reason": ":274 flushes monthly at 256 KiB or more. The draft's own table (:280) shows 36 chunks a year monthly against 3 for a yearly file at M = 1 (12x), with a 3-chunk minimum per file (N:scale.md:57 row 29, :118). Twelve payments per user-year x 1e10 = 3,802 tx/s, and section 8.4's chain load never counts it. This is subordinate to ECO-2, which makes the 10^10 archive rail infeasible anyway.",
+   "fix": "As proposed. Flush at 3 full chunks or 12 months. Cover the device-only loss window with the second failure domain (F1 alt inbox or own always-on device). Add a payment-overhead row per rail with gas measured in P4 and an ECON gas/value ceiling tooth. Count archive payments in section 8.4."
+  },
+  {
+   "id": "F9",
+   "verdict": "CONFIRMED",
+   "reason": "E21 (:96) fits 12.7M to 30.0M A accounts, so E3 member-pays at 10^10 depends on a voucher layer that is never sized. :362 prefers a single provider. Section 7.4's per-member-year figures imply monthly top-ups of $0.002 to $0.02 with no measured fee. Merged with ECO-10 on provider plurality.",
+   "fix": "As proposed. Size the voucher layer (providers, issuance rate, settlement rail). Set the top-up cadence from value, with a minimum such that fee/value <= 5%, and an ECON tooth for it. State that E3 at 10^10 is feasible only through vouchers."
+  },
+  {
+   "id": "F10",
+   "verdict": "CONFIRMED",
+   "reason": "K_BIND (:122) is never sized. A card is about 8.7 KB as base64 JSON (N:scale.md:122-123), and each card needs a 7,706 B attestation. Churn from section 8.5 (:366) is 1.826e7 new devices per day. 1.826e7 x 41.5 KB x 246 readers comes to about 17.3 Gbps, and none of it appears in section 7.",
+   "fix": "As proposed. Size K_BIND for D = 1-4. Add a churn row: bind republish x readers, card fetches, 90-day resync per new device, rekeys from device loss. Consider a card-reference bind that carries only digests. Carry the D range through every table."
+  },
+  {
+   "id": "F11",
+   "verdict": "CONFIRMED",
+   "reason": ":318 and E15 (:90) make push optional, but no section 11 gate measures phone delivery latency. A source design states 'Phone-only latency is unbounded, and iOS without push delivers on open' (D/mesh-native.md:530). The gateway is vendor-run and APNs-only (N:critic.md:239-242), and no mobile budget exists.",
+   "fix": "As proposed. A PQB-MOBILE family (p50/p95 time-to-device with push on and off, bytes and radio wakes per day, the L5 handshake inside the iOS background window). The content-free wake is sent by the F1-alt inbox, and gateways are replaceable by a signed entry. Add a push-gateway-dies drill (numbered centrally)."
+  },
+  {
+   "id": "F12",
+   "verdict": "CONFIRMED",
+   "reason": "The column header uses 'classical 428 B/copy' (:304), while the draft measures a deployed kind 9 at 586 B (:181), and the live-lane per-copy figure includes that 586 B message. The ratios become 2.99x / 2.73x / 2.25x, not 4.1x to 3.1x (:310, :503). Low severity.",
+   "fix": "As proposed. Use the 586 B baseline (or show both, labelled) and restate the ratios from the saved calculator."
+  },
+  {
+   "id": "ECO-1",
+   "verdict": "PARTIAL",
+   "reason": "Overstated: B1 rule 2 says 'Buzz's own A pays for Buzz's own resources only - its relay, its epoch anchors' (dispatches/BUZZ_A_METERING_SPEC.md, section 3). A relay is its operator's own resource, so a community paying for its own relay is not by itself the rule-1 breach, and ECON-1 ('one funder settling two users' operations') does not convict it. What holds: in default mode nothing is metered and no receipt is emitted (section 8.4 is conditional, :360); 'community' names no account; and review condition 4 asks for actual consumption to be metered. The ruled precedent meters at zero charge: 'free-tier receipts simply charge zero' (LANE_M_B_METER_2026-08-29.md:6).",
+   "fix": "Meter unconditionally. Every connection, byte, cache-day and checkpoint gets a SpendReceipt naming the consuming member, at zero charge when the relay operator pays its own resource under rule 2. The payer of record is a named operator account (bzDiD or wallet), never 'community' and never BNR beyond seeds. Scope ECON-1 to name the lawful shapes (operator-own-resource; member-pays under E3; an optional capped sponsor grant), and plant an unsigned 'community pays all' funder that must turn it red. Zero funds always gives FloorRefusal, never silent absorption."
+  },
+  {
+   "id": "ECO-2",
+   "verdict": "CONFIRMED",
+   "reason": "RULING_RAIL_C_NO_FRONTLOAD_2026-08-08.md:83-85 requires 'state the market-cap vs acquirable-liquidity check explicitly'. Section 8.7 (:374) compares against node income instead. 3.6e11 x 0.0848 = 3.05e10 ANT against 341.57M circulating is 89x (storage-substrate-split.md:151). Node capacity is 'Short by 48x to 1,000x' (:153). 'an unmeasured rail is not a usable rail' (BUZZ_A_METERING_SPEC section 4). 'does not depend on it' is contradicted by D2 and PQB-REMOVE, which seed replacements 'from archives and devices' (:424, :447).",
+   "fix": "As proposed. A section 8.7 table (circulating supply, acquirable depth at stated slippage, daily volume, node capacity) against demand at M = 1/10/100. Declare the 10^10 archive claim NOT-RUN and infeasible on today's rails. The second failure domain becomes the user's own devices plus reciprocal holding (METABOLIC F-1, D/economics-first.md:320) with zero-charge receipts. Depth-gated paid admission, yearly files, a per-user byte cap, and an ECON 'assume depth' tooth."
+  },
+  {
+   "id": "ECO-3",
+   "verdict": "CONFIRMED",
+   "reason": "Agent binds carry only owner:{npub, expires} (:122). The meter table (:336-348) has no ceiling column. 'A keyless relay can be replaced, so a cap only it enforces is not a cap' (SPEC-RESOURCE-DASHBOARD-1.md:299). The METABOLIC owner grant with ceilings (D/economics-first.md:82, :85) was not grafted, although the header (:5) claims METABOLIC's meters were.",
+   "fix": "As proposed. A 'grant' object (purpose, kinds, recipients, per-ResourceClass ceilings per epoch, total, expiry), signed per record as Tier-S and enforced by the key-holding signer. A ceiling column in section 8.1. ECON-CAP, extending PQB-EXPIRY."
+  },
+  {
+   "id": "ECO-4",
+   "verdict": "CONFIRMED",
+   "reason": "The word 'refund' does not appear in the draft. voucher-escrow has 0 refund matches. SpendReceipt has Provenance.prior_receipt_id (crates/shared-types/src/spend.rs:141-145) but no reversal shape. EXPIRED and LATE-REFUSED are shown only to the sender (:266). ECON-9's 'client tally' is the payer's own, which is not independent audit.",
+   "fix": "As proposed. A content-free relay-signed delivery state over a salted commitment, countersigned by the client. A Merkle root plus counts per epoch receipt. Refunds as linked negative line items via prior_receipt_id. Aggregates under SPEC-ZK-RECEIPT-AGGREGATES-1 (counts, sums, roots only). ECON-R, where a third party with no plaintext convicts an unrefunded EXPIRED charge."
+  },
+  {
+   "id": "ECO-5",
+   "verdict": "CONFIRMED",
+   "reason": "Every fence at :358 is per free identifier. A wallet session 'is not bzDiD' and needs only a key (RULING_WALLET_GATED_OPS section 3, pt 1). :354 relies on communities that 'admit free members'. METABOLIC's A2-SYBIL row (D/economics-first.md:445) and its BYO free tier (:18) were dropped. Axis 2 (:448) tests only forgery, although the review requires Sybil resistance as a separate measurable property.",
+   "fix": "Required: A2-SYBIL with a stated metric (community-paid bytes gained per added persona = 0), a planted welcome allowance that must be convicted, and cost-per-Sybil plus seed-cap consumption reported apart from PQB-FORGE. Community-funded quota attaches to an inviter's capped grant (ECO-1). Moving the free tier to BYO reciprocity is optional and needs its own sizing."
+  },
+  {
+   "id": "ECO-6",
+   "verdict": "CONFIRMED",
+   "reason": "Cross-community DMs use mailbox relays from P7 (:314), yet the meter table (:336-348) has no inbox or mailbox row and the only spam fence is membership (:358). Founder Decision 9 (:33) is asked but the design specifies nothing. METABOLIC had the full shape (D/economics-first.md:216, :299-301, :361-364).",
+   "fix": "As proposed. Inbox rows in section 8.1 (pushed NetByte double-entry and sender-paid, held StorageByte byte-days sender-paid until pickup, leases RamByte paid by the holder) with named refusals. Recipient policy ACL, then introduction, then E13 postage, then capped PoW. P7 acceptance gated on the 10^4-stranger spam drill. Also covers the F1-alt inbox in Stage 1."
+  },
+  {
+   "id": "ECO-7",
+   "verdict": "CONFIRMED",
+   "reason": "E3's default is 'BNR runs its own community relay' (:78). :370 assumes user 10^10 joins a member-funded community. :354 admits that nothing guarantees one. BNR's relay has no capacity cap or overflow refusal. CONSTITUTION.md:83 limits standing costs to seeds and spec. HARDLINE: '(a) sponsored / metered | DEAD' (RULINGS_HARDLINE_METHOD_ADOPTION_2026-08-08.md:22). Merged with LAW-10's section 8.6 point.",
+   "fix": "As proposed. Fixed per-epoch capacity on BNR's community relay with a named overflow refusal ('this community is full; join or start another'), or member-pays on it. A row in the section 8.6 cost table. A1-ECON-8D planted case: N simulated joiners leave BNR's paid quantity flat past the cap. The section 8.6 verdict is conditional on E3."
+  },
+  {
+   "id": "ECO-8",
+   "verdict": "CONFIRMED",
+   "reason": ":366 caps seeds at 1e7 per day (41.0 GB) with first-come allocation. 41.0e9 x 8 / 1e9 = 328 s on one 1 Gbps link. Under the draft's own demand (2.183e8 per day) 95.4% of cold starts at 10^10 are already refused. 'anyone may mirror the list' is stated, but mirrors are not the specified primary path. Merged with ADV-12(a).",
+   "fix": "As proposed. The hint list becomes a content-addressed, signed per-epoch object embedded in invites and charters, and mirrorable by anyone. The BNR seed is one mirror. Token-bucket allocation per minute and per source prefix, an optional capped PoW, and a drill where a planted exhauster cannot push honest join success below a stated floor."
+  },
+  {
+   "id": "ECO-9",
+   "verdict": "CONFIRMED-ALT",
+   "reason": "The defect holds. FloorRefusal and quota refusal (:341, :343) apply to rekey wraps paid by the changer (:227, about 738 KB at 256 devices), to Tier-S closing checkpoints (:177) and to break-mode final checkpoints (:398). Fan-out payer is unspecified. But the proposed reserve 'escrowed at join from the member's own funds' is a per-identity pre-positioned balance. RULING_RAIL_C:80-82 says any such design 'fails at 10^10 on arithmetic alone', and :88 says 'DO NOT BUILD AGAINST EITHER READING'.",
+   "fix": "Define a security-critical class (revocation, rekey on leave or ban, Tier-S closing checkpoint, break-mode final checkpoint). It is quota-exempt up to a charter-set per-member bound and charged to the relay's payer of record (the operator's own resource, or members pro rata under E3), never to an escrow and never to BNR. Specify the payer per row: push and unsolicited inbound are sender-paid, pull is reader-paid. Test: a moderator with zero balance completes a ban and rekey within T_rekey."
+  },
+  {
+   "id": "ECO-10",
+   "verdict": "CONFIRMED",
+   "reason": ":362 says '... unless one voucher provider fronts many relays, which this plan prefers'. That creates the chokepoint conditions 4 and 5 forbid. Relays are chosen only by the owner's signature (:248). METABOLIC's offer cards and 'no provider registry' (D/economics-first.md:330-334) were dropped.",
+   "fix": "As proposed. Drop the single-provider preference. Signed provider offer cards. At least 2 relays from distinct operators per charter. Unspent voucher redemption on exit as a linked receipt. PQB-REMOVE and A1-REMOVE extended to remove the largest voucher provider. Merged with F9."
+  },
+  {
+   "id": "ECO-11",
+   "verdict": "CONFIRMED",
+   "reason": ":400 prices renewal at '$0.00006 each, user-paid'. But raw Arweave L1 means 'a 300-byte record costs $0.0049' (storage-substrate-split.md:101). The free Turbo tier is a corporate subsidy (:314). 'renew-only grant' (:346) names no funder, so lapse is the default for absent authors.",
+   "fix": "As proposed. Claimant-paid inclusion of each user's evidence hash in an epoch evidence tree (the epoch-notary pattern, D/economics-first.md:384). One root per era is re-stamped and re-hashed, and anyone may renew it. Price the inclusion and the root with settlement overhead, state the expected lapse fraction, and add an over-budget tooth for per-user L1 renewal."
+  },
+  {
+   "id": "LAW-01",
+   "verdict": "CONFIRMED",
+   "reason": ":50 says Stage 1 is 'lawful under every current ruling'. :7 defines READING as 'always escalated', yet E2, E5 and E6 default to their readings. CLAUDE.md section 1: 'ESCALATE by name. Do not resolve it.' E5's default contradicts the CLAUDE.md section 2 Seat-3 addition ('no agent holds/requests/transmits private key material'). P1 (:488) needs E5, E7 and E8 with no founder gate. One nuance: E6's own-seed reading is arguably the safer key-custody branch, so gating P3 is enough there; R4 does not need to be frozen everywhere.",
+   "fix": "Each READING row defaults to its conservative or unbuilt branch. E5: no agent PQ key; agent ids are owner-device-attested and labelled observed-attested (:468). E2: the PQ-private lane is lab-only until ruled. E6: P3 device keys gated on E6, with R4 on Safe 7 unchanged. Split P1 into P1a (human journals) and P1b (agent checkpoints, gated on E5, E7 and E8). Replace :50 with 'lawful under current rulings only in its conservative branches; E2, E3, E5, E6 and E9 need rulings'."
+  },
+  {
+   "id": "LAW-02",
+   "verdict": "CONFIRMED",
+   "reason": "pirate-haul-rulings.md:18 is a ledger summary: 'SPEC_X0X-1.md drafted: PLANE LAW', inside 'x0x RULED IN as design docket ... AND BUZZ'. The spec text has not been located (N:critic.md:102). LOADMODEL-1M.md:50 and :92 point both ways. SPEC-BCHAT-1.md:3 is 'GENESIS LANDED' by a zCode seat, and its adapters (:45-48) do not include x0x. The draft's default (x0x machine plane only, no human frames) already matches the review's recommendation. So the defect is in how E1 is recorded and switched, not in the default. Severity: medium.",
+   "fix": "As proposed. E1 status 'RULED-as-recorded: ledger summary of a drafted spec; source not located'. Add E1b naming the review's 'bChat over an optional x0x adapter carrying only opaque ciphertext' as a READING, citing :18 'AND BUZZ', LOADMODEL-1M:50 and :92, and SPEC-BCHAT-1:45-48. The switch is a dated RULINGS-*.md entry under PQ-LAW.json, made before any road-policy re-sign. Ask Seat 1 to locate or re-land SPEC_X0X-1."
+  },
+  {
+   "id": "LAW-03",
+   "verdict": "CONFIRMED",
+   "reason": ":13 'quantum computers cannot forge', :17 'Tonight's failure ends here.', :267 '(... fatal flaw, fixed)', :175 'F8 proves', :398 'forgeries never reach an author's journal'. All of these exceed 'sound by construction' or announce unrun results ('A property with no receipt is a hypothesis', SPEC-BTUNGSTEN-1.md:35-37). The :267 'fixed' is in fact false (C5-01).",
+   "fix": "As proposed for :13, :17, :175 and :398. :267 becomes 'proposed fix, untested; see the commit-time floor'. Also rewrite :50's 'Weekly windows cost no forgery resistance' per PQ-3."
+  },
+  {
+   "id": "LAW-04",
+   "verdict": "CONFIRMED",
+   "reason": "article-vi-s3.md section 3.1 (heading :13, text :15) is ratification eligibility: 'a written RFC ... plus a working reference implementation and passing tests'. That is one implementation, in a frozen RATIFIED text. The draft (:394) attributes its own two-implementation registry rule to it. E23 'Without a ruling' (:98) lets the one-press sign records, while :511 says 'no distrust record can be signed'.",
+   "fix": "As proposed. Label it 'proposed registry gate (this draft)', inspired by DIFFERENTIAL in SPEC-BTUNGSTEN-PQ-1. Cite :15 accurately if at all. E23 default: no registry record of any kind until ruled. D6 and D7 run on lab registries only."
+  },
+  {
+   "id": "LAW-05",
+   "verdict": "PARTIAL",
+   "reason": "Overstated: the ORIGIN RULING itself splits identity from connection: 'push.origin = identity string (stays), the join URL = connection string (client's choice of road)' (LANE_RELAY_DUALHOME_2026-08-29.md, ORIGIN section). The draft keeps the label byte for byte, so choosing roads is already within the ruling. What holds: making the charter the acceptance authority (:84; D1 :423 'no acceptance needs the label's DNS') and scoping PQ keys by charter id (section 2) pre-empts Decision 8 (:32), and E9 is not labelled READING.",
+   "fix": "Label E9 READING. Default: the identity string stays, and the charter is a second verifier that must agree. A mismatch refuses; DNS loss alone does not. D1 PASS: 'flow continues on charter roads with the identity string unchanged'. Whether the charter becomes the acceptance authority waits for Decision 8."
+  },
+  {
+   "id": "LAW-06",
+   "verdict": "PARTIAL",
+   "reason": "The framing is wrong. The finding says a post-distrust attestation 'fails (3)', but :396 says 'Settled legacy-nostr records depend on ML-DSA-65, SHA-256 and the binding, not secp256k1', so the record passes rule (3) and is VALID by the draft's own rule. There is no contradiction. What holds: such a record carries only a claimed created_at, so a living author can backdate after a break and the result is indistinguishable from honest pre-break settlement ('Claimed times are never evidence'). Duplicate of PQ-9's third part; merged.",
+   "fix": "A SETTLED-LATE (time unproven) state, attributable to the author's PQ key, that never satisfies Tier-S, binds or payment intents. Tied into F6 monotonicity. PQB-FORGE tooth: a backdated post-distrust settlement shown as VALID turns the run red."
+  },
+  {
+   "id": "LAW-07",
+   "verdict": "CONFIRMED",
+   "reason": "LD/AGENT-1.md:65 is A-8 ('Capability is scoped by the tool surface'), and :155 is Q-2 (context isolation). Neither says hosts hold agent keys. SPEC-BCHAT-1.md:1-6 is the title and status block. LOADMODEL-1M.md:91 is a 'Connection-count cross-check (not binding)' for 'a strong dedicated box [GAP...]', paired at :318 with the U-1G $101 box (:87). SPEC-BTUNGSTEN-PQ-1.md:3 is 'Status: DESIGN'. MEM notes sit outside the CLAUDE.md section 1 precedence table.",
+   "fix": "As proposed. Cite config.rs:243-244 alone for E5. Cite SPEC-BCHAT-1.md's BNR-private lane row (around :55) for E2. Restate :318 as an unbinding GAP figure, with U-1G connection capacity UNVERIFIED and a connections lane in P0.b. Say 'classes defined in SPEC-BTUNGSTEN-1 (ruled) and SPEC-BTUNGSTEN-PQ-1 (design)'. Add a RECORDED-IN-MEMORY citation class, and ask Seat 1 to land the 2026-10-11 order as a RULINGS file."
+  },
+  {
+   "id": "LAW-08",
+   "verdict": "CONFIRMED",
+   "reason": "joint-liveness-coherence.md:174 says 'Every account-recovery path must require the original body', in a personhood resale-floor context (7-agent synthesis, :1-7). Read literally, it would also bar the PRF and r1 rungs (:128). The ledger records a trustee tier: 'Trustee-tier users are covered regardless, because trustees hold owner authority' (pirate-haul-rulings-2026q3.md:73), plus 3-of-5 M-of-N (:43-45). E14 and Decision 10 cite only one side.",
+   "fix": "As proposed. Set :174 (scope: personhood accounts) against q3:43-45 and :73. State that the literal reading would also bar rungs 2 and 3. Keep 'not offered' labelled 'pending ruling', and rephrase Decision 10 to cite both."
+  },
+  {
+   "id": "LAW-09",
+   "verdict": "PARTIAL",
+   "reason": "What holds: RULING_WALLET_GATED_OPS_2026-08-20.md:42-44 covers anything that 'writes state', whether Buzz is in 'the BNRoSe ecosystem' is unruled, and the draft uses the ruling only as a quota tool, so an unnamed collision exists. Overstated: the ruling's own pattern is a key-possession session ('SIWE-shaped - the address is the session ... not bzDiD', section 3), and NIP-42 AUTH is a signed nonce challenge. The relay door may already satisfy it, and the proposed default (a separate SIWE session for BNR relay writes) settles the reading the strict way.",
+   "fix": "Add E28 'wallet-gated ops vs relay writes'. Default (READING): NIP-42 AUTH counts as the key-possession session, with per-npub quotas. Ruled otherwise: a SIWE wallet session (unfunded) for writes on BNR-operated relays. Tooth: an unauthenticated write is refused."
+  },
+  {
+   "id": "LAW-10",
+   "verdict": "CONFIRMED",
+   "reason": "E3 (:78) picks BUZZ_A_METERING_SPEC (a Cowork deliverable, 'Every rule below is DERIVED', :1-6) over CONSTITUTION.md:83 without a READING label. Section 8.6 (:370) assumes the ruled-otherwise branch. RULING_RAIL_C:88 and :100: 'No seat builds against either reading yet'. ECON-7 (:378) convicts a 'planted genesis grant', which is the KISS funded-wallet reading, so E17's 'None needed' (:92) is false. Section 8.6 overlap merged with ECO-7.",
+   "fix": "As proposed. Label E3 READING, and make section 8.6 'PASS only if E3 is ruled member-pays; under the default BNR's cost is bounded by its relay cap (ECO-7)'. E17 default: 'the design neither requires nor forbids a funded wallet; no code path depends on either'. Scope ECON-7 to resource-token balances, with any gas float left to the Rail C ruling."
+  },
+  {
+   "id": "LAW-11",
+   "verdict": "CONFIRMED",
+   "reason": ":239 'nobody, by design | ... a persona's other communities' contradicts :242 'No unlinkability claim without a TAM slice'. :237-238 already concede that relays see IPs and timing and that the network sees endpoints and timing. Unlinkability is NOT-RUN at :448. Merged with ADV-07.",
+   "fix": "As proposed. Rewrite the row as 'not published by the protocol: device-to-wallet bindings, the bzDiD; cross-community linkage by IP and timing possible for shared operators and network observers; NOT-RUN'. Add a PQB-LINK family with planted correlators (see ADV-07's M1-M3)."
+  },
+  {
+   "id": "LAW-12",
+   "verdict": "PARTIAL",
+   "reason": "SPEC-BPQ-1.md:224-226 says carriage 'is the upstream ask to block/buzz'. That names a route; it is not a prohibition. The draft already marks the kinds provisional and requires a recheck against upstream (:156). What holds: the upstream ask is never filed, and E4 escalates only the deploy, not the departure from the stated route.",
+   "fix": "Add an E4 sub-row ('carriage kinds fork-local pending the SPEC-BPQ-1 section 5b upstream ask'). File the ask, hold the numbers provisional, and add P0 acceptance: grep upstream main at a fetched sha for 37100, 47100-47104 and 22100 before P2."
+  },
+  {
+   "id": "C5-01",
+   "verdict": "CONFIRMED",
+   "reason": "BZ migrations/0021_created_at_fence_floor.sql:19-36 is a DEFERRABLE commit-time trigger on 'channel_id IS NOT NULL' rows, with 'deliberately NO in-band bypass for channel-bearing rows'. Backfill must run outside the writer pool with the replica breaker closed. The writer pool arms it on every connection (buzz-db/src/lib.rs:673-713) at CREATED_AT_FLOOR_SECS = 960 (replica_fence.rs:74). So the :268 late-accept aborts at COMMIT. The D2 and D15 'operator import' is a breaker-closed DBA operation. late_days <= cache_days strands partitions longer than 7 days, against axis 6's 'recovery after long partitions' (SPEC-BTUNGSTEN-1.md:79-81).",
+   "fix": "As proposed in principle. Never insert backdated bytes into channel-window rows. Carry late or imported events as exact original bytes in an exempt row class or a separate late table, indexed by original id, with the channel membership read gate preserved (a bare channel_id NULL carrier would lose it). No age cap for events covered by an attested, OTS-stamped K_CP. buzz-db fence tests stay green in the same job. PQB-HEAL adds 8- and 30-day partitions (0 left LATE-REFUSED). D2 passes with member republishing only. Still E4 RED-class."
+  },
+  {
+   "id": "C5-02",
+   "verdict": "CONFIRMED",
+   "reason": "Handover v1's target is 'the new key set's section 3 card' (SPEC-BPQ-1.md:200-201). That card is fixed to ML-DSA-65 with lengths 1952/1216/32 (:94). The bSigner registry signature side is ml-dsa-44/65/87 only (crates/bsigner/CONTRACT.md:35-36), and bzDiD KeyAlg is {Ed25519, MlDsa65} (crates/bzdid/src/genesis.rs:37-41). D6's 'personas hand over' (:427) therefore lands on the broken family, and the composite's other half dies in D7.",
+   "fix": "As proposed. Card v2 with an 'alg' field. A handover may target a different family. A second, non-lattice ongoing signer (an SLH-DSA small-signature set; FN-DSA later), admitted under the LAW-04-corrected registry gate. bzDiD KeyAlg via E22(a). Rewrite D6's PASS, add a joint D6+D7 drill, and add a v1-to-v1-after-distrust tooth. Price the SLH-DSA ongoing-signature bytes in section 7."
+  },
+  {
+   "id": "C5-03",
+   "verdict": "CONFIRMED",
+   "reason": "The drills cover ML-DSA, secp256k1/Ed25519 and SHA-256 only (:427-429). Yet SHA3/SHAKE underpins key commitment, author_ref, prev, msg_id and the seal digest (:164, :201), the evidence (:276) and SLH-DSA-SHAKE succession (:167). Archive bundles are sealed with only X-Wing (:273) onto permanent public storage ('Uploading it publicly is safe', SPEC-BPQ-1.md:187-188). SPEC-BPQ-1.md:268 already names the HQC second-family double wrap.",
+   "fix": "As proposed. Permanent uploads double-wrapped across families at write time. Until a second-family KEM is admitted, archives stay device-only, or the UI says 'a lattice break opens this archive'. Add ML-KEM, SHA3/SHAKE and AES-GCM extinction drills (numbered centrally). Bind the hash id into the bzm1 suite, proved in F5."
+  },
+  {
+   "id": "C5-04",
+   "verdict": "CONFIRMED",
+   "reason": "OTS 'holds while SHA-256 and the proof-of-work chain hold' (SPEC-BPQ-1.md:122-125). Bitcoin headers are SHA-256d, so D8 also removes the only anchor, and :414 says 'renew or expire before it' with no target. The wallet's .ots files are pending calendar promises and are unverified (N:pq-tungsten.md:118). L1 forbids dependence on any blockchain (SPEC-BTUNGSTEN-1.md:105-108), and the drill table has no anchor row.",
+   "fix": "As proposed. An anchor-adapter registry with at least 2 anchors in different hash families. An anchor-extinction drill with an OTS-only-after-distrust(sha256) tooth. P0.e includes an OTS verify KAT against upstream proofs (NOT-RUN if absent) before any claim rests on OTS."
+  },
+  {
+   "id": "C5-05",
+   "verdict": "CONFIRMED",
+   "reason": "Registry records are 'signed by the one-press' (:394), and break mode switches only on a signed distrust record (:398). No drill covers losing that signer. The L1 row (:453) omits registry authority and D1, D11, D12, D14 and D15. SPEC-BTUNGSTEN-1.md:105-108 and :130-132 forbid an indispensable signer set or organization. Caveats: canaries detect only public breaks, because a covert holder will not spend them. An ML-DSA public key sampled from a hash may have no valid secret at all, so that canary needs its own analysis. A steward set is an E23 ruling, not a design default. ADV-03(d) merged.",
+   "fix": "As proposed, with the caveats stated. A NUMS secp256k1 canary as an authority-free trigger. An ML-DSA canary only after analysis. Steward-set authority proposed under E23. A 'registry signer extinct' drill. Complete the L1 row, and state 'L1 RED by construction until E22 and E23'."
+  },
+  {
+   "id": "C5-06",
+   "verdict": "CONFIRMED",
+   "reason": ":398(2) makes bzm1 the only post-break authorship lane, gated on P7 'K_BZM (founder word)' (:494) with no date. Meanwhile per-event K_ATT (5,033 B, :175) already exists from P2 for Tier-S (:124), and nothing lets break mode fall back to it.",
+   "fix": "As proposed. An interim break-mode lane: every new event is treated as Tier-S with its own K_ATT, and readers require it. D7's live PASS moves to P2. P7 becomes a cost reduction. Price the lane in section 7.7 (F5)."
+  },
+  {
+   "id": "C5-07",
+   "verdict": "CONFIRMED",
+   "reason": "The charter is one owner key, and 'Lower seq is refused' (:248). seq may go to 2^53-1 (:409), so one compromise can lock the community forever. 37100 sits in buzz-core's NIP-33 range 30000-39999 (crates/buzz-core/src/kind.rs:451-454), so relays keep only the latest charter. D2 and PQB-REMOVE depend on that one original key, which L1 forbids (SPEC-BTUNGSTEN-1.md:105).",
+   "fix": "As proposed, merged with the PQ-4 and ADV-03 authority lifecycle. An M-of-N steward set and an SLH-DSA succession commitment. seq = prev.seq + 1 with a prev hash. Steward-threshold recovery from a named fork point, with the losing branch kept as evidence. Owner-gone and max-seq drills (numbered centrally). A seq-jump tooth."
+  },
+  {
+   "id": "C5-08",
+   "verdict": "CONFIRMED",
+   "reason": "NIP-11 'self' is a plain string in a public HTTP document (BZ nip11.rs:55-57), and the relay signs nothing during AUTH (handlers/auth.rs checks only the client's event). So IDENTITY at :258 is copyable configuration. AGREEMENT checks only the persona's own checkpoint, while L5 requires 'an INDEPENDENT source' (SPEC-BTUNGSTEN-1.md:165-166). Relay identity has no PQ path. Merged with ADV-04 and PQ-7(2).",
+   "fix": "As proposed. IDENTITY = the relay signs a fresh client nonce plus the challenge, road and charter seq with its charter key. A bzpq1 card per relay key is pinned in the charter, with a mutual ML-DSA proof in break mode. AGREEMENT = the charter head plus sampled member heads matched against the second rho relay or the invite; a new persona uses the charter head. Teeth: an impostor copying NIP-11, and a split-view relay, both leave the UI 'not connected'."
+  },
+  {
+   "id": "C5-09",
+   "verdict": "CONFIRMED",
+   "reason": "The source table had 'cadence / first' and D9 'reopens archive + phrase, verifies, and continues' (D/millennium-first.md:422-437). The draft keeps only 'First' (:421) and drops 'continues' (:430). CT's control is 'none' (:437), against :419 'each with a positive control'.",
+   "fix": "As proposed. Restore cadence, and let a drill receipt older than its cadence turn the row NOT-RUN in CI. A CT positive control (a planted irreplaceable dependency). D9 continues authoring. D15 names its owner and uses the buzz-conformance independent trace checker (BZ/crates/buzz-conformance/src/lib.rs:1-14) as the oracle."
+  },
+  {
+   "id": "C5-10",
+   "verdict": "CONFIRMED",
+   "reason": "The ruled classes are the four in SPEC-BTUNGSTEN-1.md:269-275. KAT, DIFFERENTIAL and INHERITED come from SPEC-BTUNGSTEN-PQ-1.md:32-41, whose status is DESIGN (:3). MEASURED appears in neither, yet :443 lists it under 'Classes as ruled'. :451-452 also use MODEL and mix PROVE-UNIVERSAL with drill outcomes in one cell.",
+   "fix": "As proposed. Remove MEASURED and MODEL from 'as ruled'. Propose a run-receipt class in a new E-row. Label drills SIMULATED-EXTINCTION. Split axis 6 into separate rows per class. Print 'private-infra, not CI' where CI cannot host a run."
+  },
+  {
+   "id": "C5-11",
+   "verdict": "CONFIRMED",
+   "reason": "D4/D5's PASS is degradation (:426), and the 'other store' does not exist because Arweave is 'refused until receipted' (:345). Settlement runs through ant-pay and bPay (:275, :362), but the only settlement drill is Vaulta, refuse-only, at P8 (:433). No replacement path is tested.",
+   "fix": "As proposed. D4' provider migration with evidence unchanged: content hashes plus at least 2 locators on the paper list. D12' settlement adapter swap that reconciles refunds and FloorRefusals. Teeth: an address-keyed receipt and a hardwired adapter are both convicted. Both by P4."
+  },
+  {
+   "id": "C5-12",
+   "verdict": "CONFIRMED",
+   "reason": "L4 requires crossing a boundary 'with authority continuity intact and fail-closed before it' (SPEC-BTUNGSTEN-1.md:140-145). The L4 row tests only 'boundaries refused, never wrapped' (:456). The u32 rows name no successor (:414). bzDiD validUntil is 'uint' unix seconds (genesis.rs:14), and the relay casts created_at.as_secs() as i64 (BZ buzz-db/src/event.rs:287).",
+   "fix": "As proposed. PQB-TIME-CROSS past 2038 and 2106 under a successor time_rep: same bzDiD signs, evidence renews onto the C5-04 second anchor, and both a wrap and a refuse-everything client are convicted. Add rows for validUntil and the relay cast."
+  },
+  {
+   "id": "ADV-01",
+   "verdict": "CONFIRMED",
+   "reason": "Duplicate of PQ-4; merged. Adds: the npub sits in BUZZ_PRIVATE_KEY on agent hosts (config.rs:243-244), agent Tier-S acts need only the host card (:124), and PQB-FORGE (:448) never models a holder of nsec plus one card.",
+   "fix": "Merged into PQ-4. Keep (b) k-of-n device cards, (d) the cooling-off veto, the PQB-DEVTHEFT test, and (e) owner co-attestation of agent Tier-S acts in the E5-ruled branch."
+  },
+  {
+   "id": "ADV-02",
+   "verdict": "CONFIRMED-ALT",
+   "reason": "The core is PQ-1, and D13 (:434) checks only authority, not confidentiality. Two sub-fixes do not work. (b) A per-epoch archive ratchet gives nothing against a phrase holder, because every epoch key can be recomputed from the root. (c) 'only r1 derives the recovery card' is not available: SPEC-BPQ-1.md:33-34 says the phrase is masterPrk's BIP-39 encoding and 'a passkey PRF gives it', so PRF and phrase yield the same root. Separating them is E22 work.",
+   "fix": "Use PQ-1's fix. Keep (d): D13's PASS includes 'captor decrypts 0 recorded DMs and 0 bundles sealed before capture', and PQB-ROOT-THEFT reports a measured count. Route root separation to E22."
+  },
+  {
+   "id": "ADV-03",
+   "verdict": "CONFIRMED",
+   "reason": "Anti-rollback refuses only a lower seq a client has already seen (:248). Revocations (:124), charter updates and registry records all travel over roads the adversary may control. A withholding relay can therefore keep revoked cards in slot lists and keep clients pre-break, and :98 and :511 leave time-to-break-mode unbounded.",
+   "fix": "As proposed, merged into the authority-lifecycle cluster (PQ-4, C5-07). fresh_until horizons and a STALE state. The current bind hash and charter seq carried in K_CP. Heads from at least 2 independent sources. PQB-STALE. (d) merged into C5-05."
+  },
+  {
+   "id": "ADV-04",
+   "verdict": "CONFIRMED",
+   "reason": "Duplicate of C5-08; merged. Adds the agent kill path: :252 makes an AUTH denial from a 'charter-key relay' terminal, and buzz-acp treats any message without the 'error:' prefix as terminal (BZ relay.rs:3804-3806). So a road that copies NIP-11 can stop agents.",
+   "fix": "Merged into C5-08. A terminal denial counts only if signed by the charter relay key; an unsigned denial is a transport failure. PQB-ROADSPOOF with the unsigned-self tooth."
+  },
+  {
+   "id": "ADV-05",
+   "verdict": "CONFIRMED",
+   "reason": "The state list (:177) has no state for 'listed in a covering checkpoint but never received', although :191 says K_CP 'exposes withheld messages'. rho = 1 until E26 (:250). Checkpoints arrive every 7 to 30 days, and PQB-HEAL (:449) states no detection latency.",
+   "fix": "As proposed. A WITHHELD state. A daily signed head beacon (seq, count) for silent authors, combined with PQ-3's chain tag, which exposes gaps on the next post. Cross-checking over the second rho relay or in-lane. T_detect named, for example 24 h. PQB-WITHHOLD with an honest-relay control."
+  },
+  {
+   "id": "ADV-06",
+   "verdict": "CONFIRMED",
+   "reason": "Duplicate of PQ-3; merged. Adds that no fast 'my npub is stolen' path exists.",
+   "fix": "Merged into PQ-3. A K_BIND npub_compromised_since field signed under the PQ-4 rank rules. A 24 h window or per-event attestation for agent npubs held in host env. PQB-NPUB-THEFT."
+  },
+  {
+   "id": "ADV-07",
+   "verdict": "CONFIRMED",
+   "reason": "Every session requires NIP-42 AUTH as a member (:258), and writes are membership-gated (:358). The bzm1 relay therefore links each envelope and each mailbox-tag fetch to an authenticated npub, which :240 ('no sender in the envelope') omits. :448 defines no metadata property. Merged with LAW-11.",
+   "fix": "(a) Separate measurable properties: M1 relay-log linkability, M2 timing linkability for a global passive observer, M3 cadence leakage. (c) Rewrite the :240 row now. (b) Anonymous quota tokens on unauthenticated sessions are named as an option needing its own design and receipts, not a P7 requirement. M1 tooth: a planted log join."
+  },
+  {
+   "id": "ADV-08",
+   "verdict": "CONFIRMED",
+   "reason": "Duplicate of PQ-2; merged. :219 specifies a hash ratchet, which gives FS only. PCS needs fresh ephemeral KEM input from both sides, and the only published keys are static (:115, :122).",
+   "fix": "Merged into PQ-2 (P7 KEM ratchet with ephemeral keys erased after use, PQB-PCS with a static-key tooth, wording withheld until it passes)."
+  },
+  {
+   "id": "ADV-09",
+   "verdict": "CONFIRMED-ALT",
+   "reason": "Real. :268 extends late-accept to any 1059 'with an ephemeral signer', and the relay already skips the pubkey check for gift wraps (BZ ingest.rs:2023-2028). Any member can therefore replay pruned or moderated 1059s, or mint new ones dated up to 7 days back. But a relay-issued admission token cannot exist for a 1059 that never reached the relay, which is exactly the outage case late-accept exists for.",
+   "fix": "Remove the 1059 carve-out. The outbox re-wraps the unchanged inner signed event in a fresh 1059 with a current created_at. The record is the inner event, so the identical-bytes rule (section 6.2) holds for it, as PQ-2 already notes. Relays refuse ids on their prune and moderation tombstone lists. PQB-REPLAY-1059: a replayed pruned 1059 and a backdated fresh one are refused, and an outbox re-wrap is accepted."
+  },
+  {
+   "id": "ADV-10",
+   "verdict": "PARTIAL",
+   "reason": "Overstated: the draft already says plainly that 'HELD means the relay answered OK until receipted' (:266). What holds: authority objects (binds, revocations, charters, K_CP) count as published on that OK with no read-back, so a relay that acknowledges and then drops silently defeats revocation (compounds ADV-03).",
+   "fix": "For authority objects only: HELD-VERIFIED, requiring a delayed read-back of the identical bytes over a separate road or the other rho relay. The outbox retries and alerts until VERIFIED. PQB-FAKEACK: a relay that acknowledges and drops gives 0 VERIFIED and an alert within a named T."
+  },
+  {
+   "id": "ADV-11",
+   "verdict": "CONFIRMED-ALT",
+   "reason": "Real. Under write-common (:417) one stale or Sybil member keeps the group on the oldest admitted suite until retire_new, and a relay dropping 4710x kinds looks 'classical only' (:156). But fix (a), write-preferred with exclusion, breaks members who have not upgraded, and CONSTITUTION.md:92 says 'new versions must not break existing consumers (... deprecation windows measured in years)'.",
+   "fix": "Keep write-common above a monotone charter suite_floor that only the owner or stewards raise. Take (b)-(d) from PQ-5 (FAULTY road, pq-seen high-water alarm, first pin with OTS). PQB-DOWNGRADE."
+  },
+  {
+   "id": "ADV-12",
+   "verdict": "CONFIRMED",
+   "reason": "(a) is ECO-8. (b): the section 8.1 rows name 'community; member if E3' (:341) with no payer for inbound or fan-out bytes, and at zero balance the session is refused (:340). A flooded victim therefore loses revocations, charter updates and distrust records.",
+   "fix": "(a) merged into ECO-8. (b) merged into ECO-9 alt and ECO-6: unsolicited inbound is sender-paid, and authority kinds (K_BIND, K_CHARTER, registry heads, revocations) get a quota-exempt read path even at FloorRefusal. ECON-DRAIN: the victim's balance is untouched and revocations are still delivered."
+  }
+ ],
+ "fixList": [
+  "1. Law frame first (LAW-01, LAW-10, LAW-05, ECO-7, LAW-04). Rewrite :50 so Stage 1 is lawful only in its conservative branches. Every READING row (E2, E3, E5, E6, E9) defaults to its unbuilt or conservative branch: no agent PQ key, owner-device attestation of agent checkpoints, and the PQ-private lane lab-only. Split P1 into P1a (human journals) and P1b (agents, gated on E5, E7, E8); gate P3 on E6 and P5-P6 on E2. Label E3 and E9 READING. Section 8.6 becomes conditional on E3. Cap BNR's own community relay with a named overflow refusal, add it to the 8.6 table, and plant it in A1-ECON-8D. E17 becomes 'neither requires nor forbids a funded wallet'; scope ECON-7 to resource-token balances. E9 default: identity string kept, charter as a second agreeing verifier. E23 default: no registry record of any kind until ruled.",
+  "2. Claims and citations (LAW-03, PQ-3(4), LAW-07, C5-10, LAW-04). Rewrite :13, :17, :50 ('weekly windows cost no forgery resistance'), :175, :267 ('proposed fix, untested') and :398 to the 'sound by construction' ceiling. Remove the article-vi-s3 Proof-gate attribution and call it 'proposed registry gate'. Remove MEASURED and MODEL from 'classes as ruled' and propose a run-receipt class by E-row. Fix the AGENT-1, SPEC-BCHAT-1 and LOADMODEL-1M:91 citations. Add a RECORDED-IN-MEMORY citation class.",
+  "3. Confidentiality core (PQ-1 + ADV-02, PQ-2 + ADV-08, PQ-8). Remove the archive slot and card-kem targets from every message lane. Recovery comes from receiving-device local re-seal into the journal and bundle, with the residual loss window stated. Add PQ-EPOCH: weekly OS-RNG X-Wing prekeys attested via the existing bpq1/nostr-event statement; P5 retargets at them; P6 random epoch keys, rekeyed on join, leave or ban, and weekly, wrapped to prekeys, with the SHA3 tie-break; P7 KEM ratchet with ephemeral keys from both sides, erased after use. Teeth: FS-1, PCS-1, the joiner test, and the archive-key replay test opening 0 DMs. D13 PASS gains confidentiality. Escalate the CONSTITUTION:49 reading and the conflict between prekey retention and cache_days. Withhold 'keys change every epoch' until receipts exist.",
+  "4. Authority-object lifecycle (PQ-4 + ADV-01, C5-07, ADV-03, ADV-10). K_BIND roles: device cards add or retire only themselves; evictions and changes to recovery or owner need the recovery card or k-of-n devices, enter CONTESTED with a 72 h veto, and every pinned device gets an alarm (also for recovery-card evictions until E22(b)), on the bzDiD succession.rs priority precedent. Mandatory charter and seq (prev+1 plus prev hash) on K_BIND and K_CHARTER. Charter steward set M-of-N with SLH-DSA succession and fork evidence. fresh_until horizons and a STALE state. Bind hash and charter seq carried in K_CP. Heads from at least 2 sources. HELD-VERIFIED read-back for authority objects. Replace E25 'first seen wins'. Tests: PQB-DEVTHEFT, PQB-STALE, PQB-FAKEACK, owner-gone and max-seq drills.",
+  "5. Late delivery rebuilt around the commit-time floor (C5-01, ADV-09). BZ migration 0021 plus CREATED_AT_FLOOR_SECS = 960 abort any backdated channel row at COMMIT. Carry late or imported events as exact original bytes in an exempt row class or late table that keeps the membership read gate. No age cap for events covered by an OTS-stamped K_CP. Drop the 1059 carve-out: the outbox re-wraps the unchanged inner signed event in a fresh 1059, and relays refuse tombstoned ids. buzz-db fence tests stay green as teeth. PQB-HEAL gains 8- and 30-day partitions. D2 passes by member republishing only. PQB-REPLAY-1059.",
+  "6. Forgery and censorship detection (PQ-3 + ADV-06, ADV-05, PQ-9 + LAW-06). Per-cell sender chain 'prev' tag inside the id. npub_compromised_since bind field. Suspect mode on local break evidence. Window closes on the next send after 7 days. WITHHELD state, daily head beacon and T_detect. Verifier refuses K_CP cell mismatch. OTS-on-close as a rule. SETTLED-LATE (time unproven) state that never satisfies time-dependent acts. E23 as a P0.f precondition.",
+  "7. Relay identity and transport (C5-08 + ADV-04, PQ-7). Nonce proof of possession by the charter relay key. Terminal AUTH denial only when signed by it. Relay bzpq1 card in the charter for mutual PQ auth in break mode. AGREEMENT against an independent source (second rho relay or invite heads). Per-road connect receipt of the negotiated TLS group (X25519MLKEM768), with classical roads labelled. PQB-ROADSPOOF and split-view teeth.",
+  "8. Algorithm, anchor and time extinction paths (C5-02, C5-03, C5-04, C5-05, C5-06, C5-12). Card v2 with alg, cross-family handover, and a second non-lattice ongoing signer (KeyAlg via E22a). Joint D6+D7 drill. Permanent archives double-wrapped across KEM families, or device-only with explicit wording. ML-KEM, SHA3 and AES drills. Hash-agile bzm1 suite. Second anchor family plus an OTS verify KAT. NUMS secp256k1 canary (ML-DSA canary only after analysis; covert breaks undetected) and steward set under E23. Interim break-mode lane: per-event K_ATT from P2, with D7 live at P2. PQB-TIME-CROSS for 2038 and 2106 with authority continuity. Complete the L1 row and state 'RED until E22/E23'.",
+  "9. Drill program hygiene (C5-09, C5-11, plus numbering). Restore the cadence column; a stale receipt is NOT-RUN in CI. CT positive control. D9 'continues authoring'. D15 owner, with buzz-conformance as oracle. D4' provider migration and D12' settlement-adapter swap by P4. Assign all new drill numbers centrally: F1, F11, PQ-11 and C5-03..07 each proposed colliding D16-D22 numbers.",
+  "10. Mobile inbox and delivery payer (F1 alt, F11, ECO-6, ECO-9 alt, ADV-12b). A Stage-1 per-user replaceable inbox under its own key with a user-issued, read-scoped, expiring per-community grant, never the user's nsec. Listed in K_BIND and contact cards, replaced by one bind update. Own always-on device as the free path. Second failure domain for journal ciphertext. One connection per phone. Inbox meter rows (sender-paid push and holding, reader-paid pull, holder-paid lease). Recipient policy ACL, then intro, then E13 postage, then PoW, with the P7 spam drill. Security-critical quota-exempt class charged to the relay's payer of record, with no escrow at join (Rail C). Authority kinds readable at FloorRefusal. PQB-MOBILE latency and battery family, plus a push-gateway-dies drill.",
+  "11. Economics metering (ECO-1 partial, ECO-3, ECO-4, ECO-5, ECO-10, F9). Unconditional metering with zero-charge receipts naming the consuming member. Payer of record is a named operator account under B1 rule 2, or the member under E3. ECON-1 scoped to lawful shapes, with a planted unsigned funder. Signer-enforced grant object with per-class ceilings, a ceiling column and ECON-CAP. Double-entry delivery states over salted commitments, refunds via prior_receipt_id and ECON-R. A2-SYBIL metric with a planted welcome grant. Drop the single-voucher preference: offer cards, at least 2 operators, redemption on exit. Size the voucher layer and the fee/value ratio.",
+  "12. Storage and seed economics (ECO-2, F8, ECO-11, ECO-8 + ADV-12a). An explicit Rail C depth table (supply, depth, volume, node capacity), with the 10^10 archive declared NOT-RUN and infeasible. Depth-gated admission and an 'assume depth' tooth. Flush at 3 chunks or 12 months, with archive payments counted in chain load. Renew epoch Merkle roots, not per-user objects. Content-addressed, mirrorable seed list, token-bucket fairness and an exhauster drill.",
+  "13. Scale model (F2, F3, F4, F5, F6, F7, F10, F12). Save the section 7 calculator beside the draft now. Connections table over C, rho and concurrency plus agents, on one cost basis. Agent workload row. Channel-size distribution and crossover. K_ATT column or a section 7.7 break-mode transition budget. Restate the native rows and fix the bzm1 channel seal fan-out before calling native 'the fix'. Per-lane n-bar budgets with a mandatory phone row or explicit NOT-RUN. K_BIND sizing and churn row. 586 B classical baseline.",
+  "14. Downgrade resistance (PQ-5, ADV-11 alt). Sticky per-contact PQ pin with a named refusal. Monotone charter suite_floor while keeping write-common above it (CONSTITUTION:92). A relay dropping PQ kinds under a PQ charter is a FAULTY road. pq-seen high-water alarm, in-band suite advertisement, first pin with OTS.",
+  "15. Signature details (PQ-6, PQ-10, PQ-11). Ed25519 key bound in an OTS-stamped K_BIND. Seal message binds the suite and all fields, both halves required, F10 compositeNonSeparable. Hedged signing on devices, deterministic only for vectors. Agent claim wording and the owner endorsement only in the E5-ruled branch.",
+  "16. Metadata as separate measured properties (LAW-11, ADV-07). Replace the 'nobody, by design' row and the :240 row. Define M1 relay-log linkability, M2 timing linkability and M3 cadence leakage as a PQB-LINK family with planted correlators. Anonymous quota tokens named as a future option only.",
+  "17. Escalation records (LAW-02, LAW-08, LAW-09 partial, LAW-12 partial). E1 'RULED-as-recorded, source not located', with E1b naming the review's x0x-adapter reading and the counter-texts; the switch is a RULINGS file before any road-policy re-sign. E14 cites both joint-liveness:174 and q3 :43-45/:73. New E28 wallet-gated ops (default: NIP-42 AUTH as the key-possession session, READING). E4 sub-row for upstream carriage kinds, plus a grep of upstream at a fetched sha before P2."
+ ],
+ "critic": {
+  "unmet": [
+   "OPEN DESIGN DEFECT, not fixable by editing (introduced by fix 6). Spec :277 reads: 'Every event a persona publishes in a cell carries [\"bzp\", <id of its previous event in this cell>, <cell seq>]'. Spec :786 (now :795) counts 'an event under one's own npub that one's journal does not hold' as local break evidence. The npub is shared by all of a user's devices (§2.1 :158, 'npub | as today | per community'). So two honest devices that post in one cell without syncing first make two events with the same parent, which the spec calls Forked. Each device also sees the other's events as missing from its own journal. Every persona with D >= 2 (the declared default is D = 2) would therefore enter suspect mode with no thief present. A per-device chain would need device slots bound under the §2.2 rank rules, because a slot a thief can add freely defeats the tag. Under the E6 default those slots exist only on lab identities. The defect is now disclosed at :279, :795 and §14 item 13, and a two-honest-devices control has been added to PQB-FORGE. The design still needs a redesign and a ruling.",
+   "Brief §5 gaps 'accessibility' and 'real-time voice (x0x voice is 2-party; Buzz huddles 25/255)' had no section. The only coverage was the Huddles row at :336, 'Not end-to-end encrypted.' I added §7.9 at :636 and §14 item 14. It discloses facts and gaps but defines no accessibility test family, so the condition is disclosed, not met.",
+   "Fix 13, 'Save the section 7 calculator beside the draft now', was not done as a file. The spec embeds the calculator as Appendix A and says it is 'to land as docs/evidence/pqbuzz-design-2026-10-15/calc-s7.js' (:13). No calc-s7.js exists beside the draft (the scratchpad holds only the older calc.js), and docs/evidence/pqbuzz-design-2026-10-15/ does not exist in the repo at 69ef2c717. I extracted Appendix A and ran it with node. Every ARITH figure I checked in §2.2, §3.4, §3.5, §4.1 to §4.3, §6.5, §7.2 to §7.8, §8.4, §8.5, §8.7, §10.4 and §16 matches its output. My output file was the spec only, so I could not save the file.",
+   "Header :7 said 'Every citation resolves from the public repo', but every '.../notes/' and '.../designs/' citation pointed into an evidence folder that has not landed. I qualified the header. Those citations stay unresolvable for an outside reader until the folder lands.",
+   "§2.2 rule 4 (:178) reads 'Among conflicting valid binds, the recovery-card-endorsed one wins'. The recovery card derives from the wallet root, which a passkey PRF reaches (:177; E22 (b)). So whoever captures the RP domain wins every bind fork. Rule 3's 72 h notice and alarm soften this, but whether pinned devices can veto a recovery-card fork is not stated. Condition 1 (authenticated identity binding) therefore depends on E22 (b).",
+   "PQB-HEAL requires '0 events left LATE-REFUSED' after a 30-day partition (§11 axis 3). Acceptance with no age cap needs an OTS-stamped K_CP. If the partition also cuts the device off from the OTS calendars, the stamps carry heal-time dates. Whether the drill's partition includes OTS reachability is not defined.",
+   "Fix 10, 'PQB-MOBILE latency and battery family', is partly met. PQB-MOBILE measures 'bytes and radio wakes per phone-day' (:878 originally) as a stand-in for battery. There is no energy measurement.",
+   "Fix 12 asked for a depth column in the Rail C table. Acquirable depth was never measured: the table at §8.7 has only supply and volume columns. This is now stated at :729 and P4 admits no one until a depth receipt exists. The depth column still has no data."
+  ],
+  "notApplied": [
+   "Fix 12 / ECO-2. The depth-gated-admission example used the very rule its own tooth convicts. The draft read: 'For example, a budget of 1% of circulating supply a year admits about 4.5·10^6 users' (§8.7). ECON-DEPTH convicts 'a planted path that sizes archive admission from market cap instead of acquirable depth', and the 'assume depth' tooth was missing. I fixed both at :729 and :744.",
+   "Fix 5 / C5-01. The spec says 'either an attested, OTS-stamped K_CP covers its id (no age cap)' (§6.3, now :460). The fix list says 'covered by an OTS-stamped K_CP', and the spec added 'attested'. Under the E6 default, human checkpoints carry no PQ attestation (E6 row :121, 'PQ attestation runs on lab identities only'). So the no-age-cap path did not exist for humans at P2, and PQB-HEAL's 30-day PASS could not be met by the spec's own design. I fixed it at :460 (OTS-stamped, and also attested in break mode) and in the §16 C5-01 row.",
+   "Fix 1 / LAW-01, partly applied. §0 still said each persona 'attests the newest checkpoint' weekly, with 'an online device's unattested window is at most 8 days'. The founder summary said 'once a week a quantum-safe signature vouches for that list'. P1b and §2.3 said 'owner-device observed-attestation'. None of these stated that under the E6 default real human and owner devices have no PQ card. I fixed this at :22, :82, :186, P1b (:943) and the condition-1 row (:69).",
+   "Fix 2 / LAW-03 ceiling. Three spots were still above it: 'a stolen phone or key now has a firm limit and an alarm' (:33), 'so a forged or withheld message shows up on the author's next post' (§0), and 'with it, nobody can open recorded P5 or P6 traffic' (§2.6 :220). I softened all three to design-plus-test wording.",
+   "Fix 2: the RECORDED-IN-MEMORY class was added at :16, but :14 still defined a second label, 'seat memory, not in repo'. I tied the two together at :14."
+  ],
+  "newErrors": [
+   "Brief conflict. Brief §6 item 13 says 'P0 must be doable now without any pending ruling'. P0.f's acceptance read 'Exit, which unblocks live break mode, requires E23 ruled' (:929 originally), repeated in E23 (:138) and §16 PQ-3. This came from applying fix 6 ('E23 as a P0.f precondition') literally. Fixed: P0.f's lab drills need no ruling, and live break mode is a separate gate after P0.f that requires E23 (:938, :138, §16 PQ-3).",
+   "§4.4 'Suite floor = max(the registry's prefer, ...)' (:371) used a registry record, but the E23 default is 'no registry record of any kind until ruled'. Fixed with 'once E23 allows a registry record'.",
+   "The §11 L1 row listed 'D1, D2, D6 to D15, D18 to D27, D29' and left out D3 (x0x), D16 (inbox operator) and D17 (push gateway). Condition 5 requires tested replacement for every operator and vendor. Fixed: 'D1 to D27 and D29, with D28 in the E5-ruled branch' (:892).",
+   "The P0.a tooth 'a planted captive-portal refusal stops no agent' contradicted M1 and §3.6, under which the agent does stop, with an alert, when every road refuses alike for 10 minutes. Fixed to 'on one road' (:933).",
+   "Late-table backdating was understated. §14 item 4 said 'A member can still insert events dated up to late_days back'. The no-age-cap path lets a member carry their own events with any earlier claimed date through a self-made, OTS-stamped K_CP. Now disclosed at :460 and :961, with the stamp time shown beside the claimed time.",
+   "No hex strings of 40 or more characters appear, so no PUBLIC-CONSTANT tag is needed. Every sha is 8 to 10 characters, and the codepoint 0x11EC is the correct one for X25519MLKEM768. I spot-checked about 60 path:line citations across the repo, buzz-src at e1035672 and LOVErnment-DAO specs, including LOADMODEL-1M:87/91/92/137, SPEC-BCHAT-1:45-48/55, AGENT-1:30/45/73/155/160/168-169/198, BIO-1:35/37/43-44, PERSON-1:36/117, article-vi-s3:15/37/51, CONSTITUTION:49/52/83/92, ingest.rs:2005-2028/344-346, migration 0021:19-36, replica_fence.rs:74 (960), relay.rs:3804-3806, config.rs:240/243-244, kind.rs:451-454 and room.rs:46-49. All resolve. Apart from the PQB-FORGE control, which I wrote as analysis and not a result, no test verdict is asserted before a run."
+  ],
+  "editsMade": [
+   ":7 Citation keys now say the evidence folder docs/evidence/pqbuzz-design-2026-10-15/ has not landed at 69ef2c717, so .../notes/ and .../designs/ resolve only in the scratch copy.",
+   ":14 'seat memory, not in repo' now carries the evidence class RECORDED-IN-MEMORY.",
+   ":22 For the founder: the weekly quantum-safe signature for real people waits for decision 5 (E6); until then it runs on test identities only and the daily lists are timestamped.",
+   ":33 'firm limit' became 'a designed limit and an alarm, not yet tested'.",
+   ":69 Condition-1 gap now says the PQ-private lane is lab-only until E2 and real human PQ cards and attestations wait for E6.",
+   ":82 §0 chain-tag sentence softened to 'designed so that ... (PQB-FORGE tests it; the multi-device case is an open defect, §3.4)'. Added that under the E6 default human checkpoints are journaled and OTS-stamped only, and that the 8-day bound applies to lab identities alone.",
+   ":186 §2.3: owner-device observed-attestation runs on lab identities until E6.",
+   ":220 §2.6: 'nobody can open recorded P5 or P6 traffic' became 'by design the phrase opens no recorded P5 or P6 traffic, which PQB-ROOT-THEFT must show before it is claimed'.",
+   ":279 New paragraph in §3.4, 'Open defect: several devices, one npub', with a two-honest-devices control for PQB-FORGE, stated as analysis, not a run.",
+   ":371 §4.4 suite floor uses the registry's prefer only once E23 allows a registry record.",
+   ":460 §6.3 late acceptance: an OTS-stamped K_CP of the same persona suffices (also attested in break mode), so the rule works under the E6 default. Disclosed self-made-K_CP backdating, with stamp time shown.",
+   "§16 C5-01 row updated to match: 'no age cap under an OTS-stamped K_CP (also attested in break mode)'.",
+   ":636 New §7.9 'Voice, low bandwidth and accessibility', citing room.rs:46-49, saorsa-labs/x0x@v0.48.0:README.md:147, notes/critic.md:265-268 and .github/workflows/tests.yml:1095-1099; no test family claimed.",
+   ":729 §8.7: acquirable depth stated UNMEASURED, so P4 admits no one until a depth receipt exists. The 1%-of-supply figure is relabelled 'for scale only' and noted as a rule ECON-DEPTH would refuse.",
+   ":744 ECON-DEPTH now also convicts sizing from supply and any assumed, unreceipted depth (the fix-list 'assume depth' tooth).",
+   ":795 §10.3 local break evidence points to the §3.4 multi-device defect.",
+   ":892 §11 L1 row now covers D1 to D27 and D29 (D28 in the E5-ruled branch), naming inbox operators, push gateways, and storage and settlement providers.",
+   ":933 P0.a tooth became 'a planted captive-portal refusal on one road stops no agent'.",
+   ":938 P0.f: lab drills need no ruling; live break mode is a separate gate after P0.f that requires E23. Matching edits in E23 (:138) and the §16 PQ-3 row.",
+   ":943 P1b: owner-device observed-attestation on lab identities until E6, as P1a.",
+   ":961 §14 item 4 discloses backdating through a self-made OTS-stamped K_CP. Added §14 item 13 (multi-device defect) and item 14 (accessibility and voice).",
+   "Checked that Appendix A is byte-identical before and after my edits: same md5 of node output. Deleted my temporary scratch copy (scratchpad/calc-check.js)."
+  ],
+  "verdict": "Nearly complete, but not ready to ship. I checked all 17 fixes on the list. Most were applied in substance: every escalation row E1 to E31 is present, D16 to D29 are numbered centrally, the cadence column is restored, and the economics battery, PQ-EPOCH, the per-user inbox, the commit-time floor and the steward set are all there. I verified the citations against the repo, the Buzz fork and LOVErnment-DAO, and Appendix A reproduces every number in the tables. I fixed the problems an editor could fix in place: the E6 default had been silently contradicted in §0, the founder summary, §2.3 and P1b; adding 'attested' to the late-acceptance rule made PQB-HEAL fail under the spec's own defaults; P0.f's exit required a ruling, against the brief; ECON-DEPTH convicted §8.7's own example; and the L1 drill list, the suite floor before E23, the P0.a tooth and three claims above the ceiling were wrong. One blocking design defect remains. The fix-6 per-cell chain tag and the own-npub rule falsely flag every user with two or more devices, which is the default D = 2. It is now disclosed in §3.4 and §14 and has a control test, but needs redesign and an E6 ruling. Accessibility and voice, which brief §5 requires, are now disclosed but have no test family. The section 7 calculator was never saved as a file, and the evidence folder the citations point to has not landed in the repo."
+ }
+}

@@ -20,6 +20,9 @@ base64 = "0.22"
 ureq = { version = "2", features = ["json"] }
 bmesh-hwfit = { path = "../bmesh-hwfit" }
 ed25519-dalek = "2"
+# envelope.rs: form check of a PQ successor's bzpq1 id (SPEC-BPQ-1 §2), the
+# same bech32 line crates/bsigner encodes it with.
+bech32 = "0.9"
 
 [dev-dependencies]
 tower = { version = "0.5", features = ["util"] }

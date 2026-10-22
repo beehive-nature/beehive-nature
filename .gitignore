@@ -79,3 +79,6 @@ archive-staging/
 .hubshots/
 tools/ln-rail/node_modules/
 e2e/.local-agent-profile/
+
+# Wallet browser acceptance screenshots (generated, never source).
+e2e/shots-wallet-unified/

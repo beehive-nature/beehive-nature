@@ -28,9 +28,10 @@ after(async () => { if (browser) await browser.close(); srv.close(); });
 const ROWS = [{ domain_name: 'king', owner: 'kingbeelovis', account: 'kingbeelovis', expires: '2027-08-01T00:00:00' },
   { domain_name: 'lovis', owner: 'kingbeelovis', account: 'kingbeelovis', expires: '2027-08-01T00:00:00' },
   { domain_name: 'hive', owner: 'someoneelse1', account: 'someoneelse1', expires: '2027-08-01T00:00:00' }];
+let CONFIG_ROW = { registration_fee: '0.0000 EOS', registration_days: 365 }; // the real mainnet row shape
 function chain(route) {
   const b = JSON.parse(route.request().postData() || '{}');
-  const body = b.table === 'domains' ? { rows: ROWS, more: false } : b.table === 'config' ? { rows: [{ registration_fee: '0.0000 A', registration_days: 365 }] }
+  const body = b.table === 'domains' ? { rows: ROWS, more: false } : b.table === 'config' ? { rows: [CONFIG_ROW] }
     : b.table === 'rammarket' ? { rows: [{ base: { balance: '100000000 RAM' }, quote: { balance: '33.2000 A' } }] } : { rows: [] };
   return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
 }
@@ -46,10 +47,13 @@ async function open(reg, live = true) {
 }
 const shown = p => p.evaluate(() => ['.et-b', '.et-r', '.et-c'].filter(s => getComputedStyle(document.querySelector('#eternal>' + s)).display !== 'none'));
 
+// the founder's chosen UI (2026-10-05): new bee is paper with bold system sans titles and a forest
+// green action; raver is night purple (the sovereign tint) with plain bold sans titles and its
+// magenta pill; cypherpunk is unchanged. Each value is asserted exactly.
 test('one front per register, each in its own dress', async () => {
   const want = {
-    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /Instrument Serif/, action: 'rgb(168, 35, 140)' },
-    raver: { front: '.et-r', bg: 'rgb(6, 17, 12)', title: /Unbounded/, action: 'rgb(214, 85, 187)' },
+    bee: { front: '.et-b', bg: 'rgb(251, 247, 240)', title: /^ui-sans-serif, system-ui/, action: 'rgb(38, 77, 54)' },
+    raver: { front: '.et-r', bg: 'rgb(18, 14, 30)', title: /^ui-sans-serif, system-ui/, action: 'rgb(214, 85, 187)' },
     cypherpunk: { front: '.et-c', bg: 'rgb(6, 17, 12)', title: /IBM Plex Mono/, action: 'rgb(69, 194, 220)' },
   };
   for (const [reg, w] of Object.entries(want)) {
@@ -90,7 +94,7 @@ test('the same facts in all three: the registry, the config, the gate', async ()
   const a = facts.bee, D = a.D;
   for (const reg of ['raver', 'cypherpunk']) assert.equal(facts[reg].model, a.model, reg + ' reads the same desk');
   assert.equal(D.rows, ROWS.length); assert.equal(a.deskCount, String(ROWS.length), 'the desk\'s own readout agrees');
-  assert.equal(D.fee, '0.0000 A'); assert.equal(D.days, 365);
+  assert.equal(D.fee, '0.0000 A', 'chain row says EOS; every register reads A'); assert.equal(D.days, 365);
   assert.deepEqual(D.jewels, { king: { state: 'held', owner: 'kingbeelovis', expires: '2027-08-01' }, k: { state: 'free' }, q: { state: 'free' } });
   assert.deepEqual(D.gate, { q: 2, v: 0, h: false }, 'the gate\'s own constants: two verifiers needed, none yet');
   assert.deepEqual(D.hosts, ['https://eos.api.eosnation.io', 'https://eos.greymass.com']);
@@ -113,6 +117,29 @@ test('bee: the check is the desk\'s real search; taken and free are the chain\'s
   assert.match(await p.textContent('#etBeeAnswer'), /mira\.b is free today.*founder-only for now/);
   assert.equal(await p.$eval('#sign-btn', b => b.disabled), true, 'a free name is still not signed by a tap');
   assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
+});
+
+test('a config row without a readable fee stays unread: never a manufactured zero', async () => {
+  const good = CONFIG_ROW;
+  try {
+    for (const bad of [undefined, null, '', '   ', 0, 'free', '0.0000', 'EOS', '-1.0000 EOS']) {
+      CONFIG_ROW = { registration_days: 365 }; if (bad !== undefined) CONFIG_ROW.registration_fee = bad;
+      const { ctx, p, errs } = await open('bee');
+      await p.waitForFunction(() => document.getElementById('days').textContent !== 'not read yet', null, { timeout: 8000 });
+      const s = await p.evaluate(() => ({ D: window.__eternal.data.fee, card: document.getElementById('fee').textContent, days: document.getElementById('days').textContent }));
+      assert.equal(s.D, null, JSON.stringify(bad) + ': the fee stays unread in the model');
+      assert.equal(s.card, 'not read yet', JSON.stringify(bad) + ': the card never says 0.0000 A');
+      assert.equal(s.days, '365 days', 'the rest of the row is still read');
+      assert.equal(errs.length, 0, errs.join(' | '));
+      await ctx.close();
+    }
+    // a non-EOS symbol is the chain's own word and is shown as returned
+    CONFIG_ROW = { registration_fee: '1.5000 A', registration_days: 365 };
+    const { ctx, p } = await open('bee');
+    await p.waitForFunction(() => document.getElementById('days').textContent !== 'not read yet', null, { timeout: 8000 });
+    assert.equal(await p.evaluate(() => window.__eternal.data.fee), '1.5000 A');
+    await ctx.close();
+  } finally { CONFIG_ROW = good; }
 });
 
 test('a silent chain is said plainly in every register, never "free"', async () => {

@@ -1,0 +1,5 @@
+[Crux] Found counterexample for verification goal
+[Crux]   ./libs/crucible/lib.rs:50:9: 50:79 !src/props.rs:64:9: 64:62: error: in rb03_budget/b5c6597c::props[0]::check_cap_fits[0]
+[Crux]   MIR assertion at src/props.rs:64:9:
+[Crux]   	fits(cap, i.gas_limit, i.remaining)
+[Crux] Overall status: Invalid.

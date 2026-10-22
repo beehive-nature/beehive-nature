@@ -121,27 +121,50 @@ test('the tree of life carries exactly the registry — one cell per counted sur
   assert.ok(caption.includes('<b>'+estate.counts.surfaces+'</b>'));
   for(const [org,n] of Object.entries(estate.counts.byOrg)) assert.ok(caption.includes(escape(org)+' <b>'+n+'</b>'),org+' is named in words beside its colour');
 });
-test('the keep rows promise only what their destinations say, and bGENEaLOGy stays a plain row until it is registered', () => {
+test('the keep rows include a working registered genealogy destination', () => {
   const corpus=JSON.parse(read('surfaces/lang-corpus.json')).strings;
   const keeps=[...html.matchAll(/<a class="keep-link [^>]*>[\s\S]*?<\/a>/g)].map(m=>m[0]);
-  assert.equal(keeps.length,2);
+  assert.equal(keeps.length,3);
   for(const [i,[id,action,help]] of [['bdata','bd.h1','bd.lead'],['watch','watch.title','watch.beeLead']].entries()){
     assert.ok(keeps[i].includes('href="'+estate.surfaces.find(s=>s.id===id).path.replace(/^surfaces\//,'')+'"'),id);
     for(const key of [action,help]) assert.ok(keeps[i].includes('data-i18n="'+key+'">'+escape(corpus[key].en)+'<'),id+' speaks with '+key);
   }
-  const plain=html.match(/<div class="keep-plain line">[\s\S]*?<\/div><\/div>/)?.[0]||'';
+  const plain=keeps[2];
   assert.ok(plain.includes('<strong class="bgene" translate="no" dir="ltr">b<b>GENE</b>a<b>LOG</b>y</strong>'),'the founder casing, exactly');
-  assert.doesNotMatch(plain,/<a[\s>]|<button\b|disabled/,'not yet open is prose with its reason — never a dead link or a disabled button');
-  assert.ok(plain.includes('data-i18n="hub.keep.line.state"'));
-  assert.equal(estate.surfaces.some(s=>/genealogy/i.test(s.id+s.path)),false,'once registered, the builder refuses this row');
+  assert.ok(plain.includes('href="'+estate.surfaces.find(s=>s.id==='blood').path.replace(/^surfaces\//,'')+'"'));
+  assert.doesNotMatch(plain,/keep-state|disabled/);
   const langs=['en',...JSON.parse(read('surfaces/lang-corpus.json'))._meta.langs];
   for(const key of Object.keys(corpus).filter(k=>k.startsWith('hub.keep.'))) for(const l of langs) assert.ok(corpus[key][l]?.trim(),key+'/'+l);
 });
 test('the house hand is same-origin, names only, and never forces case', () => {
   const css=read('surfaces/atlas.css');
+  /* the house hand is skaists (founder ruling 2026-10-04); burti stays declared behind it */
+  assert.match(css,/@font-face\{font-family:skaists;src:url\(fonts\/skaists\.woff2\) format\('woff2'\);font-display:swap\}/);
   assert.match(css,/@font-face\{font-family:burti;src:url\(fonts\/burti\.woff2\) format\('woff2'\);font-display:swap\}/);
-  assert.ok(existsSync(fileURLToPath(new URL('../surfaces/fonts/burti.woff2',import.meta.url))));
+  for(const face of ['skaists','burti']) assert.ok(existsSync(fileURLToPath(new URL('../surfaces/fonts/'+face+'.woff2',import.meta.url))),face);
+  for(const sel of ['.wordmark.house','.footer .wordmark','.bgene']){
+    const rule=css.match(new RegExp('(?:^|\\})'+sel.replace(/\./g,'\\.')+'\\{[^}]*\\bfont:[^}]*\\}','m'))?.[0]||'';
+    assert.match(rule,/\bskaists,burti,var\(--(?:mono|sans)\)/,sel+' sets skaists first, burti behind it');
+  }
+  assert.match(html,/<link rel="preload" href="fonts\/skaists\.woff2" as="font" type="font\/woff2" crossorigin>/);
   assert.doesNotMatch(css,/text-transform\s*:\s*(?:uppercase|capitalize)/);
   assert.doesNotMatch(css,/url\(\s*["']?(?:https?:|\/\/)/);
   assert.match(html,/<a class="wordmark house" href="index\.html" translate="no" dir="ltr">skaists<span>\.dev<\/span><\/a>/);
+});
+test('the skaists face is served byte-true: the founder\'s own cut, unaltered', async () => {
+  /* a plain static server over surfaces/, the path the hub's preload and atlas.css ask for */
+  const {createServer}=await import('node:http');
+  const srv=createServer((q,r)=>{
+    if(q.url!=='/fonts/skaists.woff2'){r.writeHead(404);return r.end();}
+    r.writeHead(200,{'content-type':'font/woff2'});r.end(readFileSync(new URL('../surfaces/fonts/skaists.woff2',import.meta.url)));
+  }).listen(0,'127.0.0.1');
+  await new Promise(ok=>srv.once('listening',ok));
+  try{
+    const res=await fetch('http://127.0.0.1:'+srv.address().port+'/fonts/skaists.woff2');
+    assert.equal(res.status,200);
+    const bytes=Buffer.from(await res.arrayBuffer());
+    assert.equal(bytes.length,6968);
+    assert.equal(bytes.subarray(0,4).toString('latin1'),'wOF2');
+    assert.equal(createHash('sha256').update(bytes).digest('hex'),'09d3e65e90cbaa7626a4ac3758d1e229643fd8782fc9b3dffcb2287892dcbc4f');   // PUBLIC-CONSTANT: sha256 of the founder's skaists.woff2
+  }finally{srv.close();}
 });

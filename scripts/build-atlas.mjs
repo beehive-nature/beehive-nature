@@ -8,11 +8,15 @@
    in-page JS adds search and reading preferences. Run after editing estate.json:
      node scripts/build-atlas.mjs
    CI (scripts/estate-check.mjs) fails if the page drifts from the registry.
-   THE TREE OF LIFE PASS (2026-09-19, hub lane): the house hand (burti) names
+   THE TREE OF LIFE PASS (2026-09-19, hub lane): the house hand (skaists, burti behind it) names
    the page, and Austras koks — drawn from these same counts by
    scripts/atlas-tree.mjs — is the hero in three readings: a fir bearing comb
    (new bee), a wheel of light (raver), a graph you can check (cypherpunk).
-   The keep rows reuse their destinations' own words (bd.*, watch.*). */
+   The keep rows reuse their destinations' own words (bd.*, watch.*).
+   THE CHOSEN UI PASS (2026-10-05): the founder's chosen UI is worn by all three
+   readings. skaists.css (the compiled token sheet) is linked ahead of atlas.css
+   so the hub paints with skaists tokens; only the dress moved, the markup and
+   every register's structure are as before. */
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { countSurfacesOnDisk, listSurfacesOnDisk, recomputeCounts } from './surface-count.mjs';
@@ -140,10 +144,9 @@ const starters = [
   return `<a class="start-link ${item.mark}" href="${esc(s.path.replace(/^surfaces\//,''))}"><span class="start-picture" aria-hidden="true">${picture}</span><div><strong>${text('atlas.'+item.mark+'Action',item.action)}</strong><span class="start-help">${text('atlas.'+item.mark+'Help',item.help)}</span><span class="start-technical" data-reg="cypherpunk">${description(s)}</span></div><span class="start-arrow" aria-hidden="true">→</span></a>`;
 }).join('\n');
 /* ── remember · restore · keep ──────────────────────────────────────────────
-   Two open doors and one honest not-yet. The open rows take their words from
+   Three registered doors. The first two open rows take their words from
    the destination pages' own keys, so the hub can never promise more than the
-   page does. bGENEaLOGy is not registered yet, so it is a plain row with its
-   reason — never a link to nowhere, never a disabled button. */
+   page does. bGENEaLOGy resolves the registered blood surface. */
 const keepPictures = {
   data: '<svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="m40 10 26 15v30L40 70 14 55V25Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="m40 27 11.5 6.5v13L40 53l-11.5-6.5v-13Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/></svg>',
   watch: '<svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><rect x="10" y="16" width="60" height="40" rx="7" stroke="currentColor" stroke-width="3"/><path d="m35 28 13 8-13 8Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M27 67h26" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
@@ -158,8 +161,9 @@ const keepers = [
   for (const key of [item.action, item.help]) if (!corpus[key]?.en) throw new Error('Keep row key missing from the corpus: '+key);
   return `<a class="keep-link ${item.mark}" href="${esc(s.path.replace(/^surfaces\//,''))}"><span class="start-picture" aria-hidden="true">${keepPictures[item.mark]}</span><div><strong>${text(item.action,'')}</strong><span class="start-help">${text(item.help,'')}</span><span class="start-technical" data-reg="cypherpunk">${description(s)}</span></div><span class="start-arrow" aria-hidden="true">→</span></a>`;
 }).join('\n');
-if (E.surfaces.some(s => /genealogy/i.test(s.id + s.path))) throw new Error('bGENEaLOGy is registered now — turn its plain row on the hub into a keep-link');
-const notYet = `<div class="keep-plain line"><span class="start-picture" aria-hidden="true">${keepPictures.line}</span><div><strong class="bgene" translate="no" dir="ltr">b<b>GENE</b>a<b>LOG</b>y</strong><span class="start-help">${text('hub.keep.line.help','')}</span><span class="keep-state"><span aria-hidden="true">△</span> ${text('hub.keep.line.state','')}</span></div></div>`;
+const genealogy = E.surfaces.find(s => s.id === 'blood' && s.presented !== false);
+if (!genealogy) throw new Error('Genealogy destination missing from registry');
+const notYet = `<a class="keep-link line" href="${esc(genealogy.path.replace(/^surfaces\//,''))}"><span class="start-picture" aria-hidden="true">${keepPictures.line}</span><div><strong class="bgene" translate="no" dir="ltr">b<b>GENE</b>a<b>LOG</b>y</strong><span class="start-help">Walk the Latvian tree of life, switch to the fan chart, and research your relatives.</span></div><span class="start-arrow" aria-hidden="true">→</span></a>`;
 
 /* ── Austras koks, from the counts ───────────────────────────────────────── */
 const treeFams = E.families.map(f => { const o = ORGS.find(o => o.id === familyOrg(f)); return {id:f, org:o?.id, mark:o?.mark || 'sk', n:c.byFamily[f] || 0}; });
@@ -178,8 +182,9 @@ const page = `<!doctype html>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="bn-logo.jpg">
-<link rel="preload" href="fonts/burti.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="atlas.css?v=4">
+<link rel="preload" href="fonts/skaists.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="skaists.css">
+<link rel="stylesheet" href="atlas.css?v=6">
 <title>skaists · beehive nature reserve</title>
 <meta name="description" content="Explore the beehive nature reserve: on-chain art, music, people, science and open tools. Find a place to begin, then browse the whole estate.">
 <style>
@@ -250,7 +255,7 @@ ${JSON.stringify(E)}
 <script src="atlas-search.js?v=1" defer></script>
 <script src="atlas.js?v=4" defer></script>
 <script src="daily-art.js?v=1" defer></script>
-<script src="browser-translate.js?v=1" defer></script>
+<script src="browser-translate.js?v=2" defer></script>
 <script src="agent-dock.js?v=10"></script>
 <script src="tour.js?v=42"></script>
 </body>

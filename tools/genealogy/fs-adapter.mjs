@@ -489,11 +489,62 @@ export const DISCOVER_RECORD_WIRE_SOURCE = String.raw`
 //     at the unauthenticated tier; an authed page context may fetch the
 //     data wire differently, so the fast path is UNPROVEN, not dead (the
 //     authed useSLS probe stays first-order business next session).
-//   · /ark:/61903/1:1:{id}?useSLS=true → 404 FailureToGetPersona when
-//     signed out; whether an authed session changes this is UNTESTED — the
-//     next authed session must try it on 2-3 records FIRST because a 200
-//     unlocks a fetch-based mapping walker (hours) instead of the
-//     navigation walker (~30-60s/record ⇒ multi-day at 12,845 records).
+//   · /ark:/61903/1:1:{id}?useSLS=true → 404 FailureToGetPersona BOTH TIERS
+//     (signed out 2026-09-28 AND authed 2026-09-29, tested on two
+//     known-mapped ground truths) — THIS ENDPOINT is dead, receipted. That
+//     does NOT establish every faster-than-navigation mapping method is
+//     impossible (other wires the SPA/search pages use remain unprobed);
+//     per-record rendered-DOM is the only method PROVEN so far, not the
+//     only possible one (founder readback 2026-09-29 #2).
+//
+// ── SWEEP WIRE LAWS (v2, 2026-09-29 founder readback #2 — BINDING IS THE
+//    LAW; the earlier "iterate candidates until a 200" was a VALIDITY HOLE:
+//    a filmstrip neighbor's 200 would stitch the WRONG image while the
+//    sha256 still verifies the saved bytes — hashes verify bytes, never
+//    record identity) ──
+//   · BINDING LAW: the apid for an ark comes ONLY from the authoritative
+//     same-origin binding  sg30p0…/dascloud/das/v2/3:1:{ark}/name?namespace=apid
+//     (returns the bare apid, 200) — never from perf-log candidate picking.
+//     RETRO-AUDIT 2026-09-29: all 18 downloaded images re-checked against
+//     the binding — 18/18 MATCH (the proximity-first heuristic happened to
+//     pick correctly every time; the hole existed but was never exercised).
+//     Manifest entries now carry bindingVerified.
+//   · VIEWER-FREE PATH (proven 2026-09-29): from a tab parked on sg30p0,
+//     binding → image.xml → tiles ALL fetch same-origin with NO viewer
+//     visit (no 15s settles) — per image ≈15-25s. Viewer warm-up is only
+//     the fallback: direct xml 403 → one viewer visit (15-18s settle) →
+//     retry xml once → still 403 = xml-403 negative.
+//   · SETTLE LAW (fallback path): the viewer needs 15-18s+ in this webview
+//     before its deepzoom calls appear; the 2026-09-19 "error" states were
+//     4-12s settles, not broken arks (2 of 3 healed at 18-20s).
+//   · NEGATIVE STATES — OBSERVATIONS, NOT DIAGNOSES (readback #2): missing
+//     traffic in MY viewer session does NOT prove a record has no image.
+//     xml-403 = image.xml denied to this session after binding+warm-up
+//     (storage-restricted for THIS account tier — the 939Z NUMIDENT class
+//     behaves so); no-deepzoom-traffic = zero deepzoom URLs observed in a
+//     rendered viewer this session (image MIGHT still exist via other
+//     paths/tiers). Both are per-ark session-scoped facts with timestamps,
+//     honestly re-openable — never claims about the record's nature.
+//   · Queue: skaists.sweep-queue/1 (private, images-harvest/sweep-queue.json)
+//     — 366 arks / 397 records, depth-ordered, Lowry-Rockwood flagged.
+//     MANIFEST-TRUE COUNTS (readback #2 reconciliation): 25 resolved
+//     (12 downloaded + 13 negatives — the dispatch's "23" under-counted by
+//     the two 9/19 no-deepzoom queue members), REMAINING = 341 (not 343,
+//     not ~335); manifest checkpoint after EVERY image.
+//
+// ── WALKER GUARD (founder order 2026-09-29d: "remembering the rule hasn't
+//    prevented the same failure class" — the 09-29c stray arks were typed
+//    from memory AFTER the prose law was banked, so the law is now CODE) ──
+// tools/genealogy/walker-guard.mjs (7/7 tests, walker-guard.test.mjs incl.
+// the actual stray 33SQ-GBSF-9FTG as the rejection fixture):
+//   · nextPending(n) is the ONLY sanctioned source of the next arks —
+//     read from the saved queue minus resolved manifest states, in order;
+//   · assertQueueMember(ark) MUST run before any fetch — rejects
+//     malformed / out-of-queue / already-resolved identifiers;
+//   · saves go ONLY through checkpointState/checkpointDownload, which
+//     re-verify membership on the save side and refuse downloads lacking
+//     a binding apid or sha256 (bytes without identity never land).
+// Memory-typed arks are void BY CONSTRUCTION, not by remembering.
 //
 // ── IMAGE-SWEEP QUEUE (reconciled 2026-09-28 founder readback; executes
 //    only under a live authed founder session; bytes private-tier per the

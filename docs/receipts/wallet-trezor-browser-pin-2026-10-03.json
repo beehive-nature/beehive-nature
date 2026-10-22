@@ -1,0 +1,8 @@
+{
+  "checkedAt": "2026-10-03T14:21:23.932Z",
+  "origin": "https://skaists.dev",
+  "script": "https://connect.trezor.io/9.7.3/trezor-connect.js",
+  "loaded": true,
+  "api": true,
+  "boundary": "In-memory source page; actual upstream script passed browser CORS, SRI and CSP. No SDK init, device, export, signing or firmware method invoked."
+}
