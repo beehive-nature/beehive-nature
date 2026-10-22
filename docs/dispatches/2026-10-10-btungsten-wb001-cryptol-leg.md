@@ -192,3 +192,70 @@ longer runs, and the single-query rows read, verbatim,
 the 6291456 KiB cap, rc=251; recorded, never success)` and the same line
 for `wireInjective`; `validImpliesBounded`, `offsetsOrdered`,
 `zeroTailAtPosition` PROVEN; `FORMAL-WIRE-ALIGNMENT: PASS`.
+
+## FINAL RECEIPT (closeout 2026-10-11): the tested and landed proof commit
+
+**Proof commit: `aa4f25d72371f7b68343e15be4b720b83062659e`**, tested on
+the branch and then fast-forwarded to main, unchanged (main moved from
+`eba793737` to it; non-force push). It is the fourth merge of main into
+the lane branch; the Cryptol-leg files are those of `acb716f6a` plus the
+comment-only header fix of `b99d6a1c8`.
+
+Branch-push CI on that exact commit, all `completed success`: tests
+38112748025, WB001 SAW proofs 38112747965, bTunGsTeN PQ SAW 38112748027,
+bTunGsTeN PQ 38112747955, bTunGsTeN RB 38112747913, WB002 SAW equivalence
+38112748082, WB002 WASM corpus 38112747917, secret-scan 38112747946.
+
+Cryptol leg: tests run 38112748025, job `formal-cryptol-leg`
+114391521813. 43 of 43 obligations `PROVEN (Q.E.D., …)`; both composed
+conclusions, verbatim:
+
+    CRYPTOL-LEG-COMPOSED wireZeroTail: PROVEN BY COMPOSITION (21 obligations, every one Q.E.D. in this run; glue: (D-eq) and first-order logic, README WB001 §cryptol-leg; not a single :prove verdict)
+    CRYPTOL-LEG-COMPOSED wireInjective: PROVEN BY COMPOSITION (42 obligations, every one Q.E.D. in this run; glue: (D-eq) and first-order logic, README WB001 §cryptol-leg; not a single :prove verdict)
+    CRYPTOL-LEG CONTROLS: 7 of 7 ended in the required counterexample
+
+Resources: each obligation ran in its own process under a 6291456 KiB
+address-space cap, three processes at once; pool wall time 365 s. The
+**highest per-process peak RSS was 945948 KiB** (a `wireIsByteAt` chunk),
+15 % of one process's cap. It is not the job's total concurrent memory,
+which was not measured. Examples: `wireIsByteAt`{0}` 149 s, 896396 KiB;
+`byteDiffPld` 64 s, 406584 KiB.
+
+Classification, unchanged: a composition of 43 machine-proved
+obligations by a written argument (README WB001 §cryptol-leg), not a
+single machine-checked top-level theorem. The single-query rows stay
+NOT-PROVEN (memory) in the `formal` job. The SAW proof
+(`wb001-saw/injective.saw`) is a separate result. `wireIndexDef` stays
+retired from the Cryptol prove list: as stated it has no bounds premise
+and is unsafe under Cryptol's semantics; control C1 executes that
+counterexample every run.
+
+**Main-push CI on `aa4f25d72` (read, not re-run), as of 2026-10-11:**
+WB002 WASM corpus 38116261518 success; WB001 SAW proofs 38116261495 and
+bTunGsTeN PQ SAW 38116261478 in progress; bTunGsTeN RB 38116261482,
+WB002 SAW equivalence 38116261475, bTunGsTeN PQ 38116261485, tests
+38116261522 and secret-scan 38116261529 queued; pages
+38116261069 cancelled (superseded). Not called green. **Monitoring
+handed to the integration owner**: the PQ batch coordinator seat (codex),
+author of the green-landing rule, to read these eight run IDs to their
+conclusions.
+
+**This addendum's landing**: owner the same integration owner, batched
+with the next documentation landing; branch
+`claude-LoVis/wb001-cryptol-leg-final-receipt`. It names the proof
+commit, not its own commit.
+
+**Lingering `abc` process, routed, not stopped.** WSL PID 201658,
+`abc -q read_aiger /tmp/saw_abc_external-9aa84ae7a54b3028/abc_verilog.v;
+sat; write_cex …`, started Fri 2026-10-09 07:11:14 (box local time),
+parent PID 201527 (`/init`, WSL's process relay: the SAW process that
+launched it is gone), working directory `/tmp`, state R, about 99 % of
+one core, 40 h of CPU time, RSS 130732 KiB, VSZ 162120 KiB; its input is
+a 320979-byte AIGER file (64 inputs, 1 output). Not this lane's: it
+started a day before this session. Routed to the box's infrastructure
+owner (Seat 3, CLAUDE.md §3); the likeliest source is the RB lane's
+2026-10-08/09 SAW runs (rb02-aes256 era). Stop it only once the owning
+lane confirms it is stale.
+
+Deferred, untouched: P2 (third parser) and P3 (refusal-reason
+comparison). The landing loop that fast-forwarded main has exited.
