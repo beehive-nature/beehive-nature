@@ -282,6 +282,19 @@ needs ONE founder console write (binary + keys.json + unit +
 Caddy repoint) — retirement removed every other write channel,
 by design. The flat POOL_KEY becomes the capped `test` account
 at cutover; doors serve test agents only until then.
+**Cutover staged (same day):** the musl binary (1,439,048 B)
+was mesh-transferred to the box and sits in
+`/var/lib/x0x/data/transfers/` (Complete); the single console
+paste is `ops/llama-pool/door-meter-cutover.sh` — installs the
+binary, writes SHA-256 `keys.json` (existing door key -> capped
+`test` account at 100 MiB, plus a 1-byte probe account), unit,
+firewall door, Caddy repoint to `172.20.0.1:8092`, and prints
+the live 401/200/402 verification matrix. It has NOT been run:
+no agent-side write channel remains, by the retirement's own
+design. Vaulta anchor lane staged at `ops/vaulta-anchors/`
+(probe evidence, ordinal registry design, scoreboard with
+Vaulta columns honestly UNMEASURED pending first inscription
+with the founder's account).
 4. **ZKADAPTOR — crate + measured scoreboard.**
 `crates/zk-adaptor` (ProofShape trait; Schnorr-BIP340 native,
 ML-DSA-65 PQ via bsigner). Bench over the B9 chain statement
