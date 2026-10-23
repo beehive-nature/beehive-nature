@@ -54,3 +54,5 @@ The [latest inspected embedder report](https://github.com/saorsa-labs/x0x/issues
 5. Close bMESH economics, admission, receipt-dispute and recovery requirements within the ratified privacy architecture; do not promote the archived Groth16 fixture into production architecture.
 
 Validation: fetched refs, inspected committed sources and live GitHub records/logs. No solver, build, payment, deployment or runtime experiment was executed for this read-only review. Documentation whitespace checked before commit. No Codex review or third-party messaging was launched.
+
+Publication tooling: bare `sh` was unavailable in PowerShell. Git-for-Windows `sh.exe` then ran the installer, which refused: `pre-commit exists and was not written by this installer. Inspect it, remove it, then re-run.` The existing shared hook was preserved; no deletion or replacement attempted. The actual commit executed the existing hook and reported `secret-scan: clean` and both §7 checks `ok`. Installer success is not claimed.
