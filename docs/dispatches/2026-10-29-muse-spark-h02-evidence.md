@@ -14,6 +14,14 @@ authority and the frozen fixture conforms to its `b9.rs`.
 **Status:** FIXTURE FROZEN per ruling, committed below. No recorded
 run (no live-run receipts exist; they attach only after an actual
 run).
+**Publish re-verification (2026-10-29, HEAD `eb3ac482a`):**
+`manifest.json` 5,037 bytes, SHA-256
+`acc9cb10289dc7a409be1004aec779ff07bf654b5b3415913373354f7b8c569c` <!-- PUBLIC-CONSTANT -->
+(Get-FileHash agrees), `check_manifest.py` MATCH exit 0, 40 items,
+`order_id: demo-task`. PR #492 head re-fetched at publish:
+`a4e017144edc98b00ccdadb34f6ab2cb748e093b` (unchanged; JSON contract
+retained). Refusal matrix extended with R8 (failed run presenting a
+valid receipt must refuse: outcome-gating, not receipt-gating).
 
 ## 1. Governing specification
 

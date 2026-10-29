@@ -17,6 +17,7 @@ these cases; tampering happens on disposable copies (see
 | R5 | Reused session | execute twice into the same `--workdir/--session` | refusal (same-session reuse) until the correction lands; second run must not silently overwrite | UNEXECUTED |
 | R6 | Copied evidence under wrong session | copy a passing `runs/<good>/` tree to `runs/<other>/` and verify with `--session <other>` | FAIL: evidence bound to its session/order, not portable | UNEXECUTED |
 | R7 | Wrong requested order | verify a `demo-task` run with `--order-id <other>` | FAIL: receipt is for the requested order only | UNEXECUTED |
+| R8 | Failed run with valid receipt | exhaust backends (or cancel) while a verifying `receipt.json` sits in `runs/<session>/` | FAIL: acceptance gates on run outcome, not receipt presence (`accept_completed_run`: `Err`/`Cancelled`/`MaxTurns` never accept) | UNEXECUTED |
 
 Rule for all rows: a missing, unreadable or mismatched artifact is an
 error, never a pass. Record stdout/stderr verbatim in the executed
