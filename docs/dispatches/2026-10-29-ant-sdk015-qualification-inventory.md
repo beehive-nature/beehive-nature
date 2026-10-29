@@ -84,10 +84,81 @@ toolchain that produced it.
 5. Prepare the subsequent fresh-device, GitHub-independent release
    and cross-DAO resource tests as named, unclaimed follow-ons.
 
-## Blockers
+## Ownership record (evidenced; acknowledgment still outstanding)
 
-- Vendor/consumer ownership unacknowledged (gate above).
-- `kernel.wasm` unbuilt on this seat (exact `ENOENT` evidence
-  above); the pinned NixOS build path is the sanctioned producer.
+Ownership was looked for in the repository's own records before any
+measurement. What the record shows:
+
+- **SDK vendor pin** — `vendor/ant-browser-sdk/<version>/`, copied
+  byte-for-byte from the official npm package with provenance in
+  `VENDOR.md` ("Upgrade the adapter and SDK together"). The pin was
+  last advanced by the bView seat's dispatches (SDK 0.1.1 on
+  2026-10-03, later 0.1.2). `surfaces/bview.html` currently loads
+  `vendor/ant-browser-sdk/0.1.2/`; **0.1.5 is not vendored anywhere
+  in the tree**.
+- **bView read-path consumers** — `surfaces/bview.html` plus the
+  mocked suites `e2e/bview-direct.test.mjs`,
+  `e2e/bview-adaptive.test.mjs`, `e2e/bview.test.mjs` and siblings,
+  historically the same bView seat (Claude Seat 3 dispatches).
+- **Wallet/payment consumers** — the ANT storage/payment adapters
+  (`surfaces/myspace-adapter-ant.js`, wallet adapters) with offline
+  vector suites `e2e/ant-pay.test.mjs` and
+  `e2e/ant-testnet-pin.test.mjs`; test payments are chain-confined
+  and journal-separated by those suites' own tests.
+
+**Acknowledgment status: none received in this session from any
+seat.** Per the gate above, no vendor or consumer surface was
+edited. All work below is measurement with the existing harness and
+tests, which changes no surface.
+
+## Qualification measurements (2026-10-29, this seat)
+
+Kernel first: `kernel.wasm` was built on this Windows seat from the
+unchanged three crates in a copied minimal workspace, repo-pinned
+Rust 1.98.1, `wasm32-unknown-unknown`, release — 43,240 bytes,
+SHA-256 `25e0524eea193df6e698b78fffd88f6fc3fcb96f5f1f94d5604e9b2d52334cd4` <!-- PUBLIC-CONSTANT -->.
+This is **not** the sanctioned NixOS build (`build-wasm.sh` +
+`flake.nix`); it is labelled a local-seat build and the artifact is
+gitignored, so the checkout carries no built kernel.
+
+- **ant-bnrose observer tests:** `node --test` over the three unit
+  files now passes **9 / 9** (was 4 pass / 1 fail on the missing
+  kernel). Tamper, size-mismatch, transport-failure and
+  cancellation cases all refuse before observation.
+- **bView read-path tests (mocked, current SDK 0.1.2 pin):**
+  `node --test e2e/bview-direct.test.mjs e2e/bview-adaptive.test.mjs
+  e2e/bview.test.mjs` — **41 / 41 passed** (~170 s wall on this
+  seat). These qualify the current pin's consumer behaviour, not
+  0.1.5.
+- **Identical verified content under existing limits** — new local
+  measurement `tools/ant-bnrose/qualify-local.mjs` (stand-in
+  transport, no network): 1 MiB deterministic fixture, SHA-256
+  `06b7bbfb7824aa03382051691630eb26de85102d1b08a81e907ec0744cd8a286` <!-- PUBLIC-CONSTANT -->,
+  25 ms simulated transport latency. Results: latency 45.37 ms
+  observed vs 29.21 ms opt-out (observer breakdown: sdk 39.43 ms,
+  verification 1.80 ms, observation 2.09 ms); connections 4
+  transport calls, max concurrency 4, 46.33 ms wall; bytes
+  1,048,576 per read, 4,194,304 verified total; memory heap delta
+  +73,296 bytes across the concurrent batch; cancellation rejected
+  with no observation consumed (next sequence still 1); recovery
+  after a first transport failure succeeded with identical verified
+  content at observation sequence 1.
+- **Wallet/payment consumers, qualified separately:** `node --test
+  e2e/ant-pay.test.mjs e2e/ant-testnet-pin.test.mjs` — **14 / 14
+  passed** offline (chain confinement, journal separation, testnet
+  flag strictness). No live payment, upload or wallet action was
+  attempted, and this read-path work claims nothing about payment
+  qualification beyond those offline vectors.
+
+## Blockers for SDK 0.1.5 itself
+
+- **Ownership acknowledgment outstanding** (above): until the
+  vendor-pin owner and each consumer owner acknowledge, the 0.1.5
+  tarball is not vendored and no adapter is upgraded.
+- **0.1.5 provenance not yet recorded**: the qualification must pin
+  the exact 0.1.5 artifact (tarball hash, WASM source commit, WASM
+  SHA-256, lock hash) the way `VENDOR.md` records 0.1.1/0.1.2.
 - No live ANT network qualification attempted from this seat;
-  nothing here claims SDK 0.1.5 works.
+  nothing here claims SDK 0.1.5 works. The measurements above
+  qualify the current pin (0.1.2 consumers, local observer kernel)
+  as the baseline 0.1.5 must beat or match.
