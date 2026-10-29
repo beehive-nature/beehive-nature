@@ -123,12 +123,45 @@ refused; real Chrome loads the pinned 0.1.5 `index.js` (exports
 | Real-browser pinned module load | PASS |
 | Live 0.1.5 smoke (55 MB, direct) | PASS (accepted, sdkVerified) |
 | Live 0.1.2 baseline pair | PASS (accepted, sdkVerified; relay path) |
+| Reader exercises 0.1.5 | PASS 9/9 + receipt |
+| Reader exercises 0.1.2 | FAIL at close/reopen (confirmed WASM borrow defect; candidate fixes it) |
 | Remaining 9× AB/BA blocks | NOT EXECUTED |
 | Wallet/payment consumer re-qual | OUT OF SCOPE (separate lane) |
 
 ## Remaining gaps
 
-Live AB/BA measurement; hosted CI on this branch; `tests.yml`
-wiring for the new offline suite (not added — outside owned paths);
-combined-tree validation stays with Wonder; production bView still
-serves 0.1.2 until the deployment decision lands.
+Nine AB/BA blocks (driver staged, sequential); hosted CI on this
+branch; `tests.yml` wiring for the new suites (not added — outside
+owned paths); combined-tree validation stays with Wonder; production
+bView still serves 0.1.2 until the deployment decision lands.
+
+## Reader exercises + confirmed 0.1.2 lifecycle defect
+
+`e2e/bview-sdk-reader-exercises.test.mjs` (live network, real pinned
+SDKs, small public photo fixture, bounded waits, one receipt per arm):
+
+- 0.1.5: **9/9 pass** — connect 3,021 ms (mainnet, 7 seeds);
+  full-fixture SHA-256 in 21,660 ms; cancel-then-reuse, close/reopen,
+  2 s late consumption, unroutable address refused in 39,819 ms
+  (bounded, no wedge), invalid ranges rejected pre-network in 4 ms,
+  post-failure recovery, seedless profile refused in 3 ms, past-EOF
+  truncation exact. Receipt:
+  `reader-exercises-0.1.5-2026-10-29T22-04-19-891Z.json`.
+- 0.1.2: **fails at close/reopen** — after an aborted pending read,
+  a later reader's `close()` throws `attempted to take ownership of
+  Rust value while it was borrowed` (WASM use-after-free from the
+  immediate `free()` in 0.1.2's `close()`; 0.1.5 defers via
+  `#freeWhenIdle()`). Minimal repro (abort → close → reopen → close)
+  fails 2/2 on 0.1.2; the same minimal shape without the abort passes
+  3/3. The candidate fixes a real defect.
+- Comparability: plain open→read→close transfer flows are unaffected
+  (both smokes completed intact), so the AB blocks stay comparable
+  for throughput/integrity; lifecycle robustness differs in the
+  candidate's favor.
+- First-frame / seek / complete-transfer (smoke receipts): first
+  frame proxy `playStartMs` 47,152 ms (0.1.5) vs 88,787 ms (0.1.2),
+  `ttffMs` 47,139 vs 88,745; complete transfer 54,903,201 bytes with
+  integrity on both (received 259,494 vs 100,160 ms; ended 278,923 vs
+  321,482 ms). No seek was performed in the live smokes — seek
+  recovery is covered only by the offline hls suite with a fixture
+  SDK, not live per arm; the blocks should include a seek step.
