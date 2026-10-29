@@ -118,6 +118,9 @@ production fault injection was performed (loopback only).
 
 ## Bank record (lead order 2026-10-29)
 
+- Commit: `3ebe1c0cf89da3dab623e1be62d4373c51e87497` (branch
+  `spark/h02-backends-2026-10-29`, published to origin).
+- Review: PR #493 (`spark/h02-backends-2026-10-29` → `main`).
 - Base: `059e16f270adae824bf1b6980fc89f5fcdcf78ca` (PR #492 head at
   lane start; PR head has since moved to `4613c22f`, which does not
   touch `backend.rs` — no rebase).
