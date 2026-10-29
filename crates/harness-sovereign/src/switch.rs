@@ -139,9 +139,13 @@ pub fn utc_now_plus_rfc3339(offset_secs: i64) -> String {
 fn utc_from_secs(secs: u64) -> String {
     let days = secs / 86_400;
     let time = secs % 86_400;
-    // Howard Hinnant's civil-from-days.
-    let era = (if days >= 719_468 { days } else { 0 } + 719_468) / 146_097;
-    let day_of_era = (if days >= 719_468 { days } else { 0 } + 719_468) - era * 146_097;
+    // Howard Hinnant's civil-from-days. The shift is `days + 719468`
+    // unconditionally: the inherited guard (`days` when large, else
+    // `0`, then `+ 719468`) discarded the actual day count for every
+    // realistic date and mapped all timestamps to 1970-01-01.
+    let shifted = days + 719_468;
+    let era = shifted / 146_097;
+    let day_of_era = shifted - era * 146_097;
     let year_of_era =
         (day_of_era - day_of_era / 1_460 + day_of_era / 36_524 - day_of_era / 146_096) / 365;
     let year = year_of_era as i64 + era as i64 * 400;
@@ -509,6 +513,12 @@ impl SwitchCoordinator {
     pub fn with_log(mut self, log: Arc<dyn Fn(String) + Send + Sync>) -> Self {
         self.log = Some(log);
         self
+    }
+
+    /// The session store, for evidence export after a run (canonical
+    /// transcript, checkpoints) without the private keystore.
+    pub fn store(&self) -> &SessionStore {
+        &self.store
     }
 
     pub fn request_failover(&self, reason: String) {
@@ -927,6 +937,20 @@ mod tests {
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("temp root");
         dir
+    }
+
+    #[test]
+    fn utc_conversion_matches_known_timestamps() {
+        // Known-answer vectors (Unix epoch -> UTC), including leap
+        // days and a far-future date; the inherited conversion mapped
+        // every one of these to 1970-01-01.
+        assert_eq!(utc_from_secs(0), "1970-01-01T00:00:00+00:00");
+        assert_eq!(utc_from_secs(86_400), "1970-01-02T00:00:00+00:00");
+        assert_eq!(utc_from_secs(951_782_400), "2000-02-29T00:00:00+00:00");
+        assert_eq!(utc_from_secs(1_709_164_800), "2024-02-29T00:00:00+00:00");
+        assert_eq!(utc_from_secs(1_767_225_600), "2026-01-01T00:00:00+00:00");
+        assert_eq!(utc_from_secs(1_767_312_061), "2026-01-02T00:01:01+00:00");
+        assert_eq!(utc_from_secs(4_102_444_800), "2100-01-01T00:00:00+00:00");
     }
 
     #[test]

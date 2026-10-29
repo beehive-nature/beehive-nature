@@ -5,16 +5,44 @@
 //! `<input_sha256>:<item_count>:<order_id>` with its bSigner identity,
 //! and write `receipt.json`. Acceptance is a program, not a judge: an
 //! independent path recomputes the hash and count from the frozen
-//! manifest bytes and verifies the signature against public material
-//! exported before the run. A run outcome alone — including `EndTurn` —
-//! is never task success; the verified receipt is mandatory, and it is
-//! separate from economic settlement (the settle lane).
+//! manifest bytes, checks the receipt is for the *requested* order,
+//! and verifies the signature against public material exported before
+//! the run. A run outcome alone — including `EndTurn` — is never task
+//! success; the verified receipt is mandatory, and it is separate
+//! from economic settlement (the settle lane).
 //!
-//! Item definition (pinned here so producer and verifier cannot drift):
-//! split the raw bytes on `\n`, strip one trailing `\r` from each part,
-//! and count the non-empty parts. A final empty part (file terminator)
-//! is dropped by that rule; duplicate items count, because custody
-//! counts the items presented.
+//! ## Specification reconciliation (read before changing the count)
+//!
+//! Two B9 sources exist and they are not the same task shape:
+//!
+//! - **Governing for this module — B9 Chain of Custody**, as stated in
+//!   the submission draft's project summary
+//!   (`hackathon-day1-submission-package-draft.md`, SHA-256 recorded
+//!   in `docs/dispatches/2026-10-29-muse-spark-h01.md`): fetch a
+//!   manifest, hash its exact bytes, count its items, sign
+//!   `<hash>:<count>:<order_id>`, write the five-field `receipt.json`.
+//!   The handoff describes the manifest as JSON with ~40 biomass
+//!   items, frozen once at rehearsal. `B9-DEMO-TASK.md` itself was
+//!   **not found on this seat** (not in the repository, not in the
+//!   Python harness folder) — that absence is recorded, not papered
+//!   over.
+//! - **Referenced by the earlier fixture comment — LEDGER-KEEP**
+//!   (`workspace/hackathon-harness/demo-task/task.md`, SHA-256
+//!   likewise recorded in the dispatch): a byte-ledger transform over
+//!   newline records producing a different four-field `result.json`.
+//!   Its record-splitting rule governed *that* fixture only; it does
+//!   not govern the Chain-of-Custody receipt, and this module no
+//!   longer borrows its count.
+//!
+//! Item definition (governing, pinned here so producer and verifier
+//! cannot drift): the manifest is JSON; its items are the elements of
+//! the top-level array, or of the top-level object's `items` array.
+//! Anything else is not a B9 manifest and fails closed. Duplicates
+//! count, because custody counts the items presented. The final
+//! fixture freeze remains coordinated with the evidence seat, which
+//! owns fixtures and evidence documents; this module freezes only
+//! the bytes a run is actually given, and test fixtures are examples
+//! of the shape, not the frozen stage fixture.
 //!
 //! The signature representation is the harness's documented one: raw
 //! ML-DSA-65 signature bytes encoded with [`bsigner::b64::b64u`]
@@ -35,31 +63,83 @@ use crate::switch::{CoordError, RunOutcome};
 /// backend request (H01A). `order_id` identifies this custody order.
 pub fn b9_task_text(order_id: &str) -> String {
     format!(
-        "B9 — Chain of Custody (order_id: {order_id}). You are given a manifest as \
-         exact raw bytes (input.bin in the sandbox). Produce receipt.json with \
-         exactly these keys: order_id, input_sha256, item_count, signature, did. \
-         Steps: (1) input_sha256 is the SHA-256 of the raw manifest bytes — hash \
-         bytes, never decoded text; (2) item_count is the count of manifest items: \
-         split the raw bytes on \\n, strip one trailing \\r per record, drop empty \
-         records (including the final terminator), count the rest, duplicates \
-         included; (3) sign the exact string \"<input_sha256>:<item_count>:{order_id}\" \
-         with your bSigner identity and put the base64url (no padding) signature in \
-         signature; (4) did is your agent DID. Acceptance recomputes the hash and \
-         count from the frozen manifest bytes and verifies the signature against \
-         your exported public key — a wrong hash, count, identity or signature \
-         fails, and finishing your turn without receipt.json fails."
+        "B9 — Chain of Custody (order_id: {order_id}). The manifest is frozen in \
+         the sandbox as input.bin (JSON, exact raw bytes). Use the b9_receipt tool \
+         exactly once with args {{\"order_id\": \"{order_id}\"}} to produce \
+         receipt.json, then report completion. receipt.json has exactly these keys: \
+         order_id, input_sha256, item_count, signature, did. input_sha256 is the \
+         SHA-256 of the raw manifest bytes — hash bytes, never decoded text. \
+         item_count is the number of manifest items: the elements of the JSON \
+         top-level array, or of its items array, duplicates included. The receipt \
+         signs the exact string \"<input_sha256>:<item_count>:{order_id}\". \
+         Acceptance recomputes the hash and count from the frozen manifest bytes, \
+         checks the receipt is for order_id {order_id}, and verifies the signature \
+         against the exported public key — a wrong hash, count, order, identity or \
+         signature fails, and finishing your turn without receipt.json fails."
     )
 }
 
-/// Count manifest items under the pinned definition above.
-pub fn count_manifest_items(manifest: &[u8]) -> usize {
-    manifest
-        .split(|byte| *byte == b'\n')
-        .filter(|part| {
-            let part = part.strip_suffix(b"\r").unwrap_or(part);
-            !part.is_empty()
+/// Count manifest items under the governing JSON definition above.
+/// Returns `None` for bytes that are not a B9 manifest at all; callers
+/// must fail closed on it, never fall back to another counting rule.
+pub fn count_manifest_items(manifest: &[u8]) -> Option<usize> {
+    let value: serde_json::Value = serde_json::from_slice(manifest).ok()?;
+    match &value {
+        serde_json::Value::Array(items) => Some(items.len()),
+        serde_json::Value::Object(object) => match object.get("items") {
+            Some(serde_json::Value::Array(items)) => Some(items.len()),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
+/// One run definition: the single source the executable derives the
+/// saved goal, the seeded task, the expected order and the verifier
+/// expectations from, so they cannot drift apart.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RunDefinition {
+    pub order_id: String,
+    pub session_id: String,
+    pub goal_objective: String,
+    pub task_text: String,
+    pub manifest_sha256: String,
+    pub item_count: usize,
+    pub did: String,
+    pub alg: String,
+}
+
+impl RunDefinition {
+    /// Build the definition from the frozen manifest bytes and the
+    /// public identity material exported before model execution.
+    pub fn new(
+        order_id: &str,
+        session_id: &str,
+        manifest: &[u8],
+        material: &PublicMaterial,
+    ) -> Result<Self, String> {
+        let item_count = count_manifest_items(manifest)
+            .ok_or("manifest is not a B9 JSON manifest (array or items array)")?;
+        Ok(RunDefinition {
+            order_id: order_id.to_string(),
+            session_id: session_id.to_string(),
+            goal_objective: format!("Complete B9 Chain of Custody order {order_id}"),
+            task_text: b9_task_text(order_id),
+            manifest_sha256: manifest_sha256(manifest),
+            item_count,
+            did: material.did.clone(),
+            alg: material.alg.clone(),
         })
-        .count()
+    }
+
+    /// The goal saved for the run; its `task_id` is the order, which
+    /// is also what the seeded user task is derived from.
+    pub fn goal(&self) -> serde_json::Value {
+        serde_json::json!({
+            "objective": self.goal_objective,
+            "task_id": self.order_id,
+        })
+    }
 }
 
 /// Hex SHA-256 of the exact raw manifest bytes.
@@ -92,7 +172,8 @@ pub fn produce_receipt(
     order_id: &str,
 ) -> Result<B9Receipt, String> {
     let input_sha256 = manifest_sha256(manifest);
-    let item_count = count_manifest_items(manifest);
+    let item_count = count_manifest_items(manifest)
+        .ok_or("manifest is not a B9 JSON manifest (array or items array)")?;
     let payload = signed_payload(&input_sha256, item_count, order_id);
     let signed = identity.checkpoint(payload.as_bytes())?;
     if signed.did != identity.did() {
@@ -121,11 +202,24 @@ pub fn read_receipt(path: &Path) -> Result<B9Receipt, String> {
     serde_json::from_str(&text).map_err(|e| format!("receipt is not valid JSON: {e}"))
 }
 
-/// Independent verification: recompute hash + count from the frozen
-/// manifest bytes, rebuild the signed payload, and verify the
-/// signature against the expected public material (which also binds
-/// the receipt's DID to that key's canonical genesis DID).
-pub fn verify_receipt(receipt: &B9Receipt, manifest: &[u8], expected: &PublicMaterial) -> bool {
+/// Independent verification: the receipt must be for the *requested*
+/// order, the expected material must name the expected algorithm,
+/// hash + count are recomputed from the frozen manifest bytes, the
+/// signed payload is rebuilt, and the signature verifies against the
+/// expected public material (which also binds the receipt's DID to
+/// that key's canonical genesis DID).
+pub fn verify_receipt(
+    receipt: &B9Receipt,
+    manifest: &[u8],
+    expected: &PublicMaterial,
+    expected_order_id: &str,
+) -> bool {
+    if receipt.order_id != expected_order_id {
+        return false;
+    }
+    if expected.alg != bsigner::alg::SigAlg::MlDsa65.id() {
+        return false;
+    }
     let Some(verifying_key) = expected.verifying_key_bytes() else {
         return false;
     };
@@ -136,7 +230,7 @@ pub fn verify_receipt(receipt: &B9Receipt, manifest: &[u8], expected: &PublicMat
         return false;
     }
     if receipt.input_sha256 != manifest_sha256(manifest)
-        || receipt.item_count != count_manifest_items(manifest)
+        || count_manifest_items(manifest) != Some(receipt.item_count)
     {
         return false;
     }
@@ -153,34 +247,44 @@ pub fn verify_receipt(receipt: &B9Receipt, manifest: &[u8], expected: &PublicMat
     .unwrap_or(false)
 }
 
-/// Verify a receipt at a path against the frozen manifest bytes.
+/// Verify a receipt at a path against the frozen manifest bytes and
+/// the requested order.
 pub fn verify_receipt_file(
     path: &Path,
     manifest: &[u8],
     expected: &PublicMaterial,
+    expected_order_id: &str,
 ) -> Result<B9Receipt, String> {
     let receipt = read_receipt(path)?;
-    if verify_receipt(&receipt, manifest, expected) {
+    if verify_receipt(&receipt, manifest, expected, expected_order_id) {
         Ok(receipt)
     } else {
-        Err("receipt failed independent verification (hash, count, identity or signature)".into())
+        Err(
+            "receipt failed independent verification (order, hash, count, identity, \
+             algorithm or signature)"
+                .into(),
+        )
     }
 }
 
 /// Task acceptance for a finished coordinator run. Backend exhaustion
 /// (an `Err` run), cancellation and turn exhaustion all fail; `EndTurn`
-/// also fails without a receipt that independently verifies.
+/// also fails without a receipt for the requested order that
+/// independently verifies.
 pub fn accept_completed_run(
     run: &Result<RunOutcome, CoordError>,
     receipt_path: &Path,
     manifest: &[u8],
     expected: &PublicMaterial,
+    expected_order_id: &str,
 ) -> Result<B9Receipt, String> {
     match run {
         Err(error) => Err(format!("run did not complete (backend failure): {error}")),
         Ok(RunOutcome::Cancelled) => Err("run was cancelled: no B9 acceptance".into()),
         Ok(RunOutcome::MaxTurns) => Err("turn budget exhausted: no B9 acceptance".into()),
-        Ok(RunOutcome::EndTurn) => verify_receipt_file(receipt_path, manifest, expected),
+        Ok(RunOutcome::EndTurn) => {
+            verify_receipt_file(receipt_path, manifest, expected, expected_order_id)
+        }
     }
 }
 
@@ -190,9 +294,12 @@ mod tests {
     use crate::identity::IdentityHook;
     use std::path::PathBuf;
 
-    // LEDGER-KEEP-shaped fixture (demo-task/task.md): mixed CRLF/LF, a
-    // duplicate record, an unterminated final record.
-    const MANIFEST: &[u8] = b"rec-0007,alpha,120\r\nrec-0042,bravo,98\nrec-0013,charlie,455\r\nrec-0042,bravo,98\nrec-0001,delta,7\nrec-0029,echo,1000\r\nrec-0029,echo,1000";
+    // JSON biomass-shaped example fixture (governing Chain-of-Custody
+    // definition; not the frozen stage fixture): a top-level array
+    // with a duplicate item, formatted with mixed whitespace — the
+    // raw bytes are what get hashed, the parsed items are counted.
+    const MANIFEST: &[u8] =
+        b"[\r\n {\"id\": \"bio-0007\", \"kg\": 120},\n {\"id\": \"bio-0042\", \"kg\": 98},\r\n {\"id\": \"bio-0042\", \"kg\": 98}\n]";
 
     fn temp_dir(tag: &str) -> PathBuf {
         let dir =
@@ -213,9 +320,17 @@ mod tests {
 
     #[test]
     fn item_count_and_payload_are_pinned() {
-        assert_eq!(count_manifest_items(MANIFEST), 7);
-        assert_eq!(count_manifest_items(b"a\r\nb\na\n"), 3);
-        assert_eq!(count_manifest_items(b""), 0);
+        assert_eq!(count_manifest_items(MANIFEST), Some(3));
+        assert_eq!(
+            count_manifest_items(b"{\"items\": [{\"id\": 1}, {\"id\": 2}]}"),
+            Some(2)
+        );
+        assert_eq!(count_manifest_items(b"[]"), Some(0));
+        // Not a B9 manifest: fail closed, never a fallback count. The
+        // LEDGER-KEEP newline shape is a different task's input.
+        assert_eq!(count_manifest_items(b"a\r\nb\na\n"), None);
+        assert_eq!(count_manifest_items(b""), None);
+        assert_eq!(count_manifest_items(b"{\"no_items\": true}"), None);
         assert_eq!(signed_payload("ab", 3, "ORD-1"), "ab:3:ORD-1");
         // Independent hash oracle: sha256 of the empty input is a
         // published constant, not a value copied from the code.
@@ -233,14 +348,57 @@ mod tests {
         let (dir, identity, material) = fixture("roundtrip");
         let receipt = produce_receipt(&identity, MANIFEST, "demo-task").expect("receipt");
         assert_eq!(receipt.order_id, "demo-task");
-        assert_eq!(receipt.item_count, 7);
+        assert_eq!(receipt.item_count, 3);
         assert_eq!(receipt.did, material.did);
-        assert!(verify_receipt(&receipt, MANIFEST, &material));
+        assert!(verify_receipt(&receipt, MANIFEST, &material, "demo-task"));
 
         let path = dir.join("receipt.json");
         write_receipt(&path, &receipt).expect("write");
-        let back = verify_receipt_file(&path, MANIFEST, &material).expect("verify file");
+        let back =
+            verify_receipt_file(&path, MANIFEST, &material, "demo-task").expect("verify file");
         assert_eq!(back, receipt);
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn valid_receipt_for_a_different_order_is_rejected() {
+        let (dir, identity, material) = fixture("order-binding");
+        // A genuinely valid receipt: same key, same manifest, its
+        // signature verifies — but it was produced for ORDER-A while
+        // ORDER-B is the requested order.
+        let receipt = produce_receipt(&identity, MANIFEST, "ORDER-A").expect("receipt");
+        assert!(verify_receipt(&receipt, MANIFEST, &material, "ORDER-A"));
+        assert!(
+            !verify_receipt(&receipt, MANIFEST, &material, "ORDER-B"),
+            "a valid receipt for another order must not satisfy this order"
+        );
+        let path = dir.join("receipt.json");
+        write_receipt(&path, &receipt).expect("write");
+        assert!(verify_receipt_file(&path, MANIFEST, &material, "ORDER-B").is_err());
+        assert!(accept_completed_run(
+            &Ok(RunOutcome::EndTurn),
+            &path,
+            MANIFEST,
+            &material,
+            "ORDER-B"
+        )
+        .is_err());
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn unexpected_public_material_alg_is_rejected() {
+        let (dir, identity, material) = fixture("alg-binding");
+        let receipt = produce_receipt(&identity, MANIFEST, "demo-task").expect("receipt");
+        assert!(verify_receipt(&receipt, MANIFEST, &material, "demo-task"));
+        for alg in ["ml-dsa-44", "ml-dsa-87", "ed25519", ""] {
+            let mut wrong_alg = material.clone();
+            wrong_alg.alg = alg.to_string();
+            assert!(
+                !verify_receipt(&receipt, MANIFEST, &wrong_alg, "demo-task"),
+                "alg {alg:?} must be rejected, not dispatched on"
+            );
+        }
         std::fs::remove_dir_all(&dir).ok();
     }
 
@@ -251,15 +409,24 @@ mod tests {
 
         let mut bad = receipt.clone();
         bad.input_sha256 = manifest_sha256(b"other bytes");
-        assert!(!verify_receipt(&bad, MANIFEST, &material), "wrong hash");
+        assert!(
+            !verify_receipt(&bad, MANIFEST, &material, "demo-task"),
+            "wrong hash"
+        );
 
         let mut bad = receipt.clone();
         bad.item_count += 1;
-        assert!(!verify_receipt(&bad, MANIFEST, &material), "wrong count");
+        assert!(
+            !verify_receipt(&bad, MANIFEST, &material, "demo-task"),
+            "wrong count"
+        );
 
         let mut bad = receipt.clone();
         bad.order_id = "other-order".into();
-        assert!(!verify_receipt(&bad, MANIFEST, &material), "wrong order");
+        assert!(
+            !verify_receipt(&bad, MANIFEST, &material, "demo-task"),
+            "wrong order"
+        );
 
         let mut bad = receipt.clone();
         bad.did = (concat!(
@@ -267,20 +434,28 @@ mod tests {
             "aaaaaaaaaaaaaaaaaaaaaaaaaa"
         ))
         .into();
-        assert!(!verify_receipt(&bad, MANIFEST, &material), "wrong identity");
+        assert!(
+            !verify_receipt(&bad, MANIFEST, &material, "demo-task"),
+            "wrong identity"
+        );
 
         let mut bad = receipt.clone();
         let mut sig = bsigner::b64::b64u_decode(&bad.signature).expect("sig decodes");
         sig[0] ^= 0xff;
         bad.signature = bsigner::b64::b64u(&sig);
         assert!(
-            !verify_receipt(&bad, MANIFEST, &material),
+            !verify_receipt(&bad, MANIFEST, &material, "demo-task"),
             "wrong signature"
         );
 
         // Receipt is bound to the manifest: other bytes fail even with
         // the original, internally consistent receipt.
-        assert!(!verify_receipt(&receipt, b"rec-9999,other,1\n", &material));
+        assert!(!verify_receipt(
+            &receipt,
+            b"[{\"id\": \"bio-9999\"}]",
+            &material,
+            "demo-task"
+        ));
         std::fs::remove_dir_all(&dir).ok();
     }
 
@@ -294,7 +469,7 @@ mod tests {
         let other = IdentityHook::genesis(&other_keys, IdentityHook::test_vault()).expect("other");
         let other_material = other.public_material().expect("other material");
         assert!(
-            !verify_receipt(&receipt, MANIFEST, &other_material),
+            !verify_receipt(&receipt, MANIFEST, &other_material, "demo-task"),
             "another actor's public material must not verify this receipt"
         );
 
@@ -304,7 +479,7 @@ mod tests {
             verifying_key_b64u: String::new(),
         };
         assert!(
-            !verify_receipt(&receipt, MANIFEST, &missing),
+            !verify_receipt(&receipt, MANIFEST, &missing, "demo-task"),
             "missing verification material must fail closed"
         );
         std::fs::remove_dir_all(&dir).ok();
@@ -317,28 +492,39 @@ mod tests {
         let ok_run: Result<RunOutcome, CoordError> = Ok(RunOutcome::EndTurn);
 
         // EndTurn with no receipt file at all: fail.
-        assert!(accept_completed_run(&ok_run, &path, MANIFEST, &material).is_err());
+        assert!(accept_completed_run(&ok_run, &path, MANIFEST, &material, "demo-task").is_err());
 
         // EndTurn with a verified receipt: pass.
         let receipt = produce_receipt(&identity, MANIFEST, "demo-task").expect("receipt");
         write_receipt(&path, &receipt).expect("write");
-        assert!(accept_completed_run(&ok_run, &path, MANIFEST, &material).is_ok());
+        assert!(accept_completed_run(&ok_run, &path, MANIFEST, &material, "demo-task").is_ok());
 
         // Cancellation, turn exhaustion and backend exhaustion fail
         // even when a valid receipt is on disk.
-        assert!(
-            accept_completed_run(&Ok(RunOutcome::Cancelled), &path, MANIFEST, &material).is_err()
-        );
-        assert!(
-            accept_completed_run(&Ok(RunOutcome::MaxTurns), &path, MANIFEST, &material).is_err()
-        );
+        assert!(accept_completed_run(
+            &Ok(RunOutcome::Cancelled),
+            &path,
+            MANIFEST,
+            &material,
+            "demo-task"
+        )
+        .is_err());
+        assert!(accept_completed_run(
+            &Ok(RunOutcome::MaxTurns),
+            &path,
+            MANIFEST,
+            &material,
+            "demo-task"
+        )
+        .is_err());
         assert!(accept_completed_run(
             &Err(CoordError::BackendsExhausted {
                 reason: "all down".into()
             }),
             &path,
             MANIFEST,
-            &material
+            &material,
+            "demo-task"
         )
         .is_err());
         std::fs::remove_dir_all(&dir).ok();

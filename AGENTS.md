@@ -78,3 +78,19 @@ the `surfaces/review.html` SURFACES entry. CI (`estate-check`,
   reading list. `docs/specs/` — the SPEC-* canon. `docs/raids/` — source
   studies. `ops/` — runbooks that run.
 - Laws with a FOUNDER RULING tag are not relitigable.
+
+## Standing system requirements (PCi environment, added 2026-10-29)
+
+These stand alongside the laws above; they do not overwrite any of them.
+
+- Build toward 10 billion active unique human users and at least
+  1,000 years of continuity for the PCi hybrid quantum cryptographic
+  computing environment.
+- Fully decentralized and noncustodial; users pay their own way.
+- Providers stay replaceable; keys stay owner-controlled; state and
+  work stay bounded.
+- Paid operations are attributable to an authorized payer with a
+  bounded budget — no unattributable spend, no unbounded operation.
+- Agent-key continuity does not establish unique humanity. Never
+  present a key-continuity proof (a DID, a checkpoint pair, a signed
+  receipt) as proof that a unique human stands behind an agent.
