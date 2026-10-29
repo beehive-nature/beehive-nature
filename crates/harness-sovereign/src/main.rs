@@ -29,9 +29,9 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use harness_sovereign::b9::{accept_completed_run, verify_receipt_file, RunDefinition};
+use harness_sovereign::b9::{accept_completed_run, RunDefinition};
 use harness_sovereign::backend::OpenAiCompatBackend;
-use harness_sovereign::identity::{IdentityHook, PublicMaterial};
+use harness_sovereign::identity::IdentityHook;
 use harness_sovereign::nostr::{ensure_demo_key, NostrAdapter, NostrBusBridge};
 use harness_sovereign::relay::LocalRelay;
 use harness_sovereign::settle::{NostrSettleSink, SettlementLane};
@@ -66,51 +66,50 @@ fn write_json(path: &Path, value: &serde_json::Value) -> Result<(), String> {
     std::fs::write(path, format!("{text}\n")).map_err(|e| format!("write {}: {e}", path.display()))
 }
 
-/// Independent verification of a finished run from its on-disk
-/// artifacts. Needs no private keystore: public material, the frozen
-/// manifest bytes, the receipt, and the requested order.
+/// Complete independent verification of a finished saved run, from
+/// its on-disk artifacts only. Needs no private keystore: canonical
+/// public material, run definition, frozen manifest, saved goal,
+/// session transcript, exported evidence, signed checkpoints and the
+/// receipt are all checked for mutual agreement and independently
+/// verified (see `verify_saved_run`).
 fn run_verify_only(args: &[String]) -> Result<harness_sovereign::b9::B9Receipt, String> {
     let workdir = PathBuf::from(flag_value(args, "--workdir", "runs/demo"));
-    let manifest_path = PathBuf::from(flag_value(
-        args,
-        "--manifest",
-        &workdir.join("frozen-manifest.bin").to_string_lossy(),
-    ));
-    let receipt_path = PathBuf::from(flag_value(
-        args,
-        "--receipt",
-        &workdir.join("sandbox/receipt.json").to_string_lossy(),
-    ));
-    let material_path = PathBuf::from(flag_value(
-        args,
-        "--public-material",
-        &workdir.join("public-material.json").to_string_lossy(),
-    ));
-    let order_id = if has_flag(args, "--order-id") {
-        flag_value(args, "--order-id", "")
+    let session_id = flag_value(args, "--session", "demo-1");
+    let isolated = workdir.join("runs").join(&session_id);
+    let run_dir = if isolated.is_dir() {
+        isolated
+    } else if !has_flag(args, "--session") {
+        // No session named: discover the single isolated run, if any.
+        let runs = workdir.join("runs");
+        let mut found: Vec<PathBuf> = std::fs::read_dir(&runs)
+            .map(|entries| {
+                entries
+                    .filter_map(|entry| entry.ok())
+                    .map(|entry| entry.path())
+                    .filter(|path| path.is_dir())
+                    .collect()
+            })
+            .unwrap_or_default();
+        if found.len() == 1 {
+            found.pop().expect("one run dir")
+        } else {
+            workdir.clone()
+        }
     } else {
-        let definition_path = workdir.join("run-definition.json");
-        let text = std::fs::read_to_string(&definition_path).map_err(|e| {
-            format!(
-                "no --order-id and no readable {}: {e}",
-                definition_path.display()
-            )
-        })?;
-        let definition: serde_json::Value =
-            serde_json::from_str(&text).map_err(|e| format!("run definition JSON: {e}"))?;
-        definition
-            .get("order_id")
-            .and_then(|id| id.as_str())
-            .ok_or("run definition carries no order_id")?
-            .to_string()
+        workdir.clone()
     };
-    let manifest = std::fs::read(&manifest_path)
-        .map_err(|e| format!("read frozen manifest {}: {e}", manifest_path.display()))?;
-    let material_text = std::fs::read_to_string(&material_path)
-        .map_err(|e| format!("read public material {}: {e}", material_path.display()))?;
-    let material: PublicMaterial =
-        serde_json::from_str(&material_text).map_err(|e| format!("public material JSON: {e}"))?;
-    verify_receipt_file(&receipt_path, &manifest, &material, &order_id)
+    let expected_order = if has_flag(args, "--order-id") {
+        Some(flag_value(args, "--order-id", ""))
+    } else {
+        None
+    };
+    let report =
+        harness_sovereign::b9::verify_saved_run(&workdir, &run_dir, expected_order.as_deref())?;
+    eprintln!(
+        "saved-run evidence: checkpoints_verified={} same_actor={} transcript_sha256={}",
+        report.checkpoint_signatures_verified, report.same_actor_verified, report.transcript_sha256
+    );
+    Ok(report.receipt)
 }
 
 #[tokio::main(flavor = "multi_thread")]
@@ -226,15 +225,19 @@ async fn main() {
                 std::process::exit(2);
             }
         };
-    std::fs::create_dir_all(&workdir).expect("workdir");
-    std::fs::write(workdir.join("frozen-manifest.bin"), &manifest_bytes).expect("freeze manifest");
+    // Isolated run evidence: every run artifact lives under
+    // `runs/<session>/` inside the workdir, so runs sharing a workdir
+    // never overwrite each other's definition, material or evidence.
+    let run_dir = workdir.join("runs").join(&session_id);
+    std::fs::create_dir_all(&run_dir).expect("run dir");
+    std::fs::write(run_dir.join("frozen-manifest.bin"), &manifest_bytes).expect("freeze manifest");
     write_json(
-        &workdir.join("public-material.json"),
+        &run_dir.join("public-material.json"),
         &serde_json::to_value(&public_material).expect("material serializes"),
     )
     .expect("export public material");
     write_json(
-        &workdir.join("run-definition.json"),
+        &run_dir.join("run-definition.json"),
         &serde_json::to_value(&definition).expect("definition serializes"),
     )
     .expect("write run definition");
@@ -297,7 +300,7 @@ async fn main() {
     )
     .expect("settlement lane")
     .with_sink(receipt_sink);
-    let receipt_path = sandbox_dir.join("receipt.json");
+    let receipt_path = run_dir.join("receipt.json");
     let _ = std::fs::remove_file(&receipt_path);
     let toolset = Toolset::new(&sandbox_dir)
         .expect("sandbox")
@@ -310,6 +313,34 @@ async fn main() {
         ));
     // The frozen manifest is the agent's input, byte-exact.
     std::fs::write(sandbox_dir.join("input.bin"), &manifest_bytes).expect("freeze sandbox input");
+
+    // Backend health interface, integrated with a bounded wait: each
+    // backend's `health()` is probed under a 3 s timeout before model
+    // execution and the snapshot is exported as evidence. The probe
+    // informs, it does not pre-empt the run — the coordinator's own
+    // health monitor and the failover path still do their work, so a
+    // primary that dies (or is killed) mid-task fails over with the
+    // task and authority preserved.
+    let evidence_dir = run_dir.join("evidence");
+    std::fs::create_dir_all(&evidence_dir).expect("evidence dir");
+    let mut health_snapshot = Vec::new();
+    for backend in &backends {
+        let healthy = matches!(
+            tokio::time::timeout(Duration::from_secs(3), backend.health()).await,
+            Ok(true)
+        );
+        health_snapshot.push(serde_json::json!({
+            "backend": backend.name(),
+            "model": backend.model_id(),
+            "healthy": healthy,
+            "probe_timeout_ms": 3000,
+        }));
+    }
+    write_json(
+        &evidence_dir.join("backend-health.json"),
+        &serde_json::Value::Array(health_snapshot),
+    )
+    .expect("write backend health");
 
     // The agent loop itself: the switch coordinator. The saved goal
     // comes from the run definition, so the seeded B9 task (derived
@@ -329,14 +360,28 @@ async fn main() {
 
     let cancel = tokio_util::sync::CancellationToken::new();
     // Recovery/run durations are measured on a monotonic clock, never
-    // by differencing wall-clock timestamps.
+    // by differencing wall-clock timestamps. The run itself is also a
+    // bounded wait: `--run-timeout-secs` (default 900) caps it, and
+    // exceeding the bound is an explicit failure, never a hang.
+    let run_timeout_secs: u64 = flag_value(&args, "--run-timeout-secs", "900")
+        .parse()
+        .unwrap_or(900);
     let started = Instant::now();
-    let run = coordinator.run(cancel).await;
+    let run = match tokio::time::timeout(
+        Duration::from_secs(run_timeout_secs),
+        coordinator.run(cancel),
+    )
+    .await
+    {
+        Ok(run) => run,
+        Err(_) => Err(harness_sovereign::switch::CoordError::Store(format!(
+            "run exceeded its bounded wait of {run_timeout_secs}s"
+        ))),
+    };
     let duration_ms = started.elapsed().as_millis();
 
     // Export canonical transcript + checkpoint evidence: sufficient
     // for verification without the private keystore.
-    let evidence_dir = workdir.join("evidence");
     std::fs::create_dir_all(&evidence_dir).expect("evidence dir");
     let messages = coordinator.store().messages();
     std::fs::write(

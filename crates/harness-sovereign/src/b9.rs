@@ -217,16 +217,15 @@ pub fn verify_receipt(
     if receipt.order_id != expected_order_id {
         return false;
     }
-    if expected.alg != bsigner::alg::SigAlg::MlDsa65.id() {
+    // Canonical material binding: expected algorithm, canonical
+    // bzDiD genesis, and the DID recomputed from the key.
+    if !crate::identity::public_material_binds(expected) {
         return false;
     }
     let Some(verifying_key) = expected.verifying_key_bytes() else {
         return false;
     };
-    if verifying_key.is_empty() || expected.did != receipt.did {
-        return false;
-    }
-    if crate::identity::did_for_verifying_key(&verifying_key) != receipt.did {
+    if expected.did != receipt.did {
         return false;
     }
     if receipt.input_sha256 != manifest_sha256(manifest)
@@ -265,6 +264,193 @@ pub fn verify_receipt_file(
                 .into(),
         )
     }
+}
+
+/// A completely verified saved run: every artifact agrees with the
+/// single run definition and independently verifies.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SavedRunReport {
+    pub order_id: String,
+    pub did: String,
+    pub receipt: B9Receipt,
+    pub checkpoint_signatures_verified: usize,
+    pub same_actor_verified: bool,
+    pub transcript_sha256: String,
+}
+
+/// Complete saved-run verification, from disk only — no private
+/// keystore, no live harness state. Checks, in order: the public
+/// material binds canonically (bzDiD genesis, algorithm, DID); the
+/// run definition agrees with that material; the frozen manifest
+/// hashes and counts to the definition; the saved goal is the
+/// definition's goal; the transcript opens with the seeded task from
+/// the definition; the exported canonical transcript is byte-exact
+/// the session transcript and hashes to the exported value; every
+/// signed checkpoint envelope verifies over its canonical prefix
+/// under the exported key (and, when there are at least two, the
+/// SAME ACTOR pair verifies); the run outcome is `EndTurn`; and the
+/// receipt independently verifies for the requested order.
+pub fn verify_saved_run(
+    workdir: &Path,
+    run_dir: &Path,
+    expected_order_id: Option<&str>,
+) -> Result<SavedRunReport, String> {
+    let read_json = |path: &Path| -> Result<serde_json::Value, String> {
+        let text =
+            std::fs::read_to_string(path).map_err(|e| format!("read {}: {e}", path.display()))?;
+        serde_json::from_str(&text).map_err(|e| format!("parse {}: {e}", path.display()))
+    };
+    let material: PublicMaterial = {
+        let value = read_json(&run_dir.join("public-material.json"))?;
+        serde_json::from_value(value).map_err(|e| format!("public material shape: {e}"))?
+    };
+    if !crate::identity::public_material_binds(&material) {
+        return Err("public material does not bind canonically (bzDiD genesis, alg, DID)".into());
+    }
+    let definition: RunDefinition = {
+        let value = read_json(&run_dir.join("run-definition.json"))?;
+        serde_json::from_value(value).map_err(|e| format!("run definition shape: {e}"))?
+    };
+    if let Some(expected) = expected_order_id {
+        if definition.order_id != expected {
+            return Err(format!(
+                "run definition is for order {}, not the requested {expected}",
+                definition.order_id
+            ));
+        }
+    }
+    if definition.did != material.did || definition.alg != material.alg {
+        return Err("run definition identity does not match the public material".into());
+    }
+    let manifest = std::fs::read(run_dir.join("frozen-manifest.bin"))
+        .map_err(|e| format!("read frozen manifest: {e}"))?;
+    if manifest_sha256(&manifest) != definition.manifest_sha256
+        || count_manifest_items(&manifest) != Some(definition.item_count)
+    {
+        return Err("frozen manifest does not hash/count to the run definition".into());
+    }
+
+    let sessions = workdir.join("sessions");
+    let goal = read_json(&sessions.join(format!("{}.goal.json", definition.session_id)))?;
+    if goal != definition.goal() {
+        return Err("saved goal does not match the run definition goal".into());
+    }
+    let transcript_text =
+        std::fs::read_to_string(sessions.join(format!("{}.jsonl", definition.session_id)))
+            .map_err(|e| format!("read session transcript: {e}"))?;
+    let mut messages = Vec::new();
+    for line in transcript_text
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+    {
+        let row: serde_json::Value =
+            serde_json::from_str(line).map_err(|e| format!("transcript row JSON: {e}"))?;
+        let message: crate::backend::ChatMessage =
+            serde_json::from_value(row.get("msg").cloned().ok_or("transcript row has no msg")?)
+                .map_err(|e| format!("transcript message shape: {e}"))?;
+        messages.push(message);
+    }
+    if messages.len() < 2
+        || messages[0].role != "system"
+        || messages[1].content != definition.task_text
+    {
+        return Err("transcript does not open with the seeded task from the run definition".into());
+    }
+    let canonical = crate::switch::canonical_messages(&messages);
+    let evidence = run_dir.join("evidence");
+    let exported = std::fs::read_to_string(evidence.join("transcript.canonical.txt"))
+        .map_err(|e| format!("read exported transcript: {e}"))?;
+    if exported != canonical {
+        return Err(
+            "exported canonical transcript is not byte-exact the session transcript".into(),
+        );
+    }
+    let transcript_sha = crate::switch::transcript_sha256(&messages);
+    let exported_sha = std::fs::read_to_string(evidence.join("transcript.sha256"))
+        .map_err(|e| format!("read exported transcript hash: {e}"))?;
+    if exported_sha.trim() != transcript_sha {
+        return Err("exported transcript hash does not match the transcript".into());
+    }
+
+    // Signed checkpoint envelopes verify over their canonical prefix.
+    let checkpoints = read_json(&evidence.join("checkpoints.json"))?;
+    let mut signed: Vec<crate::identity::SignedCheckpoint> = Vec::new();
+    if let Some(array) = checkpoints.as_array() {
+        for checkpoint in array {
+            let Some(envelope) = checkpoint.get("bsigner_envelope") else {
+                continue;
+            };
+            let turn_count = checkpoint
+                .get("turn_count")
+                .and_then(|n| n.as_u64())
+                .ok_or("checkpoint has no turn_count")? as usize;
+            if turn_count > messages.len() {
+                return Err("checkpoint turn_count exceeds the transcript".into());
+            }
+            let prefix = &messages[..turn_count];
+            if crate::switch::transcript_sha256(prefix)
+                != checkpoint["transcript_sha256"].as_str().unwrap_or("")
+            {
+                return Err("checkpoint transcript hash does not match its prefix".into());
+            }
+            let signature_text = envelope["signature_b64u"]
+                .as_str()
+                .ok_or("checkpoint envelope has no signature")?;
+            let signature = bsigner::b64::b64u_decode(signature_text)
+                .ok_or("checkpoint signature is not base64url")?;
+            signed.push(crate::identity::SignedCheckpoint {
+                did: envelope["did"].as_str().unwrap_or("").to_string(),
+                verifying_key: material
+                    .verifying_key_bytes()
+                    .ok_or("public material key does not decode")?,
+                bytes: crate::switch::canonical_messages(prefix).into_bytes(),
+                sig: signature,
+            });
+        }
+    }
+    let mut same_actor_verified = false;
+    if signed.len() >= 2 {
+        same_actor_verified = crate::identity::IdentityHook::verify_same_actor(
+            &signed[0],
+            &signed[signed.len() - 1],
+            &material,
+        );
+        if !same_actor_verified {
+            return Err("checkpoint pair does not verify as SAME ACTOR".into());
+        }
+    } else {
+        for checkpoint in &signed {
+            let verifies = bsigner::pq::dsa_verify(
+                bsigner::alg::SigAlg::MlDsa65,
+                &checkpoint.verifying_key,
+                &checkpoint.bytes,
+                &checkpoint.sig,
+            )
+            .unwrap_or(false);
+            if !verifies || checkpoint.did != material.did {
+                return Err("checkpoint signature does not verify".into());
+            }
+        }
+    }
+
+    let outcome = read_json(&evidence.join("run-outcome.json"))?;
+    if !outcome["run"].as_str().unwrap_or("").contains("EndTurn") {
+        return Err("recorded run outcome is not EndTurn".into());
+    }
+    let receipt = verify_receipt_file(
+        &run_dir.join("receipt.json"),
+        &manifest,
+        &material,
+        &definition.order_id,
+    )?;
+    Ok(SavedRunReport {
+        order_id: definition.order_id.clone(),
+        did: definition.did.clone(),
+        receipt,
+        checkpoint_signatures_verified: signed.len(),
+        same_actor_verified,
+        transcript_sha256: transcript_sha,
+    })
 }
 
 /// Task acceptance for a finished coordinator run. Backend exhaustion
@@ -477,6 +663,7 @@ mod tests {
             did: material.did.clone(),
             alg: material.alg.clone(),
             verifying_key_b64u: String::new(),
+            genesis_op_b64u: String::new(),
         };
         assert!(
             !verify_receipt(&receipt, MANIFEST, &missing, "demo-task"),

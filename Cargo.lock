@@ -2341,6 +2341,7 @@ dependencies = [
  "async-trait",
  "base64",
  "bsigner",
+ "bzdid",
  "event-bus",
  "futures-util",
  "getrandom 0.2.17",

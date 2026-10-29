@@ -6,6 +6,7 @@ license.workspace = true
 description = "Kill-the-Model-Keep-the-Agent demo harness as a kernel citizen: model backends as sense adapters, checkpoints as bus events, bSigner linked as a library"
 
 [dependencies]
+bzdid = { path = "../bzdid" }
 event-bus = { path = "../event-bus" }
 shared-types = { path = "../shared-types" }
 bsigner = { path = "../bsigner" }

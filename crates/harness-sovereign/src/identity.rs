@@ -1,10 +1,12 @@
 //! R7 — identity hook over the bSigner **library** (RUST-HARNESS-SPEC.md §6).
 //!
-//! `did:b:` self-certifying identity: `did:b:` + base32(sha256(canonical
-//! genesis op)). Zero chain bytes — the DID is hash-derived, so there is
-//! nothing chain-specific in it. Rotation-readiness follows Article II
-//! (key algorithm travels in the keyset; data keys off the DID, never the
-//! raw key).
+//! `did:b:` self-certifying identity, canonical bzDiD form: the DID is
+//! `bzdid::BzDid::derive` over the BDID-GENESIS-V1 DAG-CBOR genesis op
+//! built by the `bzdid` crate — the same bytes its `verify_genesis`
+//! checks — so a harness identity verifies with the estate's canonical
+//! verifier, not a harness-local JSON lookalike. Zero chain bytes.
+//! Rotation-readiness follows Article II (key algorithm travels in the
+//! keyset; data keys off the DID, never the raw key).
 //!
 //! All crypto goes through `bsigner` as linked function calls: keygen,
 //! load, sign, verify. No CLI spawning, no JSON over stdio. Key files live
@@ -14,9 +16,29 @@
 use std::path::{Path, PathBuf};
 
 use bsigner::alg::SigAlg;
-use sha2::{Digest, Sha256};
 
 pub use bsigner::keys::Vault;
+
+/// The harness genesis op's `validUntil` (2100-01-01T00:00:00Z, the
+/// bzdid frozen-vector convention). Part of the canonical op, hence
+/// part of the identity: changing it is a new identity, never an edit.
+pub const GENESIS_VALID_UNTIL: u64 = 4_102_444_800;
+
+/// Build the canonical BDID-GENESIS-V1 genesis op bytes for one
+/// ML-DSA-65 verifying key: the key is both the single rotation key
+/// (r0) and the signing key; no services or aliases are claimed.
+pub fn genesis_op_bytes(verifying_key: &[u8]) -> Result<Vec<u8>, String> {
+    let card = bzdid::KeyCard::new(bzdid::KeyAlg::MlDsa65, verifying_key.to_vec())
+        .map_err(|e| e.to_string())?;
+    let op = bzdid::GenesisOp {
+        rotation_keys: vec![card.clone()],
+        signing_key: card,
+        services: Vec::new(),
+        also_known_as: Vec::new(),
+        valid_until: GENESIS_VALID_UNTIL,
+    };
+    op.build().map_err(|e| e.to_string())
+}
 
 /// A signed checkpoint: the bytes, who signed, and with what.
 #[derive(Debug, Clone)]
@@ -35,6 +57,12 @@ pub struct PublicMaterial {
     pub did: String,
     pub alg: String,
     pub verifying_key_b64u: String,
+    /// The canonical BDID-GENESIS-V1 genesis op bytes (base64url), so
+    /// any holder can run the canonical `bzdid` verifier. Empty in
+    /// material written before this field existed — verifiers treat
+    /// that as missing verification material and fail closed.
+    #[serde(default)]
+    pub genesis_op_b64u: String,
 }
 
 impl PublicMaterial {
@@ -46,19 +74,50 @@ impl PublicMaterial {
 }
 
 /// Recompute the canonical genesis/DID binding for a verifying key:
-/// `did:b:` + base32(sha256(canonical genesis op)). This is the same
-/// construction [`IdentityHook::genesis`] uses, factored out so an
-/// independent verifier can check that a DID actually belongs to the
-/// key presented — a copied DID string proves nothing on its own.
+/// derive the DID from the BDID-GENESIS-V1 op exactly as
+/// [`IdentityHook::genesis`] does. An independent verifier uses this
+/// to check that a DID actually belongs to the key presented — a
+/// copied DID string proves nothing on its own. Returns an empty
+/// string for key bytes that cannot form a canonical op, which
+/// matches no DID and therefore fails closed.
 pub fn did_for_verifying_key(verifying_key: &[u8]) -> String {
-    let genesis_op = serde_json::json!({
-        "type": "b:genesis",
-        "alg": SigAlg::MlDsa65.id(),
-        "pubkey_b64u": bsigner::b64::b64u(verifying_key),
-    });
-    let canonical = serde_json::to_string(&genesis_op).expect("genesis op serializes");
-    let digest = Sha256::digest(canonical.as_bytes());
-    format!("did:b:{}", base32_encode(&digest))
+    match genesis_op_bytes(verifying_key) {
+        Ok(bytes) => bzdid::BzDid::derive(&bytes).to_string(),
+        Err(_) => String::new(),
+    }
+}
+
+/// Whether exported public material is complete and self-consistent:
+/// the expected algorithm, a decodable key, exported canonical
+/// genesis bytes that the canonical `bzdid` verifier accepts for the
+/// claimed DID, a signing key equal to the exported verifying key,
+/// and a DID that recomputes from that key. Anything missing or
+/// mismatched fails closed.
+pub fn public_material_binds(material: &PublicMaterial) -> bool {
+    if material.alg != SigAlg::MlDsa65.id() {
+        return false;
+    }
+    let Some(verifying_key) = material.verifying_key_bytes() else {
+        return false;
+    };
+    if verifying_key.is_empty() || did_for_verifying_key(&verifying_key) != material.did {
+        return false;
+    }
+    if material.genesis_op_b64u.is_empty() {
+        return false;
+    }
+    let Some(genesis_bytes) = bsigner::b64::b64u_decode(&material.genesis_op_b64u) else {
+        return false;
+    };
+    let Ok(did) = bzdid::BzDid::parse(&material.did) else {
+        return false;
+    };
+    match bzdid::verify_genesis(&genesis_bytes, &did) {
+        Ok(op) => {
+            op.signing_key.alg == bzdid::KeyAlg::MlDsa65 && op.signing_key.key == verifying_key
+        }
+        Err(_) => false,
+    }
 }
 
 /// Whether `post` continues `pre` at a complete-message boundary of
@@ -171,6 +230,7 @@ impl IdentityHook {
             did: self.did.clone(),
             alg: SigAlg::MlDsa65.id().to_string(),
             verifying_key_b64u: bsigner::b64::b64u(&verifying_key),
+            genesis_op_b64u: bsigner::b64::b64u(&genesis_op_bytes(&verifying_key)?),
         })
     }
 
@@ -187,15 +247,12 @@ impl IdentityHook {
         post: &SignedCheckpoint,
         expected: &PublicMaterial,
     ) -> bool {
+        if !public_material_binds(expected) {
+            return false;
+        }
         let Some(verifying_key) = expected.verifying_key_bytes() else {
             return false;
         };
-        if verifying_key.is_empty() || expected.alg != SigAlg::MlDsa65.id() {
-            return false;
-        }
-        if did_for_verifying_key(&verifying_key) != expected.did {
-            return false;
-        }
         if pre.did != expected.did || post.did != expected.did {
             return false;
         }
@@ -220,35 +277,17 @@ impl IdentityHook {
         if pre.verifying_key.is_empty() || pre.verifying_key != post.verifying_key {
             return false;
         }
+        let Ok(genesis_bytes) = genesis_op_bytes(&pre.verifying_key) else {
+            return false;
+        };
         let expected = PublicMaterial {
             did: pre.did.clone(),
             alg: SigAlg::MlDsa65.id().to_string(),
             verifying_key_b64u: bsigner::b64::b64u(&pre.verifying_key),
+            genesis_op_b64u: bsigner::b64::b64u(&genesis_bytes),
         };
         Self::verify_same_actor(pre, post, &expected)
     }
-}
-
-/// RFC 4648 base32, lowercase, no padding — the estate's base32-lower
-/// precedent (atmirror CIDs). Local so the harness adds no dependency
-/// for one encoding.
-fn base32_encode(data: &[u8]) -> String {
-    const ALPHABET: &[u8; 32] = b"abcdefghijklmnopqrstuvwxyz234567";
-    let mut out = String::with_capacity(data.len().div_ceil(5) * 8);
-    let mut acc: u32 = 0;
-    let mut bits = 0u32;
-    for byte in data {
-        acc = (acc << 8) | u32::from(*byte);
-        bits += 8;
-        while bits >= 5 {
-            bits -= 5;
-            out.push(ALPHABET[((acc >> bits) & 31) as usize] as char);
-        }
-    }
-    if bits > 0 {
-        out.push(ALPHABET[((acc << (5 - bits)) & 31) as usize] as char);
-    }
-    out
 }
 
 #[cfg(test)]
@@ -286,6 +325,43 @@ mod tests {
         let post = hook.checkpoint(&post_bytes).expect("post sign");
 
         assert!(IdentityHook::verify_continuity(&pre, &post));
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn harness_identity_verifies_with_the_canonical_bzdid_verifier() {
+        let dir = temp_keys_dir("bzdid-canon");
+        let hook = IdentityHook::genesis(&dir, IdentityHook::test_vault()).expect("genesis");
+        let material = hook.public_material().expect("public material");
+        assert!(public_material_binds(&material));
+
+        // The exported genesis bytes are the identity, checked by the
+        // canonical crate — not by harness-local code.
+        let genesis_bytes =
+            bsigner::b64::b64u_decode(&material.genesis_op_b64u).expect("genesis bytes decode");
+        let did = bzdid::BzDid::parse(hook.did()).expect("did parses canonically");
+        assert_eq!(bzdid::BzDid::derive(&genesis_bytes), did);
+        let op = bzdid::verify_genesis(&genesis_bytes, &did).expect("canonical verify");
+        assert_eq!(op.signing_key.alg, bzdid::KeyAlg::MlDsa65);
+        assert_eq!(op.signing_key.key, hook.verifying_key().expect("vk"));
+        assert_eq!(op.rotation_keys.len(), 1);
+        assert_eq!(op.valid_until, GENESIS_VALID_UNTIL);
+
+        // Tampered genesis bytes are a different identity, refused by
+        // the canonical verifier and by the material binding.
+        let mut tampered = genesis_bytes.clone();
+        let last = tampered.len() - 1;
+        tampered[last] ^= 0x01;
+        assert!(bzdid::verify_genesis(&tampered, &did).is_err());
+        let mut bad_material = material.clone();
+        bad_material.genesis_op_b64u = bsigner::b64::b64u(&tampered);
+        assert!(!public_material_binds(&bad_material));
+
+        // Material without the canonical genesis is incomplete
+        // verification material and fails closed.
+        let mut incomplete = material.clone();
+        incomplete.genesis_op_b64u = String::new();
+        assert!(!public_material_binds(&incomplete));
         std::fs::remove_dir_all(&dir).ok();
     }
 

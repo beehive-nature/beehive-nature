@@ -16,6 +16,12 @@ use std::sync::{Arc, Mutex};
 const MANIFEST: &[u8] = b"[\n {\"id\": \"bio-0007\", \"kg\": 120},\n {\"id\": \"bio-0042\", \"kg\": 98},\n {\"id\": \"bio-0013\", \"kg\": 455}\n]";
 const ORDER: &str = "ORDER-A";
 
+fn tool_call_text_for(order: &str) -> String {
+    format!(
+        "Producing the receipt now.\n```tool\n{{\"id\": \"b1\", \"name\": \"b9_receipt\", \"args\": {{\"order_id\": \"{order}\"}}}}\n```\n"
+    )
+}
+
 fn tool_call_text() -> String {
     format!(
         "Producing the receipt now.\n```tool\n{{\"id\": \"b1\", \"name\": \"b9_receipt\", \"args\": {{\"order_id\": \"{ORDER}\"}}}}\n```\n"
@@ -137,6 +143,35 @@ fn run_binary(
     (workdir, output)
 }
 
+/// Run the binary into an explicit workdir under an explicit
+/// session (for evidence-isolation scenarios).
+fn run_binary_at(
+    dir: &Path,
+    workdir: &Path,
+    session: &str,
+    order: &str,
+    backend_urls: &[String],
+) -> Output {
+    let mut command = Command::new(env!("CARGO_BIN_EXE_harness-sovereign"));
+    command
+        .arg("--workdir")
+        .arg(workdir)
+        .arg("--session")
+        .arg(session)
+        .arg("--manifest")
+        .arg(dir.join("manifest.json"))
+        .arg("--order-id")
+        .arg(order)
+        .arg("--max-turns")
+        .arg("6")
+        .env("HARNESS_VAULT_REC", vault_phrase())
+        .env("MODEL_API_KEY", "test-key-not-a-secret");
+    for url in backend_urls {
+        command.arg("--backend-url").arg(url);
+    }
+    command.output().expect("binary runs")
+}
+
 fn verify_only(workdir: &Path, extra: &[&str]) -> Output {
     let mut command = Command::new(env!("CARGO_BIN_EXE_harness-sovereign"));
     command
@@ -150,8 +185,12 @@ fn verify_only(workdir: &Path, extra: &[&str]) -> Output {
     command.output().expect("verify-only runs")
 }
 
-fn read_material(workdir: &Path) -> harness_sovereign::identity::PublicMaterial {
-    let text = std::fs::read_to_string(workdir.join("public-material.json"))
+fn run_root(workdir: &Path, workdir_name: &str) -> PathBuf {
+    workdir.join("runs").join(format!("sess-{workdir_name}"))
+}
+
+fn read_material(run_root: &Path) -> harness_sovereign::identity::PublicMaterial {
+    let text = std::fs::read_to_string(run_root.join("public-material.json"))
         .expect("public material exported");
     serde_json::from_str(&text).expect("public material parses")
 }
@@ -173,7 +212,7 @@ fn zero_turns_fail_without_a_receipt() {
         "zero turns must exit nonzero: {}",
         String::from_utf8_lossy(&output.stderr)
     );
-    assert!(!workdir.join("sandbox/receipt.json").exists());
+    assert!(!run_root(&workdir, "run-zero").join("receipt.json").exists());
     std::fs::remove_dir_all(&dir).ok();
 }
 
@@ -187,7 +226,9 @@ fn end_turn_without_receipt_fails() {
         "EndTurn without a receipt must exit nonzero: {}",
         String::from_utf8_lossy(&output.stderr)
     );
-    assert!(!workdir.join("sandbox/receipt.json").exists());
+    assert!(!run_root(&workdir, "run-noreceipt")
+        .join("receipt.json")
+        .exists());
     std::fs::remove_dir_all(&dir).ok();
 }
 
@@ -206,11 +247,16 @@ fn valid_completed_task_passes_and_artifacts_verify_from_disk() {
     );
 
     // Independent verification in this process, from disk artifacts.
-    let material = read_material(&workdir);
-    let frozen = std::fs::read(workdir.join("frozen-manifest.bin")).expect("frozen manifest");
+    let root = run_root(&workdir, "run-valid");
+    let material = read_material(&root);
+    let frozen = std::fs::read(root.join("frozen-manifest.bin")).expect("frozen manifest");
     assert_eq!(frozen, MANIFEST);
+    // Complete saved-run verification agrees from disk as well.
+    let saved = harness_sovereign::b9::verify_saved_run(&workdir, &root, Some(ORDER))
+        .expect("saved run verifies completely");
+    assert_eq!(saved.receipt.order_id, ORDER);
     let receipt = harness_sovereign::b9::verify_receipt_file(
-        &workdir.join("sandbox/receipt.json"),
+        &root.join("receipt.json"),
         &frozen,
         &material,
         ORDER,
@@ -221,7 +267,7 @@ fn valid_completed_task_passes_and_artifacts_verify_from_disk() {
     // The run definition is the single source: saved goal, order and
     // transcript evidence all agree with it.
     let definition: serde_json::Value = serde_json::from_str(
-        &std::fs::read_to_string(workdir.join("run-definition.json")).expect("definition"),
+        &std::fs::read_to_string(root.join("run-definition.json")).expect("definition"),
     )
     .expect("definition parses");
     assert_eq!(definition["order_id"], ORDER);
@@ -231,7 +277,7 @@ fn valid_completed_task_passes_and_artifacts_verify_from_disk() {
     )
     .expect("goal parses");
     assert_eq!(goal["task_id"], ORDER);
-    let transcript = std::fs::read_to_string(workdir.join("evidence/transcript.canonical.txt"))
+    let transcript = std::fs::read_to_string(root.join("evidence/transcript.canonical.txt"))
         .expect("transcript evidence");
     assert!(
         transcript.contains("receipt.json written for order ORDER-A"),
@@ -270,7 +316,8 @@ fn tampered_receipt_and_wrong_order_fail_verify_only() {
 
     // Tampered receipt: flip the recorded count on disk; both the
     // binary's verify-only path and this process must refuse it.
-    let receipt_path = workdir.join("sandbox/receipt.json");
+    let root = run_root(&workdir, "run-tampered");
+    let receipt_path = root.join("receipt.json");
     let mut receipt: serde_json::Value =
         serde_json::from_str(&std::fs::read_to_string(&receipt_path).expect("receipt"))
             .expect("receipt parses");
@@ -282,7 +329,7 @@ fn tampered_receipt_and_wrong_order_fail_verify_only() {
         "tampered receipt must fail verify-only: {}",
         String::from_utf8_lossy(&tampered.stderr)
     );
-    let material = read_material(&workdir);
+    let material = read_material(&root);
     assert!(
         harness_sovereign::b9::verify_receipt_file(&receipt_path, MANIFEST, &material, ORDER)
             .is_err()
@@ -304,14 +351,15 @@ fn primary_connection_failure_then_replacement_completes() {
         "failover run must exit zero: {}",
         String::from_utf8_lossy(&output.stderr)
     );
-    let transcript = std::fs::read_to_string(workdir.join("evidence/transcript.canonical.txt"))
+    let root = run_root(&workdir, "run-failover");
+    let transcript = std::fs::read_to_string(root.join("evidence/transcript.canonical.txt"))
         .expect("transcript evidence");
     assert!(
         transcript.contains("[harness] Provider failover at "),
         "handoff must be in the exported transcript: {transcript}"
     );
     let checkpoints: serde_json::Value = serde_json::from_str(
-        &std::fs::read_to_string(workdir.join("evidence/checkpoints.json"))
+        &std::fs::read_to_string(root.join("evidence/checkpoints.json"))
             .expect("checkpoint evidence"),
     )
     .expect("checkpoints parse");
@@ -325,7 +373,64 @@ fn primary_connection_failure_then_replacement_completes() {
         phases.contains(&"pre-switch") && phases.contains(&"post-switch"),
         "signed checkpoint pair must be exported: {phases:?}"
     );
+    // Complete saved-run verification, including the signed
+    // checkpoint pair as SAME ACTOR, agrees from disk.
+    let saved = harness_sovereign::b9::verify_saved_run(&workdir, &root, Some(ORDER))
+        .expect("failover saved run verifies completely");
+    assert!(saved.same_actor_verified);
+    assert_eq!(saved.checkpoint_signatures_verified, 2);
+    // Backend health snapshot is part of the exported evidence.
+    let health: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(root.join("evidence/backend-health.json"))
+            .expect("backend health evidence"),
+    )
+    .expect("health parses");
+    let backends = health.as_array().expect("health array");
+    assert_eq!(backends.len(), 2);
+    assert_eq!(backends[0]["healthy"], serde_json::json!(false));
+    assert_eq!(backends[1]["healthy"], serde_json::json!(true));
     let verify = verify_only(&workdir, &[]);
     assert!(verify.status.success(), "failover receipt must verify");
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn two_runs_in_one_workdir_keep_isolated_evidence() {
+    // Two sessions, two orders, ONE workdir: each run's definition,
+    // material, receipt and evidence live in its own runs/<session>/
+    // root, and neither overwrites the other.
+    let dir = scenario_dir("isolated");
+    let workdir = dir.join("shared-workdir");
+    let stub_a = start_stub(vec![tool_call_text_for("ORDER-A"), "done A".to_string()]);
+    let out_a = run_binary_at(&dir, &workdir, "sess-alpha", "ORDER-A", &[stub_a.url]);
+    assert!(
+        out_a.status.success(),
+        "run A: {}",
+        String::from_utf8_lossy(&out_a.stderr)
+    );
+    let root_a = workdir.join("runs/sess-alpha");
+    let receipt_a = std::fs::read(root_a.join("receipt.json")).expect("receipt A");
+
+    let stub_b = start_stub(vec![tool_call_text_for("ORDER-B"), "done B".to_string()]);
+    let out_b = run_binary_at(&dir, &workdir, "sess-beta", "ORDER-B", &[stub_b.url]);
+    assert!(
+        out_b.status.success(),
+        "run B: {}",
+        String::from_utf8_lossy(&out_b.stderr)
+    );
+    let root_b = workdir.join("runs/sess-beta");
+
+    assert_eq!(
+        std::fs::read(root_a.join("receipt.json")).expect("receipt A reread"),
+        receipt_a,
+        "run B must not overwrite run A's evidence"
+    );
+    let saved_a = harness_sovereign::b9::verify_saved_run(&workdir, &root_a, Some("ORDER-A"))
+        .expect("run A verifies after B");
+    let saved_b = harness_sovereign::b9::verify_saved_run(&workdir, &root_b, Some("ORDER-B"))
+        .expect("run B verifies");
+    assert_eq!(saved_a.order_id, "ORDER-A");
+    assert_eq!(saved_b.order_id, "ORDER-B");
+    assert_ne!(saved_a.did, saved_b.did);
     std::fs::remove_dir_all(&dir).ok();
 }
