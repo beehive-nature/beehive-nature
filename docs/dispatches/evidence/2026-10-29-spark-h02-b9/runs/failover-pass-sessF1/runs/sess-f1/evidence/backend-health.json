@@ -1,0 +1,14 @@
+[
+  {
+    "backend": "backend-1",
+    "healthy": false,
+    "model": "muse-spark-1.3",
+    "probe_timeout_ms": 3000
+  },
+  {
+    "backend": "backend-2",
+    "healthy": true,
+    "model": "muse-spark-1.3",
+    "probe_timeout_ms": 3000
+  }
+]

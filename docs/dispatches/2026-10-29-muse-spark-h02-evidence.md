@@ -22,6 +22,13 @@ run).
 `a4e017144edc98b00ccdadb34f6ab2cb748e093b` (unchanged; JSON contract
 retained). Refusal matrix extended with R8 (failed run presenting a
 valid receipt must refuse: outcome-gating, not receipt-gating).
+**Execution (loopback, same day):** harness `a4e01714` built detached
+(`../wt-b9-verify`, binary digest `2D83F184…3801395`); baselines +
+R1–R8 executed via scripted loopback, archived in `runs/` with
+`RUN-LOG.md`. Accepted: R1, R2a, R2b, R6 outright; R3/R4b/R4c at
+checkpoint stage; R5 mutated without refusal (post-state
+unverifiable). Refused as required: R4d, R7, R8. R4a accepted without
+defect claim. Golden fixture unchanged throughout.
 
 ## 1. Governing specification
 

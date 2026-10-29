@@ -1,0 +1,244 @@
+{
+  "items": [
+    {
+      "id": "bio-syn-001",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-A",
+      "mass_kg": 6.25
+    },
+    {
+      "id": "bio-syn-002",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-B",
+      "mass_kg": 7.5
+    },
+    {
+      "id": "bio-syn-003",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-C",
+      "mass_kg": 8.75
+    },
+    {
+      "id": "bio-syn-004",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-D",
+      "mass_kg": 10.0
+    },
+    {
+      "id": "bio-syn-005",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-A",
+      "mass_kg": 11.25
+    },
+    {
+      "id": "bio-syn-006",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-B",
+      "mass_kg": 12.5
+    },
+    {
+      "id": "bio-syn-007",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-C",
+      "mass_kg": 13.75
+    },
+    {
+      "id": "bio-syn-008",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-D",
+      "mass_kg": 15.0
+    },
+    {
+      "id": "bio-syn-009",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-A",
+      "mass_kg": 16.25
+    },
+    {
+      "id": "bio-syn-010",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-B",
+      "mass_kg": 17.5
+    },
+    {
+      "id": "bio-syn-011",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-C",
+      "mass_kg": 18.75
+    },
+    {
+      "id": "bio-syn-012",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-D",
+      "mass_kg": 20.0
+    },
+    {
+      "id": "bio-syn-013",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-A",
+      "mass_kg": 21.25
+    },
+    {
+      "id": "bio-syn-014",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-B",
+      "mass_kg": 22.5
+    },
+    {
+      "id": "bio-syn-015",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-C",
+      "mass_kg": 23.75
+    },
+    {
+      "id": "bio-syn-016",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-D",
+      "mass_kg": 25.0
+    },
+    {
+      "id": "bio-syn-017",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-A",
+      "mass_kg": 26.25
+    },
+    {
+      "id": "bio-syn-018",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-B",
+      "mass_kg": 27.5
+    },
+    {
+      "id": "bio-syn-019",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-C",
+      "mass_kg": 28.75
+    },
+    {
+      "id": "bio-syn-020",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-D",
+      "mass_kg": 30.0
+    },
+    {
+      "id": "bio-syn-021",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-A",
+      "mass_kg": 31.25
+    },
+    {
+      "id": "bio-syn-022",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-B",
+      "mass_kg": 32.5
+    },
+    {
+      "id": "bio-syn-007",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-C",
+      "mass_kg": 13.75
+    },
+    {
+      "id": "bio-syn-024",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-D",
+      "mass_kg": 35.0
+    },
+    {
+      "id": "bio-syn-025",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-A",
+      "mass_kg": 36.25
+    },
+    {
+      "id": "bio-syn-026",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-B",
+      "mass_kg": 37.5
+    },
+    {
+      "id": "bio-syn-027",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-C",
+      "mass_kg": 38.75
+    },
+    {
+      "id": "bio-syn-028",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-D",
+      "mass_kg": 40.0
+    },
+    {
+      "id": "bio-syn-029",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-A",
+      "mass_kg": 41.25
+    },
+    {
+      "id": "bio-syn-030",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-B",
+      "mass_kg": 42.5
+    },
+    {
+      "id": "bio-syn-031",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-C",
+      "mass_kg": 43.75
+    },
+    {
+      "id": "bio-syn-032",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-D",
+      "mass_kg": 45.0
+    },
+    {
+      "id": "bio-syn-033",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-A",
+      "mass_kg": 46.25
+    },
+    {
+      "id": "bio-syn-034",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-B",
+      "mass_kg": 47.5
+    },
+    {
+      "id": "bio-syn-035",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-C",
+      "mass_kg": 48.75
+    },
+    {
+      "id": "bio-syn-036",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-D",
+      "mass_kg": 50.0
+    },
+    {
+      "id": "bio-syn-037",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-A",
+      "mass_kg": 51.25
+    },
+    {
+      "id": "bio-syn-038",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-B",
+      "mass_kg": 52.5
+    },
+    {
+      "id": "bio-syn-039",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-C",
+      "mass_kg": 53.75
+    },
+    {
+      "id": "bio-syn-040",
+      "kind": "synthetic-biomass",
+      "plot": "SYN-PLOT-D",
+      "mass_kg": 55.0
+    }
+  ]
+}

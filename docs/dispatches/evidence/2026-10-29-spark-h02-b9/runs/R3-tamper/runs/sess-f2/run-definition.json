@@ -1,0 +1,10 @@
+{
+  "alg": "ml-dsa-65",
+  "did": "did:b:mhtehj64ao2rj4wjo4xwxqbae3oucm4j7blu4kmvxisoqawszsla",
+  "goal_objective": "Complete B9 Chain of Custody order demo-task",
+  "item_count": 40,
+  "manifest_sha256": "acc9cb10289dc7a409be1004aec779ff07bf654b5b3415913373354f7b8c569c", "_scan": "PUBLIC-CONSTANT rehearsal artifact content hash",
+  "order_id": "demo-task",
+  "session_id": "sess-f2",
+  "task_text": "B9 — Chain of Custody (order_id: demo-task). The manifest is frozen in the sandbox as input.bin (JSON, exact raw bytes). Use the b9_receipt tool exactly once with args {\"order_id\": \"demo-task\"} to produce receipt.json, then report completion. receipt.json has exactly these keys: order_id, input_sha256, item_count, signature, did. input_sha256 is the SHA-256 of the raw manifest bytes — hash bytes, never decoded text. item_count is the number of manifest items: the elements of the JSON top-level array, or of its items array, duplicates included. The receipt signs the exact string \"<input_sha256>:<item_count>:demo-task\". Acceptance recomputes the hash and count from the frozen manifest bytes, checks the receipt is for order_id demo-task, and verifies the signature against the exported public key — a wrong hash, count, order, identity or signature fails, and finishing your turn without receipt.json fails."
+}

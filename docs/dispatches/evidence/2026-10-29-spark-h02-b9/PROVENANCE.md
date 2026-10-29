@@ -106,5 +106,28 @@ this directory. The discrepancy is CLOSED by this ruling.
   `demo-task` — execution and independent verification must use this
   same pinned value.
 - Private keys/credentials: none collected; none stored. The `identity/`
-  slot takes only exported public material at run time. No live-run
-  receipts exist yet; they are added only after an actual run.
+  slot takes only exported public material at run time.
+- No vault phrases, key files or `keys/`/`nostr-keys/` directories in
+  `runs/` (verified by content + directory scan at archive time).
+
+## Execution record (loopback rehearsals, 2026-10-29)
+
+- Harness: PR #492 `a4e01714`, built detached at `../wt-b9-verify`
+  (no commits there); binary SHA-256
+  `2D83F1843A425B397E99AE6ADE40A0DFD743158CD54FD2C009FB1F04F3801395` <!-- PUBLIC-CONSTANT --> <!-- PUBLIC-CONSTANT -->
+  (pre-existing warnings only). Toolchain: cargo/rustc 1.98.1.
+- Backends: scripted loopback (`loopback_backend.py`, same wire
+  protocol as `tests/b9_binary.rs`); no provider, no credits, no paid
+  calls. Every runtime's `public-material.json` archived with
+  non-empty `genesis_op_b64u`, and verification used that runtime's
+  identity throughout.
+- Baselines archived in `runs/`: clean pass, single-failover pass
+  (10.2 s, pre+post pair), exhausted fail (15.4 s, prober kill —
+  monitor probes only `backends[0]`), max-turns fail with own valid
+  receipt. `R1/R2a/R2b/R6` accepted (defects), `R3/R4b/R4c` passed at
+  checkpoint stage (defects), `R4a` accepted without defect claim,
+  `R4d/R7/R8` refused as required, `R5` mutated without refusal and
+  left post-state unverifiable (defect). Full narrative + verbatim
+  outputs: `runs/RUN-LOG.md` + per-case archives.
+- After Wonder's correction, the accepted cases get rerun with both
+  receipts preserved; this record stays as the pre-correction baseline.
