@@ -434,6 +434,12 @@ pub enum RunOutcome {
 pub enum CoordError {
     Backend(BackendError),
     Store(String),
+    /// Every backend in the chain failed (or was flagged down) and no
+    /// backend remains to resume on. This is an explicit task failure:
+    /// frozen evidence stays in the store, and no outcome is a PASS.
+    BackendsExhausted {
+        reason: String,
+    },
 }
 
 impl std::fmt::Display for CoordError {
@@ -441,6 +447,9 @@ impl std::fmt::Display for CoordError {
         match self {
             CoordError::Backend(error) => write!(formatter, "backend failed: {error:?}"),
             CoordError::Store(error) => write!(formatter, "session store failed: {error}"),
+            CoordError::BackendsExhausted { reason } => {
+                write!(formatter, "all backends exhausted: {reason}")
+            }
         }
     }
 }
@@ -477,8 +486,8 @@ impl SwitchCoordinator {
         max_turns: u32,
     ) -> Self {
         assert!(
-            backends.len() >= 2,
-            "a switch demo needs at least two backends"
+            !backends.is_empty(),
+            "a coordinator needs at least one backend"
         );
         SwitchCoordinator {
             backends,
@@ -544,10 +553,48 @@ impl SwitchCoordinator {
                 ));
             }
         }
+        // H01A: seed the tool contract and the actual B9 user task
+        // exactly once, before the first backend request. A resumed
+        // store that already holds messages is never re-seeded.
+        self.seed_task_once()?;
         let monitor = self.spawn_monitor();
         let outcome = self.drive(cancel).await;
         monitor.abort();
         outcome
+    }
+
+    /// Append the seeded opening messages (system tool contract, then
+    /// the B9 user task) iff the store is still empty. Returns whether
+    /// seeding happened.
+    fn seed_task_once(&mut self) -> Result<bool, CoordError> {
+        if !self.store.rows().is_empty() {
+            return Ok(false);
+        }
+        self.store
+            .append(
+                ChatMessage {
+                    role: "system".into(),
+                    content: self.toolset.system_prompt(),
+                    tool_call_id: None,
+                },
+                {
+                    let mut meta = meta_pair("backend", "harness");
+                    meta.insert("seeded".to_string(), Value::String("tool-contract".into()));
+                    meta
+                },
+            )
+            .map_err(|e| CoordError::Store(e.to_string()))?;
+        self.store
+            .append(
+                ChatMessage::user(crate::b9::b9_task_text(&self.task_id())),
+                {
+                    let mut meta = meta_pair("backend", "harness");
+                    meta.insert("seeded".to_string(), Value::String("b9-task".into()));
+                    meta
+                },
+            )
+            .map_err(|e| CoordError::Store(e.to_string()))?;
+        Ok(true)
     }
 
     fn spawn_monitor(&self) -> tokio::task::JoinHandle<()> {
@@ -580,10 +627,11 @@ impl SwitchCoordinator {
                 return Ok(RunOutcome::Cancelled);
             }
             if let Some(reason) = self.flag.take() {
-                if self.active_index + 1 < self.backends.len() {
-                    self.do_failover(String::new(), reason)?;
-                    continue;
-                }
+                // do_failover guards the exhausted case itself: with
+                // no next backend it preserves evidence and returns an
+                // explicit failure instead of resuming on a dead one.
+                self.do_failover(String::new(), reason)?;
+                continue;
             }
             let backend = self.backends[self.active_index].clone();
             self.publish_status("thinking", backend.name());
@@ -663,6 +711,22 @@ impl SwitchCoordinator {
 
     fn do_failover(&mut self, partial_text: String, reason: String) -> Result<(), CoordError> {
         let old_name = self.backends[self.active_index].name().to_string();
+        // H01B: the error-driven path can arrive on the last backend.
+        // Guard it before indexing the next one: freeze whatever
+        // partial evidence exists, checkpoint it, and return an
+        // explicit exhaustion failure — never a panic, never a PASS.
+        if self.active_index + 1 >= self.backends.len() {
+            if !partial_text.trim().is_empty() {
+                self.append_assistant(&partial_text, &old_name, true)?;
+            }
+            self.checkpoint("backend-exhausted")?;
+            self.emit(format!(
+                "BACKENDS EXHAUSTED {old_name} ({reason}); no backend remains"
+            ));
+            return Err(CoordError::BackendsExhausted {
+                reason: format!("{old_name}: {reason}; no backend remains"),
+            });
+        }
         let new_name = self.backends[self.active_index + 1].name().to_string();
         self.emit(format!("FAILOVER {old_name} -> {new_name} ({reason})"));
 
@@ -1020,33 +1084,36 @@ mod tests {
         assert_eq!(outcome, RunOutcome::EndTurn);
 
         let rows = coordinator.store.rows().to_vec();
-        // turn1 assistant + tool result + freeze partial + orphan notice +
-        // handoff + final assistant = 6 rows.
-        assert_eq!(rows.len(), 6, "rows: {rows:?}");
-        assert_eq!(rows[0].msg.role, "assistant");
+        // seeded system + user (H01A), then turn1 assistant + tool
+        // result + freeze partial + orphan notice + handoff + final
+        // assistant = 8 rows.
+        assert_eq!(rows.len(), 8, "rows: {rows:?}");
+        assert_eq!(rows[0].msg.role, "system");
+        assert_eq!(rows[1].msg.role, "user");
+        assert_eq!(rows[2].msg.role, "assistant");
         assert_eq!(
-            rows[0].meta.get("backend").and_then(|v| v.as_str()),
+            rows[2].meta.get("backend").and_then(|v| v.as_str()),
             Some("mock-primary")
         );
-        assert!(rows[1].msg.content.contains("sha256(a.txt) = "));
-        assert_eq!(rows[1].msg.role, "tool");
+        assert!(rows[3].msg.content.contains("sha256(a.txt) = "));
+        assert_eq!(rows[3].msg.role, "tool");
         assert_eq!(
-            rows[2].meta.get("truncated"),
+            rows[4].meta.get("truncated"),
             Some(&Value::Bool(true)),
             "FREEZE keeps partial marked"
         );
-        assert!(rows[2].msg.content.contains("partial thinking"));
-        assert_eq!(rows[3].meta.get("orphaned"), Some(&Value::Bool(true)));
-        assert!(rows[3].msg.content.contains("NOT run"));
-        assert!(rows[4]
+        assert!(rows[4].msg.content.contains("partial thinking"));
+        assert_eq!(rows[5].meta.get("orphaned"), Some(&Value::Bool(true)));
+        assert!(rows[5].msg.content.contains("NOT run"));
+        assert!(rows[6]
             .msg
             .content
             .contains("mock-primary -> mock-secondary"));
         assert_eq!(
-            rows[4].meta.get("injected").and_then(|v| v.as_str()),
+            rows[6].meta.get("injected").and_then(|v| v.as_str()),
             Some("handoff")
         );
-        assert_eq!(rows[5].msg.content, "final answer");
+        assert_eq!(rows[7].msg.content, "final answer");
 
         // Pre/post checkpoints on disk with distinct digests.
         let checkpoints = coordinator.store.read_checkpoints();
@@ -1154,6 +1221,220 @@ mod tests {
             statuses >= 3,
             "thinking/responded/failed-over must ride the bus"
         );
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    /// Records every message list it is asked to complete, so a test
+    /// can inspect the actual backend request — not just the store.
+    struct CapturingBackend {
+        inner: Arc<StubBackend>,
+        seen: Arc<Mutex<Vec<Vec<ChatMessage>>>>,
+    }
+
+    impl CapturingBackend {
+        fn wrap(inner: Arc<StubBackend>) -> (Arc<Self>, Arc<Mutex<Vec<Vec<ChatMessage>>>>) {
+            let seen = Arc::new(Mutex::new(Vec::new()));
+            (
+                Arc::new(CapturingBackend {
+                    inner,
+                    seen: seen.clone(),
+                }),
+                seen,
+            )
+        }
+    }
+
+    #[async_trait::async_trait]
+    impl ModelBackend for CapturingBackend {
+        fn name(&self) -> &str {
+            self.inner.name()
+        }
+
+        fn model_id(&self) -> &str {
+            self.inner.model_id()
+        }
+
+        async fn complete(
+            &self,
+            messages: &[ChatMessage],
+            cancel: CancellationToken,
+        ) -> Result<Turn, BackendError> {
+            self.seen.lock().expect("seen").push(messages.to_vec());
+            self.inner.complete(messages, cancel).await
+        }
+
+        async fn health(&self) -> bool {
+            self.inner.health().await
+        }
+    }
+
+    fn unavailable(detail: &str, partial: &str) -> BackendError {
+        BackendError::Unavailable {
+            reason: FailoverReason::Transport,
+            detail: detail.into(),
+            partial: partial.into(),
+        }
+    }
+
+    #[tokio::test]
+    async fn seeded_task_reaches_first_backend_once_and_survives_failover_byte_exactly() {
+        let (root, toolset, identity, publisher, goal) = failover_fixture("seeded");
+        let expected_system = toolset.system_prompt();
+        let expected_task = crate::b9::b9_task_text("T-001");
+        let primary_inner = Arc::new(StubBackend {
+            name: "mock-primary".into(),
+            model: "spark-primary".into(),
+            script: Mutex::new(VecDeque::from([StubStep::Fail(unavailable("refused", ""))])),
+            health_script: Mutex::new(VecDeque::new()),
+        });
+        let secondary_inner = Arc::new(StubBackend {
+            name: "mock-secondary".into(),
+            model: "spark-tertiary".into(),
+            script: Mutex::new(VecDeque::from([scripted_turn("final answer")])),
+            health_script: Mutex::new(VecDeque::new()),
+        });
+        let (primary, seen_primary) = CapturingBackend::wrap(primary_inner);
+        let (secondary, seen_secondary) = CapturingBackend::wrap(secondary_inner);
+        let store = SessionStore::new(&root, "sess-seeded").expect("store");
+        let mut coordinator = SwitchCoordinator::new(
+            vec![primary, secondary],
+            store,
+            toolset,
+            Some(Arc::new(publisher)),
+            Some(identity),
+            goal,
+            8,
+        );
+        let outcome = coordinator
+            .run(CancellationToken::new())
+            .await
+            .expect("run succeeds");
+        assert_eq!(outcome, RunOutcome::EndTurn);
+
+        // The first backend request is exactly the seeded pair: tool
+        // contract first, then the actual B9 user task.
+        let first = seen_primary.lock().expect("seen").clone();
+        assert_eq!(first.len(), 1, "primary gets exactly one request");
+        assert_eq!(first[0].len(), 2, "first request: {first:?}");
+        assert_eq!(first[0][0].role, "system");
+        assert_eq!(first[0][0].content, expected_system);
+        assert_eq!(first[0][1].role, "user");
+        assert_eq!(first[0][1].content, expected_task);
+
+        // Across failover the seeded pair survives byte-exactly as the
+        // complete-message prefix of the second backend's request.
+        let second = seen_secondary.lock().expect("seen").clone();
+        assert_eq!(second.len(), 1, "secondary gets exactly one request");
+        assert_eq!(
+            canonical_messages(&second[0][..2]),
+            canonical_messages(&first[0]),
+            "seeded messages must survive failover byte-exactly"
+        );
+
+        // Exactly once in the stored transcript: no duplicate seeding.
+        let msgs = coordinator.store.messages();
+        assert_eq!(
+            msgs.iter().filter(|m| m.content == expected_system).count(),
+            1
+        );
+        assert_eq!(
+            msgs.iter().filter(|m| m.content == expected_task).count(),
+            1
+        );
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[tokio::test]
+    async fn single_failing_backend_exhausts_without_panic_or_pass() {
+        let root = temp_root("single-exhausted");
+        let toolset = Toolset::new(&root.join("sandbox")).expect("sandbox");
+        let store = SessionStore::new(&root, "sess-single").expect("store");
+        let goal = serde_json::json!({"objective": "x", "task_id": "T-single"});
+        let only = StubBackend::failing(
+            "only-backend",
+            unavailable("refused", "partial work before death"),
+        );
+        let mut coordinator =
+            SwitchCoordinator::new(vec![only], store, toolset, None, None, goal, 4);
+        let error = coordinator
+            .run(CancellationToken::new())
+            .await
+            .expect_err("a single dead backend is an explicit failure, not a pass");
+        assert!(
+            matches!(error, CoordError::BackendsExhausted { .. }),
+            "error: {error:?}"
+        );
+        // Evidence is preserved: the frozen partial is in the store,
+        // marked truncated, and an exhaustion checkpoint was written.
+        let rows = coordinator.store.rows();
+        let partial = rows
+            .iter()
+            .find(|row| row.msg.content == "partial work before death")
+            .expect("frozen partial must be preserved");
+        assert_eq!(partial.meta.get("truncated"), Some(&Value::Bool(true)));
+        let checkpoints = coordinator.store.read_checkpoints();
+        assert_eq!(checkpoints.len(), 1);
+        assert_eq!(
+            checkpoints[0]["phase"],
+            Value::String("backend-exhausted".into())
+        );
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[tokio::test]
+    async fn complete_failure_chain_exhausts_with_evidence_preserved() {
+        let root = temp_root("chain-exhausted");
+        let toolset = Toolset::new(&root.join("sandbox")).expect("sandbox");
+        let store = SessionStore::new(&root, "sess-chain").expect("store");
+        let goal = serde_json::json!({"objective": "x", "task_id": "T-chain"});
+        let primary =
+            StubBackend::failing("chain-primary", unavailable("refused", "first partial"));
+        let secondary =
+            StubBackend::failing("chain-secondary", unavailable("refused", "second partial"));
+        let mut coordinator = SwitchCoordinator::new(
+            vec![primary, secondary],
+            store,
+            toolset,
+            None,
+            None,
+            goal,
+            6,
+        );
+        let error = coordinator
+            .run(CancellationToken::new())
+            .await
+            .expect_err("a complete failure chain must not report a pass");
+        assert!(
+            matches!(error, CoordError::BackendsExhausted { .. }),
+            "error: {error:?}"
+        );
+        let contents: Vec<&str> = coordinator
+            .store
+            .rows()
+            .iter()
+            .map(|row| row.msg.content.as_str())
+            .collect();
+        assert!(
+            contents.iter().any(|c| c.contains("first partial")),
+            "first frozen partial preserved: {contents:?}"
+        );
+        assert!(
+            contents.iter().any(|c| c.contains("second partial")),
+            "second frozen partial preserved: {contents:?}"
+        );
+        assert!(
+            contents
+                .iter()
+                .any(|c| c.contains("chain-primary -> chain-secondary")),
+            "the failover itself happened before exhaustion: {contents:?}"
+        );
+        let phases: Vec<String> = coordinator
+            .store
+            .read_checkpoints()
+            .into_iter()
+            .filter_map(|c| c["phase"].as_str().map(str::to_string))
+            .collect();
+        assert_eq!(phases, vec!["pre-switch", "backend-exhausted"]);
         std::fs::remove_dir_all(&root).ok();
     }
 
