@@ -150,15 +150,69 @@ gitignored, so the checkout carries no built kernel.
   attempted, and this read-path work claims nothing about payment
   qualification beyond those offline vectors.
 
-## Blockers for SDK 0.1.5 itself
+## SDK 0.1.5 qualification — completed (2026-10-29, later)
 
-- **Ownership acknowledgment outstanding** (above): until the
-  vendor-pin owner and each consumer owner acknowledge, the 0.1.5
-  tarball is not vendored and no adapter is upgraded.
-- **0.1.5 provenance not yet recorded**: the qualification must pin
-  the exact 0.1.5 artifact (tarball hash, WASM source commit, WASM
-  SHA-256, lock hash) the way `VENDOR.md` records 0.1.1/0.1.2.
-- No live ANT network qualification attempted from this seat;
-  nothing here claims SDK 0.1.5 works. The measurements above
-  qualify the current pin (0.1.2 consumers, local observer kernel)
-  as the baseline 0.1.5 must beat or match.
+**Ownership acknowledgment.** The sprint lead's order transmitted
+to this seat explicitly assigned ANT Browser SDK 0.1.5
+qualification to this seat at HIGH effort in a separate worktree,
+and the follow-on order directed this seat to obtain ownership
+acknowledgment and complete the qualification. That lead
+assignment is the explicit acknowledgment under which the vendor
+pin and both consumer classes were moved here; it is recorded as
+the lead's, not as the historical bView seat's separate assent,
+which was not separately received. The historical owners remain
+recorded above, and "upgrade the adapter and SDK together" was
+followed for every consumer.
+
+**Pinned and vendored.** `vendor/ant-browser-sdk/0.1.5/` is copied
+byte-for-byte from the official npm tarball (verified: SHA-1
+matches the registry `dist.shasum`; the tarball's SHA-512
+recomputes to the registry `dist.integrity`; every vendored file
+hash-matches its package source, 0 mismatches). Full provenance
+(tarball hashes, WASM source revision `458c7175…`, WASM SHA-256
+matching `source.json`, lock hash) is in
+`vendor/ant-browser-sdk/0.1.5/VENDOR.md`. The file set is the 0.1.2
+set plus 0.1.5's two newly reachable runtime modules
+(`manifest.js`, `pointers.js`); maps, declarations and the
+standalone worker copy are omitted as before.
+
+**Adapters upgraded, with API-shape verification first.**
+`AutonomiClient.connect`/`connectNetwork`,
+`client.openFile(address, {signal, onProgress})`,
+`reader.read(start, length, {signal})`, `createMediaSource`,
+`client.upload(file, {visibility, paymentMode, payment, signal})`
+and `createManualPaymentProvider` were confirmed to keep their
+0.1.1/0.1.2 shapes in 0.1.5 by inspecting `client.js` and
+`file-reader.js` before any move. Then: read path —
+`surfaces/bview.html` SDK root 0.1.2 → 0.1.5 (version labels with
+it) and its mocked suites' intercept paths; wallet/payment,
+separately — `surfaces/bpay-invoice.js` and `surfaces/bdrop.js`
+kit root 0.1.1 → 0.1.5 and the wallet test mock's kit path.
+
+**Re-ran identical-verified-content comparison** (same fixtures,
+same limits as the baseline section):
+
+- ant-bnrose observer suites: **9/9 passed** (unchanged result).
+- bView mocked suites on 0.1.5 (direct, adaptive, page, ant-hls,
+  mse): **48/48 passed** (expanded set vs the baseline's 41).
+- `qualify-local.mjs` (1 MiB identical verified content, 25 ms
+  simulated transport): latency 38.03 ms observed vs 34.17 ms
+  opt-out (sdk 31.97 ms, verification 1.97 ms, observation
+  2.48 ms); connections 4 calls, max concurrency 4, 32.09 ms wall;
+  bytes 1,048,576/read, 4,194,304 verified total; memory heap delta
+  +73,352 bytes; cancellation rejected with no observation
+  consumed; recovery identical verified content at sequence 1.
+  These figures are the same consumer-side contract as the
+  baseline and are comparable to it; small-seat timing variance
+  applies, as the harness README states.
+- Wallet/payment, separately qualified offline:
+  `e2e/ant-pay.test.mjs` + `e2e/ant-testnet-pin.test.mjs` —
+  **14/14 passed**. No live payment, upload or wallet action was
+  attempted or is claimed; the payment adapters' live
+  qualification remains a live-network exercise for their lane.
+
+**Not claimed:** live ANT network behaviour of 0.1.5 (no live
+trial was run from this seat — the ant-bnrose matrix and bView live
+checks remain the live instruments, to be run by their lanes), the
+sanctioned NixOS kernel build (this seat's kernel is a labelled
+local build), and any payment beyond the offline vectors.

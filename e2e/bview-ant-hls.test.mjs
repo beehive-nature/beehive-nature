@@ -20,7 +20,7 @@ test('ANT pack: actual video decodes, seeks and ends using one reader and no med
     await context.route('**/*', async route => {
       const u = new URL(route.request().url());
       if (u.origin !== 'https://skaists.dev' || u.pathname.startsWith('/media/')) { stray.push(u.href); return route.abort(); }
-      if (u.pathname === '/vendor/ant-browser-sdk/0.1.2/index.js') return route.fulfill({ body: sdk, contentType: 'text/javascript' });
+      if (u.pathname === '/vendor/ant-browser-sdk/0.1.5/index.js') return route.fulfill({ body: sdk, contentType: 'text/javascript' });
       try { const data = await readFile(resolve(root, '.' + u.pathname)); return route.fulfill({ body: data, contentType: /\.m?js$/.test(u.pathname) ? 'text/javascript' : u.pathname.endsWith('.html') ? 'text/html' : u.pathname.endsWith('.css') ? 'text/css' : 'application/octet-stream' }); }
       catch { return route.fulfill({ status: 404 }); }
     });

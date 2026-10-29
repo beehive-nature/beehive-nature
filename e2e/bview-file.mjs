@@ -22,7 +22,7 @@ const server=createServer(async(req,res)=>{try{
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const browser=await chromium.launch({channel:'chrome'}),context=await browser.newContext(),page=await context.newPage(),errors=[];
 page.on('pageerror',e=>errors.push(e.name));
-await context.route('**/vendor/ant-browser-sdk/0.1.2/index.js',r=>r.fulfill({contentType:'text/javascript',body:`export class AutonomiClient{static async connect(){window.connects=(window.connects||0)+1;return{close(){},async openFile(){const b=new Uint8Array(await(await fetch('/media.mp4')).arrayBuffer());return{size:b.length,close(){},async read(start,length){window.reads=(window.reads||0)+1;return b.slice(start,start+length)}}}}}}`}));
+await context.route('**/vendor/ant-browser-sdk/0.1.5/index.js',r=>r.fulfill({contentType:'text/javascript',body:`export class AutonomiClient{static async connect(){window.connects=(window.connects||0)+1;return{close(){},async openFile(){const b=new Uint8Array(await(await fetch('/media.mp4')).arrayBuffer());return{size:b.length,close(){},async read(start,length){window.reads=(window.reads||0)+1;return b.slice(start,start+length)}}}}}}`}));
 const take=()=>page.evaluate(()=>window.__bviewEngine());
 try{
   await page.goto('http://127.0.0.1:'+server.address().port+'/surfaces/bview.html');
