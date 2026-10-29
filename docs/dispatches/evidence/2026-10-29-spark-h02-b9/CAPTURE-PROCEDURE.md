@@ -46,13 +46,20 @@ authorized payer (see §7) before any backend request.
 
 ## 5. B9 receipt and independent verifier output
 
-1. Agent writes `receipt.json` (`order_id`, `input_sha256`,
-   `item_count`, `signature`, `did`) in the sandbox.
-2. Accept ONLY via `b9::accept_completed_run` against the frozen
-   `input.bin` and exported public material; store the verifier
-   output beside the receipt. `EndTurn` without a verifying receipt
-   fails; backend exhaustion (`BackendsExhausted`) fails even with a
-   receipt on disk.
+1. Execute against a FRESH workdir and session per rehearsal, e.g.
+   `--workdir runs/rehearsal-<date> --session <session>` producing
+   isolated evidence at `runs/<session>/` (frozen `frozen-manifest.bin`,
+   transcripts, checkpoints, receipt). Never reuse a session
+   directory until the same-session refusal correction lands — reuse
+   is itself a refusal case (see `EXPECTED-REFUSALS.md`).
+2. Pass `--order-id demo-task` EXPLICITLY in both execution and
+   `--verify-only` (the executable's execution default differs, so an
+   omitted flag binds the wrong order). Verify with `--verify-only
+   --workdir <same> --session <same> --order-id demo-task`, which
+   re-checks hash, count, requested order and signature via
+   `verify_saved_run`; store its stdout beside the receipt.
+   `EndTurn` without a verifying receipt fails; backend exhaustion
+   (`BackendsExhausted`) fails even with a receipt on disk.
 
 ## 6. Actual fault/backend timing
 

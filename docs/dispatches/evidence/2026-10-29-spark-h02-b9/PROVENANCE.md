@@ -55,6 +55,20 @@ Revision note: this worktree was staged from `059e16f27` (the PR
 `4613c22fa` (one commit ahead, `b9.rs` +320/-2 there, new
 `tests/b9_binary.rs`). The frozen fixture below conforms to the
 `4613c22` JSON contract, read from the object store before freezing.
+
+Compatibility recheck (publish time): PR #492 head is now
+`a4e017144edc98b00ccdadb34f6ab2cb748e093b` ("canonical bzDiD
+identity, complete saved-run verification, isolated run evidence").
+Its `b9.rs` retains the JSON item-counting contract verbatim
+(top-level array or `items` array, duplicates included, fail-closed
+otherwise; five-field receipt; order-bound verification), and its
+executable exposes `--workdir` (default `runs/demo`), `--session`
+(default `demo-1`), `--order-id` (execution default
+`B9-DEMO-ORDER-1` — hence the explicit `--order-id demo-task`),
+`--verify-only`, and isolated `runs/<session>/` evidence with
+`frozen-manifest.bin`. The golden fixture is unchanged by harness
+advance: 5,037 bytes, SHA-256 `acc9cb10…569c`, 40 items
+(re-verified at publish).
 Harness integration stays with Wonder; this lane owns fixtures,
 evidence documentation and its dispatch only.
 
