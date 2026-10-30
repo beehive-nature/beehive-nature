@@ -197,14 +197,27 @@ async function runArm(version, pins) {
             return head.length;
           } finally { try { await reader.close(); } catch {} }
         `), null, { timeout: OP_MS })).then((n) => assert.equal(n, 32));
-      // Seed-loss configuration: empty seeds fail fast and clean.
-      await timed('seed-loss-config', 30_000, () => page.evaluate(
-        script(version, `
+      // Seed-loss configuration uses the actual module export. A valid bundled
+      // profile must pass first; a missing function or TypeError is a test failure.
+      await timed('seed-loss-config', 30_000, async () => {
+        const outcome = await page.evaluate(script(version, `
+          const { snapshotNetworkProfile } = await import('https://sdk-qual.local/network-profile.js');
+          if (typeof snapshotNetworkProfile !== 'function') throw new TypeError('Missing actual network-profile validator');
+          const defaults = await sdk.getNetworkDefaults();
+          const control = snapshotNetworkProfile(defaults);
+          let refusal;
           try {
-            sdk.snapshotNetworkProfile({ id: 'seedless', seeds: [], payment: {} });
-            return 'UNEXPECTED-ACCEPT';
-          } catch (e) { return 'refused:' + (e.code || e.name); }
-        `), null, { timeout: 30_000 })).then((outcome) => assert.match(outcome, /^refused:/));
+            snapshotNetworkProfile({ ...defaults, id: 'seedless', seeds: [] });
+          } catch (error) {
+            if (!(error instanceof sdk.AutonomiError) || error.code !== 'CONNECTION_FAILED') throw error;
+            refusal = { name: error.name, code: error.code };
+          }
+          return { control, expected: { id: defaults.id, seeds: [...defaults.seeds], payment: { ...defaults.payment } }, refusal };
+        `));
+        assert.ok(outcome.expected.seeds.length > 0, 'bundled profile supplies the valid seed control');
+        assert.deepEqual(outcome.control, outcome.expected, 'valid profile is accepted unchanged');
+        assert.deepEqual(outcome.refusal, { name: 'AutonomiError', code: 'CONNECTION_FAILED' }, 'exact seed-loss refusal');
+      });
       // Past-EOF truncation.
       await timed('past-eof-truncation', OP_MS, () => page.evaluate(
         script(version, `
