@@ -98,43 +98,35 @@ fn claim_run_dir(workdir: &Path, session_id: &str) -> Result<PathBuf, String> {
 }
 
 /// Complete independent verification of a finished saved run, from
-/// its on-disk artifacts only. Needs no private keystore. The
-/// expectations (requested session and order, the actor's public
-/// material, the frozen manifest bytes) are independently supplied
-/// by the caller — `--public-material` and `--manifest` point at the
-/// pre-run archived copies when available — and the artifacts must
-/// agree with them (see `verify_saved_run`).
+/// its on-disk artifacts only. Needs no private keystore. Every
+/// expectation is **required explicitly** at this boundary — the
+/// requested `--session`, requested `--order-id`, the expected
+/// `--public-material` (the pre-run archived pin) and the frozen
+/// `--manifest`. There are no fallbacks to the candidate evidence:
+/// a missing required expectation refuses before any artifact is
+/// trusted (see `verify_saved_run`).
+fn required_flag(args: &[String], name: &str) -> Result<String, String> {
+    if has_flag(args, name) {
+        Ok(flag_value(args, name, ""))
+    } else {
+        Err(format!(
+            "stage=expectations: missing required {name} for --verify-only (expectations are \
+             never taken from the candidate evidence)"
+        ))
+    }
+}
+
 fn run_verify_only(args: &[String]) -> Result<harness_sovereign::b9::B9Receipt, String> {
     let workdir = PathBuf::from(flag_value(args, "--workdir", "runs/demo"));
-    let session_id = flag_value(args, "--session", "demo-1");
+    let session_id = required_flag(args, "--session")?;
+    let order_id = required_flag(args, "--order-id")?;
+    let material_path = PathBuf::from(required_flag(args, "--public-material")?);
+    let manifest_path = PathBuf::from(required_flag(args, "--manifest")?);
     let run_dir = workdir.join("runs").join(&session_id);
-    let order_id = if has_flag(args, "--order-id") {
-        flag_value(args, "--order-id", "")
-    } else {
-        let text = std::fs::read_to_string(run_dir.join("run-definition.json"))
-            .map_err(|e| format!("read run definition: {e}"))?;
-        let definition: serde_json::Value =
-            serde_json::from_str(&text).map_err(|e| format!("run definition JSON: {e}"))?;
-        definition
-            .get("order_id")
-            .and_then(|id| id.as_str())
-            .ok_or("run definition carries no order_id")?
-            .to_string()
-    };
-    let material_path = PathBuf::from(flag_value(
-        args,
-        "--public-material",
-        &run_dir.join("public-material.json").to_string_lossy(),
-    ));
     let material_text = std::fs::read_to_string(&material_path)
         .map_err(|e| format!("read public material {}: {e}", material_path.display()))?;
     let material: harness_sovereign::identity::PublicMaterial =
         serde_json::from_str(&material_text).map_err(|e| format!("public material JSON: {e}"))?;
-    let manifest_path = PathBuf::from(flag_value(
-        args,
-        "--manifest",
-        &run_dir.join("frozen-manifest.bin").to_string_lossy(),
-    ));
     let manifest = std::fs::read(&manifest_path)
         .map_err(|e| format!("read manifest {}: {e}", manifest_path.display()))?;
     let expectations = SavedRunExpectations {
@@ -457,6 +449,7 @@ async fn main() {
         Ok(harness_sovereign::switch::RunOutcome::Cancelled) => "Cancelled",
         Err(_) => "Error",
     };
+    let checkpoint_snapshot = coordinator.store().read_checkpoints();
     let outcome_record = TerminalOutcome {
         session_id: definition.session_id.clone(),
         order_id: definition.order_id.clone(),
@@ -464,8 +457,12 @@ async fn main() {
         manifest_sha256: definition.manifest_sha256.clone(),
         transcript_sha256: transcript_sha256(&messages),
         outcome_kind: outcome_kind.to_string(),
-        checkpoint_count: coordinator.store().read_checkpoints().len(),
+        checkpoint_count: checkpoint_snapshot.len(),
         duration_ms,
+        inventory_version: harness_sovereign::b9::CHECKPOINT_INVENTORY_VERSION,
+        inventory_commitment: harness_sovereign::b9::checkpoint_inventory_commitment(
+            &checkpoint_snapshot,
+        ),
     };
     let outcome_value =
         signed_terminal_outcome(&identity, &outcome_record).expect("sign terminal outcome");

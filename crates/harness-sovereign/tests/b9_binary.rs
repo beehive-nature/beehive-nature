@@ -86,6 +86,12 @@ fn handle(mut stream: TcpStream, queue: Arc<Mutex<VecDeque<String>>>) {
             .expect("queue")
             .pop_front()
             .unwrap_or_else(|| "done".to_string());
+        if text == "DROP" {
+            // Transport failure: close without any response, so the
+            // real backend adapter reports a transport error and the
+            // coordinator fails over.
+            return;
+        }
         let event = serde_json::json!({"choices": [{"delta": {"content": text}}]});
         (
             "text/event-stream",
@@ -185,7 +191,8 @@ fn expectations(
     }
 }
 
-fn verify_only(workdir: &Path, session: &str, extra: &[&str]) -> Output {
+fn verify_only(dir: &Path, workdir: &Path, session: &str, order: &str) -> Output {
+    let root = workdir.join("runs").join(session);
     let mut command = Command::new(env!("CARGO_BIN_EXE_harness-sovereign"));
     command
         .arg("--verify-only")
@@ -193,10 +200,13 @@ fn verify_only(workdir: &Path, session: &str, extra: &[&str]) -> Output {
         .arg(workdir)
         .arg("--session")
         .arg(session)
+        .arg("--order-id")
+        .arg(order)
+        .arg("--public-material")
+        .arg(root.join("public-material.json"))
+        .arg("--manifest")
+        .arg(dir.join("manifest.json"))
         .env("HARNESS_VAULT_REC", vault_phrase());
-    for arg in extra {
-        command.arg(arg);
-    }
     command.output().expect("verify-only runs")
 }
 
@@ -303,7 +313,7 @@ fn valid_completed_task_passes_and_artifacts_verify_from_disk() {
         "tool result must be in the exported transcript: {transcript}"
     );
     // Verify-only through the binary agrees, with no keystore use.
-    let verify = verify_only(&workdir, "sess-run-valid", &[]);
+    let verify = verify_only(&dir, &workdir, "sess-run-valid", ORDER);
     assert!(
         verify.status.success(),
         "verify-only must pass: {}",
@@ -324,13 +334,13 @@ fn tampered_receipt_and_wrong_order_fail_verify_only() {
 
     // Wrong requested order: the receipt is genuinely valid for
     // ORDER-A, so only the order binding can refuse ORDER-B.
-    let wrong_order = verify_only(&workdir, "sess-run-tampered", &["--order-id", "ORDER-B"]);
+    let wrong_order = verify_only(&dir, &workdir, "sess-run-tampered", "ORDER-B");
     assert!(
         !wrong_order.status.success(),
         "verify-only for ORDER-B must fail: {}",
         String::from_utf8_lossy(&wrong_order.stderr)
     );
-    let right_order = verify_only(&workdir, "sess-run-tampered", &["--order-id", ORDER]);
+    let right_order = verify_only(&dir, &workdir, "sess-run-tampered", ORDER);
     assert!(right_order.status.success(), "control: ORDER-A passes");
 
     // Tampered receipt: flip the recorded count on disk; both the
@@ -342,7 +352,7 @@ fn tampered_receipt_and_wrong_order_fail_verify_only() {
             .expect("receipt parses");
     receipt["item_count"] = serde_json::json!(99);
     std::fs::write(&receipt_path, receipt.to_string()).expect("tamper");
-    let tampered = verify_only(&workdir, "sess-run-tampered", &[]);
+    let tampered = verify_only(&dir, &workdir, "sess-run-tampered", ORDER);
     assert!(
         !tampered.status.success(),
         "tampered receipt must fail verify-only: {}",
@@ -412,7 +422,7 @@ fn primary_connection_failure_then_replacement_completes() {
     assert_eq!(backends.len(), 2);
     assert_eq!(backends[0]["healthy"], serde_json::json!(false));
     assert_eq!(backends[1]["healthy"], serde_json::json!(true));
-    let verify = verify_only(&workdir, "sess-run-failover", &[]);
+    let verify = verify_only(&dir, &workdir, "sess-run-failover", ORDER);
     assert!(verify.status.success(), "failover receipt must verify");
     std::fs::remove_dir_all(&dir).ok();
 }
@@ -520,7 +530,7 @@ fn agent3_counterexamples_refused_with_fresh_valid_controls() {
 
     let control = dir.join("copy-control");
     copy_dir(&workdir, &control);
-    let ok = verify_only(&control, session, &[]);
+    let ok = verify_only(&dir, &control, session, ORDER);
     assert!(
         ok.status.success(),
         "fresh control must pass: {}",
@@ -532,7 +542,7 @@ fn agent3_counterexamples_refused_with_fresh_valid_controls() {
         let copy = dir.join(format!("copy-{tag}"));
         copy_dir(&workdir, &copy);
         tamper(&copy);
-        let out = verify_only(&copy, session, &[]);
+        let out = verify_only(&dir, &copy, session, ORDER);
         assert!(
             !out.status.success(),
             "{tag} must be refused: {}",
@@ -573,7 +583,7 @@ fn agent3_counterexamples_refused_with_fresh_valid_controls() {
     }
     // R6: same order, wrong requested session.
     {
-        let out = verify_only(&control, "sess-does-not-exist", &[]);
+        let out = verify_only(&dir, &control, "sess-does-not-exist", ORDER);
         assert!(!out.status.success(), "wrong session must be refused");
         let root = run_root(&control, "run-ctr");
         assert!(harness_sovereign::b9::verify_saved_run(
@@ -603,7 +613,7 @@ fn agent3_checkpoint_inventory_counterexamples_are_refused() {
     let control = dir.join("copy-control");
     copy_dir(&workdir, &control);
     assert!(
-        verify_only(&control, session, &[]).status.success(),
+        verify_only(&dir, &control, session, ORDER).status.success(),
         "fresh failover control must pass"
     );
 
@@ -611,7 +621,7 @@ fn agent3_checkpoint_inventory_counterexamples_are_refused() {
         let copy = dir.join(format!("copy-{tag}"));
         copy_dir(&workdir, &copy);
         tamper(&copy);
-        let out = verify_only(&copy, session, &[]);
+        let out = verify_only(&dir, &copy, session, ORDER);
         assert!(
             !out.status.success(),
             "{tag} must be refused: {}",
@@ -710,5 +720,252 @@ fn occupied_session_refuses_before_mutation_and_original_stays_verifiable() {
     )
     .expect("original run still verifies after refused reuse");
     assert_eq!(saved.order_id, ORDER);
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+fn verify_with_pin(
+    workdir: &Path,
+    session: &str,
+    order: &str,
+    pin: &Path,
+    manifest: &Path,
+) -> Output {
+    Command::new(env!("CARGO_BIN_EXE_harness-sovereign"))
+        .arg("--verify-only")
+        .arg("--workdir")
+        .arg(workdir)
+        .arg("--session")
+        .arg(session)
+        .arg("--order-id")
+        .arg(order)
+        .arg("--public-material")
+        .arg(pin)
+        .arg("--manifest")
+        .arg(manifest)
+        .env("HARNESS_VAULT_REC", vault_phrase())
+        .output()
+        .expect("verify-only with pin runs")
+}
+
+#[test]
+fn verify_only_requires_explicit_expectations_and_refuses_identity_substitution() {
+    // Two valid bundles: same session, same order, same manifest,
+    // different identities. A's public material is retained outside
+    // the disposable evidence as the pin; B's whole bundle is then
+    // substituted into A's workdir and must refuse against A's pin.
+    let dir = scenario_dir("identity-substitution");
+    let manifest = dir.join("manifest.json");
+
+    let workdir_a = dir.join("workdir-a");
+    let stub_a = start_stub(vec![tool_call_text(), "done A".to_string()]);
+    let out_a = run_binary_at(&dir, &workdir_a, "sess-bundle", ORDER, &[stub_a.url]);
+    assert!(
+        out_a.status.success(),
+        "bundle A: {}",
+        String::from_utf8_lossy(&out_a.stderr)
+    );
+    let pin_a = dir.join("pin-a-public-material.json");
+    std::fs::copy(
+        workdir_a.join("runs/sess-bundle/public-material.json"),
+        &pin_a,
+    )
+    .expect("retain A pin outside the evidence");
+
+    // Missing required expectation arguments refuse, naming the
+    // missing expectation, before any artifact is trusted.
+    for (tag, args) in [
+        ("none", vec!["--verify-only", "--workdir"]),
+        ("workdir-only-extra", vec!["--verify-only"]),
+    ] {
+        let _ = tag;
+        let out = Command::new(env!("CARGO_BIN_EXE_harness-sovereign"))
+            .args(args)
+            .arg(&workdir_a)
+            .env("HARNESS_VAULT_REC", vault_phrase())
+            .output()
+            .expect("missing-args invocation");
+        assert!(
+            !out.status.success()
+                && String::from_utf8_lossy(&out.stderr).contains("missing required"),
+            "{tag} must refuse for missing expectations: {}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+    }
+
+    // Independently pinned control passes.
+    let control = verify_with_pin(&workdir_a, "sess-bundle", ORDER, &pin_a, &manifest);
+    assert!(
+        control.status.success(),
+        "pinned control must pass: {}",
+        String::from_utf8_lossy(&control.stderr)
+    );
+
+    // Bundle B: same session/order/manifest, a different identity.
+    let workdir_b = dir.join("workdir-b");
+    let stub_b = start_stub(vec![tool_call_text(), "done B".to_string()]);
+    let out_b = run_binary_at(&dir, &workdir_b, "sess-bundle", ORDER, &[stub_b.url]);
+    assert!(
+        out_b.status.success(),
+        "bundle B: {}",
+        String::from_utf8_lossy(&out_b.stderr)
+    );
+
+    // Substitute B's whole bundle into A's workdir.
+    for name in ["runs", "sessions"] {
+        let _ = std::fs::remove_dir_all(workdir_a.join(name));
+        copy_dir(&workdir_b.join(name), &workdir_a.join(name));
+    }
+    let substituted = verify_with_pin(&workdir_a, "sess-bundle", ORDER, &pin_a, &manifest);
+    assert!(
+        !substituted.status.success(),
+        "B's bundle must refuse against A's pin: {}",
+        String::from_utf8_lossy(&substituted.stderr)
+    );
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+fn mutate_checkpoints_both_copies(
+    workdir: &Path,
+    session: &str,
+    mutate: &dyn Fn(&mut Vec<serde_json::Value>),
+) {
+    let exported_path = workdir.join(format!("runs/{session}/evidence/checkpoints.json"));
+    let mut entries: Vec<serde_json::Value> = serde_json::from_str(
+        &std::fs::read_to_string(&exported_path).expect("exported checkpoints"),
+    )
+    .expect("checkpoints parse");
+    mutate(&mut entries);
+    std::fs::write(
+        &exported_path,
+        serde_json::to_string_pretty(&entries).expect("serialize exported"),
+    )
+    .expect("write exported");
+    let persisted = entries
+        .iter()
+        .map(|entry| serde_json::to_string(entry).expect("serialize entry"))
+        .collect::<Vec<_>>()
+        .join("\n")
+        + "\n";
+    std::fs::write(
+        workdir.join(format!("sessions/{session}.checkpoints.jsonl")),
+        persisted,
+    )
+    .expect("write persisted");
+}
+
+#[test]
+fn inventory_commitment_and_interior_signature_regressions() {
+    // A three-checkpoint control: primary drops, secondary drops,
+    // tertiary completes — pre-switch, pre-switch, post-switch.
+    let dir = scenario_dir("inventory");
+    // The backend adapter retries transport failures internally
+    // (three attempts), so the middle backend must drop them all
+    // before the coordinator fails over.
+    let mid = start_stub(vec![
+        "DROP".to_string(),
+        "DROP".to_string(),
+        "DROP".to_string(),
+    ]);
+    let finisher = start_stub(vec![
+        tool_call_text(),
+        "Receipt produced after two failovers.".to_string(),
+    ]);
+    // The dead endpoint is claimed last, so its freed port cannot be
+    // reused by either live stub listener.
+    let dead = closed_url();
+    let (workdir, output) = run_binary(
+        &dir,
+        "run-inv",
+        ORDER,
+        10,
+        &[dead, mid.url.clone(), finisher.url.clone()],
+    );
+    let _ = (&mid, &finisher);
+    assert!(
+        output.status.success(),
+        "three-checkpoint control run: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let session = "sess-run-inv";
+    let root = run_root(&workdir, "run-inv");
+    let saved = harness_sovereign::b9::verify_saved_run(
+        &workdir,
+        &root,
+        &expectations(&root, session, ORDER),
+    )
+    .expect("three-checkpoint control verifies");
+    assert_eq!(saved.checkpoint_signatures_verified, 3);
+    assert!(saved.same_actor_verified);
+
+    let case = |tag: &str, mutate: &dyn Fn(&mut Vec<serde_json::Value>)| -> String {
+        let copy = dir.join(format!("copy-{tag}"));
+        copy_dir(&workdir, &copy);
+        mutate_checkpoints_both_copies(&copy, session, mutate);
+        let root = copy.join(format!("runs/{session}"));
+        let err = harness_sovereign::b9::verify_saved_run(
+            &copy,
+            &root,
+            &expectations(&root, session, ORDER),
+        )
+        .expect_err(&format!("{tag} must be refused"));
+        err
+    };
+
+    // Two-copy substitution [pre, post] -> [pre, pre]: every
+    // remaining envelope verifies, so only the signed inventory
+    // commitment can refuse it.
+    let err = case("duplicate", &|entries| {
+        // Order-preserving duplication of the first entry over the
+        // middle one ([pre, pre, post]): every envelope verifies and
+        // turn counts stay non-decreasing, so only the signed
+        // inventory commitment can refuse it.
+        let first = entries[0].clone();
+        entries[1] = first;
+    });
+    assert!(
+        err.contains("stage=inventory-commitment"),
+        "duplication refusal stage: {err}"
+    );
+
+    // Consistent metadata mutation in both copies.
+    let err = case("metadata", &|entries| {
+        entries[0]["phase"] = serde_json::json!("mutated-phase");
+    });
+    assert!(
+        err.contains("stage=inventory-commitment"),
+        "metadata refusal stage: {err}"
+    );
+
+    // Same-length reordered entries, consistently in both copies.
+    let err = case("reorder", &|entries| {
+        entries.reverse();
+    });
+    assert!(!err.is_empty(), "reorder must be refused: {err}");
+
+    // Genuine interior signature failure: corrupt the middle
+    // checkpoint's signature in both copies. The refusal stage must
+    // be signature verification itself, not a later stage.
+    let err = case("interior-signature", &|entries| {
+        let signature = entries[1]["bsigner_envelope"]["signature_b64u"]
+            .as_str()
+            .expect("middle signature")
+            .to_string();
+        let mut bytes = signature.into_bytes();
+        bytes[0] = if bytes[0] == b'A' { b'B' } else { b'A' };
+        entries[1]["bsigner_envelope"]["signature_b64u"] =
+            serde_json::json!(String::from_utf8(bytes).expect("still base64url alphabet"));
+    });
+    assert!(
+        err.contains("stage=checkpoint-signature") && err.contains("checkpoint 1"),
+        "interior refusal stage must be checkpoint-signature: {err}"
+    );
+
+    // The untouched control still passes through the binary too.
+    let control = dir.join("copy-control");
+    copy_dir(&workdir, &control);
+    assert!(
+        verify_only(&dir, &control, session, ORDER).status.success(),
+        "three-checkpoint control must pass verify-only"
+    );
     std::fs::remove_dir_all(&dir).ok();
 }

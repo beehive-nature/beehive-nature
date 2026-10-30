@@ -296,6 +296,66 @@ pub struct TerminalOutcome {
     pub outcome_kind: String,
     pub checkpoint_count: usize,
     pub duration_ms: u128,
+    /// Versioned, domain-separated commitment to the complete
+    /// ordered checkpoint inventory as exported (see
+    /// [`checkpoint_inventory_commitment`]). Inside the signed
+    /// record, so a consistently substituted inventory in both
+    /// evidence copies still refuses against the original record.
+    pub inventory_version: u32,
+    pub inventory_commitment: String,
+}
+
+/// Domain separator and version for the checkpoint inventory
+/// commitment. Changing either is a new commitment scheme, never a
+/// silent reinterpretation.
+pub const CHECKPOINT_INVENTORY_DOMAIN: &str = "harness-sovereign/checkpoint-inventory";
+pub const CHECKPOINT_INVENTORY_VERSION: u32 = 1;
+
+/// Canonical JSON for commitment purposes: object keys sorted
+/// recursively, so the commitment does not depend on serialization
+/// key order in either evidence copy.
+fn canonical_json(value: &serde_json::Value) -> String {
+    match value {
+        serde_json::Value::Object(object) => {
+            let mut keys: Vec<&String> = object.keys().collect();
+            keys.sort();
+            let parts: Vec<String> = keys
+                .iter()
+                .map(|key| {
+                    format!(
+                        "{}:{}",
+                        serde_json::to_string(key).expect("key serializes"),
+                        canonical_json(&object[*key])
+                    )
+                })
+                .collect();
+            format!("{{{}}}", parts.join(","))
+        }
+        serde_json::Value::Array(items) => {
+            let parts: Vec<String> = items.iter().map(canonical_json).collect();
+            format!("[{}]", parts.join(","))
+        }
+        other => serde_json::to_string(other).expect("value serializes"),
+    }
+}
+
+/// Deterministic commitment to the complete ordered checkpoint
+/// inventory exactly as presented as evidence: the domain-separated,
+/// versioned preimage is the domain string, the version, the entry
+/// count, and each entry's canonical JSON in order. Duplicated,
+/// reordered, substituted or metadata-mutated entries — even applied
+/// consistently to both evidence copies — change the commitment.
+pub fn checkpoint_inventory_commitment(checkpoints: &[serde_json::Value]) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(CHECKPOINT_INVENTORY_DOMAIN.as_bytes());
+    hasher.update(b"\n");
+    hasher.update(CHECKPOINT_INVENTORY_VERSION.to_be_bytes());
+    hasher.update((checkpoints.len() as u64).to_be_bytes());
+    for entry in checkpoints {
+        hasher.update(canonical_json(entry).as_bytes());
+        hasher.update(b"\n");
+    }
+    format!("{:x}", hasher.finalize())
 }
 
 /// The exact bytes signed for a terminal outcome record.
@@ -466,21 +526,28 @@ pub fn verify_saved_run(
     }
     let checkpoints = read_json(&evidence.join("checkpoints.json"))?;
     let Some(exported) = checkpoints.as_array() else {
-        return Err("exported checkpoint evidence is not an array".into());
+        return Err(
+            "stage=checkpoint-inventory: exported checkpoint evidence is not an array".into(),
+        );
     };
     if exported.as_slice() != persisted.as_slice() {
         return Err(
-            "exported checkpoint inventory is not the complete ordered persisted log".into(),
+            "stage=checkpoint-inventory: exported inventory is not the complete ordered \
+             persisted log"
+                .into(),
         );
     }
     // Every signed envelope verifies over its canonical prefix, in
     // order with non-decreasing turn counts — not only first/last.
+    // This stage runs before the inventory-commitment stage, so an
+    // interior signature failure is reported as itself and never
+    // masked by a later commitment mismatch.
     let verifying_key = material
         .verifying_key_bytes()
         .ok_or("public material key does not decode")?;
     let mut signed: Vec<crate::identity::SignedCheckpoint> = Vec::new();
     let mut previous_turn_count: Option<usize> = None;
-    for checkpoint in exported {
+    for (index, checkpoint) in exported.iter().enumerate() {
         let envelope = checkpoint
             .get("bsigner_envelope")
             .filter(|envelope| !envelope.is_null())
@@ -493,7 +560,9 @@ pub fn verify_saved_run(
             return Err("checkpoint turn_count exceeds the transcript".into());
         }
         if previous_turn_count.is_some_and(|previous| turn_count < previous) {
-            return Err("checkpoint inventory is not in transcript order".into());
+            return Err(
+                "stage=checkpoint-order: checkpoint inventory is not in transcript order".into(),
+            );
         }
         previous_turn_count = Some(turn_count);
         let prefix = &messages[..turn_count];
@@ -521,7 +590,9 @@ pub fn verify_saved_run(
         )
         .unwrap_or(false);
         if !verifies || candidate.did != material.did {
-            return Err("a checkpoint signature does not verify".into());
+            return Err(format!(
+                "stage=checkpoint-signature: checkpoint {index} signature does not verify"
+            ));
         }
         signed.push(candidate);
     }
@@ -537,6 +608,14 @@ pub fn verify_saved_run(
         }
     }
 
+    // Inventory commitment: recomputed over the inventory exactly
+    // as presented, and compared with the commitment inside the
+    // signed terminal record below. A consistent two-copy
+    // substitution (e.g. [pre, post] -> [pre, pre]), a consistent
+    // metadata mutation, or a same-length reorder changes this
+    // value even though every remaining envelope still verifies.
+    let presented_commitment = checkpoint_inventory_commitment(exported);
+
     // Authenticated terminal outcome: the signed record must bind
     // this session, order, actor, manifest, final transcript and
     // checkpoint inventory, and its kind must be exactly EndTurn.
@@ -548,6 +627,15 @@ pub fn verify_saved_run(
         }
         serde_json::from_value(fields).map_err(|e| format!("terminal outcome record shape: {e}"))?
     };
+    if record.inventory_version != CHECKPOINT_INVENTORY_VERSION
+        || record.inventory_commitment != presented_commitment
+    {
+        return Err(format!(
+            "stage=inventory-commitment: presented inventory commitment {} does not match \
+             the signed terminal record {}",
+            presented_commitment, record.inventory_commitment
+        ));
+    }
     if record.session_id != expectations.session_id
         || record.order_id != expectations.order_id
         || record.did != material.did
@@ -555,7 +643,7 @@ pub fn verify_saved_run(
         || record.transcript_sha256 != transcript_sha
         || record.checkpoint_count != signed.len()
     {
-        return Err("terminal outcome does not bind the executed run".into());
+        return Err("stage=terminal-outcome: record does not bind the executed run".into());
     }
     let envelope = outcome
         .get("envelope")
