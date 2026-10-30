@@ -1,0 +1,1 @@
+{"actual_exit_code":3,"capture":"captures/omit-order-id.json","case":"omit-order-id","classification":"PUBLIC-CONSTANT: offline generated public evidence and source/artifact digests","details":{"complete_valid_bundle_present":true},"expected_exit":"nonzero","expected_stderr_fragments":["stage=expectations","--order-id"],"output_limited":false,"timed_out":false,"verdict":"PASS"}
