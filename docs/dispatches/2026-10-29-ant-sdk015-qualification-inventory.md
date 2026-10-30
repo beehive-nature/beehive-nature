@@ -216,3 +216,50 @@ trial was run from this seat — the ant-bnrose matrix and bView live
 checks remain the live instruments, to be run by their lanes), the
 sanctioned NixOS kernel build (this seat's kernel is a labelled
 local build), and any payment beyond the offline vectors.
+
+## Hosted CI closeout for head `448722148` (recorded 2026-10-29)
+
+Exact head qualified locally above:
+`44872214882af1fe77f960374b6f93890b63dcbf` on
+`spark/ant-sdk015-qualification-2026-10-29`. Vendored artifact:
+`vendor/ant-browser-sdk/0.1.5/` (byte-for-byte from the official
+npm tarball; provenance in its `VENDOR.md`: tarball SHA-1 matching
+the registry `dist.shasum`, SHA-512 recomputing to the registry
+`dist.integrity`, WASM source `ant-client` at
+`458c7175490e6934a5501e51ff1d80d784f27564`, WASM SHA-256 matching
+`source.json`). Hosted runs for this exact head, all terminal:
+
+- harness-lane — **success**:
+  https://github.com/beehive-nature/beehive-nature/actions/runs/40961280182
+- bTunGsTeN RB — **success**:
+  https://github.com/beehive-nature/beehive-nature/actions/runs/40961280283
+- BNROSE-EVOLVE — **success**:
+  https://github.com/beehive-nature/beehive-nature/actions/runs/40961280366
+- secret-scan — **success**:
+  https://github.com/beehive-nature/beehive-nature/actions/runs/40961280523
+- tests — **failure**:
+  https://github.com/beehive-nature/beehive-nature/actions/runs/40961280263
+
+The `tests` failure is confined to its `wallet` job (the other
+seven jobs — eternal, meter, test, formal, node, formal-cryptol-leg,
+static — all succeeded). Exact failure evidence from the hosted
+log: `e2e/ant-hosted-browser.mjs:103` "condition timed out", and
+`e2e/keychain-wallet-purchase.mjs:89` waiting for the button
+"Authorize this invoice and ask my wallet" (Playwright 30 s click
+timeout). Identified cause, from the code: both suites (and the
+sibling wallet harnesses `ant-record-import.mjs`,
+`ant-replacement-recovery.mjs`, `keychain-devnet.mjs`) intercept
+`**/vendor/ant-browser-sdk/0.1.1/index.js` to substitute their mock
+kit, while the upgraded surfaces now load
+`/vendor/ant-browser-sdk/0.1.5/` — the mock no longer matches, so
+the real SDK loads and the fixture flows time out. The required
+follow-up is to move those wallet-lane intercepts to the 0.1.5 path
+and re-run the `wallet` job; until that lands and passes, the
+hosted `tests` workflow for this head is **red** and the 0.1.5
+upgrade is not hosted-green. Local results recorded earlier stand
+as measured (observer 9/9, bView mocked 48/48 on 0.1.5, payment
+offline vectors 14/14, `qualify-local` metrics), but they do not
+override this hosted failure.
+
+The H01 lane is untouched by this record: PR #492 still holds head
+`a4e017144edc98b00ccdadb34f6ab2cb748e093b`, merge held.
