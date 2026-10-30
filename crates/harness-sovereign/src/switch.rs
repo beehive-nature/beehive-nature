@@ -234,11 +234,56 @@ impl SessionStore {
         self.append_row(&self.session_file("checkpoints.jsonl"), &line)
     }
 
+    /// Best-effort legacy inspection. Evidence finalization must use
+    /// `read_checkpoints_strict` so corruption cannot discard entries.
     pub fn read_checkpoints(&self) -> Vec<Value> {
         let path = self.session_file("checkpoints.jsonl");
         let text = std::fs::read_to_string(path).unwrap_or_default();
         text.lines()
             .filter_map(|line| serde_json::from_str(line).ok())
+            .collect()
+    }
+
+    /// Read one complete ordered checkpoint inventory for finalization.
+    /// An absent log in an existing sessions directory is the only
+    /// missing-file case that represents an empty inventory. All read
+    /// and JSON errors refuse the snapshot; no line is silently omitted.
+    pub fn read_checkpoints_strict(&self) -> std::io::Result<Vec<Value>> {
+        let path = self.session_file("checkpoints.jsonl");
+        let text = match std::fs::read_to_string(&path) {
+            Ok(text) => text,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                // A dangling symlink or a removed sessions directory
+                // is not the normal no-checkpoints-yet case.
+                match std::fs::symlink_metadata(&path) {
+                    Err(missing) if missing.kind() == std::io::ErrorKind::NotFound => {
+                        if !std::fs::metadata(&self.dir)?.is_dir() {
+                            return Err(std::io::Error::new(
+                                std::io::ErrorKind::NotADirectory,
+                                "checkpoint sessions path is not a directory",
+                            ));
+                        }
+                        return Ok(Vec::new());
+                    }
+                    _ => return Err(error),
+                }
+            }
+            Err(error) => return Err(error),
+        };
+        text.lines()
+            .enumerate()
+            .map(|(index, line)| {
+                serde_json::from_str(line).map_err(|error| {
+                    std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        format!(
+                            "checkpoint log {} line {}: {error}",
+                            path.display(),
+                            index + 1
+                        ),
+                    )
+                })
+            })
             .collect()
     }
 
@@ -937,6 +982,96 @@ mod tests {
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("temp root");
         dir
+    }
+
+    #[test]
+    fn strict_checkpoint_reader_preserves_complete_ordered_inventory() {
+        let root = temp_root("strict-checkpoints-order");
+        let store = SessionStore::new(&root, "sess-order").expect("store");
+        let path = store.session_file("checkpoints.jsonl");
+        assert!(store
+            .read_checkpoints_strict()
+            .expect("absent log")
+            .is_empty());
+        assert!(!path.exists(), "reading an absent log must not create it");
+        std::fs::write(&path, b"").expect("empty log");
+        assert!(store
+            .read_checkpoints_strict()
+            .expect("empty log")
+            .is_empty());
+
+        let entries = vec![
+            serde_json::json!({"phase": "pre-switch", "turn_count": 2}),
+            serde_json::json!({"phase": "pre-switch", "turn_count": 2}),
+            serde_json::json!({"phase": "post-switch", "turn_count": 5}),
+        ];
+        for entry in &entries {
+            store.append_checkpoint(entry).expect("append checkpoint");
+        }
+        assert_eq!(store.read_checkpoints_strict().expect("valid log"), entries);
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[test]
+    fn strict_checkpoint_reader_rejects_malformed_lines_and_invalid_utf8() {
+        let root = temp_root("strict-checkpoints-data");
+        let store = SessionStore::new(&root, "sess-data").expect("store");
+        let path = store.session_file("checkpoints.jsonl");
+        for invalid in [
+            b"{\"turn_count\":1}\nnot-json\n{\"turn_count\":3}\n".as_slice(),
+            b"{\"turn_count\":1}\n\n{\"turn_count\":3}\n".as_slice(),
+        ] {
+            std::fs::write(&path, invalid).expect("malformed log");
+            let error = store
+                .read_checkpoints_strict()
+                .expect_err("the middle line must not be discarded");
+            assert_eq!(error.kind(), std::io::ErrorKind::InvalidData);
+            assert!(error.to_string().contains("line 2"), "{error}");
+        }
+        std::fs::write(&path, [0xff, b'\n']).expect("invalid UTF-8 log");
+        assert_eq!(
+            store
+                .read_checkpoints_strict()
+                .expect_err("invalid UTF-8 must refuse")
+                .kind(),
+            std::io::ErrorKind::InvalidData
+        );
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[test]
+    fn strict_checkpoint_reader_rejects_io_failures() {
+        let root = temp_root("strict-checkpoints-io");
+        let store = SessionStore::new(&root, "sess-io").expect("store");
+        let path = store.session_file("checkpoints.jsonl");
+        std::fs::create_dir(&path).expect("directory at log path");
+        assert!(
+            store.read_checkpoints_strict().is_err(),
+            "an unreadable log must not become an empty inventory"
+        );
+        std::fs::remove_dir_all(&store.dir).expect("remove sessions directory");
+        assert!(
+            store.read_checkpoints_strict().is_err(),
+            "missing session storage must not become an empty inventory"
+        );
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn strict_checkpoint_reader_rejects_dangling_symlinks() {
+        let root = temp_root("strict-checkpoints-symlink");
+        let store = SessionStore::new(&root, "sess-symlink").expect("store");
+        std::os::unix::fs::symlink(
+            root.join("missing-checkpoint-target"),
+            store.session_file("checkpoints.jsonl"),
+        )
+        .expect("dangling checkpoint symlink");
+        assert!(
+            store.read_checkpoints_strict().is_err(),
+            "an existing dangling log symlink must not become an empty inventory"
+        );
+        std::fs::remove_dir_all(&root).ok();
     }
 
     #[test]
