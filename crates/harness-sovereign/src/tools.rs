@@ -17,7 +17,36 @@ use std::sync::{Arc, Mutex};
 use sha2::{Digest, Sha256};
 
 use crate::backend::ChatMessage;
+use crate::identity::IdentityHook;
 use crate::settle::SettlementLane;
+
+/// The bounded B9 operation exposed through the tool registry: the
+/// agent may ask for a receipt only for the expected order, only over
+/// the manifest bytes frozen before model execution, and only once.
+/// The harness — never the model — hashes, counts and signs, through
+/// the agent identity's existing bSigner library interface.
+pub struct B9Tool {
+    identity: IdentityHook,
+    frozen_manifest: Vec<u8>,
+    expected_order_id: String,
+    receipt_path: PathBuf,
+}
+
+impl B9Tool {
+    pub fn new(
+        identity: IdentityHook,
+        frozen_manifest: Vec<u8>,
+        expected_order_id: impl Into<String>,
+        receipt_path: PathBuf,
+    ) -> Self {
+        B9Tool {
+            identity,
+            frozen_manifest,
+            expected_order_id: expected_order_id.into(),
+            receipt_path,
+        }
+    }
+}
 
 /// One parsed tool call. Malformed blocks carry `parse_error` and no
 /// identity — surfaced to the model as an error result, never a crash.
@@ -106,6 +135,7 @@ pub fn tool_message(tool_call_id: &str, content: impl Into<String>) -> ChatMessa
 pub struct Toolset {
     sandbox_dir: PathBuf,
     settle_lane: Option<Arc<Mutex<SettlementLane>>>,
+    b9_tool: Option<B9Tool>,
 }
 
 impl Toolset {
@@ -115,6 +145,7 @@ impl Toolset {
         Ok(Toolset {
             sandbox_dir,
             settle_lane: None,
+            b9_tool: None,
         })
     }
 
@@ -126,19 +157,31 @@ impl Toolset {
         self
     }
 
+    /// Attach the bounded B9 operation: `b9_receipt` produces the
+    /// custody receipt for the expected order over the frozen manifest.
+    pub fn with_b9_tool(mut self, tool: B9Tool) -> Self {
+        self.b9_tool = Some(tool);
+        self
+    }
+
     pub fn tool_names(&self) -> Vec<&'static str> {
-        vec![
+        let mut names = vec![
             "compute_sha256",
             "list_files",
             "read_file",
             "settle_subtask",
-        ]
+        ];
+        if self.b9_tool.is_some() {
+            names.push("b9_receipt");
+        }
+        names
     }
 
     /// The tool-protocol contract, stated to the model in plain text.
-    /// Verbatim from the Python (the model reads this).
+    /// Verbatim from the Python (the model reads this), plus the B9
+    /// line when the bounded B9 operation is attached.
     pub fn system_prompt(&self) -> String {
-        [
+        let mut lines = vec![
             "You have tools. To call one, emit a fenced block exactly like this:",
             "```tool",
             "{\"id\": \"t1\", \"name\": \"compute_sha256\", \"args\": {\"target\": \"a.txt\"}}",
@@ -149,12 +192,20 @@ impl Toolset {
             "- list_files",
             "- read_file",
             "- settle_subtask",
-            "- compute_sha256 args: {\"target\": \"<filename | 'text:<literal>'>\"}",
+            "- compute_sha256 args: {\"target\": \"<filename | 'text:<literal'>\"}",
             "- read_file args: {\"path\": \"<filename>\"} (sandbox-relative)",
             "- list_files args: {}",
             "- settle_subtask args: {\"subtask_id\": \"<id>\"}",
-        ]
-        .join("\n")
+        ];
+        if self.b9_tool.is_some() {
+            lines.push("- b9_receipt");
+            lines.push(
+                "- b9_receipt args: {\"order_id\": \"<the order_id from your task>\"} \
+                 — produces receipt.json for that order over the frozen manifest; \
+                 call it exactly once, then report completion",
+            );
+        }
+        lines.join("\n")
     }
 
     /// Execute one parsed call; ALWAYS returns a tool message, never
@@ -172,6 +223,7 @@ impl Toolset {
             "read_file" => self.tool_read_file(call).map_err(|e| e.to_string()),
             "compute_sha256" => self.tool_compute_sha256(call).map_err(|e| e.to_string()),
             "settle_subtask" => Ok(self.tool_settle_subtask(call)),
+            "b9_receipt" => Ok(self.tool_b9_receipt(call)),
             _ => Err(format!(
                 "[tool error] unknown tool {name:?}; available: {}",
                 self.tool_names().join(", ")
@@ -270,6 +322,44 @@ impl Toolset {
         let mut hasher = Sha256::new();
         hasher.update(&data);
         Ok(format!("sha256({target}) = {:x}", hasher.finalize()))
+    }
+
+    /// Bounded B9 operation: only the expected order, only the frozen
+    /// manifest, only once. Any other request is an error result and
+    /// writes nothing — acceptance can never be satisfied by a receipt
+    /// this tool refused to produce.
+    fn tool_b9_receipt(&self, call: &ToolCall) -> String {
+        let Some(tool) = &self.b9_tool else {
+            return "[tool error] b9_receipt is not attached for this run".to_string();
+        };
+        let order_id = call
+            .args
+            .get("order_id")
+            .and_then(|id| id.as_str())
+            .unwrap_or("");
+        if order_id != tool.expected_order_id {
+            return format!(
+                "[tool error] b9_receipt refused: order {order_id:?} is not the \
+                 expected order for this run"
+            );
+        }
+        if tool.receipt_path.exists() {
+            return "[tool error] b9_receipt refused: receipt already produced for \
+                    this run (bounded to one)"
+                .to_string();
+        }
+        match crate::b9::produce_receipt(&tool.identity, &tool.frozen_manifest, order_id) {
+            Ok(receipt) => {
+                if let Err(error) = crate::b9::write_receipt(&tool.receipt_path, &receipt) {
+                    return format!("[tool error] b9_receipt could not write receipt: {error}");
+                }
+                format!(
+                    "receipt.json written for order {}: input_sha256={} item_count={} did={}",
+                    receipt.order_id, receipt.input_sha256, receipt.item_count, receipt.did
+                )
+            }
+            Err(error) => format!("[tool error] b9_receipt failed: {error}"),
+        }
     }
 
     fn tool_settle_subtask(&self, call: &ToolCall) -> String {
@@ -430,6 +520,51 @@ mod tests {
         let result = toolset.execute(&call);
         assert_eq!(result.role, "tool");
         assert!(result.content.contains("escapes the tool sandbox"));
+    }
+
+    #[test]
+    fn b9_receipt_tool_is_bounded_to_the_expected_order_and_one_shot() {
+        let (dir, toolset) = sandbox("b9tool");
+        let keys = dir.join("keys");
+        std::fs::create_dir_all(&keys).unwrap();
+        let identity = crate::identity::IdentityHook::genesis(
+            &keys,
+            crate::identity::IdentityHook::test_vault(),
+        )
+        .expect("genesis");
+        let material = identity.public_material().expect("material");
+        let manifest: &[u8] = b"[{\"id\": \"bio-1\"}, {\"id\": \"bio-2\"}]";
+        let receipt_path = dir.join("receipt.json");
+        let toolset = toolset.with_b9_tool(B9Tool::new(
+            identity,
+            manifest.to_vec(),
+            "ORDER-A",
+            receipt_path.clone(),
+        ));
+        assert!(toolset.tool_names().contains(&"b9_receipt"));
+        assert!(toolset.system_prompt().contains("b9_receipt"));
+
+        let call = |order: &str| ToolCall {
+            id: Some("b1".into()),
+            name: Some("b9_receipt".into()),
+            args: serde_json::json!({"order_id": order}),
+            parse_error: None,
+        };
+        // Wrong order: refused, writes nothing.
+        let refused = toolset.execute(&call("ORDER-B"));
+        assert!(refused.content.contains("not the expected order"));
+        assert!(!receipt_path.exists());
+        // Expected order: produces a receipt that verifies for ORDER-A
+        // and not for ORDER-B.
+        let done = toolset.execute(&call("ORDER-A"));
+        assert!(done.content.contains("receipt.json written"));
+        let receipt = crate::b9::verify_receipt_file(&receipt_path, manifest, &material, "ORDER-A")
+            .expect("receipt verifies");
+        assert_eq!(receipt.item_count, 2);
+        // One shot: a second call is refused.
+        let again = toolset.execute(&call("ORDER-A"));
+        assert!(again.content.contains("already produced"));
+        std::fs::remove_dir_all(&dir).ok();
     }
 
     #[test]

@@ -139,9 +139,13 @@ pub fn utc_now_plus_rfc3339(offset_secs: i64) -> String {
 fn utc_from_secs(secs: u64) -> String {
     let days = secs / 86_400;
     let time = secs % 86_400;
-    // Howard Hinnant's civil-from-days.
-    let era = (if days >= 719_468 { days } else { 0 } + 719_468) / 146_097;
-    let day_of_era = (if days >= 719_468 { days } else { 0 } + 719_468) - era * 146_097;
+    // Howard Hinnant's civil-from-days. The shift is `days + 719468`
+    // unconditionally: the inherited guard (`days` when large, else
+    // `0`, then `+ 719468`) discarded the actual day count for every
+    // realistic date and mapped all timestamps to 1970-01-01.
+    let shifted = days + 719_468;
+    let era = shifted / 146_097;
+    let day_of_era = shifted - era * 146_097;
     let year_of_era =
         (day_of_era - day_of_era / 1_460 + day_of_era / 36_524 - day_of_era / 146_096) / 365;
     let year = year_of_era as i64 + era as i64 * 400;
@@ -230,11 +234,56 @@ impl SessionStore {
         self.append_row(&self.session_file("checkpoints.jsonl"), &line)
     }
 
+    /// Best-effort legacy inspection. Evidence finalization must use
+    /// `read_checkpoints_strict` so corruption cannot discard entries.
     pub fn read_checkpoints(&self) -> Vec<Value> {
         let path = self.session_file("checkpoints.jsonl");
         let text = std::fs::read_to_string(path).unwrap_or_default();
         text.lines()
             .filter_map(|line| serde_json::from_str(line).ok())
+            .collect()
+    }
+
+    /// Read one complete ordered checkpoint inventory for finalization.
+    /// An absent log in an existing sessions directory is the only
+    /// missing-file case that represents an empty inventory. All read
+    /// and JSON errors refuse the snapshot; no line is silently omitted.
+    pub fn read_checkpoints_strict(&self) -> std::io::Result<Vec<Value>> {
+        let path = self.session_file("checkpoints.jsonl");
+        let text = match std::fs::read_to_string(&path) {
+            Ok(text) => text,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                // A dangling symlink or a removed sessions directory
+                // is not the normal no-checkpoints-yet case.
+                match std::fs::symlink_metadata(&path) {
+                    Err(missing) if missing.kind() == std::io::ErrorKind::NotFound => {
+                        if !std::fs::metadata(&self.dir)?.is_dir() {
+                            return Err(std::io::Error::new(
+                                std::io::ErrorKind::NotADirectory,
+                                "checkpoint sessions path is not a directory",
+                            ));
+                        }
+                        return Ok(Vec::new());
+                    }
+                    _ => return Err(error),
+                }
+            }
+            Err(error) => return Err(error),
+        };
+        text.lines()
+            .enumerate()
+            .map(|(index, line)| {
+                serde_json::from_str(line).map_err(|error| {
+                    std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        format!(
+                            "checkpoint log {} line {}: {error}",
+                            path.display(),
+                            index + 1
+                        ),
+                    )
+                })
+            })
             .collect()
     }
 
@@ -434,6 +483,12 @@ pub enum RunOutcome {
 pub enum CoordError {
     Backend(BackendError),
     Store(String),
+    /// Every backend in the chain failed (or was flagged down) and no
+    /// backend remains to resume on. This is an explicit task failure:
+    /// frozen evidence stays in the store, and no outcome is a PASS.
+    BackendsExhausted {
+        reason: String,
+    },
 }
 
 impl std::fmt::Display for CoordError {
@@ -441,6 +496,9 @@ impl std::fmt::Display for CoordError {
         match self {
             CoordError::Backend(error) => write!(formatter, "backend failed: {error:?}"),
             CoordError::Store(error) => write!(formatter, "session store failed: {error}"),
+            CoordError::BackendsExhausted { reason } => {
+                write!(formatter, "all backends exhausted: {reason}")
+            }
         }
     }
 }
@@ -477,8 +535,8 @@ impl SwitchCoordinator {
         max_turns: u32,
     ) -> Self {
         assert!(
-            backends.len() >= 2,
-            "a switch demo needs at least two backends"
+            !backends.is_empty(),
+            "a coordinator needs at least one backend"
         );
         SwitchCoordinator {
             backends,
@@ -500,6 +558,12 @@ impl SwitchCoordinator {
     pub fn with_log(mut self, log: Arc<dyn Fn(String) + Send + Sync>) -> Self {
         self.log = Some(log);
         self
+    }
+
+    /// The session store, for evidence export after a run (canonical
+    /// transcript, checkpoints) without the private keystore.
+    pub fn store(&self) -> &SessionStore {
+        &self.store
     }
 
     pub fn request_failover(&self, reason: String) {
@@ -544,10 +608,48 @@ impl SwitchCoordinator {
                 ));
             }
         }
+        // H01A: seed the tool contract and the actual B9 user task
+        // exactly once, before the first backend request. A resumed
+        // store that already holds messages is never re-seeded.
+        self.seed_task_once()?;
         let monitor = self.spawn_monitor();
         let outcome = self.drive(cancel).await;
         monitor.abort();
         outcome
+    }
+
+    /// Append the seeded opening messages (system tool contract, then
+    /// the B9 user task) iff the store is still empty. Returns whether
+    /// seeding happened.
+    fn seed_task_once(&mut self) -> Result<bool, CoordError> {
+        if !self.store.rows().is_empty() {
+            return Ok(false);
+        }
+        self.store
+            .append(
+                ChatMessage {
+                    role: "system".into(),
+                    content: self.toolset.system_prompt(),
+                    tool_call_id: None,
+                },
+                {
+                    let mut meta = meta_pair("backend", "harness");
+                    meta.insert("seeded".to_string(), Value::String("tool-contract".into()));
+                    meta
+                },
+            )
+            .map_err(|e| CoordError::Store(e.to_string()))?;
+        self.store
+            .append(
+                ChatMessage::user(crate::b9::b9_task_text(&self.task_id())),
+                {
+                    let mut meta = meta_pair("backend", "harness");
+                    meta.insert("seeded".to_string(), Value::String("b9-task".into()));
+                    meta
+                },
+            )
+            .map_err(|e| CoordError::Store(e.to_string()))?;
+        Ok(true)
     }
 
     fn spawn_monitor(&self) -> tokio::task::JoinHandle<()> {
@@ -580,10 +682,11 @@ impl SwitchCoordinator {
                 return Ok(RunOutcome::Cancelled);
             }
             if let Some(reason) = self.flag.take() {
-                if self.active_index + 1 < self.backends.len() {
-                    self.do_failover(String::new(), reason)?;
-                    continue;
-                }
+                // do_failover guards the exhausted case itself: with
+                // no next backend it preserves evidence and returns an
+                // explicit failure instead of resuming on a dead one.
+                self.do_failover(String::new(), reason)?;
+                continue;
             }
             let backend = self.backends[self.active_index].clone();
             self.publish_status("thinking", backend.name());
@@ -663,6 +766,22 @@ impl SwitchCoordinator {
 
     fn do_failover(&mut self, partial_text: String, reason: String) -> Result<(), CoordError> {
         let old_name = self.backends[self.active_index].name().to_string();
+        // H01B: the error-driven path can arrive on the last backend.
+        // Guard it before indexing the next one: freeze whatever
+        // partial evidence exists, checkpoint it, and return an
+        // explicit exhaustion failure — never a panic, never a PASS.
+        if self.active_index + 1 >= self.backends.len() {
+            if !partial_text.trim().is_empty() {
+                self.append_assistant(&partial_text, &old_name, true)?;
+            }
+            self.checkpoint("backend-exhausted")?;
+            self.emit(format!(
+                "BACKENDS EXHAUSTED {old_name} ({reason}); no backend remains"
+            ));
+            return Err(CoordError::BackendsExhausted {
+                reason: format!("{old_name}: {reason}; no backend remains"),
+            });
+        }
         let new_name = self.backends[self.active_index + 1].name().to_string();
         self.emit(format!("FAILOVER {old_name} -> {new_name} ({reason})"));
 
@@ -866,6 +985,110 @@ mod tests {
     }
 
     #[test]
+    fn strict_checkpoint_reader_preserves_complete_ordered_inventory() {
+        let root = temp_root("strict-checkpoints-order");
+        let store = SessionStore::new(&root, "sess-order").expect("store");
+        let path = store.session_file("checkpoints.jsonl");
+        assert!(store
+            .read_checkpoints_strict()
+            .expect("absent log")
+            .is_empty());
+        assert!(!path.exists(), "reading an absent log must not create it");
+        std::fs::write(&path, b"").expect("empty log");
+        assert!(store
+            .read_checkpoints_strict()
+            .expect("empty log")
+            .is_empty());
+
+        let entries = vec![
+            serde_json::json!({"phase": "pre-switch", "turn_count": 2}),
+            serde_json::json!({"phase": "pre-switch", "turn_count": 2}),
+            serde_json::json!({"phase": "post-switch", "turn_count": 5}),
+        ];
+        for entry in &entries {
+            store.append_checkpoint(entry).expect("append checkpoint");
+        }
+        assert_eq!(store.read_checkpoints_strict().expect("valid log"), entries);
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[test]
+    fn strict_checkpoint_reader_rejects_malformed_lines_and_invalid_utf8() {
+        let root = temp_root("strict-checkpoints-data");
+        let store = SessionStore::new(&root, "sess-data").expect("store");
+        let path = store.session_file("checkpoints.jsonl");
+        for invalid in [
+            b"{\"turn_count\":1}\nnot-json\n{\"turn_count\":3}\n".as_slice(),
+            b"{\"turn_count\":1}\n\n{\"turn_count\":3}\n".as_slice(),
+        ] {
+            std::fs::write(&path, invalid).expect("malformed log");
+            let error = store
+                .read_checkpoints_strict()
+                .expect_err("the middle line must not be discarded");
+            assert_eq!(error.kind(), std::io::ErrorKind::InvalidData);
+            assert!(error.to_string().contains("line 2"), "{error}");
+        }
+        std::fs::write(&path, [0xff, b'\n']).expect("invalid UTF-8 log");
+        assert_eq!(
+            store
+                .read_checkpoints_strict()
+                .expect_err("invalid UTF-8 must refuse")
+                .kind(),
+            std::io::ErrorKind::InvalidData
+        );
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[test]
+    fn strict_checkpoint_reader_rejects_io_failures() {
+        let root = temp_root("strict-checkpoints-io");
+        let store = SessionStore::new(&root, "sess-io").expect("store");
+        let path = store.session_file("checkpoints.jsonl");
+        std::fs::create_dir(&path).expect("directory at log path");
+        assert!(
+            store.read_checkpoints_strict().is_err(),
+            "an unreadable log must not become an empty inventory"
+        );
+        std::fs::remove_dir_all(&store.dir).expect("remove sessions directory");
+        assert!(
+            store.read_checkpoints_strict().is_err(),
+            "missing session storage must not become an empty inventory"
+        );
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn strict_checkpoint_reader_rejects_dangling_symlinks() {
+        let root = temp_root("strict-checkpoints-symlink");
+        let store = SessionStore::new(&root, "sess-symlink").expect("store");
+        std::os::unix::fs::symlink(
+            root.join("missing-checkpoint-target"),
+            store.session_file("checkpoints.jsonl"),
+        )
+        .expect("dangling checkpoint symlink");
+        assert!(
+            store.read_checkpoints_strict().is_err(),
+            "an existing dangling log symlink must not become an empty inventory"
+        );
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[test]
+    fn utc_conversion_matches_known_timestamps() {
+        // Known-answer vectors (Unix epoch -> UTC), including leap
+        // days and a far-future date; the inherited conversion mapped
+        // every one of these to 1970-01-01.
+        assert_eq!(utc_from_secs(0), "1970-01-01T00:00:00+00:00");
+        assert_eq!(utc_from_secs(86_400), "1970-01-02T00:00:00+00:00");
+        assert_eq!(utc_from_secs(951_782_400), "2000-02-29T00:00:00+00:00");
+        assert_eq!(utc_from_secs(1_709_164_800), "2024-02-29T00:00:00+00:00");
+        assert_eq!(utc_from_secs(1_767_225_600), "2026-01-01T00:00:00+00:00");
+        assert_eq!(utc_from_secs(1_767_312_061), "2026-01-02T00:01:01+00:00");
+        assert_eq!(utc_from_secs(4_102_444_800), "2100-01-01T00:00:00+00:00");
+    }
+
+    #[test]
     fn canonical_form_matches_python_oracle() {
         // Oracle vectors generated from harness/switch.py canonical_messages
         // + hashlib.sha256 (canon_vectors.py). Byte parity is load-bearing
@@ -1020,33 +1243,36 @@ mod tests {
         assert_eq!(outcome, RunOutcome::EndTurn);
 
         let rows = coordinator.store.rows().to_vec();
-        // turn1 assistant + tool result + freeze partial + orphan notice +
-        // handoff + final assistant = 6 rows.
-        assert_eq!(rows.len(), 6, "rows: {rows:?}");
-        assert_eq!(rows[0].msg.role, "assistant");
+        // seeded system + user (H01A), then turn1 assistant + tool
+        // result + freeze partial + orphan notice + handoff + final
+        // assistant = 8 rows.
+        assert_eq!(rows.len(), 8, "rows: {rows:?}");
+        assert_eq!(rows[0].msg.role, "system");
+        assert_eq!(rows[1].msg.role, "user");
+        assert_eq!(rows[2].msg.role, "assistant");
         assert_eq!(
-            rows[0].meta.get("backend").and_then(|v| v.as_str()),
+            rows[2].meta.get("backend").and_then(|v| v.as_str()),
             Some("mock-primary")
         );
-        assert!(rows[1].msg.content.contains("sha256(a.txt) = "));
-        assert_eq!(rows[1].msg.role, "tool");
+        assert!(rows[3].msg.content.contains("sha256(a.txt) = "));
+        assert_eq!(rows[3].msg.role, "tool");
         assert_eq!(
-            rows[2].meta.get("truncated"),
+            rows[4].meta.get("truncated"),
             Some(&Value::Bool(true)),
             "FREEZE keeps partial marked"
         );
-        assert!(rows[2].msg.content.contains("partial thinking"));
-        assert_eq!(rows[3].meta.get("orphaned"), Some(&Value::Bool(true)));
-        assert!(rows[3].msg.content.contains("NOT run"));
-        assert!(rows[4]
+        assert!(rows[4].msg.content.contains("partial thinking"));
+        assert_eq!(rows[5].meta.get("orphaned"), Some(&Value::Bool(true)));
+        assert!(rows[5].msg.content.contains("NOT run"));
+        assert!(rows[6]
             .msg
             .content
             .contains("mock-primary -> mock-secondary"));
         assert_eq!(
-            rows[4].meta.get("injected").and_then(|v| v.as_str()),
+            rows[6].meta.get("injected").and_then(|v| v.as_str()),
             Some("handoff")
         );
-        assert_eq!(rows[5].msg.content, "final answer");
+        assert_eq!(rows[7].msg.content, "final answer");
 
         // Pre/post checkpoints on disk with distinct digests.
         let checkpoints = coordinator.store.read_checkpoints();
@@ -1154,6 +1380,220 @@ mod tests {
             statuses >= 3,
             "thinking/responded/failed-over must ride the bus"
         );
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    /// Records every message list it is asked to complete, so a test
+    /// can inspect the actual backend request — not just the store.
+    struct CapturingBackend {
+        inner: Arc<StubBackend>,
+        seen: Arc<Mutex<Vec<Vec<ChatMessage>>>>,
+    }
+
+    impl CapturingBackend {
+        fn wrap(inner: Arc<StubBackend>) -> (Arc<Self>, Arc<Mutex<Vec<Vec<ChatMessage>>>>) {
+            let seen = Arc::new(Mutex::new(Vec::new()));
+            (
+                Arc::new(CapturingBackend {
+                    inner,
+                    seen: seen.clone(),
+                }),
+                seen,
+            )
+        }
+    }
+
+    #[async_trait::async_trait]
+    impl ModelBackend for CapturingBackend {
+        fn name(&self) -> &str {
+            self.inner.name()
+        }
+
+        fn model_id(&self) -> &str {
+            self.inner.model_id()
+        }
+
+        async fn complete(
+            &self,
+            messages: &[ChatMessage],
+            cancel: CancellationToken,
+        ) -> Result<Turn, BackendError> {
+            self.seen.lock().expect("seen").push(messages.to_vec());
+            self.inner.complete(messages, cancel).await
+        }
+
+        async fn health(&self) -> bool {
+            self.inner.health().await
+        }
+    }
+
+    fn unavailable(detail: &str, partial: &str) -> BackendError {
+        BackendError::Unavailable {
+            reason: FailoverReason::Transport,
+            detail: detail.into(),
+            partial: partial.into(),
+        }
+    }
+
+    #[tokio::test]
+    async fn seeded_task_reaches_first_backend_once_and_survives_failover_byte_exactly() {
+        let (root, toolset, identity, publisher, goal) = failover_fixture("seeded");
+        let expected_system = toolset.system_prompt();
+        let expected_task = crate::b9::b9_task_text("T-001");
+        let primary_inner = Arc::new(StubBackend {
+            name: "mock-primary".into(),
+            model: "spark-primary".into(),
+            script: Mutex::new(VecDeque::from([StubStep::Fail(unavailable("refused", ""))])),
+            health_script: Mutex::new(VecDeque::new()),
+        });
+        let secondary_inner = Arc::new(StubBackend {
+            name: "mock-secondary".into(),
+            model: "spark-tertiary".into(),
+            script: Mutex::new(VecDeque::from([scripted_turn("final answer")])),
+            health_script: Mutex::new(VecDeque::new()),
+        });
+        let (primary, seen_primary) = CapturingBackend::wrap(primary_inner);
+        let (secondary, seen_secondary) = CapturingBackend::wrap(secondary_inner);
+        let store = SessionStore::new(&root, "sess-seeded").expect("store");
+        let mut coordinator = SwitchCoordinator::new(
+            vec![primary, secondary],
+            store,
+            toolset,
+            Some(Arc::new(publisher)),
+            Some(identity),
+            goal,
+            8,
+        );
+        let outcome = coordinator
+            .run(CancellationToken::new())
+            .await
+            .expect("run succeeds");
+        assert_eq!(outcome, RunOutcome::EndTurn);
+
+        // The first backend request is exactly the seeded pair: tool
+        // contract first, then the actual B9 user task.
+        let first = seen_primary.lock().expect("seen").clone();
+        assert_eq!(first.len(), 1, "primary gets exactly one request");
+        assert_eq!(first[0].len(), 2, "first request: {first:?}");
+        assert_eq!(first[0][0].role, "system");
+        assert_eq!(first[0][0].content, expected_system);
+        assert_eq!(first[0][1].role, "user");
+        assert_eq!(first[0][1].content, expected_task);
+
+        // Across failover the seeded pair survives byte-exactly as the
+        // complete-message prefix of the second backend's request.
+        let second = seen_secondary.lock().expect("seen").clone();
+        assert_eq!(second.len(), 1, "secondary gets exactly one request");
+        assert_eq!(
+            canonical_messages(&second[0][..2]),
+            canonical_messages(&first[0]),
+            "seeded messages must survive failover byte-exactly"
+        );
+
+        // Exactly once in the stored transcript: no duplicate seeding.
+        let msgs = coordinator.store.messages();
+        assert_eq!(
+            msgs.iter().filter(|m| m.content == expected_system).count(),
+            1
+        );
+        assert_eq!(
+            msgs.iter().filter(|m| m.content == expected_task).count(),
+            1
+        );
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[tokio::test]
+    async fn single_failing_backend_exhausts_without_panic_or_pass() {
+        let root = temp_root("single-exhausted");
+        let toolset = Toolset::new(&root.join("sandbox")).expect("sandbox");
+        let store = SessionStore::new(&root, "sess-single").expect("store");
+        let goal = serde_json::json!({"objective": "x", "task_id": "T-single"});
+        let only = StubBackend::failing(
+            "only-backend",
+            unavailable("refused", "partial work before death"),
+        );
+        let mut coordinator =
+            SwitchCoordinator::new(vec![only], store, toolset, None, None, goal, 4);
+        let error = coordinator
+            .run(CancellationToken::new())
+            .await
+            .expect_err("a single dead backend is an explicit failure, not a pass");
+        assert!(
+            matches!(error, CoordError::BackendsExhausted { .. }),
+            "error: {error:?}"
+        );
+        // Evidence is preserved: the frozen partial is in the store,
+        // marked truncated, and an exhaustion checkpoint was written.
+        let rows = coordinator.store.rows();
+        let partial = rows
+            .iter()
+            .find(|row| row.msg.content == "partial work before death")
+            .expect("frozen partial must be preserved");
+        assert_eq!(partial.meta.get("truncated"), Some(&Value::Bool(true)));
+        let checkpoints = coordinator.store.read_checkpoints();
+        assert_eq!(checkpoints.len(), 1);
+        assert_eq!(
+            checkpoints[0]["phase"],
+            Value::String("backend-exhausted".into())
+        );
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    #[tokio::test]
+    async fn complete_failure_chain_exhausts_with_evidence_preserved() {
+        let root = temp_root("chain-exhausted");
+        let toolset = Toolset::new(&root.join("sandbox")).expect("sandbox");
+        let store = SessionStore::new(&root, "sess-chain").expect("store");
+        let goal = serde_json::json!({"objective": "x", "task_id": "T-chain"});
+        let primary =
+            StubBackend::failing("chain-primary", unavailable("refused", "first partial"));
+        let secondary =
+            StubBackend::failing("chain-secondary", unavailable("refused", "second partial"));
+        let mut coordinator = SwitchCoordinator::new(
+            vec![primary, secondary],
+            store,
+            toolset,
+            None,
+            None,
+            goal,
+            6,
+        );
+        let error = coordinator
+            .run(CancellationToken::new())
+            .await
+            .expect_err("a complete failure chain must not report a pass");
+        assert!(
+            matches!(error, CoordError::BackendsExhausted { .. }),
+            "error: {error:?}"
+        );
+        let contents: Vec<&str> = coordinator
+            .store
+            .rows()
+            .iter()
+            .map(|row| row.msg.content.as_str())
+            .collect();
+        assert!(
+            contents.iter().any(|c| c.contains("first partial")),
+            "first frozen partial preserved: {contents:?}"
+        );
+        assert!(
+            contents.iter().any(|c| c.contains("second partial")),
+            "second frozen partial preserved: {contents:?}"
+        );
+        assert!(
+            contents
+                .iter()
+                .any(|c| c.contains("chain-primary -> chain-secondary")),
+            "the failover itself happened before exhaustion: {contents:?}"
+        );
+        let phases: Vec<String> = coordinator
+            .store
+            .read_checkpoints()
+            .into_iter()
+            .filter_map(|c| c["phase"].as_str().map(str::to_string))
+            .collect();
+        assert_eq!(phases, vec!["pre-switch", "backend-exhausted"]);
         std::fs::remove_dir_all(&root).ok();
     }
 

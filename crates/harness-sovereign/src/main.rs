@@ -1,24 +1,47 @@
-//! harness-sovereign demo binary: the §3 task topology.
+//! harness-sovereign demo binary: the §3 task topology, routed
+//! through independent B9 acceptance.
 //!
 //! Parallel tokio tasks per concern, one shared [`EventBus`]:
 //! backends (sense adapters) + switch coordinator (the agent loop) +
 //! identity + settlement lane + Nostr bridge. A slow subscriber lags and
 //! skips — it never blocks the publisher.
 //!
+//! Before any model executes, the run freezes its input bytes and
+//! establishes the expected order and the public identity material
+//! (one [`RunDefinition`]: saved goal, seeded task, order and verifier
+//! expectations all derive from it). The agent produces its receipt
+//! only through the bounded `b9_receipt` tool. After the run, the
+//! executable exports the canonical transcript and checkpoint
+//! evidence and accepts the task only via
+//! [`harness_sovereign::b9::accept_completed_run`]: missing or invalid
+//! evidence exits nonzero, and no receipt is ever generated after an
+//! arbitrary `EndTurn`.
+//!
+//! `--verify-only` is the independent path: it re-checks a finished
+//! run's artifacts (frozen manifest, `receipt.json`,
+//! `public-material.json`, order) from disk, with no vault, no
+//! keystore and no backends.
+//!
 //! Configuration is env + flags (keys never argv, never committed):
 //! `MODEL_API_KEY`, `TOGETHER_API_KEY`.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
+use harness_sovereign::b9::{
+    accept_completed_run, signed_terminal_outcome, RunDefinition, SavedRunExpectations,
+    TerminalOutcome,
+};
 use harness_sovereign::backend::OpenAiCompatBackend;
 use harness_sovereign::identity::IdentityHook;
 use harness_sovereign::nostr::{ensure_demo_key, NostrAdapter, NostrBusBridge};
 use harness_sovereign::relay::LocalRelay;
 use harness_sovereign::settle::{NostrSettleSink, SettlementLane};
-use harness_sovereign::switch::{BusPublisher, RunOutcome, SessionStore, SwitchCoordinator};
-use harness_sovereign::tools::Toolset;
+use harness_sovereign::switch::{
+    canonical_messages, transcript_sha256, BusPublisher, SessionStore, SwitchCoordinator,
+};
+use harness_sovereign::tools::{B9Tool, Toolset};
 use harness_sovereign::x0x::{X0xBusBridge, X0xTransport};
 
 use event_bus::EventBus;
@@ -30,39 +53,205 @@ fn flag_value(args: &[String], name: &str, default: &str) -> String {
         .unwrap_or_else(|| default.to_string())
 }
 
+fn flag_values(args: &[String], name: &str) -> Vec<String> {
+    args.windows(2)
+        .filter(|pair| pair[0] == name)
+        .map(|pair| pair[1].clone())
+        .collect()
+}
+
+fn has_flag(args: &[String], name: &str) -> bool {
+    args.iter().any(|arg| arg == name)
+}
+
+fn write_json(path: &Path, value: &serde_json::Value) -> Result<(), String> {
+    let text = serde_json::to_string_pretty(value).map_err(|e| format!("JSON: {e}"))?;
+    std::fs::write(path, format!("{text}\n")).map_err(|e| format!("write {}: {e}", path.display()))
+}
+
+/// Claim a session's run directory atomically, before any identity
+/// generation, artifact mutation or provider dispatch. A session is
+/// occupied if any of its prior artifacts exist; the atomic claim is
+/// `create_dir` on `runs/<session>/`, which exactly one caller can
+/// win. The loser refuses and the original run stays byte-identical.
+fn claim_run_dir(workdir: &Path, session_id: &str) -> Result<PathBuf, String> {
+    let sessions = workdir.join("sessions");
+    for suffix in ["jsonl", "goal.json", "checkpoints.jsonl", "state.json"] {
+        let prior = sessions.join(format!("{session_id}.{suffix}"));
+        if prior.exists() {
+            return Err(format!(
+                "session {session_id} is already occupied ({} exists); refusing before any mutation",
+                prior.display()
+            ));
+        }
+    }
+    std::fs::create_dir_all(workdir.join("runs")).map_err(|e| format!("create runs dir: {e}"))?;
+    let run_dir = workdir.join("runs").join(session_id);
+    match std::fs::create_dir(&run_dir) {
+        Ok(()) => Ok(run_dir),
+        Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => Err(format!(
+            "session {session_id} is already occupied ({} exists); refusing before any mutation",
+            run_dir.display()
+        )),
+        Err(error) => Err(format!("claim run dir {}: {error}", run_dir.display())),
+    }
+}
+
+/// Complete independent verification of a finished saved run, from
+/// its on-disk artifacts only. Needs no private keystore. Every
+/// expectation is **required explicitly** at this boundary — the
+/// requested `--session`, requested `--order-id`, the expected
+/// `--public-material` (the pre-run archived pin) and the frozen
+/// `--manifest`. There are no fallbacks to the candidate evidence:
+/// a missing required expectation refuses before any artifact is
+/// trusted (see `verify_saved_run`).
+fn required_flag(args: &[String], name: &str) -> Result<String, String> {
+    let mut positions = args
+        .iter()
+        .enumerate()
+        .filter(|(_, arg)| arg.as_str() == name);
+    let (index, _) = positions.next().ok_or_else(|| {
+        format!(
+            "stage=expectations: missing required {name} for --verify-only (expectations are \
+             never taken from the candidate evidence)"
+        )
+    })?;
+    if positions.next().is_some() {
+        return Err(format!(
+            "stage=expectations: {name} must be supplied exactly once for --verify-only"
+        ));
+    }
+    args.get(index + 1)
+        .filter(|value| !value.trim().is_empty() && !value.starts_with("--"))
+        .cloned()
+        .ok_or_else(|| {
+            format!("stage=expectations: {name} requires a non-empty value, not another option")
+        })
+}
+
+fn run_verify_only(args: &[String]) -> Result<harness_sovereign::b9::B9Receipt, String> {
+    let workdir = PathBuf::from(flag_value(args, "--workdir", "runs/demo"));
+    let session_id = required_flag(args, "--session")?;
+    let order_id = required_flag(args, "--order-id")?;
+    let material_path = PathBuf::from(required_flag(args, "--public-material")?);
+    let manifest_path = PathBuf::from(required_flag(args, "--manifest")?);
+    let run_dir = workdir.join("runs").join(&session_id);
+    let material_text = std::fs::read_to_string(&material_path)
+        .map_err(|e| format!("read public material {}: {e}", material_path.display()))?;
+    let material: harness_sovereign::identity::PublicMaterial =
+        serde_json::from_str(&material_text).map_err(|e| format!("public material JSON: {e}"))?;
+    let manifest = std::fs::read(&manifest_path)
+        .map_err(|e| format!("read manifest {}: {e}", manifest_path.display()))?;
+    let expectations = SavedRunExpectations {
+        session_id,
+        order_id,
+        material,
+        manifest,
+    };
+    let report = harness_sovereign::b9::verify_saved_run(&workdir, &run_dir, &expectations)?;
+    eprintln!(
+        "saved-run evidence: checkpoints_verified={} same_actor={} transcript_sha256={}",
+        report.checkpoint_signatures_verified, report.same_actor_verified, report.transcript_sha256
+    );
+    Ok(report.receipt)
+}
+
 #[tokio::main(flavor = "multi_thread")]
 async fn main() {
     let args: Vec<String> = std::env::args().collect();
+
+    if has_flag(&args, "--verify-only") {
+        match run_verify_only(&args) {
+            Ok(receipt) => {
+                eprintln!(
+                    "B9 ACCEPTANCE PASS (verify-only): order={} input_sha256={} item_count={} did={}",
+                    receipt.order_id, receipt.input_sha256, receipt.item_count, receipt.did
+                );
+            }
+            Err(error) => {
+                eprintln!("B9 ACCEPTANCE FAIL (verify-only): {error}");
+                std::process::exit(3);
+            }
+        }
+        return;
+    }
+
     let workdir = PathBuf::from(flag_value(&args, "--workdir", "runs/demo"));
     let session_id = flag_value(&args, "--session", "demo-1");
     let max_turns: u32 = flag_value(&args, "--max-turns", "12").parse().unwrap_or(12);
-    let goal_text = flag_value(
-        &args,
-        "--goal",
-        "Demonstrate provider failover without losing context.",
-    );
+    let order_id = flag_value(&args, "--order-id", "B9-DEMO-ORDER-1");
+
+    // Freeze the input bytes and establish the run definition before
+    // any model executes.
+    let manifest_arg = flag_value(&args, "--manifest", "");
+    if manifest_arg.is_empty() {
+        eprintln!("B9 run refused: --manifest <path> is required (the frozen input)");
+        std::process::exit(2);
+    }
+    let manifest_bytes = match std::fs::read(&manifest_arg) {
+        Ok(bytes) => bytes,
+        Err(error) => {
+            eprintln!("B9 run refused: cannot read manifest {manifest_arg}: {error}");
+            std::process::exit(2);
+        }
+    };
+
+    // Occupied-session refusal comes first: before identity
+    // generation, before any artifact mutation, before any provider
+    // dispatch. The loser of the atomic claim changes nothing.
+    let run_dir = match claim_run_dir(&workdir, &session_id) {
+        Ok(run_dir) => run_dir,
+        Err(error) => {
+            eprintln!("B9 run refused: {error}");
+            std::process::exit(2);
+        }
+    };
 
     let bus = EventBus::new(1024);
 
-    // Sense: three backends, one struct, three configs (spec §4).
-    let primary = Arc::new(OpenAiCompatBackend::new(
-        "spark-primary",
-        "muse-spark-1.3",
-        "https://api.meta.ai/v1",
-        "MODEL_API_KEY",
-    ));
-    let secondary = Arc::new(OpenAiCompatBackend::new(
-        "openweights-secondary",
-        "meta-models/Muse-Spark-Open-816B-A42B",
-        "https://api.together.xyz/v1",
-        "TOGETHER_API_KEY",
-    ));
-    let tertiary = Arc::new(OpenAiCompatBackend::new(
-        "spark-11-tertiary",
-        "muse-spark-1.1",
-        "https://api.meta.ai/v1",
-        "MODEL_API_KEY",
-    ));
+    // Sense: backends are configuration, not code. `--backend-url`
+    // (repeatable, in order) replaces the default three-config set —
+    // loopback scripted backends for rehearsal, real endpoints for the
+    // live run — through the backend seat's existing constructor.
+    let backend_urls = flag_values(&args, "--backend-url");
+    let backends: Vec<Arc<dyn harness_sovereign::backend::ModelBackend>> =
+        if backend_urls.is_empty() {
+            vec![
+                Arc::new(OpenAiCompatBackend::new(
+                    "spark-primary",
+                    "muse-spark-1.3",
+                    "https://api.meta.ai/v1",
+                    "MODEL_API_KEY",
+                )),
+                Arc::new(OpenAiCompatBackend::new(
+                    "openweights-secondary",
+                    "meta-models/Muse-Spark-Open-816B-A42B",
+                    "https://api.together.xyz/v1",
+                    "TOGETHER_API_KEY",
+                )),
+                Arc::new(OpenAiCompatBackend::new(
+                    "spark-11-tertiary",
+                    "muse-spark-1.1",
+                    "https://api.meta.ai/v1",
+                    "MODEL_API_KEY",
+                )),
+            ]
+        } else {
+            let model = flag_value(&args, "--backend-model", "muse-spark-1.3");
+            let key_env = flag_value(&args, "--backend-key-env", "MODEL_API_KEY");
+            backend_urls
+                .iter()
+                .enumerate()
+                .map(|(index, url)| {
+                    Arc::new(OpenAiCompatBackend::new(
+                        format!("backend-{}", index + 1),
+                        model.clone(),
+                        url.clone(),
+                        key_env.clone(),
+                    )) as Arc<dyn harness_sovereign::backend::ModelBackend>
+                })
+                .collect()
+        };
 
     // Identity: F4 boot gate — the signer proves itself before the demo.
     let keys_dir = workdir.join("keys");
@@ -79,17 +268,43 @@ async fn main() {
         std::process::exit(1);
     }
     eprintln!("agent: {}", identity.did());
+    let public_material = identity.public_material().expect("public material");
+
+    // One run definition: goal, seeded task, expected order and
+    // verifier expectations all derive from these frozen facts.
+    let definition =
+        match RunDefinition::new(&order_id, &session_id, &manifest_bytes, &public_material) {
+            Ok(definition) => definition,
+            Err(error) => {
+                eprintln!("B9 run refused: {error}");
+                std::process::exit(2);
+            }
+        };
+    // Isolated run evidence: every run artifact lives under the
+    // atomically claimed `runs/<session>/` inside the workdir, so
+    // runs sharing a workdir never overwrite each other's evidence.
+    std::fs::write(run_dir.join("frozen-manifest.bin"), &manifest_bytes).expect("freeze manifest");
+    write_json(
+        &run_dir.join("public-material.json"),
+        &serde_json::to_value(&public_material).expect("material serializes"),
+    )
+    .expect("export public material");
+    write_json(
+        &run_dir.join("run-definition.json"),
+        &serde_json::to_value(&definition).expect("definition serializes"),
+    )
+    .expect("write run definition");
+    eprintln!(
+        "run definition: order={} manifest sha256={} items={} did={}",
+        definition.order_id, definition.manifest_sha256, definition.item_count, definition.did
+    );
 
     // Transport: two local relays (kill one on stage; the bus survives)
     // plus any external relays from --relay (repeatable).
     let relay_a = LocalRelay::bind("127.0.0.1", 0).await.expect("relay r1");
     let relay_b = LocalRelay::bind("127.0.0.1", 0).await.expect("relay r2");
     let mut relay_urls = vec![relay_a.url().to_string(), relay_b.url().to_string()];
-    relay_urls.extend(
-        args.windows(2)
-            .filter(|pair| pair[0] == "--relay")
-            .map(|pair| pair[1].clone()),
-    );
+    relay_urls.extend(flag_values(&args, "--relay"));
     eprintln!("relays: {relay_urls:?}");
 
     // Bridge: bus lifecycle events -> transport, lag-tolerant. The
@@ -119,6 +334,7 @@ async fn main() {
     }
 
     // Settlement lane (R6), receipts fanning out over the same relays.
+    // Settlement stays outside the required B9 demonstration.
     let sandbox_dir = workdir.join("sandbox");
     let price_list = workdir.join("prices.json");
     if !price_list.exists() {
@@ -137,34 +353,166 @@ async fn main() {
     )
     .expect("settlement lane")
     .with_sink(receipt_sink);
+    let receipt_path = run_dir.join("receipt.json");
+    let _ = std::fs::remove_file(&receipt_path);
     let toolset = Toolset::new(&sandbox_dir)
         .expect("sandbox")
-        .with_settle_lane(settle);
+        .with_settle_lane(settle)
+        .with_b9_tool(B9Tool::new(
+            identity.clone(),
+            manifest_bytes.clone(),
+            definition.order_id.clone(),
+            receipt_path.clone(),
+        ));
+    // The frozen manifest is the agent's input, byte-exact.
+    std::fs::write(sandbox_dir.join("input.bin"), &manifest_bytes).expect("freeze sandbox input");
 
-    // The agent loop itself: the switch coordinator.
+    // Backend health interface, integrated with a bounded wait: each
+    // backend's `health()` is probed under a 3 s timeout before model
+    // execution and the snapshot is exported as evidence. The probe
+    // informs, it does not pre-empt the run — the coordinator's own
+    // health monitor and the failover path still do their work, so a
+    // primary that dies (or is killed) mid-task fails over with the
+    // task and authority preserved.
+    let evidence_dir = run_dir.join("evidence");
+    std::fs::create_dir_all(&evidence_dir).expect("evidence dir");
+    let mut health_snapshot = Vec::new();
+    for backend in &backends {
+        let healthy = matches!(
+            tokio::time::timeout(Duration::from_secs(3), backend.health()).await,
+            Ok(true)
+        );
+        health_snapshot.push(serde_json::json!({
+            "backend": backend.name(),
+            "model": backend.model_id(),
+            "healthy": healthy,
+            "probe_timeout_ms": 3000,
+        }));
+    }
+    write_json(
+        &evidence_dir.join("backend-health.json"),
+        &serde_json::Value::Array(health_snapshot),
+    )
+    .expect("write backend health");
+
+    // The agent loop itself: the switch coordinator. The saved goal
+    // comes from the run definition, so the seeded B9 task (derived
+    // from the goal's task_id) names the same order the verifier
+    // expects.
     let store = SessionStore::new(&workdir, &session_id).expect("session store");
     let publisher = Arc::new(BusPublisher::new(bus, identity.did()));
-    let goal = serde_json::json!({
-        "objective": goal_text,
-        "task_id": session_id,
-    });
     let mut coordinator = SwitchCoordinator::new(
-        vec![primary, secondary, tertiary],
+        backends,
         store,
         toolset,
         Some(publisher),
-        Some(identity),
-        goal,
+        Some(identity.clone()),
+        definition.goal(),
         max_turns,
     );
 
     let cancel = tokio_util::sync::CancellationToken::new();
-    match coordinator.run(cancel).await {
-        Ok(RunOutcome::EndTurn) => eprintln!("demo complete: end_turn"),
-        Ok(other) => eprintln!("demo complete: {other:?}"),
+    // Recovery/run durations are measured on a monotonic clock, never
+    // by differencing wall-clock timestamps. The run itself is also a
+    // bounded wait: `--run-timeout-secs` (default 900) caps it, and
+    // exceeding the bound is an explicit failure, never a hang.
+    let run_timeout_secs: u64 = flag_value(&args, "--run-timeout-secs", "900")
+        .parse()
+        .unwrap_or(900);
+    let started = Instant::now();
+    let run = match tokio::time::timeout(
+        Duration::from_secs(run_timeout_secs),
+        coordinator.run(cancel),
+    )
+    .await
+    {
+        Ok(run) => run,
+        Err(_) => Err(harness_sovereign::switch::CoordError::Store(format!(
+            "run exceeded its bounded wait of {run_timeout_secs}s"
+        ))),
+    };
+    let duration_ms = started.elapsed().as_millis();
+
+    // Export canonical transcript + checkpoint evidence: sufficient
+    // for verification without the private keystore.
+    std::fs::create_dir_all(&evidence_dir).expect("evidence dir");
+    let messages = coordinator.store().messages();
+    std::fs::write(
+        evidence_dir.join("transcript.canonical.txt"),
+        canonical_messages(&messages),
+    )
+    .expect("write transcript evidence");
+    std::fs::write(
+        evidence_dir.join("transcript.sha256"),
+        format!("{}\n", transcript_sha256(&messages)),
+    )
+    .expect("write transcript hash");
+    // Read once, without discarding malformed entries or I/O errors.
+    // This exact ordered snapshot is exported and authenticated below.
+    let checkpoint_snapshot = match coordinator.store().read_checkpoints_strict() {
+        Ok(snapshot) => snapshot,
         Err(error) => {
-            eprintln!("demo aborted: {error}");
-            std::process::exit(2);
+            eprintln!("B9 ACCEPTANCE FAIL: stage=checkpoint-inventory: {error}");
+            std::process::exit(3);
+        }
+    };
+    let checkpoint_count = checkpoint_snapshot.len();
+    let inventory_commitment =
+        harness_sovereign::b9::checkpoint_inventory_commitment(&checkpoint_snapshot);
+    write_json(
+        &evidence_dir.join("checkpoints.json"),
+        &serde_json::Value::Array(checkpoint_snapshot),
+    )
+    .expect("write checkpoint evidence");
+    // Authenticated terminal outcome: signed by the agent identity
+    // over the record binding session, order, actor, manifest, final
+    // transcript and checkpoint inventory. A bare or pasted outcome
+    // file cannot satisfy verification of this record.
+    let outcome_kind = match &run {
+        Ok(harness_sovereign::switch::RunOutcome::EndTurn) => "EndTurn",
+        Ok(harness_sovereign::switch::RunOutcome::MaxTurns) => "MaxTurns",
+        Ok(harness_sovereign::switch::RunOutcome::Cancelled) => "Cancelled",
+        Err(_) => "Error",
+    };
+    let outcome_record = TerminalOutcome {
+        session_id: definition.session_id.clone(),
+        order_id: definition.order_id.clone(),
+        did: definition.did.clone(),
+        manifest_sha256: definition.manifest_sha256.clone(),
+        transcript_sha256: transcript_sha256(&messages),
+        outcome_kind: outcome_kind.to_string(),
+        checkpoint_count,
+        duration_ms,
+        inventory_version: harness_sovereign::b9::CHECKPOINT_INVENTORY_VERSION,
+        inventory_commitment,
+    };
+    let outcome_value =
+        signed_terminal_outcome(&identity, &outcome_record).expect("sign terminal outcome");
+    write_json(&evidence_dir.join("run-outcome.json"), &outcome_value).expect("write run outcome");
+
+    // Independent B9 acceptance: the only path to a zero exit. No
+    // receipt is generated here — the agent must have produced it
+    // through the bounded tool during the run.
+    match accept_completed_run(
+        &run,
+        &receipt_path,
+        &manifest_bytes,
+        &public_material,
+        &definition.order_id,
+    ) {
+        Ok(receipt) => {
+            eprintln!(
+                "B9 ACCEPTANCE PASS: order={} input_sha256={} item_count={} did={} ({} ms)",
+                receipt.order_id,
+                receipt.input_sha256,
+                receipt.item_count,
+                receipt.did,
+                duration_ms
+            );
+        }
+        Err(error) => {
+            eprintln!("B9 ACCEPTANCE FAIL: {error} (run: {run:?})");
+            std::process::exit(3);
         }
     }
 }

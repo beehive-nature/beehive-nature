@@ -14,6 +14,7 @@
 
 #![forbid(unsafe_code)]
 
+pub mod b9;
 pub mod backend;
 pub mod identity;
 pub mod nostr;
