@@ -7,6 +7,8 @@
 `origin/main` at lane start).
 **Commit:** `0116421d28f4785df3d27a1d64a11af9087859a5` (published).
 **Review:** PR #495 (`spark/ant-sdk-015-qualification-2026-10-29` → `main`).
+**Head:** `5bac2052a9e93f981f254ff9ca9ae627878dbc04` (all 18 block
+receipts + exercises banked).
 **Baseline:** bView production pins SDK 0.1.2 (`surfaces/bview.html`
 `SDK_ROOT`, untouched).
 
