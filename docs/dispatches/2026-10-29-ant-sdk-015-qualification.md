@@ -9,6 +9,8 @@
 **Review:** PR #495 (`spark/ant-sdk-015-qualification-2026-10-29` → `main`).
 **Head:** `5bac2052a9e93f981f254ff9ca9ae627878dbc04` (all 18 block
 receipts + exercises banked).
+**Close-out:** `c66b3e295d7eaa7259f22cb90e78c9e63d323473` (seek pair,
+SUMMARY over 30 samples, offline gate, abort/exercise reruns).
 **Baseline:** bView production pins SDK 0.1.2 (`surfaces/bview.html`
 `SDK_ROOT`, untouched).
 
