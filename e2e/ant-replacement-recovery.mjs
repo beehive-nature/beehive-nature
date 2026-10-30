@@ -76,7 +76,8 @@ const FILES = {
 const GAS = '0.00000000002';
 // the storage network and the chain, outside every browser
 const net = {sends: 0, txs: {}, senders: [], holdReceipts: false, holdSendReply: false, failAfterPay: false, stored: new Set()};
-const sdk = `const files=${JSON.stringify(Object.fromEntries(Object.entries(FILES).map(([k, v]) => [k, v.toString()])))};
+const sdk = `globalThis.__antFixtureSdk='fixture-0.1.5';
+const files=${JSON.stringify(Object.fromEntries(Object.entries(FILES).map(([k, v]) => [k, v.toString()])))};
 const enc=new TextEncoder();const sha=async b=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b)),x=>x.toString(16).padStart(2,'0')).join('');
 export async function getNetworkDefaults(){return {payment:{chainId:42161,paymentTokenAddress:'0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684',paymentVaultAddress:'0x9a3ecac693b699fc0b2b6a50b5549e50c2320a26'},rpcUrl:'https://fixture.invalid/rpc'};}
 export class AutonomiClient{static async connect(){return new AutonomiClient();}closed=false;close(){}
@@ -88,10 +89,19 @@ export class AutonomiClient{static async connect(){return new AutonomiClient();}
   await fetch('https://fixture.invalid/stored?sha='+h);return {file:{address:'fixture-'+h.slice(0,8)},storageCostAtto:'100'};}
  async download(f){for(const k of Object.keys(files)){const b=enc.encode(files[k]);if(f.address==='fixture-'+(await sha(b)).slice(0,8))return {bytes:b};}throw new Error('fixture: unknown address');}}`;
 const sha256 = b => hexOf(realm.BnrSign.sha256(b));
+const sdkPin = {fixture: 'fixture-0.1.5', expected: '/vendor/ant-browser-sdk/0.1.5/index.js', served: 0, unexpected: []};
+const assertFixturePin = page => page.evaluate(() => window.__antFixtureSdk).then(pin => assert.equal(pin, sdkPin.fixture, 'the loaded module is the intended inline fixture'));
 
 async function wire(context) {
   await context.route('https://keys.skaists.dev/**', r => { const p = new URL(r.request().url()).pathname; return KEYS[p] ? r.fulfill({body: readFileSync(root + '/' + KEYS[p]), contentType: p.endsWith('.js') ? 'text/javascript' : 'text/html'}) : r.fulfill({status: 404, body: ''}); });
-  await context.route('**/vendor/ant-browser-sdk/0.1.1/index.js', r => r.fulfill({body: sdk, contentType: 'text/javascript'}));
+  // Consumer branch pins the qualified 0.1.5 SDK: serve only its entry module from the
+  // inline fixture; same-version assets fall through to source, other versions abort.
+  await context.route('**/vendor/ant-browser-sdk/**', r => {
+    const path = new URL(r.request().url()).pathname;
+    if (path === sdkPin.expected) { sdkPin.served++; return r.fulfill({body: sdk, contentType: 'text/javascript'}); }
+    if (path.startsWith('/vendor/ant-browser-sdk/0.1.5/')) return r.fallback();
+    sdkPin.unexpected.push(path); return r.abort('failed');
+  });
   await context.route('https://fixture.invalid/sdk-state?**', r => { const h = new URL(r.request().url()).searchParams.get('sha'); return r.fulfill({json: {stored: net.stored.has(h), failAfterPay: net.failAfterPay}}); });
   await context.route('https://fixture.invalid/stored?**', r => { net.stored.add(new URL(r.request().url()).searchParams.get('sha')); return r.fulfill({json: {ok: true}}); });
   await context.route('https://fixture.invalid/rpc', async route => {
@@ -190,6 +200,7 @@ try {
     net.holdReceipts = false;
     const again = await openPurchase(profile);
     await resumeAndCheck(again.page, again.kc, 'a.txt', FILES.A, 2, lastTwo());
+    await assertFixturePin(again.page);
     assert.deepEqual([...new Set(net.senders)], [account]);
     await profile.close();
     console.log('ok   1. same-context page restart after a lost receipt response: resumed from the journal, no second payment, no second press');
@@ -254,6 +265,7 @@ try {
     assert.equal(net.sends, sendsBefore, 'nothing was paid for bytes the network already holds');
     assert.equal(await kc.getByRole('button', {name: 'Sign this payment'}).count(), 0);
     assert.deepEqual(JSON.parse(await page.locator('#ant-buy-receipt').textContent()).transactions, [], 'the receipt records no payment');
+    await assertFixturePin(page);
     await stranger.close();
     console.log('ok   3. already-stored, no-payment reuse: a stranger\'s client stores the file and pays nothing');
   }
@@ -377,5 +389,7 @@ try {
     }
     await ctx.close();
   }
+  assert.ok(sdkPin.served > 0, 'the intended 0.1.5 fixture module was actually requested');
+  assert.deepEqual(sdkPin.unexpected, [], 'no unexpected SDK version request occurred');
   console.log('PASS recovery (exactly these): same-context page restart after a lost receipt; saved-record replacement; already-stored no-payment reuse; lost submission acknowledgement; abrupt process termination 12 s after the write; abrupt termination before the submission boundary; abrupt termination immediately after the acknowledged write (outcome measured and printed) — never a second payment, never a second press. NOT covered and OPEN: paid-but-incomplete upload with all original browser state lost before any record was saved.');
 } finally { await browser.close(); }

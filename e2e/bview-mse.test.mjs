@@ -22,7 +22,7 @@ if(start)await new Promise(r=>setTimeout(r,start<bytes.length/2?5000:7000));retu
 for(const dryPressure of [false,true])test(dryPressure?'a dry MSE player reads the next chunk even when estimated forward bytes exceed its target':'direct MSE starts from the first chunk, retains one source through gaps, and caches a genuine warm replay',async()=>{
   const context=await browser.newContext(),page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
-  await context.route('**/vendor/ant-browser-sdk/0.1.2/index.js',r=>r.fulfill({contentType:'text/javascript',body:sdk}));
+  await context.route('**/vendor/ant-browser-sdk/0.1.5/index.js',r=>r.fulfill({contentType:'text/javascript',body:sdk}));
   try{
     await page.goto(origin+'/surfaces/bview.html');await page.selectOption('#playback-route','direct-only');await page.fill('#addr','ab'.repeat(32));
     await page.click('button[type=submit]');
@@ -52,7 +52,7 @@ for(const dryPressure of [false,true])test(dryPressure?'a dry MSE player reads t
 
 for(const quota of [false,true])test(quota?'MSE quota pressure retries the same bytes once after freeing history':'MSE append failure recovers at the same playhead from retained bytes without another read',async()=>{
   const context=await browser.newContext(),page=await context.newPage();
-  await context.route('**/vendor/ant-browser-sdk/0.1.2/index.js',r=>r.fulfill({contentType:'text/javascript',body:sdk}));
+  await context.route('**/vendor/ant-browser-sdk/0.1.5/index.js',r=>r.fulfill({contentType:'text/javascript',body:sdk}));
   await context.addInitScript(quota=>{
     const append=SourceBuffer.prototype.appendBuffer;
     SourceBuffer.prototype.appendBuffer=function(bytes){if(window.failAppend){window.failAppend=false;throw new DOMException('fixture append failure',quota?'QuotaExceededError':'OperationError');}return append.call(this,bytes);};
@@ -72,7 +72,7 @@ for(const quota of [false,true])test(quota?'MSE quota pressure retries the same 
 
 test('unsupported MSE codec keeps the file player and performs one set of reads',async()=>{
   const context=await browser.newContext(),page=await context.newPage();
-  await context.route('**/vendor/ant-browser-sdk/0.1.2/index.js',r=>r.fulfill({contentType:'text/javascript',body:sdk}));
+  await context.route('**/vendor/ant-browser-sdk/0.1.5/index.js',r=>r.fulfill({contentType:'text/javascript',body:sdk}));
   await context.addInitScript(()=>MediaSource.isTypeSupported=()=>false);
   try{
     await page.goto(origin+'/surfaces/bview.html');await page.selectOption('#playback-route','direct-only');await page.fill('#addr','ad'.repeat(32));await page.click('button[type=submit]');

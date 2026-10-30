@@ -53,12 +53,14 @@ test('reader closures import no wallet or payment modules', async () => {
   }
 });
 
-test('candidate HTML overlay selects the pinned SDK', async () => {
+test('consumer HTML pins the qualified 0.1.5 SDK', async () => {
+  // Consumer branch cutover (the #495 qualification branch instead asserts production
+  // still pins 0.1.2): this branch moves the consumer to the qualified candidate.
   const html = await readFile(join(root, 'surfaces', 'bview.html'), 'utf8');
-  assert.ok(html.includes('/vendor/ant-browser-sdk/0.1.2/'), 'production still pins 0.1.2');
+  assert.ok(html.includes('/vendor/ant-browser-sdk/0.1.5/'), 'consumer pins the qualified 0.1.5');
+  assert.ok(!html.includes('/vendor/ant-browser-sdk/0.1.2/'), 'no stale SDK root remains');
   const overlaid = htmlWithSdk(html, '0.1.5');
   assert.ok(overlaid.includes('/vendor/ant-browser-sdk/0.1.5/'));
-  assert.ok(!overlaid.includes('/vendor/ant-browser-sdk/0.1.2/'), 'no stale SDK root remains');
   assert.throws(() => htmlWithSdk(html, '9.9.9'), /unknown SDK version/);
 });
 
