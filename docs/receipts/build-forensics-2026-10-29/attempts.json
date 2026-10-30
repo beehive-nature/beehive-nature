@@ -1,0 +1,90 @@
+{
+  "final_clippy": {
+    "exit": 0
+  },
+  "patch_context": {
+    "status": "failed",
+    "corrected": true,
+    "reason": "Expected formatted line not found; no edit applied"
+  },
+  "initial_benchmark_launch": {
+    "reason": "Nested shell quoting; /bin/sh -c requires an argument; no benchmark receipt",
+    "exit": 1
+  },
+  "namespace_pattern_probe": {
+    "reason": "Process search did not select target; subsequent direct PID observation succeeded",
+    "exit": 2
+  },
+  "initial_compile": {
+    "warning": "Unused PathBuf import; removed",
+    "exit": 0
+  },
+  "final_tests": {
+    "passed": 5,
+    "exit": 0,
+    "note": "Includes real 30-second hung-child deadline and nonzero propagation control."
+  },
+  "final_collect": {
+    "scope": "475 PRs since July 4 cutoff; 159 tests PR runs Oct 15-29; 110 latest-attempt jobs in 20 selected runs",
+    "exit": 0
+  },
+  "final_benchmark": {
+    "filesystem": "Linux for both comparators",
+    "controls": "clean accepted; negative-case exits retained individually",
+    "exit": 0,
+    "timed_exits": "120/120 zero"
+  },
+  "pilot_wrapper": {
+    "reason": "Wrapper failed to print/propagate exit variable after receipt written; pilot not final acceptance",
+    "exit": 1
+  },
+  "final_format": {
+    "exit": 0
+  },
+  "initial_clippy": {
+    "corrected": true,
+    "reason": "manual_range_contains under -D warnings",
+    "exit": 1,
+    "exit_scope": "Observed tool-wrapper exit; Cargo child numeric exit was not independently captured."
+  },
+  "initial_wide_collection": {
+    "workflow_records_committed": false,
+    "supervisor": "12-minute limit was temporarily suspended with a separate 15-minute watcher; collector failed naturally before extension elapsed. Only this lane processes were affected.",
+    "partial_prs": "github/pulls.json",
+    "status": "failed",
+    "reason": "Single Actions day exceeded 1000-search-result bound",
+    "exit": 1
+  },
+  "final_analysis": {
+    "exit": 0
+  },
+  "instrumentation_correction": {
+    "both_pilots_preserved": true,
+    "subtraction": false,
+    "pilot_timeout_noop_seconds": [
+      0.108,
+      0.105,
+      0.106,
+      0.105,
+      0.105
+    ],
+    "final_noop_seconds": [
+      0.001554587,
+      0.001419849,
+      0.001880443,
+      0.001484896,
+      0.001376717
+    ]
+  },
+  "cargo_audit": {
+    "advisory_count": 1386,
+    "yanked_check": "not run (--no-yanked)",
+    "warnings": 0,
+    "advisory_commit_time": "2026-10-29T15:05:38+01:00",
+    "exit": 0,
+    "no_fetch": true,
+    "vulnerabilities": 0,
+    "advisory_commit": "ee1a49a2769a24a596afc1c20cb33748d2769586",
+    "lockfile_entries": 53
+  }
+}

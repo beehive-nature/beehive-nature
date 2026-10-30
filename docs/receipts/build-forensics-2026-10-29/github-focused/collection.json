@@ -1,0 +1,61 @@
+{
+  "coverage": "Retained API-visible records only; deleted/expired runs and logs cannot be reconstructed from this API. Latest job attempts only; PR API state observed at retrieval, timestamps cut at the fixed cutoff during analysis.",
+  "cutoff_utc": "2026-10-30T05:03:43Z",
+  "daily_selection_ids": [
+    38692078689,
+    38829044080,
+    38986477419,
+    39083118592,
+    39179441688,
+    39345792708,
+    39770695371,
+    40946535326
+  ],
+  "intervals": [
+    {
+      "api_count": 136,
+      "from": "2026-10-15",
+      "retrieved": 136,
+      "through": "2026-10-21"
+    },
+    {
+      "api_count": 12,
+      "from": "2026-10-22",
+      "retrieved": 12,
+      "through": "2026-10-28"
+    },
+    {
+      "api_count": 11,
+      "from": "2026-10-29",
+      "retrieved": 11,
+      "through": "2026-10-29"
+    }
+  ],
+  "jobs": 110,
+  "pulls": 475,
+  "repository": "beehive-nature/beehive-nature",
+  "retained_runs": 159,
+  "retrieved_at_utc": "2026-10-30T05:18:30.743549398+00:00",
+  "selected_run_ids": [
+    38692078689,
+    38829044080,
+    38986477419,
+    39008052140,
+    39013417840,
+    39013417846,
+    39057237018,
+    39057237019,
+    39083118592,
+    39166986891,
+    39167003391,
+    39179422708,
+    39179422712,
+    39179422723,
+    39179422737,
+    39179422744,
+    39179441688,
+    39345792708,
+    39770695371,
+    40946535326
+  ]
+}

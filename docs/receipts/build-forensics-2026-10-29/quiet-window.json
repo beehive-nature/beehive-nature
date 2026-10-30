@@ -1,0 +1,5 @@
+{
+  "matching_windows_processes": [],
+  "observed_at": "2026-10-30T05:12:01.8615403Z",
+  "note": "Read-only process-name check. No SDK timing window was communicated. No matching active native compilation/timing process observed; not a reservation or a global activity guarantee."
+}

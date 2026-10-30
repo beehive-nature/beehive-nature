@@ -1,0 +1,10 @@
+{
+  "candidate_events": [],
+  "coverage": "One local build-recovery conversation snapshot only. Exact-string search of tool output records, not all providers, all sessions or all refusal formats. Zero matches is not proof no guardrail delay occurred. Raw trace remains local because it contains conversation and environment data.",
+  "first_timestamp": "2026-10-30T01:35:55.167Z",
+  "last_timestamp": "2026-10-30T05:11:55.764Z",
+  "pattern_counts": {},
+  "tool_output_records": 162,
+  "trace_bytes": 5005571,
+  "trace_sha256_base64url": "saKvjpBYF9nu-8rTLonuzIvZUJFHjPxwIXYJKrBlWPQ"
+}
