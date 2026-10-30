@@ -1,0 +1,1 @@
+B9 ACCEPTANCE FAIL (verify-only): terminal outcome does not bind the executed run

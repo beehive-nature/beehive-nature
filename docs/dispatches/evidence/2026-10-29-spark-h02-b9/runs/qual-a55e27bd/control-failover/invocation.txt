@@ -1,0 +1,2 @@
+env: test recovery phrase + throwaway MODEL_API_KEY (rehearsal-only)
+one dead backend then loopback; pass 10.2 s; pre+post signed pair; verify-only PASS

@@ -1,0 +1,2 @@
+env: test recovery phrase + throwaway MODEL_API_KEY (rehearsal-only)
+reuse attempt into occupied sess-qbase: exit 2, refused before any mutation; post verify-only PASS, DID unchanged (f2tq…)
