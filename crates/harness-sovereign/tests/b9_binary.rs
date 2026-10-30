@@ -806,9 +806,7 @@ fn verify_only_requires_explicit_expectations_and_refuses_identity_substitution(
             .expect("malformed-expectation invocation");
         let stderr = String::from_utf8_lossy(&out.stderr);
         assert!(
-            !out.status.success()
-                && stderr.contains("stage=expectations")
-                && stderr.contains(name),
+            !out.status.success() && stderr.contains("stage=expectations") && stderr.contains(name),
             "{tag} {name} must refuse at the expectation boundary: {stderr}"
         );
         assert!(
@@ -848,7 +846,8 @@ fn verify_only_requires_explicit_expectations_and_refuses_identity_substitution(
         ]);
         refuse("conflicting duplicate", name, &conflicting);
     }
-    let control_after_refusals = verify_with_pin(&workdir_a, "sess-bundle", ORDER, &pin_a, &manifest);
+    let control_after_refusals =
+        verify_with_pin(&workdir_a, "sess-bundle", ORDER, &pin_a, &manifest);
     assert!(
         control_after_refusals.status.success(),
         "original pinned control must still pass after every refusal: {}",

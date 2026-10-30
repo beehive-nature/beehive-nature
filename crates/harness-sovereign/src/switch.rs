@@ -989,10 +989,16 @@ mod tests {
         let root = temp_root("strict-checkpoints-order");
         let store = SessionStore::new(&root, "sess-order").expect("store");
         let path = store.session_file("checkpoints.jsonl");
-        assert!(store.read_checkpoints_strict().expect("absent log").is_empty());
+        assert!(store
+            .read_checkpoints_strict()
+            .expect("absent log")
+            .is_empty());
         assert!(!path.exists(), "reading an absent log must not create it");
         std::fs::write(&path, b"").expect("empty log");
-        assert!(store.read_checkpoints_strict().expect("empty log").is_empty());
+        assert!(store
+            .read_checkpoints_strict()
+            .expect("empty log")
+            .is_empty());
 
         let entries = vec![
             serde_json::json!({"phase": "pre-switch", "turn_count": 2}),

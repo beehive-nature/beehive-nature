@@ -67,3 +67,11 @@ from the upstream head do not qualify this change. No workflow, compiler pin,
 dependency, SDK surface, payer configuration, or provider authorization changes.
 No paid inference calls. H02 current-backend/generation health integration and
 live provider qualification remain separate work.
+
+## First hosted pass and formatting correction
+
+The first published candidate, `48c9cc1`, failed rustfmt in push run
+41007792989, job 123906517764. Tests in that job were skipped. Its log required
+four formatting-only changes in the new regression assertions; those exact
+changes are applied in a descendant. The failed run is retained as history,
+and the corrected head must execute formatting and tests afresh.
