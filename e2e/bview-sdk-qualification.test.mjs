@@ -46,21 +46,42 @@ test('module graphs stay inside the vendor dir', async () => {
   for (const version of SDK_VERSIONS) await checkModuleClosure(sdkDir(version));
 });
 
-test('reader closures import no wallet or payment modules', async () => {
+test('reader closures contain no bare or external module imports', async () => {
   for (const version of SDK_VERSIONS) {
     const seen = await checkReaderIsWalletFree(sdkDir(version));
     assert.ok(seen.includes('client.js') && seen.includes('file-reader.js'), version);
   }
 });
 
-test('consumer HTML pins the qualified 0.1.5 SDK', async () => {
+test('consumer HTML pins 0.1.5 and either qualified SDK can be selected without changing unrelated bytes', async () => {
   // Consumer branch cutover (the #495 qualification branch instead asserts production
   // still pins 0.1.2): this branch moves the consumer to the qualified candidate.
   const html = await readFile(join(root, 'surfaces', 'bview.html'), 'utf8');
-  assert.ok(html.includes('/vendor/ant-browser-sdk/0.1.5/'), 'consumer pins the qualified 0.1.5');
+  const root015 = "const SDK_ROOT = '/vendor/ant-browser-sdk/0.1.5/';";
+  const receipt015 = "{sdk:'0.1.5',lanes:";
+  const label015 = "(dr?dr.sdk:'0.1.5')";
+  for (const pin of [root015, receipt015, label015]) assert.ok(html.includes(pin), `consumer carries ${pin}`);
   assert.ok(!html.includes('/vendor/ant-browser-sdk/0.1.2/'), 'no stale SDK root remains');
-  const overlaid = htmlWithSdk(html, '0.1.5');
-  assert.ok(overlaid.includes('/vendor/ant-browser-sdk/0.1.5/'));
+  // Independent expected HTML: do not ask the selector under test to manufacture
+  // its own baseline oracle. Only the known root and its two labels differ.
+  const baseline = html
+    .replace(root015, "const SDK_ROOT = '/vendor/ant-browser-sdk/0.1.2/';")
+    .replace(receipt015, "{sdk:'0.1.2',lanes:")
+    .replace(label015, "(dr?dr.sdk:'0.1.2')");
+  const expected = new Map([['0.1.2', baseline], ['0.1.5', html]]);
+  for (const [sourceVersion, source] of expected) {
+    for (const [targetVersion, target] of expected) {
+      const selected = htmlWithSdk(source, targetVersion);
+      assert.equal(selected, target, `${sourceVersion} -> ${targetVersion}: exact root, labels and preserved bytes`);
+      assert.equal(htmlWithSdk(selected, sourceVersion), source, `${sourceVersion} -> ${targetVersion} -> ${sourceVersion}: byte-exact round trip`);
+    }
+  }
+  assert.throws(() => htmlWithSdk(html.replace(root015, ''), '0.1.5'), /no selectable SDK root/);
+  assert.throws(() => htmlWithSdk(html.replace('/vendor/ant-browser-sdk/0.1.5/', '/vendor/ant-browser-sdk/9.9.9/'), '0.1.5'), /unknown SDK source root/);
+  for (const other of SDK_VERSIONS) {
+    const ambiguous = html + `\n<script>const otherSdk = '/vendor/ant-browser-sdk/${other}/';</script>\n`;
+    assert.throws(() => htmlWithSdk(ambiguous, '0.1.5'), /ambiguous SDK roots/, `second ${other} root is refused`);
+  }
   assert.throws(() => htmlWithSdk(html, '9.9.9'), /unknown SDK version/);
 });
 
@@ -87,7 +108,8 @@ test('stalled operation hits the deadline, writes a failure receipt and cleans u
   let chromium;
   try {
     ({ chromium } = await import('playwright'));
-  } catch {
+  } catch (error) {
+    if (process.env.CI) throw error;
     t.skip('playwright not installed');
     return;
   }
@@ -97,7 +119,8 @@ test('stalled operation hits the deadline, writes a failure receipt and cleans u
   } catch {
     try {
       browser = await chromium.launch();
-    } catch {
+    } catch (error) {
+      if (process.env.CI) throw error;
       t.skip('no Chrome available');
       return;
     }
@@ -142,11 +165,12 @@ test('stalled operation hits the deadline, writes a failure receipt and cleans u
   await rm(dir, { recursive: true, force: true });
 });
 
-test('browser loads the real pinned SDK modules and served bytes hash clean', { timeout: 120000 }, async (t) => {
+test('both real pinned SDKs validate seed-loss configuration offline and served bytes hash clean', { timeout: 120000 }, async (t) => {
   let chromium;
   try {
     ({ chromium } = await import('playwright'));
-  } catch {
+  } catch (error) {
+    if (process.env.CI) throw error;
     t.skip('playwright not installed');
     return;
   }
@@ -157,41 +181,85 @@ test('browser loads the real pinned SDK modules and served bytes hash clean', { 
   } catch {
     try {
       browser = await chromium.launch();
-    } catch {
+    } catch (error) {
+      if (process.env.CI) throw error;
       t.skip('no Chrome available');
       return;
     }
   }
-  const served = [];
-  const context = await browser.newContext();
   try {
-    await context.route('https://sdk-qual.local/**', async (route) => {
-      const rel = new URL(route.request().url()).pathname.slice(1);
+    for (const version of SDK_VERSIONS) {
+      const served = [], unexpected = [];
+      const context = await browser.newContext({ serviceWorkers: 'block' });
       try {
-        const body = await readFile(join(sdkDir('0.1.5'), rel));
-        served.push({ rel, status: 200, body });
-        const type = rel.endsWith('.wasm') ? 'application/wasm' : 'text/javascript';
-        return route.fulfill({ body, contentType: type });
-      } catch {
-        served.push({ rel, status: 404, body: Buffer.of() });
-        return route.fulfill({ status: 404 });
+        // Only local pinned assets are available. Defaults come from the bundled
+        // WASM; neither this control nor the seedless refusal connects to peers.
+        await context.addInitScript(() => {
+          window.__sdkDialAttempts = [];
+          for (const name of ['RTCPeerConnection', 'WebSocket']) {
+            globalThis[name] = function () {
+              window.__sdkDialAttempts.push(name);
+              throw new Error(`Offline SDK profile test forbids ${name}`);
+            };
+          }
+        });
+        await context.route('**/*', async (route) => {
+          const url = new URL(route.request().url());
+          if (url.origin !== 'https://sdk-qual.local') {
+            unexpected.push(url.href);
+            return route.abort();
+          }
+          const rel = url.pathname.slice(1);
+          try {
+            const body = await readFile(join(sdkDir(version), rel));
+            served.push({ rel, status: 200, body });
+            const type = rel.endsWith('.wasm') ? 'application/wasm' : 'text/javascript';
+            return route.fulfill({ body, contentType: type });
+          } catch {
+            served.push({ rel, status: 404, body: Buffer.of() });
+            return route.fulfill({ status: 404 });
+          }
+        });
+        const page = await context.newPage();
+        const result = await page.evaluate(async () => {
+          const sdk = await import('https://sdk-qual.local/index.js');
+          const { snapshotNetworkProfile } = await import('https://sdk-qual.local/network-profile.js');
+          if (typeof snapshotNetworkProfile !== 'function') throw new TypeError('Missing actual network-profile validator');
+          const defaults = await sdk.getNetworkDefaults();
+          // The valid control executes outside the refusal catch: a missing API
+          // or initialization failure cannot masquerade as seed-loss refusal.
+          const control = snapshotNetworkProfile(defaults);
+          let refusal;
+          try {
+            snapshotNetworkProfile({ ...defaults, id: 'seedless', seeds: [] });
+          } catch (error) {
+            if (!(error instanceof sdk.AutonomiError) || error.code !== 'CONNECTION_FAILED') throw error;
+            refusal = { name: error.name, code: error.code };
+          }
+          return {
+            exports: Object.keys(sdk).sort(),
+            control,
+            expected: { id: defaults.id, seeds: [...defaults.seeds], payment: { ...defaults.payment } },
+            refusal,
+          };
+        });
+        const names = ['AutonomiClient', 'PublicFileReader', 'AutonomiError', 'getNetworkDefaults'];
+        if (version === '0.1.5') names.push('decodeManifest', 'pointerAddress');
+        for (const name of names) assert.ok(result.exports.includes(name), `${version}: SDK exports ${name}`);
+        assert.ok(result.expected.seeds.length > 0, `${version}: bundled profile supplies the valid seed control`);
+        assert.deepEqual(result.control, result.expected, `${version}: valid profile is accepted unchanged`);
+        assert.deepEqual(result.refusal, { name: 'AutonomiError', code: 'CONNECTION_FAILED' }, `${version}: exact seed-loss refusal`);
+        assert.deepEqual(unexpected, [], `${version}: no external HTTP request or payment RPC`);
+        assert.deepEqual(await page.evaluate(() => window.__sdkDialAttempts), [], `${version}: no WebRTC or WebSocket dial`);
+        for (const { rel, status, body } of served) checkServedAsset(pins, version, rel, status, body);
+        for (const rel of ['index.js', 'client.js', 'network-profile.js', 'wasm/ant_core_bg.wasm']) {
+          assert.ok(served.some((s) => s.rel === rel), `${version}: ${rel} was loaded from verified local bytes`);
+        }
+      } finally {
+        await context.close();
       }
-    });
-    const page = await context.newPage();
-    const exports = await page.evaluate(async () => {
-      const sdk = await import('https://sdk-qual.local/index.js');
-      return Object.keys(sdk).sort();
-    });
-    for (const name of ['AutonomiClient', 'PublicFileReader', 'decodeManifest', 'pointerAddress']) {
-      assert.ok(exports.includes(name), `SDK exports ${name}: ${exports.join(',')}`);
     }
-    for (const { rel, status, body } of served) {
-      checkServedAsset(pins, '0.1.5', rel, status, body);
-    }
-    assert.ok(served.some((s) => s.rel === 'index.js'));
-    assert.ok(served.some((s) => s.rel === 'client.js'));
   } finally {
-    await context.close();
     await browser.close();
   }
 });
