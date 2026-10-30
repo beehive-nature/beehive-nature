@@ -23,9 +23,9 @@
   var BRIDGE_DEFAULT = ''; // No local service is required or selected by this wallet.
   var LS = 'bpay-policy-v1';
   // The file quote asks Autonomi itself through the official browser kit
-  // (vendor/ant-browser-sdk/0.1.1). Its size limits come from the kit's own
+  // (vendor/ant-browser-sdk/0.1.5). Its size limits come from the kit's own
   // limits.js; the kit and its network connection load only when a quote is asked.
-  var ANT_KIT = '/vendor/ant-browser-sdk/0.1.1/';
+  var ANT_KIT = '/vendor/ant-browser-sdk/0.1.5/';
   var antLimits = null, antKit = null, antClient = null, quoteRun = null;
   var limitsLoad = import(ANT_KIT + 'limits.js').then(function(m){ antLimits = m.SDK_LIMITS; }, function(){ antLimits = null; });
   var st = { audience:null, selectedAt:null, inspection:'newbee', bridge:BRIDGE_DEFAULT };

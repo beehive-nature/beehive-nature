@@ -29,7 +29,8 @@ const KEYS = {'/': 'keychain/index.html', '/prelude.js': 'keychain/prelude.js', 
 const file = Buffer.from('Record import fixture: untrusted evidence, validated whole; never live funds.');
 const GAS = '0.00000000002', CLAIMS = 'bnr.ant.quote-claims.v1';
 const sha = '0x' + hexOf(realm.BnrSign.sha256(file)), shaHex = sha.slice(2), JOURNAL = 'bnr.ant.purchase.v1:' + shaHex;
-const sdk = `const bytes=new TextEncoder().encode(${JSON.stringify(file.toString())});
+const sdk = `globalThis.__antFixtureSdk='fixture-0.1.5';
+const bytes=new TextEncoder().encode(${JSON.stringify(file.toString())});
 export async function getNetworkDefaults(){return {payment:{chainId:42161,paymentTokenAddress:'0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684',paymentVaultAddress:'0x9a3ecac693b699fc0b2b6a50b5549e50c2320a26'},rpcUrl:'https://fixture.invalid/rpc'};}
 export class AutonomiClient{static async connect(){return new AutonomiClient();}closed=false;close(){}
  async upload(file,opts){const st=await (await fetch('https://fixture.invalid/sdk-state')).json();await opts.onCheckpoint({fixture:true});const n=(await getNetworkDefaults()).payment;
@@ -38,9 +39,18 @@ export class AutonomiClient{static async connect(){return new AutonomiClient();}
  async download(){return {bytes};}}`;
 // one fixture chain per context: nothing crosses between them unless a test says so
 const chain = () => ({sends: 0, txs: {}, failAfterPay: false});
+const sdkPin = {fixture: 'fixture-0.1.5', expected: '/vendor/ant-browser-sdk/0.1.5/index.js', served: 0, unexpected: []};
+const assertFixturePin = page => page.evaluate(() => window.__antFixtureSdk).then(pin => assert.equal(pin, sdkPin.fixture, 'the loaded module is the intended inline fixture'));
 async function wire(context, net) {
   await context.route('https://keys.skaists.dev/**', r => { const p = new URL(r.request().url()).pathname; return KEYS[p] ? r.fulfill({body: readFileSync(root + '/' + KEYS[p]), contentType: p.endsWith('.js') ? 'text/javascript' : 'text/html'}) : r.fulfill({status: 404, body: ''}); });
-  await context.route('**/vendor/ant-browser-sdk/0.1.1/index.js', r => r.fulfill({body: sdk, contentType: 'text/javascript'}));
+  // Consumer branch pins the qualified 0.1.5 SDK: serve only its entry module from the
+  // inline fixture; same-version assets fall through to source, other versions abort.
+  await context.route('**/vendor/ant-browser-sdk/**', r => {
+    const path = new URL(r.request().url()).pathname;
+    if (path === sdkPin.expected) { sdkPin.served++; return r.fulfill({body: sdk, contentType: 'text/javascript'}); }
+    if (path.startsWith('/vendor/ant-browser-sdk/0.1.5/')) return r.fallback();
+    sdkPin.unexpected.push(path); return r.abort('failed');
+  });
   await context.route('https://fixture.invalid/sdk-state', r => r.fulfill({json: {failAfterPay: net.failAfterPay}}));
   await context.route('https://fixture.invalid/rpc', async route => {
     const {method, params: p} = route.request().postDataJSON(); let result;
@@ -114,6 +124,7 @@ try {
     text = await page.evaluate(async () => (await fetch(document.getElementById('ant-buy-record').href)).text());
     record = JSON.parse(text);
     assert.deepEqual(record.ledger.plans[0].txs.map(t => t.state), ['confirmed', 'confirmed']);
+    await assertFixturePin(page);
     await context.close();
   }
   const quote = record.ledger.plans[0].payments[0].quote_hash.toLowerCase();
@@ -192,7 +203,10 @@ try {
     const j = JSON.parse(await stored(page, JOURNAL));
     assert.ok(j.plans[0].txs.every(x => x.state !== 'dropped'), 'the kept transactions and their reservations are still held');
     assert.equal(JSON.parse(await stored(page, CLAIMS))[quote], shaHex, 'the quote stays claimed');
+    await assertFixturePin(page);
     await context.close(); console.log('ok   5. asserted confirmed, chain unaware, window shut: UNKNOWN on resume; no send, no press, exposure held');
   }
+  assert.ok(sdkPin.served > 0, 'the intended 0.1.5 fixture module was actually requested');
+  assert.deepEqual(sdkPin.unexpected, [], 'no unexpected SDK version request occurred');
   console.log('PASS record import: untrusted evidence validated whole, envelopes checked independently, claims derived from plans, conflicts and malformed records refused, failure-atomic under the purchase lock, unknown stays unknown');
 } finally { await browser.close(); }

@@ -37,7 +37,7 @@ var DISCLOSURE_VERSION='bdrop-0001-disclosure-v1';
 var OUTBOX_KEY='bnr.bdrop.outbox.v1';
 var OUTBOX_DAMAGED_KEY='bnr.bdrop.outbox.v1.damaged';
 var EDITIONS_URL='../docs/bdrop/editions.json';
-var ANT_KIT='/vendor/ant-browser-sdk/0.1.1/';
+var ANT_KIT='/vendor/ant-browser-sdk/0.1.5/';
 var RECEIPT_NEVER=['content','text','payload','plaintext','wif','key','secret'];
 /* bMeter shape: events and references, never contents (bchat-core law) */
 function ev(event,ref,meta){

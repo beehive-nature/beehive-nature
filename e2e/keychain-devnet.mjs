@@ -46,7 +46,10 @@ const endpoints = Array.from({length: 8}, (_, i) => ({multiaddr: `/ip4/10.0.0.5/
 const browserManifest = {version: 6, network_id: 'fixture-devnet', endpoints, payment_network: {chain_id: 31337, payment_token_address: TOKEN, payment_vault_address: VAULT}};
 const devnetManifest = {node_count: 8, evm: {rpc_url: 'http://0.0.0.0:45000/', payment_token_address: TOKEN, payment_vault_address: VAULT}};
 const file = Buffer.from('TEST BUILD keychain purchase fixture on the test network; never live funds.');
-const sdk = `const bytes=new TextEncoder().encode(${JSON.stringify(file.toString())});
+const sdkPin = {fixture: 'fixture-0.1.5', expected: '/vendor/ant-browser-sdk/0.1.5/index.js', served: 0, unexpected: []};
+const assertFixturePin = page => page.evaluate(() => window.__antFixtureSdk).then(pin => assert.equal(pin, sdkPin.fixture, 'the loaded module is the intended inline fixture'));
+const sdk = `globalThis.__antFixtureSdk='fixture-0.1.5';
+const bytes=new TextEncoder().encode(${JSON.stringify(file.toString())});
 export class AutonomiClient{static async connect(o){if(!o||!o.network||o.network.id!=='bnr-devnet'||!o.expectedPaymentNetwork||o.expectedPaymentNetwork.chainId!==31337)throw new Error('fixture: the page must connect with the devnet profile');return new AutonomiClient();}closed=false;close(){}async upload(file,opts){await opts.onCheckpoint({fixture:true});const n={chainId:31337,paymentTokenAddress:${JSON.stringify(TOKEN)},paymentVaultAddress:${JSON.stringify(VAULT)}};await opts.payment.pay(n,[{quoteHash:'0x'+'c'.repeat(64),rewardsAddress:'0x'+'d'.repeat(40),amount:'100'}],{signal:opts.signal});return {file:{address:'fixture-only'},storageCostAtto:'100'};}async download(){return {bytes};}}`;
 
 // one fixture chain per context: who was funded, what was sent, by whom
@@ -84,7 +87,14 @@ function chain(context, expectPayer) {
   return st;
 }
 async function openWallet(context) {
-  await context.route('**/vendor/ant-browser-sdk/0.1.1/index.js', r => r.fulfill({body: sdk, contentType: 'text/javascript'}));
+  // Consumer branch pins the qualified 0.1.5 SDK: serve only its entry module from the
+  // inline fixture; same-version assets fall through to source, other versions abort.
+  await context.route('**/vendor/ant-browser-sdk/**', r => {
+    const path = new URL(r.request().url()).pathname;
+    if (path === sdkPin.expected) { sdkPin.served++; return r.fulfill({body: sdk, contentType: 'text/javascript'}); }
+    if (path.startsWith('/vendor/ant-browser-sdk/0.1.5/')) return r.fallback();
+    sdkPin.unexpected.push(path); return r.abort('failed');
+  });
   await context.addInitScript(() => {
     localStorage.setItem('bregister', 'bee'); localStorage.setItem('bnr_soul', 'gatesoul'); localStorage.setItem('bpay-policy-v1', JSON.stringify({audience: 'public'}));
     window.ethereum = {request: async () => { throw Error('The isolated keychain must never fall back to an extension wallet'); }};
@@ -165,6 +175,7 @@ try {
     assert.equal(await record.evaluate(a => a.hidden), false, 'the payment record is offered (inside the resuming disclosure)');
     assert.match(await record.getAttribute('download'), /-testnet\.json$/, 'a test-network record is named as one');
     assert.deepEqual(errors, [], 'no page errors');
+    await assertFixturePin(page);
     await context.close();
   }
   // ── 2. the production pin at the devnet origin is refused by name; nothing falls back ──
@@ -208,5 +219,7 @@ try {
     assert.match(await ask(1, '0x7a69'), /Arbitrum One only/, 'the production build refuses the test chain');
     await context.close();
   }
+  assert.ok(sdkPin.served > 0, 'the intended 0.1.5 fixture module was actually requested');
+  assert.deepEqual(sdkPin.unexpected, [], 'no unexpected SDK version request occurred');
   console.log('PASS keychain on the test network: TEST BUILD keychain pays from its own account with the page keychain open too (funding, session, invoice, two presses, chain, receipt all agree); a production-pinned keychain is refused by name; each build refuses the other chain');
 } finally { await browser.close(); }

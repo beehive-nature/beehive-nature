@@ -1131,6 +1131,27 @@ jobs:
         if: always()
         timeout-minutes: 10
         run: node e2e/ant-hosted-browser.mjs
+      - name: ANT SDK native qualification — Rust refusal and provenance controls
+        if: always()
+        timeout-minutes: 10
+        run: |
+          cargo fmt --manifest-path tools/ant-sdk-qualification/Cargo.toml -- --check
+          cargo test --manifest-path tools/ant-sdk-qualification/Cargo.toml --locked --target-dir target/ant-sdk-qualification
+          cargo build --manifest-path tools/ant-sdk-qualification/Cargo.toml --locked --release --target-dir target/ant-sdk-qualification
+      # ANT browser SDK 0.1.5 qualification (offline half): vendored pin
+      # table vs bytes, provenance pins, closed module graph, wallet-free
+      # reader, HTML overlay, wrong-asset refusal, stalled-operation
+      # deadline, and a real-browser load of the pinned modules.
+      # Host policy runs in the native Rust qualifier built above. The
+      # Node adapter only transports requests and invokes Playwright.
+      # After the shared browser install, the browser tests execute
+      # against the installed Chromium instead of skipping. Live reader
+      # exercises and the known-failing 0.1.2 baseline stay out of this
+      # unconditional gate by design.
+      - name: ANT browser SDK pins — digests, closure, refusal, deadline (offline)
+        if: always()
+        timeout-minutes: 10
+        run: node --test e2e/bview-sdk-qualification.test.mjs
       - name: Isolated keychain — own origin, passkey-born root, decoded confirm, refusals, the hosted purchase paid from it, the Hive drop door, host-loss succession, the TEST BUILD keychain on the test network, network confinement, the named recovery cases, and the record importer
         if: always()
         timeout-minutes: 25

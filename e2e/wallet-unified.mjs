@@ -18,7 +18,7 @@ async function waitForCondition(page,predicate,arg,options={}){
  throw new Error('Wallet condition timed out');
 }
 function check(label,value){assert.ok(value,label);console.log('PASS '+(++checks)+': '+label);}
-// A stand-in for the Autonomi browser kit's index.js (vendor/ant-browser-sdk/0.1.1).
+// A stand-in for the Autonomi browser kit's index.js (vendor/ant-browser-sdk/0.1.5).
 // It mirrors the kit's manual payment flow: the upload pauses at the payment step
 // and hands the page a request with totalAmountAtto, pay() and cancel(). pay()
 // is counted and refused; the real limits.js is served from the repo unchanged.
@@ -63,7 +63,7 @@ try {
     const u=new URL(route.request().url());
     if(['localhost','127.0.0.1','[::1]'].includes(u.hostname))localRequests.push(u.href);
     if(u.hostname==='relay.skaists.dev'&&u.pathname.startsWith('/ant/v1/upload'))relayUploads++;
-    if(u.origin===origin&&u.pathname==='/vendor/ant-browser-sdk/0.1.1/index.js'){kitLoads++;return kitMissing?route.fulfill({status:404,body:'not found'}):route.fulfill({contentType:'text/javascript',body:mockAntKit});}
+    if(u.origin===origin&&u.pathname==='/vendor/ant-browser-sdk/0.1.5/index.js'){kitLoads++;return kitMissing?route.fulfill({status:404,body:'not found'}):route.fulfill({contentType:'text/javascript',body:mockAntKit});}
     if(u.origin!==origin)return route.abort();
     const path=resolve(root,'.'+decodeURIComponent(u.pathname));
     if(!path.startsWith(root+sep))return route.abort();

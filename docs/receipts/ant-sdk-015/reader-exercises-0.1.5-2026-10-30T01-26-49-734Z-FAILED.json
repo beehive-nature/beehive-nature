@@ -1,0 +1,1 @@
+{"script":"e2e/bview-sdk-reader-exercises.test.mjs","runner":"v24.18.0","startedAt":"2026-10-30T01:28:55.059Z","version":"0.1.5","ok":false,"error":"deadline: corrupt-address exceeded 90000ms","PUBLIC-CONSTANT":"failure record with public fixture address only; no key material"}

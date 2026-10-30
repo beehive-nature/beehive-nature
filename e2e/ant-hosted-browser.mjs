@@ -23,13 +23,33 @@ const browser=await chromium.launch();
 async function until(fn){for(let i=0;i<150;i++){if(await fn())return;await new Promise(r=>setTimeout(r,100));}throw Error('condition timed out');}
 await installWalletFixture(browser,process.cwd());
 const bytes=Buffer.from('Agent 20 browser purchase fixture; never live funds.');
-const sdk=`const bytes=new TextEncoder().encode(${JSON.stringify(bytes.toString())});
+const sdk=`globalThis.__antFixtureSdk='fixture-0.1.5';
+const bytes=new TextEncoder().encode(${JSON.stringify(bytes.toString())});
 export async function getNetworkDefaults(){return {payment:{chainId:42161,paymentTokenAddress:'0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684',paymentVaultAddress:'0x9a3ecac693b699fc0b2b6a50b5549e50c2320a26'},rpcUrl:'https://fixture.invalid/rpc'};}
 export class AutonomiClient{static async connect(){return new AutonomiClient();}closed=false;close(){}async upload(file,opts){await opts.onCheckpoint({fixture:true});const n=(await getNetworkDefaults()).payment;await opts.payment.pay(n,[{quoteHash:'0x'+'c'.repeat(64),rewardsAddress:'0x'+'d'.repeat(40),amount:'100'}],{signal:opts.signal});return {file:{address:'fixture-only'},storageCostAtto:'100'};}async download(){return {bytes};}}`;
+// Consumer branch pins the qualified 0.1.5 SDK: serve only its entry module from the
+// inline fixture above. Same-version asset paths fall through to the source fixture;
+// any other SDK version request aborts loudly instead of silently serving stale bytes.
+const sdkPin={fixture:'fixture-0.1.5',expected:'/vendor/ant-browser-sdk/0.1.5/index.js',served:0,unexpected:[]};
+async function guardSdkRoute(context){
+  await context.route('**/vendor/ant-browser-sdk/**',r=>{
+    const path=new URL(r.request().url()).pathname;
+    if(path===sdkPin.expected){sdkPin.served++;return r.fulfill({body:sdk,contentType:'text/javascript'});}
+    if(path.startsWith('/vendor/ant-browser-sdk/0.1.5/'))return r.fallback();
+    sdkPin.unexpected.push(path);return r.abort('failed');
+  });
+}
+function assertSdkRoute(){
+  assert.ok(sdkPin.served>0,'the intended 0.1.5 fixture module was actually requested');
+  assert.deepEqual(sdkPin.unexpected,[],'no unexpected SDK version request occurred');
+}
+async function assertFixturePin(page){
+  assert.equal(await page.evaluate(()=>window.__antFixtureSdk),sdkPin.fixture,'the loaded module is the intended inline fixture');
+}
 try{
  for(const width of [320,390]) for(const reg of ['bee','raver','cypherpunk']){
   const context=await browser.newContext({viewport:{width,height:900}});
-  await context.route('**/vendor/ant-browser-sdk/0.1.1/index.js',r=>r.fulfill({body:sdk,contentType:'text/javascript'}));
+  await guardSdkRoute(context);
   await context.addInitScript(reg=>{
    localStorage.setItem('bregister',reg);localStorage.setItem('bnr_soul','gatesoul');localStorage.setItem('bpay-policy-v1',JSON.stringify({audience:'public'}));window.__sends=0;window.__txs={};
    window.ethereum={request:async()=>{throw Error('Native bzDiD storage must never request an extension wallet');}};
@@ -153,6 +173,7 @@ try{
   await until(async()=>{const text=await page.locator('#ant-buy-status').innerText();if(text.startsWith('Storage stopped:'))throw Error(text);return text.startsWith('Stored and retrieved:');});
   assert.equal(await page.evaluate(()=>window.__sends),2);
   const receipt=JSON.parse(await page.locator('#ant-buy-receipt').textContent());assert.equal(receipt.retrievedBytes,bytes.length);assert.equal(receipt.transactions.length,2);
+  await assertFixturePin(page);assertSdkRoute();
   await page.evaluate(()=>document.fonts.ready);
   const layout=await page.evaluate(()=>({viewport:innerWidth,scroll:document.documentElement.scrollWidth}));
   assert.ok(layout.scroll<=layout.viewport+1,`${reg} at ${width}px overflows: ${JSON.stringify(layout)}`);
