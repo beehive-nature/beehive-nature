@@ -118,8 +118,8 @@ try {
       verified.push({rel,bytes:r.bytes,sha256:r.sha256});
     }
     sdkDigests=verified;
-    sdkVerified=verified.some(v=>v.rel==='index.js');
-    if(!sdkVerified)throw Error(`SDK ${values.sdk} entry point was not served in this run`);
+    sdkVerified=verified.some(v=>v.rel==='index.js')&&verified.some(v=>v.rel==='wasm/ant_core_bg.wasm');
+    if(!sdkVerified)throw Error(`SDK ${values.sdk} entry module or expected WASM was not served in this run`);
   }
   const result={observedAt:new Date().toISOString(),origin,htmlSha256,browser:browser.version(),
     mode:values.candidate?'candidate HTML on public origin':'deployed public HTML',route:values.route,sdk:values.sdk||null,sdkVerified,sdkDigests,

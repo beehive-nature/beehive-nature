@@ -78,6 +78,68 @@ test('wrong-asset regression: tampered, wrong-version and failed assets are refu
   assert.throws(() => checkServedAsset(pins, '0.1.5', 'index.js', 200, older), /mismatch/, '0.1.2 bytes under 0.1.5 URLs are refused');
 });
 
+test('stalled operation hits the deadline, writes a failure receipt and cleans up', { timeout: 120000 }, async (t) => {
+  const { mkdtemp, writeFile, readFile, rm } = await import('node:fs/promises');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  let chromium;
+  try {
+    ({ chromium } = await import('playwright'));
+  } catch {
+    t.skip('playwright not installed');
+    return;
+  }
+  let browser;
+  try {
+    browser = await chromium.launch({ channel: 'chrome' });
+  } catch {
+    try {
+      browser = await chromium.launch();
+    } catch {
+      t.skip('no Chrome available');
+      return;
+    }
+  }
+  const dir = await mkdtemp(join(tmpdir(), 'sdk-stall-'));
+  // Real deadline: this Playwright's evaluate ignores the timeout
+  // option, so the bound is an explicit race; closing the page kills
+  // the straggler.
+  const withDeadline = (promise, ms, label) => Promise.race([promise, new Promise((_, reject) => {
+    const timer = setTimeout(() => reject(Error(`deadline: ${label} exceeded ${ms}ms`)), ms);
+    if (timer.unref) timer.unref();
+  })]);
+  const started = performance.now();
+  let outcome;
+  const page = await browser.newPage();
+  try {
+    await withDeadline(page.evaluate(`new Promise(() => {})`), 3000, 'stalled-operation');
+    outcome = { ok: true };
+  } catch (error) {
+    outcome = { ok: false, error: String((error && error.message) || error).slice(0, 200) };
+  } finally {
+    await page.close();
+    await browser.close();
+  }
+  const elapsed = Math.round(performance.now() - started);
+  assert.equal(outcome.ok, false, 'the stalled operation must time out');
+  assert.match(outcome.error, /deadline: stalled-operation exceeded 3000ms/, 'deadline signature recorded');
+  assert.ok(elapsed < 30_000, `deadline bounded, took ${elapsed}ms`);
+  const receipt = {
+    script: 'e2e/bview-sdk-qualification.test.mjs#stalled-operation',
+    ok: false,
+    error: outcome.error,
+    elapsedMs: elapsed,
+    browserClosed: !browser.isConnected(),
+    'PUBLIC-CONSTANT': 'deadline regression, no key material',
+  };
+  const path = join(dir, 'stall-failure.json');
+  await writeFile(path, JSON.stringify(receipt) + '\n', { flag: 'wx' });
+  const back = JSON.parse(await readFile(path, 'utf8'));
+  assert.equal(back.ok, false);
+  assert.equal(back.browserClosed, true, 'browser released in the finally path');
+  await rm(dir, { recursive: true, force: true });
+});
+
 test('browser loads the real pinned SDK modules and served bytes hash clean', { timeout: 120000 }, async (t) => {
   let chromium;
   try {
@@ -91,8 +153,12 @@ test('browser loads the real pinned SDK modules and served bytes hash clean', { 
   try {
     browser = await chromium.launch({ channel: 'chrome' });
   } catch {
-    t.skip('no Chrome available');
-    return;
+    try {
+      browser = await chromium.launch();
+    } catch {
+      t.skip('no Chrome available');
+      return;
+    }
   }
   const served = [];
   const context = await browser.newContext();
