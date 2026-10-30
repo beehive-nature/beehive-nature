@@ -1,5 +1,11 @@
 # bSigner bounded build recovery — 2026-10-29
 
+Historical receipt: this run used the Python controller at
+`25c0a2f33bdde7ffe67fec4ad782026209fdc092`. The founder subsequently ordered
+replacement with Rust. The original evidence is preserved, not relabeled as a
+Rust-controller run. Current implementation and separately measured results:
+[after-action report](2026-10-29-codex-build-recovery-after-action.md).
+
 Lane: `codex/build-recovery-2026-10-29`, worktree
 `C:/Users/travi/wt-codex-build-recovery`. Lead: ChatGPT. No merge or production
 rollout is assigned. Wonder's H01, Spark High's SDK qualification, Spark

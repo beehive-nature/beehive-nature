@@ -1,0 +1,20 @@
+   Compiling version_check v0.9.5
+   Compiling serde_core v1.0.228
+   Compiling generic-array v0.14.7
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.46
+   Compiling unicode-ident v1.0.24
+   Compiling zmij v1.0.21
+   Compiling syn v2.0.118
+    Checking block-buffer v0.10.4
+    Checking crypto-common v0.1.7
+   Compiling serde_json v1.0.150
+   Compiling serde v1.0.228
+    Checking digest v0.10.7
+   Compiling serde_derive v1.0.228
+    Checking toml_datetime v1.1.2+spec-1.1.0
+    Checking serde_spanned v1.1.2
+    Checking sha2 v0.10.9
+    Checking toml v1.1.8+spec-1.1.0
+    Checking bsigner-recovery v0.1.0 (/mnt/c/Users/travi/wt-codex-build-recovery/tools/build-recovery)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 21.85s

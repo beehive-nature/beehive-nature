@@ -1,125 +1,139 @@
-# bSigner bounded build recovery
+# bSigner recovery in Rust
 
-This runner reconstructs the existing **default-feature** bSigner from a
-retained Git source archive, the unchanged workspace `Cargo.lock`, a copied
-Rust toolchain, vendored dependency sources, and the existing public fixtures.
-It does not change the signer, its contract, any wallet consumer, or CI.
+The recovery controller, inventory, integrity refusals, public-law verification
+orchestration and receipts are Rust. The existing signer and cryptography are
+unchanged. This standalone workspace has its own pinned lockfile and does not
+change the signer's lockfile. No Python or Node interpreter is required by the
+controller. HTML is presentation, not a substitute for native protocol logic.
 
-This is a Linux x86_64 recovery drill, including under WSL. It is not a
-bit-for-bit reproducible-build claim, an independent cryptographic audit, a
-hardware recovery ceremony, a production release, or a durability guarantee.
-The optional, off-by-default FROST feature and other workspace applications
-are outside this drill. No provider, wallet, payment, or mesh call is needed.
+The original reconstruction remains historical evidence at commit
+`25c0a2f33bdde7ffe67fec4ad782026209fdc092`, with its original snapshot and logs.
+Never rewrite those artifacts or attribute that run to this Rust binary.
+The [Python sources and original raw evidence](evidence/python-25c0a2f/PRESERVATION.md)
+are also preserved on this branch under the founder's explicit instruction.
+See [the after-action report](../../docs/dispatches/2026-10-29-codex-build-recovery-after-action.md).
 
-## Preparation (network allowed)
+## Build the controller
 
-Use an isolated worktree. Fetch and record the full main SHA before archiving.
-On Windows, use Git for Windows so the worktree's gitfile resolves correctly:
-
-```powershell
-git fetch origin
-git rev-parse origin/main
-git archive --format=tar -o C:/Users/travi/build-recovery-2026-10-29/source.tar e36fde447446440916131a2b4dadd1eee3bcc7d0
-```
-
-The output's parent must exist and the output must be a fresh, dedicated path.
-Do not copy another seat's working directory, target directory, credentials,
-Cargo credentials file, private keys, or unpushed work. The archive is the
-committed source tree, not the worktree's current bytes or Git history.
-
-Prerequisites: Python 3.12+ (`tomllib`, safe tar extraction), curl, Cargo,
-the exact toolchain named by `rust-toolchain.toml`, and sufficient disk space.
-For the offline host also retain Linux, bubblewrap with unprivileged namespace
-support, `timeout`, `nice`, util-linux `prlimit`, a C linker/toolchain and its system libraries, and Node
-for the existing law-signature script. The runner records host executable
-digests and relevant installed package versions; it does **not** package an
-entire bootable OS. Keep compatible OS installation media separately.
+Linux x86_64, Rust 1.98.1, an installed C linker/system libraries and locked
+dependency sources are required. The 31 packages in this tool's lockfile are
+already in the retained recovery vendor directory. Compile locally:
 
 ```sh
-python3 tools/build-recovery/bsigner.py prepare \
-  --archive /mnt/c/Users/travi/build-recovery-2026-10-29/source.tar \
-  --source-sha e36fde447446440916131a2b4dadd1eee3bcc7d0 \
-  --snapshot /home/travi/bsigner-recovery-2026-10-29/snapshot \
-  --toolchain /home/travi/.rustup/toolchains/1.98.1-x86_64-unknown-linux-gnu
+cargo --config 'source.crates-io.replace-with="vendored-sources"' \
+  --config 'source.vendored-sources.directory="/retained/vendor"' \
+  build --release --frozen --offline \
+  --manifest-path tools/build-recovery/Cargo.toml -j 1
 ```
 
-Preparation refuses an existing snapshot directory. It copies the full source
-and toolchain, runs `cargo vendor --locked --versioned-dirs`, and downloads
-only the four public fixtures already pinned by
-`scripts/btungsten/pq05-xwing-draft.json` and `pq12-bip341.json`. Each fixture
-must match its retained size and SHA-256. Cargo validates registry package
-checksums against the original lockfile; directory-source checksums remain
-present in the vendor tree. The full workspace dependency inventory is kept
-because Cargo resolves the workspace even when only bSigner is built.
+Use a dedicated `CARGO_TARGET_DIR`, the pinned toolchain's `bin` first in PATH,
+and one build job. `test` runs refusal controls; `clippy --all-targets -- -D warnings`
+checks the same implementation. The recorded controller build also used a
+network namespace without external interfaces, in addition to Cargo offline.
 
-`provenance.json`, `dependencies.json`, preparation command receipts, and the
-per-file `manifest.json` describe the snapshot. Preserve the archive and the
-manifest digest outside the snapshot as an independent integrity anchor.
-A digest stored beside its bytes alone is not an authenticity authority.
-Preparation failures leave their partial directory for diagnosis; retry at a
-new path after resolving the named missing input. Never call it complete just
-because a local cache previously built a different source revision.
+## Local preparation; downloads are separate
 
-## Offline phase (after SDK timings finish)
+Acquire a committed Git archive with `git archive --format=tar`, the exact
+toolchain named in `rust-toolchain.toml`, dependency sources via
+`cargo vendor --locked --versioned-dirs`, and the four public fixtures below.
+Online acquisition is separate. Git remotes, registries and URLs are replaceable
+acquisition locations, not authorities for accepting bytes. Independently
+retained archive/source/lock digests and fixture pins determine acceptance.
+A digest beside replaceable bytes is not itself proof of origin.
 
-Check the SDK seat's activity first. This synchronous command must run in a
-quiet window; `--quiet-window-note` records the evidence, not a reservation.
-Do not treat low CPU priority as permission to overlap another seat's timings.
-Use a new output directory for every attempt; the runner will not overwrite
-an existing output. A failed attempt's logs remain available.
+`prepare` performs **no network calls**. The demonstrated run reused previously
+retained inputs and downloaded nothing. Its new snapshot's parent must exist:
 
-```sh
-python3 tools/build-recovery/bsigner.py offline \
-  --snapshot /home/travi/bsigner-recovery-2026-10-29/snapshot \
-  --work /home/travi/bsigner-recovery-2026-10-29/run-1 \
-  --quiet-window-note 'Record the actual SDK-idle observation and time here'
+```text
+bsigner-recovery prepare ARCHIVE ARCHIVE_SHA256 SOURCE_SHA TOOLCHAIN VENDOR FIXTURES NEW_SNAPSHOT EXPECTED_LOCK_SHA256
 ```
 
-The runner first verifies every retained file and host tool digest. Bubblewrap
-then provides a new network, mount, PID, user, IPC and UTS namespace. The
-snapshot and host tools/libraries are read-only, only the new output directory
-is writable, `/tmp` is disposable, the environment is cleared, and neither the
-host home directory nor `/mnt/c` is mounted. No network socket is passed in.
-The namespace must differ from the host, have no IPv4 routes, and fail IPv4 and
-IPv6 connection probes with `ENETUNREACH` before Cargo runs. The probes cannot
-reach the public addresses in a successfully isolated namespace.
+It checks archive hash and Git PAX commit, extracts with native GNU tar, checks
+lock/toolchain pins, copies source/toolchain/vendor, and checks fixture size and
+SHA-256 against retained source pins: `xwing-draft.txt`, `bip341.json`,
+`bip174.mediawiki`, `bip371.mediawiki`. Unsupported dependency source types fail
+closed. This retained workspace uses crates.io and local workspace dependencies;
+Cargo validates vendored checksums during resolution/build. Assembly alone is
+not a reconstruction pass.
 
-The following commands reuse existing build/test entry points. Each Cargo
-command also receives the retained source-replacement configuration,
-`--frozen --offline`, a new `CARGO_HOME`, a new `CARGO_TARGET_DIR`, and `-j 1`:
+The controller embeds its Rust source, manifest and lockfile for retention.
+`provenance.json` records input and host-tool identities. `manifest.json` records
+every retained file/link and ordinary-file mode. Preserve the manifest digest
+independently. Historical manifests without modes remain readable, without
+retroactively claiming permission integrity. Preparation additionally requires
+native Git and GNU tar. Partial failures remain for diagnosis; retry into a new
+path. A bootable OS image and compiler source reconstruction remain separate.
 
-1. `cargo build --release -p bsigner`
-2. `cargo test --release -p bsigner`
-3. `cargo test --release -p bsigner xwing_matches_the_draft_vectors -- --ignored --nocapture`
-4. `cargo test --release -p bsigner -- --ignored --nocapture bip341_wallet_vectors bip174_and_bip371_vectors`
-5. `target/release/bsigner selftest`
-6. `sh scripts/verify-law-signatures-rust.sh target/release/bsigner`
+## Offline reconstruction
 
-`cargo tree --frozen --offline -p bsigner --edges normal,build` first records
-the actual default dependency graph. Add `--probe-only` to the offline command
-to check isolation and this dependency graph without compiling or executing
-fixtures. A probe success is not a successful reconstruction.
+Observe an SDK timing gap before compilation. A note is evidence, not a
+reservation; low priority does not authorize overlap. Preserve other owners'
+processes and worktrees. Use:
 
-Steps 3 and 4 explicitly execute the public external-fixture tests ignored by
-the ordinary suite. Their fixture environment variables point into the
-retained snapshot. The ordinary suite also consumes the committed NIST KAT,
-bPQ, derivation, Nostr, WB001, intent and BIP-39 fixtures. The law gate verifies
-the current archived files against their existing signatures and pinned
-signers, and requires refusal of a modified law file. A failing existing law
-signature is a failed gate, not permission to regenerate it.
+```text
+bsigner-recovery verify SNAPSHOT INDEPENDENT_MANIFEST_SHA256
+bsigner-recovery offline SNAPSHOT INDEPENDENT_MANIFEST_SHA256 NEW_WORK QUIET_WINDOW_NOTE
+```
 
-Resources: one Cargo worker and one Rust test thread, nice level 15, 30-minute
-process-group timeout (15-second termination grace), 8 GiB address-space and
-1,200 CPU-second **per-process** ceilings, 1,024 open files, and 2 GiB maximum
-individual output file. These are not an aggregate memory or total disk quota.
-Keep at least several GiB free; measured disk and memory are in the dispatch.
-All generated test key material stays in the sandbox's disposable `/tmp`;
-the persisted outputs contain build artifacts, public fixtures and receipts.
+Output and snapshot must be disjoint; output must not already exist. All retained
+bytes and host executable hashes are checked before launch. Bubblewrap creates
+isolated network/mount/PID/user/IPC/UTS namespaces, read-only source/tools, fresh
+target/Cargo home, cleared environment and disposable `/tmp`. No host home,
+Windows drive, credentials or inherited network socket is supplied. The usual
+`python3` and `node` executable paths are masked with `/dev/null`; execution
+attempts must fail before Cargo starts.
 
-`launch.json` records exact argv, isolation settings and the snapshot digest;
-`isolation.json` records the namespace and refusal probes; `logs/*.json` records
-command exit statuses/times; `artifact.json` identifies the actual binary; and
-`result.json` records the overall exit status. Success means those recorded
-checks passed on this host for that source and toolchain. It does not establish
-reproducibility across independent builders, future cryptographic strength,
-10-billion-user capacity, or 1,000-year continuity.
+Admission requires a different network namespace, loopback only, no IPv4 route,
+and IPv4/IPv6 connection attempts returning `ENETUNREACH` (101). Timeouts do not
+count. Add `--probe-only` to run isolation and dependency resolution alone.
+
+The seven command receipts cover:
+
+1. `cargo --config /snapshot/cargo-config.toml tree --frozen --offline -p bsigner --edges normal,build`
+2. `cargo --config /snapshot/cargo-config.toml build --frozen --offline --release -p bsigner -j 1`
+3. `cargo --config /snapshot/cargo-config.toml test --frozen --offline --release -p bsigner -j 1`
+4. The same test command with `xwing_matches_the_draft_vectors -- --ignored --nocapture`.
+5. The same test command with `-- --ignored --nocapture bip341_wallet_vectors bip174_and_bip371_vectors`.
+6. `/work/target/release/bsigner selftest`.
+7. `/snapshot/runner law /work/target/release/bsigner /source`.
+
+The last command ports the existing shell/Node law gate's orchestration to
+Rust. It uses the same `bsigner bpq-verify` contract, requires verified detached
+signatures by the existing pinned signers for every listed file, and requires
+exit 1 for a changed copy. A crash/missing binary is not a tamper refusal. No
+cryptographic implementation is substituted.
+
+Limits: one Cargo worker/test thread, nice 15, 30 minutes plus 15-second
+termination grace, 8 GiB address space and 1,200 CPU seconds **per process**,
+1,024 descriptors and 2 GiB per output file. These are not aggregate memory or
+disk quotas. Manifest parsing is capped at 64 MiB, 150,000 entries and 64
+directory levels. Keep several GiB free per snapshot/run. Compatible OS,
+linker/libraries and native isolation utilities remain explicit dependencies.
+
+## Language census and change check
+
+Produce a UTF-8 native-Git path list (`git ls-files`, plus new files where
+appropriate), one repository-relative path per line. Then:
+
+```text
+bsigner-recovery audit REPOSITORY_ROOT TRACKED_PATH_LIST OUTPUT_JSON
+bsigner-recovery guard REPOSITORY_ROOT CHANGED_PATH_LIST
+```
+
+The census names tracked scripting-language paths and script-bearing HTML
+indicators. It is not a runtime graph, complete HTML parser or centralization
+verdict. Classify first-party logic, vendor specimens, build glue, proof
+languages and generated files before porting; preserve contracts and fixtures.
+
+The guard refuses listed Python/JavaScript/TypeScript/shell/etc. changes and
+obvious script-bearing HTML. Rust and Vaulta-native C++ are implementation
+targets. It checks only supplied paths and selected syntax. It is not wired to
+shared hooks/CI by this lane and is not estate-wide enforcement.
+Pass active implementation changes to the guard. The explicitly preserved,
+hash-checked historical evidence files are not new runtime implementations and
+are maintained separately; do not delete them to make a language count smaller.
+
+Results must identify executed source/binary and commands. One reconstruction
+is not statistical evidence of a speedup, universal security, reproducibility,
+10-billion-active-user capacity or 1,000-year durability. Language compliance
+alone establishes none of these.
