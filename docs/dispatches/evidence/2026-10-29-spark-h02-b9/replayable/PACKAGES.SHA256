@@ -1,0 +1,9 @@
+# SHA-256 of replayable packages (PUBLIC-CONSTANT: recorded digests
+# of public rehearsal evidence, never key material). Halves reassemble
+# by concatenation, top entry first.
+# baseline-pass-sessB.tar.gz (11,047 bytes, 15 files):
+d84865bb80851cc6792c68c70fd6246d320d2f
+e91696abb4ee3008f7131a5ea1
+# failover-pass-sessF1.tar.gz (25,987 bytes, 16 files):
+ac8941f2c07f08c039f2d3f7bd5c85ffdf0ab78
+e45a28cb7a1d78a3fca735d12

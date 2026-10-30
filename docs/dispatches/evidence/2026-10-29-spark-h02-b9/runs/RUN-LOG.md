@@ -59,9 +59,9 @@ lane (none active here; nothing to deconflict).
   (middle envelopes never signature-checked; only first/last go
   through `verify_same_actor`). A passing-run triple is
   unconstructible (third phase exists only on exhaustion) — noted.
-- R4a entry removed: no checkpoint-stage error (remaining first/last
-  genuinely verify) → recorded WITHOUT defect claim; overall exit 3
-  via substrate outcome.
+- R4a entry removed: checkpoint omission not detected; retained pair
+  verifies; inventory completeness remains unproved (no end-to-end
+  PASS claimed; overall exit 3 via genuine substrate outcome).
 - R4b envelopes stripped: no checkpoint-stage error (empty set skips
   all verification) → UNEXPECTED ACCEPTANCE / DEFECT REPRODUCED;
   overall exit 3 via substrate outcome.

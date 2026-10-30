@@ -25,10 +25,18 @@ valid receipt must refuse: outcome-gating, not receipt-gating).
 **Execution (loopback, same day):** harness `a4e01714` built detached
 (`../wt-b9-verify`, binary digest `2D83F184…3801395`); baselines +
 R1–R8 executed via scripted loopback, archived in `runs/` with
-`RUN-LOG.md`. Accepted: R1, R2a, R2b, R6 outright; R3/R4b/R4c at
-checkpoint stage; R5 mutated without refusal (post-state
-unverifiable). Refused as required: R4d, R7, R8. R4a accepted without
-defect claim. Golden fixture unchanged throughout.
+`RUN-LOG.md`. Accepted: R1, R2a, R2b, R6 outright; R3/R4b/R4c silent
+at checkpoint stage (no end-to-end PASS: wholes failed later);
+R5 mutated without refusal (post-state unverifiable). Refused as
+required: R4d, R7, R8. R4a: omission not detected, retained pair
+verifies, completeness unproved. Golden fixture unchanged throughout.
+**Close-out:** original capture bytes for both passing controls
+repackaged losslessly in `replayable/` (deterministic tarballs +
+digests + restore procedure); fresh-extract → pinned-verifier replay
+passes both (baseline `checkpoints_verified=0 same_actor=false`,
+failover `checkpoints_verified=2 same_actor=true`). Annotated
+`runs/` record preserved as historical. Model turns now conserved
+until Wonder's corrective SHA/binary lands.
 
 ## 1. Governing specification
 
