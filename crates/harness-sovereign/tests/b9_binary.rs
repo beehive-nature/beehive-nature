@@ -7,6 +7,7 @@
 //! run leaves behind, never from helper calls in the run's process.
 
 use std::collections::VecDeque;
+use std::ffi::OsString;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::path::{Path, PathBuf};
@@ -771,33 +772,87 @@ fn verify_only_requires_explicit_expectations_and_refuses_identity_substitution(
     )
     .expect("retain A pin outside the evidence");
 
-    // Missing required expectation arguments refuse, naming the
-    // missing expectation, before any artifact is trusted.
-    for (tag, args) in [
-        ("none", vec!["--verify-only", "--workdir"]),
-        ("workdir-only-extra", vec!["--verify-only"]),
-    ] {
-        let _ = tag;
-        let out = Command::new(env!("CARGO_BIN_EXE_harness-sovereign"))
-            .args(args)
-            .arg(&workdir_a)
-            .env("HARNESS_VAULT_REC", vault_phrase())
-            .output()
-            .expect("missing-args invocation");
-        assert!(
-            !out.status.success()
-                && String::from_utf8_lossy(&out.stderr).contains("missing required"),
-            "{tag} must refuse for missing expectations: {}",
-            String::from_utf8_lossy(&out.stderr)
-        );
-    }
-
     // Independently pinned control passes.
     let control = verify_with_pin(&workdir_a, "sess-bundle", ORDER, &pin_a, &manifest);
     assert!(
         control.status.success(),
         "pinned control must pass: {}",
         String::from_utf8_lossy(&control.stderr)
+    );
+
+    // Exercise each expectation independently while all other pins
+    // remain valid. Repeated values are ambiguous even when equal;
+    // no malformed invocation may reach artifact acceptance or
+    // change the original bundle, external pin or frozen manifest.
+    let expectation_args = [
+        ("--session", OsString::from("sess-bundle")),
+        ("--order-id", OsString::from(ORDER)),
+        ("--public-material", pin_a.as_os_str().to_os_string()),
+        ("--manifest", manifest.as_os_str().to_os_string()),
+    ];
+    let valid_args: Vec<OsString> = expectation_args
+        .iter()
+        .flat_map(|(name, value)| [OsString::from(*name), value.clone()])
+        .collect();
+    let before_refusals = snapshot_tree(&dir);
+    let refuse = |tag: &str, name: &str, args: &[OsString]| {
+        let out = Command::new(env!("CARGO_BIN_EXE_harness-sovereign"))
+            .arg("--verify-only")
+            .arg("--workdir")
+            .arg(&workdir_a)
+            .args(args)
+            .env("HARNESS_VAULT_REC", vault_phrase())
+            .output()
+            .expect("malformed-expectation invocation");
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(
+            !out.status.success()
+                && stderr.contains("stage=expectations")
+                && stderr.contains(name),
+            "{tag} {name} must refuse at the expectation boundary: {stderr}"
+        );
+        assert!(
+            snapshot_tree(&dir) == before_refusals,
+            "{tag} {name} must preserve the original run and independent pins"
+        );
+    };
+    for (index, (name, value)) in expectation_args.iter().enumerate() {
+        let mut omitted = valid_args.clone();
+        drop(omitted.drain(index * 2..index * 2 + 2));
+        refuse("omitted", name, &omitted);
+
+        let mut empty = valid_args.clone();
+        empty[index * 2 + 1] = OsString::new();
+        refuse("empty value", name, &empty);
+
+        let mut whitespace = valid_args.clone();
+        whitespace[index * 2 + 1] = OsString::from(" \t ");
+        refuse("whitespace-only value", name, &whitespace);
+
+        let mut followed_by_flag = valid_args.clone();
+        followed_by_flag[index * 2 + 1] = OsString::from("--verify-only");
+        refuse("value replaced by next option", name, &followed_by_flag);
+
+        let mut dangling = omitted;
+        dangling.push(OsString::from(*name));
+        refuse("dangling option", name, &dangling);
+
+        let mut repeated = valid_args.clone();
+        repeated.extend([OsString::from(*name), value.clone()]);
+        refuse("identical duplicate", name, &repeated);
+
+        let mut conflicting = valid_args.clone();
+        conflicting.extend([
+            OsString::from(*name),
+            OsString::from("different-expected-value"),
+        ]);
+        refuse("conflicting duplicate", name, &conflicting);
+    }
+    let control_after_refusals = verify_with_pin(&workdir_a, "sess-bundle", ORDER, &pin_a, &manifest);
+    assert!(
+        control_after_refusals.status.success(),
+        "original pinned control must still pass after every refusal: {}",
+        String::from_utf8_lossy(&control_after_refusals.stderr)
     );
 
     // Bundle B: same session/order/manifest, a different identity.
