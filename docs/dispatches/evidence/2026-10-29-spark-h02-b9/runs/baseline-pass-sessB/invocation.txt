@@ -1,0 +1,3 @@
+env: test recovery phrase + throwaway MODEL_API_KEY (rehearsal-only)
+C:\Users\travi\wt-b9-verify\target\debug\harness-sovereign.exe --workdir <workG> --session sess-B --manifest …/evidence/2026-10-29-spark-h02-b9/manifest.json --order-id demo-task --max-turns 6 --backend-url <loopback:18928>
+verify: --verify-only --workdir <same> --session sess-B --order-id demo-task

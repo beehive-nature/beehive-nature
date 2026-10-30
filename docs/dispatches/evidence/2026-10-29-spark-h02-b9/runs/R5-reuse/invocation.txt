@@ -1,0 +1,2 @@
+env: test recovery phrase + throwaway MODEL_API_KEY (rehearsal-only)
+reuse: same --workdir/--session as baseline-pass with fresh loopback; identity rotated did:b:t6io... -> did:b:wk2t...; post verify fails: "exported canonical transcript is not byte-exact the session transcript"
