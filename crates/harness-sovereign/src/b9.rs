@@ -278,65 +278,133 @@ pub struct SavedRunReport {
     pub transcript_sha256: String,
 }
 
+/// The authenticated terminal outcome of a run, signed by the agent
+/// identity at the end of the run. This replaces the earlier bare
+/// outcome string: a pasted, hand-written or substring-matching
+/// outcome record cannot satisfy verification, because the record
+/// binds session, order, actor, manifest, final transcript and
+/// checkpoint inventory under the signer's key.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct TerminalOutcome {
+    pub session_id: String,
+    pub order_id: String,
+    pub did: String,
+    pub manifest_sha256: String,
+    pub transcript_sha256: String,
+    /// Exact terminal kind: `EndTurn`, `MaxTurns`, `Cancelled` or
+    /// `Error`. Compared by equality, never by substring.
+    pub outcome_kind: String,
+    pub checkpoint_count: usize,
+    pub duration_ms: u128,
+}
+
+/// The exact bytes signed for a terminal outcome record.
+pub fn terminal_outcome_payload(record: &TerminalOutcome) -> Vec<u8> {
+    serde_json::to_vec(record).expect("terminal outcome serializes")
+}
+
+/// Sign a terminal outcome record with the agent identity and return
+/// the JSON value written to `evidence/run-outcome.json`.
+pub fn signed_terminal_outcome(
+    identity: &IdentityHook,
+    record: &TerminalOutcome,
+) -> Result<serde_json::Value, String> {
+    let signed = identity.checkpoint(&terminal_outcome_payload(record))?;
+    let mut value =
+        serde_json::to_value(record).map_err(|e| format!("terminal outcome JSON: {e}"))?;
+    value["envelope"] = serde_json::json!({
+        "did": signed.did,
+        "signature_b64u": bsigner::b64::b64u(&signed.sig),
+    });
+    Ok(value)
+}
+
+/// Independently supplied pre-run expectations for saved-run
+/// verification: the requested session and order, the actor's public
+/// material (archived before the run), and the frozen manifest bytes
+/// the run was given. Nothing in here is read from the run's own
+/// artifacts, so swapped evidence cannot supply its own expectations.
+#[derive(Debug, Clone)]
+pub struct SavedRunExpectations {
+    pub session_id: String,
+    pub order_id: String,
+    pub material: PublicMaterial,
+    pub manifest: Vec<u8>,
+}
+
 /// Complete saved-run verification, from disk only — no private
-/// keystore, no live harness state. Checks, in order: the public
-/// material binds canonically (bzDiD genesis, algorithm, DID); the
-/// run definition agrees with that material; the frozen manifest
-/// hashes and counts to the definition; the saved goal is the
-/// definition's goal; the transcript opens with the seeded task from
-/// the definition; the exported canonical transcript is byte-exact
-/// the session transcript and hashes to the exported value; every
-/// signed checkpoint envelope verifies over its canonical prefix
-/// under the exported key (and, when there are at least two, the
-/// SAME ACTOR pair verifies); the run outcome is `EndTurn`; and the
-/// receipt independently verifies for the requested order.
+/// keystore, no live harness state. Every expectation comes from the
+/// caller (independently supplied before the run); the artifacts
+/// must agree with those expectations and independently verify:
+/// canonical material binding; definition bound to session, order,
+/// actor and manifest; saved goal; seeded-task opening; byte-exact
+/// canonical transcript; the complete ordered checkpoint inventory
+/// identical to the persisted checkpoint log, every envelope
+/// verifying over its canonical prefix (SAME ACTOR for the pair);
+/// the signed terminal outcome binding session, order, actor,
+/// manifest, final transcript and checkpoint count, with kind
+/// exactly `EndTurn`; and the receipt verifying for the order.
 pub fn verify_saved_run(
     workdir: &Path,
     run_dir: &Path,
-    expected_order_id: Option<&str>,
+    expectations: &SavedRunExpectations,
 ) -> Result<SavedRunReport, String> {
     let read_json = |path: &Path| -> Result<serde_json::Value, String> {
         let text =
             std::fs::read_to_string(path).map_err(|e| format!("read {}: {e}", path.display()))?;
         serde_json::from_str(&text).map_err(|e| format!("parse {}: {e}", path.display()))
     };
-    let material: PublicMaterial = {
+    // Expectations are independently supplied; the run's own copies
+    // must agree with them, never replace them.
+    let material = &expectations.material;
+    if !crate::identity::public_material_binds(material) {
+        return Err("public material does not bind canonically (bzDiD genesis, alg, DID)".into());
+    }
+    let artifact_material: PublicMaterial = {
         let value = read_json(&run_dir.join("public-material.json"))?;
         serde_json::from_value(value).map_err(|e| format!("public material shape: {e}"))?
     };
-    if !crate::identity::public_material_binds(&material) {
-        return Err("public material does not bind canonically (bzDiD genesis, alg, DID)".into());
+    if artifact_material != *material {
+        return Err("archived public material does not match the supplied expectation".into());
     }
     let definition: RunDefinition = {
         let value = read_json(&run_dir.join("run-definition.json"))?;
         serde_json::from_value(value).map_err(|e| format!("run definition shape: {e}"))?
     };
-    if let Some(expected) = expected_order_id {
-        if definition.order_id != expected {
-            return Err(format!(
-                "run definition is for order {}, not the requested {expected}",
-                definition.order_id
-            ));
-        }
+    if definition.session_id != expectations.session_id {
+        return Err(format!(
+            "run definition is for session {}, not the requested session {}",
+            definition.session_id, expectations.session_id
+        ));
+    }
+    if definition.order_id != expectations.order_id {
+        return Err(format!(
+            "run definition is for order {}, not the requested {}",
+            definition.order_id, expectations.order_id
+        ));
     }
     if definition.did != material.did || definition.alg != material.alg {
         return Err("run definition identity does not match the public material".into());
     }
-    let manifest = std::fs::read(run_dir.join("frozen-manifest.bin"))
+    let manifest = &expectations.manifest;
+    let frozen = std::fs::read(run_dir.join("frozen-manifest.bin"))
         .map_err(|e| format!("read frozen manifest: {e}"))?;
-    if manifest_sha256(&manifest) != definition.manifest_sha256
-        || count_manifest_items(&manifest) != Some(definition.item_count)
+    if frozen != *manifest {
+        return Err("frozen manifest bytes do not match the supplied manifest".into());
+    }
+    if manifest_sha256(manifest) != definition.manifest_sha256
+        || count_manifest_items(manifest) != Some(definition.item_count)
     {
         return Err("frozen manifest does not hash/count to the run definition".into());
     }
 
     let sessions = workdir.join("sessions");
-    let goal = read_json(&sessions.join(format!("{}.goal.json", definition.session_id)))?;
+    let goal = read_json(&sessions.join(format!("{}.goal.json", expectations.session_id)))?;
     if goal != definition.goal() {
         return Err("saved goal does not match the run definition goal".into());
     }
     let transcript_text =
-        std::fs::read_to_string(sessions.join(format!("{}.jsonl", definition.session_id)))
+        std::fs::read_to_string(sessions.join(format!("{}.jsonl", expectations.session_id)))
             .map_err(|e| format!("read session transcript: {e}"))?;
     let mut messages = Vec::new();
     for line in transcript_text
@@ -372,70 +440,148 @@ pub fn verify_saved_run(
         return Err("exported transcript hash does not match the transcript".into());
     }
 
-    // Signed checkpoint envelopes verify over their canonical prefix.
+    // Complete ordered checkpoint inventory: the exported evidence
+    // must be an array identical, entry for entry and in order, to
+    // the persisted checkpoint log for the requested session. A
+    // removed, reordered, stripped or malformed entry is rejected —
+    // checkpoint evidence is never skipped silently.
+    // A session that never checkpointed has no persisted log; that
+    // is an empty inventory, and the exported evidence must then be
+    // empty too (the equality check below enforces it). Any other
+    // read failure is an error.
+    let persisted_text = match std::fs::read_to_string(
+        sessions.join(format!("{}.checkpoints.jsonl", expectations.session_id)),
+    ) {
+        Ok(text) => text,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => String::new(),
+        Err(error) => return Err(format!("read persisted checkpoint log: {error}")),
+    };
+    let mut persisted: Vec<serde_json::Value> = Vec::new();
+    for line in persisted_text
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+    {
+        persisted
+            .push(serde_json::from_str(line).map_err(|e| format!("checkpoint log row JSON: {e}"))?);
+    }
     let checkpoints = read_json(&evidence.join("checkpoints.json"))?;
+    let Some(exported) = checkpoints.as_array() else {
+        return Err("exported checkpoint evidence is not an array".into());
+    };
+    if exported.as_slice() != persisted.as_slice() {
+        return Err(
+            "exported checkpoint inventory is not the complete ordered persisted log".into(),
+        );
+    }
+    // Every signed envelope verifies over its canonical prefix, in
+    // order with non-decreasing turn counts — not only first/last.
+    let verifying_key = material
+        .verifying_key_bytes()
+        .ok_or("public material key does not decode")?;
     let mut signed: Vec<crate::identity::SignedCheckpoint> = Vec::new();
-    if let Some(array) = checkpoints.as_array() {
-        for checkpoint in array {
-            let Some(envelope) = checkpoint.get("bsigner_envelope") else {
-                continue;
-            };
-            let turn_count = checkpoint
-                .get("turn_count")
-                .and_then(|n| n.as_u64())
-                .ok_or("checkpoint has no turn_count")? as usize;
-            if turn_count > messages.len() {
-                return Err("checkpoint turn_count exceeds the transcript".into());
-            }
-            let prefix = &messages[..turn_count];
-            if crate::switch::transcript_sha256(prefix)
-                != checkpoint["transcript_sha256"].as_str().unwrap_or("")
-            {
-                return Err("checkpoint transcript hash does not match its prefix".into());
-            }
-            let signature_text = envelope["signature_b64u"]
-                .as_str()
-                .ok_or("checkpoint envelope has no signature")?;
-            let signature = bsigner::b64::b64u_decode(signature_text)
-                .ok_or("checkpoint signature is not base64url")?;
-            signed.push(crate::identity::SignedCheckpoint {
-                did: envelope["did"].as_str().unwrap_or("").to_string(),
-                verifying_key: material
-                    .verifying_key_bytes()
-                    .ok_or("public material key does not decode")?,
-                bytes: crate::switch::canonical_messages(prefix).into_bytes(),
-                sig: signature,
-            });
+    let mut previous_turn_count: Option<usize> = None;
+    for checkpoint in exported {
+        let envelope = checkpoint
+            .get("bsigner_envelope")
+            .filter(|envelope| !envelope.is_null())
+            .ok_or("checkpoint entry has no signature envelope")?;
+        let turn_count = checkpoint
+            .get("turn_count")
+            .and_then(|n| n.as_u64())
+            .ok_or("checkpoint has no turn_count")? as usize;
+        if turn_count > messages.len() {
+            return Err("checkpoint turn_count exceeds the transcript".into());
         }
+        if previous_turn_count.is_some_and(|previous| turn_count < previous) {
+            return Err("checkpoint inventory is not in transcript order".into());
+        }
+        previous_turn_count = Some(turn_count);
+        let prefix = &messages[..turn_count];
+        if crate::switch::transcript_sha256(prefix)
+            != checkpoint["transcript_sha256"].as_str().unwrap_or("")
+        {
+            return Err("checkpoint transcript hash does not match its prefix".into());
+        }
+        let signature_text = envelope["signature_b64u"]
+            .as_str()
+            .ok_or("checkpoint envelope has no signature")?;
+        let signature = bsigner::b64::b64u_decode(signature_text)
+            .ok_or("checkpoint signature is not base64url")?;
+        let candidate = crate::identity::SignedCheckpoint {
+            did: envelope["did"].as_str().unwrap_or("").to_string(),
+            verifying_key: verifying_key.clone(),
+            bytes: crate::switch::canonical_messages(prefix).into_bytes(),
+            sig: signature,
+        };
+        let verifies = bsigner::pq::dsa_verify(
+            bsigner::alg::SigAlg::MlDsa65,
+            &candidate.verifying_key,
+            &candidate.bytes,
+            &candidate.sig,
+        )
+        .unwrap_or(false);
+        if !verifies || candidate.did != material.did {
+            return Err("a checkpoint signature does not verify".into());
+        }
+        signed.push(candidate);
     }
     let mut same_actor_verified = false;
     if signed.len() >= 2 {
         same_actor_verified = crate::identity::IdentityHook::verify_same_actor(
             &signed[0],
             &signed[signed.len() - 1],
-            &material,
+            material,
         );
         if !same_actor_verified {
             return Err("checkpoint pair does not verify as SAME ACTOR".into());
         }
-    } else {
-        for checkpoint in &signed {
-            let verifies = bsigner::pq::dsa_verify(
-                bsigner::alg::SigAlg::MlDsa65,
-                &checkpoint.verifying_key,
-                &checkpoint.bytes,
-                &checkpoint.sig,
-            )
-            .unwrap_or(false);
-            if !verifies || checkpoint.did != material.did {
-                return Err("checkpoint signature does not verify".into());
-            }
-        }
     }
 
+    // Authenticated terminal outcome: the signed record must bind
+    // this session, order, actor, manifest, final transcript and
+    // checkpoint inventory, and its kind must be exactly EndTurn.
     let outcome = read_json(&evidence.join("run-outcome.json"))?;
-    if !outcome["run"].as_str().unwrap_or("").contains("EndTurn") {
-        return Err("recorded run outcome is not EndTurn".into());
+    let record: TerminalOutcome = {
+        let mut fields = outcome.clone();
+        if let Some(object) = fields.as_object_mut() {
+            object.remove("envelope");
+        }
+        serde_json::from_value(fields).map_err(|e| format!("terminal outcome record shape: {e}"))?
+    };
+    if record.session_id != expectations.session_id
+        || record.order_id != expectations.order_id
+        || record.did != material.did
+        || record.manifest_sha256 != definition.manifest_sha256
+        || record.transcript_sha256 != transcript_sha
+        || record.checkpoint_count != signed.len()
+    {
+        return Err("terminal outcome does not bind the executed run".into());
+    }
+    let envelope = outcome
+        .get("envelope")
+        .ok_or("terminal outcome has no signature envelope")?;
+    if envelope["did"].as_str().unwrap_or("") != material.did {
+        return Err("terminal outcome signer is not the expected actor".into());
+    }
+    let outcome_signature = envelope["signature_b64u"]
+        .as_str()
+        .and_then(bsigner::b64::b64u_decode)
+        .ok_or("terminal outcome signature is not base64url")?;
+    let outcome_verifies = bsigner::pq::dsa_verify(
+        bsigner::alg::SigAlg::MlDsa65,
+        &verifying_key,
+        &terminal_outcome_payload(&record),
+        &outcome_signature,
+    )
+    .unwrap_or(false);
+    if !outcome_verifies {
+        return Err("terminal outcome signature does not verify".into());
+    }
+    if record.outcome_kind != "EndTurn" {
+        return Err(format!(
+            "terminal outcome is {}, not EndTurn",
+            record.outcome_kind
+        ));
     }
     let receipt = verify_receipt_file(
         &run_dir.join("receipt.json"),

@@ -29,7 +29,10 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use harness_sovereign::b9::{accept_completed_run, RunDefinition};
+use harness_sovereign::b9::{
+    accept_completed_run, signed_terminal_outcome, RunDefinition, SavedRunExpectations,
+    TerminalOutcome,
+};
 use harness_sovereign::backend::OpenAiCompatBackend;
 use harness_sovereign::identity::IdentityHook;
 use harness_sovereign::nostr::{ensure_demo_key, NostrAdapter, NostrBusBridge};
@@ -66,45 +69,81 @@ fn write_json(path: &Path, value: &serde_json::Value) -> Result<(), String> {
     std::fs::write(path, format!("{text}\n")).map_err(|e| format!("write {}: {e}", path.display()))
 }
 
+/// Claim a session's run directory atomically, before any identity
+/// generation, artifact mutation or provider dispatch. A session is
+/// occupied if any of its prior artifacts exist; the atomic claim is
+/// `create_dir` on `runs/<session>/`, which exactly one caller can
+/// win. The loser refuses and the original run stays byte-identical.
+fn claim_run_dir(workdir: &Path, session_id: &str) -> Result<PathBuf, String> {
+    let sessions = workdir.join("sessions");
+    for suffix in ["jsonl", "goal.json", "checkpoints.jsonl", "state.json"] {
+        let prior = sessions.join(format!("{session_id}.{suffix}"));
+        if prior.exists() {
+            return Err(format!(
+                "session {session_id} is already occupied ({} exists); refusing before any mutation",
+                prior.display()
+            ));
+        }
+    }
+    std::fs::create_dir_all(workdir.join("runs")).map_err(|e| format!("create runs dir: {e}"))?;
+    let run_dir = workdir.join("runs").join(session_id);
+    match std::fs::create_dir(&run_dir) {
+        Ok(()) => Ok(run_dir),
+        Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => Err(format!(
+            "session {session_id} is already occupied ({} exists); refusing before any mutation",
+            run_dir.display()
+        )),
+        Err(error) => Err(format!("claim run dir {}: {error}", run_dir.display())),
+    }
+}
+
 /// Complete independent verification of a finished saved run, from
-/// its on-disk artifacts only. Needs no private keystore: canonical
-/// public material, run definition, frozen manifest, saved goal,
-/// session transcript, exported evidence, signed checkpoints and the
-/// receipt are all checked for mutual agreement and independently
-/// verified (see `verify_saved_run`).
+/// its on-disk artifacts only. Needs no private keystore. The
+/// expectations (requested session and order, the actor's public
+/// material, the frozen manifest bytes) are independently supplied
+/// by the caller — `--public-material` and `--manifest` point at the
+/// pre-run archived copies when available — and the artifacts must
+/// agree with them (see `verify_saved_run`).
 fn run_verify_only(args: &[String]) -> Result<harness_sovereign::b9::B9Receipt, String> {
     let workdir = PathBuf::from(flag_value(args, "--workdir", "runs/demo"));
     let session_id = flag_value(args, "--session", "demo-1");
-    let isolated = workdir.join("runs").join(&session_id);
-    let run_dir = if isolated.is_dir() {
-        isolated
-    } else if !has_flag(args, "--session") {
-        // No session named: discover the single isolated run, if any.
-        let runs = workdir.join("runs");
-        let mut found: Vec<PathBuf> = std::fs::read_dir(&runs)
-            .map(|entries| {
-                entries
-                    .filter_map(|entry| entry.ok())
-                    .map(|entry| entry.path())
-                    .filter(|path| path.is_dir())
-                    .collect()
-            })
-            .unwrap_or_default();
-        if found.len() == 1 {
-            found.pop().expect("one run dir")
-        } else {
-            workdir.clone()
-        }
+    let run_dir = workdir.join("runs").join(&session_id);
+    let order_id = if has_flag(args, "--order-id") {
+        flag_value(args, "--order-id", "")
     } else {
-        workdir.clone()
+        let text = std::fs::read_to_string(run_dir.join("run-definition.json"))
+            .map_err(|e| format!("read run definition: {e}"))?;
+        let definition: serde_json::Value =
+            serde_json::from_str(&text).map_err(|e| format!("run definition JSON: {e}"))?;
+        definition
+            .get("order_id")
+            .and_then(|id| id.as_str())
+            .ok_or("run definition carries no order_id")?
+            .to_string()
     };
-    let expected_order = if has_flag(args, "--order-id") {
-        Some(flag_value(args, "--order-id", ""))
-    } else {
-        None
+    let material_path = PathBuf::from(flag_value(
+        args,
+        "--public-material",
+        &run_dir.join("public-material.json").to_string_lossy(),
+    ));
+    let material_text = std::fs::read_to_string(&material_path)
+        .map_err(|e| format!("read public material {}: {e}", material_path.display()))?;
+    let material: harness_sovereign::identity::PublicMaterial =
+        serde_json::from_str(&material_text).map_err(|e| format!("public material JSON: {e}"))?;
+    let manifest_path = PathBuf::from(flag_value(
+        args,
+        "--manifest",
+        &run_dir.join("frozen-manifest.bin").to_string_lossy(),
+    ));
+    let manifest = std::fs::read(&manifest_path)
+        .map_err(|e| format!("read manifest {}: {e}", manifest_path.display()))?;
+    let expectations = SavedRunExpectations {
+        session_id,
+        order_id,
+        material,
+        manifest,
     };
-    let report =
-        harness_sovereign::b9::verify_saved_run(&workdir, &run_dir, expected_order.as_deref())?;
+    let report = harness_sovereign::b9::verify_saved_run(&workdir, &run_dir, &expectations)?;
     eprintln!(
         "saved-run evidence: checkpoints_verified={} same_actor={} transcript_sha256={}",
         report.checkpoint_signatures_verified, report.same_actor_verified, report.transcript_sha256
@@ -148,6 +187,17 @@ async fn main() {
         Ok(bytes) => bytes,
         Err(error) => {
             eprintln!("B9 run refused: cannot read manifest {manifest_arg}: {error}");
+            std::process::exit(2);
+        }
+    };
+
+    // Occupied-session refusal comes first: before identity
+    // generation, before any artifact mutation, before any provider
+    // dispatch. The loser of the atomic claim changes nothing.
+    let run_dir = match claim_run_dir(&workdir, &session_id) {
+        Ok(run_dir) => run_dir,
+        Err(error) => {
+            eprintln!("B9 run refused: {error}");
             std::process::exit(2);
         }
     };
@@ -225,11 +275,9 @@ async fn main() {
                 std::process::exit(2);
             }
         };
-    // Isolated run evidence: every run artifact lives under
-    // `runs/<session>/` inside the workdir, so runs sharing a workdir
-    // never overwrite each other's definition, material or evidence.
-    let run_dir = workdir.join("runs").join(&session_id);
-    std::fs::create_dir_all(&run_dir).expect("run dir");
+    // Isolated run evidence: every run artifact lives under the
+    // atomically claimed `runs/<session>/` inside the workdir, so
+    // runs sharing a workdir never overwrite each other's evidence.
     std::fs::write(run_dir.join("frozen-manifest.bin"), &manifest_bytes).expect("freeze manifest");
     write_json(
         &run_dir.join("public-material.json"),
@@ -353,7 +401,7 @@ async fn main() {
         store,
         toolset,
         Some(publisher),
-        Some(identity),
+        Some(identity.clone()),
         definition.goal(),
         max_turns,
     );
@@ -399,19 +447,29 @@ async fn main() {
         &serde_json::Value::Array(coordinator.store().read_checkpoints()),
     )
     .expect("write checkpoint evidence");
-    write_json(
-        &evidence_dir.join("run-outcome.json"),
-        &serde_json::json!({
-            "order_id": definition.order_id,
-            "session_id": definition.session_id,
-            "manifest_sha256": definition.manifest_sha256,
-            "item_count": definition.item_count,
-            "did": definition.did,
-            "duration_ms": duration_ms,
-            "run": format!("{run:?}"),
-        }),
-    )
-    .expect("write run outcome");
+    // Authenticated terminal outcome: signed by the agent identity
+    // over the record binding session, order, actor, manifest, final
+    // transcript and checkpoint inventory. A bare or pasted outcome
+    // file cannot satisfy verification of this record.
+    let outcome_kind = match &run {
+        Ok(harness_sovereign::switch::RunOutcome::EndTurn) => "EndTurn",
+        Ok(harness_sovereign::switch::RunOutcome::MaxTurns) => "MaxTurns",
+        Ok(harness_sovereign::switch::RunOutcome::Cancelled) => "Cancelled",
+        Err(_) => "Error",
+    };
+    let outcome_record = TerminalOutcome {
+        session_id: definition.session_id.clone(),
+        order_id: definition.order_id.clone(),
+        did: definition.did.clone(),
+        manifest_sha256: definition.manifest_sha256.clone(),
+        transcript_sha256: transcript_sha256(&messages),
+        outcome_kind: outcome_kind.to_string(),
+        checkpoint_count: coordinator.store().read_checkpoints().len(),
+        duration_ms,
+    };
+    let outcome_value =
+        signed_terminal_outcome(&identity, &outcome_record).expect("sign terminal outcome");
+    write_json(&evidence_dir.join("run-outcome.json"), &outcome_value).expect("write run outcome");
 
     // Independent B9 acceptance: the only path to a zero exit. No
     // receipt is generated here — the agent must have produced it

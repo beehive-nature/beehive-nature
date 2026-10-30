@@ -172,12 +172,27 @@ fn run_binary_at(
     command.output().expect("binary runs")
 }
 
-fn verify_only(workdir: &Path, extra: &[&str]) -> Output {
+fn expectations(
+    root: &Path,
+    session: &str,
+    order: &str,
+) -> harness_sovereign::b9::SavedRunExpectations {
+    harness_sovereign::b9::SavedRunExpectations {
+        session_id: session.to_string(),
+        order_id: order.to_string(),
+        material: read_material(root),
+        manifest: MANIFEST.to_vec(),
+    }
+}
+
+fn verify_only(workdir: &Path, session: &str, extra: &[&str]) -> Output {
     let mut command = Command::new(env!("CARGO_BIN_EXE_harness-sovereign"));
     command
         .arg("--verify-only")
         .arg("--workdir")
         .arg(workdir)
+        .arg("--session")
+        .arg(session)
         .env("HARNESS_VAULT_REC", vault_phrase());
     for arg in extra {
         command.arg(arg);
@@ -252,8 +267,12 @@ fn valid_completed_task_passes_and_artifacts_verify_from_disk() {
     let frozen = std::fs::read(root.join("frozen-manifest.bin")).expect("frozen manifest");
     assert_eq!(frozen, MANIFEST);
     // Complete saved-run verification agrees from disk as well.
-    let saved = harness_sovereign::b9::verify_saved_run(&workdir, &root, Some(ORDER))
-        .expect("saved run verifies completely");
+    let saved = harness_sovereign::b9::verify_saved_run(
+        &workdir,
+        &root,
+        &expectations(&root, "sess-run-valid", ORDER),
+    )
+    .expect("saved run verifies completely");
     assert_eq!(saved.receipt.order_id, ORDER);
     let receipt = harness_sovereign::b9::verify_receipt_file(
         &root.join("receipt.json"),
@@ -284,7 +303,7 @@ fn valid_completed_task_passes_and_artifacts_verify_from_disk() {
         "tool result must be in the exported transcript: {transcript}"
     );
     // Verify-only through the binary agrees, with no keystore use.
-    let verify = verify_only(&workdir, &[]);
+    let verify = verify_only(&workdir, "sess-run-valid", &[]);
     assert!(
         verify.status.success(),
         "verify-only must pass: {}",
@@ -305,13 +324,13 @@ fn tampered_receipt_and_wrong_order_fail_verify_only() {
 
     // Wrong requested order: the receipt is genuinely valid for
     // ORDER-A, so only the order binding can refuse ORDER-B.
-    let wrong_order = verify_only(&workdir, &["--order-id", "ORDER-B"]);
+    let wrong_order = verify_only(&workdir, "sess-run-tampered", &["--order-id", "ORDER-B"]);
     assert!(
         !wrong_order.status.success(),
         "verify-only for ORDER-B must fail: {}",
         String::from_utf8_lossy(&wrong_order.stderr)
     );
-    let right_order = verify_only(&workdir, &["--order-id", ORDER]);
+    let right_order = verify_only(&workdir, "sess-run-tampered", &["--order-id", ORDER]);
     assert!(right_order.status.success(), "control: ORDER-A passes");
 
     // Tampered receipt: flip the recorded count on disk; both the
@@ -323,7 +342,7 @@ fn tampered_receipt_and_wrong_order_fail_verify_only() {
             .expect("receipt parses");
     receipt["item_count"] = serde_json::json!(99);
     std::fs::write(&receipt_path, receipt.to_string()).expect("tamper");
-    let tampered = verify_only(&workdir, &[]);
+    let tampered = verify_only(&workdir, "sess-run-tampered", &[]);
     assert!(
         !tampered.status.success(),
         "tampered receipt must fail verify-only: {}",
@@ -375,8 +394,12 @@ fn primary_connection_failure_then_replacement_completes() {
     );
     // Complete saved-run verification, including the signed
     // checkpoint pair as SAME ACTOR, agrees from disk.
-    let saved = harness_sovereign::b9::verify_saved_run(&workdir, &root, Some(ORDER))
-        .expect("failover saved run verifies completely");
+    let saved = harness_sovereign::b9::verify_saved_run(
+        &workdir,
+        &root,
+        &expectations(&root, "sess-run-failover", ORDER),
+    )
+    .expect("failover saved run verifies completely");
     assert!(saved.same_actor_verified);
     assert_eq!(saved.checkpoint_signatures_verified, 2);
     // Backend health snapshot is part of the exported evidence.
@@ -389,7 +412,7 @@ fn primary_connection_failure_then_replacement_completes() {
     assert_eq!(backends.len(), 2);
     assert_eq!(backends[0]["healthy"], serde_json::json!(false));
     assert_eq!(backends[1]["healthy"], serde_json::json!(true));
-    let verify = verify_only(&workdir, &[]);
+    let verify = verify_only(&workdir, "sess-run-failover", &[]);
     assert!(verify.status.success(), "failover receipt must verify");
     std::fs::remove_dir_all(&dir).ok();
 }
@@ -425,12 +448,267 @@ fn two_runs_in_one_workdir_keep_isolated_evidence() {
         receipt_a,
         "run B must not overwrite run A's evidence"
     );
-    let saved_a = harness_sovereign::b9::verify_saved_run(&workdir, &root_a, Some("ORDER-A"))
-        .expect("run A verifies after B");
-    let saved_b = harness_sovereign::b9::verify_saved_run(&workdir, &root_b, Some("ORDER-B"))
-        .expect("run B verifies");
+    let saved_a = harness_sovereign::b9::verify_saved_run(
+        &workdir,
+        &root_a,
+        &expectations(&root_a, "sess-alpha", "ORDER-A"),
+    )
+    .expect("run A verifies after B");
+    let saved_b = harness_sovereign::b9::verify_saved_run(
+        &workdir,
+        &root_b,
+        &expectations(&root_b, "sess-beta", "ORDER-B"),
+    )
+    .expect("run B verifies");
     assert_eq!(saved_a.order_id, "ORDER-A");
     assert_eq!(saved_b.order_id, "ORDER-B");
     assert_ne!(saved_a.did, saved_b.did);
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+fn copy_dir(from: &Path, to: &Path) {
+    std::fs::create_dir_all(to).expect("copy dest");
+    for entry in std::fs::read_dir(from).expect("read dir") {
+        let entry = entry.expect("entry");
+        let target = to.join(entry.file_name());
+        if entry.path().is_dir() {
+            copy_dir(&entry.path(), &target);
+        } else {
+            std::fs::copy(entry.path(), &target).expect("copy file");
+        }
+    }
+}
+
+fn snapshot_tree(root: &Path) -> Vec<(String, Vec<u8>)> {
+    let mut out = Vec::new();
+    let mut walk = vec![root.to_path_buf()];
+    while let Some(dir) = walk.pop() {
+        for entry in std::fs::read_dir(&dir).expect("snapshot read") {
+            let entry = entry.expect("snapshot entry");
+            if entry.path().is_dir() {
+                walk.push(entry.path());
+            } else {
+                out.push((
+                    entry
+                        .path()
+                        .strip_prefix(root)
+                        .expect("under root")
+                        .to_string_lossy()
+                        .replace('\\', "/"),
+                    std::fs::read(entry.path()).expect("snapshot file"),
+                ));
+            }
+        }
+    }
+    out.sort();
+    out
+}
+
+#[test]
+fn agent3_counterexamples_refused_with_fresh_valid_controls() {
+    // Agent 3's published counterexample shapes (#494 at 31ab1820),
+    // rerun against fresh valid runs produced by this binary. Every
+    // tamper works on a disposable copy; the fresh control passes.
+    let dir = scenario_dir("counterexamples");
+    let stub = start_stub(vec![
+        tool_call_text(),
+        "Receipt produced. Task complete.".to_string(),
+    ]);
+    let (workdir, output) = run_binary(&dir, "run-ctr", ORDER, 6, &[stub.url]);
+    assert!(output.status.success(), "fresh valid control run");
+    let session = "sess-run-ctr";
+
+    let control = dir.join("copy-control");
+    copy_dir(&workdir, &control);
+    let ok = verify_only(&control, session, &[]);
+    assert!(
+        ok.status.success(),
+        "fresh control must pass: {}",
+        String::from_utf8_lossy(&ok.stderr)
+    );
+
+    let outcome_path = |wd: &Path| wd.join(format!("runs/{session}/evidence/run-outcome.json"));
+    let tamper_case = |tag: &str, tamper: &dyn Fn(&Path)| {
+        let copy = dir.join(format!("copy-{tag}"));
+        copy_dir(&workdir, &copy);
+        tamper(&copy);
+        let out = verify_only(&copy, session, &[]);
+        assert!(
+            !out.status.success(),
+            "{tag} must be refused: {}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+    };
+
+    // R2b: bare hand-written outcome, no authentication.
+    tamper_case("r2b", &|copy| {
+        std::fs::write(outcome_path(copy), "{\"run\":\"Ok(EndTurn)\"}").expect("tamper");
+    });
+    // R2a shape: outcome kind is not exactly EndTurn (and the record
+    // no longer matches its signature).
+    tamper_case("r2a", &|copy| {
+        let path = outcome_path(copy);
+        let mut value: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(&path).expect("outcome"))
+                .expect("outcome parses");
+        value["outcome_kind"] = serde_json::json!("Cancelled before EndTurn");
+        std::fs::write(&path, value.to_string()).expect("tamper");
+    });
+    // R1 shape: a successful outcome record from another run pasted
+    // over this one — it binds another actor/transcript.
+    {
+        let other_dir = scenario_dir("counterexample-other");
+        let other_stub = start_stub(vec![
+            tool_call_text(),
+            "Receipt produced. Task complete.".to_string(),
+        ]);
+        let (other_workdir, other_out) =
+            run_binary(&other_dir, "run-ctr", ORDER, 6, &[other_stub.url]);
+        assert!(other_out.status.success(), "donor run");
+        tamper_case("r1", &|copy| {
+            let donor = other_workdir.join("runs/sess-run-ctr/evidence/run-outcome.json");
+            std::fs::copy(&donor, outcome_path(copy)).expect("paste outcome");
+        });
+        std::fs::remove_dir_all(&other_dir).ok();
+    }
+    // R6: same order, wrong requested session.
+    {
+        let out = verify_only(&control, "sess-does-not-exist", &[]);
+        assert!(!out.status.success(), "wrong session must be refused");
+        let root = run_root(&control, "run-ctr");
+        assert!(harness_sovereign::b9::verify_saved_run(
+            &control,
+            &root,
+            &expectations(&root, "sess-does-not-exist", ORDER),
+        )
+        .is_err());
+    }
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn agent3_checkpoint_inventory_counterexamples_are_refused() {
+    // Failover run: two signed checkpoints, complete inventory.
+    let dir = scenario_dir("ckpt-counterexamples");
+    let stub = start_stub(vec![
+        tool_call_text(),
+        "Receipt produced after failover. Task complete.".to_string(),
+    ]);
+    let dead = closed_url();
+    let (workdir, output) = run_binary(&dir, "run-fx", ORDER, 8, &[dead, stub.url]);
+    assert!(output.status.success(), "fresh failover control run");
+    let session = "sess-run-fx";
+    let checkpoints_path = |wd: &Path| wd.join(format!("runs/{session}/evidence/checkpoints.json"));
+
+    let control = dir.join("copy-control");
+    copy_dir(&workdir, &control);
+    assert!(
+        verify_only(&control, session, &[]).status.success(),
+        "fresh failover control must pass"
+    );
+
+    let tamper_case = |tag: &str, tamper: &dyn Fn(&Path)| {
+        let copy = dir.join(format!("copy-{tag}"));
+        copy_dir(&workdir, &copy);
+        tamper(&copy);
+        let out = verify_only(&copy, session, &[]);
+        assert!(
+            !out.status.success(),
+            "{tag} must be refused: {}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+    };
+    // R4a: remove one exported entry (persisted log retains it).
+    tamper_case("r4a-remove-entry", &|copy| {
+        let path = checkpoints_path(copy);
+        let mut value: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(&path).expect("checkpoints"))
+                .expect("checkpoints parse");
+        value.as_array_mut().expect("array").remove(0);
+        std::fs::write(&path, value.to_string()).expect("tamper");
+    });
+    // R4b: strip every envelope from the exported evidence.
+    tamper_case("r4b-strip-envelope", &|copy| {
+        let path = checkpoints_path(copy);
+        let mut value: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(&path).expect("checkpoints"))
+                .expect("checkpoints parse");
+        for entry in value.as_array_mut().expect("array") {
+            entry
+                .as_object_mut()
+                .expect("entry")
+                .remove("bsigner_envelope");
+        }
+        std::fs::write(&path, value.to_string()).expect("tamper");
+    });
+    // R4c: non-array checkpoint evidence.
+    tamper_case("r4c-non-array", &|copy| {
+        std::fs::write(checkpoints_path(copy), "{}").expect("tamper");
+    });
+    // R4d: whole exported file deleted.
+    tamper_case("r4d-deleted", &|copy| {
+        std::fs::remove_file(checkpoints_path(copy)).expect("tamper");
+    });
+    // R3: corrupt a checkpoint signature in BOTH the exported
+    // evidence and the persisted log, so only signature verification
+    // itself can refuse it.
+    tamper_case("r3-corrupt-signature", &|copy| {
+        for path in [
+            checkpoints_path(copy),
+            copy.join(format!("sessions/{session}.checkpoints.jsonl")),
+        ] {
+            let text = std::fs::read_to_string(&path).expect("read checkpoints");
+            let marker = "\"signature_b64u\"";
+            let after = text.find(marker).expect("signature field") + marker.len();
+            let start = after + text[after..].find('"').expect("signature value") + 1;
+            let mut bytes = text.into_bytes();
+            bytes[start] = if bytes[start] == b'A' { b'B' } else { b'A' };
+            std::fs::write(&path, bytes).expect("tamper");
+        }
+    });
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn occupied_session_refuses_before_mutation_and_original_stays_verifiable() {
+    // R5: re-running into the same workdir/session must refuse
+    // atomically, before identity generation or any mutation, and
+    // the original run must remain byte-identical and verifiable.
+    let dir = scenario_dir("reuse");
+    let workdir = dir.join("reuse-workdir");
+    let stub = start_stub(vec![tool_call_text(), "done".to_string()]);
+    let first = run_binary_at(&dir, &workdir, "sess-reuse", ORDER, &[stub.url]);
+    assert!(
+        first.status.success(),
+        "first run: {}",
+        String::from_utf8_lossy(&first.stderr)
+    );
+    let before = snapshot_tree(&workdir);
+
+    let stub2 = start_stub(vec![tool_call_text(), "done again".to_string()]);
+    let second = run_binary_at(&dir, &workdir, "sess-reuse", ORDER, &[stub2.url]);
+    assert!(
+        !second.status.success(),
+        "occupied session must refuse: {}",
+        String::from_utf8_lossy(&second.stderr)
+    );
+    assert!(
+        String::from_utf8_lossy(&second.stderr).contains("already occupied"),
+        "refusal must name occupancy: {}",
+        String::from_utf8_lossy(&second.stderr)
+    );
+    assert_eq!(
+        snapshot_tree(&workdir),
+        before,
+        "refused reuse must leave the original run byte-identical"
+    );
+    let root = workdir.join("runs/sess-reuse");
+    let saved = harness_sovereign::b9::verify_saved_run(
+        &workdir,
+        &root,
+        &expectations(&root, "sess-reuse", ORDER),
+    )
+    .expect("original run still verifies after refused reuse");
+    assert_eq!(saved.order_id, ORDER);
     std::fs::remove_dir_all(&dir).ok();
 }
