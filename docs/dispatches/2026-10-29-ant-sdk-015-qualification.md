@@ -11,6 +11,8 @@
 receipts + exercises banked).
 **Close-out:** `c66b3e295d7eaa7259f22cb90e78c9e63d323473` (seek pair,
 SUMMARY over 30 samples, offline gate, abort/exercise reruns).
+**Bank:** `1419b72d3dfde7a6621558745867dc7e9538da36` (head record).
+**Hosted:** checks pending at push (runs just started); not yet observed.
 **Baseline:** bView production pins SDK 0.1.2 (`surfaces/bview.html`
 `SDK_ROOT`, untouched).
 
