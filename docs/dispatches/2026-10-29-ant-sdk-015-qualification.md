@@ -100,13 +100,42 @@ refused; real Chrome loads the pinned 0.1.5 `index.js` (exports
   integrity. The 0.1.2 run took the relay path after a direct timeout
   (network-path variance, not an SDK verdict); no performance claim
   is made from n=1 — that is what the remaining nine blocks are for.
-- Remaining nine AB/BA blocks (cold / session-warm /
-  completed-file-cache, comparable corpus/device/browser/caps/cache):
-  NOT EXECUTED — beyond this turn's budget (18 more × ~55 MB +
-  playback time). Exact procedure: repeat the two smoke commands
-  alternating A/B/B/A, keeping one receipt per run; compare
-  `receivedAtMs`, `endedAtMs`, `stalls`/`stallMs`, `transportSummary`
-  (wire bytes, dials), `sdkDigests` and memory recovery per receipt.
+- All ten AB blocks complete (18 runs, blocks 2–4 cold direct-only,
+  blocks 5–10 `--warm` giving a cold phase plus a completed-file-cache
+  reload phase, alternating BA/AB order, same box/corpus/browser).
+  Raw receipts: `docs/receipts/ant-sdk-015/block{2..10}-0.1.{2,5}-{cold,warm}.json`.
+  Cold accepted means (elapsed / received ms):
+
+  | block | 0.1.5 | 0.1.2 |
+  |---|---|---|
+  | 2 | 334,645 / 313,203 (2 stalls, 41.4 s) | FAILED, 0 bytes in 163,690 ms |
+  | 3 | 276,803 / 255,172 | 266,754 / 245,459 |
+  | 4 | 260,679 / 239,553 | 306,646 / 286,364 |
+  | 5 | 273,904 / 253,162 | 275,858 / 254,650 |
+  | 6 | 266,124 / 245,979 | 293,415 / 272,076 |
+  | 7 | 269,141 / 247,985 | 269,186 / 248,294 |
+  | 8 | 267,062 / 246,273 | 283,797 / 262,583 |
+  | 9 | 264,340 / 243,999 | 276,422 / 256,295 |
+  | 10 | 265,599 / 244,481 | 284,528 / 263,880 (1×82.8 ms stall) |
+
+  Plus the block-1 smokes (route `direct`): 0.1.5 280,886/259,494
+  direct 0 stalls; 0.1.2 323,704/100,160 via relay 1×82.8 ms stall.
+- Aggregate: 17/18 accepted runs intact with `sdkVerified` and the
+  correct per-arm WASM pin; every accepted run took the direct path
+  with 0 relay requests and 0 page errors. Cold-phase means ≈267.7 s
+  (0.1.5) vs ≈280.5 s (0.1.2) — within ~5%, noise-dominated given
+  the 27–73 s first-frame spread across runs: **no performance
+  superiority is claimed either way**. All 12 cache phases:
+  `source=cache`, integrity true, 0 SDK requests, 0 relay, 0 dials.
+- The single failure (block2-0.1.2-cold, direct-only, 0 bytes, SDK
+  served+verified with 24 digests) is network-path variance under a
+  strict route, not an SDK defect — same as the block-1 relay
+  fallback. Failures are kept as data, never retried away.
+- First-frame proxy (`ttffMs`/`playStartMs`) is recorded per receipt
+  above; complete transfer = full 54,903,201 bytes with integrity on
+  every accepted run. Seek was not performed live per arm (gap stands:
+  seek recovery is covered only by the offline hls suite with a
+  fixture SDK).
 
 ## Pass/fail table
 
@@ -125,7 +154,8 @@ refused; real Chrome loads the pinned 0.1.5 `index.js` (exports
 | Live 0.1.2 baseline pair | PASS (accepted, sdkVerified; relay path) |
 | Reader exercises 0.1.5 | PASS 9/9 + receipt |
 | Reader exercises 0.1.2 | FAIL at close/reopen (confirmed WASM borrow defect; candidate fixes it) |
-| Remaining 9× AB/BA blocks | NOT EXECUTED |
+| All 10 AB blocks (18 runs) | 17 accepted intact, 1 network-path failure kept as data |
+| Cache phases (12) | all source=cache, integrity true, 0 sdk/relay/dials |
 | Wallet/payment consumer re-qual | OUT OF SCOPE (separate lane) |
 
 ## Remaining gaps
