@@ -106,14 +106,27 @@ fn claim_run_dir(workdir: &Path, session_id: &str) -> Result<PathBuf, String> {
 /// a missing required expectation refuses before any artifact is
 /// trusted (see `verify_saved_run`).
 fn required_flag(args: &[String], name: &str) -> Result<String, String> {
-    if has_flag(args, name) {
-        Ok(flag_value(args, name, ""))
-    } else {
-        Err(format!(
+    let mut positions = args
+        .iter()
+        .enumerate()
+        .filter(|(_, arg)| arg.as_str() == name);
+    let (index, _) = positions.next().ok_or_else(|| {
+        format!(
             "stage=expectations: missing required {name} for --verify-only (expectations are \
              never taken from the candidate evidence)"
-        ))
+        )
+    })?;
+    if positions.next().is_some() {
+        return Err(format!(
+            "stage=expectations: {name} must be supplied exactly once for --verify-only"
+        ));
     }
+    args.get(index + 1)
+        .filter(|value| !value.trim().is_empty() && !value.starts_with("--"))
+        .cloned()
+        .ok_or_else(|| {
+            format!("stage=expectations: {name} requires a non-empty value, not another option")
+        })
 }
 
 fn run_verify_only(args: &[String]) -> Result<harness_sovereign::b9::B9Receipt, String> {
@@ -434,9 +447,21 @@ async fn main() {
         format!("{}\n", transcript_sha256(&messages)),
     )
     .expect("write transcript hash");
+    // Read once, without discarding malformed entries or I/O errors.
+    // This exact ordered snapshot is exported and authenticated below.
+    let checkpoint_snapshot = match coordinator.store().read_checkpoints_strict() {
+        Ok(snapshot) => snapshot,
+        Err(error) => {
+            eprintln!("B9 ACCEPTANCE FAIL: stage=checkpoint-inventory: {error}");
+            std::process::exit(3);
+        }
+    };
+    let checkpoint_count = checkpoint_snapshot.len();
+    let inventory_commitment =
+        harness_sovereign::b9::checkpoint_inventory_commitment(&checkpoint_snapshot);
     write_json(
         &evidence_dir.join("checkpoints.json"),
-        &serde_json::Value::Array(coordinator.store().read_checkpoints()),
+        &serde_json::Value::Array(checkpoint_snapshot),
     )
     .expect("write checkpoint evidence");
     // Authenticated terminal outcome: signed by the agent identity
@@ -449,7 +474,6 @@ async fn main() {
         Ok(harness_sovereign::switch::RunOutcome::Cancelled) => "Cancelled",
         Err(_) => "Error",
     };
-    let checkpoint_snapshot = coordinator.store().read_checkpoints();
     let outcome_record = TerminalOutcome {
         session_id: definition.session_id.clone(),
         order_id: definition.order_id.clone(),
@@ -457,12 +481,10 @@ async fn main() {
         manifest_sha256: definition.manifest_sha256.clone(),
         transcript_sha256: transcript_sha256(&messages),
         outcome_kind: outcome_kind.to_string(),
-        checkpoint_count: checkpoint_snapshot.len(),
+        checkpoint_count,
         duration_ms,
         inventory_version: harness_sovereign::b9::CHECKPOINT_INVENTORY_VERSION,
-        inventory_commitment: harness_sovereign::b9::checkpoint_inventory_commitment(
-            &checkpoint_snapshot,
-        ),
+        inventory_commitment,
     };
     let outcome_value =
         signed_terminal_outcome(&identity, &outcome_record).expect("sign terminal outcome");
