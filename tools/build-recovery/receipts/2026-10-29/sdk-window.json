@@ -1,0 +1,41 @@
+{
+  "firstIdleObservation": "2026-10-29T20:04:15.8087353-06:00",
+  "secondIdleObservation": "2026-10-29T20:05:17.9079507-06:00",
+  "activeTimingProcessCount": 0,
+  "note": "Observed timing gap; existing offline qualification processes preserved; not an owner reservation.",
+  "observedDuringAndAfter": [
+    {
+      "checkedAt": "2026-10-29T20:05:53.2642530-06:00",
+      "activeSdkTimingCount": 0
+    },
+    {
+      "checkedAt": "2026-10-29T20:06:13.5385220-06:00",
+      "activeSdkTimingCount": 0
+    },
+    {
+      "checkedAt": "2026-10-29T20:06:37.8687406-06:00",
+      "activeSdkTimingCount": 0
+    },
+    {
+      "checkedAt": "2026-10-29T20:07:32.4976436-06:00",
+      "activeSdkTimingCount": 0
+    },
+    {
+      "checkedAt": "2026-10-29T20:07:54.9344890-06:00",
+      "activeSdkTimingCount": 0
+    },
+    {
+      "checkedAt": "2026-10-29T20:08:49.3853470-06:00",
+      "activeSdkTimingCount": 0
+    },
+    {
+      "checkedAt": "2026-10-29T20:09:48.7489079-06:00",
+      "activeSdkTimingCount": 0
+    },
+    {
+      "checkedAt": "2026-10-29T20:10:18.4755649-06:00",
+      "activeSdkTimingCount": 0
+    }
+  ],
+  "processMatch": "node.exe command line matching bview-sdk-seek|qualify-local|sdk-run|reader-exercises|sdk-ab"
+}

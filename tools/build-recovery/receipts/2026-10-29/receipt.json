@@ -1,0 +1,496 @@
+{
+  "build_directory": "/home/travi/bsigner-recovery-2026-10-29/run-1",
+  "groups": {
+    "fixtures": {
+      "file_bytes": 256937,
+      "files": 4,
+      "manifest_subset_sha256_b64url": "-dklP-C6peCAdbTY0Jjka77Z-ueNivH9AbUJLE1CscU"
+    },
+    "source": {
+      "file_bytes": 569305644,
+      "files": 28256,
+      "manifest_subset_sha256_b64url": "PsoIg2PlHUlLf3CTlENyRUhiYIJ-V_C_0v1diQYFUN0"
+    },
+    "toolchain": {
+      "file_bytes": 1065840275,
+      "files": 339,
+      "manifest_subset_sha256_b64url": "mx8_lAj8PXs7YRmy77EMsZB_TWt_QPlYVS43gfqDH6c"
+    },
+    "vendor": {
+      "file_bytes": 734888499,
+      "files": 31214,
+      "manifest_subset_sha256_b64url": "naAVpqhnMZ9gv5VL5s6LVVADvlc90GtrrgciaLq3UEs"
+    }
+  },
+  "hash_encoding": "SHA-256 encoded base64url without padding",
+  "hook_fixture": {
+    "command": "Git-for-Windows sh e2e/hooks-installed.test.sh",
+    "exit": 0
+  },
+  "installer_refusal": {
+    "exit": 2,
+    "reason": "Existing shared hook is not the installer delegator; preserved"
+  },
+  "integrity_controls": {
+    "command": "python3 -m unittest discover -s tools/build-recovery -p test_integrity.py -v",
+    "exit": 0,
+    "tests_passed": 4
+  },
+  "local_snapshot": "/home/travi/bsigner-recovery-2026-10-29/snapshot",
+  "local_source_archive": "C:/Users/travi/build-recovery-2026-10-29/source.tar",
+  "log_integrity": {
+    "bitcoin.log": {
+      "committed_sha256_b64url": "GNck-yKmwQA89wIf6zG6YEE4HVHnT8QO4si9a0csaTo",
+      "raw_sha256_b64url": "hwizc-UUHvfxUKd8ACSp5c_bO6M-kvm2cBnSrhxL_mQ"
+    },
+    "build.log": {
+      "committed_sha256_b64url": "ki_l7rSVCONO7RosBiGh9R0JMQ3bxCt-QXn0Qwl6cWk",
+      "raw_sha256_b64url": "ki_l7rSVCONO7RosBiGh9R0JMQ3bxCt-QXn0Qwl6cWk"
+    },
+    "dependency-tree.log": {
+      "committed_sha256_b64url": "VfDU6KSkOnwpU4CrMNpij64R6UtxhJPJYxxxDjWpdMM",
+      "raw_sha256_b64url": "VfDU6KSkOnwpU4CrMNpij64R6UtxhJPJYxxxDjWpdMM"
+    },
+    "law.log": {
+      "committed_sha256_b64url": "Q0MbYUYMTUme8tFyYi7KF2C6rYvBQSdqVp7obKQ1-G0",
+      "raw_sha256_b64url": "Q0MbYUYMTUme8tFyYi7KF2C6rYvBQSdqVp7obKQ1-G0"
+    },
+    "selftest.log": {
+      "committed_sha256_b64url": "UKDqH8o_XUJ67KynslWX4L77oaoJcP2a6VY-PzhBcWc",
+      "raw_sha256_b64url": "UKDqH8o_XUJ67KynslWX4L77oaoJcP2a6VY-PzhBcWc"
+    },
+    "tests.log": {
+      "committed_sha256_b64url": "rdM1ZieQjaKIsadHtmMgZnoCksJ5wJMiNJAwDaaK6vs",
+      "raw_sha256_b64url": "oO1qjYqdaDR2R5q9BXKjG-MvZJ2g03W0AreoyBScl0Q"
+    },
+    "xwing.log": {
+      "committed_sha256_b64url": "WsMZDjCvJzm9iU2y6d5zo5SyNGExbOonvPiUWfk5rvw",
+      "raw_sha256_b64url": "G31dMq13w7zSq46gRLesW4PvSnT9dHlQhMliXAPN1pg"
+    }
+  },
+  "log_normalization": "Only trailing blank lines removed for the repository whitespace gate; original files remain in local run directory",
+  "output_file_bytes": 175642196,
+  "preparation": [
+    {
+      "command": [
+        "curl",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--location",
+        "--retry",
+        "3",
+        "--max-time",
+        "120",
+        "--output",
+        "/home/travi/bsigner-recovery-2026-10-29/snapshot/fixtures/bip174.mediawiki",
+        "https://raw.githubusercontent.com/bitcoin/bips/200f9b26fe0a2f235a2af8b30c4be9f12f6bc9cb/bip-0174.mediawiki"
+      ],
+      "exit": 0,
+      "seconds": 0.821
+    },
+    {
+      "command": [
+        "curl",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--location",
+        "--retry",
+        "3",
+        "--max-time",
+        "120",
+        "--output",
+        "/home/travi/bsigner-recovery-2026-10-29/snapshot/fixtures/bip341.json",
+        "https://raw.githubusercontent.com/bitcoin/bips/200f9b26fe0a2f235a2af8b30c4be9f12f6bc9cb/bip-0341/wallet-test-vectors.json"
+      ],
+      "exit": 0,
+      "seconds": 0.617
+    },
+    {
+      "command": [
+        "curl",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--location",
+        "--retry",
+        "3",
+        "--max-time",
+        "120",
+        "--output",
+        "/home/travi/bsigner-recovery-2026-10-29/snapshot/fixtures/bip371.mediawiki",
+        "https://raw.githubusercontent.com/bitcoin/bips/200f9b26fe0a2f235a2af8b30c4be9f12f6bc9cb/bip-0371.mediawiki"
+      ],
+      "exit": 0,
+      "seconds": 0.367
+    },
+    {
+      "command": [
+        "curl",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--location",
+        "--retry",
+        "3",
+        "--max-time",
+        "120",
+        "--output",
+        "/home/travi/bsigner-recovery-2026-10-29/snapshot/fixtures/xwing-draft.txt",
+        "https://www.ietf.org/archive/id/draft-connolly-cfrg-xwing-kem-11.txt"
+      ],
+      "exit": 0,
+      "seconds": 0.621
+    },
+    {
+      "command": [
+        "/home/travi/bsigner-recovery-2026-10-29/snapshot/toolchain/bin/cargo",
+        "vendor",
+        "--locked",
+        "--versioned-dirs",
+        "/home/travi/bsigner-recovery-2026-10-29/snapshot/vendor"
+      ],
+      "exit": 0,
+      "seconds": 40.188
+    }
+  ],
+  "provenance": {
+    "archive_bytes": 590776320,
+    "archive_sha256_b64url": "60WjdortKhMOKfoU-2if9flglliwkqpT4R3XiFVZHbU",
+    "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+    "downloads": [
+      {
+        "bytes": 61105,
+        "file": "xwing-draft.txt",
+        "sha256_b64url": "E1P2Hw1wYZnYa2gC6rg8q7tRlbLZn7NbyiD15Pg9t4Y",
+        "url": "https://www.ietf.org/archive/id/draft-connolly-cfrg-xwing-kem-11.txt"
+      },
+      {
+        "bytes": 29296,
+        "file": "bip341.json",
+        "sha256_b64url": "QD4Z-4HdHzHnRWmSFjCPYftAN3SyqvqHtjG498BC038",
+        "url": "https://raw.githubusercontent.com/bitcoin/bips/200f9b26fe0a2f235a2af8b30c4be9f12f6bc9cb/bip-0341/wallet-test-vectors.json"
+      },
+      {
+        "bytes": 132652,
+        "file": "bip174.mediawiki",
+        "sha256_b64url": "iw0JGxICKYs-039jrXnmm77GdqF3sNfPkDotzwl028k",
+        "url": "https://raw.githubusercontent.com/bitcoin/bips/200f9b26fe0a2f235a2af8b30c4be9f12f6bc9cb/bip-0174.mediawiki"
+      },
+      {
+        "bytes": 33884,
+        "file": "bip371.mediawiki",
+        "sha256_b64url": "J4eeDnxKW6nbIovpuFC7nb-hl6hhVCH3hUZTFu_0cTc",
+        "url": "https://raw.githubusercontent.com/bitcoin/bips/200f9b26fe0a2f235a2af8b30c4be9f12f6bc9cb/bip-0371.mediawiki"
+      }
+    ],
+    "host_packages": "binutils\t2.46-3ubuntu2\nbubblewrap\t0.11.1-1ubuntu0.3\ngcc\t4:15.2.0-5ubuntu1\nlibc6:amd64\t2.43-2ubuntu2.4\nlibc6-dev:amd64\t2.43-2ubuntu2.4\nlibgcc-s1:amd64\t16-20260322-1ubuntu1\nlibstdc++6:amd64\t16-20260322-1ubuntu1\nnodejs\t22.22.1+dfsg+~cs22.19.15-1ubuntu1\npython3\t3.14.3-0ubuntu2\n",
+    "host_tools": {
+      "as": {
+        "path": "/usr/bin/x86_64-linux-gnu-as",
+        "sha256_b64url": "Tl_Ko83BYBc8tc_nqjXcOdeqHwa6jXW42SO7rlRzmRs"
+      },
+      "bwrap": {
+        "path": "/usr/bin/bwrap",
+        "sha256_b64url": "Uj2j5zmQRL5RY67m9Xp3pr73RUN24o8KBieSC64bdrY"
+      },
+      "cc": {
+        "path": "/usr/bin/x86_64-linux-gnu-gcc-15",
+        "sha256_b64url": "tfG3c6fHM3ODUgAMkqB33FhSoaL8bYNrHkEb4ensX4g"
+      },
+      "gcc": {
+        "path": "/usr/bin/x86_64-linux-gnu-gcc-15",
+        "sha256_b64url": "tfG3c6fHM3ODUgAMkqB33FhSoaL8bYNrHkEb4ensX4g"
+      },
+      "ld": {
+        "path": "/usr/bin/x86_64-linux-gnu-ld.bfd",
+        "sha256_b64url": "l_SNk7iwdqktKAnsKdyxfw83yIJzWPgyJV4u0i_vYHU"
+      },
+      "nice": {
+        "path": "/usr/lib/cargo/bin/coreutils/nice",
+        "sha256_b64url": "SIk7D7IUNrVGGduASG6D7znfzK8a7-g9-gDALWFG6MA"
+      },
+      "node": {
+        "path": "/usr/bin/node",
+        "sha256_b64url": "0O-2_LnQI7pOKxYOwjhNwo_k8XcyFB70f2doKPqWBQU"
+      },
+      "prlimit": {
+        "path": "/usr/bin/prlimit",
+        "sha256_b64url": "yyiBHLOQJ3PBoPOsDqVUx6HiMnJOnUyuBV7eVLZae8Q"
+      },
+      "python3": {
+        "path": "/usr/bin/python3.14",
+        "sha256_b64url": "UuChPmCpgdjEtkeL4rpRdvadoHlIoFa_Sc9vB34wy0E"
+      },
+      "timeout": {
+        "path": "/usr/lib/cargo/bin/coreutils/timeout",
+        "sha256_b64url": "SIk7D7IUNrVGGduASG6D7znfzK8a7-g9-gDALWFG6MA"
+      }
+    },
+    "kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "lock_sha256_b64url": "oTsN7aTb2nvl2AdvewBhDS5tGJ-JLmFGBWW9YqzO_NM",
+    "os_release": "PRETTY_NAME=\"Ubuntu 26.04 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"26.04\"\nVERSION=\"26.04 (Resolute Raccoon)\"\nVERSION_CODENAME=resolute\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=resolute\nLOGO=ubuntu-logo\n",
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8\n",
+    "source_sha": "e36fde447446440916131a2b4dadd1eee3bcc7d0"
+  },
+  "resource_accounting_limit": "Outer time output does not establish compiler-descendant peak RSS or aggregate CPU. Per-process limits and disk bytes are recorded; aggregate memory was not measured.",
+  "run": {
+    "artifact.json": {
+      "bytes": 1974552,
+      "features": "default",
+      "path": "target/release/bsigner",
+      "profile": "release",
+      "sha256_b64url": "FQQq3Qj0o4yrdeonEO_QzT94pQmUhstnxClmFb5ERZE"
+    },
+    "isolation.json": {
+      "empty_target": true,
+      "interfaces": [
+        [
+          1,
+          "lo"
+        ]
+      ],
+      "netns": "net:[4026532498]",
+      "probes": [
+        {
+          "address": "1.1.1.1",
+          "errno": 101
+        },
+        {
+          "address": "2606:4700:4700::1111",
+          "errno": 101
+        }
+      ],
+      "routes": "Iface\tDestination\tGateway \tFlags\tRefCnt\tUse\tMetric\tMask\t\tMTU\tWindow\tIRTT                                                       \n"
+    },
+    "launch.json": {
+      "command": [
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=15s",
+        "30m",
+        "nice",
+        "-n",
+        "15",
+        "prlimit",
+        "--as=8589934592",
+        "--cpu=1200",
+        "--nofile=1024",
+        "--fsize=2147483648",
+        "--",
+        "bwrap",
+        "--unshare-all",
+        "--die-with-parent",
+        "--new-session",
+        "--cap-drop",
+        "ALL",
+        "--ro-bind",
+        "/usr",
+        "/usr",
+        "--ro-bind",
+        "/bin",
+        "/bin",
+        "--ro-bind",
+        "/lib",
+        "/lib",
+        "--ro-bind",
+        "/lib64",
+        "/lib64",
+        "--dir",
+        "/etc",
+        "--ro-bind",
+        "/etc/ld.so.cache",
+        "/etc/ld.so.cache",
+        "--ro-bind",
+        "/etc/alternatives",
+        "/etc/alternatives",
+        "--proc",
+        "/proc",
+        "--dev",
+        "/dev",
+        "--tmpfs",
+        "/tmp",
+        "--ro-bind",
+        "/home/travi/bsigner-recovery-2026-10-29/snapshot",
+        "/snapshot",
+        "--ro-bind",
+        "/home/travi/bsigner-recovery-2026-10-29/snapshot/source",
+        "/source",
+        "--bind",
+        "/home/travi/bsigner-recovery-2026-10-29/run-1",
+        "/work",
+        "--chdir",
+        "/source",
+        "--clearenv",
+        "--setenv",
+        "PATH",
+        "/snapshot/toolchain/bin:/usr/bin:/bin",
+        "--setenv",
+        "HOME",
+        "/work/home",
+        "--setenv",
+        "CARGO_HOME",
+        "/work/cargo-home",
+        "--setenv",
+        "CARGO_TARGET_DIR",
+        "/work/target",
+        "--setenv",
+        "CARGO_NET_OFFLINE",
+        "true",
+        "--setenv",
+        "CARGO_BUILD_JOBS",
+        "1",
+        "--setenv",
+        "RUST_TEST_THREADS",
+        "1",
+        "--setenv",
+        "LANG",
+        "C.UTF-8",
+        "--setenv",
+        "TZ",
+        "UTC",
+        "--setenv",
+        "BPQ_XWING_DRAFT",
+        "/snapshot/fixtures/xwing-draft.txt",
+        "--setenv",
+        "BPQ_BIP341_VECTORS",
+        "/snapshot/fixtures/bip341.json",
+        "--setenv",
+        "BPQ_BIP174_TEXT",
+        "/snapshot/fixtures/bip174.mediawiki",
+        "--setenv",
+        "BPQ_BIP371_TEXT",
+        "/snapshot/fixtures/bip371.mediawiki",
+        "python3",
+        "/snapshot/runner.py",
+        "inside"
+      ],
+      "host_netns": "net:[4026531833]",
+      "quiet_window_note": "No live SDK timing process observed at 20:04:15 and 20:05:17 America/Denver; immediate preflight still clear. Static offline qualification processes preserved.",
+      "snapshot_manifest_sha256_b64url": "VJJLYy4LYSwhXI_ZPlFsRbQc0n7W-0VpNCbMZVkwKYo"
+    },
+    "logs/bitcoin.json": {
+      "command": [
+        "cargo",
+        "--config",
+        "/snapshot/cargo-config.toml",
+        "test",
+        "--frozen",
+        "--offline",
+        "--release",
+        "-p",
+        "bsigner",
+        "-j",
+        "1",
+        "--",
+        "--ignored",
+        "--nocapture",
+        "bip341_wallet_vectors",
+        "bip174_and_bip371_vectors"
+      ],
+      "exit": 0,
+      "seconds": 0.767
+    },
+    "logs/build.json": {
+      "command": [
+        "cargo",
+        "--config",
+        "/snapshot/cargo-config.toml",
+        "build",
+        "--frozen",
+        "--offline",
+        "--release",
+        "-p",
+        "bsigner",
+        "-j",
+        "1"
+      ],
+      "exit": 0,
+      "seconds": 164.582
+    },
+    "logs/dependency-tree.json": {
+      "command": [
+        "cargo",
+        "--config",
+        "/snapshot/cargo-config.toml",
+        "tree",
+        "--frozen",
+        "--offline",
+        "-p",
+        "bsigner",
+        "--edges",
+        "normal,build"
+      ],
+      "exit": 0,
+      "seconds": 0.366
+    },
+    "logs/law.json": {
+      "command": [
+        "sh",
+        "scripts/verify-law-signatures-rust.sh",
+        "/work/target/release/bsigner"
+      ],
+      "exit": 0,
+      "seconds": 2.677
+    },
+    "logs/selftest.json": {
+      "command": [
+        "/work/target/release/bsigner",
+        "selftest"
+      ],
+      "exit": 0,
+      "seconds": 0.032
+    },
+    "logs/tests.json": {
+      "command": [
+        "cargo",
+        "--config",
+        "/snapshot/cargo-config.toml",
+        "test",
+        "--frozen",
+        "--offline",
+        "--release",
+        "-p",
+        "bsigner",
+        "-j",
+        "1"
+      ],
+      "exit": 0,
+      "seconds": 78.85
+    },
+    "logs/xwing.json": {
+      "command": [
+        "cargo",
+        "--config",
+        "/snapshot/cargo-config.toml",
+        "test",
+        "--frozen",
+        "--offline",
+        "--release",
+        "-p",
+        "bsigner",
+        "-j",
+        "1",
+        "xwing_matches_the_draft_vectors",
+        "--",
+        "--ignored",
+        "--nocapture"
+      ],
+      "exit": 0,
+      "seconds": 0.416
+    },
+    "result.json": {
+      "exit": 0,
+      "finished_unix": 1793326194.509838,
+      "seconds": 247.814,
+      "started_unix": 1793325946.695816
+    }
+  },
+  "schema": "bsigner.build-recovery.receipt/1",
+  "snapshot_files": 59827,
+  "snapshot_manifest_sha256_b64url": "VJJLYy4LYSwhXI_ZPlFsRbQc0n7W-0VpNCbMZVkwKYo",
+  "snapshot_runner_sha256_b64url": "jAVWvih_9wvOo4zLdR2sJ_7SkEIxDN_cQg7aK1Vu38Q",
+  "tooling_commit": "2d4b07ef9c5e87811edab4251ea50e5ee4c088e1",
+  "tree_hash_definition": "SHA-256 of json.dumps(subset, sort_keys=True, separators=(comma, colon), ensure_ascii=True).encode(UTF-8), where subset preserves original manifest order and contains entries with the named path prefix"
+}

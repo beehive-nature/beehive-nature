@@ -1,0 +1,1 @@
+{"covered":["ml-dsa-44/65/87 roundtrip+tamper","ml-kem-512/768/1024 roundtrip","future-alg refusal","keys never printed","x402 pre-signature gate + exact-multi sign/verify + over-cap refusal"],"selftest":"PASS"}
