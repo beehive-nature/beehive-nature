@@ -1,0 +1,34 @@
+   Compiling serde_core v1.0.228
+   Compiling version_check v0.9.5
+   Compiling generic-array v0.14.7
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.46
+   Compiling unicode-ident v1.0.24
+   Compiling zmij v1.0.21
+   Compiling syn v2.0.118
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling serde_json v1.0.150
+   Compiling serde v1.0.228
+   Compiling digest v0.10.7
+   Compiling serde_derive v1.0.228
+   Compiling serde_spanned v1.1.2
+   Compiling toml_datetime v1.1.2+spec-1.1.0
+   Compiling sha2 v0.10.9
+   Compiling toml v1.1.8+spec-1.1.0
+   Compiling bsigner-recovery v0.1.0 (/mnt/c/Users/travi/wt-codex-build-recovery/tools/build-recovery)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 21.73s
+     Running unittests src/main.rs (/home/travi/bsigner-recovery-rust-2026-10-29/runner-target/debug/deps/bsigner_recovery-43f679bc43723402)
+
+running 9 tests
+test tests::file_mode_change_refused ... ok
+test tests::independent_anchor_refuses_rewritten_manifest ... ok
+test tests::ancestor_symlink_refused ... ok
+test tests::file_symlink_substitution ... ok
+test tests::language_guard_refuses_new_script_and_embedded_script ... ok
+test tests::law_verdict_and_pin_required ... ok
+test tests::missing_and_extra ... ok
+test tests::retained_and_changed_bytes ... ok
+test tests::duplicate_and_parent_paths ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

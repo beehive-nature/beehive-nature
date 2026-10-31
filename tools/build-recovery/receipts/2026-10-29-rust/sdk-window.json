@@ -1,0 +1,27 @@
+{
+  "sampled_at": "2026-10-29T22:27:22.3546961-06:00",
+  "timing_processes": [],
+  "existing_stalled_qualification": [
+    {
+      "Id": 6824,
+      "CPU": 0.140625,
+      "StartTime": "2026-10-29T19:15:38.7476194-06:00"
+    },
+    {
+      "Id": 42160,
+      "CPU": 1.0,
+      "StartTime": "2026-10-29T19:15:38.8198386-06:00"
+    },
+    {
+      "Id": 52524,
+      "CPU": 1.484375,
+      "StartTime": "2026-10-29T19:08:23.0352775-06:00"
+    },
+    {
+      "Id": 59048,
+      "CPU": 0.21875,
+      "StartTime": "2026-10-29T19:08:22.9621035-06:00"
+    }
+  ],
+  "previous_sample": "2026-10-29T22:23:06-06:00: same four process CPU totals; no timing processes"
+}

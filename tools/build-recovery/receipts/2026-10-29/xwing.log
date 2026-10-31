@@ -1,0 +1,118 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /source/crates/bnr-keys/Cargo.toml
+workspace: /source/Cargo.toml
+warning: unused imports: `Decapsulate` and `KeyExport`
+  --> crates/bsigner/src/kat.rs:48:19
+   |
+48 | use ml_kem::kem::{Decapsulate, KeyExport};
+   |                   ^^^^^^^^^^^  ^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused imports: `Ciphertext`, `DecapsulationKey`, `ExpandedDecapsulationKey`, `ExpandedKeyEncoding`, and `MlKem768`
+  --> crates/bsigner/src/kat.rs:50:5
+   |
+50 |     Ciphertext, DecapsulationKey, ExpandedDecapsulationKey, ExpandedKeyEncoding, MlKem768,
+   |     ^^^^^^^^^^  ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^
+
+warning: unused imports: `KemAlg` and `SigAlg`
+  --> crates/bsigner/src/kat.rs:54:18
+   |
+54 | use crate::alg::{KemAlg, SigAlg};
+   |                  ^^^^^^  ^^^^^^
+
+warning: unused import: `b64u`
+  --> crates/bsigner/src/kat.rs:55:18
+   |
+55 | use crate::b64::{b64u, b64u_decode};
+   |                  ^^^^
+
+warning: unused import: `crate::pq`
+  --> crates/bsigner/src/kat.rs:56:5
+   |
+56 | use crate::pq;
+   |     ^^^^^^^^^
+
+warning: use of deprecated trait `ml_kem::ExpandedKeyEncoding`: use `DecapsulationKey::from_seed` instead
+  --> crates/bsigner/src/kat.rs:50:61
+   |
+50 |     Ciphertext, DecapsulationKey, ExpandedDecapsulationKey, ExpandedKeyEncoding, MlKem768,
+   |                                                             ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+
+warning: constant `KAT` is never used
+  --> crates/bsigner/src/kat.rs:58:7
+   |
+58 | const KAT: &str = include_str!("../../../surfaces/pq-kat.json");
+   |       ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `kat` is never used
+  --> crates/bsigner/src/kat.rs:60:4
+   |
+60 | fn kat() -> Value {
+   |    ^^^
+
+warning: function `cases` is never used
+  --> crates/bsigner/src/kat.rs:65:4
+   |
+65 | fn cases<'a>(v: &'a Value, alg: &str, section: &str) -> &'a [Value] {
+   |    ^^^^^
+
+warning: function `bytes` is never used
+  --> crates/bsigner/src/kat.rs:81:4
+   |
+81 | fn bytes(case: &Value, field: &str) -> Vec<u8> {
+   |    ^^^^^
+
+warning: function `flipped` is never used
+  --> crates/bsigner/src/kat.rs:88:4
+   |
+88 | fn flipped(b: &[u8]) -> Vec<u8> {
+   |    ^^^^^^^
+
+warning: function `dsa65_public_key` is never used
+  --> crates/bsigner/src/kat.rs:94:4
+   |
+94 | fn dsa65_public_key(seed: [u8; 32]) -> Vec<u8> {
+   |    ^^^^^^^^^^^^^^^^
+
+warning: function `dsa65_verify_with_context` is never used
+   --> crates/bsigner/src/kat.rs:103:4
+    |
+103 | fn dsa65_verify_with_context(pk: &[u8], msg: &[u8], ctx: &[u8], sig: &[u8]) -> bool {
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `bsigner` (lib) generated 13 warnings (run `cargo fix --lib -p bsigner` to apply 5 suggestions)
+warning: use of deprecated method `ml_kem::ExpandedKeyEncoding::to_expanded_bytes`: use `DecapsulationKey::from_seed` instead
+   --> crates/bsigner/src/kat.rs:237:23
+    |
+237 |             b64u(&key.to_expanded_bytes()),
+    |                       ^^^^^^^^^^^^^^^^^
+
+warning: use of deprecated associated function `ml_kem::DecapsulationKey::<P>::from_expanded`: use `DecapsulationKey::from_seed` instead
+   --> crates/bsigner/src/kat.rs:273:43
+    |
+273 |             DecapsulationKey::<MlKem768>::from_expanded(&dk).expect("dk passes its H(ek) check");
+    |                                           ^^^^^^^^^^^^^
+
+warning: `bsigner` (bin "bsigner" test) generated 3 warnings (1 duplicate)
+warning: `bsigner` (lib test) generated 3 warnings (3 duplicates)
+    Finished `release` profile [optimized] target(s) in 0.31s
+     Running unittests src/lib.rs (/work/target/release/deps/bsigner-d4a01b4554402a25)
+
+running 1 test
+test bpq::tests::xwing_matches_the_draft_vectors ... PQ05-XWING bsigner: 3 of 3 vectors pass (keygen, decapsulate, one changed ciphertext refused)
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 83 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (/work/target/release/deps/bsigner-338b48f64b509b2c)
+
+running 1 test
+test bpq::tests::xwing_matches_the_draft_vectors ... PQ05-XWING bsigner: 3 of 3 vectors pass (keygen, decapsulate, one changed ciphertext refused)
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 83 filtered out; finished in 0.00s
