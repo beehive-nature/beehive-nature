@@ -1,0 +1,198 @@
+{
+  "schema": "bnr.build-recovery.rust.v1",
+  "source_commit": "e36fde447446440916131a2b4dadd1eee3bcc7d0",
+  "historical_python_commit": "25c0a2f33bdde7ffe67fec4ad782026209fdc092",
+  "historical_evidence_unchanged": true,
+  "hash_encoding": "SHA-256 bytes, unpadded base64url",
+  "runner_source_sha256_base64url": "jL2lZpzVx6nM7njlqOwbbX0kvL3uDMVUHbrLW8suwZI",
+  "runner_cargo_lock_sha256_base64url": "o5reCtpLXJFY63o0mp-aFvm2sovqanq92QjH05EZVOA",
+  "runner_binary_sha256_base64url": "riY4RQZUhsaNtRHbJEh2BvjwuEaxzteM9MCHy8_2YTY",
+  "snapshot_manifest_sha256_base64url": "KKGR1-sZ938CkyT1L6jdCalt-f1MSzBMcHOSgX9kXJA",
+  "artifact_sha256_base64url": "FQQq3Qj0o4yrdeonEO_QzT94pQmUhstnxClmFb5ERZE",
+  "artifact_bytes": 1974552,
+  "raw_evidence_archive_sha256_base64url": "HsR76Sp42yoBlY1ebzcfMWpvNGW5KRwUd99bczHk28k",
+  "commands": [
+    {
+      "name": "dependency-tree",
+      "command": [
+        "cargo",
+        "--config",
+        "/snapshot/cargo-config.toml",
+        "tree",
+        "--frozen",
+        "--offline",
+        "-p",
+        "bsigner",
+        "--edges",
+        "normal,build"
+      ],
+      "exit": 0,
+      "seconds": 0.506530187,
+      "raw_log_sha256_base64url": "VfDU6KSkOnwpU4CrMNpij64R6UtxhJPJYxxxDjWpdMM",
+      "published_log_sha256_base64url": "VfDU6KSkOnwpU4CrMNpij64R6UtxhJPJYxxxDjWpdMM"
+    },
+    {
+      "name": "build",
+      "command": [
+        "cargo",
+        "--config",
+        "/snapshot/cargo-config.toml",
+        "build",
+        "--frozen",
+        "--offline",
+        "--release",
+        "-p",
+        "bsigner",
+        "-j",
+        "1"
+      ],
+      "exit": 0,
+      "seconds": 182.194064648,
+      "raw_log_sha256_base64url": "vDXqmLSgLdbYATDL8_vSbf-ybgjDThsrRknz4zZB4yg",
+      "published_log_sha256_base64url": "vDXqmLSgLdbYATDL8_vSbf-ybgjDThsrRknz4zZB4yg"
+    },
+    {
+      "name": "tests",
+      "command": [
+        "cargo",
+        "--config",
+        "/snapshot/cargo-config.toml",
+        "test",
+        "--frozen",
+        "--offline",
+        "--release",
+        "-p",
+        "bsigner",
+        "-j",
+        "1"
+      ],
+      "exit": 0,
+      "seconds": 79.933181821,
+      "raw_log_sha256_base64url": "iD6jk2Z-FVASrwJqMmI7qhM78dRlKeuDHaPukpHORqk",
+      "published_log_sha256_base64url": "RyMbFhsx8optwUvfEc40JysR2tyw_FqPrLPejyY2GHo"
+    },
+    {
+      "name": "xwing",
+      "command": [
+        "cargo",
+        "--config",
+        "/snapshot/cargo-config.toml",
+        "test",
+        "--frozen",
+        "--offline",
+        "--release",
+        "-p",
+        "bsigner",
+        "-j",
+        "1",
+        "xwing_matches_the_draft_vectors",
+        "--",
+        "--ignored",
+        "--nocapture"
+      ],
+      "exit": 0,
+      "seconds": 0.606337015,
+      "raw_log_sha256_base64url": "eLjQ9KcQhdovc8ta3LM3v2yeUvp_Fmgj1rcRubhSLI8",
+      "published_log_sha256_base64url": "N6423HoLT61oN5Qs88TGQige3tBq2TD2HJEQYw7Bhd4"
+    },
+    {
+      "name": "bitcoin",
+      "command": [
+        "cargo",
+        "--config",
+        "/snapshot/cargo-config.toml",
+        "test",
+        "--frozen",
+        "--offline",
+        "--release",
+        "-p",
+        "bsigner",
+        "-j",
+        "1",
+        "--",
+        "--ignored",
+        "--nocapture",
+        "bip341_wallet_vectors",
+        "bip174_and_bip371_vectors"
+      ],
+      "exit": 0,
+      "seconds": 0.906752719,
+      "raw_log_sha256_base64url": "qltW91jSUHt33Shc11-KphQwOU9pdtidVu9Qqtfg_HQ",
+      "published_log_sha256_base64url": "cDatpFtyh8jKRDFQlPtiEeawyCS_2oYG04O3WH-xPSc"
+    },
+    {
+      "name": "selftest",
+      "command": [
+        "/work/target/release/bsigner",
+        "selftest"
+      ],
+      "exit": 0,
+      "seconds": 0.105112245,
+      "raw_log_sha256_base64url": "UKDqH8o_XUJ67KynslWX4L77oaoJcP2a6VY-PzhBcWc",
+      "published_log_sha256_base64url": "UKDqH8o_XUJ67KynslWX4L77oaoJcP2a6VY-PzhBcWc"
+    },
+    {
+      "name": "law",
+      "command": [
+        "/snapshot/runner",
+        "law",
+        "/work/target/release/bsigner",
+        "/source"
+      ],
+      "exit": 0,
+      "seconds": 0.105509201,
+      "raw_log_sha256_base64url": "RyAcq0nmWR8H56oZsRMww1Vp51olG87jDBjb3QwEEek",
+      "published_log_sha256_base64url": "RyAcq0nmWR8H56oZsRMww1Vp51olG87jDBjb3QwEEek"
+    }
+  ],
+  "result": {
+    "exit": 0,
+    "seconds": 264.420821356,
+    "started_unix": 1793334499.3961053
+  },
+  "isolation": {
+    "empty_target": true,
+    "interfaces": [
+      "lo"
+    ],
+    "interpreters_unavailable": [
+      "/usr/bin/python3",
+      "/usr/bin/node"
+    ],
+    "netns": "net:[4026532560]",
+    "probes": [
+      {
+        "address": "1.1.1.1:443",
+        "errno": 101
+      },
+      {
+        "address": "[2606:4700:4700::1111]:443",
+        "errno": 101
+      }
+    ],
+    "routes": "Iface\tDestination\tGateway \tFlags\tRefCnt\tUse\tMetric\tMask\t\tMTU\tWindow\tIRTT                                                       \n"
+  },
+  "controller_tests": {
+    "exit": 0,
+    "failed": 0,
+    "passed": 9
+  },
+  "controller_build": {
+    "exit": 0,
+    "seconds_reported_by_cargo": 35.08
+  },
+  "controller_clippy": {
+    "exit": 0,
+    "warnings_denied": true
+  },
+  "reconstruction_test_executions": 168,
+  "law_signatures": 7,
+  "tamper_refusal_exit": 1,
+  "new_downloads": 0,
+  "measurement_limits": [
+    "One same-host replacement run; no statistical performance comparison",
+    "No independent-host reproducibility qualification",
+    "Compiler peak RSS and aggregate CPU were not measured",
+    "Per-process resource limits are not aggregate quotas"
+  ]
+}

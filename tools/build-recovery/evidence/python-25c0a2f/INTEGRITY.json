@@ -1,0 +1,35 @@
+{
+  "source_commit": "25c0a2f33bdde7ffe67fec4ad782026209fdc092",
+  "hash_encoding": "SHA-256 bytes, unpadded base64url",
+  "files": [
+    {
+      "file": "bsigner.py",
+      "bytes": 14611,
+      "sha256_base64url": "jAVWvih_9wvOo4zLdR2sJ_7SkEIxDN_cQg7aK1Vu38Q"
+    },
+    {
+      "file": "test_integrity.py",
+      "bytes": 2110,
+      "sha256_base64url": "O1N645Iqknz4ry0W6sGq7IiWrud97eGTcKYXwXD1Mbk"
+    },
+    {
+      "file": "README.md",
+      "bytes": 7165,
+      "sha256_base64url": "yH_Q9ue7R8yzb3FDBziGQyqmeBvokMbCFST4OI98dYI"
+    },
+    {
+      "file": "original-evidence.tar.gz",
+      "bytes": 9064649,
+      "sha256_base64url": "kFUe92O8ZT2r0n3hkce776CIp5cCB9__YwPr20udKd8"
+    },
+    {
+      "file": "original-bsigner.bin",
+      "bytes": 1974552,
+      "sha256_base64url": "FQQq3Qj0o4yrdeonEO_QzT94pQmUhstnxClmFb5ERZE"
+    }
+  ],
+  "original_git_blobs": {
+    "bsigner_py": "90d00489c5dfeed17c3e8f6cf66312d9359a9dba",
+    "test_integrity_py": "d9df1cd142e8ace1b9548431a1ab5896063a79fe"
+  }
+}
