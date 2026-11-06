@@ -1,0 +1,99 @@
+[
+  {
+    "label": "rustc",
+    "bytes": 645952,
+    "sha256_base64url": "hZJUl4wKBALDL5SfbeDZmu5zvo0V9FqsAK4USKrFHnQ"
+  },
+  {
+    "label": "cargo",
+    "bytes": 40680304,
+    "sha256_base64url": "2nfIszhJMSJVzN4xeRmK2kyN6zcEiNBQKGFGsdGyfhQ"
+  },
+  {
+    "label": "python",
+    "bytes": 7477160,
+    "sha256_base64url": "UuChPmCpgdjEtkeL4rpRdvadoHlIoFa_Sc9vB34wy0E"
+  },
+  {
+    "label": "node",
+    "bytes": 26856,
+    "sha256_base64url": "0O-2_LnQI7pOKxYOwjhNwo_k8XcyFB70f2doKPqWBQU"
+  },
+  {
+    "label": "bubblewrap",
+    "bytes": 80424,
+    "sha256_base64url": "Uj2j5zmQRL5RY67m9Xp3pr73RUN24o8KBieSC64bdrY"
+  },
+  {
+    "label": "timeout",
+    "bytes": 11352352,
+    "sha256_base64url": "SIk7D7IUNrVGGduASG6D7znfzK8a7-g9-gDALWFG6MA",
+    "resolved_path": "/usr/lib/cargo/bin/coreutils/timeout"
+  },
+  {
+    "label": "historical_python",
+    "bytes": 14611,
+    "sha256_base64url": "jAVWvih_9wvOo4zLdR2sJ_7SkEIxDN_cQg7aK1Vu38Q"
+  },
+  {
+    "label": "historical_tests",
+    "bytes": 2110,
+    "sha256_base64url": "O1N645Iqknz4ry0W6sGq7IiWrud97eGTcKYXwXD1Mbk"
+  },
+  {
+    "label": "native_recovery_runner",
+    "bytes": 1029944,
+    "sha256_base64url": "riY4RQZUhsaNtRHbJEh2BvjwuEaxzteM9MCHy8_2YTY"
+  },
+  {
+    "label": "bsigner",
+    "bytes": 1974552,
+    "sha256_base64url": "FQQq3Qj0o4yrdeonEO_QzT94pQmUhstnxClmFb5ERZE"
+  },
+  {
+    "label": "executed_benchmark_controller",
+    "bytes": 955680,
+    "sha256_base64url": "MU0TLoSF42Llg4uXHczsx5uHLgyhjQ1ojOeQIbhSikM"
+  },
+  {
+    "label": "executed_benchmark_source",
+    "bytes": 34887,
+    "sha256_base64url": "h8pL8ar2t8vIMCJD5Lw4ug06hLp6rORviNlUJQtJWEE"
+  },
+  {
+    "label": "final_analyzer",
+    "bytes": 970208,
+    "sha256_base64url": "-fIybFAGFX6KAhXUdTlUGJhm3bKzqeNYhHJgdB2a-OI"
+  },
+  {
+    "label": "final_measurer",
+    "bytes": 975232,
+    "sha256_base64url": "U6GYoY1XBuHTMiP5-auq0nBLX4bQvErRrOgIgRcRuZU"
+  },
+  {
+    "label": "final_measurer_source",
+    "bytes": 42032,
+    "sha256_base64url": "6EuexKrzAluAxftLDDmxhndnguaGKBhhMTlzBiCoYmY"
+  },
+  {
+    "label": "source_archive",
+    "bytes": 590776320,
+    "sha256_base64url": "60WjdortKhMOKfoU-2if9flglliwkqpT4R3XiFVZHbU"
+  },
+  {
+    "label": "original_snapshot_manifest",
+    "bytes": 10944124,
+    "sha256_base64url": "VJJLYy4LYSwhXI_ZPlFsRbQc0n7W-0VpNCbMZVkwKYo"
+  },
+  {
+    "label": "native_snapshot_manifest",
+    "bytes": 11960248,
+    "sha256_base64url": "KKGR1-sZ938CkyT1L6jdCalt-f1MSzBMcHOSgX9kXJA"
+  },
+  {
+    "bytes": 975232,
+    "sha256_base64url": "U6GYoY1XBuHTMiP5-auq0nBLX4bQvErRrOgIgRcRuZU",
+    "note": "Same executable used for final measurement and analysis; earlier final_analyzer entry belongs to the second pilot.",
+    "label": "final_analysis_executable"
+  }
+]

@@ -1,0 +1,11 @@
+   Compiling build-forensics v0.1.0 (/mnt/c/Users/travi/wt-codex-build-forensics/tools/build-forensics)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.00s
+     Running unittests src/main.rs (/home/travi/build-forensics-2026-10-29/target/debug/deps/build_forensics-f805ba2b0c9d13ee)
+
+running 4 tests
+test tests::timestamp_arithmetic_and_missing_are_explicit ... ok
+test tests::percentile_interpolates ... ok
+test tests::equal_pairs_are_not_significant ... ok
+test tests::paired_interval_recovers_known_difference ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s

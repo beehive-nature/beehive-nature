@@ -1,0 +1,317 @@
+[
+  {
+    "path": "docs/dispatches/2026-10-29-codex-build-forensics.md",
+    "bytes": 18685,
+    "sha256_base64url": "Nydb45xiRJjwL6f9aTmyAe9r1mHF79Ec9eBd3OnAwBE"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/attempts.json",
+    "bytes": 2616,
+    "sha256_base64url": "qVK47eRVPo0dQMmWAQYb0TTH74U7Ht6Lebu8G9p9LPA"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/attribution.svg",
+    "bytes": 2055,
+    "sha256_base64url": "x7DW_UmtMgO_Ka3pBNSytJRSdji862APJf3Ni1p9pr8"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/benchmark-isolation.log",
+    "bytes": 413,
+    "sha256_base64url": "59Ns5cCGJI_Aw7polwZrQK24QZ4Sg_bgLyLxPGRQsgE"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/benchmark.json",
+    "bytes": 11697,
+    "sha256_base64url": "bJ1sbvwA4GtiIuumNUFrmU6u8vQ9BSKFvHVC-c1EHc0"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/build.log",
+    "bytes": 166,
+    "sha256_base64url": "KGjCCSCX-2OoYNTUUk8qujsMa9FyzvnZ17-d2tXLdeE"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/cargo-audit-retained-db.json",
+    "bytes": 313,
+    "sha256_base64url": "IhGVHWvYgNBJ7VzvjzfD5niCFjf1qyk7Sb6TZbXNihs"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/cargo-audit.json",
+    "bytes": 313,
+    "sha256_base64url": "t-tc8Or4yKX2s-VlTlW_GjlgnXqJeoKriGMD36QJd0M"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/clippy.log",
+    "bytes": 176,
+    "sha256_base64url": "jUHcBFBY07H6o9vGm1rV9iRNoeFhxvYkn9EueLRNoKE"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/execution.json",
+    "bytes": 1643,
+    "sha256_base64url": "YKCo_dQqRVq7a-8LDQNOph0oGvQqpJjWBxToQOSCnrU"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/final-benchmark-isolation.log",
+    "bytes": 957,
+    "sha256_base64url": "GvebGNghPlo4sSKqhdSHF6Md8FfhxZIPZBf1RGcLuQ0"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/final-clippy.log",
+    "bytes": 176,
+    "sha256_base64url": "6JNM8ucHXkUZhS4QHO_Wby3h5SV4vCaz9vo3EfqsSKc"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/final-tests.log",
+    "bytes": 710,
+    "sha256_base64url": "CQVi2PNVekx0MofA1DKez6XZP7Da4baZoNJcDeZz3qo"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/github-focused/case-runs.json",
+    "bytes": 8887,
+    "sha256_base64url": "EXnwYatV5IG8sVvya07Vzlb-1ZXGH0cisbDnFPSFVMI"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/github-focused/collection.json",
+    "bytes": 1352,
+    "sha256_base64url": "009JQt_1GL-PWBv7Z7X3moSzbRTDnnGh6WyMSPLMlEg"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/github-focused/intervals.partial.json",
+    "bytes": 320,
+    "sha256_base64url": "Z9I9i3ZMSXKnHeRkkQQnhSvoMibbQH0d4sVpYVJAqIk"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/github-focused/jobs.json",
+    "bytes": 678757,
+    "sha256_base64url": "XjoF_77TWGVFX0T_IrIOnkTeTH7WLTYxUXhyg68GDzE"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/github-focused/pulls.json",
+    "bytes": 222268,
+    "sha256_base64url": "7qQBni0kE6m6OsVmqejfRF_KXFjBrxrRpkItg6YPYK0"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/github-focused/runs.json",
+    "bytes": 70295,
+    "sha256_base64url": "nOEecKi41oABC7ztoYVvcoHog4FOR8HCdEz2PQ8Qa5w"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/github-focused/runs.partial.json",
+    "bytes": 70295,
+    "sha256_base64url": "nOEecKi41oABC7ztoYVvcoHog4FOR8HCdEz2PQ8Qa5w"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/github/pulls.json",
+    "bytes": 222268,
+    "sha256_base64url": "7qQBni0kE6m6OsVmqejfRF_KXFjBrxrRpkItg6YPYK0"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/graphs/analysis.json",
+    "bytes": 46772,
+    "sha256_base64url": "ZbRf9A3LVHT-T9IEf5OpC9hOGZoNKvzXKGR-1c6B9co"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/graphs/ci-daily-sample.svg",
+    "bytes": 3161,
+    "sha256_base64url": "2gJSQRK4k21TwbeavHiQ0q--QpS7S9lgCS42MaA2y7c"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/graphs/integrity-controls.svg",
+    "bytes": 4128,
+    "sha256_base64url": "SLkkI8JNmmYbG1r4UEXLJ3O9hMm1OBuZUGYrrDNhUEw"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/graphs/language-timing.svg",
+    "bytes": 2000,
+    "sha256_base64url": "IwvllYvBSYQJfW1mQYiVlBKGEnIvItt-b3I-r3_DG8Q"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/graphs/paired-confidence.svg",
+    "bytes": 1475,
+    "sha256_base64url": "BO21BMvxRWckB6-gtPRSlx9faf_O24XPsAZENvDXwdY"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/graphs/pr-calendar-time.svg",
+    "bytes": 1479,
+    "sha256_base64url": "OoeH9wvPDsWHIidrnXR1tKUFDcqv7SNdlZfdMqwB33E"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/graphs/wallet-delay.svg",
+    "bytes": 1234,
+    "sha256_base64url": "q25iOpMYK2XPD5k-uww_DVAYfkapCzZKWckv2O9biNw"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/index.html",
+    "bytes": 6356,
+    "sha256_base64url": "Mtl4XVyoI2lXLcJi9DpC4_VLjWuecwwdsxLh_fyfOQ8"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/input-digests.json",
+    "bytes": 2715,
+    "sha256_base64url": "IOuZ7r-tGOI33RIveb6NGJ5UV_axYuwf8N5oQa6mc3A"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-benchmark.json",
+    "bytes": 11487,
+    "sha256_base64url": "ZBAs9y4meSo6FmxJEfe1Rkq2XvR0E_0uJDojBraUrII"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-graphs/analysis.json",
+    "bytes": 46783,
+    "sha256_base64url": "Q4f-CIDmKTlNlVBADmjm8qJ1Q_i5qaqWDWZlxJ9MPMM"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-graphs/ci-daily-sample.svg",
+    "bytes": 3161,
+    "sha256_base64url": "2gJSQRK4k21TwbeavHiQ0q--QpS7S9lgCS42MaA2y7c"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-graphs/integrity-controls.svg",
+    "bytes": 4128,
+    "sha256_base64url": "SLkkI8JNmmYbG1r4UEXLJ3O9hMm1OBuZUGYrrDNhUEw"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-graphs/language-timing.svg",
+    "bytes": 2031,
+    "sha256_base64url": "Lu24A8EOk6lYW2n-kVDMOkxtWyFmb9RB9JzWwQr8ReY"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-graphs/paired-confidence.svg",
+    "bytes": 1399,
+    "sha256_base64url": "TlDfJ7ErP1MvhC9nTiiCx7t_QR9gBMjG-WOCvI_y7RU"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-graphs/pr-calendar-time.svg",
+    "bytes": 1479,
+    "sha256_base64url": "OoeH9wvPDsWHIidrnXR1tKUFDcqv7SNdlZfdMqwB33E"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-graphs/README.md",
+    "bytes": 174,
+    "sha256_base64url": "F8A8JGnn_gc3J8yaAE0AWGV6y9hxLb3v-IC80oP08cQ"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-graphs/wallet-delay.svg",
+    "bytes": 1234,
+    "sha256_base64url": "q25iOpMYK2XPD5k-uww_DVAYfkapCzZKWckv2O9biNw"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-same-filesystem-isolation.log",
+    "bytes": 957,
+    "sha256_base64url": "hykHOApI9ojaer4NNowlEMsoh7QrSUz2bRzJ4meOeBg"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-timeout-graphs/analysis.json",
+    "bytes": 46757,
+    "sha256_base64url": "TN76z2f0Mo7rgdaPdKm6ru65pz8pacCe3m_ROzwIyVc"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-timeout-graphs/ci-daily-sample.svg",
+    "bytes": 3161,
+    "sha256_base64url": "2gJSQRK4k21TwbeavHiQ0q--QpS7S9lgCS42MaA2y7c"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-timeout-graphs/integrity-controls.svg",
+    "bytes": 4128,
+    "sha256_base64url": "SLkkI8JNmmYbG1r4UEXLJ3O9hMm1OBuZUGYrrDNhUEw"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-timeout-graphs/language-timing.svg",
+    "bytes": 2003,
+    "sha256_base64url": "ZzkPqdkYLyy7WUPxGuoyTPZ81okTPQiRWsxWY-HC_PQ"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-timeout-graphs/paired-confidence.svg",
+    "bytes": 1478,
+    "sha256_base64url": "tqGHaTU8tD2tf8BgnmTqd82zf1hH6a0Ywi06Q1YZUcM"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-timeout-graphs/pr-calendar-time.svg",
+    "bytes": 1479,
+    "sha256_base64url": "OoeH9wvPDsWHIidrnXR1tKUFDcqv7SNdlZfdMqwB33E"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-timeout-graphs/README.md",
+    "bytes": 159,
+    "sha256_base64url": "DxEbKc3wW0Q71ncO2_Wp1jfRrImVvQ0SyQM-sto2MAY"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-timeout-graphs/wallet-delay.svg",
+    "bytes": 1234,
+    "sha256_base64url": "q25iOpMYK2XPD5k-uww_DVAYfkapCzZKWckv2O9biNw"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/pilot-timeout-supervisor-benchmark.json",
+    "bytes": 11399,
+    "sha256_base64url": "H_bFubLdruT4yMUPW9BDdXc6GCFfohZ_N1mj-lQTrGo"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/quiet-window.json",
+    "bytes": 283,
+    "sha256_base64url": "iVzO4lVxD-rvAIhxFxzbyzWhg_ELVHS02Lx8ZUROT6o"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/raw-audit-v2.tar.gz",
+    "bytes": 1716630,
+    "sha256_base64url": "iNXhX8_cCgoV-5J3iBUXK1I8XoIc8T2PJhFawKgnPtA"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/raw-audit.tar.gz",
+    "bytes": 1629194,
+    "sha256_base64url": "9_VP7s87sHKnEE7UMXEmEgsbMkdPFTzwwYIkX0fXlAY"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/raw-public-logs.tar.gz",
+    "bytes": 1342,
+    "sha256_base64url": "OTOo6ZoMucItFdTnMxSIAIRjWQFcQv78NMNvsroRZTw"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/README.md",
+    "bytes": 8411,
+    "sha256_base64url": "XkYR4UmBmjmZ6LZmQLJZriuxz0n0P8YJB7zHH1V0vGU"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/session-audit.json",
+    "bytes": 585,
+    "sha256_base64url": "6JQnG5hSkNPqhufS89k7NE9PhYvSCvQ9h9C1lwXCHhw"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/tests.log",
+    "bytes": 636,
+    "sha256_base64url": "vzbIogPy_Vxh2PKqbs5tBJ8UvXRU5agL8cr88qepKMw"
+  },
+  {
+    "path": "docs/receipts/build-forensics-2026-10-29/timeout-noop.log",
+    "bytes": 210,
+    "sha256_base64url": "uymDg9Yh56dVFZggm2Zh_apenzA7DsSeEO_ScpYMhDc"
+  },
+  {
+    "path": "tools/build-forensics/AGENTS.md",
+    "bytes": 1124,
+    "sha256_base64url": "CcX6yZFOh2nw5wYSxtM_IxIloIt2y5lkuJiCru2jewE"
+  },
+  {
+    "path": "tools/build-forensics/Cargo.lock",
+    "bytes": 12094,
+    "sha256_base64url": "-J0o7Ybs4a60Bu4Yl55Ery3WGGdJnmytqXwjkixImOk"
+  },
+  {
+    "path": "tools/build-forensics/Cargo.toml",
+    "bytes": 263,
+    "sha256_base64url": "jiuMZ69cySirY9ieYjTY8OEC35HZKH6y7K-xeBlvzPU"
+  },
+  {
+    "path": "tools/build-forensics/README.md",
+    "bytes": 5336,
+    "sha256_base64url": "r39fTrOfBuPWTO2JtskJ7lH1_heI7rGkySZb1PhR1Xc"
+  },
+  {
+    "path": "tools/build-forensics/rust-toolchain.toml",
+    "bytes": 86,
+    "sha256_base64url": "yRCZfLFSxtyO0Tsf35-iik7TDWd2Ej4n3WFw5cZgZ6A"
+  },
+  {
+    "path": "tools/build-forensics/src/main.rs",
+    "bytes": 42424,
+    "sha256_base64url": "Y47rDeWToAu8bMquD5HnM9yraFzW701Q9XjccIOL76Y"
+  }
+]
