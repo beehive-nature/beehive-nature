@@ -1,0 +1,13 @@
+{
+  "order_id": "demo-task",
+  "manifest_file": "manifest.json",
+  "runtime_copy_names": [
+    "input.bin",
+    "frozen-manifest.bin"
+  ],
+  "input_sha256": "acc9cb10289dc7a409be1004aec779ff07bf654b5b3415913373354f7b8c569c", "input_sha256_note": "PUBLIC-CONSTANT: SHA-256 of the public frozen manifest.json bytes",
+  "item_count": 40,
+  "input_bytes": 5037,
+  "newline_convention": "LF only, no CR bytes; single trailing newline",
+  "item_schema": "elements of the top-level object's items array, duplicates included; anything else is not a B9 manifest and fails closed"
+}

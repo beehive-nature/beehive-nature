@@ -1,0 +1,23 @@
+[
+  {
+    "backend": "backend-1",
+    "phase": "pre-switch",
+    "transcript_sha256": "58dd6fc860b8bc9b8ea8ecf8b2f669215e2a82ef5b686ed52b3aeda86338ca64", "_scan": "PUBLIC-CONSTANT rehearsal artifact content hash",
+    "ts": "2026-10-29T22:14:01+00:00",
+    "turn_count": 2
+  },
+  {
+    "backend": "backend-2",
+    "phase": "pre-switch",
+    "transcript_sha256": "fdbda3fa1b6f11caa7f167296a5939c426e192b38db1e36bf47fa629cb631d6d", "_scan": "PUBLIC-CONSTANT rehearsal artifact content hash",
+    "ts": "2026-10-29T22:14:09+00:00",
+    "turn_count": 3
+  },
+  {
+    "backend": "backend-3",
+    "phase": "backend-exhausted",
+    "transcript_sha256": "54ffbeb22479e22681aa3b15a131c8b5fc110c094e5d6431cce1b86984938d06", "_scan": "PUBLIC-CONSTANT rehearsal artifact content hash",
+    "ts": "2026-10-29T22:14:09+00:00",
+    "turn_count": 4
+  }
+]

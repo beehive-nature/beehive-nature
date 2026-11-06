@@ -1,0 +1,2 @@
+env: test recovery phrase + throwaway MODEL_API_KEY (rehearsal-only)
+actor-B passing run (N1 substrate)

@@ -1,0 +1,2 @@
+env: test recovery phrase + throwaway MODEL_API_KEY (rehearsal-only)
+MaxTurns exit 3 WITH own valid signed receipt (R1/R2/R8 substrate)

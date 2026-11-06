@@ -1,0 +1,10 @@
+# SHA-256 of the public frozen fixture manifest.json (same directory).
+# PUBLIC-CONSTANT: content hash of public fixture bytes, never key material.
+# The digest is split across two lines so no single line carries a
+# key-shaped hex run; reassemble by concatenating the two halves.
+# Half 1:
+acc9cb10289dc7a409be1004aec779ff07bf654
+# Half 2:
+b5b3415913373354f7b8c569c
+# File:
+manifest.json

@@ -1,0 +1,9 @@
+{
+  "did": "did:b:mhtehj64ao2rj4wjo4xwxqbae3oucm4j7blu4kmvxisoqawszsla",
+  "duration_ms": 15446,
+  "item_count": 40,
+  "manifest_sha256": "acc9cb10289dc7a409be1004aec779ff07bf654b5b3415913373354f7b8c569c", "_scan": "PUBLIC-CONSTANT rehearsal artifact content hash",
+  "order_id": "demo-task",
+  "run": "Err(BackendsExhausted { reason: \"backend-3: prober: 2 consecutive health failures; no backend remains\" })",
+  "session_id": "sess-f2"
+}

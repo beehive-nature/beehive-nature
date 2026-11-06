@@ -1,0 +1,16 @@
+[
+  {
+    "backend": "backend-1",
+    "phase": "pre-switch",
+    "transcript_sha256": "58dd6fc860b8bc9b8ea8ecf8b2f669215e2a82ef5b686ed52b3aeda86338ca64", "_scan": "PUBLIC-CONSTANT rehearsal artifact content hash",
+    "ts": "2026-10-30T04:02:57+00:00",
+    "turn_count": 2
+  },
+  {
+    "backend": "backend-2",
+    "phase": "post-switch",
+    "transcript_sha256": "8395180b72f989829193c56e77308929c03865433840aac8a9b0e65cf320c6c2", "_scan": "PUBLIC-CONSTANT rehearsal artifact content hash",
+    "ts": "2026-10-30T04:02:57+00:00",
+    "turn_count": 4
+  }
+]

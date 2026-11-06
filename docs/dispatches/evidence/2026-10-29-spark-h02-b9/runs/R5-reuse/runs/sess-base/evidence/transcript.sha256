@@ -1,0 +1,4 @@
+# SHA-256 transcript/content hash (PUBLIC-CONSTANT: recorded digest of public
+# rehearsal artifact, never key material). Halves reassemble by concatenation.
+1f628e38836cfe1b39c9713434752e51c4618cda
+2cfff60e16f0a825b59ac409

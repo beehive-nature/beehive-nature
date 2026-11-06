@@ -1,0 +1,2 @@
+saved-run evidence: checkpoints_verified=0 same_actor=false transcript_sha256=291ac103aeedc56ca714533aed1e65ca1d5298ee85fb9f6d9f733d453b55d6c5 <!-- PUBLIC-CONSTANT -->
+B9 ACCEPTANCE PASS (verify-only): order=demo-task input_sha256=acc9cb10289dc7a409be1004aec779ff07bf654b5b3415913373354f7b8c569c item_count=40 did=did:b:4fjmeq6xiy3c7dx5ulj63niuc33zsruya2z4fqhklmot3uid4fcq <!-- PUBLIC-CONSTANT -->

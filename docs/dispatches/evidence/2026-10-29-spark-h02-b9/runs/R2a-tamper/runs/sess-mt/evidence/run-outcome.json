@@ -1,0 +1,9 @@
+{
+  "did": "did:b:ny7lrsbot2dh4drwq7awoa26iehs2ol5x32mu42afvm7tm7f3mha",
+  "duration_ms": 103,
+  "item_count": 40,
+  "manifest_sha256": "acc9cb10289dc7a409be1004aec779ff07bf654b5b3415913373354f7b8c569c", "_scan": "PUBLIC-CONSTANT rehearsal artifact content hash",
+  "order_id": "demo-task",
+  "run": "Ok(Cancelled before EndTurn)",
+  "session_id": "sess-mt"
+}

@@ -1,0 +1,2 @@
+env: test recovery phrase + throwaway MODEL_API_KEY (rehearsal-only)
+baseline pass 187 ms; verify-only PASS afterwards

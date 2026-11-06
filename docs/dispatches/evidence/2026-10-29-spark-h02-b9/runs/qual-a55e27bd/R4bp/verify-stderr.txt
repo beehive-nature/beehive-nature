@@ -1,0 +1,1 @@
+B9 ACCEPTANCE FAIL (verify-only): exported checkpoint inventory is not the complete ordered persisted log

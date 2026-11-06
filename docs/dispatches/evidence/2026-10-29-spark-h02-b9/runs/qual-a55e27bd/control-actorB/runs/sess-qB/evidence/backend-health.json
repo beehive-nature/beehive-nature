@@ -1,0 +1,8 @@
+[
+  {
+    "backend": "backend-1",
+    "healthy": true,
+    "model": "muse-spark-1.3",
+    "probe_timeout_ms": 3000
+  }
+]
